@@ -34,6 +34,13 @@ REVIEW_OTP_TTL_MINUTES = 60
 MAX_VERIFY_ATTEMPTS = 5
 RATE_LIMIT_WINDOW_MINUTES = 15
 RATE_LIMIT_MAX_REQUESTS = 3
+#: Délai minimal entre deux envois au même numéro (cahier des charges,
+#: section 8.1 : « renvoi après 60 s »). L'écran affiche le même compte à
+#: rebours ; le serveur le fait respecter.
+RESEND_MIN_SECONDS = 60
+#: Cinq codes faux, tous codes confondus, verrouillent le numéro quinze
+#: minutes. Sans ce cumul, redemander un code remettait le compteur à zéro.
+LOCKOUT_MINUTES = 15
 
 _PHONE_RE = re.compile(r"^\+[1-9]\d{6,14}$")
 
@@ -48,6 +55,19 @@ class OTPRateLimitError(OTPError):
 
 class OTPInvalidError(OTPError):
     pass
+
+
+def _recent_failures(db: Session, phone: str) -> int:
+    since = datetime.utcnow() - timedelta(minutes=LOCKOUT_MINUTES)
+    rows = db.query(PhoneOTP.attempts).filter(PhoneOTP.phone == phone, PhoneOTP.created_at >= since).all()
+    return sum(row[0] or 0 for row in rows)
+
+
+def _ensure_not_locked(db: Session, phone: str) -> None:
+    if _recent_failures(db, phone) >= MAX_VERIFY_ATTEMPTS:
+        raise OTPRateLimitError(
+            f"Trop d'essais pour ce numéro — réessayez dans {LOCKOUT_MINUTES} minutes."
+        )
 
 
 def normalize_phone(raw: str) -> str:
@@ -158,6 +178,18 @@ def generate_and_send_otp(db: Session, raw_phone: str, channel: str = "both") ->
         raise OTPRateLimitError(
             f"Trop de demandes de code pour ce numéro — réessayez dans {RATE_LIMIT_WINDOW_MINUTES} minutes."
         )
+    _ensure_not_locked(db, phone)
+    # Seul un code ENCORE EN ATTENTE impose le délai : après une connexion
+    # réussie, se reconnecter aussitôt (autre appareil) reste possible.
+    last = (
+        db.query(PhoneOTP.created_at)
+        .filter(PhoneOTP.phone == phone, PhoneOTP.consumed_at.is_(None))
+        .order_by(PhoneOTP.created_at.desc())
+        .first()
+    )
+    if last is not None and (datetime.utcnow() - last[0]).total_seconds() < RESEND_MIN_SECONDS:
+        wait = RESEND_MIN_SECONDS - int((datetime.utcnow() - last[0]).total_seconds())
+        raise OTPRateLimitError(f"Patientez {wait} s avant de redemander un code.")
 
     # Compte de démonstration pour la revue des stores : code FIXE, aucun SMS.
     # Tout le reste du flux est identique — la ligne PhoneOTP est créée
@@ -241,6 +273,7 @@ def verify_otp(db: Session, raw_phone: str, code: str) -> User:
     same error/message for all of these so a caller can't distinguish
     "expired" from "wrong code" to narrow down a brute-force guess."""
     phone = normalize_phone(raw_phone)
+    _ensure_not_locked(db, phone)
 
     otp: Optional[PhoneOTP] = (
         db.query(PhoneOTP)
@@ -254,7 +287,17 @@ def verify_otp(db: Session, raw_phone: str, code: str) -> User:
     if not verify_password(code, otp.code_hash):
         otp.attempts += 1
         db.commit()
-        raise OTPInvalidError("Code invalide ou expiré — redemandez un code.")
+        # Le nombre d'essais restants, comme le demande l'état « erreur avec
+        # essais restants » du composant de saisie (section 7.6). Il ne dit
+        # rien du code lui-même.
+        left = MAX_VERIFY_ATTEMPTS - _recent_failures(db, phone)
+        if left <= 0:
+            raise OTPRateLimitError(
+                f"Trop d'essais pour ce numéro — réessayez dans {LOCKOUT_MINUTES} minutes."
+            )
+        raise OTPInvalidError(
+            f"Code incorrect — il vous reste {left} essai{'s' if left > 1 else ''}."
+        )
 
     otp.consumed_at = datetime.utcnow()
     db.commit()

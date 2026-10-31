@@ -1733,7 +1733,7 @@ class LRu extends L {
   String get marketCheckoutUnreachable => 'Оплата Mobile Money недоступна.';
 
   @override
-  String get marketBoostDone => 'Оплата прошла — товар продвинут!';
+  String get marketBoostDone => 'Оплачено: объявление продвигается.';
 
   @override
   String get marketBoostPending => 'Оплата продвижения ожидается.';
@@ -1788,7 +1788,7 @@ class LRu extends L {
       'Добавьте первый товар, чтобы начать продавать!';
 
   @override
-  String get marketBoosted => '★ Продвинут';
+  String get marketBoosted => 'Спонсорское';
 
   @override
   String get vitrineSeeProduct => 'Открыть товар';
@@ -1834,7 +1834,7 @@ class LRu extends L {
       'Стихи приходят даже без интернета: они уже на вашем телефоне.';
 
   @override
-  String get marketBoosted48h => '★ Продвинут · 48 ч';
+  String get marketBoosted48h => 'Спонсорское';
 
   @override
   String get marketBoost => 'Продвинуть';
@@ -2456,7 +2456,7 @@ class LRu extends L {
   String get profileChooseMonitor => 'Выберите монитор';
 
   @override
-  String get profileAoussiMessaging => 'Чат Aoussi';
+  String get profileBabaMessaging => 'Чат Baba';
 
   @override
   String profileMonitorAlerts(int count) {
@@ -2472,7 +2472,7 @@ class LRu extends L {
   }
 
   @override
-  String get profileAoussiAssistant => 'Ассистент Aoussi';
+  String get profileBabaAssistant => 'Ассистент Baba';
 
   @override
   String get profileShieldModeBody =>
@@ -3946,7 +3946,7 @@ class LRu extends L {
   String get aiAskAboutData => 'Задайте вопрос о подключённых данных.';
 
   @override
-  String get aiThinking => 'Aoussi думает';
+  String get aiThinking => 'Baba думает';
 
   @override
   String aiHelloIm(String name) {
@@ -4532,7 +4532,7 @@ class LRu extends L {
   String get stickerSaved => 'Стикер добавлен в ваши стикеры';
 
   @override
-  String get navAoussi => 'Аусси';
+  String get navBaba => 'Баба';
 
   @override
   String get appBarOnline => 'В сети';
@@ -4562,7 +4562,7 @@ class LRu extends L {
   String get chatsFilterGroups => 'Группы';
 
   @override
-  String get chatsSearchOrAsk => 'Найти или спросить Аусси…';
+  String get chatsSearchOrAsk => 'Найти или спросить Баба…';
 
   @override
   String get convEncryptedHint => 'Зашифрованное сообщение…';
@@ -5158,7 +5158,7 @@ class LRu extends L {
   String get koryStatusConfirmed => 'Подтверждён';
 
   @override
-  String get koryStatusRejected => 'Не получен';
+  String get koryStatusRejected => 'Оспорен';
 
   @override
   String get koryConfirm => 'Получено';
@@ -5234,4 +5234,496 @@ class LRu extends L {
 
   @override
   String get koryActionFailed => 'Не удалось. Попробуйте ещё раз.';
+
+  @override
+  String get welcomePromise => 'Больше, чем мессенджер, — сообщество.';
+
+  @override
+  String get welcomeSignature => 'Вместе мы сильнее.';
+
+  @override
+  String get welcomeCreate => 'Создать аккаунт';
+
+  @override
+  String get welcomeSignIn => 'Войти';
+
+  @override
+  String get welcomeServiceChats => 'Чаты, группы и звонки';
+
+  @override
+  String get welcomeServiceKory => 'Сборы и тонтины';
+
+  @override
+  String get legalPrivacy => 'Конфиденциальность';
+
+  @override
+  String get legalTerms => 'Условия использования';
+
+  @override
+  String get legalUnavailable => 'Документ пока недоступен.';
+
+  @override
+  String onbStep(String step) {
+    return 'Шаг $step из 3';
+  }
+
+  @override
+  String get onbProfileTitle => 'Ваш профиль';
+
+  @override
+  String get onbProfileBody => 'Это имя увидят ваши контакты.';
+
+  @override
+  String get onbDisplayName => 'Отображаемое имя';
+
+  @override
+  String get onbNameRequired => 'Укажите имя (не менее 2 символов).';
+
+  @override
+  String get onbPhotoLater => 'Фото можно добавить позже в профиле.';
+
+  @override
+  String get onbContinue => 'Продолжить';
+
+  @override
+  String get onbTermsTitle => 'Перед началом';
+
+  @override
+  String get onbAcceptTerms =>
+      'Я прочитал(а) и принимаю условия использования и политику конфиденциальности.';
+
+  @override
+  String get onbAge => 'Я достиг(ла) возраста, необходимого для Pokou.';
+
+  @override
+  String get onbOptional => 'Необязательно, можно изменить в настройках';
+
+  @override
+  String get onbAnalytics =>
+      'Делиться статистикой использования, чтобы улучшать Pokou';
+
+  @override
+  String get onbMarketing => 'Получать новости и предложения Pokou';
+
+  @override
+  String get onbFinish => 'Готово';
+
+  @override
+  String get onbFailed => 'Не удалось сохранить. Попробуйте ещё раз.';
+
+  @override
+  String get moreConsents => 'Статистика и рассылки';
+
+  @override
+  String get navHonam => 'Honam';
+
+  @override
+  String get honamSubtitle => 'Аптеки и доставка';
+
+  @override
+  String get honamSend => 'Отправить рецепт';
+
+  @override
+  String get honamPhotograph => 'Сфотографировать рецепт';
+
+  @override
+  String get honamFromGallery => 'Выбрать фото';
+
+  @override
+  String get honamUrgent => 'Экстренный вызов';
+
+  @override
+  String get honamNotEmergency => 'Pokou не является экстренной службой.';
+
+  @override
+  String get honamNearby => 'Аптеки рядом';
+
+  @override
+  String get honamOnDuty => 'Дежурная';
+
+  @override
+  String get honamNoPharmacy => 'Пока нет аптек-партнёров.';
+
+  @override
+  String get honamCurrentOrder => 'Текущий заказ';
+
+  @override
+  String get honamMyOrders => 'Мои заказы';
+
+  @override
+  String get honamChoosePharmacy => 'Выберите аптеку';
+
+  @override
+  String get honamAddress => 'Адрес доставки';
+
+  @override
+  String get honamNote => 'Комментарий для фармацевта (необязательно)';
+
+  @override
+  String get honamSubmit => 'Отправить в аптеку';
+
+  @override
+  String get honamNeedPhoto => 'Добавьте фото рецепта.';
+
+  @override
+  String get honamNeedAddress => 'Укажите адрес доставки.';
+
+  @override
+  String get honamFailed => 'Не удалось. Попробуйте ещё раз.';
+
+  @override
+  String honamOrderTitle(String id) {
+    return 'Заказ № $id';
+  }
+
+  @override
+  String get honamStSubmitted => 'Отправлен, ждёт фармацевта';
+
+  @override
+  String get honamStQuoted => 'Получена смета';
+
+  @override
+  String get honamStAccepted => 'Смета принята, к оплате';
+
+  @override
+  String get honamStPaid => 'Оплачен, готовится';
+
+  @override
+  String get honamStReady => 'Готов, ждёт курьера';
+
+  @override
+  String get honamStInDelivery => 'В пути';
+
+  @override
+  String get honamStDelivered => 'Доставлен';
+
+  @override
+  String get honamStRejected => 'Рецепт отклонён';
+
+  @override
+  String get honamStExpired => 'Смета истекла';
+
+  @override
+  String get honamStCancelled => 'Отменён';
+
+  @override
+  String get honamQuote => 'Смета';
+
+  @override
+  String get honamUnavailableItem => 'Нет в наличии';
+
+  @override
+  String get honamMedicines => 'Лекарства';
+
+  @override
+  String get honamDelivery => 'Доставка';
+
+  @override
+  String get honamTotal => 'Итого к оплате';
+
+  @override
+  String get honamAcceptQuote => 'Принять смету';
+
+  @override
+  String honamPayTo(String amount, String phone) {
+    return 'Отправьте $amount со своего кошелька на $phone (аптека), затем подтвердите.';
+  }
+
+  @override
+  String get honamDeclarePaid => 'Я оплатил(а) аптеке';
+
+  @override
+  String get honamPaidDeclared => 'Оплата отмечена: аптека подтвердит её.';
+
+  @override
+  String get honamPaymentNotReceived =>
+      'Аптека не получила оплату. Проверьте номер и сумму.';
+
+  @override
+  String get honamCode => 'Код получения';
+
+  @override
+  String get honamCodeHelp =>
+      'Назовите код курьеру только когда посылка у вас в руках.';
+
+  @override
+  String get honamOriginal => 'Курьер заберёт оригинал рецепта.';
+
+  @override
+  String honamRefundDue(String amount, String reason) {
+    return 'Аптека должна вам $amount: $reason';
+  }
+
+  @override
+  String get honamRefundReceived => 'Я получил(а) возврат';
+
+  @override
+  String get honamCancel => 'Отменить заказ';
+
+  @override
+  String get honamResend => 'Отправить в другую аптеку';
+
+  @override
+  String honamReason(String reason) {
+    return 'Причина: $reason';
+  }
+
+  @override
+  String get honamTimeline => 'Отслеживание';
+
+  @override
+  String get honamCourierMode => 'Режим курьера';
+
+  @override
+  String get honamCourierJoin => 'Стать курьером Win Pokou';
+
+  @override
+  String get honamCourierJoinBody =>
+      '5 пробных доставок без комиссии на месяц. Затем — членство Win Pokou и предоплаченный пакет.';
+
+  @override
+  String honamRidesLeft(String count) {
+    return 'Осталось доставок: $count';
+  }
+
+  @override
+  String get honamUnlimited => 'Безлимитные доставки';
+
+  @override
+  String honamMembership(String amount) {
+    return 'Членство Win Pokou: $amount без НДС / мес';
+  }
+
+  @override
+  String get honamPayMembership => 'Оплатить членство';
+
+  @override
+  String get honamPacks => 'Пакеты доставок';
+
+  @override
+  String honamPackPrice(String amount) {
+    return '$amount без НДС';
+  }
+
+  @override
+  String get honamAvailableRides => 'Доступные доставки';
+
+  @override
+  String get honamMyRides => 'Мои доставки';
+
+  @override
+  String get honamNoRides => 'Пока нет доставок.';
+
+  @override
+  String get honamAcceptRide => 'Принять доставку';
+
+  @override
+  String get honamPickup => 'Посылка получена';
+
+  @override
+  String get honamDeliver => 'Подтвердить вручение';
+
+  @override
+  String get honamEnterCode => 'Код от пациента';
+
+  @override
+  String get honamCoursePaid => 'Я получил(а) оплату доставки';
+
+  @override
+  String get honamPaymentLinkOpened =>
+      'Завершите оплату на открывшейся странице.';
+
+  @override
+  String get honamCourierSuspended =>
+      'Аккаунт курьера приостановлен после 3 срывов доставки. Обратитесь в поддержку.';
+
+  @override
+  String get honamPriceNote => 'Цены без НДС; НДС страны добавляется.';
+
+  @override
+  String get certTitle => 'Pokou certifié';
+
+  @override
+  String get certPitch =>
+      'Значок подтверждает, что имя действительно ваше. Режим доказательства оставляет удалённые сообщения группы видимыми, зачёркнутыми.';
+
+  @override
+  String get certHowItWorks =>
+      'Личность подтверждается именем владельца кошелька, с которого идёт оплата.';
+
+  @override
+  String certStartTrial(String days) {
+    return 'Попробовать $days дн.';
+  }
+
+  @override
+  String get certTrialNote =>
+      'Во время пробного периода доступен режим доказательства; значок появится после первой оплаты.';
+
+  @override
+  String certPlanPrice(String ht, String ttc) {
+    return '$ht без НДС · $ttc с НДС';
+  }
+
+  @override
+  String get certSubscribe => 'Выбрать';
+
+  @override
+  String get certActive => 'Значок активен';
+
+  @override
+  String certTrialUntil(String date) {
+    return 'Пробный период до $date';
+  }
+
+  @override
+  String certActiveUntil(String date) {
+    return 'Активен до $date';
+  }
+
+  @override
+  String get certExpired => 'Подписка истекла';
+
+  @override
+  String get certMismatchTitle => 'Имена не совпадают';
+
+  @override
+  String get certMismatchBody =>
+      'Введённое имя не совпадает с именем владельца кошелька, с которого оплачено. Исправьте его как в документе.';
+
+  @override
+  String get proofModeTitle => 'Режим доказательства';
+
+  @override
+  String get proofModeOnBanner =>
+      'Режим доказательства включён: удалённое сообщение остаётся видимым, зачёркнутым, для всех.';
+
+  @override
+  String get proofModeEnable => 'Включить режим доказательства';
+
+  @override
+  String get proofModeDisable => 'Выключить режим доказательства';
+
+  @override
+  String get proofModeNeedsCert =>
+      'Режиму доказательства нужен Pokou certifié (есть бесплатный пробный период).';
+
+  @override
+  String get deleteForAll => 'Удалить у всех';
+
+  @override
+  String get deleteProofWarning =>
+      'Включён режим доказательства: сообщение останется видимым, зачёркнутым, для всех участников.';
+
+  @override
+  String get deletedKept =>
+      'Удалённое сообщение, сохранено режимом доказательства';
+
+  @override
+  String get certCorrectName => 'Полное имя владельца';
+
+  @override
+  String get certRetryName => 'Проверить имя';
+
+  @override
+  String get certStillMismatch => 'Имя по-прежнему не совпадает.';
+
+  @override
+  String get proofExport => 'Экспортировать чат (PDF)';
+
+  @override
+  String proofModeOn(String name) {
+    return '$name включил(а) режим доказательства';
+  }
+
+  @override
+  String proofModeOff(String name) {
+    return '$name выключил(а) режим доказательства';
+  }
+
+  @override
+  String proofOriginal(String text) {
+    return 'Исходная версия: $text';
+  }
+
+  @override
+  String get proofDisableReserved =>
+      'Выключить может только тот, кто включил, или администратор с оплаченным значком.';
+
+  @override
+  String get marketBoost3 => '3 дня · 600 FCFA';
+
+  @override
+  String get marketBoost7 => '7 дней · 1 300 FCFA';
+
+  @override
+  String get marketUseHonam =>
+      'Лекарства не продаются в Assimé: используйте Honam.';
+
+  @override
+  String get honamMissingTitle => 'Не хватает товара';
+
+  @override
+  String honamMissingBody(String amount, String reason) {
+    return 'Не хватает на $amount: $reason. Что выберете?';
+  }
+
+  @override
+  String get honamKeepRest => 'Получить остальное';
+
+  @override
+  String get honamCancelAll => 'Отменить всё';
+
+  @override
+  String get honamRefundDelay =>
+      'Аптека вернёт деньги в течение 2 часов на номер, с которого платили.';
+
+  @override
+  String get honamZones => 'Районы и время (напр. Бе, Токоин — вечер)';
+
+  @override
+  String get honamWallet => 'Номер кошелька для оплаты доставок';
+
+  @override
+  String get honamRules =>
+      'Принимаю золотые правила: отдаю посылку только по коду, не смотрю рецепты, вежлив(а).';
+
+  @override
+  String get honamApply => 'Отправить заявку';
+
+  @override
+  String get honamPending => 'Заявка отправлена: команда Pokou её проверяет.';
+
+  @override
+  String get honamLaunch => 'Период запуска: доставки без членства и пакета.';
+
+  @override
+  String get honamQueenLocked =>
+      'Queen Pokou открывается после месяца без срывов доставки.';
+
+  @override
+  String koryDeclaredTotal(String amount) {
+    return 'Заявлено всего: $amount';
+  }
+
+  @override
+  String koryRemaining(String amount) {
+    return 'Осталось собрать: $amount';
+  }
+
+  @override
+  String get onbBabaWelcome => 'Я Baba, ассистент Pokou. Как к вам обращаться?';
+
+  @override
+  String get onbContactsTitle => 'Найти близких';
+
+  @override
+  String get onbContactsBody =>
+      'Baba может найти ваших контактов, которые уже в Pokou. Можно отказаться — спросим позже.';
+
+  @override
+  String get onbContactsAllow => 'Разрешить';
+
+  @override
+  String get onbLater => 'Позже';
 }

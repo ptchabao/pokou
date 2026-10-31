@@ -5,7 +5,7 @@ Pokou (`../backend`). Inscription/connexion par numéro de téléphone façon
 WhatsApp (OTP SMS, sans mot de passe) ; messagerie chiffrée, groupes,
 communautés, chaînes, statuts, appels, marché et modules.
 
-L'assistant (chat, Aoussi/Minou, contacts intelligents, bilan du soir) est un
+L'assistant (chat, Baba/Minou, contacts intelligents, bilan du soir) est un
 service **Mahizu**, tiers : l'app l'appelle sur l'API Mahizu avec un compte
 Mahizu rattaché séparément (voir `lib/core/mahizu/`). Le backend Pokou n'en
 contient rien.
@@ -65,7 +65,7 @@ pas, services à provisionner, points d'attention) est dans le document
 Ne pas le présenter comme acquis :
 
 - Chiffrement de bout en bout des groupes, chaînes, statuts, listes de
-  diffusion, appels de groupe et de l'assistant Aoussi
+  diffusion, appels de groupe et de l'assistant Baba
 - Plusieurs appareils par compte, sauvegarde chiffrée, transfert d'historique
 - Sécurité post-compromission (pas de cliquet Diffie-Hellman) et audit externe
 - Vérification de clé par numéro de sécurité, QR code ou emoji
@@ -88,7 +88,7 @@ chiffré que si une session existe déjà et que les deux côtés annoncent la
 capacité `call-v1` ; sinon il est en clair et l'écran l'indique.
 
 Ne le sont **pas** : les groupes, les chaînes, les statuts, les listes de
-diffusion, les appels de groupe, et les conversations avec l'assistant Aoussi
+diffusion, les appels de groupe, et les conversations avec l'assistant Baba
 — qui ne pourra jamais l'être, puisqu'il doit lire pour répondre.
 
 Une conversation dont un seul côté a une version qui chiffre reste **en clair**

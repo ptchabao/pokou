@@ -10,7 +10,17 @@ from app.services.payments import semoa_client
 
 logger = logging.getLogger(__name__)
 
-PRODUCT_BOOST_AMOUNT = 1000
+#: Mise en avant d'une annonce Assimé (maquettes Assimé 10 et 14 à 17) :
+#: montants ronds TTC, sans renouvellement automatique. 3 jours = en tête
+#: des résultats ; 7 jours = résultats et une place dans la bande des statuts.
+PRODUCT_BOOST_OPTIONS = {3: 600, 7: 1300}
+#: Au plus deux annonces sponsorisées par écran de résultats.
+SPONSORED_PER_PAGE = 2
+#: Les médicaments ne se vendent pas sur Assimé : ils renvoient vers Honam.
+MEDICINE_CATEGORIES = {"MEDICAMENTS", "MEDICAMENT", "PHARMACIE"}
+#: Hypothèse (ASM-05, partie du cahier non reçue) : catégories qui ne se
+#: mettent jamais en avant.
+BOOST_FORBIDDEN_CATEGORIES = MEDICINE_CATEGORIES | {"ARMES", "TABAC", "ALCOOL"}
 STATUS_BOOST_AMOUNT = 1000
 VERIFICATION_AMOUNT = 5000
 
@@ -124,6 +134,11 @@ _MODULE_PAYMENT_KINDS = {
     "VIP_SUBSCRIPTION": "app.api.v1.modules.vip_room",
     "HYPE_CONTRIBUTION": "app.api.v1.modules.hype_train",
     "SPARK_LIKES": "app.api.v1.spark.spark",
+    "CERTIFIED_SUBSCRIPTION": "app.api.v1.certified.certified",
+    "HONAM_PHARMACY_SUB": "app.api.v1.honam.honam",
+    "HONAM_CREDIT": "app.api.v1.honam.honam",
+    "HONAM_COURIER_MEMBERSHIP": "app.api.v1.honam.honam",
+    "HONAM_COURIER_PACK": "app.api.v1.honam.honam",
     "SPARK_PLUS": "app.api.v1.spark.spark",
     "SPARK_LIKERS": "app.api.v1.spark.spark",
     "SPARK_BOOST": "app.api.v1.spark.spark",
@@ -145,6 +160,20 @@ def _apply_module_payment(db: Session, payment: MarketplacePayment) -> dict[str,
 
     module = importlib.import_module(_MODULE_PAYMENT_KINDS[payment.kind])
     return module.apply_confirmed_payment(db, payment)
+
+
+def attach_payer_name(db: Session, provider_reference: str, payer_name: str) -> None:
+    """Retient le nom du titulaire du wallet AVANT la confirmation, pour que
+    l'effet du paiement (Pokou certifié) puisse le comparer."""
+    payment = (
+        db.query(MarketplacePayment)
+        .filter(MarketplacePayment.provider_reference == provider_reference)
+        .first()
+    )
+    if payment is None or payment.status != "PENDING":
+        return
+    payment.metadata_json = {**(payment.metadata_json or {}), "payer_name": payer_name}
+    db.flush()
 
 
 def confirm_payment(db: Session, provider_reference: str) -> dict[str, Any]:
@@ -174,7 +203,7 @@ def confirm_payment(db: Session, provider_reference: str) -> dict[str, Any]:
             status_id=metadata.get("status_id"),
             payment_id=payment.id,
             starts_at=now,
-            expires_at=now + timedelta(hours=48),
+            expires_at=now + timedelta(hours=int(metadata.get("duration_hours") or 48)),
         )
         db.add(boost)
         db.flush()

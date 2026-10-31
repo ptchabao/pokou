@@ -178,6 +178,13 @@ class User(Base):
     # ne protège que l'écran de cet appareil) : exigée en plus de l'OTP à la
     # reconnexion sur un nouvel appareil.
     two_step_pin_hash = Column(String(255), nullable=True)
+    # ── Consentements (cahier des charges, section 8.1) ────────────────
+    terms_accepted_at = Column(DateTime, nullable=True)
+    terms_version = Column(String(16), nullable=True)
+    age_confirmed_at = Column(DateTime, nullable=True)
+    #: Deux choix DISTINCTS, non cochés par défaut, révocables.
+    consent_analytics = Column(Boolean, default=False, nullable=False)
+    consent_marketing = Column(Boolean, default=False, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships

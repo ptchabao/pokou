@@ -142,6 +142,8 @@ def _serialize_group(group: Group, *, with_members: bool = False) -> dict:
         # Le réglage courant, pas l'échéance d'un message : chaque message
         # emporte la sienne, figée à l'envoi (voir send_group_message).
         "disappearing_seconds": group.disappearing_seconds,
+        "proof_mode": bool(group.proof_mode),
+        "proof_mode_since": group.proof_mode_since.isoformat() if group.proof_mode_since else None,
     }
     if with_members:
         payload["members"] = [_serialize_member(member) for member in group.members]
@@ -281,6 +283,11 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
         # initial de polls.py la portait).
         "payload": message.payload,
         "poll": _serialize_poll(message.poll, viewer_id) if message.poll else None,
+        # Mode preuve : le message supprimé reste lisible, et le client le
+        # barre. Hors mode preuve, une suppression efface la ligne.
+        "deleted_at": message.deleted_at.isoformat() if message.deleted_at else None,
+        "deleted_by": message.deleted_by,
+        "original_content": message.original_content,
     }
 
 
@@ -1226,6 +1233,8 @@ async def edit_group_message(
         # 403 et non 404 : le message est bien visible de tout le groupe,
         # cacher son existence à un membre n'aurait aucun sens.
         raise HTTPException(status_code=403, detail="Vous ne pouvez modifier que vos propres messages")
+    if message.deleted_at is not None:
+        raise HTTPException(status_code=409, detail="Un message supprimé ne se modifie plus")
     if message.message_type != MessageType.TEXT:
         # Remplacer une pièce jointe n'est pas une modification, c'est un
         # autre message : la précédente est déjà téléchargée chez les autres.
@@ -1240,6 +1249,10 @@ async def edit_group_message(
     if not content:
         raise HTTPException(status_code=400, detail="Le contenu du message est requis")
 
+    # En mode preuve, la PREMIÈRE version reste lisible de tous : modifier
+    # ne permet pas de réécrire ce qui a été dit.
+    if message.group is not None and message.group.proof_mode and message.original_content is None:
+        message.original_content = message.content
     message.content = content
     message.edited_at = datetime.utcnow()
     db.commit()
@@ -1256,6 +1269,137 @@ async def edit_group_message(
         exclude_user_id=user_id,
     )
     return _serialize_message(message, user_id)
+
+
+class ProofModeBody(BaseModel):
+    enabled: bool
+
+
+@router.post("/{group_id}/proof-mode")
+async def set_proof_mode(
+    group_id: int,
+    body: ProofModeBody,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Activer ou couper le mode preuve.
+
+    Activer : tout membre qui a le badge (payé ou en essai), administrateur
+    ou non. Couper : la personne qui l'a activé, ou un administrateur dont le
+    badge est PAYÉ — l'essai ne donne pas ce droit (maquette 7). Le mode
+    n'est jamais caché : un message système l'annonce dans le fil.
+    """
+    from app.api.v1.certified.certified import has_paid_badge, proof_mode_allowed
+
+    user_id = current_user["user_id"]
+    membership = _require_membership(db, group_id, user_id)
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if body.enabled == bool(group.proof_mode):
+        return _serialize_group_for(group, user_id)
+    if body.enabled:
+        if not proof_mode_allowed(db, user_id):
+            raise HTTPException(status_code=403, detail="Le mode preuve demande Pokou certifié")
+    else:
+        is_activator = group.proof_mode_by == user_id
+        if not is_activator and not (membership.role in _MANAGER_ROLES and has_paid_badge(db, user_id)):
+            raise HTTPException(
+                status_code=403,
+                detail="Seule la personne qui l'a activé, ou un administrateur au badge payant, peut le désactiver",
+            )
+    group.proof_mode = body.enabled
+    group.proof_mode_since = datetime.utcnow() if body.enabled else None
+    group.proof_mode_by = user_id if body.enabled else None
+    notice = GroupMessage(
+        group_id=group_id,
+        sender_id=user_id,
+        message_type=MessageType.TEXT,
+        content="a activé le mode preuve" if body.enabled else "a désactivé le mode preuve",
+        payload={"kind": "proof_mode", "enabled": body.enabled},
+    )
+    db.add(notice)
+    db.commit()
+    db.refresh(notice)
+    await _broadcast(db, group_id, {"type": "group:message:new", "message": _serialize_message(notice)})
+    await _broadcast(db, group_id, {
+        "type": "group:proof_mode",
+        "group_id": group_id,
+        "enabled": body.enabled,
+        "by": user_id,
+    })
+    return _serialize_group_for(group, user_id)
+
+
+@router.get("/{group_id}/proof-export")
+def export_proof(
+    group_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """L'export daté (maquettes 8 et 9) : tout membre, tant que le groupe
+    est en mode preuve. Depuis l'activation, messages supprimés et versions
+    d'origine compris."""
+    from fastapi.responses import Response as RawResponse
+
+    from app.services.messaging.proof_export import render
+
+    user_id = current_user["user_id"]
+    _require_membership(db, group_id, user_id)
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group.proof_mode:
+        raise HTTPException(status_code=409, detail="Le mode preuve n'est pas actif")
+    rows = (
+        db.query(GroupMessage)
+        .filter(GroupMessage.group_id == group_id, GroupMessage.created_at >= group.proof_mode_since)
+        .order_by(GroupMessage.created_at)
+        .all()
+    )
+    messages = [{
+        "sender": _display_name(m.sender),
+        "created_at": m.created_at,
+        "type": m.message_type.value,
+        "content": m.content,
+        "deleted_at": m.deleted_at,
+        "original_content": m.original_content,
+        "edited_at": m.edited_at,
+    } for m in rows]
+    me = db.query(User).filter(User.id == user_id).first()
+    pdf = render(group.name, group.proof_mode_since, messages, _display_name(me))
+    filename = f"pokou-preuve-{group_id}-{datetime.utcnow():%Y%m%d-%H%M}.pdf"
+    return RawResponse(pdf, media_type="application/pdf",
+                       headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+@router.delete("/{group_id}/messages/{message_id}")
+async def delete_group_message(
+    group_id: int,
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Supprimer un message pour tout le groupe : son auteur, ou un admin.
+
+    En mode preuve, la ligne reste avec son contenu, marquée supprimée, et
+    chaque membre la voit barrée. Hors mode preuve, elle est effacée.
+    """
+    user_id = current_user["user_id"]
+    membership = _require_membership(db, group_id, user_id)
+    message = _get_group_message(db, group_id, message_id)
+    if message.sender_id != user_id and membership.role not in _MANAGER_ROLES:
+        raise HTTPException(status_code=403, detail="Vous ne pouvez supprimer que vos propres messages")
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if group.proof_mode:
+        if message.deleted_at is None:
+            message.deleted_at = datetime.utcnow()
+            message.deleted_by = user_id
+            db.commit()
+            db.refresh(message)
+        event = {"type": "group:message:edited", "group_id": group_id, "message": _serialize_message(message)}
+        await _broadcast(db, group_id, event)
+        return {"deleted": True, "kept_as_proof": True, "message": _serialize_message(message, user_id)}
+    db.delete(message)
+    db.commit()
+    await _broadcast(db, group_id, {"type": "group:message:deleted", "group_id": group_id, "message_id": message_id})
+    return {"deleted": True, "kept_as_proof": False, "message_id": message_id}
 
 
 @router.put("/{group_id}/messages/{message_id}/reaction")

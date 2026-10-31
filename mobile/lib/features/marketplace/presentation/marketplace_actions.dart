@@ -132,11 +132,36 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     MarketplaceProduct product,
   ) async {
     if (boostingProductIds.contains(product.id)) return;
+    // 3 jours : en tête des résultats ; 7 jours : résultats et bande des
+    // statuts (maquette Assimé 10).
+    final l = L.of(context);
+    final days = await showModalBottomSheet<int>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(title: Text(l.marketBoost, style: const TextStyle(fontWeight: FontWeight.w600))),
+            ListTile(
+              leading: const Icon(Icons.trending_up),
+              title: Text(l.marketBoost3),
+              onTap: () => Navigator.pop(sheetContext, 3),
+            ),
+            ListTile(
+              leading: const Icon(Icons.campaign_outlined),
+              title: Text(l.marketBoost7),
+              onTap: () => Navigator.pop(sheetContext, 7),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (days == null || !mounted) return;
     setState(() => boostingProductIds.add(product.id));
     try {
       final payment = await ref
           .read(marketplaceRepositoryProvider)
-          .boostProduct(product.id);
+          .boostProduct(product.id, days: days);
       final paymentId = payment['payment_id'] as int?;
       final paymentUrl = payment['payment_url'] as String?;
       if (paymentId == null || paymentUrl == null || paymentUrl.isEmpty) {

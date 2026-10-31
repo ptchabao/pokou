@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'certified_screen.dart';
+
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
@@ -86,6 +88,9 @@ class MoreScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: ModuleCard(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CertifiedScreen()),
+              ),
               child: Row(
                 children: [
                   ModuleBadge(
@@ -102,7 +107,7 @@ class MoreScreen extends ConsumerWidget {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          l.moreCertifiedBody,
+                          l.certPitch,
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,

@@ -14,6 +14,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../data/auth_repository.dart' show TwoStepRequired;
 import 'auth_controller.dart';
+import 'onboarding_screen.dart';
 import 'two_step_pin_screen.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import '../../../core/settings/app_settings.dart';
@@ -44,7 +45,9 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   late final AnimationController _successController;
   bool _success = false;
   String? _error;
-  int _resendCooldown = 30;
+  /// 60 s, comme le serveur (RESEND_MIN_SECONDS) : un bouton qui se
+  /// réactive avant que le serveur accepte ne produirait qu'un refus.
+  int _resendCooldown = 60;
   Timer? _timer;
 
   @override
@@ -66,7 +69,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   }
 
   void _startCooldown() {
-    _resendCooldown = 30;
+    _resendCooldown = 60;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_resendCooldown <= 1) {
@@ -94,7 +97,12 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
     try {
       await ref
           .read(authControllerProvider.notifier)
-          .verifyOtp(phone: widget.phone, code: _codeController.text.trim());
+          .verifyOtp(
+            phone: widget.phone,
+            code: _codeController.text.trim(),
+            acceptTerms: ref.read(signupConsentProvider).terms,
+            ageConfirmed: ref.read(signupConsentProvider).age,
+          );
       // Le numéro vient d'être confirmé par SMS : son pays est le seul que
       // l'application connaisse avec certitude. On le retient pour le
       // proposer par défaut à la prochaine connexion sur cet appareil,
@@ -106,7 +114,8 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
       setState(() => _success = true);
       await _successController.forward();
       await Future<void>.delayed(const Duration(milliseconds: 400));
-      if (mounted) context.go('/inbox');
+      final next = await routeAfterSignIn(ref);
+      if (mounted) context.go(next);
     } on TwoStepRequired catch (pending) {
       // Le SMS est validé, le compte demande encore son code : le numéro
       // est donc confirmé, on peut retenir son pays dès maintenant.
@@ -242,6 +251,11 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
       key: const ValueKey('form'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          L.of(context).onbStep('2'),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
+        const SizedBox(height: 4),
         Text(
           L.of(context).authVerifyTitle,
           style: TextStyle(

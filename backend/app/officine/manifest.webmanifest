@@ -1,0 +1,13 @@
+{
+  "name": "Honam — espace officine",
+  "short_name": "Honam Officine",
+  "start_url": "/officine/",
+  "scope": "/officine/",
+  "display": "standalone",
+  "background_color": "#FFF7EC",
+  "theme_color": "#A65527",
+  "lang": "fr",
+  "icons": [
+    {"src": "/officine/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

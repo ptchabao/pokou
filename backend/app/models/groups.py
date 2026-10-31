@@ -43,6 +43,12 @@ class Group(Base):
     disappearing_seconds = Column(Integer, nullable=True)
     # Réservé aux admins pour écrire (hors annonces, qui l'imposent déjà).
     admins_only_messages = Column(Boolean, default=False, nullable=False)
+    # Mode preuve (Pokou certifié) : un message supprimé reste visible,
+    # barré, pour TOUS les membres, et plus rien ne se modifie. Activé par un
+    # administrateur certifié ou en essai.
+    proof_mode = Column(Boolean, default=False, nullable=False)
+    proof_mode_since = Column(DateTime, nullable=True)
+    proof_mode_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
     creator = relationship("User", foreign_keys=[created_by])
     avatar_media = relationship("MediaAsset")
@@ -291,6 +297,13 @@ class GroupMessage(Base):
     )
     edited_at = Column(DateTime, nullable=True)
     expires_at = Column(DateTime, nullable=True, index=True)
+    # Renseignés seulement en mode preuve : hors mode preuve, une
+    # suppression efface la ligne.
+    deleted_at = Column(DateTime, nullable=True)
+    deleted_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # La version d'origine d'un message modifié EN MODE PREUVE : elle reste
+    # visible de tous, avec l'heure de la modification (maquette 14).
+    original_content = Column(Text, nullable=True)
     poll_id = Column(String(36), ForeignKey("polls.id", ondelete="CASCADE"), nullable=True)
     payload = Column(JSON, nullable=True)
 

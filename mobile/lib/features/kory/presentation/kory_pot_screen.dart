@@ -193,6 +193,15 @@ class _Header extends StatelessWidget {
               fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
+          Text(
+            l.koryDeclaredTotal(formatFcfa(pot.declaredTotal)),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          ),
+          if (pot.remainingToCollect != null)
+            Text(
+              l.koryRemaining(formatFcfa(pot.remainingToCollect!)),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
           if (progress != null) ...[
             const SizedBox(height: 8),
             ModuleProgressBar(

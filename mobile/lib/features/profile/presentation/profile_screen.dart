@@ -265,7 +265,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final monitors = status.monitors;
     if (status.mode == MinouMode.messaging || monitors.isEmpty) {
-      context.push('/chat/$kNoMonitor', extra: 'Aoussi');
+      context.push('/chat/$kNoMonitor', extra: L.of(context).navBaba);
       return;
     }
     if (monitors.length == 1) {
@@ -323,7 +323,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // l'app verrouillée sur l'écran de connexion (voir app_lock.dart).
     await ref.read(appLockProvider.notifier).forgetOnLogout();
     await ref.read(authControllerProvider.notifier).logout();
-    if (mounted) context.go('/phone');
+    if (mounted) context.go('/welcome');
   }
 
   Future<void> _verifyAccount() async {
@@ -463,13 +463,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               final count = status.monitors.length;
                               if (status.mode == MinouMode.messaging ||
                                   count == 0) {
-                                return L.of(context).profileAoussiMessaging;
+                                return L.of(context).profileBabaMessaging;
                               }
                               return L.of(context).profileMonitorAlerts(count);
                             },
                             loading: () => L.of(context).commonLoading,
                             error: (_, _) =>
-                                L.of(context).profileAoussiAssistant,
+                                L.of(context).profileBabaAssistant,
                           ),
                           onTap: _openMahizu,
                         ),
@@ -759,7 +759,7 @@ class _MahizuCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    L.of(context).profileAoussiAssistant,
+                    L.of(context).profileBabaAssistant,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,

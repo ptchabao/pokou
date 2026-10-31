@@ -184,8 +184,9 @@ class MarketplaceRepository {
 
   Future<void> delete(int id) => _api.delete('/marketplace/$id');
 
-  Future<Map<String, dynamic>> boostProduct(int id) async {
-    final response = await _api.post('/marketplace/$id/boost', body: const {});
+  /// Mise en avant de 3 ou 7 jours (600 ou 1 300 FCFA TTC).
+  Future<Map<String, dynamic>> boostProduct(int id, {int days = 7}) async {
+    final response = await _api.post('/marketplace/$id/boost', body: {'days': days});
     return (response as Map).cast<String, dynamic>();
   }
 

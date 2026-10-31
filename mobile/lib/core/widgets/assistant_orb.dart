@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// L'orbe d'Aoussi — son visage, dans le vert de l'application.
+/// L'orbe de Baba — son visage, dans le vert de l'application.
 ///
 /// Elle doit paraître VIVANTE, sans s'agiter :
 ///
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 ///   qu'on regarde à travers le verre ;
 /// - **elle rayonne** : un halo vert s'étend et se resserre avec le souffle.
 ///
-/// Quand Aoussi réfléchit, tout s'accélère — souffle court, lumière qui
+/// Quand Baba réfléchit, tout s'accélère — souffle court, lumière qui
 /// tourne vite, halo plus vif. On lit « il travaille » sans un mot ni un
 /// sablier.
 ///

@@ -139,3 +139,14 @@ from app.models.kory import (  # noqa: F401
 from app.models.events import (  # noqa: F401
     OutboxEvent,
 )
+from app.models.certified import (  # noqa: F401
+    CertifiedSubscription,
+)
+from app.models.honam import (  # noqa: F401
+    Pharmacy,
+    PharmacyStaff,
+    HonamOrder,
+    HonamOrderEvent,
+    CourierProfile,
+    CourierLedgerEntry,
+)

@@ -66,12 +66,17 @@ class Group {
     this.inviteCode,
     this.communityId,
     this.isAnnouncement = false,
+    this.proofMode = false,
   });
 
   final int id;
   final String name;
   final int createdBy;
   final int memberCount;
+
+  /// Mode preuve (Pokou certifié) : un message supprimé reste visible,
+  /// barré, pour tous, et plus rien ne se modifie.
+  final bool proofMode;
   final String? communityName;
   final int? avatarMediaId;
 
@@ -140,6 +145,7 @@ class Group {
       inviteCode: json['invite_code'] as String?,
       communityId: json['community_id'] as int?,
       isAnnouncement: json['is_announcement'] as bool? ?? false,
+      proofMode: json['proof_mode'] as bool? ?? false,
       members: membersJson == null
           ? const []
           : membersJson
@@ -225,7 +231,17 @@ class GroupMessage {
     this.payload,
     this.poll,
     this.pendingMedia,
+    this.deletedAt,
+    this.originalContent,
   });
+
+  /// La première version d'un message modifié en mode preuve : elle reste
+  /// visible de tous.
+  final String? originalContent;
+
+  /// Renseigné seulement en mode preuve : le message a été supprimé mais
+  /// reste affiché, barré.
+  final DateTime? deletedAt;
 
   final String id;
   final int groupId;
@@ -339,6 +355,10 @@ class GroupMessage {
       editedAt: json['edited_at'] != null
           ? DateTime.parse(json['edited_at'] as String)
           : null,
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'] as String)
+          : null,
+      originalContent: json['original_content'] as String?,
       expiresAt: json['expires_at'] != null
           ? DateTime.parse(json['expires_at'] as String)
           : null,
@@ -359,6 +379,7 @@ class GroupMessage {
     DateTime? editedAt,
     String? content,
     PollData? poll,
+    DateTime? deletedAt,
   }) {
     return GroupMessage(
       id: id,
@@ -380,6 +401,8 @@ class GroupMessage {
       mentions: mentions,
       payload: payload,
       poll: poll ?? this.poll,
+      deletedAt: deletedAt ?? this.deletedAt,
+      originalContent: originalContent,
     );
   }
 }

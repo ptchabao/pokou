@@ -35,7 +35,7 @@ import 'e2ee_store.dart';
 ///   Signal ajoute un second cliquet pour ça ;
 /// - ❌ **les groupes, les chaînes et les statuts ne sont PAS chiffrés.** Ne
 ///   pas laisser croire le contraire ;
-/// - ❌ l'assistant Aoussi ne l'est pas non plus, et ne peut pas l'être : il
+/// - ❌ l'assistant Baba ne l'est pas non plus, et ne peut pas l'être : il
 ///   doit lire pour répondre ;
 /// - ❌ **aucun audit externe.** C'est la limite la plus importante, et elle
 ///   n'est pas technique.

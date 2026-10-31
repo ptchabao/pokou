@@ -89,6 +89,18 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
     if asset.uploader_id == user_id:
         return True
 
+    # Ordonnance HONAM : l'équipe de l'officine destinataire, et elle seule.
+    # Ni le coursier ni les autres officines : une ordonnance dit une
+    # maladie.
+    from app.models.honam import HonamOrder, PharmacyStaff
+
+    prescription = db.query(HonamOrder.pharmacy_id).filter(HonamOrder.prescription_media_id == asset.id).all()
+    if prescription:
+        pharmacy_ids = [row[0] for row in prescription]
+        return db.query(PharmacyStaff.id).filter(
+            PharmacyStaff.pharmacy_id.in_(pharmacy_ids), PharmacyStaff.user_id == user_id
+        ).first() is not None
+
     # Les pièces d'un dossier Pokou Business (registre du commerce, pièce
     # d'identité du représentant) : l'équipe qui l'examine, et personne
     # d'autre — même règle que les dossiers vendeur.

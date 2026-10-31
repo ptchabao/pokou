@@ -118,7 +118,9 @@ def test_invalid_phone_format_rejected(client):
     assert response.status_code == 400
 
 
-def test_request_otp_rate_limited_after_three_requests(client):
+def test_request_otp_rate_limited_after_three_requests(client, monkeypatch):
+    # La fenêtre de 15 minutes, sans le délai de renvoi de 60 s testé à part.
+    monkeypatch.setattr(otp_service, "RESEND_MIN_SECONDS", 0)
     phone = "+22890000006"
     with patch.object(otp_service.sms_service, "send_sms", return_value=True):
         for _ in range(3):
@@ -209,8 +211,10 @@ def test_whatsapp_is_not_attempted_for_an_invalid_number(client):
     assert not sent.wait(0.5)
 
 
-def test_rate_limited_request_sends_nothing_on_either_channel(client):
+def test_rate_limited_request_sends_nothing_on_either_channel(client, monkeypatch):
     import threading
+
+    monkeypatch.setattr(otp_service, "RESEND_MIN_SECONDS", 0)
 
     sent = threading.Event()
     phone = "+22890123492"
@@ -377,3 +381,61 @@ def test_the_review_code_lives_long_enough_for_a_review_session(client):
     assert response.json()["expires_in"] == otp_service.REVIEW_OTP_TTL_MINUTES * 60
     # Et la durée ordinaire n'a pas bougé pour autant.
     assert ordinary.json()["expires_in"] == otp_service.OTP_TTL_MINUTES * 60
+
+
+# ─── Section 8.1 du cahier des charges ────────────────────────────────────────
+
+def test_renvoi_refuse_avant_60_secondes(client):
+    phone = "+22890000041"
+    _request_otp_and_extract_code(client, phone=phone)
+    with patch.object(otp_service.sms_service, "send_sms", return_value=True) as mock_sms:
+        again = client.post("/api/v1/auth/phone/request-otp", json={"phone": phone})
+    assert again.status_code == 429
+    mock_sms.assert_not_called()
+
+
+def test_cinq_codes_faux_verrouillent_le_numero(client):
+    phone = "+22890000042"
+    code = _request_otp_and_extract_code(client, phone=phone)
+    messages = []
+    for _ in range(4):
+        r = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": "000000"})
+        assert r.status_code == 400
+        messages.append(r.json()["detail"])
+    assert "4 essais" in messages[0] and "1 essai" in messages[-1]
+    fifth = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": "000000"})
+    assert fifth.status_code == 429
+    # Même le BON code est refusé pendant le verrou.
+    locked = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": code})
+    assert locked.status_code == 429
+
+
+def test_onboarding_tant_que_nom_et_conditions_manquent(client):
+    phone = "+22890000043"
+    code = _request_otp_and_extract_code(client, phone=phone)
+    body = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": code}).json()
+    headers = {"Authorization": f"Bearer {body['access_token']}"}
+    assert body["user"]["needs_onboarding"] is True
+
+    refused = client.post("/api/v1/auth/me/consents", json={"accept_terms": True}, headers=headers)
+    assert refused.status_code == 422  # l'âge requis manque
+
+    client.patch("/api/v1/auth/me", json={"full_name": "Afi"}, headers=headers)
+    me = client.post(
+        "/api/v1/auth/me/consents",
+        json={"accept_terms": True, "age_confirmed": True, "consent_analytics": True},
+        headers=headers,
+    ).json()
+    assert me["needs_onboarding"] is False
+    assert me["consent_analytics"] is True and me["consent_marketing"] is False
+
+
+def test_conditions_cochees_avec_le_numero(client):
+    phone = "+22890000044"
+    code = _request_otp_and_extract_code(client, phone=phone)
+    body = client.post("/api/v1/auth/phone/verify-otp", json={
+        "phone": phone, "code": code, "accept_terms": True, "age_confirmed": True, "consent_marketing": False,
+    }).json()
+    assert body["user"]["terms_accepted_at"] is not None
+    # Reste le nom affiché : l'étape « Profil, avec Baba ».
+    assert body["user"]["needs_onboarding"] is True

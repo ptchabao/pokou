@@ -762,7 +762,7 @@
   "marketProductUnavailable": "Produit indisponible.",
   "marketPaymentUnavailable": "Paiement Mobile Money indisponible.",
   "marketCheckoutUnreachable": "Checkout Mobile Money inaccessible.",
-  "marketBoostDone": "Paiement effectué — produit boosté !",
+  "marketBoostDone": "Paiement effectué : annonce sponsorisée.",
   "marketBoostPending": "Paiement du boost en attente.",
   "marketBoostFailed": "Boost impossible pour le moment.",
   "marketTitle": "Marketplace",
@@ -780,7 +780,7 @@
   "marketSwipeCatalogue": "Glissez pour voir tous vos produits",
   "marketCatalogueEmpty": "Votre catalogue est vide",
   "marketCatalogueEmptyBody": "Ajoutez votre premier produit pour commencer à vendre !",
-  "marketBoosted": "★ Boosté",
+  "marketBoosted": "Sponsorisé",
   "vitrineSeeProduct": "Voir l'article",
   "vitrineHint": "Touchez l'article pour l'ouvrir",
   "vitrineTitle": "Vitrine du Marché",
@@ -795,8 +795,8 @@
   "versesQuranTitle": "Versets coraniques",
   "versesShare": "Partager",
   "versesOfflineHint": "Les versets arrivent même sans connexion : ils sont déjà sur votre téléphone.",
-  "marketBoosted48h": "★ Boosté · 48 h",
-  "marketBoost": "Booster",
+  "marketBoosted48h": "Sponsorisé",
+  "marketBoost": "Mettre en avant",
   "marketRemove": "Retirer",
   "marketGpsSaved": "Position GPS enregistrée.",
   "marketNameAndPrice": "Un nom et un prix sont nécessaires.",
@@ -1072,7 +1072,7 @@
   "storageDataSaverFootnote": "Activée, les photos et vidéos reçues attendent que vous les touchiez pour se télécharger, et les photos que vous envoyez sont compressées davantage.",
   "profileAvatarFailed": "Impossible de mettre à jour la photo de profil.",
   "profileChooseMonitor": "Choisir un moniteur",
-  "profileAoussiMessaging": "Messagerie Aoussi",
+  "profileBabaMessaging": "Messagerie Baba",
   "profileMonitorAlerts": "{count, plural, =1{Alertes de 1 moniteur} other{Alertes de {count} moniteurs}}",
   "@profileMonitorAlerts": {
     "placeholders": {
@@ -1081,7 +1081,7 @@
       }
     }
   },
-  "profileAoussiAssistant": "Assistant Aoussi",
+  "profileBabaAssistant": "Assistant Baba",
   "profileShieldModeBody": "Met en attente les appels et met en veilleuse les conversations non prioritaires pendant que vous êtes concentré. Vos contacts étiquetés Business, Client, Fournisseur ou Boss passent toujours.",
   "contactConnectFailed": "Connexion impossible.",
   "contactCallFailed": "Appel impossible pour l'instant.",
@@ -1788,7 +1788,7 @@
   "aiHowCanIHelp": "Comment puis-je vous aider ?",
   "aiAskAnything": "Posez-moi n'importe quelle question.",
   "aiAskAboutData": "Posez une question sur vos données connectées.",
-  "aiThinking": "Aoussi réfléchit",
+  "aiThinking": "Baba réfléchit",
   "aiHelloIm": "Bonjour, je suis {name}",
   "@aiHelloIm": {
     "placeholders": {
@@ -2046,7 +2046,7 @@
   "stickerStoreEmpty": "Aucun pack disponible pour l'instant",
   "stickerSaveToMine": "Ajouter à mes stickers",
   "stickerSaved": "Sticker ajouté à vos stickers",
-  "navAoussi": "Aoussi",
+  "navBaba": "Baba",
   "appBarOnline": "En ligne",
   "appBarOffline": "Hors ligne",
   "marketNegotiate": "Négocier",
@@ -2056,7 +2056,7 @@
   "chatsFilterAll": "Toutes",
   "chatsFilterUnread": "Non lues",
   "chatsFilterGroups": "Groupes",
-  "chatsSearchOrAsk": "Rechercher ou demander à Aoussi…",
+  "chatsSearchOrAsk": "Rechercher ou demander à Baba…",
   "convEncryptedHint": "Message chiffré…",
   "chatsArchivedSection": "Discussions archivées",
   "statusMineTitle": "Mon Actu",
@@ -2300,7 +2300,7 @@
   "koryJournalEmpty": "Aucune contribution déclarée pour l'instant.",
   "koryStatusDeclared": "En attente du collecteur",
   "koryStatusConfirmed": "Confirmée",
-  "koryStatusRejected": "Non reçue",
+  "koryStatusRejected": "Contestée",
   "koryConfirm": "Reçu",
   "koryReject": "Pas reçu",
   "koryCloseAction": "Clôturer",
@@ -2340,5 +2340,288 @@
   "koryDeclared": "Contribution déclarée. Le collecteur va la confirmer.",
   "koryCopyPhone": "Copier le numéro",
   "koryCopied": "Copié",
-  "koryActionFailed": "L'opération n'a pas abouti. Réessayez."
+  "koryActionFailed": "L'opération n'a pas abouti. Réessayez.",
+  "welcomePromise": "Plus qu'une messagerie, une communauté.",
+  "welcomeSignature": "Ensemble, plus forts.",
+  "welcomeCreate": "Créer un compte",
+  "welcomeSignIn": "Se connecter",
+  "welcomeServiceChats": "Discussions, groupes et appels",
+  "welcomeServiceKory": "Cagnottes & tontines",
+  "legalPrivacy": "Confidentialité",
+  "legalTerms": "Conditions d'utilisation",
+  "legalUnavailable": "Document indisponible pour l'instant.",
+  "onbStep": "Étape {step} sur 3",
+  "@onbStep": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "onbProfileTitle": "Votre profil",
+  "onbProfileBody": "C'est le nom que verront vos contacts.",
+  "onbDisplayName": "Nom affiché",
+  "onbNameRequired": "Indiquez un nom (2 caractères au moins).",
+  "onbPhotoLater": "Vous pourrez ajouter une photo plus tard, depuis votre profil.",
+  "onbContinue": "Continuer",
+  "onbTermsTitle": "Avant de commencer",
+  "onbAcceptTerms": "J'ai lu et j'accepte les conditions d'utilisation et la politique de confidentialité.",
+  "onbAge": "J'ai l'âge requis pour utiliser Pokou.",
+  "onbOptional": "Facultatif, modifiable à tout moment dans les réglages",
+  "onbAnalytics": "Partager des statistiques d'usage pour améliorer Pokou",
+  "onbMarketing": "Recevoir les nouvelles et offres de Pokou",
+  "onbFinish": "Terminer",
+  "onbFailed": "L'enregistrement n'a pas abouti. Réessayez.",
+  "moreConsents": "Statistiques et communications",
+  "navHonam": "Honam",
+  "honamSubtitle": "Pharmacies & livraison",
+  "honamSend": "Envoyer une ordonnance",
+  "honamPhotograph": "Photographier l'ordonnance",
+  "honamFromGallery": "Choisir une photo",
+  "honamUrgent": "Urgence",
+  "honamNotEmergency": "Pokou n'est pas un service d'urgence.",
+  "honamNearby": "Pharmacies proches",
+  "honamOnDuty": "De garde",
+  "honamNoPharmacy": "Aucune pharmacie partenaire pour l'instant.",
+  "honamCurrentOrder": "Commande en cours",
+  "honamMyOrders": "Mes commandes",
+  "honamChoosePharmacy": "Choisir la pharmacie",
+  "honamAddress": "Adresse de livraison",
+  "honamNote": "Note pour le pharmacien (facultatif)",
+  "honamSubmit": "Envoyer à la pharmacie",
+  "honamNeedPhoto": "Ajoutez la photo de l'ordonnance.",
+  "honamNeedAddress": "Indiquez l'adresse de livraison.",
+  "honamFailed": "L'opération n'a pas abouti. Réessayez.",
+  "honamOrderTitle": "Commande n° {id}",
+  "@honamOrderTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "honamStSubmitted": "Envoyée, en attente du pharmacien",
+  "honamStQuoted": "Devis reçu",
+  "honamStAccepted": "Devis accepté, à payer",
+  "honamStPaid": "Payée, en préparation",
+  "honamStReady": "Prête, coursier attendu",
+  "honamStInDelivery": "En livraison",
+  "honamStDelivered": "Livrée",
+  "honamStRejected": "Ordonnance refusée",
+  "honamStExpired": "Devis expiré",
+  "honamStCancelled": "Annulée",
+  "honamQuote": "Devis",
+  "honamUnavailableItem": "Indisponible",
+  "honamMedicines": "Médicaments",
+  "honamDelivery": "Livraison",
+  "honamTotal": "Total à payer",
+  "honamAcceptQuote": "Accepter le devis",
+  "honamPayTo": "Envoyez {amount} depuis votre wallet au {phone} (la pharmacie), puis confirmez.",
+  "@honamPayTo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "honamDeclarePaid": "J'ai payé la pharmacie",
+  "honamPaidDeclared": "Paiement signalé : la pharmacie va le confirmer.",
+  "honamPaymentNotReceived": "La pharmacie n'a pas reçu votre paiement. Vérifiez le numéro et le montant.",
+  "honamCode": "Code de remise",
+  "honamCodeHelp": "Donnez ce code au coursier, seulement quand vous avez le colis en main.",
+  "honamOriginal": "Le coursier récupérera l'ordonnance originale.",
+  "honamRefundDue": "La pharmacie vous doit {amount} : {reason}",
+  "@honamRefundDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "honamRefundReceived": "J'ai reçu le remboursement",
+  "honamCancel": "Annuler la commande",
+  "honamResend": "Envoyer à une autre pharmacie",
+  "honamReason": "Motif : {reason}",
+  "@honamReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "honamTimeline": "Suivi",
+  "honamCourierMode": "Mode coursier",
+  "honamCourierJoin": "Devenir coursier Win Pokou",
+  "honamCourierJoinBody": "5 courses d'essai sans commission pendant un mois. Ensuite : adhésion Win Pokou et pack de courses payé d'avance.",
+  "honamRidesLeft": "Courses restantes : {count}",
+  "@honamRidesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUnlimited": "Courses illimitées",
+  "honamMembership": "Adhésion Win Pokou : {amount} HT / mois",
+  "@honamMembership": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPayMembership": "Payer l'adhésion",
+  "honamPacks": "Packs de courses",
+  "honamPackPrice": "{amount} HT",
+  "@honamPackPrice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamAvailableRides": "Courses disponibles",
+  "honamMyRides": "Mes courses",
+  "honamNoRides": "Aucune course pour l'instant.",
+  "honamAcceptRide": "Accepter la course",
+  "honamPickup": "Colis récupéré",
+  "honamDeliver": "Valider la remise",
+  "honamEnterCode": "Code donné par le patient",
+  "honamCoursePaid": "J'ai reçu le prix de la course",
+  "honamPaymentLinkOpened": "Terminez le paiement dans la page qui s'ouvre.",
+  "honamCourierSuspended": "Compte coursier suspendu après 3 défauts de livraison. Contactez le support pour un recours.",
+  "honamPriceNote": "Prix hors taxes, TVA du pays en sus.",
+  "certTitle": "Pokou certifié",
+  "certPitch": "Le badge prouve que votre nom est bien le vôtre. Le mode preuve garde visibles, barrés, les messages supprimés d'un groupe.",
+  "certHowItWorks": "Votre identité est vérifiée par le nom du titulaire du wallet qui paie.",
+  "certStartTrial": "Essayer {days} jours",
+  "@certStartTrial": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "certTrialNote": "Pendant l'essai, le mode preuve est disponible ; le badge s'affiche au premier paiement.",
+  "certPlanPrice": "{ht} HT · {ttc} TTC",
+  "@certPlanPrice": {
+    "placeholders": {
+      "ht": {
+        "type": "String"
+      },
+      "ttc": {
+        "type": "String"
+      }
+    }
+  },
+  "certSubscribe": "Choisir",
+  "certActive": "Badge actif",
+  "certTrialUntil": "Essai jusqu'au {date}",
+  "@certTrialUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certActiveUntil": "Actif jusqu'au {date}",
+  "@certActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certExpired": "Abonnement expiré",
+  "certMismatchTitle": "Les noms ne correspondent pas",
+  "certMismatchBody": "Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrigez-le tel qu'il figure sur sa pièce d'identité.",
+  "proofModeTitle": "Mode preuve",
+  "proofModeOnBanner": "Mode preuve actif : un message supprimé reste visible, barré, pour tous.",
+  "proofModeEnable": "Activer le mode preuve",
+  "proofModeDisable": "Désactiver le mode preuve",
+  "proofModeNeedsCert": "Le mode preuve demande Pokou certifié (essai gratuit disponible).",
+  "deleteForAll": "Supprimer pour tous",
+  "deleteProofWarning": "Le mode preuve est actif : le message restera visible, barré, pour tous les membres.",
+  "deletedKept": "Message supprimé, conservé par le mode preuve",
+  "certCorrectName": "Nom complet du titulaire",
+  "certRetryName": "Vérifier ce nom",
+  "certStillMismatch": "Ce nom ne correspond toujours pas.",
+  "proofExport": "Exporter la discussion (PDF)",
+  "proofModeOn": "{name} a activé le mode preuve",
+  "@proofModeOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofModeOff": "{name} a désactivé le mode preuve",
+  "@proofModeOff": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofOriginal": "Version d'origine : {text}",
+  "@proofOriginal": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "proofDisableReserved": "Seule la personne qui l'a activé, ou un administrateur au badge payant, peut le désactiver.",
+  "marketBoost3": "3 jours · 600 FCFA",
+  "marketBoost7": "7 jours · 1 300 FCFA",
+  "marketUseHonam": "Les médicaments ne se vendent pas sur Assimé : passez par Honam.",
+  "honamMissingTitle": "Un produit manque",
+  "honamMissingBody": "{amount} manquent : {reason}. Que préférez-vous ?",
+  "@honamMissingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "honamKeepRest": "Recevoir le reste",
+  "honamCancelAll": "Tout annuler",
+  "honamRefundDelay": "La pharmacie vous rembourse sous 2 h, sur le numéro qui a payé.",
+  "honamZones": "Zones et créneaux (ex. Bè, Tokoin — soirs)",
+  "honamWallet": "Numéro du wallet qui reçoit le prix des courses",
+  "honamRules": "J'accepte les règles d'or : je remets le colis seulement contre le code, je ne regarde pas les ordonnances, je reste courtois.",
+  "honamApply": "Envoyer ma candidature",
+  "honamPending": "Candidature envoyée : l'équipe Pokou la vérifie.",
+  "honamLaunch": "Période de lancement : vous livrez sans adhésion ni pack.",
+  "honamQueenLocked": "Queen Pokou se débloque après un mois sans défaut de livraison.",
+  "koryDeclaredTotal": "Total déclaré : {amount}",
+  "@koryDeclaredTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryRemaining": "Reste à collecter : {amount}",
+  "@koryRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "onbBabaWelcome": "Je suis Baba, l'assistant de Pokou. Comment veux-tu qu'on t'appelle ?",
+  "onbContactsTitle": "Retrouver tes proches",
+  "onbContactsBody": "Baba peut retrouver ceux de tes contacts qui sont déjà sur Pokou. Tu peux refuser : on te le redemandera plus tard.",
+  "onbContactsAllow": "Autoriser",
+  "onbLater": "Plus tard"
 }

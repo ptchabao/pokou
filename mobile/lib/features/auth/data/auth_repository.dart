@@ -43,10 +43,17 @@ class AuthRepository {
   Future<PokouUser> verifyOtp({
     required String phone,
     required String code,
+    bool acceptTerms = false,
+    bool ageConfirmed = false,
   }) async {
     final response = await _api.post(
       '/auth/phone/verify-otp',
-      body: {'phone': phone, 'code': code},
+      body: {
+        'phone': phone,
+        'code': code,
+        if (acceptTerms) 'accept_terms': true,
+        if (ageConfirmed) 'age_confirmed': true,
+      },
       authenticated: false,
     );
     if (response['two_step_required'] == true) {

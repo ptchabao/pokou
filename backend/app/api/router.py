@@ -7,15 +7,17 @@ d'atterrissage des liens d'invitation, destinées à un navigateur.
 """
 from fastapi import APIRouter
 
-from app.api.public import deeplinks, wellknown
+from app.api.public import deeplinks, legal, officine, wellknown
 from app.api.v1.account import account_privacy, contacts, profile
 from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
 from app.api.v1.calls import calls
+from app.api.v1.certified import certified
 from app.api.v1.config import country
 from app.api.v1.communities import channels, communities
 from app.api.v1.marketplace import marketplace, marketplace_admin
 from app.api.v1.media import media, stickers, status
+from app.api.v1.honam import honam
 from app.api.v1.kory import kory
 from app.api.v1.messaging import broadcasts, conversations, groups, link_preview, messages, polls, presence, sync, ws
 from app.api.v1.payments import webhooks as payment_webhooks
@@ -72,6 +74,9 @@ for router in (
     payment_webhooks.router,
     country.router,
     kory.router,
+    certified.router,
+    honam.router,
+    honam.admin_router,
     metrics.router,
 ):
     api_router.include_router(router)
@@ -79,3 +84,7 @@ for router in (
 public_router = APIRouter()
 public_router.include_router(wellknown.router)
 public_router.include_router(deeplinks.router)
+public_router.include_router(officine.router)
+# Aussi sous /api/v1, pour que l'application les lise avec son client habituel.
+public_router.include_router(legal.router)
+api_router.include_router(legal.router)

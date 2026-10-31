@@ -9,6 +9,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../../../l10n/app_localizations.dart';
 import 'auth_controller.dart';
+import 'onboarding_screen.dart';
 
 /// Seconde étape de la connexion : le code du compte, après le SMS.
 ///
@@ -58,7 +59,8 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
             verificationToken: widget.verificationToken,
             pin: _pinController.text.trim(),
           );
-      if (mounted) context.go('/inbox');
+      final next = await routeAfterSignIn(ref);
+      if (mounted) context.go(next);
     } on ApiException catch (e) {
       _fail(e.message);
     } catch (_) {

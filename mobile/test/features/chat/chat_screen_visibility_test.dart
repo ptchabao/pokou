@@ -113,13 +113,13 @@ void main() {
 
     // L'accueil, affiché tant que la conversation est vide, sur le fond de
     // l'écran.
-    // Toujours Aoussi, avec son badge — pas le nom du moniteur ouvert.
+    // Toujours Baba, avec son badge — pas le nom du moniteur ouvert.
     final title = tester.widget<Text>(
       find.byWidgetPredicate(
         (w) =>
             w is Text &&
             (w.textSpan?.toPlainText() ?? w.data ?? '').contains(
-              'Bonjour, je suis Aoussi',
+              'Bonjour, je suis Baba',
             ),
       ),
     );

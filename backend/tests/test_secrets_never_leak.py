@@ -51,6 +51,10 @@ def test_le_code_de_connexion_n_apparait_jamais_dans_les_journaux(journal):
     # quelqu'un la réécrit autrement, ce test doit tomber quand même.
     db = MagicMock()
     db.query.return_value.filter.return_value.count.return_value = 0
+    # Aucun essai raté récent, aucun code encore en attente (verrou de 15 min
+    # et délai de renvoi de 60 s, voir otp_service).
+    db.query.return_value.filter.return_value.all.return_value = []
+    db.query.return_value.filter.return_value.order_by.return_value.first.return_value = None
 
     with patch.object(otp_service.secrets, "randbelow", return_value=424242), \
          patch.object(otp_service.sms_service, "send_sms", return_value=True), \
@@ -67,6 +71,10 @@ def test_les_journaux_disent_quand_meme_l_essentiel(journal):
     # suffisent — c'est le CODE qui n'a rien à faire là.
     db = MagicMock()
     db.query.return_value.filter.return_value.count.return_value = 0
+    # Aucun essai raté récent, aucun code encore en attente (verrou de 15 min
+    # et délai de renvoi de 60 s, voir otp_service).
+    db.query.return_value.filter.return_value.all.return_value = []
+    db.query.return_value.filter.return_value.order_by.return_value.first.return_value = None
 
     with patch.object(otp_service.sms_service, "send_sms", return_value=True), \
          patch.object(otp_service, "_send_whatsapp_otp"):

@@ -122,6 +122,14 @@ def _confirmed_total(db: Session, pot_id: int, contributor_id: Optional[int] = N
     return int(query.scalar() or 0)
 
 
+def _declared_total(db: Session, pot_id: int) -> int:
+    """« Total déclaré » : ce que les membres disent avoir envoyé, confirmé
+    ou non. Jamais un solde : c'est une somme de déclarations."""
+    return int(db.query(func.coalesce(func.sum(KoryEntry.amount), 0)).filter(
+        KoryEntry.pot_id == pot_id, KoryEntry.status.in_(("DECLARED", "CONFIRMED"))
+    ).scalar() or 0)
+
+
 def _pending_count(db: Session, pot_id: int) -> int:
     return db.query(func.count(KoryEntry.id)).filter(
         KoryEntry.pot_id == pot_id, KoryEntry.status == "DECLARED"
@@ -176,6 +184,9 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         "due_at": pot.due_at.isoformat() if pot.due_at else None,
         "status": pot.status,
         "confirmed_total": total,
+        "declared_total": _declared_total(db, pot.id),
+        # « Reste à collecter » : vers l'objectif, à partir du confirmé.
+        "remaining_to_collect": max(pot.goal_amount - total, 0) if pot.goal_amount else None,
         "my_confirmed_total": _confirmed_total(db, pot.id, viewer_id),
         "pending_count": _pending_count(db, pot.id) if viewer_id == pot.collector_id else None,
         "is_organizer": viewer_id == pot.organizer_id,

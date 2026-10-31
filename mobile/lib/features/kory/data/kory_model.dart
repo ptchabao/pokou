@@ -24,8 +24,16 @@ class KoryPot {
     this.period,
     this.dueAt,
     this.pendingCount,
+    this.declaredTotal = 0,
+    this.remainingToCollect,
     this.entries = const [],
   });
+
+  /// « Total déclaré » : ce que les membres disent avoir envoyé.
+  final int declaredTotal;
+
+  /// « Reste à collecter » vers l'objectif, depuis le confirmé.
+  final int? remainingToCollect;
 
   final int id;
   final String kind; // CAGNOTTE | COTISATION
@@ -75,6 +83,8 @@ class KoryPot {
     confirmedTotal: json['confirmed_total'] as int? ?? 0,
     myConfirmedTotal: json['my_confirmed_total'] as int? ?? 0,
     pendingCount: json['pending_count'] as int?,
+    declaredTotal: json['declared_total'] as int? ?? 0,
+    remainingToCollect: json['remaining_to_collect'] as int?,
     isOrganizer: json['is_organizer'] as bool? ?? false,
     isCollector: json['is_collector'] as bool? ?? false,
     joinCode: json['join_code'] as String? ?? '',

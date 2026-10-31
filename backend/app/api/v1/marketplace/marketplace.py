@@ -27,7 +27,15 @@ from app.api.v1.messaging.messages import _serialize as serialize_direct_message
 from app.core.security import get_current_user
 from app.utils.identity import est_vendeur_verifie
 from app.services.marketplace import marketplace_config_service
-from app.services.marketplace.marketplace_monetization_service import ad_amount_for, PRODUCT_BOOST_AMOUNT, STATUS_BOOST_AMOUNT, create_payment
+from app.services.marketplace.marketplace_monetization_service import (
+    BOOST_FORBIDDEN_CATEGORIES,
+    MEDICINE_CATEGORIES,
+    PRODUCT_BOOST_OPTIONS,
+    SPONSORED_PER_PAGE,
+    STATUS_BOOST_AMOUNT,
+    ad_amount_for,
+    create_payment,
+)
 
 router = APIRouter(prefix="/marketplace", tags=["Pokou marketplace"])
 
@@ -150,7 +158,9 @@ def _serialize(product: MarketplaceProduct, rating: Optional[dict] = None, boost
     return {
         "id": product.id,
         "seller_id": product.seller_id,
-        "seller_name": (seller.full_name or seller.phone or "Vendeur") if seller else "Vendeur",
+        # Jamais le numéro en repli : le contact passe par Discussions, sans
+        # exposer le téléphone du vendeur (Assimé).
+        "seller_name": (seller.full_name or "Vendeur") if seller else "Vendeur",
         # Le badge de certification vient du COMPTE vendeur, pas du produit :
         # un vendeur certifié l'est sur tout son catalogue.
         "seller_is_certified": est_vendeur_verifie(seller) if seller else False,
@@ -163,6 +173,9 @@ def _serialize(product: MarketplaceProduct, rating: Optional[dict] = None, boost
         "latitude": product.latitude,
         "longitude": product.longitude,
         "is_boosted": boosted,
+        # Une mise en avant se DIT (BM-14) : jamais une annonce payée qui se
+        # ferait passer pour un résultat ordinaire.
+        "boost_label": "Sponsorisé" if boosted else None,
         "price": str(product.price),
         "currency": product.currency,
         "image": _media(product.image_media),
@@ -295,8 +308,18 @@ async def list_marketplace(
     }
     # Les boosts sont un signal de tri, jamais une autorisation d'afficher un
     # produit inactif: le filtre actif reste appliqué par la requête ci-dessus.
-    items.sort(key=lambda item: (item.id not in boosted_ids, distances[item.id], -item.created_at.timestamp()))
-    page = items[offset:offset + limit]
+    # Deux annonces sponsorisées AU PLUS par écran, en tête, et qui tournent
+    # d'un écran à l'autre ; les autres annonces payées restent à leur place
+    # ordinaire, sans mention. Un écran rempli d'annonces payées ne serait
+    # plus un résultat de recherche.
+    items.sort(key=lambda item: (distances[item.id], -item.created_at.timestamp()))
+    boosted = [item for item in items if item.id in boosted_ids]
+    start = (offset // max(limit, 1)) * SPONSORED_PER_PAGE
+    sponsored = [boosted[(start + i) % len(boosted)] for i in range(min(SPONSORED_PER_PAGE, len(boosted)))] if boosted else []
+    sponsored_ids = {item.id for item in sponsored}
+    regular = [item for item in items if item.id not in sponsored_ids]
+    page = sponsored + regular[offset:offset + max(limit - len(sponsored), 0)]
+    boosted_ids = sponsored_ids
     ratings = _rating_summary(db, [item.seller_id for item in page])
     return {
         "items": [_serialize(item, ratings.get(item.seller_id), item.id in boosted_ids) for item in page],
@@ -355,6 +378,16 @@ async def marketplace_payment_status(
     return _payment_json(payment)
 
 
+def _refuse_medicines(category: Optional[str]) -> None:
+    """Assimé 8 « Produit interdit » : un médicament se commande avec
+    Honam, sur ordonnance, auprès d'une officine."""
+    if (category or "").upper() in MEDICINE_CATEGORIES:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "use_honam", "message": "Les médicaments ne se vendent pas sur Assimé : passez par Honam."},
+        )
+
+
 @router.post("")
 async def create_product(payload: ProductPayload, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     user_id = current_user["user_id"]
@@ -363,6 +396,7 @@ async def create_product(payload: ProductPayload, db: Session = Depends(get_db),
     _exiger_devise_connue(db, payload.currency)
     fields = payload.model_dump(exclude={"gallery_media_ids"})
     fields["category"] = (payload.category or "AUTRE").upper()
+    _refuse_medicines(fields["category"])
     item = MarketplaceProduct(seller_id=user_id, **fields)
     db.add(item)
     db.flush()
@@ -409,6 +443,8 @@ async def update_product(product_id: int, payload: ProductPayload, db: Session =
     # C'est la même règle que la galerie, qui la documentait déjà : absent
     # = inchangé, valeur explicite = appliquée.
     updates = payload.model_dump(exclude={"gallery_media_ids"}, exclude_unset=True)
+    if payload.category is not None:
+        _refuse_medicines(payload.category)
     if payload.category is None:
         updates.pop("category", None)
     for key, value in updates.items():
@@ -463,8 +499,17 @@ def _payment_json(payment: MarketplacePayment) -> dict:
     }
 
 
+class BoostBody(BaseModel):
+    days: int = 7
+
+
 @router.post("/{product_id}/boost")
-async def boost_product(product_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+async def boost_product(
+    product_id: int,
+    body: Optional[BoostBody] = None,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     product = db.query(MarketplaceProduct).filter(
         MarketplaceProduct.id == product_id,
         MarketplaceProduct.seller_id == current_user["user_id"],
@@ -475,16 +520,23 @@ async def boost_product(product_id: int, db: Session = Depends(get_db), current_
     ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Produit introuvable")
+    if (product.category or "").upper() in BOOST_FORBIDDEN_CATEGORIES:
+        raise HTTPException(status_code=422, detail="Cette catégorie ne peut pas être mise en avant")
+    days = (body or BoostBody()).days
+    amount = PRODUCT_BOOST_OPTIONS.get(days)
+    if amount is None:
+        raise HTTPException(status_code=422, detail="Mise en avant de 3 ou 7 jours")
     user = db.query(User).filter(User.id == current_user["user_id"]).first()
+    hours = days * 24
     try:
         payment = create_payment(
-            db, user, kind="PRODUCT_BOOST", amount=PRODUCT_BOOST_AMOUNT,
-            description=f"Boost annonce 48h — {product.name}",
-            metadata={"product_id": product.id},
+            db, user, kind="PRODUCT_BOOST", amount=amount,
+            description=f"Annonce sponsorisée {days} jours — {product.name}",
+            metadata={"product_id": product.id, "duration_hours": hours, "days": days},
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    return {"kind": "PRODUCT_BOOST", "duration_hours": 48, **_payment_json(payment)}
+    return {"kind": "PRODUCT_BOOST", "duration_hours": hours, "days": days, **_payment_json(payment)}
 
 
 @router.post("/boost/status/{status_id}")

@@ -149,6 +149,12 @@ class PhoneOTPRequest(BaseModel):
 class PhoneOTPVerify(BaseModel):
     phone: str = Field(..., min_length=6, max_length=32)
     code: str = Field(..., min_length=4, max_length=8)
+    # Cochés sur l'écran du numéro, avant le code. Facultatifs ici : un
+    # compte existant qui se reconnecte ne les renvoie pas.
+    accept_terms: bool = False
+    age_confirmed: bool = False
+    consent_analytics: Optional[bool] = None
+    consent_marketing: Optional[bool] = None
 
 
 @router.post("/phone/request-otp", responses={400: {"model": ErrorResponse}, 429: {"model": ErrorResponse}})
@@ -179,6 +185,21 @@ async def verify_phone_otp(
 ):
     try:
         user = otp_service.verify_otp(db, payload.phone, payload.code)
+        # Inscription en un écran (maquette « 1. Bienvenue et numéro ») : les
+        # conditions se cochent AVANT le code, et s'enregistrent ici, une
+        # fois le numéro prouvé.
+        if payload.accept_terms and payload.age_confirmed:
+            now = datetime.utcnow()
+            user.terms_accepted_at = now
+            user.terms_version = TERMS_VERSION
+            user.age_confirmed_at = now
+            if payload.consent_analytics is not None:
+                user.consent_analytics = payload.consent_analytics
+            if payload.consent_marketing is not None:
+                user.consent_marketing = payload.consent_marketing
+            db.commit()
+    except otp_service.OTPRateLimitError as exc:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc)) from exc
     except otp_service.OTPInvalidError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
@@ -574,6 +595,47 @@ async def update_current_user_info(
     if "full_name" in payload:
         user.full_name = (payload.get("full_name") or "").strip() or None
 
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+#: Version des conditions d'utilisation acceptées. À changer quand le texte
+#: change : `needs_onboarding` redevient vrai et l'écran est présenté de
+#: nouveau à la prochaine connexion.
+TERMS_VERSION = "2026-10"
+
+
+@router.post("/me/consents", response_model=UserResponse)
+async def record_consents(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Les conditions, l'âge et les deux consentements DISTINCTS (section 8.1).
+
+    Les conditions et l'âge sont obligatoires pour utiliser Pokou ; les
+    statistiques et les communications marketing sont facultatives et
+    révocables, chacune séparément — un consentement groupé ne vaut pas
+    consentement au sens des lois togolaise et ivoirienne sur les données.
+    """
+    user = db.query(User).filter(User.id == current_user["user_id"]).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    now = datetime.utcnow()
+    if "accept_terms" in payload:
+        if payload.get("accept_terms") is not True or payload.get("age_confirmed") is not True:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Les conditions et l'âge requis doivent être acceptés.",
+            )
+        user.terms_accepted_at = now
+        user.terms_version = TERMS_VERSION
+        user.age_confirmed_at = now
+    if "consent_analytics" in payload:
+        user.consent_analytics = bool(payload.get("consent_analytics"))
+    if "consent_marketing" in payload:
+        user.consent_marketing = bool(payload.get("consent_marketing"))
     db.commit()
     db.refresh(user)
     return user

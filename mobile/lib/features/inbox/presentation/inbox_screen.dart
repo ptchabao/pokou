@@ -6,6 +6,7 @@ import '../../../core/widgets/pokou_background.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../contacts/presentation/contacts_screen.dart';
 import '../../home/presentation/home_screen.dart';
+import '../../honam/presentation/honam_screen.dart';
 import '../../home/presentation/more_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
 
@@ -43,6 +44,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     PokouTab.home => HomeScreen(onOpenTab: _open),
     PokouTab.discussions => const ContactsScreen(),
     PokouTab.kory => const KoryScreen(),
+    PokouTab.honam => const HonamScreen(),
     PokouTab.more => const MoreScreen(),
   };
 

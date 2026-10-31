@@ -187,6 +187,10 @@ class AuthController extends StateNotifier<AuthState> {
     return state.user;
   }
 
+  /// Relit le profil depuis le serveur, même s'il est déjà connu — après
+  /// l'inscription, qui vient de poser le nom affiché.
+  Future<void> reloadProfile() => _loadProfile();
+
   void setCertificationStatus({
     bool? isVerified,
     bool? isCertificationPending,
@@ -210,8 +214,18 @@ class AuthController extends StateNotifier<AuthState> {
 
   /// Lève [TwoStepRequired] quand le compte exige aussi son code : l'écran
   /// demande alors le code, puis appelle [verifyTwoStep].
-  Future<void> verifyOtp({required String phone, required String code}) async {
-    final user = await _repository.verifyOtp(phone: phone, code: code);
+  Future<void> verifyOtp({
+    required String phone,
+    required String code,
+    bool acceptTerms = false,
+    bool ageConfirmed = false,
+  }) async {
+    final user = await _repository.verifyOtp(
+      phone: phone,
+      code: code,
+      acceptTerms: acceptTerms,
+      ageConfirmed: ageConfirmed,
+    );
     await _onSignedIn(user);
   }
 
@@ -244,6 +258,12 @@ class AuthController extends StateNotifier<AuthState> {
     _setState(AuthState.unauthenticated);
   }
 }
+
+/// Ce qui a été coché sur l'écran du numéro, transmis à la vérification du
+/// code — le serveur ne l'enregistre qu'une fois le numéro prouvé.
+final signupConsentProvider = StateProvider<({bool terms, bool age})>(
+  (ref) => (terms: false, age: false),
+);
 
 final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
   (ref) {

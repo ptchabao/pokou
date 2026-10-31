@@ -53,6 +53,7 @@ class KoryScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     ModuleQuietButton(
                       label: l.koryJoin,
+                      expanded: false,
                       onPressed: () => _join(context, ref),
                     ),
                   ],

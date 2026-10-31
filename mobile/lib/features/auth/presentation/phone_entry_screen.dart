@@ -13,6 +13,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
 import '../../../core/widgets/pokou_background.dart';
 import 'auth_controller.dart';
+import 'legal_screen.dart';
 import 'phone_country.dart';
 import '../../../core/settings/app_settings.dart';
 import '../data/sim_country.dart';
@@ -150,8 +151,16 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
     _focusNode.requestFocus();
   }
 
+  /// Les conditions se cochent ICI, avant le code (maquette « 1. Bienvenue
+  /// et numéro ») : décochées par défaut, et obligatoires pour continuer.
+  /// Un compte existant les retrouve déjà acceptées côté serveur ; les
+  /// cocher de nouveau ne change rien.
+  bool _terms = false;
+  bool _age = false;
+
   Future<void> _submit() async {
     final phone = _e164;
+    ref.read(signupConsentProvider.notifier).state = (terms: _terms, age: _age);
     setState(() {
       _loading = true;
       _error = null;
@@ -171,171 +180,266 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canSubmit = _isValidNumber && !_loading;
+    final canSubmit = _isValidNumber && _terms && _age && !_loading;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: PokouBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Center(child: AssistantOrb(size: 80)),
-                const SizedBox(height: 28),
-                Text(
-                  L.of(context).authWelcome,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  L.of(context).authSubtitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(
-                      color: _focused ? AppColors.focusRing : AppColors.border,
-                      width: _focused ? 2 : 1,
+          // Défilant : avec les conditions sur ce même écran, la colonne
+          // dépasse la hauteur d'un petit téléphone (ou d'un grand texte).
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Center(child: AssistantOrb(size: 80)),
+                    const SizedBox(height: 28),
+                    Text(
+                      L.of(context).onbStep('1'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
-                    boxShadow: _focused
-                        ? [
-                            BoxShadow(
-                              color: AppColors.focusRing.withValues(
-                                alpha: 0.15,
-                              ),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : AppElevation.subtle,
-                  ),
-                  child: Row(
-                    children: [
-                      // Drapeau + indicatif : c'est le bouton du sélecteur,
-                      // et non une décoration comme le drapeau togolais
-                      // fixe d'avant.
-                      InkWell(
-                        onTap: _loading ? null : _pickCountry,
+                    const SizedBox(height: 4),
+                    Text(
+                      L.of(context).authWelcome,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      L.of(context).authSubtitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(AppRadius.lg),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(14, 18, 6, 18),
-                          child: Row(
-                            children: [
-                              Text(
-                                _country.flag,
-                                style: const TextStyle(fontSize: 18),
+                        border: Border.all(
+                          color: _focused
+                              ? AppColors.focusRing
+                              : AppColors.border,
+                          width: _focused ? 2 : 1,
+                        ),
+                        boxShadow: _focused
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.focusRing.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : AppElevation.subtle,
+                      ),
+                      child: Row(
+                        children: [
+                          // Drapeau + indicatif : c'est le bouton du sélecteur,
+                          // et non une décoration comme le drapeau togolais
+                          // fixe d'avant.
+                          InkWell(
+                            onTap: _loading ? null : _pickCountry,
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 18, 6, 18),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    _country.flag,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '+${_country.dialCode}',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.expand_more,
+                                    size: 18,
+                                    color: AppColors.textMuted,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '+${_country.dialCode}',
-                                style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 26,
+                            color: AppColors.border,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _phoneController,
+                              focusNode: _focusNode,
+                              keyboardType: TextInputType.phone,
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 17,
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9+ ]'),
+                                ),
+                              ],
+                              decoration: InputDecoration(
+                                // Un exemple de numéro DU PAYS CHOISI : « 90 12
+                                // 34 56 » au Togo, « 06 12 34 56 78 » en France.
+                                hintText: _country.exampleNsn.isEmpty
+                                    ? L.of(context).authPhoneHint
+                                    : _country.exampleNsn,
+                                border: InputBorder.none,
+                                filled: false,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 18,
                                 ),
                               ),
-                              Icon(
-                                Icons.expand_more,
-                                size: 18,
-                                color: AppColors.textMuted,
-                              ),
-                            ],
+                              onSubmitted: (_) => canSubmit ? _submit() : null,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      Container(width: 1, height: 26, color: AppColors.border),
-                      Expanded(
-                        child: TextField(
-                          controller: _phoneController,
-                          focusNode: _focusNode,
-                          keyboardType: TextInputType.phone,
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 17,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9+ ]'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            // Un exemple de numéro DU PAYS CHOISI : « 90 12
-                            // 34 56 » au Togo, « 06 12 34 56 78 » en France.
-                            hintText: _country.exampleNsn.isEmpty
-                                ? L.of(context).authPhoneHint
-                                : _country.exampleNsn,
-                            border: InputBorder.none,
-                            filled: false,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 18,
-                            ),
-                          ),
-                          onSubmitted: (_) => canSubmit ? _submit() : null,
-                        ),
+                    ),
+                    if (_error != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        _error!,
+                        style: const TextStyle(color: AppColors.semanticError),
                       ),
                     ],
-                  ),
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: AppColors.semanticError),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: canSubmit ? _submit : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: canSubmit
-                        ? AppColors.accentPrimaryDark
-                        : AppColors.border,
-                    foregroundColor: canSubmit
-                        ? Colors.white
-                        : AppColors.textMuted,
-                    disabledBackgroundColor: AppColors.border,
-                    disabledForegroundColor: AppColors.textMuted,
-                  ),
-                  child: _loading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                    const SizedBox(height: 12),
+                    _Consent(
+                      value: _terms,
+                      onChanged: (v) => setState(() => _terms = v),
+                      label: L.of(context).onbAcceptTerms,
+                    ),
+                    _Consent(
+                      value: _age,
+                      onChanged: (v) => setState(() => _age = v),
+                      label: L.of(context).onbAge,
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const LegalScreen(name: 'conditions'),
+                            ),
                           ),
-                        )
-                      : Text(L.of(context).actionContinue),
+                          child: Text(L.of(context).legalTerms),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const LegalScreen(name: 'confidentialite'),
+                            ),
+                          ),
+                          child: Text(L.of(context).legalPrivacy),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: canSubmit ? _submit : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: canSubmit
+                            ? AppColors.accentPrimaryDark
+                            : AppColors.border,
+                        foregroundColor: canSubmit
+                            ? Colors.white
+                            : AppColors.textMuted,
+                        disabledBackgroundColor: AppColors.border,
+                        disabledForegroundColor: AppColors.textMuted,
+                      ),
+                      child: _loading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(L.of(context).actionContinue),
+                    ),
+                    const SizedBox(height: 24),
+                    // Formulation honnête : Pokou ne fait PAS de chiffrement de
+                    // bout en bout aujourd'hui — inutile de le promettre ici.
+                    Text(
+                      L.of(context).authPrivacyNote,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                // Formulation honnête : Pokou ne fait PAS de chiffrement de
-                // bout en bout aujourd'hui — inutile de le promettre ici.
-                Text(
-                  L.of(context).authPrivacyNote,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-                ),
-              ],
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Une case et son libellé, tout le libellé étant cliquable. Pas de
+/// `CheckboxListTile` : posé sur le fond de l'écran, il cacherait son effet
+/// d'appui.
+class _Consent extends StatelessWidget {
+  const _Consent({
+    required this.value,
+    required this.onChanged,
+    required this.label,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return MergeSemantics(
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Checkbox(value: value, onChanged: (v) => onChanged(v ?? false)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(label, style: const TextStyle(fontSize: 14)),
+              ),
+            ),
+          ],
         ),
       ),
     );

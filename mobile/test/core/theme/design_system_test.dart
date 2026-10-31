@@ -58,8 +58,8 @@ void main() {
           greaterThan(4.5));
     });
 
-    test("l'ambre d'Aoussi ne porte du texte qu'en version FONCÉE", () {
-      // Le système de design prescrit `#D97706` pour les actions d'Aoussi
+    test("l'ambre de Baba ne porte du texte qu'en version FONCÉE", () {
+      // Le système de design prescrit `#D97706` pour les actions de Baba
       // AVEC un libellé blanc. Mesuré, ça donne 3,19:1 : au-dessus des 3:1
       // d'un glyphe, sous les 4,5 d'un texte.
       //

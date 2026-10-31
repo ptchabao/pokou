@@ -378,7 +378,7 @@ class _ForgottenPinSheetState extends ConsumerState<_ForgottenPinSheet> {
     await ref.read(appLockProvider.notifier).forgetOnLogout();
     await ref.read(authControllerProvider.notifier).logout();
     if (mounted) Navigator.of(context).pop();
-    ref.read(appRouterProvider).go('/phone');
+    ref.read(appRouterProvider).go('/welcome');
   }
 
   @override

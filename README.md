@@ -47,6 +47,8 @@ backend/
 │   │       ├── marketplace/    marché (+ administration)
 │   │       ├── kory/           Kory : cagnottes et cotisations, en journal
 │       ├── config/         configuration par pays (modules ouverts, TVA)
+│       ├── certified/      Pokou certifié (badge, essai, mode preuve)
+│       ├── honam/          HONAM : annuaire, commandes, officine, coursiers
 │       ├── modules/        Heart League, séries, Truth, cérémonies, VIP, Hype
 │   │       ├── spark/          rencontres
 │   │       ├── business/       Pokou Business : portail et API des bots
@@ -72,6 +74,12 @@ le compte de démonstration des stores encore ouvert.
 Donner un rôle d'administration : la personne se connecte une fois à l'app,
 puis `python -m scripts.promote_admin +228XXXXXXXX [ADMIN|SUPER_ADMIN]`.
 
+## Cahier des charges
+
+Ce qui est fait, ce qui ne l'est pas, et chaque hypothèse :
+[docs/etat-cahier-des-charges.md](docs/etat-cahier-des-charges.md).
+Espace officine HONAM : `https://api.pok.app/officine/`.
+
 ## Production
 
 Kubernetes et Kafka : [docs/deploiement-kubernetes.md](docs/deploiement-kubernetes.md).
@@ -85,7 +93,7 @@ Voir `mobile/README.md`. L'API visée se règle au build :
 ## Pokou et Mahizu
 
 Pokou est **indépendant** de Mahizu : base de données, comptes, backend et
-déploiement séparés. Seuls les écrans de l'assistant (chat, Aoussi/Minou,
+déploiement séparés. Seuls les écrans de l'assistant (chat, Baba/Minou,
 contacts intelligents, bilan du soir) parlent à l'API Mahizu, depuis
 l'application, avec un compte Mahizu que l'utilisateur rattache lui-même
 (`mobile/lib/core/mahizu/`). Le backend Pokou n'en contient rien.

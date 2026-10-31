@@ -106,8 +106,15 @@ class ApiClient {
     String message = _l.apiError(response.statusCode);
     try {
       final body = jsonDecode(response.body);
-      if (body is Map && body['detail'] != null) {
-        message = body['detail'].toString();
+      final detail = body is Map ? body['detail'] : null;
+      if (detail is Map) {
+        // Refus structuré `{code, message}` : le code choisit un texte
+        // traduit, le message du serveur sert de repli.
+        message = detail['code'] == 'use_honam'
+            ? _l.marketUseHonam
+            : (detail['message'] as String?) ?? message;
+      } else if (detail != null) {
+        message = detail.toString();
       }
     } catch (_) {
       // Body wasn't JSON — keep the generic message.

@@ -294,6 +294,25 @@ class GroupChatController extends StateNotifier<GroupChatState> {
       return;
     }
 
+    // Hors mode preuve, un message supprimé disparaît chez tout le monde.
+    if (type == 'group:message:deleted') {
+      if (event['group_id'] != groupId) return;
+      final messageId = event['message_id'] as String?;
+      state = state.copyWith(
+        messages: [
+          for (final m in state.messages)
+            if (m.id != messageId) m,
+        ],
+      );
+      return;
+    }
+
+    if (type == 'group:proof_mode') {
+      if (event['group_id'] != groupId) return;
+      _refreshGroup();
+      return;
+    }
+
     // Nom ou photo changés par un admin, ou rôle modifié : on recharge le
     // détail, qui porte aussi `my_role`/`can_manage` — un membre promu doit
     // voir apparaître les actions d'administration sans rouvrir l'écran.
@@ -315,6 +334,23 @@ class GroupChatController extends StateNotifier<GroupChatState> {
       if (eventGroupId != groupId) return;
       _refreshGroup();
     }
+  }
+
+  /// Supprimer pour tous ; en mode preuve, le message reste, barré.
+  Future<void> deleteForEveryone(String messageId) async {
+    final kept = await _repository.deleteMessage(groupId, messageId);
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          if (m.id != messageId) m else ?kept,
+      ],
+    );
+  }
+
+  Future<void> setProofMode(bool enabled) async {
+    state = state.copyWith(
+      group: await _repository.setProofMode(groupId, enabled: enabled),
+    );
   }
 
   Future<void> _refreshGroup() async {

@@ -56,6 +56,19 @@ Widget _buildApp(_FakeAuthRepository fakeRepo, {required VoidCallback onOtpScree
   );
 }
 
+/// Les conditions se cochent sur cet écran : sans elles, « Continuer »
+/// reste inactif. Le bouton est ensuite amené à l'écran avant d'être touché.
+Future<void> _acceptTermsAndContinue(WidgetTester tester) async {
+  for (final box in find.byType(Checkbox).evaluate().toList()) {
+    final finder = find.byWidget(box.widget);
+    await tester.ensureVisible(finder);
+    await tester.tap(finder);
+    await tester.pump();
+  }
+  await tester.ensureVisible(find.text('Continuer'));
+  await tester.tap(find.text('Continuer'));
+}
+
 void main() {
   testWidgets('submitting a phone number requests an OTP and navigates to /otp', (tester) async {
     final fakeRepo = _FakeAuthRepository();
@@ -65,7 +78,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '+22890123456');
     await tester.pump();
-    await tester.tap(find.text('Continuer'));
+    await _acceptTermsAndContinue(tester);
     // Pas de pumpAndSettle : AssistantOrb anime en continu (voir plus bas) ;
     // quelques pump() bornés suffisent à laisser la navigation vers /otp se
     // produire.
@@ -90,7 +103,7 @@ void main() {
     // il lui faut donc un numéro qui arrive jusqu'à lui.
     await tester.enterText(find.byType(TextField), '+22890123456');
     await tester.pump();
-    await tester.tap(find.text('Continuer'));
+    await _acceptTermsAndContinue(tester);
     // Pas de pumpAndSettle ici : AssistantOrb tourne une animation "respiration"
     // infinie tant que cet écran reste visible (elle ne se met en pause que
     // hors-écran, via TickerMode), donc pumpAndSettle n'atteindrait jamais un
@@ -117,7 +130,7 @@ void main() {
     // proposé par défaut en test.
     await tester.enterText(find.byType(TextField), '0701020304');
     await tester.pump();
-    await tester.tap(find.text('Continuer'));
+    await _acceptTermsAndContinue(tester);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -138,7 +151,7 @@ void main() {
     await tester.pump();
     expect(find.text('+225'), findsOneWidget);
 
-    await tester.tap(find.text('Continuer'));
+    await _acceptTermsAndContinue(tester);
     await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));

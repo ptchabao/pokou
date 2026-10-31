@@ -12,8 +12,8 @@ Kafka pour les évènements métier. Les manifestes sont dans
                       Internet
                          │  HTTPS / WSS
                  ┌───────▼────────┐
-                 │ ingress-nginx  │  api.pok.app   (toute l'API)
-                 │ + cert-manager │  pok.app       (/.well-known, /invite, /c, /channel, /bot)
+                 │ ingress-nginx  │  api.pok.app   (toute l'API + espace officine /officine/)
+                 │ + cert-manager │  pok.app       (/.well-known, /invite, /c, /channel, /bot, /legal)
                  └───────┬────────┘
    namespace pokou       │
    ┌─────────────────────▼──────────────┐   ┌──────────────────────┐
@@ -109,8 +109,16 @@ Format d'un évènement :
 }
 ```
 
-Types émis aujourd'hui : `kory.pot.created`, `kory.pot.closed`,
-`kory.entry.declared`, `kory.entry.confirmed`, `kory.entry.rejected`. Pour
+Types émis aujourd'hui :
+
+| Topic | Types |
+|---|---|
+| `pokou.kory.events` | `kory.pot.created`, `kory.pot.closed`, `kory.entry.declared`, `kory.entry.confirmed`, `kory.entry.rejected` |
+| `pokou.honam.events` | `honam.order.submitted`, `.quoted`, `.accepted`, `.paid`, `.ready`, `.in_delivery`, `.delivered`, `.rejected`, `.expired`, `.cancelled` ; `honam.pharmacy.suspended`, `honam.pharmacy.credit_low`, `honam.courier.suspended` |
+| `pokou.analytics.events` | `certified.subscription.paid` |
+
+Aucun évènement HONAM ne contient d'ordonnance, de nom de médicament ni de
+numéro de téléphone. Pour
 en ajouter un : appeler `record_event(db, topic, type, data, key=…)` avant
 le `commit` de la route, sans le committer à part.
 

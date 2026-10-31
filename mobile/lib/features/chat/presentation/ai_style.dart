@@ -32,7 +32,7 @@ class AiStyle {
   final Color codeText;
 
   /// L'accent : le vert de l'application, celui des conversations et du
-  /// bouton d'envoi. Aoussi fait partie de Pokou, il en porte la couleur.
+  /// bouton d'envoi. Baba fait partie de Pokou, il en porte la couleur.
   static const accent = AppColors.accentPrimary;
   static const onAccent = Colors.white;
 

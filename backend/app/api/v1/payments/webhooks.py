@@ -44,6 +44,12 @@ async def semoa_marketplace_payment_webhook(request: Request, db: Session = Depe
         raise HTTPException(status_code=400, detail="reference manquante")
     if status_value and status_value not in _PAID_STATUSES:
         return {"status": "ignored", "reason": f"payment status is '{status_value}'"}
+    # Le nom du titulaire du wallet, s'il est renvoyé : c'est lui qui vérifie
+    # l'identité de Pokou certifié. Hypothèse sur le nom du champ, à
+    # confirmer avec la documentation CashPay — d'où les trois lectures.
+    payer_name = body.get("payer_name") or body.get("customer_name") or body.get("account_holder_name")
+    if payer_name:
+        marketplace_monetization_service.attach_payer_name(db, reference, str(payer_name)[:160])
     try:
         return marketplace_monetization_service.confirm_payment(db, reference)
     except ValueError as exc:

@@ -9,6 +9,9 @@ import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../contacts/presentation/discussions_controller.dart';
+import '../../honam/presentation/honam_controller.dart';
+import '../../honam/presentation/honam_screen.dart';
+import '../../honam/presentation/honam_send_screen.dart';
 import '../../kory/presentation/kory_controller.dart';
 import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
@@ -56,6 +59,8 @@ class HomeScreen extends ConsumerWidget {
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
             if (config.has('kory'))
               _KoryCard(onSeeAll: () => onOpenTab(PokouTab.kory)),
+            if (config.has('honam'))
+              _HonamCard(onSeeAll: () => onOpenTab(PokouTab.honam)),
           ],
         ),
       ),
@@ -250,12 +255,44 @@ class _KoryCard extends ConsumerWidget {
                   ModuleActionButton(
                     label: l.koryCreate,
                     icon: Icons.add,
+                    expanded: false,
                     onPressed: () => openKoryCreate(context, ref),
                   ),
                 ],
               ),
             )
           : KoryPotCard(pot: open.first),
+    );
+  }
+}
+
+/// La carte Honam : la commande en cours, ou l'action de départ (NAV-09).
+/// Jamais un nom de médicament (HON-04).
+class _HonamCard extends ConsumerWidget {
+  const _HonamCard({required this.onSeeAll});
+
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final orders = ref.watch(honamOrdersProvider).valueOrNull ?? const [];
+    final current = orders.where((o) => !o.isFinished).toList();
+    return _HomeSection(
+      icon: Icons.local_pharmacy_outlined,
+      title: l.honamSubtitle,
+      onSeeAll: onSeeAll,
+      child: current.isEmpty
+          ? ModuleCard(
+              child: ModuleActionButton(
+                label: l.honamSend,
+                icon: Icons.photo_camera_outlined,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HonamSendScreen()),
+                ),
+              ),
+            )
+          : HonamOrderCard(order: current.first),
     );
   }
 }

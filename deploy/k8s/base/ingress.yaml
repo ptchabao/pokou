@@ -1,5 +1,5 @@
 # ingress-nginx + cert-manager. Deux hôtes, comme docs/mise-en-service.md :
-#   api.pok.app → toute l'API ;
+#   api.pok.app → toute l'API, dont l'espace officine HONAM (/officine/) ;
 #   pok.app     → seulement les chemins publics (App Links, invitations),
 #                 sans préfixe /api/v1.
 # Les noms d'hôte sont remplacés par l'overlay.
@@ -40,3 +40,4 @@ spec:
           - { path: /c, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
           - { path: /channel, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
           - { path: /bot, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
+          - { path: /legal, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }

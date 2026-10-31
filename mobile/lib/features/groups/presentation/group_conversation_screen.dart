@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
@@ -40,6 +41,7 @@ import '../../messaging/presentation/contact_card_bubble.dart'
 import '../../messaging/presentation/location_bubble.dart';
 import '../../messaging/presentation/day_separator.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../home/presentation/certified_screen.dart';
 import '../../messaging/presentation/media_bubble.dart';
 import '../../messaging/presentation/poll_bubble.dart';
 import '../../messaging/presentation/composer/composer_input.dart';
@@ -314,6 +316,17 @@ class _GroupConversationScreenState
                 _inputFocus.requestFocus();
               },
             ),
+            if (message.deletedAt == null &&
+                (message.senderId == widget.myUserId ||
+                    (ref.read(groupChatControllerProvider(widget.groupId)).group?.canManage ?? false)))
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.feedbackDanger),
+                title: Text(_l.deleteForAll),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _deleteForEveryone(message);
+                },
+              ),
             // Un sticker se GARDE — dans ses stickers, pas dans la galerie.
             // Le même geste qu'en tête-à-tête : recevoir un sticker qui
             // plaît et ne pas pouvoir le reprendre serait frustrant
@@ -333,6 +346,104 @@ class _GroupConversationScreenState
         ),
       ),
     );
+  }
+
+  /// Supprimer pour tous. En mode preuve, l'auteur est prévenu AVANT que
+  /// le message restera visible, barré : sinon il croirait l'avoir effacé.
+  Future<void> _deleteForEveryone(GroupMessage message) async {
+    final proof =
+        ref.read(groupChatControllerProvider(widget.groupId)).group?.proofMode ??
+        false;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_l.deleteForAll),
+        content: proof ? Text(_l.deleteProofWarning) : null,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(_l.actionCancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.feedbackDanger),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(_l.actionDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await ref
+          .read(groupChatControllerProvider(widget.groupId).notifier)
+          .deleteForEveryone(message.id);
+      _patches.remove(message.id);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_l.honamFailed)),
+      );
+    }
+  }
+
+  Future<void> _toggleProofMode(Group group) async {
+    try {
+      await ref
+          .read(groupChatControllerProvider(widget.groupId).notifier)
+          .setProofMode(!group.proofMode);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      if (error.statusCode == 403 && group.proofMode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_l.proofDisableReserved)),
+        );
+      } else if (error.statusCode == 403) {
+        final open = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(_l.proofModeTitle),
+            content: Text(_l.proofModeNeedsCert),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(_l.actionCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(_l.certTitle),
+              ),
+            ],
+          ),
+        );
+        if (open == true && mounted) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CertifiedScreen()),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message)),
+        );
+      }
+    }
+  }
+
+  /// L'export daté, partagé comme n'importe quel fichier : la personne
+  /// choisit où il part (avocat, chef de quartier, sauvegarde).
+  Future<void> _exportProof() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final bytes = await ref
+          .read(apiClientProvider)
+          .getBytes('/groups/${widget.groupId}/proof-export');
+      final dir = await getTemporaryDirectory();
+      final stamp = DateFormat('yyyyMMdd-HHmm').format(DateTime.now());
+      final file = File('${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf');
+      await file.writeAsBytes(bytes, flush: true);
+      await Share.shareXFiles([XFile(file.path, mimeType: 'application/pdf')]);
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(_l.honamFailed)));
+    }
   }
 
   /// Garder un sticker reçu dans un groupe.
@@ -954,6 +1065,28 @@ class _GroupConversationScreenState
               ),
               // Administration réservée aux admins — le serveur tranche
               // (`can_manage`), le client ne devine pas les droits.
+              // Le mode preuve : tout titulaire du badge, admin ou non.
+              const Divider(height: 1),
+              ListTile(
+                leading: Icon(
+                  Icons.gavel_outlined,
+                  color: AppColors.accentPrimaryDark,
+                ),
+                title: Text(
+                  group.proofMode ? _l.proofModeDisable : _l.proofModeEnable,
+                ),
+                subtitle: group.proofMode ? null : Text(_l.proofModeOnBanner),
+                onTap: () => Navigator.pop(sheetContext, 'proof'),
+              ),
+              if (group.proofMode)
+                ListTile(
+                  leading: Icon(
+                    Icons.picture_as_pdf_outlined,
+                    color: AppColors.accentPrimaryDark,
+                  ),
+                  title: Text(_l.proofExport),
+                  onTap: () => Navigator.pop(sheetContext, 'proof:export'),
+                ),
               if (group.canManage) ...[
                 const Divider(height: 1),
                 ListTile(
@@ -1041,7 +1174,11 @@ class _GroupConversationScreenState
     );
 
     if (!mounted || action == null) return;
-    if (action == 'add') {
+    if (action == 'proof') {
+      await _toggleProofMode(group);
+    } else if (action == 'proof:export') {
+      await _exportProof();
+    } else if (action == 'add') {
       await _addMembers(group);
     } else if (action == 'leave') {
       await _leave();
@@ -1576,6 +1713,7 @@ class _GroupConversationScreenState
                   ),
                 ),
               ),
+              if (group?.proofMode ?? false) const _ProofModeBanner(),
               _ActiveCallBanner(
                 groupId: widget.groupId,
                 onJoin: _startingCall
@@ -1648,6 +1786,38 @@ class _GroupConversationScreenState
                                   isMine: message.senderId == widget.myUserId,
                                   onCallBack: ({required video}) =>
                                       _startOrJoinCall(withVideo: video),
+                                )
+                              else if ((message.payload?['kind']) == 'proof_mode')
+                                _ProofModeNotice(
+                                  text: message.payload?['enabled'] == true
+                                      ? _l.proofModeOn(_authorName(message.senderId, message.senderName))
+                                      : _l.proofModeOff(_authorName(message.senderId, message.senderName)),
+                                )
+                              else if (message.deletedAt != null)
+                                _ProofKeptMessage(
+                                  key: _keyFor(message.id),
+                                  author: _authorName(
+                                    message.senderId,
+                                    message.senderName,
+                                    certifiedName: message.senderCertifiedName,
+                                  ),
+                                  content: message.content,
+                                  isMine: message.senderId == widget.myUserId,
+                                )
+                              else if (message.originalContent != null)
+                                // Modifié en mode preuve (maquette 14) : la
+                                // version d'origine reste lisible de tous.
+                                _ProofKeptMessage(
+                                  key: _keyFor(message.id),
+                                  author: _authorName(
+                                    message.senderId,
+                                    message.senderName,
+                                    certifiedName: message.senderCertifiedName,
+                                  ),
+                                  content: message.content,
+                                  original: message.originalContent,
+                                  editedAt: message.editedAt,
+                                  isMine: message.senderId == widget.myUserId,
                                 )
                               else
                                 KeyedSubtree(
@@ -2619,6 +2789,147 @@ class GroupEncryptionNotice extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Le mode preuve est actif : tout le groupe le sait, en permanence.
+class _ProofModeBanner extends StatelessWidget {
+  const _ProofModeBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: AppColors.feedbackInfo.withValues(alpha: 0.10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          const Icon(Icons.gavel_outlined, size: 18, color: AppColors.feedbackInfo),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              L.of(context).proofModeOnBanner,
+              style: const TextStyle(fontSize: 13, color: AppColors.feedbackInfo),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Un message supprimé en mode preuve : lisible, BARRÉ, et dit pourquoi il
+/// est encore là. L'état ne repose pas sur le barré seul (DS-06) : une icône
+/// et un libellé l'accompagnent.
+class _ProofKeptMessage extends StatelessWidget {
+  const _ProofKeptMessage({
+    super.key,
+    required this.author,
+    required this.content,
+    required this.isMine,
+    this.original,
+    this.editedAt,
+  });
+
+  final String author;
+  final String? content;
+  final bool isMine;
+
+  /// Renseigné pour un message MODIFIÉ (et non supprimé) en mode preuve.
+  final String? original;
+  final DateTime? editedAt;
+
+  bool get _edited => original != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isMine)
+              Text(author, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            if (content != null)
+              Text(
+                content!,
+                style: _edited
+                    ? null
+                    : TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                        color: AppColors.textSecondary,
+                      ),
+              ),
+            if (_edited) ...[
+              const SizedBox(height: 4),
+              Text(
+                L.of(context).proofOriginal(original!),
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.gavel_outlined, size: 14, color: AppColors.textSecondary),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    _edited
+                        ? '${L.of(context).convEdited} · ${TimeOfDay.fromDateTime(editedAt!.toLocal()).format(context)}'
+                        : L.of(context).deletedKept,
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Le message système du mode preuve : au centre, comme un appel terminé —
+/// c'est un évènement de la discussion, pas la parole de quelqu'un.
+class _ProofModeNotice extends StatelessWidget {
+  const _ProofModeNotice({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.feedbackInfo.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.gavel_outlined, size: 14, color: AppColors.feedbackInfo),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(text, style: const TextStyle(fontSize: 12, color: AppColors.feedbackInfo)),
+            ),
+          ],
         ),
       ),
     );

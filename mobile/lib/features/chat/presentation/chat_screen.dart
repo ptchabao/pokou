@@ -310,7 +310,7 @@ class _Welcome extends StatelessWidget {
     required this.onSuggestionTap,
   });
 
-  /// Le moniteur dont Aoussi lit les données — vide en conversation libre.
+  /// Le moniteur dont Baba lit les données — vide en conversation libre.
   final String monitorName;
   final bool isGeneral;
   final ValueChanged<String> onSuggestionTap;
@@ -333,13 +333,13 @@ class _Welcome extends StatelessWidget {
         children: [
           const AssistantOrb(size: 116),
           const SizedBox(height: 24),
-          // Toujours AOUSSI, avec son badge : c'est lui qui parle, quel que
+          // Toujours BABA, avec son badge : c'est lui qui parle, quel que
           // soit le moniteur ouvert. Le nom du moniteur arrivait ici à sa
           // place — « Bonjour, je suis Changement global ».
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(text: l.aiHelloIm(l.navAoussi)),
+                TextSpan(text: l.aiHelloIm(l.navBaba)),
                 const WidgetSpan(
                   alignment: PlaceholderAlignment.middle,
                   child: Padding(
@@ -364,7 +364,7 @@ class _Welcome extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, color: style.textSecondary),
           ),
-          // Le moniteur interrogé, à part : ce sont SES données qu'Aoussi lit.
+          // Le moniteur interrogé, à part : ce sont SES données que Baba lit.
           if (!isGeneral && monitorName.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(

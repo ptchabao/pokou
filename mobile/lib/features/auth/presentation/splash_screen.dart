@@ -55,7 +55,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (status == AuthStatus.authenticated) {
       context.go('/inbox');
     } else if (status == AuthStatus.unauthenticated) {
-      context.go('/phone');
+      context.go('/welcome');
     }
   }
 

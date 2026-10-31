@@ -22,13 +22,14 @@ class PokouNavDestination {
 /// Un ENUM et non un index : la liste des onglets dépend du pays (NAV-01),
 /// et un index partagé entre la barre et la coquille ouvrait le mauvais
 /// écran dès qu'un onglet apparaissait ou disparaissait.
-enum PokouTab { home, discussions, kory, more }
+enum PokouTab { home, discussions, kory, honam, more }
 
 /// Les onglets à montrer, selon les modules ouverts dans le pays.
 List<PokouTab> pokouTabsFor(Set<String> modules) => [
   PokouTab.home,
   PokouTab.discussions,
   if (modules.contains('kory')) PokouTab.kory,
+  if (modules.contains('honam')) PokouTab.honam,
   PokouTab.more,
 ];
 
@@ -58,6 +59,11 @@ List<PokouNavDestination> pokouNavDestinationsOf(
           icon: Icons.savings_outlined,
           activeIcon: Icons.savings,
           label: l.navKory,
+        ),
+        PokouTab.honam => PokouNavDestination(
+          icon: Icons.local_pharmacy_outlined,
+          activeIcon: Icons.local_pharmacy,
+          label: l.navHonam,
         ),
         PokouTab.more => PokouNavDestination(
           icon: Icons.menu,

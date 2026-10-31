@@ -29,6 +29,26 @@ class GroupRepository {
     return Group.fromJson(response as Map<String, dynamic>);
   }
 
+  /// Supprimer pour tous. Renvoie le message conservé en mode preuve, ou
+  /// `null` quand il a été effacé.
+  Future<GroupMessage?> deleteMessage(int groupId, String messageId) async {
+    final response =
+        await _api.delete('/groups/$groupId/messages/$messageId')
+            as Map<String, dynamic>;
+    final kept = response['message'] as Map<String, dynamic>?;
+    return response['kept_as_proof'] == true && kept != null
+        ? GroupMessage.fromJson(kept)
+        : null;
+  }
+
+  Future<Group> setProofMode(int groupId, {required bool enabled}) async {
+    final response = await _api.post(
+      '/groups/$groupId/proof-mode',
+      body: {'enabled': enabled},
+    );
+    return Group.fromJson(response as Map<String, dynamic>);
+  }
+
   Future<Group> createGroup({
     required String name,
     required List<int> memberUserIds,

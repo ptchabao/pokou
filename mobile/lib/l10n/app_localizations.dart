@@ -3192,7 +3192,7 @@ abstract class L {
   /// No description provided for @marketBoostDone.
   ///
   /// In fr, this message translates to:
-  /// **'Paiement effectué — produit boosté !'**
+  /// **'Paiement effectué : annonce sponsorisée.'**
   String get marketBoostDone;
 
   /// No description provided for @marketBoostPending.
@@ -3300,7 +3300,7 @@ abstract class L {
   /// No description provided for @marketBoosted.
   ///
   /// In fr, this message translates to:
-  /// **'★ Boosté'**
+  /// **'Sponsorisé'**
   String get marketBoosted;
 
   /// No description provided for @vitrineSeeProduct.
@@ -3390,13 +3390,13 @@ abstract class L {
   /// No description provided for @marketBoosted48h.
   ///
   /// In fr, this message translates to:
-  /// **'★ Boosté · 48 h'**
+  /// **'Sponsorisé'**
   String get marketBoosted48h;
 
   /// No description provided for @marketBoost.
   ///
   /// In fr, this message translates to:
-  /// **'Booster'**
+  /// **'Mettre en avant'**
   String get marketBoost;
 
   /// No description provided for @marketRemove.
@@ -4449,11 +4449,11 @@ abstract class L {
   /// **'Choisir un moniteur'**
   String get profileChooseMonitor;
 
-  /// No description provided for @profileAoussiMessaging.
+  /// No description provided for @profileBabaMessaging.
   ///
   /// In fr, this message translates to:
-  /// **'Messagerie Aoussi'**
-  String get profileAoussiMessaging;
+  /// **'Messagerie Baba'**
+  String get profileBabaMessaging;
 
   /// No description provided for @profileMonitorAlerts.
   ///
@@ -4461,11 +4461,11 @@ abstract class L {
   /// **'{count, plural, =1{Alertes de 1 moniteur} other{Alertes de {count} moniteurs}}'**
   String profileMonitorAlerts(int count);
 
-  /// No description provided for @profileAoussiAssistant.
+  /// No description provided for @profileBabaAssistant.
   ///
   /// In fr, this message translates to:
-  /// **'Assistant Aoussi'**
-  String get profileAoussiAssistant;
+  /// **'Assistant Baba'**
+  String get profileBabaAssistant;
 
   /// No description provided for @profileShieldModeBody.
   ///
@@ -6906,7 +6906,7 @@ abstract class L {
   /// No description provided for @aiThinking.
   ///
   /// In fr, this message translates to:
-  /// **'Aoussi réfléchit'**
+  /// **'Baba réfléchit'**
   String get aiThinking;
 
   /// No description provided for @aiHelloIm.
@@ -7887,11 +7887,11 @@ abstract class L {
   /// **'Sticker ajouté à vos stickers'**
   String get stickerSaved;
 
-  /// No description provided for @navAoussi.
+  /// No description provided for @navBaba.
   ///
   /// In fr, this message translates to:
-  /// **'Aoussi'**
-  String get navAoussi;
+  /// **'Baba'**
+  String get navBaba;
 
   /// No description provided for @appBarOnline.
   ///
@@ -7950,7 +7950,7 @@ abstract class L {
   /// No description provided for @chatsSearchOrAsk.
   ///
   /// In fr, this message translates to:
-  /// **'Rechercher ou demander à Aoussi…'**
+  /// **'Rechercher ou demander à Baba…'**
   String get chatsSearchOrAsk;
 
   /// No description provided for @convEncryptedHint.
@@ -8934,7 +8934,7 @@ abstract class L {
   /// No description provided for @koryStatusRejected.
   ///
   /// In fr, this message translates to:
-  /// **'Non reçue'**
+  /// **'Contestée'**
   String get koryStatusRejected;
 
   /// No description provided for @koryConfirm.
@@ -9074,6 +9074,876 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'L\'opération n\'a pas abouti. Réessayez.'**
   String get koryActionFailed;
+
+  /// No description provided for @welcomePromise.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus qu\'une messagerie, une communauté.'**
+  String get welcomePromise;
+
+  /// No description provided for @welcomeSignature.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ensemble, plus forts.'**
+  String get welcomeSignature;
+
+  /// No description provided for @welcomeCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
+  String get welcomeCreate;
+
+  /// No description provided for @welcomeSignIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get welcomeSignIn;
+
+  /// No description provided for @welcomeServiceChats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussions, groupes et appels'**
+  String get welcomeServiceChats;
+
+  /// No description provided for @welcomeServiceKory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnottes & tontines'**
+  String get welcomeServiceKory;
+
+  /// No description provided for @legalPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confidentialité'**
+  String get legalPrivacy;
+
+  /// No description provided for @legalTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions d\'utilisation'**
+  String get legalTerms;
+
+  /// No description provided for @legalUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Document indisponible pour l\'instant.'**
+  String get legalUnavailable;
+
+  /// No description provided for @onbStep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape {step} sur 3'**
+  String onbStep(String step);
+
+  /// No description provided for @onbProfileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre profil'**
+  String get onbProfileTitle;
+
+  /// No description provided for @onbProfileBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est le nom que verront vos contacts.'**
+  String get onbProfileBody;
+
+  /// No description provided for @onbDisplayName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom affiché'**
+  String get onbDisplayName;
+
+  /// No description provided for @onbNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez un nom (2 caractères au moins).'**
+  String get onbNameRequired;
+
+  /// No description provided for @onbPhotoLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pourrez ajouter une photo plus tard, depuis votre profil.'**
+  String get onbPhotoLater;
+
+  /// No description provided for @onbContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get onbContinue;
+
+  /// No description provided for @onbTermsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de commencer'**
+  String get onbTermsTitle;
+
+  /// No description provided for @onbAcceptTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai lu et j\'accepte les conditions d\'utilisation et la politique de confidentialité.'**
+  String get onbAcceptTerms;
+
+  /// No description provided for @onbAge.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai l\'âge requis pour utiliser Pokou.'**
+  String get onbAge;
+
+  /// No description provided for @onbOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif, modifiable à tout moment dans les réglages'**
+  String get onbOptional;
+
+  /// No description provided for @onbAnalytics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager des statistiques d\'usage pour améliorer Pokou'**
+  String get onbAnalytics;
+
+  /// No description provided for @onbMarketing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir les nouvelles et offres de Pokou'**
+  String get onbMarketing;
+
+  /// No description provided for @onbFinish.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminer'**
+  String get onbFinish;
+
+  /// No description provided for @onbFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'enregistrement n\'a pas abouti. Réessayez.'**
+  String get onbFailed;
+
+  /// No description provided for @moreConsents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statistiques et communications'**
+  String get moreConsents;
+
+  /// No description provided for @navHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam'**
+  String get navHonam;
+
+  /// No description provided for @honamSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacies & livraison'**
+  String get honamSubtitle;
+
+  /// No description provided for @honamSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer une ordonnance'**
+  String get honamSend;
+
+  /// No description provided for @honamPhotograph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier l\'ordonnance'**
+  String get honamPhotograph;
+
+  /// No description provided for @honamFromGallery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une photo'**
+  String get honamFromGallery;
+
+  /// No description provided for @honamUrgent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Urgence'**
+  String get honamUrgent;
+
+  /// No description provided for @honamNotEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou n\'est pas un service d\'urgence.'**
+  String get honamNotEmergency;
+
+  /// No description provided for @honamNearby.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacies proches'**
+  String get honamNearby;
+
+  /// No description provided for @honamOnDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'De garde'**
+  String get honamOnDuty;
+
+  /// No description provided for @honamNoPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune pharmacie partenaire pour l\'instant.'**
+  String get honamNoPharmacy;
+
+  /// No description provided for @honamCurrentOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande en cours'**
+  String get honamCurrentOrder;
+
+  /// No description provided for @honamMyOrders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes commandes'**
+  String get honamMyOrders;
+
+  /// No description provided for @honamChoosePharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la pharmacie'**
+  String get honamChoosePharmacy;
+
+  /// No description provided for @honamAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de livraison'**
+  String get honamAddress;
+
+  /// No description provided for @honamNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note pour le pharmacien (facultatif)'**
+  String get honamNote;
+
+  /// No description provided for @honamSubmit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à la pharmacie'**
+  String get honamSubmit;
+
+  /// No description provided for @honamNeedPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez la photo de l\'ordonnance.'**
+  String get honamNeedPhoto;
+
+  /// No description provided for @honamNeedAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez l\'adresse de livraison.'**
+  String get honamNeedAddress;
+
+  /// No description provided for @honamFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'opération n\'a pas abouti. Réessayez.'**
+  String get honamFailed;
+
+  /// No description provided for @honamOrderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande n° {id}'**
+  String honamOrderTitle(String id);
+
+  /// No description provided for @honamStSubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée, en attente du pharmacien'**
+  String get honamStSubmitted;
+
+  /// No description provided for @honamStQuoted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis reçu'**
+  String get honamStQuoted;
+
+  /// No description provided for @honamStAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis accepté, à payer'**
+  String get honamStAccepted;
+
+  /// No description provided for @honamStPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée, en préparation'**
+  String get honamStPaid;
+
+  /// No description provided for @honamStReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prête, coursier attendu'**
+  String get honamStReady;
+
+  /// No description provided for @honamStInDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'En livraison'**
+  String get honamStInDelivery;
+
+  /// No description provided for @honamStDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée'**
+  String get honamStDelivered;
+
+  /// No description provided for @honamStRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance refusée'**
+  String get honamStRejected;
+
+  /// No description provided for @honamStExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis expiré'**
+  String get honamStExpired;
+
+  /// No description provided for @honamStCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get honamStCancelled;
+
+  /// No description provided for @honamQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis'**
+  String get honamQuote;
+
+  /// No description provided for @honamUnavailableItem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible'**
+  String get honamUnavailableItem;
+
+  /// No description provided for @honamMedicines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médicaments'**
+  String get honamMedicines;
+
+  /// No description provided for @honamDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison'**
+  String get honamDelivery;
+
+  /// No description provided for @honamTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total à payer'**
+  String get honamTotal;
+
+  /// No description provided for @honamAcceptQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter le devis'**
+  String get honamAcceptQuote;
+
+  /// No description provided for @honamPayTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyez {amount} depuis votre wallet au {phone} (la pharmacie), puis confirmez.'**
+  String honamPayTo(String amount, String phone);
+
+  /// No description provided for @honamDeclarePaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai payé la pharmacie'**
+  String get honamDeclarePaid;
+
+  /// No description provided for @honamPaidDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement signalé : la pharmacie va le confirmer.'**
+  String get honamPaidDeclared;
+
+  /// No description provided for @honamPaymentNotReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'La pharmacie n\'a pas reçu votre paiement. Vérifiez le numéro et le montant.'**
+  String get honamPaymentNotReceived;
+
+  /// No description provided for @honamCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de remise'**
+  String get honamCode;
+
+  /// No description provided for @honamCodeHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez ce code au coursier, seulement quand vous avez le colis en main.'**
+  String get honamCodeHelp;
+
+  /// No description provided for @honamOriginal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le coursier récupérera l\'ordonnance originale.'**
+  String get honamOriginal;
+
+  /// No description provided for @honamRefundDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'La pharmacie vous doit {amount} : {reason}'**
+  String honamRefundDue(String amount, String reason);
+
+  /// No description provided for @honamRefundReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai reçu le remboursement'**
+  String get honamRefundReceived;
+
+  /// No description provided for @honamCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la commande'**
+  String get honamCancel;
+
+  /// No description provided for @honamResend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à une autre pharmacie'**
+  String get honamResend;
+
+  /// No description provided for @honamReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif : {reason}'**
+  String honamReason(String reason);
+
+  /// No description provided for @honamTimeline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi'**
+  String get honamTimeline;
+
+  /// No description provided for @honamCourierMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode coursier'**
+  String get honamCourierMode;
+
+  /// No description provided for @honamCourierJoin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devenir coursier Win Pokou'**
+  String get honamCourierJoin;
+
+  /// No description provided for @honamCourierJoinBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'5 courses d\'essai sans commission pendant un mois. Ensuite : adhésion Win Pokou et pack de courses payé d\'avance.'**
+  String get honamCourierJoinBody;
+
+  /// No description provided for @honamRidesLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses restantes : {count}'**
+  String honamRidesLeft(String count);
+
+  /// No description provided for @honamUnlimited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses illimitées'**
+  String get honamUnlimited;
+
+  /// No description provided for @honamMembership.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adhésion Win Pokou : {amount} HT / mois'**
+  String honamMembership(String amount);
+
+  /// No description provided for @honamPayMembership.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer l\'adhésion'**
+  String get honamPayMembership;
+
+  /// No description provided for @honamPacks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Packs de courses'**
+  String get honamPacks;
+
+  /// No description provided for @honamPackPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} HT'**
+  String honamPackPrice(String amount);
+
+  /// No description provided for @honamAvailableRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses disponibles'**
+  String get honamAvailableRides;
+
+  /// No description provided for @honamMyRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes courses'**
+  String get honamMyRides;
+
+  /// No description provided for @honamNoRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune course pour l\'instant.'**
+  String get honamNoRides;
+
+  /// No description provided for @honamAcceptRide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter la course'**
+  String get honamAcceptRide;
+
+  /// No description provided for @honamPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis récupéré'**
+  String get honamPickup;
+
+  /// No description provided for @honamDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider la remise'**
+  String get honamDeliver;
+
+  /// No description provided for @honamEnterCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code donné par le patient'**
+  String get honamEnterCode;
+
+  /// No description provided for @honamCoursePaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai reçu le prix de la course'**
+  String get honamCoursePaid;
+
+  /// No description provided for @honamPaymentLinkOpened.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminez le paiement dans la page qui s\'ouvre.'**
+  String get honamPaymentLinkOpened;
+
+  /// No description provided for @honamCourierSuspended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte coursier suspendu après 3 défauts de livraison. Contactez le support pour un recours.'**
+  String get honamCourierSuspended;
+
+  /// No description provided for @honamPriceNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix hors taxes, TVA du pays en sus.'**
+  String get honamPriceNote;
+
+  /// No description provided for @certTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié'**
+  String get certTitle;
+
+  /// No description provided for @certPitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le badge prouve que votre nom est bien le vôtre. Le mode preuve garde visibles, barrés, les messages supprimés d\'un groupe.'**
+  String get certPitch;
+
+  /// No description provided for @certHowItWorks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre identité est vérifiée par le nom du titulaire du wallet qui paie.'**
+  String get certHowItWorks;
+
+  /// No description provided for @certStartTrial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essayer {days} jours'**
+  String certStartTrial(String days);
+
+  /// No description provided for @certTrialNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pendant l\'essai, le mode preuve est disponible ; le badge s\'affiche au premier paiement.'**
+  String get certTrialNote;
+
+  /// No description provided for @certPlanPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{ht} HT · {ttc} TTC'**
+  String certPlanPrice(String ht, String ttc);
+
+  /// No description provided for @certSubscribe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir'**
+  String get certSubscribe;
+
+  /// No description provided for @certActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Badge actif'**
+  String get certActive;
+
+  /// No description provided for @certTrialUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essai jusqu\'au {date}'**
+  String certTrialUntil(String date);
+
+  /// No description provided for @certActiveUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif jusqu\'au {date}'**
+  String certActiveUntil(String date);
+
+  /// No description provided for @certExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnement expiré'**
+  String get certExpired;
+
+  /// No description provided for @certMismatchTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les noms ne correspondent pas'**
+  String get certMismatchTitle;
+
+  /// No description provided for @certMismatchBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrigez-le tel qu\'il figure sur sa pièce d\'identité.'**
+  String get certMismatchBody;
+
+  /// No description provided for @proofModeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve'**
+  String get proofModeTitle;
+
+  /// No description provided for @proofModeOnBanner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve actif : un message supprimé reste visible, barré, pour tous.'**
+  String get proofModeOnBanner;
+
+  /// No description provided for @proofModeEnable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer le mode preuve'**
+  String get proofModeEnable;
+
+  /// No description provided for @proofModeDisable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver le mode preuve'**
+  String get proofModeDisable;
+
+  /// No description provided for @proofModeNeedsCert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve demande Pokou certifié (essai gratuit disponible).'**
+  String get proofModeNeedsCert;
+
+  /// No description provided for @deleteForAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer pour tous'**
+  String get deleteForAll;
+
+  /// No description provided for @deleteProofWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve est actif : le message restera visible, barré, pour tous les membres.'**
+  String get deleteProofWarning;
+
+  /// No description provided for @deletedKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message supprimé, conservé par le mode preuve'**
+  String get deletedKept;
+
+  /// No description provided for @certCorrectName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom complet du titulaire'**
+  String get certCorrectName;
+
+  /// No description provided for @certRetryName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier ce nom'**
+  String get certRetryName;
+
+  /// No description provided for @certStillMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce nom ne correspond toujours pas.'**
+  String get certStillMismatch;
+
+  /// No description provided for @proofExport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter la discussion (PDF)'**
+  String get proofExport;
+
+  /// No description provided for @proofModeOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a activé le mode preuve'**
+  String proofModeOn(String name);
+
+  /// No description provided for @proofModeOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a désactivé le mode preuve'**
+  String proofModeOff(String name);
+
+  /// No description provided for @proofOriginal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version d\'origine : {text}'**
+  String proofOriginal(String text);
+
+  /// No description provided for @proofDisableReserved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seule la personne qui l\'a activé, ou un administrateur au badge payant, peut le désactiver.'**
+  String get proofDisableReserved;
+
+  /// No description provided for @marketBoost3.
+  ///
+  /// In fr, this message translates to:
+  /// **'3 jours · 600 FCFA'**
+  String get marketBoost3;
+
+  /// No description provided for @marketBoost7.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours · 1 300 FCFA'**
+  String get marketBoost7;
+
+  /// No description provided for @marketUseHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les médicaments ne se vendent pas sur Assimé : passez par Honam.'**
+  String get marketUseHonam;
+
+  /// No description provided for @honamMissingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un produit manque'**
+  String get honamMissingTitle;
+
+  /// No description provided for @honamMissingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} manquent : {reason}. Que préférez-vous ?'**
+  String honamMissingBody(String amount, String reason);
+
+  /// No description provided for @honamKeepRest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le reste'**
+  String get honamKeepRest;
+
+  /// No description provided for @honamCancelAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout annuler'**
+  String get honamCancelAll;
+
+  /// No description provided for @honamRefundDelay.
+  ///
+  /// In fr, this message translates to:
+  /// **'La pharmacie vous rembourse sous 2 h, sur le numéro qui a payé.'**
+  String get honamRefundDelay;
+
+  /// No description provided for @honamZones.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zones et créneaux (ex. Bè, Tokoin — soirs)'**
+  String get honamZones;
+
+  /// No description provided for @honamWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro du wallet qui reçoit le prix des courses'**
+  String get honamWallet;
+
+  /// No description provided for @honamRules.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'accepte les règles d\'or : je remets le colis seulement contre le code, je ne regarde pas les ordonnances, je reste courtois.'**
+  String get honamRules;
+
+  /// No description provided for @honamApply.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer ma candidature'**
+  String get honamApply;
+
+  /// No description provided for @honamPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Candidature envoyée : l\'équipe Pokou la vérifie.'**
+  String get honamPending;
+
+  /// No description provided for @honamLaunch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période de lancement : vous livrez sans adhésion ni pack.'**
+  String get honamLaunch;
+
+  /// No description provided for @honamQueenLocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Queen Pokou se débloque après un mois sans défaut de livraison.'**
+  String get honamQueenLocked;
+
+  /// No description provided for @koryDeclaredTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total déclaré : {amount}'**
+  String koryDeclaredTotal(String amount);
+
+  /// No description provided for @koryRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à collecter : {amount}'**
+  String koryRemaining(String amount);
+
+  /// No description provided for @onbBabaWelcome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je suis Baba, l\'assistant de Pokou. Comment veux-tu qu\'on t\'appelle ?'**
+  String get onbBabaWelcome;
+
+  /// No description provided for @onbContactsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouver tes proches'**
+  String get onbContactsTitle;
+
+  /// No description provided for @onbContactsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Baba peut retrouver ceux de tes contacts qui sont déjà sur Pokou. Tu peux refuser : on te le redemandera plus tard.'**
+  String get onbContactsBody;
+
+  /// No description provided for @onbContactsAllow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser'**
+  String get onbContactsAllow;
+
+  /// No description provided for @onbLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get onbLater;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

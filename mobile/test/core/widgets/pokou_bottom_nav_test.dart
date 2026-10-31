@@ -96,6 +96,14 @@ void main() {
       PokouTab.kory,
       PokouTab.more,
     ]);
+    // L'ordre du cahier des charges : Accueil | Discussions | Kory | Honam | Plus.
+    expect(pokouTabsFor({'discussions', 'kory', 'honam'}), [
+      PokouTab.home,
+      PokouTab.discussions,
+      PokouTab.kory,
+      PokouTab.honam,
+      PokouTab.more,
+    ]);
   });
 
   testWidgets("l'onglet actif suit l'index demandé", (tester) async {

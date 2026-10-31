@@ -2207,7 +2207,7 @@ class _AvatarRing extends StatelessWidget {
   }
 }
 
-/// Bouton "A" (Aoussi) — ouvre l'assistant général épinglé (monitorId 0)
+/// Bouton "A" (Baba) — ouvre l'assistant général épinglé (monitorId 0)
 class _ReplyingToBar extends StatelessWidget {
   const _ReplyingToBar({required this.message, required this.onClose});
 

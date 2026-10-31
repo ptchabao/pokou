@@ -1384,7 +1384,7 @@ class _PinnedMahizuTile extends ConsumerWidget {
       // /minou/status et non la liste des moniteurs POSSÉDÉS : on peut être
       // destinataire des alertes d'un moniteur sans en posséder aucun (le
       // cas de l'employé dont le numéro est déclaré). Interroger la
-      // propriété seule l'aurait renvoyé vers la messagerie d'Aoussi alors
+      // propriété seule l'aurait renvoyé vers la messagerie de Baba alors
       // qu'il a des alertes à lire.
       status = await ref.read(minouStatusProvider.future);
     } catch (_) {
@@ -1399,10 +1399,10 @@ class _PinnedMahizuTile extends ConsumerWidget {
 
     final monitors = status.monitors;
     if (status.mode == MinouMode.messaging || monitors.isEmpty) {
-      // Numéro rattaché à aucun moniteur : c'est la vraie messagerie d'Aoussi
+      // Numéro rattaché à aucun moniteur : c'est la vraie messagerie de Baba
       // qui s'ouvre (kNoMonitor = sentinelle locale « aucun moniteur », voir
       // ChatController).
-      context.push('/chat/$kNoMonitor', extra: 'Aoussi');
+      context.push('/chat/$kNoMonitor', extra: L.of(context).navBaba);
       return;
     }
 
@@ -1468,16 +1468,16 @@ class _PinnedMahizuTile extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Aoussi porte TOUJOURS son badge : c'est l'assistant de
+                  // Baba porte TOUJOURS son badge : c'est l'assistant de
                   // Pokou, pas un contact qu'on pourrait confondre.
-                  const Row(
+                  Row(
                     children: [
                       Text(
-                        'Aoussi',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        L.of(context).navBaba,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      SizedBox(width: 4),
-                      VerifiedBadge(size: 15),
+                      const SizedBox(width: 4),
+                      const VerifiedBadge(size: 15),
                     ],
                   ),
                   const SizedBox(height: 2),

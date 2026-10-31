@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, model_validator
 
 
 class UserRoleSchema(str, Enum):
@@ -36,9 +36,20 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    terms_accepted_at: Optional[datetime] = None
+    consent_analytics: bool = False
+    consent_marketing: bool = False
+    #: Vrai tant que le profil (nom affiché) ou les conditions manquent :
+    #: l'application présente alors les étapes 3 et 4 de l'inscription.
+    needs_onboarding: bool = False
 
     class Config:
         from_attributes = True
+
+    @model_validator(mode="after")
+    def _onboarding(self):
+        self.needs_onboarding = not self.full_name or self.terms_accepted_at is None
+        return self
 
     @field_validator("role", mode="before")
     def _normalize_role(cls, v):
