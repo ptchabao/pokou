@@ -1,0 +1,25 @@
+# FACULTATIF — PostgreSQL dans le cluster avec CloudNativePG, si aucune base
+# managée n'est disponible. Une base managée reste préférable : sauvegardes,
+# montées de version et bascule sont alors l'affaire du fournisseur.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pokou-pg
+  namespace: pokou
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:16
+  storage:
+    size: 50Gi
+  bootstrap:
+    initdb:
+      database: pokou
+      owner: pokou
+  monitoring:
+    enablePodMonitor: true
+  # Sauvegardes continues vers S3 : à renseigner AVANT la mise en service.
+  # backup:
+  #   barmanObjectStore:
+  #     destinationPath: s3://pokou-backups/pg
+  #     s3Credentials: { ... }
+  #   retentionPolicy: "30d"

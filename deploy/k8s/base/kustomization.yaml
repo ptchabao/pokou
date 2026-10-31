@@ -1,0 +1,22 @@
+# Socle commun à tous les environnements. Ne s'applique pas seul : passer
+# par un overlay (overlays/prod), qui fixe l'image, les domaines et les
+# secrets. Le Job de migration n'est PAS listé ici : il est joué par
+# deploy.sh AVANT le reste, et attendu (voir docs/deploiement-kubernetes.md).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: pokou
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - configmap.yaml
+  - api-deployment.yaml
+  - api-service.yaml
+  - api-hpa.yaml
+  - api-pdb.yaml
+  - outbox-relay-deployment.yaml
+  - ingress.yaml
+  - networkpolicy.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: pokou
+    includeSelectors: false

@@ -1,0 +1,31 @@
+# Par défaut, rien n'entre dans le namespace ; seul le contrôleur d'Ingress
+# joint l'API, et le scraping Prometheus si le namespace `monitoring` existe.
+# Les sorties restent ouvertes : PostgreSQL et Redis managés, S3, FCM,
+# LiveKit, SMS et Semoa sont hors du cluster, à des adresses qui changent.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pokou-api-from-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pokou-api
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 8000

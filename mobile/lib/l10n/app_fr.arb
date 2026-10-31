@@ -1,0 +1,2344 @@
+{
+  "@@locale": "fr",
+  "appName": "Pokou",
+  "@appName": {
+    "description": "Nom de l'application — jamais traduit, c'est une marque."
+  },
+  "actionCancel": "Annuler",
+  "actionConfirm": "Confirmer",
+  "actionSave": "Enregistrer",
+  "actionDelete": "Supprimer",
+  "actionRetry": "Réessayer",
+  "actionContinue": "Continuer",
+  "actionClose": "Fermer",
+  "actionShare": "Partager",
+  "actionSearch": "Rechercher",
+  "actionAdd": "Ajouter",
+  "actionRemove": "Retirer",
+  "actionSend": "Envoyer",
+  "actionJoin": "Rejoindre",
+  "actionCreate": "Créer",
+  "navChats": "Discussions",
+  "navStatus": "Actus",
+  "navCalls": "Appels",
+  "navMarket": "Marché",
+  "chatsEmptyTitle": "Aucune discussion",
+  "chatsEmptyBody": "Vos conversations apparaîtront ici.",
+  "chatsSearchHint": "Rechercher",
+  "chatsTyping": "écrit…",
+  "chatsTypingNamed": "{name} écrit…",
+  "@chatsTypingNamed": {
+    "description": "En groupe, on nomme qui écrit ; en 1:1 c'est inutile.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatsUnknownContact": "pas dans vos contacts",
+  "chatsNoMessageYet": "Aucun message pour l'instant",
+  "chatsYouPrefix": "Vous : {message}",
+  "@chatsYouPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "chatsGroupCount": "{count, plural, =0{Aucun groupe} =1{1 groupe} other{{count} groupes}}",
+  "@chatsGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newChatTitle": "Nouvelle discussion",
+  "newChatSearchHint": "Rechercher un contact",
+  "newChatNewGroup": "Nouveau groupe",
+  "newChatNewCommunity": "Nouvelle communauté",
+  "newChatJoinByLink": "Rejoindre par lien",
+  "newChatOnPokou": "Sur Pokou Messenger",
+  "newChatInvite": "Inviter sur Pokou Messenger",
+  "newChatNoMatch": "Aucun contact ne correspond.",
+  "newChatNoRegisteredContact": "Aucun de vos contacts n'utilise encore Pokou.",
+  "conversationSayHello": "Dites bonjour à {name}.",
+  "@conversationSayHello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "conversationMessageHint": "Message",
+  "conversationEdit": "Modifier",
+  "conversationForward": "Transférer",
+  "conversationReply": "Répondre",
+  "conversationEditWindowOver": "Ce message ne peut plus être modifié.",
+  "mediaPhoto": "Photo",
+  "mediaVideo": "Vidéo",
+  "mediaVoice": "Message vocal",
+  "mediaDocument": "Document",
+  "mediaLocation": "Position",
+  "offlineTitle": "Hors ligne",
+  "offlineBody": "Vous verrez ce qui est déjà sur cet appareil. Le reste arrivera au retour du réseau.",
+  "offlineNothingCached": "Rien n'est encore enregistré sur cet appareil.",
+  "offlineSending": "En attente d'envoi",
+  "errorNetwork": "Connexion impossible. Vérifiez votre réseau.",
+  "twoStepTitle": "Vérification en deux étapes",
+  "twoStepBody": "Ce compte est protégé par un code. Saisissez-le pour terminer la connexion.",
+  "twoStepHint": "Code du compte",
+  "errorGeneric": "Quelque chose n'a pas fonctionné.",
+  "profileTitle": "Profil",
+  "profileLanguage": "Langue",
+  "profileLanguageSystem": "Langue du téléphone",
+  "profileLanguageSubtitle": "Choisissez la langue de l'application",
+  "languageFrench": "Français",
+  "languageEnglish": "Anglais",
+  "languageSpanish": "Espagnol",
+  "languageRussian": "Russe",
+  "languageArabic": "Arabe",
+  "languageItalian": "Italien",
+  "sparkTitle": "Spark",
+  "sparkSubtitle": "Le rendez-vous d'aujourd'hui",
+  "sparkTabDiscover": "Découvrir",
+  "sparkTabMatches": "Matchs",
+  "sparkTabDates": "Sorties",
+  "sparkTabMe": "Moi",
+  "sparkAddPhoto": "Ajouter une photo",
+  "sparkNoPhotoWarning": "Ajoutez une photo — sans elle, presque personne ne like",
+  "sparkPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@sparkPhotoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sparkLike": "Liker",
+  "sparkPass": "Passer",
+  "sparkAgeRestricted": "Spark est réservé aux 18 ans et plus.",
+  "navProfile": "Profil",
+  "authWelcome": "Bienvenue sur Pokou",
+  "authSubtitle": "Connectez-vous de manière sécurisée avec votre numéro.",
+  "authPhoneHint": "Votre numéro",
+  "authPrivacyNote": "Connexion sécurisée. Votre numéro sert uniquement à vérifier votre identité.",
+  "authVerifyTitle": "Vérification",
+  "authCodeSentTo": "Saisissez le code à 6 chiffres envoyé au {phone}",
+  "@authCodeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "authChangeNumber": "Modifier le numéro",
+  "authResendIn": "Renvoyer le code dans {time}",
+  "@authResendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "authResendSms": "Renvoyer par SMS",
+  "authResendWhatsapp": "Renvoyer via WhatsApp",
+  "authCodeSentSms": "Nouveau code envoyé par SMS.",
+  "authCodeSentWhatsapp": "Nouveau code envoyé sur WhatsApp.",
+  "chatsPin": "Épingler",
+  "chatsUnpin": "Désépingler",
+  "chatsArchive": "Archiver",
+  "chatsUnarchive": "Désarchiver",
+  "chatsMute": "Mettre en sourdine",
+  "chatsUnmute": "Réactiver le son",
+  "chatsTag": "Étiqueter",
+  "chatsTagNamed": "Étiqueter {name}",
+  "@chatsTagNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatsBlock": "Bloquer",
+  "chatsBlockTitle": "Bloquer {name} ?",
+  "@chatsBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatsBlockBody": "Cette personne ne pourra plus vous écrire ni vous appeler. Elle ne sera pas prévenue.",
+  "chatsPinLimit": "Trois discussions déjà épinglées au maximum.",
+  "chatsMute8h": "8 heures",
+  "chatsMute1w": "1 semaine",
+  "chatsMuteAlways": "Toujours",
+  "chatsAddContact": "Ajouter à mes contacts",
+  "chatsActionFailed": "Action impossible pour le moment.",
+  "chatsNoResult": "Aucun résultat.",
+  "chatsConnectFailed": "Connexion impossible.",
+  "navModules": "Modules",
+  "navBroadcasts": "Listes de diffusion",
+  "navYou": "Vous",
+  "convProductFallback": "Produit",
+  "convOrderUpdated": "Commande mise à jour",
+  "convReactionFailed": "Réaction impossible.",
+  "convPermissionDenied": "Permission refusée.",
+  "convAttachDocument": "Document",
+  "convAttachGallery": "Photo (galerie)",
+  "convAttachVideo": "Vidéo (galerie)",
+  "convAttachCamera": "Appareil photo",
+  "convEditTitle": "Modifier le message",
+  "convEditHint": "Votre message",
+  "convForwarded": "Message transféré à {name}.",
+  "@convForwarded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "convForwardFailed": "Transfert impossible.",
+  "convRecordVoice": "Enregistrer une note vocale",
+  "mediaVoiceNote": "Note vocale",
+  "mediaMessage": "Message",
+  "newChatInviteAction": "Inviter",
+  "profileGallery": "Galerie",
+  "profileCamera": "Appareil photo",
+  "profileEdit": "Modifier le profil",
+  "profileFullName": "Nom complet",
+  "profileAbout": "À propos",
+  "profileUpdateFailed": "Mise à jour impossible.",
+  "profileVerifiedPhone": "Identité vérifiée par téléphone",
+  "profilePrivacySecurity": "Confidentialité & Sécurité",
+  "profileShieldMode": "Mode Bouclier",
+  "profileShieldOn": "Mode Bouclier activé",
+  "profileShieldOff": "Mode Bouclier désactivé",
+  "profileConnection": "Connexion",
+  "profileEncryptedTls": "Chiffrée (TLS)",
+  "profileStatusVisibility": "Visibilité des statuts",
+  "commonEnabled": "Activé",
+  "commonDisabled": "Désactivé",
+  "commonLoading": "Chargement…",
+  "profileDevices": "Appareils connectés",
+  "profileNotifications": "Notifications",
+  "profileStorage": "Stockage et données",
+  "profileDataSaver": "Économie de données",
+  "profileSystemPrefs": "Préférences système",
+  "profileSignOut": "Se déconnecter",
+  "modulesActivated": "{name} est activé.",
+  "@modulesActivated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "modulesUnavailable": "Modules indisponibles",
+  "modulesCheckNetwork": "Vérifiez votre connexion et réessayez.",
+  "modulesEmptyTitle": "Rien à ajouter pour l'instant",
+  "modulesEmptyBody": "De nouveaux modules arriveront ici. Vous n'avez rien à faire en attendant.",
+  "modulesMine": "Mes apps",
+  "modulesRecommended": "Recommandés",
+  "modulesRecommendedBy": "Choisis par notre équipe",
+  "modulesPopular": "Populaires",
+  "modulesPopularSub": "Les plus activés en ce moment",
+  "modulesEnable": "Activer",
+  "modulesDisable": "Désactiver",
+  "modulesEnableFailed": "L'activation n'a pas pu aboutir.",
+  "modulesComingSoon": "{name} arrive bientôt. Mettez l'application à jour pour en profiter dès sa sortie.",
+  "@modulesComingSoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "modulesUserCount": "{count, plural, =1{1 personne l'utilise} other{{count} personnes l'utilisent}}",
+  "@modulesUserCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sparkEnableLocation": "Activez la localisation sur votre téléphone.",
+  "sparkLocationNeeded": "Sans position, Spark ne peut pas savoir qui est autour de vous.",
+  "sparkLocationFailed": "La position n'a pas pu être relevée.",
+  "sparkFeedUnavailable": "Flux indisponible",
+  "sparkPickIntentTitle": "Choisissez votre carte du moment",
+  "sparkPickIntentBody": "Dites ce que vous cherchez aujourd'hui pour voir qui cherche la même chose.",
+  "sparkLocationStale": "Votre position n'est pas à jour",
+  "sparkLocationStaleBody": "Spark ne montre que des gens à moins de 5 km. Sans position fraîche, il ne peut rien afficher.",
+  "sparkShareLocation": "Partager ma position",
+  "sparkQuotaTitle": "Vous avez vu vos profils du jour",
+  "sparkQuotaBody": "Revenez demain, ou prenez Spark+ pour voir sans compter.",
+  "sparkNobodyTitle": "Personne pour l'instant",
+  "sparkNobodyBody": "Peu de monde cherche la même chose que vous, ici et maintenant. Réessayez plus tard — ou changez de carte.",
+  "sparkPickCard": "Choisissez votre carte",
+  "sparkTodayLooking": "Ce que vous cherchez aujourd'hui",
+  "sparkCardExpired": "Votre carte a expiré",
+  "sparkHoursLeft": "Encore {hours} h",
+  "@sparkHoursLeft": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "sparkMinutesLeft": "Encore {minutes} min",
+  "@sparkMinutesLeft": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "sparkIntentSheetTitle": "Aujourd'hui, je cherche",
+  "sparkIntentSheetBody": "Votre carte expire dans 24 h. Vous ne verrez que des gens qui ont choisi la même chose.",
+  "sparkLikesExhausted": "Vos likes du jour sont épuisés. Prenez un pack dans « Moi ».",
+  "sparkMatchesUnavailable": "Matchs indisponibles",
+  "sparkNoMatchTitle": "Aucun match pour l'instant",
+  "sparkNoMatchBody": "Quand vous vous likez tous les deux, une salle de dix minutes s'ouvre. C'est là que ça se joue.",
+  "sparkOpenRooms": "Salles ouvertes",
+  "sparkRoomsClose": "Elles se referment toutes seules",
+  "sparkMyMatches": "Mes matchs",
+  "sparkNext": "Suite",
+  "sparkPhotoFailed": "La photo n'a pas pu être ajoutée.",
+  "sparkGoFaster": "Aller plus vite",
+  "sparkNoExpiry": "Sans expiration",
+  "sparkPlusActive": "Actif — prolonge votre abonnement",
+  "sparkPlusPitch": "Profils illimités, un mois",
+  "sparkBoost": "Top Profil",
+  "sparkBoostPitch": "En tête du flux pendant une heure",
+  "sparkAroundMe": "Autour de moi",
+  "sparkSafety": "Sécurité",
+  "sparkSafetyPitch": "Alerte discrète et cercle de confiance",
+  "sparkWingman": "Avis de mes potes",
+  "sparkWingmanPitch": "Les profils sur lesquels on vous demande un avis",
+  "sparkUploading": "Envoi…",
+  "sparkKarma": "Street Cred",
+  "sparkCanInvite": "Vous pouvez inviter",
+  "sparkCannotInvite": "Trop bas pour inviter. Honorez vos rendez-vous.",
+  "sparkLikersCount": "{count, plural, =1{Une personne vous a liké} other{{count} personnes vous ont liké}}",
+  "@sparkLikersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sparkSeeWho": "Voir qui",
+  "sparkFindInDiscover": "Retrouvez-les dans Découvrir.",
+  "sparkPaymentPendingLikers": "La liste s'ouvrira dès la confirmation du paiement.",
+  "sparkPaymentPendingLikes": "Vos likes arriveront dès la confirmation du paiement.",
+  "sparkPaymentPendingPlus": "Spark+ s'activera dès la confirmation du paiement.",
+  "sparkPaymentPendingBoost": "Votre profil remontera dès la confirmation du paiement.",
+  "sparkBirthDateLabel": "Votre date de naissance",
+  "sparkNameAndBirthNeeded": "Un prénom et une date de naissance, au minimum.",
+  "sparkProfileFailed": "La fiche n'a pas pu être créée.",
+  "sparkCreateProfile": "Créez votre fiche",
+  "sparkStep1Title": "Vous dites ce que vous cherchez, aujourd'hui",
+  "sparkStep1Body": "Votre carte expire en 24 h. Vous ne voyez que des gens qui cherchent la même chose, à moins de 5 km.",
+  "sparkStep2Title": "Dix minutes de vocal avant d'écrire",
+  "sparkStep2Body": "Après un match, une salle s'ouvre : vocaux et stickers seulement. Les faux profils ne passent pas cette étape.",
+  "sparkStep3Title": "Vos proches savent où vous êtes",
+  "sparkStep3Body": "Un geste discret prévient votre cercle avec votre position. On vous demande aussi si tout va bien pendant le rendez-vous.",
+  "sparkSeparateTitle": "Votre fiche est séparée de Pokou",
+  "sparkSeparateBody": "Votre nom et votre numéro Pokou ne sont jamais montrés ici. Choisissez ce que vous voulez afficher.",
+  "sparkDisplayName": "Prénom affiché",
+  "sparkNameExample": "Ex : Ama",
+  "sparkBirthDate": "Date de naissance",
+  "sparkBirthDateLocked": "Elle ne pourra plus être modifiée ensuite.",
+  "sparkChoose": "Choisir",
+  "sparkYouAre": "Vous êtes",
+  "sparkWoman": "Une femme",
+  "sparkMan": "Un homme",
+  "sparkOther": "Autre",
+  "sparkBioLabel": "Deux mots sur vous (facultatif)",
+  "sparkBioHint": "Ce qu'il faut savoir avant de vous rencontrer",
+  "sparkCreateAction": "Créer ma fiche",
+  "truthSubtitle": "Une question payée, une réponse libre",
+  "truthAsk": "Poser une question",
+  "truthForMe": "Pour moi",
+  "truthMine": "Mes questions",
+  "truthUnavailable": "Questions indisponibles",
+  "truthEmptyTitle": "Aucune question pour le moment",
+  "truthEmptyBody": "Quand quelqu'un paiera pour vous poser une question, elle apparaîtra ici. Vous resterez libre de refuser.",
+  "truthYourAnswer": "Votre réponse",
+  "truthAnswerPrivacy": "Elle ne va qu'à la personne qui a payé. Pokou ne la republie nulle part.",
+  "truthWhatToSay": "Ce que vous voulez dire",
+  "truthSendAnswer": "Envoyer ma réponse",
+  "truthAskedAnon": "Demandé anonymement",
+  "truthDecline": "Refuser",
+  "truthAnswer": "Répondre",
+  "truthDeclineFree": "Refuser ne vous coûte rien. Vous n'êtes payé qu'en répondant.",
+  "truthHistoryUnavailable": "Historique indisponible",
+  "truthNothingAsked": "Vous n'avez encore rien demandé",
+  "truthNothingAskedBody": "Posez une question à quelqu'un : il verra le montant et la question, jamais votre nom.",
+  "truthAnswered": "Répondu",
+  "truthDeclined": "Refusé",
+  "truthPending": "En attente",
+  "truthToSomeone": "À {name}",
+  "@truthToSomeone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "truthSomeone": "quelqu'un",
+  "truthPreferredNot": "Cette personne a préféré ne pas répondre.",
+  "truthAwaitingAnswer": "En attente d'une réponse.",
+  "truthToWhom": "À qui ?",
+  "truthQuestionTo": "Une question à {name}",
+  "@truthQuestionTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "truthAnonTitle": "Votre nom n'est pas montré",
+  "truthAnonBody": "La personne voit le montant et la question, jamais qui les a envoyés.",
+  "truthFreeTitle": "Elle reste libre de refuser",
+  "truthFreeBody": "Refuser ne lui rapporte rien : elle n'est payée qu'en répondant.",
+  "truthPrivateTitle": "La réponse ne va qu'à vous",
+  "truthPrivateBody": "Pokou ne la republie nulle part, et elle expire au bout de sept jours sans réponse.",
+  "truthYourQuestion": "Votre question",
+  "truthQuestionHint": "Ce que vous aimeriez vraiment savoir",
+  "truthHowMuch": "Combien vous proposez",
+  "truthAskForAmount": "Poser la question — {amount} FCFA",
+  "@truthAskForAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "truthWriteFirst": "Écrivez d'abord votre question.",
+  "truthPaymentPending": "Votre question partira dès la confirmation du paiement.",
+  "hypeFinished": "Terminé",
+  "hypeSubtitle": "Un objectif, toute la salle",
+  "hypeLaunch": "Lancer un objectif",
+  "hypeOngoing": "En cours",
+  "hypeMine": "Les miens",
+  "hypeNoneTitle": "Aucun objectif en cours",
+  "hypeNoneBody": "Quand un créateur lance un objectif, il apparaît ici jusqu'à ce que le palier tombe.",
+  "hypeMineEmpty": "Rien pour le moment",
+  "hypeMineEmptyBody": "Vos objectifs et ceux que vous avez soutenus apparaîtront ici.",
+  "hypeUnavailable": "Objectifs indisponibles",
+  "hypeCreator": "Créateur",
+  "hypeTierReached": "Palier atteint",
+  "hypeGoal": "Objectif",
+  "hypeNotFound": "Objectif introuvable",
+  "hypeMaybeRemoved": "Il a peut-être été retiré.",
+  "hypeUnlocked": "Le palier est tombé. La promesse est débloquée.",
+  "hypeContribute": "Faire avancer la barre",
+  "hypePushers": "Ceux qui poussent",
+  "hypeBeFirst": "Personne encore. Soyez le premier.",
+  "hypeContributor": "Contributeur",
+  "commonDueToYou": "Vous revient : {amount} FCFA",
+  "@commonDueToYou": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "commonManualPayout": "Le versement se fait par l'équipe Pokou, sur demande.",
+  "hypeStepTogetherTitle": "Tout le monde pousse ensemble",
+  "hypeStepTogetherBody": "Chaque participation fait monter la barre, et tout le monde voit le palier tomber en même temps.",
+  "hypeStepPromiseTitle": "Ce que vous promettez",
+  "hypeStepPromiseBody": "Visible avant que quiconque ne paie. C'est votre engagement si l'objectif est atteint.",
+  "hypeStepOneTitle": "Un seul objectif à la fois",
+  "hypeStepOneBody": "Deux objectifs simultanés mettraient vos contributeurs en concurrence avec eux-mêmes.",
+  "commonTitle": "Titre",
+  "hypeTitleExample": "Ex : 100 000 et je chante",
+  "hypePromiseLabel": "Ce que vous débloquez si l'objectif tombe",
+  "hypePromiseHint": "Soyez précis : c'est ce que vos contributeurs achètent.",
+  "hypeGoalAmount": "Objectif en FCFA",
+  "commonDuration": "Durée",
+  "hypeLaunchAction": "Lancer",
+  "hypeFieldsNeeded": "Titre, promesse et objectif sont nécessaires.",
+  "hypeAlreadyRunning": "Vous avez déjà un objectif en cours.",
+  "hypeContributeNote": "Votre participation fait avancer la barre et débloque un contenu. Elle n'est pas remboursable.",
+  "commonAmount": "Montant",
+  "hypeJoinForAmount": "Participer — {amount} FCFA",
+  "@hypeJoinForAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "hypePaymentPending": "La barre avancera dès la confirmation du paiement.",
+  "ceremonyWedding": "Mariage",
+  "ceremonyBaptism": "Baptême",
+  "ceremonyFuneral": "Deuil",
+  "ceremonyOther": "Autre",
+  "ceremonyTitle": "Cagnottes",
+  "ceremonySubtitle": "Les cotisations, sans les relances",
+  "ceremonyNew": "Nouvelle cagnotte",
+  "ceremonyUnavailable": "Cagnottes indisponibles",
+  "ceremonyNone": "Aucune cagnotte",
+  "ceremonyNoneBody": "Mariage, baptême, deuil : créez la cagnotte, invitez, et chacun contribue comme il peut.",
+  "ceremonyGoalHint": "Objectif indicatif : {amount} FCFA",
+  "@ceremonyGoalHint": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "ceremonyOne": "Cagnotte",
+  "ceremonyNotFound": "Cagnotte introuvable",
+  "ceremonyMaybeClosed": "Elle a peut-être été clôturée.",
+  "ceremonyJoin": "Participer",
+  "ceremonyClose": "Clôturer la cagnotte",
+  "ceremonyContributions": "Participations",
+  "ceremonyNobodyYet": "Personne n'a encore participé.",
+  "ceremonyAnonGift": "Participation anonyme",
+  "ceremonyContributor": "Contributeur",
+  "ceremonyCollected": "collectés",
+  "ceremonyYouOrganize": "vous organisez",
+  "ceremonyNewSubtitle": "Vous suivez les participations. Pokou n'envoie aucune relance à ceux qui n'ont pas donné.",
+  "ceremonyOccasion": "Occasion",
+  "ceremonyTitleExample": "Ex : Mariage de Kossi et Ama",
+  "ceremonyFewWords": "Quelques mots (facultatif)",
+  "ceremonyFewWordsHint": "La date, le lieu, à quoi servira l'argent.",
+  "ceremonyGoalOptional": "Objectif en FCFA (facultatif)",
+  "ceremonyGoalNote": "Indicatif : la cagnotte continue d'accepter au-delà.",
+  "ceremonyCreate": "Créer la cagnotte",
+  "ceremonyNeedTitle": "Donnez un titre à la cagnotte.",
+  "ceremonyJoinTo": "Participer — {title}",
+  "@ceremonyJoinTo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "ceremonyOtherAmount": "Ou un autre montant",
+  "ceremonyWordOptional": "Un mot (facultatif)",
+  "ceremonyWordHint": "Ce que vous voulez leur dire",
+  "ceremonyAnonToggle": "Participer anonymement",
+  "ceremonyAnonNote": "Votre nom sera masqué. Le montant reste dans le total.",
+  "ceremonyJoinAmount": "Participer — {amount} FCFA",
+  "@ceremonyJoinAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "ceremonyMinimum": "Le minimum est de 100 FCFA.",
+  "ceremonyPaymentPending": "Votre participation apparaîtra dès la confirmation du paiement.",
+  "vipSubtitle": "Vos abonnés, votre espace",
+  "vipDiscover": "Découvrir",
+  "vipMySubs": "Mes abonnements",
+  "vipMyRoom": "Mon salon",
+  "vipNoRoomOpen": "Aucun salon ouvert",
+  "vipNoRoomOpenBody": "Les salons que des créateurs ouvrent apparaîtront ici.",
+  "vipNoSub": "Aucun abonnement",
+  "vipNoSubBody": "Abonnez-vous à un salon pour retrouver ici tout ce que son créateur publie.",
+  "vipUnavailable": "Salons indisponibles",
+  "vipCreator": "Créateur",
+  "vipUntil": "Jusqu'au {date}",
+  "@vipUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "vipPaymentPending": "Le salon s'ouvrira dès la confirmation du paiement.",
+  "vipRoom": "Salon",
+  "vipNotFound": "Salon introuvable",
+  "vipMaybeClosed": "Il a peut-être été fermé.",
+  "vipStepAllTitle": "Tout ce qui est publié ici",
+  "vipStepAllBody": "Vous voyez immédiatement les publications déjà en ligne, et celles qui suivront.",
+  "vipStepDaysTitle": "Trente jours",
+  "vipStepDaysBody": "L'accès s'arrête tout seul au terme. Rien ne continue sans que vous le décidiez.",
+  "vipStepNoRenewTitle": "Aucune reconduction automatique",
+  "vipStepNoRenewBody": "Pokou ne conserve pas votre moyen de paiement. Pour continuer, vous repayez, une fois.",
+  "vipSubscribeFor": "S'abonner — {amount} FCFA",
+  "@vipSubscribeFor": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "vipLockedTitle": "Contenu réservé aux abonnés",
+  "vipLockedBody": "Le reste du salon s'ouvre dès la confirmation du paiement.",
+  "vipNothingYet": "Rien encore",
+  "vipNothingYetBody": "Ce salon n'a pas encore de publication.",
+  "vipPosts": "Publications",
+  "vipRoomUnavailable": "Salon indisponible",
+  "vipOpenYourRoom": "Ouvrez votre salon",
+  "vipOpenYourRoomBody": "Vos abonnés paient une fois pour trente jours et voient tout ce que vous publiez ici. Vous fixez le prix.",
+  "vipOpenAction": "Ouvrir mon salon",
+  "vipPublish": "Publier",
+  "vipSeeMyRoom": "Voir mon salon",
+  "vipOpen": "Ouvert",
+  "vipClosed": "Fermé",
+  "vipEarnings": "Vos revenus",
+  "vipCollected": "{amount} FCFA collectés",
+  "@vipCollected": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "vipDueNote": "Montant qui vous revient. Le versement se fait par l'équipe Pokou, sur demande.",
+  "vipEditRoom": "Modifier mon salon",
+  "vipPriceNote": "Un nouveau prix ne s'applique qu'aux abonnements suivants : chacun a payé le sien d'avance.",
+  "vipRoomName": "Nom du salon",
+  "vipRoomNameHint": "Ex : Les coulisses",
+  "vipPitchLabel": "Ce que vos abonnés y trouveront",
+  "vipPitchNote": "Visible avant de payer — c'est ce qui donne envie de s'abonner.",
+  "vipPitchHint": "Des photos, des annonces, des messages vocaux…",
+  "vipMonthlyPrice": "Prix mensuel en FCFA",
+  "vipAcceptNew": "Accepter de nouveaux abonnés",
+  "vipAcceptNewNote": "Vos abonnés actuels gardent leur accès jusqu'au terme.",
+  "vipFieldsNeeded": "Nom, description et prix sont nécessaires.",
+  "vipPublishTitle": "Publier dans mon salon",
+  "vipPublishNote": "Visible uniquement par vos abonnés en cours.",
+  "vipYourMessage": "Votre message",
+  "vipShareHint": "Ce que vous voulez partager",
+  "vipEarningsSummary": "{count, plural, =1{1 abonnement} other{{count} abonnements}} • {amount} FCFA collectés",
+  "@vipEarningsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "datesUnavailable": "Sorties indisponibles",
+  "datesNone": "Aucune sortie prévue",
+  "datesNoneBody": "Une fois la salle passée, proposez un endroit. Vous payez d'avance, et l'argent n'est versé qu'une fois que vous confirmez tous les deux.",
+  "datesNotNow": "Ce n'est pas le moment pour ce geste.",
+  "datesCancelTitle": "Annuler la sortie ?",
+  "datesCancelFree": "Vous êtes à plus de 24 h : vous serez intégralement remboursé.",
+  "datesCancelLate": "Il reste moins de 24 h. L'établissement a déjà réservé, votre paiement lui reste acquis.",
+  "datesKeep": "Garder",
+  "datesCancelAction": "Annuler la sortie",
+  "datesAwaitingPayment": "En attente de paiement",
+  "datesPaidToConfirm": "Payé — à confirmer",
+  "datesDone": "Terminé",
+  "datesRefunded": "Remboursé",
+  "datesNoShow": "Lapin signalé",
+  "datesCancelled": "Annulé",
+  "datesOne": "Sortie",
+  "datesWithPeer": "{venue} • avec {name}",
+  "@datesWithPeer": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datesYourMatch": "votre match",
+  "datesWentWell": "Ça s'est bien passé",
+  "datesYouConfirmed": "Vous avez confirmé. On attend la confirmation de l'autre.",
+  "datesNoShowAction": "Il n'est pas venu",
+  "datesVoucher": "Votre bon, à donner sur place",
+  "datesPickBoth": "Choisissez une formule et un moment.",
+  "datesVoucherPending": "Votre bon sera émis dès la confirmation du paiement.",
+  "datesBookingFailed": "La réservation n'a pas abouti.",
+  "datesWhereTo": "Où allez-vous ?",
+  "datesStepPayTitle": "Vous payez d'avance, rien n'est versé",
+  "datesStepPayBody": "L'argent est bloqué. Il ne part chez l'établissement que si vous confirmez tous les deux.",
+  "datesStepCancelTitle": "Annulation libre à plus de 24 h",
+  "datesStepCancelBody": "Remboursement intégral. En deçà, l'établissement a déjà réservé et garde votre paiement.",
+  "datesStepNoShowTitle": "Si l'autre ne vient pas",
+  "datesStepNoShowBody": "La moitié vous revient. L'application ne prend rien sur un rendez-vous manqué.",
+  "datesThePackage": "La formule",
+  "datesPacksUnavailable": "Les formules ne sont pas disponibles pour le moment.",
+  "datesNoPackNearby": "Aucune formule n'est proposée près de chez vous pour l'instant.",
+  "datesWhen": "Quand ?",
+  "datesPickWhen": "Choisir la date et l'heure",
+  "datesBook": "Réserver",
+  "datesBookAmount": "Réserver — {amount} FCFA",
+  "@datesBookAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "roomNeedMic": "Sans micro, il n'y a que les stickers — la salle est vocale.",
+  "roomVoiceFailed": "Le vocal n'est pas parti.",
+  "roomBothYes": "C'est parti. Vous pouvez maintenant proposer une sortie.",
+  "roomWaitingOther": "C'est noté. On attend sa réponse avant la fin du compte à rebours.",
+  "roomExtendPending": "Dix minutes de plus dès la confirmation du paiement.",
+  "roomTitle": "Salle d'entrée",
+  "roomNotFound": "Salle introuvable",
+  "roomMaybeClosed": "Elle s'est peut-être refermée.",
+  "roomVoiceOnly": "Vocaux et stickers seulement",
+  "roomTimeUp": "Le temps est écoulé.",
+  "roomTimeLeft": "Il reste {clock} pour décider ensemble",
+  "@roomTimeLeft": {
+    "placeholders": {
+      "clock": {
+        "type": "String"
+      }
+    }
+  },
+  "roomSaySomething": "Dites quelque chose",
+  "roomNoTextBody": "Pas de texte ici : un vocal ou un sticker. C'est ce qui fait la différence entre une vraie personne et un message recopié.",
+  "roomVoice": "Vocal",
+  "roomWaitingReply": "En attente de sa réponse",
+  "roomExtendFor": "Dix minutes de plus — {amount} FCFA",
+  "@roomExtendFor": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "roomBothSaidYes": "Vous avez tous les deux dit oui.",
+  "roomSaved": "Le match est sauvé. Vous pouvez proposer une sortie.",
+  "roomClosedNoAnswer": "La salle s'est refermée sans réponse.",
+  "roomSuggestDate": "Proposer une sortie",
+  "safetyCheckin": "Tout va bien ?",
+  "safetyCheckinBody": "Sans réponse de votre part dans les cinq minutes, votre cercle de sécurité sera prévenu avec votre position.",
+  "safetyAllGood": "Oui, tout va bien",
+  "safetyCircleAlerted": "Votre cercle a été prévenu.",
+  "safetyNoCircle": "Alerte enregistrée. Ajoutez des proches pour qu'ils soient prévenus la prochaine fois.",
+  "safetyWhoToAlert": "Qui prévenir ?",
+  "safetyWhoToAlertBody": "Ces personnes recevront votre position en direct si vous déclenchez une alerte.",
+  "safetyTitle": "Sécurité",
+  "safetySubtitle": "Qui est prévenu si ça tourne mal",
+  "safetyQuietAlert": "Alerte discrète",
+  "safetyQuietAlertBody": "Prévient votre cercle avec votre position. Rien ne s'affiche à l'écran de votre téléphone.",
+  "safetyTrigger": "Déclencher une alerte",
+  "safetyMyCircle": "Mon cercle",
+  "safetyThreeEnough": "Trois personnes suffisent",
+  "safetyNobodyYet": "Personne pour l'instant. Sans cercle, une alerte est enregistrée mais ne prévient personne.",
+  "safetyAddSomeone": "Ajouter quelqu'un",
+  "wingmanTitle": "Avis de potes",
+  "wingmanAnon": "Votre avis reste anonyme",
+  "wingmanUnavailable": "Demandes indisponibles",
+  "wingmanNothing": "Rien à valider",
+  "wingmanNothingBody": "Quand un ami vous demandera ce que vous pensez d'un profil, il apparaîtra ici.",
+  "wingmanAsksYou": "{name} demande votre avis",
+  "@wingmanAsksYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wingmanMeh": "Bof",
+  "wingmanWorthIt": "Ça vaut le coup",
+  "wingmanPrivacy": "Votre ami verra seulement si le groupe valide, jamais qui a répondu quoi.",
+  "marketLocationOff": "Service de localisation désactivé.",
+  "marketGpsDenied": "Permission GPS refusée.",
+  "marketGpsApplied": "Localisation GPS appliquée.",
+  "marketGpsFailed": "Impossible de récupérer votre position.",
+  "marketYourArea": "Votre zone",
+  "marketCityOrArea": "Ville ou quartier",
+  "marketLocationCleared": "Localisation désactivée.",
+  "marketUseGps": "Utiliser ma position GPS",
+  "marketApply": "Appliquer",
+  "marketRemoveProduct": "Retirer « {name} » ?",
+  "@marketRemoveProduct": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "marketProductUnavailable": "Produit indisponible.",
+  "marketPaymentUnavailable": "Paiement Mobile Money indisponible.",
+  "marketCheckoutUnreachable": "Checkout Mobile Money inaccessible.",
+  "marketBoostDone": "Paiement effectué — produit boosté !",
+  "marketBoostPending": "Paiement du boost en attente.",
+  "marketBoostFailed": "Boost impossible pour le moment.",
+  "marketTitle": "Marketplace",
+  "marketBecomeSeller": "Devenir vendeur vérifié",
+  "marketAddProduct": "Ajouter un produit",
+  "marketAroundYou": "Autour de vous",
+  "marketMyGps": "Ma position GPS",
+  "marketPickArea": "Choisir une zone",
+  "marketNearYou": "Produits près de vous",
+  "marketUnavailable": "Marketplace indisponible.",
+  "marketNoProduct": "Aucun produit publié.",
+  "marketNoMatch": "Aucun produit ne correspond à cette recherche.",
+  "marketAllShown": "Tous les produits sont affichés",
+  "marketMyCatalogue": "Mon catalogue",
+  "marketSwipeCatalogue": "Glissez pour voir tous vos produits",
+  "marketCatalogueEmpty": "Votre catalogue est vide",
+  "marketCatalogueEmptyBody": "Ajoutez votre premier produit pour commencer à vendre !",
+  "marketBoosted": "★ Boosté",
+  "vitrineSeeProduct": "Voir l'article",
+  "vitrineHint": "Touchez l'article pour l'ouvrir",
+  "vitrineTitle": "Vitrine du Marché",
+  "versesMorning": "☀️ Verset du matin",
+  "versesEvening": "🌙 Verset du soir",
+  "versesChannel": "Versets du jour",
+  "versesChannelDesc": "Les versets de 6 h et de 18 h",
+  "versesSchedule": "Chaque jour à 6 h et à 18 h",
+  "versesThisMorning": "Ce matin",
+  "versesThisEvening": "Ce soir",
+  "versesBibleTitle": "Versets bibliques",
+  "versesQuranTitle": "Versets coraniques",
+  "versesShare": "Partager",
+  "versesOfflineHint": "Les versets arrivent même sans connexion : ils sont déjà sur votre téléphone.",
+  "marketBoosted48h": "★ Boosté · 48 h",
+  "marketBoost": "Booster",
+  "marketRemove": "Retirer",
+  "marketGpsSaved": "Position GPS enregistrée.",
+  "marketNameAndPrice": "Un nom et un prix sont nécessaires.",
+  "marketEditProduct": "Modifier le produit",
+  "marketMainPhoto": "Photo principale",
+  "marketOtherPhotos": "Autres photos",
+  "marketDescription": "Description",
+  "marketCurrency": "Devise",
+  "marketCategory": "Catégorie",
+  "marketPickCategory": "Choisir une catégorie",
+  "marketSpecifyCategory": "Préciser la catégorie",
+  "marketGpsCoords": "Coordonnées GPS : {lat}, {lon}",
+  "@marketGpsCoords": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
+  "marketUploadingPhoto": "Envoi de la photo…",
+  "marketAddPhoto": "Ajouter une photo",
+  "groupEditName": "Modifier le nom",
+  "groupAddPhoto": "Ajouter une photo",
+  "groupChangePhoto": "Changer la photo",
+  "groupRemovePhoto": "Retirer la photo",
+  "groupNoLink": "Aucun lien actif",
+  "groupLinkActive": "Un lien est actif",
+  "groupCreator": "Créateur",
+  "groupAdmin": "Administrateur",
+  "groupAddMembers": "Ajouter des participants",
+  "groupLeave": "Quitter le groupe",
+  "groupName": "Nom du groupe",
+  "groupCopyLink": "Copier le lien",
+  "groupRegenLink": "Régénérer le lien",
+  "groupDisableLink": "Désactiver le lien",
+  "groupLinkCopied": "Lien copié.",
+  "groupLinkDisabled": "Lien désactivé.",
+  "groupAllContactsIn": "Tous vos contacts Pokou sont déjà dans ce groupe.",
+  "groupAddToGroup": "Ajouter au groupe",
+  "groupMembersAdded": "{count, plural, =1{Participant ajouté.} other{{count} participants ajoutés.}}",
+  "@groupMembersAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupLeaveTitle": "Quitter le groupe ?",
+  "groupLeaveBody": "Vous ne recevrez plus les messages de « {name} ».",
+  "@groupLeaveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupLeaveAction": "Quitter",
+  "groupNoMessage": "Aucun message. Lancez la discussion.",
+  "groupNotEncryptedNotice": "Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écrivez en privé.",
+  "botLabel": "Bot",
+  "botConversationNotice": "Vous écrivez au bot d'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l'entreprise lit ce que vous lui envoyez.",
+  "groupAdminsOnly": "Seuls les administrateurs peuvent publier dans les annonces.",
+  "groupCallOngoing": "Appel en cours",
+  "communityEdit": "Modifier la communauté",
+  "commonName": "Nom",
+  "communityEditFailed": "Modification impossible.",
+  "communityAddGroup": "Ajouter un groupe",
+  "communityNewGroup": "Créer un nouveau groupe",
+  "communityAttachGroup": "Rattacher un groupe existant",
+  "communityDetachTitle": "Détacher « {name} » ?",
+  "@communityDetachTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDetachBody": "Le groupe quitte la communauté mais continue d'exister : sa conversation et ses participants ne changent pas.",
+  "communityDetach": "Détacher",
+  "communityDetachFailed": "Impossible de détacher ce groupe.",
+  "communityLinkNote": "Qui a ce lien rejoint la communauté et son groupe Annonces — pas les autres groupes, qui restent à rejoindre un par un.",
+  "communityActionFailed": "Action impossible.",
+  "communityLeaveTitle": "Quitter la communauté ?",
+  "communityLeaveBody": "Vous ne recevrez plus ses annonces. Les groupes que vous avez rejoints restent les vôtres.",
+  "communityLeave": "Quitter la communauté",
+  "communityLeaveFailed": "Impossible de quitter la communauté.",
+  "communityOne": "Communauté",
+  "communityUnavailable": "Communauté indisponible — vérifiez votre connexion.",
+  "communityGroups": "GROUPES",
+  "communityAnnouncements": "Annonces · réservé aux administrateurs",
+  "communityOnlyAdminGroups": "Seuls les groupes que vous administrez peuvent rejoindre une communauté.",
+  "channelPostsUnavailable": "Publications indisponibles.",
+  "channelReactionFailed": "Réaction non enregistrée.",
+  "channelPostFailed": "Publication impossible.",
+  "channelEditPost": "Modifier la publication",
+  "channelEditTooOld": "Modification impossible — publication trop ancienne.",
+  "channelDeletePost": "Supprimer la publication ?",
+  "channelDeleteBody": "Elle disparaîtra pour tous les abonnés.",
+  "channelDeleteFailed": "Suppression impossible.",
+  "channelLinkCopied": "Lien de la chaîne copié.",
+  "channelLinkUnavailable": "Lien indisponible.",
+  "channelEdit": "Modifier la chaîne",
+  "channelPublish": "Publier",
+  "channelFollowers": "{count, plural, =1{1 abonné} other{{count} abonnés}}",
+  "@channelFollowers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "channelFollowing": "Abonné",
+  "channelEdited": "· modifié",
+  "channelImageFailed": "Image non envoyée.",
+  "channelNewPost": "Nouvelle publication",
+  "channelPostHint": "Votre annonce…",
+  "pollAnswerN": "Réponse {index}",
+  "@pollAnswerN": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "pollAddAnswer": "Ajouter une réponse",
+  "pollMultiple": "Plusieurs réponses possibles",
+  "pollAddImage": "Ajouter une image",
+  "pollRemove": "Retirer le sondage",
+  "pollOne": "Sondage",
+  "pollQuestion": "Votre question",
+  "commonSending": "Envoi…",
+  "channelPosts": "{count, plural, =1{1 publication} other{{count} publications}}",
+  "@channelPosts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockChooseCode": "Choisir un code",
+  "lockCodeRule": "4 à 8 chiffres. Le code ne quitte jamais cet appareil et ne peut pas être retrouvé — en cas d'oubli, le verrou se lève en vérifiant votre numéro de téléphone.",
+  "lockCode": "Code",
+  "lockConfirmCode": "Confirmer le code",
+  "lockTooShort": "Le code doit faire au moins 4 chiffres.",
+  "lockMismatch": "Les deux codes ne correspondent pas.",
+  "lockCurrentCode": "Code actuel",
+  "lockValidate": "Valider",
+  "lockEnabledToast": "Verrouillage activé.",
+  "lockSaveFailed": "Impossible d'enregistrer le code.",
+  "lockEnterCurrent": "Saisir le code actuel",
+  "lockWrongCode": "Code incorrect.",
+  "lockCodeChanged": "Code modifié.",
+  "lockEnterToDisable": "Saisir le code pour désactiver",
+  "lockDisabledToast": "Verrouillage désactivé.",
+  "lockTitle": "Verrouillage de l'application",
+  "lockByCode": "Verrouiller par code",
+  "lockOn": "Activé",
+  "lockOff": "Désactivé",
+  "lockChangeCode": "Changer le code",
+  "lockFootnoteKeystore": "Pokou demande le code à chaque retour au premier plan. Le code est gardé dans le coffre sécurisé du système (Keystore), pas envoyé au serveur : il protège l'écran, pas les données de l'appareil lui-même.",
+  "lockFootnoteBiometrics": "L'empreinte digitale n'est pas encore proposée — elle demande un changement de configuration Android (FlutterFragmentActivity et la permission USE_BIOMETRIC).",
+  "lockScreenTitle": "Pokou est verrouillé",
+  "lockEnterToContinue": "Saisissez votre code pour continuer.",
+  "lockUnlock": "Déverrouiller",
+  "lockForgotQuestion": "Code oublié ?",
+  "lockSendFailed": "Envoi impossible — vérifiez votre connexion.",
+  "lockRemovedToast": "Verrouillage retiré. Vous pouvez choisir un nouveau code dans Profil.",
+  "lockVerifyFailed": "Vérification impossible — vérifiez votre connexion.",
+  "lockLogoutQuestion": "Se déconnecter ?",
+  "lockLogoutBody": "À utiliser si vous n'avez plus accès à ce numéro. Vos conversations restent sur le serveur, mais il faudra un numéro joignable pour vous reconnecter.",
+  "lockLogout": "Se déconnecter",
+  "lockForgotTitle": "Code oublié",
+  "lockNoPhoneOnDevice": "Impossible de retrouver votre numéro sur cet appareil.",
+  "lockEnterSentCode": "Saisissez le code envoyé au {phone} par SMS et WhatsApp.",
+  "@lockEnterSentCode": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "lockForgotExplain": "Le code de verrouillage n'est stocké que sur cet appareil et ne peut pas être retrouvé. Pour lever le verrou, vérifiez votre numéro {phone}.",
+  "@lockForgotExplain": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "lockLift": "Lever le verrouillage",
+  "lockSendCode": "Envoyer un code",
+  "lockResendCode": "Renvoyer le code",
+  "lockNoAccessToNumber": "Je n'ai plus accès à ce numéro",
+  "notifInApp": "Dans l'application",
+  "notifMessages": "Messages",
+  "notifMessagesSub": "Conversations individuelles",
+  "notifMessagesSemantic": "Notifications de messages",
+  "notifGroups": "Groupes",
+  "notifGroupsSub": "Conversations de groupe",
+  "notifGroupsSemantic": "Notifications de groupes",
+  "notifCallsSub": "Appels audio et vidéo entrants",
+  "notifCallsSemantic": "Notifications d'appels",
+  "notifSound": "Son et vibration",
+  "notifSoundSemantic": "Son des notifications",
+  "notifCallsFootnote": "Couper les appels ici ne supprime que la bannière affichée quand Pokou est ouvert : un appel entrant continue de sonner en plein écran, sinon vous manqueriez des appels sans le savoir.",
+  "notifSystem": "Système",
+  "notifAndroidSettings": "Réglages Android",
+  "notifAndroidSettingsSub": "Autorisation, canaux, son par canal",
+  "notifSystemFootnote": "Quand Pokou est fermé, c'est Android qui affiche les notifications reçues, sans passer par l'application : seuls les réglages système ci-dessus peuvent les modifier.",
+  "devicesRemoveTitle": "Retirer cet appareil ?",
+  "devicesRemoveCurrentBody": "Cet appareil ne recevra plus de notifications tant que vous n'ouvrirez pas Pokou à nouveau.",
+  "devicesRemoveOtherBody": "Cet appareil ne recevra plus de notifications. Il reste connecté jusqu'à sa prochaine déconnexion.",
+  "devicesRemove": "Retirer",
+  "devicesRemoveFailed": "Impossible de retirer cet appareil.",
+  "devicesTitle": "Appareils connectés",
+  "devicesUnavailable": "Liste indisponible — vérifiez votre connexion, puis tirez pour rafraîchir.",
+  "devicesEmpty": "Aucun appareil enregistré pour les notifications. Elles s'activent à la première ouverture de Pokou sur un appareil.",
+  "devicesThisDevice": " · cet appareil",
+  "devicesLastSeen": "Actif le {date} · …{hint}",
+  "@devicesLastSeen": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesFootnote": "Un appareil apparaît ici dès qu'il s'enregistre pour les notifications push. Le retirer coupe ses notifications ; cela ne ferme pas sa session, qui expire d'elle-même.",
+  "devicesBrowser": "Navigateur",
+  "devicesTodayAt": "aujourd'hui à {time}",
+  "@devicesTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storageNoCachedMedia": "Aucun média en cache.",
+  "storageFilesCleared": "{count, plural, =1{1 fichier supprimé du cache.} other{{count} fichiers supprimés du cache.}}",
+  "@storageFilesCleared": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageTitle": "Stockage et données",
+  "storageCachedMedia": "Médias en cache",
+  "storageMediaLabel": "Photos, vidéos et notes vocales",
+  "storageComputing": "Calcul en cours…",
+  "storageNoFile": "Aucun fichier",
+  "storageFileCount": "{count, plural, =1{1 fichier} other{{count} fichiers}} · {size}",
+  "@storageFileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "storageClearCache": "Vider le cache",
+  "storageClearFootnote": "Les fichiers vidés sont retéléchargés à la demande quand vous rouvrez la conversation : rien n'est perdu, seulement libéré.",
+  "storageMobileData": "Données mobiles",
+  "storageDataSaver": "Économie de données",
+  "storageDataSaverSub": "Ne pas télécharger les médias automatiquement",
+  "storageDataSaverFootnote": "Activée, les photos et vidéos reçues attendent que vous les touchiez pour se télécharger, et les photos que vous envoyez sont compressées davantage.",
+  "profileAvatarFailed": "Impossible de mettre à jour la photo de profil.",
+  "profileChooseMonitor": "Choisir un moniteur",
+  "profileAoussiMessaging": "Messagerie Aoussi",
+  "profileMonitorAlerts": "{count, plural, =1{Alertes de 1 moniteur} other{Alertes de {count} moniteurs}}",
+  "@profileMonitorAlerts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileAoussiAssistant": "Assistant Aoussi",
+  "profileShieldModeBody": "Met en attente les appels et met en veilleuse les conversations non prioritaires pendant que vous êtes concentré. Vos contacts étiquetés Business, Client, Fournisseur ou Boss passent toujours.",
+  "contactConnectFailed": "Connexion impossible.",
+  "contactCallFailed": "Appel impossible pour l'instant.",
+  "contactBlockTitle": "Bloquer {name} ?",
+  "@contactBlockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "contactBlockBody": "Cette personne ne pourra plus vous écrire ni vous appeler. Elle n'en sera pas informée.",
+  "contactActionFailed": "Action impossible pour le moment.",
+  "contactSavedToast": "Contact enregistré",
+  "contactCall": "Appel",
+  "contactSharedTitle": "Éléments échangés",
+  "contactSharedMedia": "Médias",
+  "contactSharedDocuments": "Documents",
+  "contactSharedLinks": "Liens",
+  "contactNoMedia": "Aucune photo ni vidéo échangée.",
+  "contactNoDocuments": "Aucun document échangé.",
+  "contactNoLinks": "Aucun lien échangé.",
+  "contactCommonGroups": "Groupes en commun ({count})",
+  "@contactCommonGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contactCatalog": "Catalogue ({count})",
+  "@contactCatalog": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contactUnblockName": "Débloquer {name}",
+  "@contactUnblockName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "contactBlockName": "Bloquer {name}",
+  "@contactBlockName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "contactUnblockHint": "Cette personne peut à nouveau vous écrire et vous appeler.",
+  "contactBlockHint": "Elle ne pourra plus vous écrire ni vous appeler, sans en être informée.",
+  "adNeedTitleBody": "Donnez un titre et un message à votre publicité.",
+  "adSendFailed": "La demande n'a pas pu être envoyée.",
+  "adCreateTitle": "Créer une publicité",
+  "adWhoSeesTitle": "Qui la verra",
+  "adWhoSeesBody": "Tous les utilisateurs de Pokou Messenger dans l'onglet Marché, ou entre deux statuts — à vous de choisir.",
+  "adReviewTitle": "Une relecture avant diffusion",
+  "adReviewBody": "Notre équipe lit chaque campagne avant qu'elle ne parte. Comptez quelques heures.",
+  "adCountdownTitle": "Le décompte part de la validation",
+  "adCountdownBody": "Vos jours de diffusion commencent une fois la campagne acceptée, pas au paiement.",
+  "adRefundTitle": "Refusée ? Vous êtes remboursé",
+  "adRefundBody": "Si la campagne ne peut pas être diffusée, contactez-nous : la somme vous est rendue.",
+  "adTitleHint": "Ex : Ciment CIMTOGO en promotion",
+  "adBodyHint": "Ce que vous proposez, et comment vous joindre.",
+  "adMediaLabel": "Photo ou vidéo (facultatif)",
+  "adMediaHint": "Une vidéo de 30 secondes au maximum. Sans image, seul le texte est diffusé.",
+  "adVideo30s": "Vidéo 30 s",
+  "adPlacement": "Emplacement",
+  "adPlacementMarket": "Onglet Marché",
+  "adPlacementStatus": "Entre les statuts",
+  "adDuration": "Durée",
+  "adOneWeek": "1 semaine",
+  "adTwoWeeks": "2 semaines",
+  "adOneMonth": "1 mois",
+  "adPayCaption": "Paiement Mobile Money",
+  "adPayAction": "Payer et envoyer",
+  "productInterestedMessage": "Bonjour, je suis intéressé par votre {name} à {price} {currency}. Est-il disponible ?",
+  "@productInterestedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "productWriteFailed": "Impossible d'écrire au vendeur pour l'instant.",
+  "productCallFirstWrite": "Appel impossible — écrivez-lui d'abord.",
+  "productRateSeller": "Noter ce vendeur",
+  "productEditReview": "Modifier mon avis",
+  "productReviewScope": "L'avis porte sur le VENDEUR, pas sur un produit : c'est la confiance dans la personne qui compte, et elle reste même si l'article quitte le catalogue.",
+  "productReviewHint": "Votre commentaire (facultatif)",
+  "productDeleteReview": "Supprimer mon avis",
+  "productReviewFailed": "Avis non enregistré.",
+  "productTitle": "Produit",
+  "productOpening": "Ouverture…",
+  "productDiscuss": "Discuter",
+  "productCallAction": "Appeler",
+  "productReviews": "Avis",
+  "productNoReviewYet": "Pas encore d'avis",
+  "productRatingSummary": "{rating} ★ · {reviews, plural, =1{1 avis} other{{reviews} avis}}",
+  "@productRatingSummary": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "reviews": {
+        "type": "int"
+      }
+    }
+  },
+  "productCountSuffix": " · {count, plural, =1{1 produit} other{{count} produits}}",
+  "@productCountSuffix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productCertified": "Compte vérifié par l'équipe Pokou.",
+  "productReviewMine": "Vous",
+  "verifNeedDocument": "Ajoutez une photo de votre pièce d'identité.",
+  "verifTitle": "Devenir vendeur vérifié",
+  "verifBadgeTitle": "Un badge bleu sur vos annonces",
+  "verifBadgeBody": "Les acheteurs voient que votre identité a été vérifiée par notre équipe.",
+  "verifWhyTitle": "Pourquoi ça change tout",
+  "verifWhyBody": "Un acheteur envoie plus facilement de l'argent Mobile Money à quelqu'un dont l'identité est confirmée qu'à un inconnu.",
+  "verifNeedTitle": "Ce qu'il faut fournir",
+  "verifNeedBody": "Une photo nette de votre carte d'identité, passeport ou permis. Le nom doit être lisible.",
+  "verifUseTitle": "Ce que nous en faisons",
+  "verifUseBody": "Elle est lue par notre équipe pour la seule vérification, n'apparaît jamais sur votre profil, et n'est montrée à aucun acheteur.",
+  "verifOneYearTitle": "Valable un an",
+  "verifOneYearBody": "Le badge dure douze mois. Comptez quelques jours pour l'examen du dossier.",
+  "verifDocumentLabel": "Votre pièce d'identité",
+  "verifPayCaption": "Paiement Mobile Money · 1 an",
+  "verifChoosePhoto": "Choisir une photo",
+  "verifChange": "Changer",
+  "marketRemoveBody": "L'annonce disparaît du marché. Vos conversations à son sujet restent lisibles, et les acheteurs qui l'ont déjà reçue gardent leur historique.",
+  "marketRemoveFailed": "L'annonce n'a pas pu être retirée.",
+  "marketImageFailed": "Image non envoyée — réessayez.",
+  "marketMainPhotoHint": "C'est elle qui illustre le produit dans la liste.",
+  "marketName": "Nom",
+  "marketPrice": "Prix",
+  "marketNoReviewYet": "pas encore d'avis",
+  "marketSearchHint": "Rechercher un produit…",
+  "callLogEmpty": "Aucun appel pour l'instant.",
+  "callLogUnknownUser": "Utilisateur",
+  "callStatusMissed": "Manqué",
+  "callStatusNoAnswer": "Sans réponse",
+  "callStatusDeclined": "Refusé",
+  "callStatusReceived": "Reçu",
+  "callStatusEnded": "Terminé",
+  "callStatusOngoing": "En cours",
+  "callStatusOutgoing": "Appelé",
+  "callVideoTitle": "Appel vidéo",
+  "callAudioTitle": "Appel audio",
+  "callRedialQuestion": "Rappeler {name} ?",
+  "@callRedialQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callJoinFailed": "Connexion à l'appel impossible.",
+  "callNobodyToAdd": "Personne d'autre à ajouter.",
+  "callAddToCall": "Ajouter à l'appel",
+  "callAdd": "Ajouter",
+  "callAddFailed": "Impossible d'ajouter ce participant.",
+  "callYou": "Vous",
+  "callContact": "Contact",
+  "callConnecting": "Connexion à l'appel…",
+  "callPreparing": "L'appel est en cours de préparation",
+  "callWaiting": "En attente…",
+  "callJoinImpossible": "Impossible de rejoindre l'appel.",
+  "callEncryptedJoinFailed": "Cet appel chiffré n'a pas pu être ouvert sur ce téléphone. L'appelant en est averti.",
+  "callIncoming": "Appel entrant",
+  "callIncomingFrom": "{name} vous appelle",
+  "@callIncomingFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callIncomingGroup": "Appel de groupe entrant",
+  "streakSubtitle": "Un jour manqué, quelques minutes pour le rattraper",
+  "streakUnavailable": "Chaînes indisponibles",
+  "streakCheckConnection": "Vérifiez votre connexion et réessayez.",
+  "streakEmptyTitle": "Aucune chaîne pour le moment",
+  "streakEmptyBody": "Échangez un message chaque jour avec la même personne : la chaîne démarre au premier aller-retour.",
+  "streakToRescue": "À sauver maintenant",
+  "streakToRescueSub": "Passé le délai, la chaîne repart de zéro",
+  "streakMine": "Mes chaînes",
+  "streakRunning": "En cours",
+  "streakRecord": "Record : {days, plural, =1{1 jour} other{{days} jours}}",
+  "@streakRecord": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "streakLongest": "Votre plus longue chaîne",
+  "streakRestorePending": "Votre chaîne repartira dès la confirmation du paiement.",
+  "streakDeadlinePassed": "Le délai est peut-être passé.",
+  "streakBroken": "{days, plural, =1{Chaîne de 1 jour rompue} other{Chaîne de {days} jours rompue}}",
+  "@streakBroken": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "streakExpired": "Le délai est passé. La chaîne repart de zéro.",
+  "streakCountdown": "Encore {time} pour la sauver",
+  "@streakCountdown": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "streakRescueAction": "Sauver la chaîne — {amount} FCFA",
+  "@streakRescueAction": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "leagueSubtitle": "Votre ligue monte avec ce que vous recevez",
+  "leagueUnavailable": "Classement indisponible",
+  "leagueRanking": "Classement",
+  "leagueProtectPending": "Votre protection sera active dès la confirmation du paiement.",
+  "leaguePaymentFailed": "Le paiement n'a pas pu être lancé.",
+  "leagueAtTop": "Vous êtes au sommet du classement.",
+  "leaguePointsNeeded": "Encore {points} points pour {label}.",
+  "@leaguePointsNeeded": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "leagueProtected": "Vos points sont protégés. Rien ne baisse cette semaine.",
+  "leagueDecayNow": "Vos points baissent au prochain passage.",
+  "leagueDecayIn": "{days, plural, =1{Vos points baissent dans 1 jour sans activité.} other{Vos points baissent dans {days} jours sans activité.}}",
+  "@leagueDecayIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "leagueProtectAction": "Protéger mes points — 500 FCFA",
+  "leagueNobodyRanked": "Personne n'est encore classé. Soyez le premier.",
+  "leagueMyRank": "Vous êtes {rank}ᵉ avec {points} points.",
+  "@leagueMyRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "reactWith": "Réagir avec…",
+  "reactPickEmoji": "Choisir un émoji sur le clavier",
+  "reactAction": "Réagir",
+  "mediaPoll": "Sondage",
+  "mediaContact": "Contact",
+  "mediaSharedContact": "Contact partagé",
+  "convEdited": "· modifié",
+  "convFallbackName": "Conversation",
+  "convSomeone": "Quelqu'un",
+  "contactsTagFailed": "Impossible de mettre à jour l'étiquette.",
+  "contactsTag": "Étiqueter",
+  "contactsTitle": "Contacts",
+  "contactsTyping": "écrit…",
+  "contactsTypingNamed": "{name} écrit…",
+  "@contactsTypingNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "contactsPreviewMine": "Vous : {preview}",
+  "@contactsPreviewMine": {
+    "placeholders": {
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "contactsPreviewSender": "{name} : {preview}",
+  "@contactsPreviewSender": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "contactsNotInContacts": "{preview} · pas dans vos contacts",
+  "@contactsNotInContacts": {
+    "placeholders": {
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "contactsAssistantSub": "Votre assistant IA",
+  "addContactTitle": "Ajouter un contact",
+  "addContactName": "Nom",
+  "addContactAction": "Ajouter",
+  "joinLinkTitle": "Rejoindre par lien",
+  "joinLinkBody": "Collez le lien qu'on vous a envoyé. Groupe ou communauté, on reconnaît lequel.",
+  "joinLinkContinue": "Continuer",
+  "joinLinkUnreadable": "Lien d'invitation illisible.",
+  "joinAlreadyMember": "Vous êtes déjà dans « {name} ».",
+  "@joinAlreadyMember": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "joinGroupQuestion": "{count, plural, =1{1 participant} other{{count} participants}}. Rejoindre ce groupe ?",
+  "@joinGroupQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "joinAction": "Rejoindre",
+  "joinGroupFailed": "Impossible de rejoindre ce groupe.",
+  "joinCommunityCounts": "{members, plural, =1{1 membre} other{{members} membres}} · {groups, plural, =1{1 groupe} other{{groups} groupes}}.",
+  "@joinCommunityCounts": {
+    "placeholders": {
+      "members": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "joinCommunityBody": "Vous recevrez ses annonces. Les autres groupes restent à rejoindre un par un.",
+  "joinCommunityFailed": "Impossible de rejoindre cette communauté.",
+  "newChatOwnNumber": "C'est votre propre numéro.",
+  "phoneLookupFailed": "Numéro invalide ou vérification impossible.",
+  "phoneNotOnPokou": "Ce numéro n'utilise pas encore Pokou.",
+  "phoneInviteWhatsApp": "Inviter par WhatsApp",
+  "phoneInviteText": "Salut ! Je t'invite à essayer Pokou, une messagerie privée — télécharge l'app et ajoute-moi.",
+  "contactCardTitle": "Carte de visite",
+  "viewOnceSeen": "Consultée",
+  "viewOnceTapToSee": "Vue unique — toucher pour voir",
+  "audioPlayFailed": "Lecture impossible",
+  "mediaPhotoSize": "Photo · {size}",
+  "mediaTapToDownload": "Toucher pour télécharger",
+  "mediaVideoUnavailable": "Vidéo indisponible",
+  "mediaOpenDocFailed": "Impossible d'ouvrir ce document.",
+  "mediaOpenRetry": "Échec de l'ouverture — toucher pour réessayer",
+  "dayToday": "Aujourd'hui",
+  "dayYesterday": "Hier",
+  "weekdayMonday": "lundi",
+  "weekdayTuesday": "mardi",
+  "weekdayWednesday": "mercredi",
+  "weekdayThursday": "jeudi",
+  "weekdayFriday": "vendredi",
+  "weekdaySaturday": "samedi",
+  "weekdaySunday": "dimanche",
+  "liveHoursLeft": "{hours, plural, =1{1 h restante} other{{hours} h restantes}}",
+  "@liveHoursLeft": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "liveMinutesLeft": "{minutes, plural, =1{1 min restante} other{{minutes} min restantes}}",
+  "@liveMinutesLeft": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "liveAlmostOver": "bientôt terminé",
+  "liveLocation": "En direct · {remaining}",
+  "@liveLocation": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "openInMaps": "Ouvrir dans Maps",
+  "composerEditPhoto": "Modifier la photo",
+  "composerEditorFailed": "L'éditeur n'a pas pu s'ouvrir.",
+  "composerCropRotate": "Rogner ou pivoter",
+  "composerCaptionHint": "Ajouter une légende…",
+  "composerTo": "à {name}",
+  "@composerTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "composerSend": "Envoyer",
+  "convOfflineNotCached": "Hors ligne — cette conversation n'est pas encore en mémoire.",
+  "convLoadFailed": "Impossible de charger la conversation.",
+  "convEmptyEdit": "Un message vide ne peut pas remplacer un texte.",
+  "convEditFailed": "Modification impossible — vérifiez votre connexion.",
+  "convOrderUpdateFailed": "Impossible de mettre à jour la commande.",
+  "convDeleteFailed": "Impossible de supprimer le message.",
+  "convForwardFailedMsg": "Impossible de transférer le message.",
+  "convOfflineAttachment": "Hors ligne — les pièces jointes exigent une connexion.",
+  "convAttachmentFailed": "Pièce jointe non envoyée — réessayez.",
+  "groupOfflineNotCached": "Hors ligne — ce groupe n'est pas encore en mémoire.",
+  "groupLoadFailed": "Impossible de charger le groupe.",
+  "groupRenameFailed": "Impossible de renommer le groupe.",
+  "groupPhotoFailed": "Photo du groupe non enregistrée.",
+  "groupClearPhotoFailed": "Impossible de retirer la photo.",
+  "groupRoleFailed": "Impossible de changer ce rôle.",
+  "groupInviteCreateFailed": "Impossible de créer le lien d'invitation.",
+  "groupInviteRevokeFailed": "Impossible de désactiver le lien.",
+  "groupLeaveFailed": "Impossible de quitter le groupe.",
+  "groupRemoveMemberFailed": "Impossible de retirer ce membre.",
+  "apiNetworkSilent": "Le réseau ne répond pas",
+  "apiError": "Erreur ({code})",
+  "@apiError": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "orderProductDiscussed": "Article discuté",
+  "orderValidate": "Valider la commande",
+  "orderMarkShipped": "Marquer comme expédié",
+  "orderMarkDelivered": "Marquer comme livré",
+  "orderBuyerWaiting": "Cet acheteur attend votre réponse.",
+  "orderNextStep": "Étape suivante de la commande.",
+  "msgNotSentRetry": "Non envoyé — toucher pour réessayer",
+  "msgPendingSend": "En attente d'envoi",
+  "convSearchHint": "Rechercher dans {name}…",
+  "@convSearchHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "convSearchPrompt": "Tapez un mot pour retrouver un message de cette conversation.",
+  "convSearchEmpty": "Aucun message trouvé.",
+  "commonUnknownName": "Inconnu",
+  "groupInviteLink": "Lien d'invitation",
+  "groupDemoteAdmin": "Retirer l'administration",
+  "groupPromoteAdmin": "Nommer administrateur",
+  "groupInviteLinkBody": "Toute personne qui ouvre ce lien rejoint le groupe directement, sans autre étape. Régénérez-le pour invalider celui déjà partagé.",
+  "groupNewLinkCreated": "Nouveau lien créé — l'ancien ne fonctionne plus.",
+  "groupAddFailed": "Ajout impossible.",
+  "groupCreateFailed": "Création du groupe impossible.",
+  "groupNewTitle": "Nouveau groupe",
+  "groupCreateAction": "Créer",
+  "groupNameHint": "Nom du groupe",
+  "groupPickParticipants": "Choisissez les participants",
+  "groupSelectedCount": "{count, plural, =1{1 participant sélectionné} other{{count} participants sélectionnés}}",
+  "@groupSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pushIncomingVideoCall": "Appel vidéo entrant",
+  "pushIncomingAudioCall": "Appel audio entrant",
+  "pushAnswer": "Répondre",
+  "pushDecline": "Refuser",
+  "pushMessagesChannel": "Messages",
+  "pushMessagesChannelDesc": "Notifications pour les nouveaux messages Pokou",
+  "pushCallsChannel": "Appels",
+  "pushCallsChannelDesc": "Notifications pour les appels entrants Pokou",
+  "pushGroupFallback": "Groupe",
+  "notifNewMessage": "Nouveau message",
+  "notifPhoto": "📷 Photo",
+  "notifVideo": "🎥 Vidéo",
+  "notifVoice": "🎤 Message vocal",
+  "notifDocument": "📄 Document",
+  "notifSticker": "Autocollant",
+  "notifLocation": "📍 Position",
+  "notifContact": "👤 Contact",
+  "notifPoll": "📊 Sondage",
+  "notifMe": "Moi",
+  "notifReply": "Répondre",
+  "notifReplyHint": "Votre message",
+  "notifMarkRead": "Marquer comme lu",
+  "notifReplyQueued": "envoi à l'ouverture de Pokou",
+  "notifReplyFailed": "Réponse non envoyée — ouvrez Pokou pour réessayer",
+  "notifSummary": "{count, plural, =1{1 message} other{{count} messages}} · {conversations, plural, =1{1 conversation} other{{conversations} conversations}}",
+  "@notifSummary": {
+    "description": "Résumé du groupe de notifications de message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "conversations": {
+        "type": "int"
+      }
+    }
+  },
+  "audienceContacts": "Mes contacts",
+  "audienceNobody": "Personne",
+  "audienceExcept": "Mes contacts sauf…",
+  "audienceOnly": "Uniquement…",
+  "audienceContactsDesc": "Toutes les personnes de votre carnet Pokou",
+  "audienceNobodyDesc": "Vos statuts ne seront visibles que par vous",
+  "audienceExceptDesc": "Vos contacts, à l'exception de ceux que vous choisissez",
+  "audienceOnlyDesc": "Seules les personnes que vous choisissez",
+  "statusViewerFallback": "Utilisateur",
+  "statusPrivacySaved": "Visibilité enregistrée.",
+  "statusPrivacySaveFailed": "Enregistrement impossible — vérifiez votre connexion.",
+  "statusPrivacyTitle": "Visibilité des statuts",
+  "statusExcludePeople": "Personnes à exclure",
+  "statusAllowedPeople": "Personnes autorisées",
+  "statusNoContactToOffer": "Aucun contact Pokou à proposer pour le moment.",
+  "statusExceptFootnote": "Ces personnes ne verront pas vos statuts, même si elles sont dans vos contacts.",
+  "statusOnlyFootnote": "Seules ces personnes verront vos statuts. Elles n'ont pas besoin de vous avoir en contact.",
+  "status24hFootnote": "Un statut disparaît de toute façon au bout de 24 heures, pour tout le monde.",
+  "statusGallery": "Galerie",
+  "statusCamera": "Appareil photo",
+  "statusNewTitle": "Nouveau statut",
+  "statusText": "Texte",
+  "statusTypeHint": "Tapez votre statut…",
+  "statusPublish": "Publier",
+  "statusFeedTitle": "Actualités",
+  "statusFeedUnavailable": "Statuts indisponibles — réessayer",
+  "statusSection": "Statuts",
+  "statusMine": "Moi",
+  "channelsSection": "Chaînes",
+  "bcastNeedName": "Donnez un nom à cette liste.",
+  "bcastNeedRecipient": "Choisissez au moins un destinataire.",
+  "bcastSaveFailed": "Enregistrement impossible.",
+  "bcastNewTitle": "Nouvelle diffusion",
+  "bcastEditTitle": "Modifier la liste",
+  "bcastNameHint": "Nom de la liste (visible par vous seul)",
+  "bcastNoRecipient": "Aucun destinataire",
+  "bcastRecipientCount": "{count, plural, =1{1 destinataire} other{{count} destinataires}}",
+  "@bcastRecipientCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bcastContactsUnavailable": "Contacts indisponibles.",
+  "bcastNobodyOnPokou": "Aucun de vos contacts n'est encore sur Pokou Messenger.",
+  "bcastNewList": "Nouvelle liste",
+  "bcastListsTitle": "Listes de diffusion",
+  "bcastListsUnavailable": "Listes indisponibles.",
+  "bcastDeleteTitle": "Supprimer « {name} » ?",
+  "@bcastDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bcastDeleteBody": "Les messages déjà envoyés restent chez leurs destinataires. Seule la liste disparaît.",
+  "bcastEmptyTitle": "Annoncez une fois, à plusieurs",
+  "bcastEmptyBody": "Chaque destinataire reçoit le message dans sa conversation privée. Il ne voit pas les autres, et vous répond à vous seul — contrairement à un groupe, où tout le monde se voit.",
+  "bcastSentTo": "{count, plural, =1{Envoyé à 1 destinataire.} other{Envoyé à {count} destinataires.}}",
+  "@bcastSentTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bcastSentPartly": "Envoyé à {sent} sur {total} — {skipped} ne reçoit plus vos messages.",
+  "@bcastSentPartly": {
+    "placeholders": {
+      "sent": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "bcastSendFailed": "L'envoi a échoué.",
+  "bcastEditRecipients": "Modifier les destinataires",
+  "bcastHistoryUnavailable": "Historique indisponible.",
+  "bcastNothingSent": "Rien n'a encore été diffusé.",
+  "bcastMessageHint": "Message à diffuser",
+  "bcastPrivacyNotice": "Chaque destinataire reçoit ce message en privé. Il ne voit pas les autres, et sa réponse vous arrive dans votre conversation avec lui.",
+  "channelNameRequired": "Le nom de la chaîne est obligatoire.",
+  "channelSaveFailed": "Impossible d'enregistrer la chaîne.",
+  "channelEditTitle": "Modifier la chaîne",
+  "channelNewTitle": "Nouvelle chaîne",
+  "channelAddImage": "Ajouter une image",
+  "channelChangeImage": "Changer l'image",
+  "channelRemoveImage": "Retirer l'image",
+  "channelNameLabel": "Nom de la chaîne",
+  "channelNameHint": "Ex. Actualités de mon entreprise",
+  "channelDescriptionLabel": "Description",
+  "channelDescriptionHint": "Présentez votre chaîne",
+  "channelSaveChanges": "Enregistrer les modifications",
+  "channelCreateAction": "Créer la chaîne",
+  "channelLinkCopiedClipboard": "Lien copié dans le presse-papiers.",
+  "channelLinkUnavailableShort": "Lien indisponible.",
+  "channelSearchTooltip": "Rechercher une chaîne",
+  "channelCreateTooltip": "Créer une chaîne",
+  "channelEmptyHint": "Créez une chaîne pour partager vos actualités.",
+  "channelGenerateLink": "Générer un lien",
+  "channelEditTooltip": "Modifier",
+  "channelSearchHint": "Rechercher une chaîne…",
+  "channelSearchPrompt": "Cherchez par nom ou par description. Les chaînes certifiées apparaissent en premier.",
+  "channelSearchEmpty": "Aucune chaîne trouvée.",
+  "channelNothingPublishedAdmin": "Rien de publié pour l'instant — touchez + pour votre première publication.",
+  "channelNothingPublished": "Cette chaîne n'a encore rien publié.",
+  "channelFollow": "S'abonner",
+  "channelFallbackName": "Chaîne",
+  "communityNewTitle": "Nouvelle communauté",
+  "communityNewBody": "Une communauté regroupe plusieurs groupes autour des mêmes personnes. Un groupe « Annonces » est créé avec elle : vous seul y écrivez, tous ses membres y lisent.",
+  "communityNameHint": "Nom de la communauté",
+  "communityDescriptionHint": "Description (facultatif)",
+  "communityCreateAction": "Créer",
+  "communityCreateFailed": "Création impossible.",
+  "communityNoGroupToAttach": "Vous n'avez pas d'autre groupe à rattacher. Seuls les groupes que vous administrez peuvent rejoindre une communauté.",
+  "communityAddGroupFailed": "Impossible d'ajouter ce groupe.",
+  "communityLinkFailed": "Impossible de créer le lien.",
+  "communityCreateLink": "Créer un lien",
+  "sparkOpenRoomsSub": "Elles se referment toutes seules",
+  "sparkMore": "Suite",
+  "sparkRoomOpen": "Salle ouverte — {time}",
+  "@sparkRoomOpen": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sparkBothYes": "Vous avez dit oui tous les deux",
+  "sparkMatchSaved": "Match sauvé",
+  "sparkRoomClosed": "Salle fermée",
+  "sparkMatch": "Match",
+  "sparkUnavailable": "Spark est indisponible",
+  "sparkTodaysDate": "Le rendez-vous d'aujourd'hui",
+  "sparkTabOutings": "Sorties",
+  "sparkPersonAge": "{name}, {age}",
+  "@sparkPersonAge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "aiSuggestSummary": "Résumé",
+  "aiSuggestSummarySub": "Vue d'ensemble rapide",
+  "aiSuggestSummaryPrompt": "Fais-moi un résumé de la situation actuelle.",
+  "aiSuggestTrend": "Tendance",
+  "aiSuggestTrendSub": "Analyser une évolution",
+  "aiSuggestTrendPrompt": "Quelle est la tendance sur les 7 derniers jours ?",
+  "aiSuggestAlerts": "Alertes",
+  "aiSuggestAlertsSub": "Derniers signaux",
+  "aiSuggestAlertsPrompt": "Y a-t-il des alertes récentes à connaître ?",
+  "aiSuggestAdvice": "Conseil",
+  "aiSuggestAdviceSub": "Demander une idée",
+  "aiSuggestAdvicePrompt": "Donne-moi un conseil pour organiser ma journée.",
+  "aiSuggestWrite": "Rédiger",
+  "aiSuggestWriteSub": "Écrire un texte",
+  "aiSuggestWritePrompt": "Aide-moi à rédiger un message.",
+  "aiSuggestQuestion": "Question",
+  "aiSuggestQuestionSub": "N'importe quoi",
+  "aiSuggestQuestionPrompt": "J'ai une question à te poser.",
+  "aiMessageHint": "Message…",
+  "aiHowCanIHelp": "Comment puis-je vous aider ?",
+  "aiAskAnything": "Posez-moi n'importe quelle question.",
+  "aiAskAboutData": "Posez une question sur vos données connectées.",
+  "aiThinking": "Aoussi réfléchit",
+  "aiHelloIm": "Bonjour, je suis {name}",
+  "@aiHelloIm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPartner": "Votre partenaire numérique",
+  "aiGreetMorning": "Bonjour",
+  "aiGreetAfternoon": "Bon après-midi",
+  "aiGreetEvening": "Bonsoir",
+  "aiNewChat": "Nouvelle discussion",
+  "aiCopy": "Copier",
+  "aiCopied": "Copié",
+  "aiGenerated": "Généré par l'IA",
+  "aiVoiceListening": "Je vous écoute…",
+  "aiVoiceTranscribing": "Transcription…",
+  "aiVoiceFailed": "Je n'ai pas pu vous entendre. Réessayez.",
+  "aiVoiceSpeak": "Parler à l'assistant",
+  "aiVoiceRestart": "Recommencer",
+  "aiVoiceSend": "Envoyer",
+  "aiVoiceStop": "Terminer",
+  "aiSendFailed": "Message non envoyé — réessayez.",
+  "digestTitle": "Récap du jour",
+  "digestUnread": "Messages non lus :",
+  "digestMissedCalls": "Appels manqués :",
+  "digestVideoSuffix": " (vidéo)",
+  "digestShieldDeferred": "{count, plural, =1{1 message mis en attente par le Mode Bouclier.} other{{count} messages mis en attente par le Mode Bouclier.}}",
+  "@digestShieldDeferred": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "digestMonitorSignals": "{count, plural, =1{1 signal de vos moniteurs à consulter.} other{{count} signaux de vos moniteurs à consulter.}}",
+  "@digestMonitorSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "digestNothing": "Rien à signaler aujourd'hui — bonne soirée !",
+  "shieldUnknownNumber": "Numéro inconnu",
+  "shieldFlushSummary": "{count, plural, =1{1 message mis en attente pendant votre réunion.} other{{count} messages mis en attente pendant votre réunion.}}",
+  "@shieldFlushSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shieldPendingMessages": "Messages en attente",
+  "shieldHandleSemantic": "{count, plural, =1{1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l'afficher} other{{count} messages mis en attente par le Mode Bouclier — glisser vers le bas pour les afficher}}",
+  "@shieldHandleSemantic": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shieldCallFrom": "Appel de {name}",
+  "shieldCallHeld": "En attente — Mode Bouclier",
+  "statusViewersUnavailable": "Liste des vues indisponible.",
+  "statusSeenBy": "Vu par {count}",
+  "@statusSeenBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusNobodySeen": "Personne ne l'a encore vu.",
+  "statusBoostFailed": "Boost du statut impossible.",
+  "statusDeleteTitle": "Supprimer ce statut ?",
+  "statusDeleteBody": "Il disparaîtra pour tous ceux qui peuvent le voir.",
+  "statusDeleteFailed": "Suppression impossible — vérifiez votre connexion.",
+  "statusPublishFailed": "Publication impossible — vérifiez votre connexion et réessayez.",
+  "statusBoostAction": "Booster ce statut · 1 000 FCFA",
+  "modulesSubtitle": "Ajoutez ce qui vous sert, laissez le reste",
+  "modulePaymentFailed": "Le paiement n'a pas pu être lancé.",
+  "deeplinkFollowedChannel": "Abonné à la chaîne « {name} »",
+  "@deeplinkFollowedChannel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deeplinkOpenFailed": "Ce lien d'invitation n'a pas pu être ouvert pour l'instant.",
+  "cropTitle": "Recadrer",
+  "cropHint": "Pincez pour zoomer, glissez pour cadrer",
+  "cropConfirm": "Valider",
+  "inviteJoinMe": "Rejoins-moi sur Pokou Messenger",
+  "inviteJoinMeNamed": "{name}, rejoins-moi sur Pokou Messenger",
+  "@inviteJoinMeNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "otpNoCodeReceived": "Vous n'avez pas reçu de code ?",
+  "countryDialCode": "Indicatif du pays",
+  "countrySearchHint": "Pays ou indicatif (ex. Bénin, 229)",
+  "countryNoneFound": "Aucun pays trouvé.",
+  "presenceSomeone": "Quelqu'un",
+  "atTime": "à {time}",
+  "@atTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dateAtTime": "{date} à {time}",
+  "@dateAtTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "truthAskedTo": "À {name}",
+  "@truthAskedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesNoPushHere": "Cet appareil ne reçoit pas les notifications.",
+  "devicesNoPushHereBody": "Il n'a pas pu s'enregistrer auprès du service de notifications. Touchez pour réessayer.",
+  "devicesRetryDone": "Cet appareil reçoit désormais les notifications.",
+  "devicesRetryFailed": "Toujours pas d'enregistrement possible — réessayez plus tard.",
+  "chatsProfileMissing": "Profil indisponible — vérifiez votre connexion, puis réessayez.",
+  "recSlideToCancel": "Glisser pour annuler",
+  "recReleaseToCancel": "Relâcher pour annuler",
+  "recLocked": "Verrouillé",
+  "recSlideUpToLock": "Glisser vers le haut pour verrouiller",
+  "recDelete": "Supprimer l'enregistrement",
+  "recHoldToRecord": "Maintenir pour enregistrer",
+  "composerViewOnce": "Vue unique",
+  "composerViewOnceOn": "Vue unique activée — la photo disparaîtra après avoir été ouverte.",
+  "composerViewOnceOff": "Vue unique désactivée.",
+  "channelSuggestedTitle": "Des chaînes à suivre",
+  "channelSuggestedBody": "Vous n'en suivez aucune pour l'instant. En voici quelques-unes.",
+  "channelSuggestedNone": "Aucune chaîne à proposer pour le moment.",
+  "channelFollowed": "Abonné à « {name} »",
+  "channelFollowFailed": "Abonnement impossible — vérifiez votre connexion.",
+  "@channelFollowed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "certifyTitle": "Chaîne certifiée",
+  "certifyWhyTitle": "Un badge, et la tête des suggestions",
+  "certifyWhyBody": "Les chaînes certifiées apparaissent en premier à qui cherche quoi suivre, et le badge se voit sur chacune de vos publications.",
+  "certifyReviewTitle": "Un examen, pas un achat",
+  "certifyReviewBody": "Notre équipe lit votre chaîne avant d'accorder le badge. Un badge qui s'achète sans regard ne vaudrait rien — c'est ce qui fait sa valeur.",
+  "certifyRefundTitle": "Refusée ? Vous êtes remboursé",
+  "certifyRefundBody": "Si le badge ne peut pas être accordé, contactez-nous : la somme vous est rendue.",
+  "certifyRenewTitle": "Un abonnement, pas un acquis",
+  "certifyRenewBody": "Le badge dure le temps de la formule choisie. Renouveler avant l'échéance prolonge sans rien perdre.",
+  "certifyPlanMonthly": "Mensuel — 3 000 FCFA",
+  "certifyPlanAnnual": "Annuel — 30 000 FCFA (deux mois offerts)",
+  "certifyAction": "Payer et envoyer la demande",
+  "certifyPending": "Votre demande part à l'équipe dès la confirmation du paiement.",
+  "certifyFailed": "Demande impossible — réessayez.",
+  "certifyAlready": "Cette chaîne est certifiée",
+  "certifyTooltip": "Faire certifier cette chaîne",
+  "chatsStartTitle": "Commencez une conversation",
+  "chatsStartBody": "Vos contacts sont déjà sur Pokou. Touchez un nom pour lui écrire.",
+  "chatsSeeAllContacts": "Voir tous mes contacts",
+  "chatsNoNetworkTitle": "Votre réseau n'est pas encore sur Pokou",
+  "chatsNoNetworkBody": "Invitez quelqu'un, ou suivez une chaîne en attendant qu'on vous réponde.",
+  "chatsInviteContacts": "Inviter des contacts",
+  "chatsDiscoverChannels": "Découvrir des chaînes",
+  "e2eeEncrypted": "Chiffré de bout en bout",
+  "e2eeNotEncrypted": "Non chiffré",
+  "e2eeNotEncryptedBody": "Cette personne n'utilise pas encore une version de Pokou qui chiffre. Vos messages voyagent en clair.",
+  "e2eeIdentityChangedTitle": "Les informations de sécurité de ce contact ont changé",
+  "e2eeIdentityChangedBody": "La clé de {name} n'est plus la même. Cela arrive quand quelqu'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu'un s'intercale. Vérifiez avec {name} par un autre moyen avant de continuer.",
+  "@e2eeIdentityChangedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "e2eeIdentityAccept": "J'ai vérifié, continuer",
+  "e2eeBlockedTitle": "Message non envoyé",
+  "e2eeBlockedLookup": "Impossible de récupérer la clé de chiffrement. Le message n'a pas été envoyé — Pokou ne l'enverra jamais en clair à votre insu.",
+  "e2eeBlockedInvalid": "La clé reçue est inexploitable. Le message n'a pas été envoyé, par précaution.",
+  "e2eeBlockedIdentity": "La clé de ce contact a changé. Vérifiez son identité avant d'envoyer.",
+  "e2eeBlockedCrypto": "Le chiffrement a échoué. Le message n'a pas été envoyé.",
+  "e2eeRetry": "Réessayer",
+  "profileTheme": "Apparence",
+  "themeSystem": "Comme le téléphone",
+  "themeLight": "Clair",
+  "themeDark": "Sombre",
+  "themeHint": "Le mode sombre repose les yeux le soir et économise la batterie sur les écrans OLED.",
+  "a11yBack": "Retour",
+  "a11yRefresh": "Actualiser",
+  "a11yMoreOptions": "Plus d'options",
+  "a11yVoiceCall": "Appel audio",
+  "a11yVideoCall": "Appel vidéo",
+  "a11yAttach": "Joindre un fichier",
+  "a11yRate": "Noter",
+  "a11yAudioLevel": "Niveau sonore",
+  "marketCreateAd": "Créer une publicité",
+  "adSponsored": "Sponsorisé",
+  "adYours": "Votre publicité",
+  "adContact": "Contacter",
+  "adContactFailed": "Impossible de contacter l'annonceur.",
+  "mediaSaveToPhone": "Enregistrer sur le téléphone",
+  "mediaUndecryptable": "Pièce jointe chiffrée illisible sur ce téléphone.",
+  "mediaSaved": "Enregistré dans votre galerie",
+  "mediaExported": "Choisissez où l'enregistrer",
+  "mediaSavePermission": "Pokou a besoin d'accéder à vos photos pour enregistrer ce fichier.",
+  "mediaSaveNoSpace": "Pas assez d'espace sur le téléphone.",
+  "mediaSaveFailed": "Enregistrement impossible.",
+  "composerEmoji": "Emojis",
+  "convAttachGif": "GIF",
+  "stickerTabEmoji": "Emoji",
+  "stickerTabStickers": "Stickers",
+  "stickerSearchHint": "Rechercher un sticker",
+  "stickerRecents": "Récents",
+  "stickerFavorites": "Favoris",
+  "stickerNoResult": "Aucun sticker trouvé",
+  "stickerEmptyPanel": "Aucun sticker pour l'instant",
+  "stickerBrowsePacks": "Parcourir les packs",
+  "stickerManagePacks": "Gérer les packs",
+  "stickerPacksTitle": "Packs de stickers",
+  "stickerPackAdd": "Ajouter",
+  "stickerPackAdded": "Ajouté",
+  "stickerPackRemove": "Retirer",
+  "stickerPackDelete": "Supprimer le pack",
+  "stickerPackDeleteConfirm": "Supprimer ce pack et tous ses stickers ?",
+  "stickerMyPackName": "Mes stickers",
+  "stickerCreateFromPhoto": "Créer depuis une photo",
+  "stickerCreated": "Sticker ajouté à vos stickers",
+  "stickerLimitReached": "Votre pack personnel est plein",
+  "stickerSendFailed": "Sticker non envoyé — réessayez",
+  "stickerLabel": "Sticker",
+  "stickerFavoriteAdded": "Ajouté aux favoris",
+  "stickerFavoriteRemoved": "Retiré des favoris",
+  "stickerStoreEmpty": "Aucun pack disponible pour l'instant",
+  "stickerSaveToMine": "Ajouter à mes stickers",
+  "stickerSaved": "Sticker ajouté à vos stickers",
+  "navAoussi": "Aoussi",
+  "appBarOnline": "En ligne",
+  "appBarOffline": "Hors ligne",
+  "marketNegotiate": "Négocier",
+  "callsCallBack": "Rappeler",
+  "callsFilterMissed": "Manqués",
+  "callsFilterAll": "Tous",
+  "chatsFilterAll": "Toutes",
+  "chatsFilterUnread": "Non lues",
+  "chatsFilterGroups": "Groupes",
+  "chatsSearchOrAsk": "Rechercher ou demander à Aoussi…",
+  "convEncryptedHint": "Message chiffré…",
+  "chatsArchivedSection": "Discussions archivées",
+  "statusMineTitle": "Mon Actu",
+  "statusMineBody": "Appuyez pour publier une actualité (24 h)",
+  "statusMineVisibility": "Visible par mes contacts",
+  "callLeaveConference": "Quitter la conférence",
+  "callQualityExcellent": "Excellent",
+  "callQualityGood": "Correct",
+  "callQualityPoor": "Faible",
+  "callYouShort": "Vous",
+  "callMutedShort": "Coupé",
+  "callMuteLabel": "Micro",
+  "callCameraLabel": "Caméra",
+  "callSpeakerLabel": "Haut-parleur",
+  "callFlipCamera": "Retourner la caméra",
+  "callFlipCameraFailed": "Impossible de changer de caméra.",
+  "callNoAnswer": "Pas de réponse.",
+  "callOngoingBanner": "Appel en cours · {duration} — toucher pour revenir",
+  "@callOngoingBanner": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callOngoingBannerRinging": "Appel en cours — toucher pour revenir",
+  "callHangUp": "Raccrocher",
+  "callInviteLabel": "Inviter",
+  "e2eeReassurance": "Les messages de cette conversation sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.",
+  "chatsEncryptionFooter": "Vos conversations privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.",
+  "callsRecentSection": "RÉCENTS",
+  "callsGroupChip": "Groupe",
+  "callGroupNotEncrypted": "Appel de groupe standard — non chiffré de bout en bout",
+  "marketCatalogueSeeAll": "Tout voir",
+  "marketCatalogueOpen": "Ouvrir mon catalogue",
+  "marketCatalogueTotal": "Annonces",
+  "marketCatalogueOnline": "En ligne",
+  "marketCatalogueBoostedLabel": "Boostées",
+  "marketCatalogueWithdrawn": "Retirées",
+  "marketFilterAll": "Toutes",
+  "marketCatalogueNoneInFilter": "Aucune annonce dans ce filtre.",
+  "marketStatusModerated": "Retirée du marché",
+  "marketStatusModeratedBody": "Elle n'est plus visible par les acheteurs. Écrivez au support si vous pensez que c'est une erreur.",
+  "callsFilterDirect": "En tête-à-tête",
+  "profileMyAccount": "Mon compte",
+  "profileVerifyAccount": "Vérifier mon compte",
+  "profileVerifyAccountBody": "Obtenez le badge vendeur vérifié du Marché",
+  "profileCertificationPending": "Certification en cours",
+  "profileCertificationPendingBody": "Votre demande est en cours d'examen.",
+  "profileCertificationActive": "Compte certifié",
+  "profileCertificationActiveBody": "Le badge de certification apparaît à côté de votre nom.",
+  "profileSellerCertified": "Vendeur vérifié",
+  "profileSellerCertifiedUntil": "Badge vendeur actif jusqu'au {date}.",
+  "@profileSellerCertifiedUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "verifPlanLabel": "Choisissez votre formule",
+  "callEventAudio": "Appel audio",
+  "callEventVideo": "Appel vidéo",
+  "callEventGroup": "Appel de groupe",
+  "callEventMissed": "Appel manqué",
+  "callEventNoAnswer": "Sans réponse",
+  "callEventDeclined": "Refusé",
+  "callEventYouDeclined": "Vous avez refusé",
+  "callEventEnded": "Terminé",
+  "callEventSeconds": "{count, plural, =1{1 s} other{{count} s}}",
+  "callEventMinutes": "{count, plural, =1{1 min} other{{count} min}}",
+  "callEventHours": "{hours} h {minutes}",
+  "callEventParticipants": "{count, plural, =1{1 participant} other{{count} participants}}",
+  "mediaCall": "📞 Appel",
+  "mediaSticker": "Sticker",
+  "identityVerifiedAccount": "Compte certifié",
+  "privacyTitle": "Confidentialité",
+  "privacyIntro": "Ces réglages sont appliqués par le serveur : ce que vous masquez n'est pas envoyé aux autres, pas seulement caché dans l'application.",
+  "privacySectionWhoSees": "Qui peut voir mes informations",
+  "privacySectionMessages": "Messages",
+  "privacySectionGroups": "Groupes",
+  "privacyLastSeen": "Dernière activité",
+  "privacyLastSeenBody": "À quelle heure vous étiez connecté pour la dernière fois.",
+  "privacyOnline": "Présence en ligne",
+  "privacyOnlineBody": "Le point vert qui dit que vous êtes joignable maintenant. Indépendant de la dernière activité.",
+  "privacyProfilePhoto": "Photo de profil",
+  "privacyProfilePhotoBody": "Votre photo, partout où elle apparaît.",
+  "privacyProfileInfo": "Informations du profil",
+  "privacyProfileInfoBody": "Votre description et ce que vous avez renseigné sur vous.",
+  "privacyReadReceipts": "Confirmations de lecture",
+  "privacyReadReceiptsBody": "Les désactiver vous prive aussi de celles des autres. Les accusés de réception (une coche) restent visibles.",
+  "privacyGroupInvites": "Qui peut m'inviter dans un groupe",
+  "privacyGroupInvitesBody": "Autoriser n'est pas accepter : vous gardez le dernier mot sur chaque invitation.",
+  "privacyGroupMembership": "Visibilité de mon appartenance aux groupes",
+  "privacyGroupMembershipBody": "Qui peut voir dans quels groupes vous êtes. Les membres d'un groupe continuent de se connaître entre eux.",
+  "privacyEveryone": "Tout le monde",
+  "privacyMyContacts": "Mes contacts",
+  "privacyNobody": "Personne",
+  "privacySaveFailed": "Réglage non enregistré — réessayez.",
+  "privacyUnavailable": "Réglages de confidentialité indisponibles.",
+  "privacyStatusesNote": "La confidentialité des statuts se règle depuis l'onglet Actus, où vous pouvez aussi exclure des personnes précises.",
+  "groupInvitesSent": "{count, plural, =0{Aucune invitation envoyée} =1{Invitation envoyée} other{{count} invitations envoyées}}",
+  "groupInvitationTitle": "Invitation à un groupe",
+  "groupInvitationFrom": "{name} vous invite",
+  "groupInvitationMembers": "{count, plural, =1{1 membre} other{{count} membres}}",
+  "groupInvitationAccept": "Rejoindre",
+  "groupInvitationReject": "Refuser",
+  "groupInvitationExpires": "Expire dans {hours} h",
+  "groupInvitationExpiresSoon": "Expire bientôt",
+  "groupInvitationsHeader": "{count, plural, =1{1 invitation} other{{count} invitations}}",
+  "groupInvitationFailed": "Action impossible — l'invitation n'est peut-être plus valable.",
+  "mediaStatePreparing": "Préparation…",
+  "mediaStateSending": "Envoi…",
+  "mediaStateSendingPercent": "Envoi · {percent} %",
+  "mediaStateWaitingNetwork": "En attente de connexion",
+  "mediaStateFailed": "Envoi impossible",
+  "mediaStateFileGone": "Fichier introuvable sur cet appareil",
+  "channelPrivateLabel": "Chaîne privée",
+  "channelPrivateBody": "Introuvable par la recherche. Seules les personnes à qui vous donnez le lien peuvent la rejoindre et lire ses publications. Ce choix ne pourra pas être modifié ensuite.",
+  "channelPrivateBadge": "Privée",
+  "mahizuConnectTitle": "Connectez votre compte Mahizu",
+  "mahizuConnectBody": "L'assistant est un service Mahizu, distinct de Pokou. Pour l'utiliser, rattachez votre compte Mahizu : un code sera envoyé au {phone}.",
+  "@mahizuConnectBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "mahizuSendCode": "Recevoir le code",
+  "mahizuCodeLabel": "Code reçu",
+  "mahizuPinLabel": "Code de votre compte Mahizu",
+  "mahizuConfirm": "Connecter",
+  "mahizuRestart": "Recommencer",
+  "navHome": "Accueil",
+  "navKory": "Kory",
+  "navMore": "Plus",
+  "homeGreeting": "Bonjour {name}",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSeeAll": "Tout voir",
+  "homeNoChats": "Aucune discussion pour l'instant",
+  "homeKoryEmpty": "Aucune cagnotte en cours",
+  "homeSearchHint": "Rechercher une discussion",
+  "moreCertifiedTitle": "Pokou certifié",
+  "moreCertifiedBody": "Identité vérifiée et mode preuve : bientôt disponible.",
+  "moreSectionServices": "Services",
+  "moreSectionSettings": "Réglages",
+  "moreAccount": "Compte et sécurité",
+  "moreEdit": "Modifier",
+  "koryTitle": "Kory",
+  "korySubtitle": "Cagnottes & tontines",
+  "koryMonthTotal": "Mes contributions confirmées ce mois-ci",
+  "koryNoMoney": "Pokou ne touche pas l'argent : il va directement de votre wallet à celui du collecteur.",
+  "koryCreate": "Créer une cagnotte",
+  "koryJoin": "Rejoindre",
+  "koryJournalTab": "Journal",
+  "koryJoinTitle": "Rejoindre avec un code",
+  "koryJoinHint": "Code de la cagnotte",
+  "koryJoinUnknown": "Code inconnu ou cagnotte clôturée.",
+  "koryNone": "Aucune cagnotte en cours",
+  "koryNoneBody": "Créez une cagnotte pour un mariage, un baptême ou une cotisation, ou rejoignez-en une avec son code.",
+  "koryUnavailable": "Kory est indisponible",
+  "koryKindCagnotte": "Cagnotte",
+  "koryKindCotisation": "Cotisation",
+  "koryTotalConfirmed": "Total confirmé",
+  "koryGoal": "Objectif : {amount}",
+  "@koryGoal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryDue": "Échéance : {date}",
+  "@koryDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMyShare": "Ma part confirmée : {amount}",
+  "@koryMyShare": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryToReview": "À confirmer : {count}",
+  "@koryToReview": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "koryClosed": "Clôturée",
+  "koryOpen": "Ouverte",
+  "koryCollector": "Collecteur : {name}",
+  "@koryCollector": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryPayTo": "Envoyez votre contribution depuis votre wallet au {phone}, puis déclarez-la ici.",
+  "@koryPayTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "koryPerMember": "{amount} par membre, {period}",
+  "@koryPerMember": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "koryDeclare": "J'ai contribué",
+  "koryDeclareTitle": "Déclarer une contribution",
+  "koryAmount": "Montant (FCFA)",
+  "koryWalletRef": "Référence de la transaction (facultatif)",
+  "koryWalletRefHelp": "Elle figure dans le SMS de votre opérateur. Seuls vous et le collecteur la voyez.",
+  "koryNote": "Message (facultatif)",
+  "koryPeriodLabel": "Période couverte (ex. 2026-11)",
+  "koryJournal": "Journal des contributions",
+  "koryJournalEmpty": "Aucune contribution déclarée pour l'instant.",
+  "koryStatusDeclared": "En attente du collecteur",
+  "koryStatusConfirmed": "Confirmée",
+  "koryStatusRejected": "Non reçue",
+  "koryConfirm": "Reçu",
+  "koryReject": "Pas reçu",
+  "koryCloseAction": "Clôturer",
+  "koryCloseConfirm": "Clôturer la cagnotte ? Plus personne ne pourra déclarer de contribution.",
+  "koryShareCode": "Code : {code}",
+  "@koryShareCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "koryShareText": "Rejoignez la cagnotte « {title} » sur Pokou avec le code {code}.",
+  "@koryShareText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "koryCreateTitle": "Nouvelle cagnotte",
+  "koryFieldTitle": "Titre",
+  "koryFieldDescription": "Description (facultatif)",
+  "koryFieldGoal": "Objectif en FCFA (facultatif)",
+  "koryFieldPerMember": "Montant par membre (FCFA)",
+  "koryPeriodMonthly": "chaque mois",
+  "koryPeriodWeekly": "chaque semaine",
+  "koryFieldDue": "Échéance (facultatif)",
+  "koryNeedTitle": "Donnez un titre (3 caractères au moins).",
+  "koryNeedAmount": "Indiquez un montant d'au moins 100 FCFA.",
+  "koryCollectorIsYou": "Vous êtes le collecteur : les contributions arrivent sur votre wallet, et c'est vous qui les confirmez.",
+  "koryYou": "Vous",
+  "koryTontinePlus": "Tontine en rotation : bientôt avec Kory Plus",
+  "koryDeclared": "Contribution déclarée. Le collecteur va la confirmer.",
+  "koryCopyPhone": "Copier le numéro",
+  "koryCopied": "Copié",
+  "koryActionFailed": "L'opération n'a pas abouti. Réessayez."
+}

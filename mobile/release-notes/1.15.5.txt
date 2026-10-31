@@ -1,0 +1,36 @@
+<fr-FR>
+• Dans les groupes, on voit qui parle : le nom de votre carnet, en couleur.
+• Les groupes indiquent clairement que leurs messages ne sont pas chiffrés de bout en bout.
+• Un compte certifié garde son nom partout, avec son badge, y compris dans les appels.
+• Vos contacts portent le même nom dans les appels et les statuts que dans les discussions.
+</fr-FR>
+<en-US>
+• In groups, you can see who is speaking: the name from your contacts, in color.
+• Groups now clearly state that their messages are not end-to-end encrypted.
+• A certified account keeps its name everywhere, with its badge, including in calls.
+• Your contacts carry the same name in calls and statuses as in your chats.
+</en-US>
+<es-ES>
+• En los grupos se ve quién habla: el nombre de tus contactos, en color.
+• Los grupos indican claramente que sus mensajes no están cifrados de extremo a extremo.
+• Una cuenta certificada conserva su nombre en todas partes, con su insignia, también en las llamadas.
+• Tus contactos llevan el mismo nombre en llamadas y estados que en los chats.
+</es-ES>
+<it-IT>
+• Nei gruppi si vede chi parla: il nome della tua rubrica, a colori.
+• I gruppi indicano chiaramente che i loro messaggi non sono crittografati end-to-end.
+• Un account certificato mantiene il suo nome ovunque, con il badge, anche nelle chiamate.
+• I tuoi contatti hanno lo stesso nome in chiamate e stati come nelle chat.
+</it-IT>
+<ru-RU>
+• В группах видно, кто пишет: имя из ваших контактов, в цвете.
+• Группы ясно сообщают, что их сообщения не защищены сквозным шифрованием.
+• Подтверждённый аккаунт сохраняет своё имя везде, со значком, в том числе в звонках.
+• Ваши контакты называются одинаково в звонках, статусах и чатах.
+</ru-RU>
+<ar>
+• في المجموعات ترى من يتحدث: الاسم من جهات اتصالك، بالألوان.
+• توضّح المجموعات أن رسائلها غير مشفّرة تشفيرًا تامًّا بين الطرفين.
+• الحساب الموثّق يحتفظ باسمه في كل مكان، مع شارته، بما في ذلك في المكالمات.
+• جهات اتصالك تحمل الاسم نفسه في المكالمات والحالات كما في المحادثات.
+</ar>

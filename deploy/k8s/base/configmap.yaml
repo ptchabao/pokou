@@ -1,0 +1,24 @@
+# Réglages NON secrets. Les secrets (mots de passe, clés) sont dans le
+# Secret `pokou-api-secrets` (voir overlays/prod/secrets.example.env).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pokou-api-config
+data:
+  ENVIRONMENT: "production"
+  RUN_MIGRATIONS: "0"
+  UVICORN_WORKERS: "2"
+  FORWARDED_ALLOW_IPS: "*"
+  DB_POOL_SIZE: "5"
+  DB_MAX_OVERFLOW: "5"
+  S3_BUCKET: "pokou-media"
+  S3_REGION: "eu-west-1"
+  FCM_ENABLED: "true"
+  LIVEKIT_ENABLED: "true"
+  # Kafka (Strimzi, deploy/k8s/kafka) : écoute TLS interne, SCRAM.
+  KAFKA_BOOTSTRAP_SERVERS: "pokou-kafka-kafka-bootstrap.kafka.svc:9093"
+  KAFKA_SECURITY_PROTOCOL: "SASL_SSL"
+  KAFKA_SASL_MECHANISM: "SCRAM-SHA-512"
+  KAFKA_SASL_USERNAME: "pokou-api"
+  KAFKA_SSL_CAFILE: "/etc/kafka-ca/ca.crt"
+  KAFKA_TOPIC_PREFIX: "pokou"

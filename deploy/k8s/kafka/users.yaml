@@ -1,0 +1,52 @@
+# Le compte de l'API : écrit dans les topics pokou.*, ne lit rien.
+# Strimzi génère le mot de passe dans le Secret `pokou-api` (namespace
+# kafka) ; il est recopié dans KAFKA_SASL_PASSWORD (voir la documentation).
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: pokou-api
+  labels:
+    strimzi.io/cluster: pokou-kafka
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: pokou.
+          patternType: prefix
+        operations: [Write, Describe]
+        host: "*"
+      # Producteur idempotent : nécessite IdempotentWrite sur le cluster.
+      - resource:
+          type: cluster
+        operations: [IdempotentWrite]
+        host: "*"
+---
+# Exemple de consommateur (statistiques, notifications) : lit, n'écrit pas.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: pokou-consumers
+  labels:
+    strimzi.io/cluster: pokou-kafka
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: pokou.
+          patternType: prefix
+        operations: [Read, Describe]
+        host: "*"
+      - resource:
+          type: group
+          name: pokou-
+          patternType: prefix
+        operations: [Read]
+        host: "*"

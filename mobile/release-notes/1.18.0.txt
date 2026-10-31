@@ -1,0 +1,42 @@
+<fr-FR>
+• Nouveaux modules : un verset biblique ou coranique chaque jour à 6 h et à 18 h, dans votre langue, même sans connexion.
+• Aoussi redessiné : parlez-lui à la voix, relisez avant d'envoyer.
+• Vitrine du Marché : faites défiler les articles comme des cartes, glissez à droite pour ouvrir.
+• Photos en plein écran : zoom, glisser pour fermer.
+• Écrire est plus fluide : nouvelle barre, transitions plus douces.
+</fr-FR>
+<en-US>
+• New modules: a Bible or Quran verse every day at 6 am and 6 pm, in your language, even offline.
+• Aoussi redesigned: talk to it by voice, review before sending.
+• Marketplace showcase: browse items as cards, swipe right to open one.
+• Full-screen photos: zoom, swipe down to close.
+• Smoother writing: a new message bar and gentler transitions.
+</en-US>
+<es-ES>
+• Nuevos módulos: un versículo bíblico o coránico cada día a las 6 h y a las 18 h, en tu idioma, incluso sin conexión.
+• Aoussi rediseñado: háblale con la voz y revisa antes de enviar.
+• Escaparate del Mercado: pasa los artículos como tarjetas, desliza a la derecha para abrir.
+• Fotos a pantalla completa: zoom, desliza para cerrar.
+• Escribir es más fluido: nueva barra y transiciones más suaves.
+</es-ES>
+<it-IT>
+• Nuovi moduli: un versetto biblico o coranico ogni giorno alle 6 e alle 18, nella tua lingua, anche offline.
+• Aoussi ridisegnato: parlagli a voce e rileggi prima di inviare.
+• Vetrina del Mercato: scorri gli articoli come carte, scorri a destra per aprirli.
+• Foto a schermo intero: zoom, scorri per chiudere.
+• Scrivere è più fluido: nuova barra e transizioni più morbide.
+</it-IT>
+<ru-RU>
+• Новые модули: стих из Библии или Корана каждый день в 6:00 и 18:00 на вашем языке, даже без интернета.
+• Обновлённый Aoussi: говорите голосом и проверяйте перед отправкой.
+• Витрина Маркета: листайте товары карточками, смахните вправо, чтобы открыть.
+• Фото на весь экран: масштаб, смахните, чтобы закрыть.
+• Писать стало удобнее: новая панель и плавные переходы.
+</ru-RU>
+<ar>
+• وحدات جديدة: آية من الكتاب المقدس أو من القرآن كل يوم في السادسة صباحًا والسادسة مساءً، بلغتك، حتى دون اتصال.
+• Aoussi بتصميم جديد: تحدّث إليه بصوتك وراجع قبل الإرسال.
+• واجهة السوق: تصفّح المنتجات كبطاقات، واسحب يمينًا لفتحها.
+• الصور بملء الشاشة: تكبير، واسحب للإغلاق.
+• كتابة أكثر سلاسة: شريط جديد وانتقالات أنعم.
+</ar>

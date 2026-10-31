@@ -1,0 +1,15 @@
+# La configuration de la génération des traductions.
+#
+# `arb-dir` tient les fichiers source, un par langue ; `output-localization-file`
+# est le fichier Dart généré, importé par l'application. Rien de tout cela n'est
+# versionné à la main : `flutter gen-l10n` (déclenché par `generate: true` dans
+# pubspec.yaml) le reconstruit à chaque build.
+arb-dir: lib/l10n
+template-arb-file: app_fr.arb
+output-localization-file: app_localizations.dart
+output-class: L
+# Le français est la langue de référence : c'est celle dans laquelle
+# l'application a été écrite, et celle où le texte est le plus juste. Une clé
+# non traduite retombe dessus plutôt que d'afficher son identifiant.
+untranslated-messages-file: lib/l10n/untranslated.json
+nullable-getter: false

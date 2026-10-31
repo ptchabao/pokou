@@ -1,0 +1,9 @@
+# Kafka géré par l'opérateur Strimzi (installé au préalable, voir
+# docs/deploiement-kubernetes.md). Mode KRaft : pas de ZooKeeper.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kafka
+resources:
+  - kafka-cluster.yaml
+  - topics.yaml
+  - users.yaml

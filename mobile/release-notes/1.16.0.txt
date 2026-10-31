@@ -1,0 +1,42 @@
+<fr-FR>
+• Les entreprises arrivent sur Pokou : écrivez à leurs bots, répondez d'un geste avec leurs boutons.
+• Un bot porte sa pastille « Bot », et le ✓ quand son entreprise est vérifiée.
+• Pokou vous dit clairement qu'une conversation avec un bot n'est pas chiffrée de bout en bout.
+• Ouvrez un bot directement depuis son lien pok.app/bot/…
+• Correction : la session ne se ferme plus d'elle-même à la réouverture de l'application.
+</fr-FR>
+<en-US>
+• Businesses arrive on Pokou: chat with their bots and reply in one tap with their buttons.
+• A bot carries its "Bot" label, and the ✓ once its business is verified.
+• Pokou clearly tells you that a conversation with a bot is not end-to-end encrypted.
+• Open a bot directly from its pok.app/bot/… link.
+• Fix: your session no longer closes by itself when you reopen the app.
+</en-US>
+<es-ES>
+• Las empresas llegan a Pokou: escribe a sus bots y responde con un toque en sus botones.
+• Un bot lleva su etiqueta «Bot», y el ✓ cuando su empresa está verificada.
+• Pokou te indica claramente que una conversación con un bot no está cifrada de extremo a extremo.
+• Abre un bot directamente desde su enlace pok.app/bot/…
+• Corrección: la sesión ya no se cierra sola al volver a abrir la aplicación.
+</es-ES>
+<it-IT>
+• Le aziende arrivano su Pokou: scrivi ai loro bot e rispondi con un tocco sui loro pulsanti.
+• Un bot porta l'etichetta «Bot», e il ✓ quando la sua azienda è verificata.
+• Pokou ti dice chiaramente che una conversazione con un bot non è crittografata end-to-end.
+• Apri un bot direttamente dal suo link pok.app/bot/…
+• Correzione: la sessione non si chiude più da sola quando riapri l'app.
+</it-IT>
+<ru-RU>
+• Компании приходят в Pokou: пишите их ботам и отвечайте одним касанием кнопок.
+• У бота есть метка «Бот», а после проверки компании — значок ✓.
+• Pokou ясно сообщает, что переписка с ботом не защищена сквозным шифрованием.
+• Открывайте бота прямо по ссылке pok.app/bot/…
+• Исправлено: сеанс больше не закрывается сам при повторном открытии приложения.
+</ru-RU>
+<ar>
+• الشركات تصل إلى Pokou: راسل البوتات الخاصة بها وردّ بلمسة واحدة على أزرارها.
+• يحمل البوت شارة «بوت»، وعلامة ✓ عندما تكون شركته موثّقة.
+• يخبرك Pokou بوضوح أن المحادثة مع البوت غير مشفّرة تشفيرًا تامًّا بين الطرفين.
+• افتح البوت مباشرة من رابطه pok.app/bot/…
+• إصلاح: لم تعد الجلسة تُغلق تلقائيًا عند إعادة فتح التطبيق.
+</ar>

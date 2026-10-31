@@ -1,0 +1,58 @@
+# Les migrations Alembic, jouées UNE fois avant chaque déploiement par
+# deploy.sh. Pas d'essai répété : une migration à moitié appliquée qu'on
+# rejoue produit les erreurs « already exists » (voir docker-entrypoint.sh).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pokou-migrate
+  labels:
+    app.kubernetes.io/name: pokou-migrate
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pokou-migrate
+    spec:
+      restartPolicy: Never
+      serviceAccountName: pokou-api
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: pokou-api
+          # L'entrypoint attend la base, migre, puis exécute la commande :
+          # `true` termine le Job dès la migration faite.
+          args: ["true"]
+          envFrom:
+            - configMapRef:
+                name: pokou-api-config
+            - secretRef:
+                name: pokou-api-secrets
+          env:
+            - name: RUN_MIGRATIONS
+              value: "1"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

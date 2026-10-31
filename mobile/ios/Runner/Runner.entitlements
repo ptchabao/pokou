@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Notifications push.
+	     `development` ici, remplacé par `production` à l'archivage : Xcode
+	     le fait pour les distributions App Store. Sans cette entrée, le
+	     jeton APNs n'est jamais délivré et firebase_messaging reste muet,
+	     sans erreur visible. -->
+	<key>aps-environment</key>
+	<string>development</string>
+
+	<!-- Universal Links — l'équivalent iOS des App Links Android déclarés
+	     dans AndroidManifest.xml pour les liens d'invitation.
+	     Les trois préfixes (/invite, /c/, /channel/) sont portés par le
+	     même domaine ; iOS ne filtre pas par chemin ici, c'est le fichier
+	     apple-app-site-association servi par le domaine qui le fait.
+
+	     ⚠️ Exige que https://pok.app/.well-known/apple-app-site-association
+	     existe et renvoie le bon applicationID (TEAMID.com.pokou.pokou).
+	     Voir api/app/routes/wellknown.py, qui sert déjà l'équivalent
+	     Android (assetlinks.json). -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:pok.app</string>
+	</array>
+</dict>
+</plist>

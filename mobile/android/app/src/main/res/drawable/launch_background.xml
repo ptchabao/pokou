@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Repli pour les versions d'Android antérieures à drawable-v21. Même
+     couleur, même raison : voir drawable-v21/launch_background.xml. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/pokou_launch_background" />
+</layer-list>

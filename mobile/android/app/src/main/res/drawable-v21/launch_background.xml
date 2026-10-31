@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Le tout premier pixel de l'application : ce que le système peint avant
+     que Flutter n'ait dessiné quoi que ce soit.
+
+     Blanc EN DUR, et non `?android:colorBackground` : cette référence suit
+     le mode clair/sombre du téléphone, alors que Pokou s'affiche toujours
+     en clair (ThemeMode.light, AppColors.background = #FFFFFF). Sur un
+     téléphone en mode sombre, on ouvrait donc sur un écran noir qui virait
+     au blanc dès la première image Flutter — un clignotement d'autant plus
+     visible qu'il arrive au moment où l'œil se pose. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/pokou_launch_background" />
+</layer-list>

@@ -1,0 +1,20 @@
+[project]
+name = "pokou-api"
+version = "1.0.0"
+description = "API de Pokou : messagerie, communautés, appels et marché."
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+# Erreurs réelles d'abord : syntaxe, noms non définis, imports inutilisés.
+select = ["E9", "F"]
+ignore = ["F841"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/models/__init__.py" = ["F401"]
+# Les fixtures pytest importées d'une autre suite se « redéfinissent » en paramètre.
+"tests/*" = ["F811"]

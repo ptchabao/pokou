@@ -1,0 +1,38 @@
+# ── Socle web ────────────────────────────────────────────────────────────────
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+email-validator>=1.3.1
+python-multipart>=0.0.6
+structlog>=23.2.0
+prometheus-client>=0.19.0
+httpx>=0.25.2
+
+# ── Base de données ──────────────────────────────────────────────────────────
+sqlalchemy>=2.0.23
+alembic>=1.13.1
+# Les DEUX pilotes PostgreSQL : c'est l'URL qui choisit. `postgresql://`
+# désigne psycopg2, `postgresql+psycopg://` psycopg 3 — certaines
+# plateformes servent la seconde forme. `[binary]` évite de compiler.
+psycopg2-binary>=2.9.9
+psycopg[binary]>=3.1
+redis>=5.0.1
+
+# ── Sécurité ─────────────────────────────────────────────────────────────────
+python-jose[cryptography]>=3.3.0
+bcrypt>=4.0.0
+phonenumbers>=8.13.0
+
+# ── Médias, appels, notifications ────────────────────────────────────────────
+Pillow>=10.0.0          # vignettes (services/media/thumbnail_service.py)
+boto3>=1.34             # stockage objet S3-compatible (services/media/object_storage.py)
+livekit-api>=1.2.0      # appels audio/vidéo (services/calls/livekit_service.py)
+firebase-admin>=6.5.0   # push FCM (services/notifications/push_service.py)
+beautifulsoup4>=4.12.3  # aperçus de liens (api/v1/messaging/link_preview.py)
+lxml>=5.1.0
+reportlab>=4.0.0        # factures PDF de Pokou Business
+google-genai>=1.0.0     # secours Gemini du Mode Bouclier
+
+# ── Évènements ───────────────────────────────────────────────────────────────
+aiokafka>=0.11.0     # relais de l'outbox vers Kafka (app/workers/outbox_relay.py)

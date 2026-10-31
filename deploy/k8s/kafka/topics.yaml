@@ -1,0 +1,46 @@
+# Un topic par domaine, préfixé par l'environnement (KAFKA_TOPIC_PREFIX).
+# La clé de partition est l'objet métier (« pot-12 ») : ses évènements
+# restent ordonnés.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: pokou.kory.events
+  labels:
+    strimzi.io/cluster: pokou-kafka
+spec:
+  partitions: 6
+  replicas: 3
+  config:
+    retention.ms: 2592000000   # 30 jours
+    cleanup.policy: delete
+    min.insync.replicas: 2
+---
+# Réservé à HONAM (lot 2) : états de commande, devis, courses. Créé dès
+# maintenant pour que les ACL et la supervision soient prêtes au mois 4.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: pokou.honam.events
+  labels:
+    strimzi.io/cluster: pokou-kafka
+spec:
+  partitions: 6
+  replicas: 3
+  config:
+    retention.ms: 2592000000
+    min.insync.replicas: 2
+---
+# Évènements produit pour les indicateurs (section 17 du cahier des
+# charges) : courte rétention, l'entrepôt de données en garde la copie.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: pokou.analytics.events
+  labels:
+    strimzi.io/cluster: pokou-kafka
+spec:
+  partitions: 12
+  replicas: 3
+  config:
+    retention.ms: 604800000    # 7 jours
+    min.insync.replicas: 2

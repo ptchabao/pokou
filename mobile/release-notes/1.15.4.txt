@@ -1,0 +1,48 @@
+<fr-FR>
+• Haut-parleur et caméra arrière pendant les appels vidéo : montrez vos articles en direct.
+• Supprimez un statut publié par erreur, et les vidéos de statut se lisent jusqu'au bout.
+• Remontez tout l'historique de vos conversations et de vos groupes.
+• Les appels respectent le mode silencieux et vibrent, même application ouverte.
+• Un appel sans réponse raccroche tout seul.
+• Les publicités du Marché s'affichent, avec un bouton pour contacter l'annonceur.
+</fr-FR>
+<en-US>
+• Speaker and rear camera during video calls: show your items live.
+• Delete a status posted by mistake, and status videos now play to the end.
+• Scroll back through your entire chat and group history.
+• Calls respect silent mode and vibrate, even with the app open.
+• An unanswered call now hangs up on its own.
+• Marketplace ads are now shown, with a button to contact the advertiser.
+</en-US>
+<es-ES>
+• Altavoz y cámara trasera en las videollamadas: muestra tus artículos en directo.
+• Elimina un estado publicado por error, y los vídeos de estado se reproducen hasta el final.
+• Recorre todo el historial de tus chats y grupos.
+• Las llamadas respetan el modo silencio y vibran, incluso con la app abierta.
+• Una llamada sin respuesta se cuelga sola.
+• Los anuncios del Mercado se muestran, con un botón para contactar al anunciante.
+</es-ES>
+<it-IT>
+• Altoparlante e fotocamera posteriore nelle videochiamate: mostra i tuoi articoli dal vivo.
+• Elimina uno stato pubblicato per errore, e i video di stato si riproducono fino alla fine.
+• Scorri tutta la cronologia delle chat e dei gruppi.
+• Le chiamate rispettano la modalità silenziosa e vibrano, anche con l'app aperta.
+• Una chiamata senza risposta si chiude da sola.
+• Gli annunci del Mercato vengono mostrati, con un pulsante per contattare l'inserzionista.
+</it-IT>
+<ru-RU>
+• Громкая связь и задняя камера в видеозвонках: показывайте товары вживую.
+• Удаляйте статус, опубликованный по ошибке; видео в статусах воспроизводятся до конца.
+• Листайте всю историю чатов и групп.
+• Звонки учитывают беззвучный режим и вибрируют, даже когда приложение открыто.
+• Звонок без ответа завершается сам.
+• Реклама на Рынке теперь показывается, с кнопкой связи с рекламодателем.
+</ru-RU>
+<ar>
+• مكبر الصوت والكاميرا الخلفية أثناء مكالمات الفيديو: اعرض منتجاتك مباشرة.
+• احذف حالة نشرتها بالخطأ، ومقاطع فيديو الحالة تُعرض حتى النهاية.
+• تصفّح سجل محادثاتك ومجموعاتك بالكامل.
+• المكالمات تحترم الوضع الصامت وتهتز، حتى والتطبيق مفتوح.
+• المكالمة التي لا يُرد عليها تُنهى تلقائيًا.
+• إعلانات السوق تظهر الآن، مع زر للتواصل مع المعلِن.
+</ar>

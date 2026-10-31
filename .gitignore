@@ -1,0 +1,28 @@
+# ── Système / éditeurs ──
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# ── Backend (Python) ──
+backend/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+backend/.env
+backend/*.db
+backend/media_storage/
+backend/firebase-service-account.json
+
+# ── Mobile (Flutter) ── voir aussi mobile/.gitignore
+mobile/build/
+mobile/build-production/
+mobile/.dart_tool/
+mobile/android/key.properties
+mobile/android/*.jks
+mobile/android/*.keystore
+
+# Config Firebase : fournie par projet, hors dépôt (voir docs/mise-en-service.md)
+mobile/android/app/google-services.json
+mobile/ios/Runner/GoogleService-Info.plist

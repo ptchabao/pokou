@@ -1,0 +1,36 @@
+<fr-FR>
+• Appels de groupe plus fiables : un refus ne coupe plus l'appel pour les autres, et ceux qui sonnent encore peuvent toujours décrocher.
+• Répondre depuis la notification ouvre bien l'appel.
+• Votre voix reste transmise quand vous quittez l'application pendant un appel.
+• Sécurité des appels renforcée.
+</fr-FR>
+<en-US>
+• More reliable group calls: one person declining no longer ends the call for others, and those still ringing can still answer.
+• Answering from the notification now opens the call.
+• Your voice keeps going through when you leave the app during a call.
+• Stronger call security.
+</en-US>
+<es-ES>
+• Llamadas en grupo más fiables: un rechazo ya no corta la llamada a los demás, y quienes aún reciben el tono pueden contestar.
+• Contestar desde la notificación abre la llamada.
+• Tu voz se sigue transmitiendo si sales de la aplicación durante una llamada.
+• Mayor seguridad en las llamadas.
+</es-ES>
+<it-IT>
+• Chiamate di gruppo più affidabili: un rifiuto non interrompe più la chiamata per gli altri, e chi sta ancora squillando può rispondere.
+• Rispondere dalla notifica apre la chiamata.
+• La tua voce continua a passare se esci dall'app durante una chiamata.
+• Sicurezza delle chiamate rafforzata.
+</it-IT>
+<ru-RU>
+• Групповые звонки надёжнее: отказ одного участника больше не прерывает звонок для остальных, а те, у кого ещё звонит, могут ответить.
+• Ответ из уведомления открывает звонок.
+• Ваш голос продолжает передаваться, если вы выходите из приложения во время звонка.
+• Повышена безопасность звонков.
+</ru-RU>
+<ar>
+• مكالمات جماعية أكثر موثوقية: لم يعد رفض أحد المشاركين يُنهي المكالمة للآخرين، ويمكن لمن لا يزال هاتفه يرنّ أن يجيب.
+• الرد من الإشعار يفتح المكالمة الآن.
+• يبقى صوتك مسموعًا عند مغادرة التطبيق أثناء المكالمة.
+• أمان أقوى للمكالمات.
+</ar>

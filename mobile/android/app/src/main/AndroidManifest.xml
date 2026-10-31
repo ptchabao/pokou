@@ -1,0 +1,232 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Debug builds get INTERNET for free via src/debug/AndroidManifest.xml
+         (Flutter tooling needs it for hot reload) — release builds don't,
+         so it must be declared here explicitly or the app has no network
+         access at all outside of debug. -->
+     <uses-permission android:name="android.permission.INTERNET"/>
+     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- Contact discovery (find which of the device's contacts are also
+         on Pokou, WhatsApp/Telegram-style) — requested at runtime via
+         flutter_contacts, this just makes the request possible. -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <!-- Pièces jointes des messages (Pokou Phase B) — notes vocales,
+         photo/vidéo caméra, et lecture de la galerie sur Android 13+
+         (READ_MEDIA_*) avec repli READ_EXTERNAL_STORAGE pour les versions
+         antérieures. Toutes demandées à l'exécution via permission_handler
+         / image_picker / record. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <!-- Appels audio/vidéo/de groupe (Pokou Phase D, LiveKit/WebRTC) — pas
+         de partage d'écran dans ce tour, donc pas de FOREGROUND_SERVICE ni
+         de permission MediaProjection. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- Le service qui fait sonner le téléphone tourne au PREMIER PLAN :
+         c'est ce qui lui permet de survivre à l'absence d'interface et de
+         continuer à jouer écran verrouillé, application tuée. Le type
+         `phoneCall` dit au système de quoi il s'agit — un autre type
+         (`mediaPlayback`) serait tué bien plus vite. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL"/>
+    <!-- Le service qui tient l'appel EN COURS (OngoingCallService) : sans
+         lui, le micro est coupé dès que l'application passe en arrière-plan.
+         Android 14 exige une permission par type de service déclaré. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+    <!-- Exigée par FOREGROUND_SERVICE_PHONE_CALL sur Android 14+ : le
+         système vérifie que l'application est bien une application d'appel.
+         Aucune donnée d'appel GSM n'est lue. -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
+     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+     <!-- Les versets de 6 h et 18 h sont des alarmes locales : elles doivent
+         être reposées après un redémarrage du téléphone. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <!-- android:allowBackup="false" — conséquence DIRECTE du chiffrement de
+         bout en bout, et non un réglage de confort.
+
+         Par défaut Android sauvegarde les données privées d'une application
+         vers Google Drive. Le cache local de Pokou contient les messages
+         DÉCHIFFRÉS : c'est ce qui permet de relire une conversation hors
+         ligne et de chercher dedans. Laisser la sauvegarde active reviendrait
+         donc à déposer chez un tiers exactement ce qu'on vient d'empêcher le
+         serveur de lire.
+
+         Le prix est réel et il faut le dire : l'historique ne suit pas
+         automatiquement lors d'un changement de téléphone. C'est le même
+         compromis que fait Signal, et la raison pour laquelle WhatsApp
+         propose une sauvegarde chiffrée séparée — ce qui reste à faire ici. -->
+    <application
+        android:allowBackup="false"
+        android:label="Pokou"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Android App Links — remplace Firebase Dynamic Links (arrêté
+                 par Google en août 2025). `autoVerify` déclenche la
+                 vérification du domaine via le fichier
+                 /.well-known/assetlinks.json (voir
+                 api/app/routes/wellknown.py) : si elle réussit, un clic sur
+                 un lien https://pok.app/invite/... ouvre l'app
+                 directement plutôt que le navigateur, et DeepLinkService
+                 (core/deeplink/) rejoint le groupe/la communauté sans étape
+                 manuelle supplémentaire. La propriété DNS de ce domaine et
+                 son reverse-proxy vers l'API restent hors du périmètre de
+                 ce code (infrastructure de déploiement). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!-- LES TROIS formes de lien que l'application produit —
+                     invite_link_parser.dart les accepte toutes les trois,
+                     mais seule la première était déclarée ici. Un lien de
+                     communauté ou de chaîne n'était donc même pas proposé à
+                     l'application : Android ouvrait le navigateur sans
+                     poser de question, et rien nulle part n'expliquait
+                     pourquoi ça marchait pour les groupes seulement.
+                     Voir group_model.dart, community_model.dart et
+                     channel_model.dart pour les générateurs. -->
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/invite"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/c/"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/channel/"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/bot/"/>
+            </intent-filter>
+        </activity>
+        <!-- Éditeur de recadrage d'image (uCrop), requis par image_cropper.
+             Sans cette déclaration, toucher « Rogner » lève une
+             ActivityNotFoundException à L'EXÉCUTION : rien ne le signale à
+             la compilation, aucun test ne le voit, et la panne n'apparaît
+             que sur un vrai téléphone.
+
+             `portrait` verrouillé : uCrop recalcule sa zone de recadrage à
+             chaque rotation et perd le cadre en cours. -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Ucrop.CropTheme"/>
+
+        <!-- Teinte des notifications affichées par Firebase lui-même
+             (application tuée), comme celles que Pokou affiche. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/pokou_notification_accent" />
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- ── Couche d'appel native ────────────────────────────────────
+             Voir docs/native-call-layer.md. Un appel entrant doit sonner,
+             s'afficher et se répondre SANS que le moteur Flutter existe. -->
+
+        <!-- Reçoit les push AVANT Flutter. Hérite du service du greffon
+             `firebase_messaging` et ne détourne QUE les appels : déclarer un
+             service concurrent ferait disparaître silencieusement toutes les
+             autres notifications, Android n'en livrant qu'à un seul. -->
+        <service
+            android:name=".call.PokouFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <!-- La sonnerie. Service de premier plan : il survit à l'absence
+             d'interface, ce qu'un lecteur audio Flutter ne peut pas faire. -->
+        <service
+            android:name=".call.RingtoneService"
+            android:exported="false"
+            android:foregroundServiceType="phoneCall"/>
+
+        <!-- L'appel en cours, du décroché au raccroché. -->
+        <service
+            android:name=".call.OngoingCallService"
+            android:exported="false"
+            android:foregroundServiceType="phoneCall|microphone|camera"/>
+
+        <!-- Les boutons Répondre / Refuser. Un receveur, PAS une activité :
+             une activité démarrerait Flutter, ce qui prend des secondes sur
+             un téléphone en veille. Refuser ne lance donc jamais Flutter. -->
+        <receiver
+            android:name=".call.CallActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.pokou.pokou.ANSWER_CALL"/>
+                <action android:name="com.pokou.pokou.DECLINE_CALL"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- La réponse rapide depuis une notification de message. Le texte
+             est mis en FILE et chiffré par Flutter : le natif ne détient
+             aucune clé, et ne doit jamais en détenir. -->
+        <receiver
+            android:name=".messaging.ReplyActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.pokou.pokou.REPLY_MESSAGE"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- Les notifications planifiées (versets de 6 h et 18 h) : l'un les
+             déclenche à l'heure, l'autre les repose après un redémarrage —
+             Android efface toutes les alarmes quand le téléphone s'éteint. -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

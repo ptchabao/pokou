@@ -1,0 +1,42 @@
+# ingress-nginx + cert-manager. Deux hôtes, comme docs/mise-en-service.md :
+#   api.pok.app → toute l'API ;
+#   pok.app     → seulement les chemins publics (App Links, invitations),
+#                 sans préfixe /api/v1.
+# Les noms d'hôte sont remplacés par l'overlay.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pokou-api
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Pièces jointes : media_max_size_mb (25 Mo) plus une marge.
+    nginx.ingress.kubernetes.io/proxy-body-size: "30m"
+    # WebSocket : une connexion inactive n'est pas coupée au bout de 60 s.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [api.pok.app, pok.app]
+      secretName: pokou-api-tls
+  rules:
+    - host: api.pok.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pokou-api
+                port:
+                  name: http
+    - host: pok.app
+      http:
+        paths:
+          - { path: /.well-known, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
+          - { path: /invite, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
+          - { path: /c, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
+          - { path: /channel, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }
+          - { path: /bot, pathType: Prefix, backend: { service: { name: pokou-api, port: { name: http } } } }

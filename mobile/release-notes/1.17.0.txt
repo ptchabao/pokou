@@ -1,0 +1,36 @@
+<fr-FR>
+• Notifications repensées : une seule par conversation, avec ses derniers messages et le nom de l'expéditeur.
+• Lisez le message directement dans la notification — même chiffré, il est déchiffré sur votre téléphone.
+• Répondez ou marquez comme lu sans ouvrir Pokou.
+• Pendant un appel, le bouton retour ne raccroche plus : un bandeau « Appel en cours » vous ramène à l'appel.
+</fr-FR>
+<en-US>
+• Redesigned notifications: one per conversation, with its latest messages and the sender's name.
+• Read the message right in the notification — even encrypted, it is decrypted on your phone.
+• Reply or mark as read without opening Pokou.
+• During a call, the back button no longer hangs up: an "Ongoing call" banner takes you back to it.
+</en-US>
+<es-ES>
+• Notificaciones renovadas: una por conversación, con sus últimos mensajes y el nombre del remitente.
+• Lee el mensaje en la propia notificación: aunque esté cifrado, se descifra en tu teléfono.
+• Responde o marca como leído sin abrir Pokou.
+• Durante una llamada, el botón atrás ya no cuelga: un aviso «Llamada en curso» te devuelve a ella.
+</es-ES>
+<it-IT>
+• Notifiche rinnovate: una per conversazione, con gli ultimi messaggi e il nome del mittente.
+• Leggi il messaggio direttamente nella notifica: anche se crittografato, viene decifrato sul tuo telefono.
+• Rispondi o segna come letto senza aprire Pokou.
+• Durante una chiamata, il tasto indietro non riaggancia più: un banner «Chiamata in corso» ti riporta alla chiamata.
+</it-IT>
+<ru-RU>
+• Новые уведомления: одно на беседу, с последними сообщениями и именем отправителя.
+• Читайте сообщение прямо в уведомлении — даже зашифрованное, оно расшифровывается на вашем телефоне.
+• Отвечайте или отмечайте как прочитанное, не открывая Pokou.
+• Во время звонка кнопка «Назад» больше не завершает его: баннер «Идёт звонок» вернёт вас к разговору.
+</ru-RU>
+<ar>
+• إشعارات مُعاد تصميمها: إشعار واحد لكل محادثة، مع آخر رسائلها واسم المرسل.
+• اقرأ الرسالة مباشرة في الإشعار — حتى المشفّرة منها تُفكّ على هاتفك.
+• ردّ أو علّم كمقروءة دون فتح Pokou.
+• أثناء المكالمة، لم يعد زر الرجوع يُنهيها: شريط «مكالمة جارية» يعيدك إليها.
+</ar>

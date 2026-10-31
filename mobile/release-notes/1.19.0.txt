@@ -1,0 +1,36 @@
+<fr-FR>
+• Nouvel accueil : vos discussions et vos cagnottes en un coup d'œil.
+• Kory : créez une cagnotte ou une cotisation, chacun déclare sa contribution et le collecteur la confirme. Pokou ne touche jamais l'argent.
+• Créez une cagnotte directement depuis un groupe.
+• Actus, Appels et Marché se trouvent maintenant dans « Plus ».
+</fr-FR>
+<en-US>
+• New home screen: your chats and pots at a glance.
+• Kory: create a pot or a regular contribution, everyone declares what they gave and the collector confirms it. Pokou never touches the money.
+• Create a pot straight from a group.
+• Updates, Calls and Market now live under “More”.
+</en-US>
+<es-ES>
+• Nueva pantalla de inicio: tus chats y colectas de un vistazo.
+• Kory: crea una colecta o una cotización, cada uno declara su contribución y el recaudador la confirma. Pokou nunca toca el dinero.
+• Crea una colecta directamente desde un grupo.
+• Novedades, Llamadas y Mercado están ahora en «Más».
+</es-ES>
+<it-IT>
+• Nuova home: chat e collette a colpo d'occhio.
+• Kory: crea una colletta o una quota, ognuno dichiara il proprio contributo e il collettore lo conferma. Pokou non tocca mai il denaro.
+• Crea una colletta direttamente da un gruppo.
+• Aggiornamenti, Chiamate e Mercato ora sono in «Altro».
+</it-IT>
+<ru-RU>
+• Новый главный экран: чаты и сборы с первого взгляда.
+• Kory: создайте сбор или регулярный взнос — каждый отмечает свой вклад, а сборщик его подтверждает. Pokou никогда не касается денег.
+• Создавайте сбор прямо из группы.
+• Новости, Звонки и Маркет теперь в разделе «Ещё».
+</ru-RU>
+<ar>
+• شاشة رئيسية جديدة: محادثاتك وصناديقك في لمحة.
+• Kory: أنشئ صندوقًا أو اشتراكًا، ويصرّح كل عضو بمساهمته ويؤكدها الجامع. لا يلمس Pokou المال أبدًا.
+• أنشئ صندوقًا مباشرة من مجموعة.
+• المستجدات والمكالمات والسوق أصبحت الآن في «المزيد».
+</ar>
