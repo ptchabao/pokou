@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, MessageReplyPreview, PendingMedia, PollData;
 
@@ -310,12 +311,12 @@ class GroupMessage {
     'content': content,
     'media_asset_id': mediaAssetId,
     'media': media?.toJson(),
-    'created_at': createdAt.toIso8601String(),
+    'created_at': createdAt.toUtc().toIso8601String(),
     'reply_to_id': replyToId,
     'reply_to': replyTo?.toJson(),
     'reactions': reactions.map((reaction) => reaction.toJson()).toList(),
-    'edited_at': editedAt?.toIso8601String(),
-    'expires_at': expiresAt?.toIso8601String(),
+    'edited_at': editedAt?.toUtc().toIso8601String(),
+    'expires_at': expiresAt?.toUtc().toIso8601String(),
     'mentions': mentions.map((mention) => mention.toJson()).toList(),
     // Cache LOCAL seulement — voir `pendingMedia`.
     if (pendingMedia != null) 'pending_media': pendingMedia!.toJson(),
@@ -341,7 +342,7 @@ class GroupMessage {
       content: json['content'] as String?,
       mediaAssetId: json['media_asset_id'] as int?,
       media: mediaJson != null ? MediaMeta.fromJson(mediaJson) : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerTime(json['created_at'] as String),
       replyToId: json['reply_to_id'] as String?,
       replyTo: replyToJson != null
           ? MessageReplyPreview.fromJson(replyToJson)
@@ -353,14 +354,14 @@ class GroupMessage {
           )
           .toList(),
       editedAt: json['edited_at'] != null
-          ? DateTime.parse(json['edited_at'] as String)
+          ? parseServerTime(json['edited_at'] as String)
           : null,
       deletedAt: json['deleted_at'] != null
-          ? DateTime.parse(json['deleted_at'] as String)
+          ? parseServerTime(json['deleted_at'] as String)
           : null,
       originalContent: json['original_content'] as String?,
       expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'] as String)
+          ? parseServerTime(json['expires_at'] as String)
           : null,
       mentions: (json['mentions'] as List<dynamic>? ?? const [])
           .map((raw) => GroupMentionRef.fromJson(raw as Map<String, dynamic>))

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/localized_harness.dart';
 import 'package:pokou/features/messaging/presentation/location_bubble.dart';
+import 'package:pokou/core/time/server_time.dart';
 
 Widget _wrap(Widget child) => localizedHarness(child);
 
@@ -19,7 +20,8 @@ void main() {
   });
 
   testWidgets('affiche le badge "En direct" quand live_until est dans le futur', (tester) async {
-    final liveUntil = DateTime.now().add(const Duration(hours: 2)).toIso8601String();
+    // Comme le serveur l'écrit : UTC, sans indicateur de fuseau.
+    final liveUntil = toServerTime(DateTime.now().add(const Duration(hours: 2)));
     await tester.pumpWidget(_wrap(LocationBubble(
       payload: {'latitude': 6.1319, 'longitude': 1.2228, 'label': null, 'live_until': liveUntil},
     )));
@@ -28,7 +30,7 @@ void main() {
   });
 
   testWidgets('ne montre pas "En direct" quand live_until est déjà passé', (tester) async {
-    final expired = DateTime.now().subtract(const Duration(minutes: 5)).toIso8601String();
+    final expired = toServerTime(DateTime.now().subtract(const Duration(minutes: 5)));
     await tester.pumpWidget(_wrap(LocationBubble(
       payload: {'latitude': 6.1319, 'longitude': 1.2228, 'label': null, 'live_until': expired},
     )));

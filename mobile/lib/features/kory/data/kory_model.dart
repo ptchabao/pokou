@@ -1,3 +1,4 @@
+import '../../../core/time/server_time.dart';
 /// Kory — une cagnotte ou une cotisation, telle que le serveur la décrit.
 ///
 /// Aucun champ ne s'appelle « solde » : Pokou ne détient rien (BM-01).
@@ -86,7 +87,7 @@ class KoryPot {
     goalAmount: json['goal_amount'] as int?,
     amountPerMember: json['amount_per_member'] as int?,
     period: json['period'] as String?,
-    dueAt: DateTime.tryParse(json['due_at'] as String? ?? ''),
+    dueAt: tryParseServerTime(json['due_at'] as String? ?? ''),
     status: json['status'] as String? ?? 'OPEN',
     confirmedTotal: json['confirmed_total'] as int? ?? 0,
     myConfirmedTotal: json['my_confirmed_total'] as int? ?? 0,
@@ -133,7 +134,7 @@ class KoryRound {
     number: json['number'] as int,
     beneficiaryId: json['beneficiary_id'] as int,
     beneficiaryName: json['beneficiary_name'] as String?,
-    dueAt: DateTime.tryParse(json['due_at'] as String? ?? ''),
+    dueAt: tryParseServerTime(json['due_at'] as String? ?? ''),
     status: json['status'] as String? ?? 'UPCOMING',
     confirmedTotal: json['confirmed_total'] as int? ?? 0,
     expectedTotal: json['expected_total'] as int? ?? 0,
@@ -187,7 +188,7 @@ class KoryEntry {
     note: json['note'] as String?,
     status: json['status'] as String? ?? 'DECLARED',
     declaredAt:
-        DateTime.tryParse(json['declared_at'] as String? ?? '') ??
+        tryParseServerTime(json['declared_at'] as String? ?? '') ??
         DateTime.now(),
     isMine: json['is_mine'] as bool? ?? false,
     roundNumber: json['round_number'] as int?,

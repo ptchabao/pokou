@@ -1,5 +1,6 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../l10n/app_localizations.dart';
+import '../../../core/time/server_time.dart';
 
 class PokouStatus {
   const PokouStatus({
@@ -32,8 +33,8 @@ class PokouStatus {
       contentType: json['content_type'] as String,
       textContent: json['text_content'] as String?,
       media: mediaJson != null ? MediaMeta.fromJson(mediaJson) : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      expiresAt: DateTime.parse(json['expires_at'] as String),
+      createdAt: parseServerTime(json['created_at'] as String),
+      expiresAt: parseServerTime(json['expires_at'] as String),
       viewedByMe: json['viewed_by_me'] as bool? ?? false,
       viewCount: json['view_count'] as int? ?? 0,
     );
@@ -168,7 +169,7 @@ class StatusViewer {
       // Repli défensif : le serveur fournit toujours un nom.
       displayName: json['display_name'] as String? ?? '',
       avatar: avatarJson == null ? null : MediaMeta.fromJson(avatarJson),
-      viewedAt: DateTime.parse(json['viewed_at'] as String),
+      viewedAt: parseServerTime(json['viewed_at'] as String),
     );
   }
 }

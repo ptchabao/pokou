@@ -2,6 +2,7 @@ import '../../../core/api/api_client.dart';
 import '../../messaging/data/direct_message_model.dart';
 import 'ad_model.dart';
 import 'product_model.dart';
+import '../../../core/time/server_time.dart';
 
 class PaginatedProducts {
   const PaginatedProducts({
@@ -465,8 +466,8 @@ class BoostReport {
 
   factory BoostReport.fromJson(Map<String, dynamic> json) => BoostReport(
     days: json['days'] as int?,
-    startsAt: DateTime.parse('${json['starts_at']}Z'),
-    expiresAt: DateTime.parse('${json['expires_at']}Z'),
+    startsAt: parseServerTime(json['starts_at'] as String),
+    expiresAt: parseServerTime(json['expires_at'] as String),
     active: json['active'] as bool? ?? false,
     impressions: json['impressions'] as int? ?? 0,
     statusViews: json['status_views'] as int? ?? 0,

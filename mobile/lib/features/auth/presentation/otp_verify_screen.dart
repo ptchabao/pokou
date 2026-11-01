@@ -45,9 +45,11 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   late final AnimationController _successController;
   bool _success = false;
   String? _error;
-  /// 60 s, comme le serveur (RESEND_MIN_SECONDS) : un bouton qui se
-  /// réactive avant que le serveur accepte ne produirait qu'un refus.
-  int _resendCooldown = 60;
+  /// 50 s, comme le serveur (RESEND_MIN_SECONDS, égal à la durée de vie du
+  /// code) : un bouton qui se réactive avant que le serveur accepte ne
+  /// produirait qu'un refus, et après, le code aurait déjà expiré.
+  static const _cooldownSeconds = 50;
+  int _resendCooldown = _cooldownSeconds;
   Timer? _timer;
 
   @override
@@ -69,7 +71,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   }
 
   void _startCooldown() {
-    _resendCooldown = 60;
+    _resendCooldown = _cooldownSeconds;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_resendCooldown <= 1) {

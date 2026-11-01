@@ -1,5 +1,6 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../messaging/data/direct_message_model.dart' show PollData;
+import '../../../core/time/server_time.dart';
 
 class PokouChannel {
   const PokouChannel({
@@ -193,8 +194,8 @@ class ChannelPost {
       authorName: json['author_name'] as String? ?? 'Chaîne',
       textContent: json['text_content'] as String?,
       media: mediaJson == null ? null : MediaMeta.fromJson(mediaJson),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      editedAt: editedAt == null ? null : DateTime.tryParse(editedAt),
+      createdAt: parseServerTime(json['created_at'] as String),
+      editedAt: editedAt == null ? null : tryParseServerTime(editedAt),
       viewCount: json['view_count'] as int? ?? 0,
       reactions: ((json['reactions'] as List?) ?? const [])
           .whereType<Map<String, dynamic>>()

@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/time/server_time.dart';
 
 /// Minou dans Pokou — voir api/app/routes/vault_minou.py.
 ///
@@ -125,7 +126,7 @@ class MinouThreadItem {
         isMine: json['direction'] == 'out',
         isAlert: json['kind'] == 'alert',
         body: json['body'] as String? ?? '',
-        createdAt: DateTime.parse(json['created_at'] as String),
+        createdAt: parseServerTime(json['created_at'] as String),
         title: json['title'] as String?,
         severity: json['severity'] as String?,
         severityLabel: json['severity_label'] as String?,

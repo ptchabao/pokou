@@ -1,5 +1,6 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../l10n/app_localizations.dart';
+import '../../../core/time/server_time.dart';
 
 /// Aperçu du dernier message d'une conversation — juste de quoi remplir une
 /// ligne de la liste (voir GET /conversations, api/app/routes/conversations.py
@@ -40,7 +41,7 @@ class ConversationPreview {
         messageId: json['id'] as String,
         messageType: json['message_type'] as String? ?? 'TEXT',
         content: json['content'] as String?,
-        createdAt: DateTime.parse(json['created_at'] as String),
+        createdAt: parseServerTime(json['created_at'] as String),
         senderId: json['sender_id'] as int,
         senderName: json['sender_name'] as String?,
         isMine: json['is_mine'] as bool? ?? false,

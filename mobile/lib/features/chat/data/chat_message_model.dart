@@ -1,3 +1,4 @@
+import '../../../core/time/server_time.dart';
 enum ChatRole { user, assistant }
 
 class ChatMessage {
@@ -20,7 +21,7 @@ class ChatMessage {
     'monitor_id': monitorId,
     'role': role.name,
     'content': content,
-    'created_at': createdAt.toIso8601String(),
+    'created_at': createdAt.toUtc().toIso8601String(),
   };
 
   factory ChatMessage.fromMap(Map<String, dynamic> map) {
@@ -29,7 +30,7 @@ class ChatMessage {
       monitorId: map['monitor_id'] as int,
       role: map['role'] == 'user' ? ChatRole.user : ChatRole.assistant,
       content: map['content'] as String,
-      createdAt: DateTime.parse(map['created_at'] as String),
+      createdAt: parseServerTime(map['created_at'] as String),
     );
   }
 }

@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 
 /// Une catégorie du marché, telle que l'administration l'a réglée.
 class MarketCategory {
@@ -324,7 +325,7 @@ class SellerReview {
     authorName: json['author_name'] as String? ?? 'Utilisateur',
     rating: json['rating'] as int,
     comment: json['comment'] as String?,
-    createdAt: DateTime.parse(json['created_at'] as String),
+    createdAt: parseServerTime(json['created_at'] as String),
     isMine: json['is_mine'] as bool? ?? false,
   );
 }

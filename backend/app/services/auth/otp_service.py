@@ -19,9 +19,11 @@ from app.core.security import hash_password, verify_password
 logger = logging.getLogger(__name__)
 
 OTP_LENGTH = 6
-OTP_TTL_MINUTES = 5
+#: Un code vit 50 secondes : le temps de le lire dans le SMS et de le
+#: saisir, pas celui de le transmettre à quelqu'un d'autre.
+OTP_TTL_SECONDS = 50
 # Durée de vie du code d'un compte de démonstration. Bien plus longue que
-# les 5 minutes ordinaires, pour une raison pratique : un relecteur de store
+# les 50 secondes ordinaires, pour une raison pratique : un relecteur de store
 # prend des captures, remplit un formulaire, revient — et seules 3 demandes
 # sont permises par quart d'heure. Un code expiré au mauvais moment se
 # conclut par « nous n'avons pas pu nous connecter », c'est-à-dire un refus
@@ -34,10 +36,11 @@ REVIEW_OTP_TTL_MINUTES = 60
 MAX_VERIFY_ATTEMPTS = 5
 RATE_LIMIT_WINDOW_MINUTES = 15
 RATE_LIMIT_MAX_REQUESTS = 3
-#: Délai minimal entre deux envois au même numéro (cahier des charges,
-#: section 8.1 : « renvoi après 60 s »). L'écran affiche le même compte à
-#: rebours ; le serveur le fait respecter.
-RESEND_MIN_SECONDS = 60
+#: Délai minimal entre deux envois au même numéro. Aligné sur la durée de
+#: vie du code : on peut en redemander un dès que le précédent a expiré,
+#: jamais avant. L'écran affiche le même compte à rebours ; le serveur le
+#: fait respecter.
+RESEND_MIN_SECONDS = OTP_TTL_SECONDS
 #: Cinq codes faux, tous codes confondus, verrouillent le numéro quinze
 #: minutes. Sans ce cumul, redemander un code remettait le compteur à zéro.
 LOCKOUT_MINUTES = 15
@@ -120,7 +123,7 @@ def _otp_message(code: str) -> str:
     """Le message nomme POKOU : c'est l'application que la personne vient
     d'ouvrir. Un code arrivant au nom d'une marque qu'elle n'a jamais vue se
     lit comme une tentative d'hameçonnage, et se jette."""
-    return f"Votre code Pokou est {code}. Il expire dans {OTP_TTL_MINUTES} minutes."
+    return f"Votre code Pokou est {code}. Il expire dans {OTP_TTL_SECONDS} secondes."
 
 
 def _send_whatsapp_otp(phone: str, code: str) -> None:
@@ -208,12 +211,12 @@ def generate_and_send_otp(db: Session, raw_phone: str, channel: str = "both") ->
     else:
         code = f"{secrets.randbelow(10 ** OTP_LENGTH):0{OTP_LENGTH}d}"
 
-    ttl_minutes = REVIEW_OTP_TTL_MINUTES if is_review else OTP_TTL_MINUTES
+    ttl_seconds = REVIEW_OTP_TTL_MINUTES * 60 if is_review else OTP_TTL_SECONDS
 
     otp = PhoneOTP(
         phone=phone,
         code_hash=hash_password(code),
-        expires_at=datetime.utcnow() + timedelta(minutes=ttl_minutes),
+        expires_at=datetime.utcnow() + timedelta(seconds=ttl_seconds),
     )
     db.add(otp)
     db.commit()
@@ -234,21 +237,21 @@ def generate_and_send_otp(db: Session, raw_phone: str, channel: str = "both") ->
     # sans condition. Le numéro figurait sur la même ligne : quiconque lisait
     # les journaux (hébergeur, supervision, export de débogage, capture
     # d'écran d'un terminal) pouvait se connecter à n'importe quel compte. Un
-    # code à usage unique de cinq minutes reste un mot de passe le temps de
-    # ces cinq minutes, et un journal se conserve bien plus longtemps.
+    # code à usage unique de 50 secondes reste un mot de passe le temps de
+    # ces 50 secondes, et un journal se conserve bien plus longtemps.
     #
     # Ce qui est journalisé à la place suffit à diagnostiquer « je ne reçois
     # rien » : qu'un code a été émis, pour quel numéro, et par quel canal.
     # Ce qui manquait pour déboguer, ce n'était pas le code — c'était de
     # savoir si le SMS était parti, et sms_service le dit maintenant.
     logger.info(
-        "[OTP] Code émis pour %s (canal: %s, validité: %s min)",
+        "[OTP] Code émis pour %s (canal: %s, validité: %s s)",
         phone,
         channel,
-        ttl_minutes,
+        ttl_seconds,
     )
 
-    return ttl_minutes * 60
+    return ttl_seconds
 
 
 def get_or_create_user_by_phone(db: Session, phone: str) -> User:

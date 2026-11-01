@@ -33,9 +33,13 @@ Ce que le code ne peut pas faire seul. À cocher avant la première publication.
 
 - [ ] `SECRET_KEY`, `WEBHOOK_HMAC_SECRET` (l'API refuse de démarrer sans).
 - [ ] PostgreSQL (`DATABASE_URL`), Redis (`REDIS_URL`), bucket S3 (`S3_*`).
-- [ ] SMS : identifiants NGH et identifiant d'expéditeur **POKOU déclaré chez
-      l'opérateur** (`SMS_SENDER_ID`) — un expéditeur non déclaré fait
-      refuser tous les codes de connexion.
+- [ ] SMS par Twilio : `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, et
+      `TWILIO_SMS_FROM` (numéro Twilio ou identifiant alphanumérique POKOU,
+      à faire enregistrer chez Twilio pour le Togo et la Côte d'Ivoire) ou
+      `TWILIO_MESSAGING_SERVICE_SID`. En local dans `backend/.env`, en
+      production dans le Secret. Le code est valable 50 secondes.
+- [ ] Secours facultatif : identifiants NGH et `SMS_SENDER_ID` déclaré chez
+      l'opérateur.
 - [ ] WhatsApp : passerelle ou Twilio.
 - [ ] Firebase : compte de service (`FIREBASE_CREDENTIALS_JSON`), `FCM_ENABLED=true`.
 - [ ] LiveKit Cloud (`LIVEKIT_*`).

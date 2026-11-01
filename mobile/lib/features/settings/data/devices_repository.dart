@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/time/server_time.dart';
 
 /// Un appareil = un jeton FCM enregistré côté serveur (voir
 /// api/app/routes/devices.py). Il n'y a pas de sessions persistées dans
@@ -25,8 +26,8 @@ class PokouDevice {
   factory PokouDevice.fromJson(Map<String, dynamic> json) => PokouDevice(
     id: json['id'] as int,
     platform: json['platform'] as String,
-    registeredAt: DateTime.parse(json['registered_at'] as String),
-    lastSeenAt: DateTime.parse(json['last_seen_at'] as String),
+    registeredAt: parseServerTime(json['registered_at'] as String),
+    lastSeenAt: parseServerTime(json['last_seen_at'] as String),
     tokenHint: json['token_hint'] as String,
     isCurrent: json['is_current'] as bool? ?? false,
   );

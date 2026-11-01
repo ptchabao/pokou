@@ -1,9 +1,17 @@
-"""Envoi de SMS via la passerelle NGH.
+"""Envoi de SMS : Twilio d'abord, la passerelle NGH en secours.
 
 Seul usage dans Pokou : livrer les codes de connexion (voir
-services/auth/otp_service.py). Les identifiants de la passerelle se règlent
-à chaud dans les réglages système (`ngh_api_key`/`ngh_api_secret`), avec
-repli sur l'environnement.
+services/auth/otp_service.py).
+
+- **Twilio** (canal principal) : identifiants dans l'environnement
+  (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, et `TWILIO_SMS_FROM` ou
+  `TWILIO_MESSAGING_SERVICE_SID`), donc dans le `.env` en local et dans le
+  Secret Kubernetes en production. Le code reste généré et vérifié par
+  Pokou : Twilio ne fait que transporter le SMS, si bien que l'expiration,
+  le plafond d'essais et le blocage restent les nôtres.
+- **NGH** (secours) : utilisée si Twilio n'est pas configuré ou refuse
+  l'envoi. Ses identifiants se règlent à chaud dans les réglages système
+  (`ngh_api_key`/`ngh_api_secret`), avec repli sur l'environnement.
 """
 import logging
 import re
@@ -19,6 +27,67 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 NGH_SEND_SMS_URL = "https://extranet.nghcorp.net/api/send-sms"
+TWILIO_MESSAGES_URL = "https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json"
+
+
+def twilio_configured() -> bool:
+    s = get_settings()
+    return bool(
+        s.twilio_account_sid and s.twilio_auth_token
+        and (s.twilio_sms_from or s.twilio_messaging_service_sid)
+    )
+
+
+def _send_via_twilio(to: str, text: str) -> bool:
+    """Un SMS par l'API Messages de Twilio. Renvoie `True` si Twilio l'a
+    accepté (HTTP 201). Le texte n'est jamais journalisé : il porte le code."""
+    s = get_settings()
+    destination = "+" + _gateway_msisdn(to)
+    if destination == "+":
+        logger.error("[SMS] Numéro inexploitable, envoi Twilio abandonné (reçu: %r)", to)
+        return False
+    data = {"To": destination, "Body": text}
+    # Un service de messagerie choisit lui-même l'expéditeur selon le pays ;
+    # sinon, le numéro ou l'identifiant alphanumérique déclaré.
+    if s.twilio_messaging_service_sid:
+        data["MessagingServiceSid"] = s.twilio_messaging_service_sid
+    else:
+        data["From"] = s.twilio_sms_from
+    try:
+        response = httpx.post(
+            TWILIO_MESSAGES_URL.format(sid=s.twilio_account_sid),
+            data=data,
+            auth=(s.twilio_account_sid, s.twilio_auth_token),
+            timeout=15,
+        )
+    except Exception:
+        logger.exception("[SMS] Twilio injoignable pour %s", destination)
+        return False
+    if response.status_code >= 400:
+        try:
+            body = response.json()
+        except Exception:
+            body = {}
+        logger.error(
+            "[SMS] Twilio a refusé le message pour %s — HTTP %s, code=%s, message=%s",
+            destination, response.status_code, body.get("code"), body.get("message"),
+        )
+        return False
+    try:
+        sid = response.json().get("sid")
+    except Exception:
+        sid = None
+    logger.info("[SMS] Accepté par Twilio pour %s — sid=%s", destination, sid)
+    return True
+
+
+def send_sms(db: Session, to: str, text: str, from_sender: str) -> bool:
+    """Twilio si configuré ; NGH sinon, ou si Twilio refuse."""
+    if twilio_configured():
+        if _send_via_twilio(to, text):
+            return True
+        logger.warning("[SMS] Échec Twilio pour %s : essai par NGH", _gateway_msisdn(to))
+    return _send_via_ngh(db, to, text, from_sender)
 
 
 def _gateway_msisdn(number: str) -> str:
@@ -35,7 +104,7 @@ def _gateway_msisdn(number: str) -> str:
     return re.sub(r"\D", "", number or "")
 
 
-def send_sms(db: Session, to: str, text: str, from_sender: str) -> bool:
+def _send_via_ngh(db: Session, to: str, text: str, from_sender: str) -> bool:
     """Un SMS via la passerelle NGH. Renvoie `True` si elle l'a ACCEPTÉ.
 
     NGH répond HTTP 200 avec un corps qui porte le vrai verdict

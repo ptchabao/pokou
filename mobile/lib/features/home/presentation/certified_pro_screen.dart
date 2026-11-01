@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../honam/presentation/honam_controller.dart' show openPayment;
 import '../../modules/shared/module_ui.dart';
+import '../../../core/time/server_time.dart';
 
 final _proProvider = FutureProvider.autoDispose<
     ({Map<String, dynamic> application, Map<String, dynamic> profile})>((ref) async {
@@ -42,7 +43,7 @@ class CertifiedProScreen extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     String date(String? iso) => iso == null
         ? ''
-        : DateFormat.MMMEd(locale).add_Hm().format(DateTime.parse('${iso}Z').toLocal());
+        : DateFormat.MMMEd(locale).add_Hm().format(parseServerTime(iso));
 
     return ModuleScaffold(
       title: l.proTitle,

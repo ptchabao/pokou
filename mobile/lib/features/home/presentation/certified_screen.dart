@@ -11,6 +11,7 @@ import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 import '../../kory/presentation/kory_screen.dart' show KoryStatusPill;
 import '../../modules/shared/module_ui.dart';
 import 'certified_pro_screen.dart';
+import '../../../core/time/server_time.dart';
 
 final _certifiedProvider = FutureProvider.autoDispose<
     ({Map<String, dynamic> status, Map<String, dynamic> offer})>((ref) async {
@@ -34,7 +35,7 @@ class CertifiedScreen extends ConsumerWidget {
     final api = ref.read(apiClientProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
     String date(String? iso) =>
-        iso == null ? '' : DateFormat.yMMMd(locale).format(DateTime.parse('${iso}Z').toLocal());
+        iso == null ? '' : DateFormat.yMMMd(locale).format(parseServerTime(iso));
 
     Future<void> post(String path, [Map<String, dynamic>? body]) async {
       try {

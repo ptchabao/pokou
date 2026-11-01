@@ -1,5 +1,6 @@
 import '../../../core/crypto/media_cipher.dart';
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 
 /// Fiche d'un contact, façon WhatsApp Business : ce qui a été échangé avec
 /// lui (médias, documents, liens), ce qu'on a en commun (groupes), et les
@@ -136,7 +137,7 @@ class SharedAttachment {
     return SharedAttachment(
       media: key?.toMeta(media.id) ?? media,
       messageType: json['message_type'] as String? ?? 'DOCUMENT',
-      sentAt: DateTime.parse(json['created_at'] as String),
+      sentAt: parseServerTime(json['created_at'] as String),
     );
   }
 }
@@ -157,7 +158,7 @@ class SharedLink {
     final sentAt = json['created_at'] as String?;
     return SharedLink(
       url: json['url'] as String,
-      sentAt: sentAt == null ? null : DateTime.tryParse(sentAt),
+      sentAt: sentAt == null ? null : tryParseServerTime(sentAt),
     );
   }
 

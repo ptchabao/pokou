@@ -31,7 +31,7 @@ Kafka pour les évènements métier. Les manifestes sont dans
    └────────────────────────────────────┘
 ```
 
-Hors du cluster : FCM (push), LiveKit Cloud (appels), passerelle SMS NGH,
+Hors du cluster : FCM (push), LiveKit Cloud (appels), Twilio (SMS des codes, NGH en secours),
 Semoa / CashPay (paiements).
 
 | Composant | Choix | Pourquoi |

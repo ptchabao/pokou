@@ -56,7 +56,8 @@ facturation de Pokou Business, purge des statuts expirés.
 
 | Service | Réglages | Rôle |
 |---|---|---|
-| NGH | `NGH_API_KEY`, `NGH_API_SECRET`, `SMS_SENDER_ID` | SMS des codes de connexion |
+| Twilio | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` ou `TWILIO_MESSAGING_SERVICE_SID` | SMS des codes de connexion (canal principal ; code valable 50 s) |
+| NGH | `NGH_API_KEY`, `NGH_API_SECRET`, `SMS_SENDER_ID` | SMS des codes, en secours de Twilio |
 | Passerelle WhatsApp / Twilio | `WHATSAPP_SERVICE_URL`, `TWILIO_*` | second canal des codes |
 | Firebase | `FCM_ENABLED`, `FIREBASE_CREDENTIALS_*` | notifications push |
 | LiveKit Cloud | `LIVEKIT_*` | appels audio/vidéo |

@@ -1,3 +1,4 @@
+import '../../../core/time/server_time.dart';
 /// HONAM, côté application : l'annuaire, les commandes du patient et le
 /// mode coursier. Les noms de médicaments ne sortent jamais du détail d'une
 /// commande (HON-04) : l'accueil n'affiche que l'état.
@@ -61,7 +62,7 @@ class TimelineStep {
 
   factory TimelineStep.fromJson(Map<String, dynamic> json) => TimelineStep(
     status: json['status'] as String,
-    at: DateTime.tryParse('${json['at']}Z') ?? DateTime.now(),
+    at: tryParseServerTime(json['at']) ?? DateTime.now(),
     note: json['note'] as String?,
   );
 }
@@ -141,7 +142,7 @@ class HonamOrder {
         : Pharmacy.fromJson(json['pharmacy'] as Map<String, dynamic>),
     deliveryAddress: json['delivery_address'] as String? ?? '',
     createdAt:
-        DateTime.tryParse('${json['created_at']}Z') ?? DateTime.now(),
+        tryParseServerTime(json['created_at']) ?? DateTime.now(),
     quoteItems: [
       for (final item in (json['quote_items'] as List? ?? const []))
         QuoteItem.fromJson(item as Map<String, dynamic>),
@@ -280,7 +281,7 @@ class CourierTracking {
     courierName: json['courier_name'] as String?,
     latitude: (json['latitude'] as num?)?.toDouble(),
     longitude: (json['longitude'] as num?)?.toDouble(),
-    at: json['at'] != null ? DateTime.parse(json['at'] as String) : null,
+    at: json['at'] != null ? parseServerTime(json['at'] as String) : null,
     stale: json['stale'] as bool? ?? false,
     distanceKm: (json['distance_km'] as num?)?.toDouble(),
   );

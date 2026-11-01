@@ -429,7 +429,7 @@ class PokouMessageStore {
             'id': kept.id,
             'sender_id': kept.senderId,
             'recipient_id': kept.recipientId,
-            'created_at': kept.createdAt.toIso8601String(),
+            'created_at': kept.createdAt.toUtc().toIso8601String(),
             'pending': _pendingFalse,
             'failed': _pendingFalse,
             'payload': jsonEncode(kept.toJson()),
@@ -469,7 +469,7 @@ class PokouMessageStore {
           await txn.insert('group_messages', {
             'id': groupMessage.id,
             'group_id': groupMessage.groupId,
-            'created_at': groupMessage.createdAt.toIso8601String(),
+            'created_at': groupMessage.createdAt.toUtc().toIso8601String(),
             'pending': _pendingFalse,
             'failed': _pendingFalse,
             'payload': jsonEncode(groupMessage.toJson()),
@@ -599,7 +599,7 @@ class PokouMessageStore {
         'id': message.id,
         'sender_id': message.senderId,
         'recipient_id': message.recipientId,
-        'created_at': message.createdAt.toIso8601String(),
+        'created_at': message.createdAt.toUtc().toIso8601String(),
         'pending': pending ? _pendingTrue : _pendingFalse,
         'failed': failed ? _pendingTrue : _pendingFalse,
         'payload': jsonEncode(message.toJson()),
@@ -683,7 +683,7 @@ class PokouMessageStore {
     );
     if (rows.isEmpty) return;
     final payload = _payloadOf(rows.single)
-      ..['deleted_at'] = at.toIso8601String();
+      ..['deleted_at'] = at.toUtc().toIso8601String();
     await db.update(
       'direct_messages',
       {'payload': jsonEncode(payload)},
@@ -738,7 +738,7 @@ class PokouMessageStore {
         'id': confirmed.id,
         'sender_id': confirmed.senderId,
         'recipient_id': confirmed.recipientId,
-        'created_at': confirmed.createdAt.toIso8601String(),
+        'created_at': confirmed.createdAt.toUtc().toIso8601String(),
         'pending': _pendingFalse,
         'failed': _pendingFalse,
         'payload': jsonEncode(confirmed.toJson()),
@@ -878,6 +878,7 @@ class PokouMessageStore {
     final oldest = serverMessages
         .map((message) => message.createdAt)
         .reduce((a, b) => a.isBefore(b) ? a : b)
+        .toUtc()
         .toIso8601String();
     final keptIds = serverMessages.map((message) => message.id).toList();
     final placeholders = List.filled(keptIds.length, '?').join(',');
@@ -913,7 +914,7 @@ class PokouMessageStore {
       batch.insert('group_messages', {
         'id': message.id,
         'group_id': message.groupId,
-        'created_at': message.createdAt.toIso8601String(),
+        'created_at': message.createdAt.toUtc().toIso8601String(),
         'pending': pending ? _pendingTrue : _pendingFalse,
         'failed': failed ? _pendingTrue : _pendingFalse,
         'payload': jsonEncode(message.toJson()),
@@ -952,7 +953,7 @@ class PokouMessageStore {
       await txn.insert('group_messages', {
         'id': confirmed.id,
         'group_id': confirmed.groupId,
-        'created_at': confirmed.createdAt.toIso8601String(),
+        'created_at': confirmed.createdAt.toUtc().toIso8601String(),
         'pending': _pendingFalse,
         'failed': _pendingFalse,
         'payload': jsonEncode(confirmed.toJson()),
@@ -992,6 +993,7 @@ class PokouMessageStore {
     final oldest = serverMessages
         .map((message) => message.createdAt)
         .reduce((a, b) => a.isBefore(b) ? a : b)
+        .toUtc()
         .toIso8601String();
     final keptIds = serverMessages.map((message) => message.id).toList();
     final placeholders = List.filled(keptIds.length, '?').join(',');

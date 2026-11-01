@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 
 class PokouUser {
   const PokouUser({
@@ -59,7 +60,7 @@ class PokouUser {
       isCertificationPending:
           json['is_certification_pending'] as bool? ?? false,
       isCertifiedSeller: json['is_certified_seller'] as bool? ?? false,
-      certifiedSellerUntil: DateTime.tryParse(
+      certifiedSellerUntil: tryParseServerTime(
         json['certified_seller_until'] as String? ?? '',
       ),
     );
@@ -76,7 +77,7 @@ class PokouUser {
     'is_verified': isVerified,
     'is_certification_pending': isCertificationPending,
     'is_certified_seller': isCertifiedSeller,
-    'certified_seller_until': certifiedSellerUntil?.toIso8601String(),
+    'certified_seller_until': certifiedSellerUntil?.toUtc().toIso8601String(),
   };
 
   PokouUser copyWith({

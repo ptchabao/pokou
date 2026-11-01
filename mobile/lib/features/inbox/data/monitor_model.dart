@@ -1,3 +1,4 @@
+import '../../../core/time/server_time.dart';
 /// A "Smart Contact" in Pokou's inbox — maps 1:1 to a backend `Monitor`
 /// (an intention bound to a connected data source, e.g. "Mon Stock Excel").
 class SmartContact {
@@ -24,7 +25,7 @@ class SmartContact {
       intention: json['intention'] as String,
       status: json['status'] as String? ?? 'INACTIVE',
       lastEvaluatedAt: json['last_evaluated_at'] != null
-          ? DateTime.tryParse(json['last_evaluated_at'] as String)
+          ? tryParseServerTime(json['last_evaluated_at'] as String)
           : null,
     );
   }

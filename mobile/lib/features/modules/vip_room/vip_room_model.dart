@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 
 /// Un salon d'abonnés.
 class VipRoom {
@@ -41,7 +42,7 @@ class VipRoom {
     isSubscribed: json['is_subscribed'] as bool? ?? false,
     ownerName: json['owner_name'] as String?,
     expiresAt: json['expires_at'] != null
-        ? DateTime.tryParse(json['expires_at'] as String)
+        ? tryParseServerTime(json['expires_at'] as String)
         : null,
   );
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/api_client.dart';
 import '../providers.dart';
+import '../time/server_time.dart';
 
 /// L'identité d'une personne, telle qu'elle s'affiche partout.
 ///
@@ -46,7 +47,7 @@ class Presence {
     isOnline: json['is_online'] as bool?,
     lastSeenAt: json['last_seen_at'] == null
         ? null
-        : DateTime.tryParse(json['last_seen_at'] as String),
+        : tryParseServerTime(json['last_seen_at'] as String),
   );
 
   static const inconnue = Presence();

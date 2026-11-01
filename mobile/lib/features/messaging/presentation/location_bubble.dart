@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/time/server_time.dart';
 
 /// Rendu d'un message de type LOCATION — pas de carte interactive (aucune clé
 /// de service de cartes n'est configurée dans ce projet), une carte compacte
@@ -30,7 +31,7 @@ class _LocationBubbleState extends State<LocationBubble> {
 
   DateTime? get _liveUntil {
     final raw = widget.payload['live_until'] as String?;
-    return raw == null ? null : DateTime.tryParse(raw);
+    return raw == null ? null : tryParseServerTime(raw);
   }
 
   bool get _isLive {

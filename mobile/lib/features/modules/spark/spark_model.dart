@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 
 /// Ce que je cherche aujourd'hui.
 class SparkIntent {
@@ -411,7 +412,7 @@ class SparkDate {
     status: json['status'] as String? ?? 'PENDING',
     amount: json['amount'] as int? ?? 0,
     scheduledAt:
-        DateTime.tryParse(json['scheduled_at'] as String? ?? '') ??
+        tryParseServerTime(json['scheduled_at'] as String? ?? '') ??
         DateTime.now(),
     isPayer: json['is_payer'] as bool? ?? false,
     iValidated: json['i_validated'] as bool? ?? false,
@@ -498,7 +499,7 @@ class SparkCheckin {
 
   factory SparkCheckin.fromJson(Map<String, dynamic> json) => SparkCheckin(
     id: json['id'] as int? ?? 0,
-    dueAt: DateTime.tryParse(json['due_at'] as String? ?? '') ?? DateTime.now(),
+    dueAt: tryParseServerTime(json['due_at'] as String? ?? '') ?? DateTime.now(),
     dateId: json['date_id'] as int?,
   );
 }

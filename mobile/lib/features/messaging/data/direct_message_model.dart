@@ -1,5 +1,6 @@
 import '../../../core/crypto/media_cipher.dart';
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/time/server_time.dart';
 
 enum DirectMessageStatus { sent, delivered, read }
 
@@ -363,7 +364,7 @@ class DirectMessage {
       mediaAssetId: json['media_asset_id'] as int?,
       media: mediaJson != null ? MediaMeta.fromJson(mediaJson) : null,
       status: _statusFrom(json['status'] as String?),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerTime(json['created_at'] as String),
       replyToId: json['reply_to_id'] as String?,
       replyTo: replyToJson != null
           ? MessageReplyPreview.fromJson(replyToJson)
@@ -375,21 +376,21 @@ class DirectMessage {
           )
           .toList(),
       editedAt: json['edited_at'] != null
-          ? DateTime.parse(json['edited_at'] as String)
+          ? parseServerTime(json['edited_at'] as String)
           : null,
       expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'] as String)
+          ? parseServerTime(json['expires_at'] as String)
           : null,
       viewOnce: json['view_once'] as bool? ?? false,
       viewedAt: json['viewed_at'] != null
-          ? DateTime.parse(json['viewed_at'] as String)
+          ? parseServerTime(json['viewed_at'] as String)
           : null,
       payload: json['payload'] as Map<String, dynamic>?,
       poll: pollJson != null ? PollData.fromJson(pollJson) : null,
       pendingMedia: enAttente == null ? null : PendingMedia.fromJson(enAttente),
       proofMode: json['proof_mode'] as bool? ?? false,
       deletedAt: json['deleted_at'] != null
-          ? DateTime.parse(json['deleted_at'] as String)
+          ? parseServerTime(json['deleted_at'] as String)
           : null,
       originalContent: json['original_content'] as String?,
       mediaKey: fromCache && json['encryption'] == null
@@ -436,18 +437,18 @@ class DirectMessage {
     'media_asset_id': mediaAssetId,
     'media': media?.toJson(),
     'status': _statusTo(status),
-    'created_at': createdAt.toIso8601String(),
+    'created_at': createdAt.toUtc().toIso8601String(),
     'reply_to_id': replyToId,
     'reply_to': replyTo?.toJson(),
     'reactions': reactions.map((reaction) => reaction.toJson()).toList(),
-    'edited_at': editedAt?.toIso8601String(),
-    'expires_at': expiresAt?.toIso8601String(),
+    'edited_at': editedAt?.toUtc().toIso8601String(),
+    'expires_at': expiresAt?.toUtc().toIso8601String(),
     'view_once': viewOnce,
-    'viewed_at': viewedAt?.toIso8601String(),
+    'viewed_at': viewedAt?.toUtc().toIso8601String(),
     'payload': payload,
     'poll': poll?.toJson(),
     'proof_mode': proofMode,
-    'deleted_at': deletedAt?.toIso8601String(),
+    'deleted_at': deletedAt?.toUtc().toIso8601String(),
     'original_content': originalContent,
     // Cache LOCAL seulement — voir `pendingMedia`.
     if (pendingMedia != null) 'pending_media': pendingMedia!.toJson(),
@@ -554,7 +555,7 @@ class DirectProofMode {
 
   factory DirectProofMode.fromJson(Map<String, dynamic> json) => DirectProofMode(
     enabled: json['enabled'] as bool? ?? false,
-    since: json['since'] != null ? DateTime.parse(json['since'] as String) : null,
+    since: json['since'] != null ? parseServerTime(json['since'] as String) : null,
     canDisable: json['can_disable'] as bool? ?? false,
   );
 }

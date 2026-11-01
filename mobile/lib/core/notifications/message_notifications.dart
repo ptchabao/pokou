@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../l10n/app_localizations.dart';
 import 'notification_policy.dart';
+import '../time/server_time.dart';
 
 /// Les notifications de message, façon WhatsApp : UNE notification par
 /// conversation, qui se déroule sur ses derniers messages, toutes rangées
@@ -106,7 +107,7 @@ class MessagePush {
       senderName: data['sender_name']?.toString() ?? data['contact_name']?.toString() ?? '',
       senderCertifiedName: certified == null || certified.isEmpty ? null : certified,
       messageType: data['message_type']?.toString() ?? 'TEXT',
-      sentAt: DateTime.tryParse(data['sent_at']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
+      sentAt: tryParseServerTime(data['sent_at']?.toString() ?? '') ?? DateTime.now(),
       priority: data['priority']?.toString(),
       muted: data['muted'] == '1',
       contactUserId: int.tryParse(data['contact_user_id']?.toString() ?? ''),

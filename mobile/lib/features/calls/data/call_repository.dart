@@ -3,6 +3,7 @@ import '../../../core/crypto/call_keys.dart';
 import '../../../core/crypto/e2ee_outcome.dart';
 import '../../../core/crypto/e2ee_service.dart';
 import '../../../core/media/media_repository.dart';
+import '../../../core/time/server_time.dart';
 
 class CallToken {
   const CallToken({
@@ -137,9 +138,9 @@ class CallLogEntry {
       groupName: json['group_name'] as String?,
       isVideo: json['is_video'] as bool,
       status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerTime(json['created_at'] as String),
       endedAt: json['ended_at'] != null
-          ? DateTime.parse(json['ended_at'] as String)
+          ? parseServerTime(json['ended_at'] as String)
           : null,
       durationSeconds: json['duration_seconds'] as int?,
       others: othersJson.map(CallLogOther.fromJson).toList(),

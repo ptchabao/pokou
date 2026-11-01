@@ -199,9 +199,15 @@ class Settings(BaseSettings):
     whatsapp_service_url: str = "http://localhost:4000"
     whatsapp_service_timeout_seconds: float = 30.0
 
-    # Twilio (optional)
+    # Twilio : canal principal des SMS de code (voir sms_service), et
+    # WhatsApp en option. Identifiants dans le .env, jamais dans le code.
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
+    #: Expéditeur des SMS : un numéro Twilio (« +1415… ») ou un identifiant
+    #: alphanumérique (« POKOU ») là où le pays l'accepte.
+    twilio_sms_from: str = ""
+    #: Ou un service de messagerie Twilio, qui choisit l'expéditeur par pays.
+    twilio_messaging_service_sid: str = ""
     twilio_whatsapp_from: str = ""  # E.g. "whatsapp:+1415..."
 
     # Passerelle SMS NGH (canal principal des codes de connexion)

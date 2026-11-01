@@ -1,3 +1,4 @@
+import '../../../core/time/server_time.dart';
 /// Une invitation à rejoindre un groupe — reçue, pas encore tranchée.
 ///
 /// Ajouter quelqu'un à un groupe le rendait membre sur-le-champ : on se
@@ -55,7 +56,7 @@ class GroupInvitation {
       memberCount: (groupe['member_count'] as num?)?.toInt() ?? 0,
       groupAvatarMediaId: groupe['avatar_media_id'] as int?,
       invitedByName: invitant['display_name'] as String?,
-      expiresAt: DateTime.parse(json['expires_at'] as String),
+      expiresAt: parseServerTime(json['expires_at'] as String),
     );
   }
 }

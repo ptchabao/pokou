@@ -3,6 +3,7 @@ import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, PollData;
 import 'group_invitation_model.dart';
 import 'group_model.dart';
+import '../../../core/time/server_time.dart';
 
 /// Pendant de MessagingRepository pour les conversations de groupe : simple
 /// enveloppe HTTP, aucune persistance locale (même choix qu'en 1:1, l'historique
@@ -176,7 +177,7 @@ class GroupRepository {
   }) async {
     final cursor = before == null
         ? ''
-        : '&before=${Uri.encodeQueryComponent(before.toIso8601String())}';
+        : '&before=${Uri.encodeQueryComponent(toServerTime(before))}';
     final response = await _api.get(
       '/groups/$groupId/messages?limit=$limit$cursor',
     );

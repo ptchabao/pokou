@@ -189,7 +189,7 @@ def test_whatsapp_failure_does_not_break_the_otp_request(client):
             _wait_for(attempted)
 
     assert response.status_code == 200
-    assert response.json()["expires_in"] == otp_service.OTP_TTL_MINUTES * 60
+    assert response.json()["expires_in"] == otp_service.OTP_TTL_SECONDS == 50
 
 
 def test_whatsapp_is_not_attempted_for_an_invalid_number(client):
@@ -380,7 +380,7 @@ def test_the_review_code_lives_long_enough_for_a_review_session(client):
 
     assert response.json()["expires_in"] == otp_service.REVIEW_OTP_TTL_MINUTES * 60
     # Et la durée ordinaire n'a pas bougé pour autant.
-    assert ordinary.json()["expires_in"] == otp_service.OTP_TTL_MINUTES * 60
+    assert ordinary.json()["expires_in"] == otp_service.OTP_TTL_SECONDS
 
 
 # ─── Section 8.1 du cahier des charges ────────────────────────────────────────

@@ -17,7 +17,8 @@ void main() {
     expect(restored.monitorId, original.monitorId);
     expect(restored.role, ChatRole.assistant);
     expect(restored.content, original.content);
-    expect(restored.createdAt, original.createdAt);
+    // Le même instant, rendu dans le fuseau du téléphone.
+    expect(restored.createdAt.isAtSameMomentAs(original.createdAt), isTrue);
   });
 
   test(

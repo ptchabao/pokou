@@ -1,3 +1,4 @@
+import '../../../core/time/server_time.dart';
 /// Une liste de diffusion — le carnet de copie de son auteur.
 ///
 /// Elle n'existe que pour lui : les destinataires ne savent pas qu'ils y
@@ -62,6 +63,6 @@ class BroadcastSentMessage {
         id: json['id'] as String,
         content: json['content'] as String?,
         recipientCount: json['recipient_count'] as int? ?? 0,
-        createdAt: DateTime.parse(json['created_at'] as String),
+        createdAt: parseServerTime(json['created_at'] as String),
       );
 }
