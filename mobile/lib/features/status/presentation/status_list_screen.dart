@@ -1,3 +1,4 @@
+import '../../marketplace/presentation/assime_extras.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -138,10 +139,18 @@ class StatusListScreen extends ConsumerWidget {
                             }
                           }
                           final myStatus = mine;
+                          // Une seule place sponsorisée (Assimé 14), et au
+                          // plus un statut sponsorisé tous les 5 : elle ne
+                          // vient qu'après 4 statuts de proches, jamais
+                          // devant eux.
+                          final sponsored = ref.watch(sponsoredStatusProvider).valueOrNull;
+                          final sponsoredAt = sponsored != null && others.length >= sponsored.every - 1
+                              ? sponsored.every - 1
+                              : null;
 
                           return ListView.separated(
                             scrollDirection: Axis.horizontal,
-                            itemCount: others.length + 1,
+                            itemCount: others.length + 1 + (sponsoredAt != null ? 1 : 0),
                             separatorBuilder: (_, _) =>
                                 const SizedBox(width: 4),
                             itemBuilder: (context, index) {
@@ -159,7 +168,10 @@ class StatusListScreen extends ConsumerWidget {
                                   onAddTap: () => _openComposer(context, ref),
                                 );
                               }
-                              final item = others[index - 1];
+                              if (sponsoredAt != null && index == sponsoredAt + 1) {
+                                return SponsoredStatusTile(sponsored: sponsored!);
+                              }
+                              final item = others[index - 1 - (sponsoredAt != null && index > sponsoredAt + 1 ? 1 : 0)];
                               return _StatusTile(
                                 status: item.statuses.lastOrNull,
                                 avatar: item.avatar,

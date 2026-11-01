@@ -27,7 +27,15 @@ class KoryPot {
     this.declaredTotal = 0,
     this.remainingToCollect,
     this.entries = const [],
+    this.rounds = const [],
+    this.currentRound,
   });
+
+  /// Tontine (Kory Plus) : les tours, dans l'ordre fixé à l'ouverture.
+  final List<KoryRound> rounds;
+  final int? currentRound;
+
+  bool get isTontine => kind == 'TONTINE';
 
   /// « Total déclaré » : ce que les membres disent avoir envoyé.
   final int declaredTotal;
@@ -36,7 +44,7 @@ class KoryPot {
   final int? remainingToCollect;
 
   final int id;
-  final String kind; // CAGNOTTE | COTISATION
+  final String kind; // CAGNOTTE | COTISATION | TONTINE
   final String title;
   final String? description;
   final int? groupId;
@@ -92,6 +100,43 @@ class KoryPot {
       for (final e in (json['entries'] as List? ?? const []))
         KoryEntry.fromJson(e as Map<String, dynamic>),
     ],
+    rounds: [
+      for (final r in (json['rounds'] as List? ?? const []))
+        KoryRound.fromJson(r as Map<String, dynamic>),
+    ],
+    currentRound: json['current_round'] as int?,
+  );
+}
+
+/// Un tour de tontine : son bénéficiaire reçoit les mises de tous les
+/// autres sur son wallet, et confirme seul ce qu'il a reçu.
+class KoryRound {
+  const KoryRound({
+    required this.number,
+    required this.beneficiaryId,
+    required this.status,
+    required this.confirmedTotal,
+    required this.expectedTotal,
+    this.beneficiaryName,
+    this.dueAt,
+  });
+
+  final int number;
+  final int beneficiaryId;
+  final String? beneficiaryName;
+  final DateTime? dueAt;
+  final String status; // UPCOMING | CURRENT | DONE
+  final int confirmedTotal;
+  final int expectedTotal;
+
+  factory KoryRound.fromJson(Map<String, dynamic> json) => KoryRound(
+    number: json['number'] as int,
+    beneficiaryId: json['beneficiary_id'] as int,
+    beneficiaryName: json['beneficiary_name'] as String?,
+    dueAt: DateTime.tryParse(json['due_at'] as String? ?? ''),
+    status: json['status'] as String? ?? 'UPCOMING',
+    confirmedTotal: json['confirmed_total'] as int? ?? 0,
+    expectedTotal: json['expected_total'] as int? ?? 0,
   );
 }
 
@@ -109,7 +154,15 @@ class KoryEntry {
     this.walletReference,
     this.periodLabel,
     this.note,
+    this.roundNumber,
+    this.canReview = false,
   });
+
+  final int? roundNumber;
+
+  /// Le collecteur — ou, dans une tontine, le bénéficiaire DU TOUR de la
+  /// contribution — peut la confirmer ou la contester.
+  final bool canReview;
 
   final int id;
   final int contributorId;
@@ -137,6 +190,8 @@ class KoryEntry {
         DateTime.tryParse(json['declared_at'] as String? ?? '') ??
         DateTime.now(),
     isMine: json['is_mine'] as bool? ?? false,
+    roundNumber: json['round_number'] as int?,
+    canReview: json['can_review'] as bool? ?? false,
   );
 }
 

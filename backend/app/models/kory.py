@@ -21,8 +21,9 @@ class KoryPot(Base):
 
     Un seul collecteur : c'est lui qui reçoit l'argent sur son wallet, et lui
     seul peut confirmer une contribution. La tontine en rotation — un
-    collecteur différent à chaque tour — est réservée à Kory Plus (BM-13) et
-    n'est pas ouverte par ce modèle.
+    bénéficiaire différent à chaque tour — est réservée à Kory Plus (BM-13) :
+    ses tours sont dans `KoryRound`, et `collector_id` y désigne le
+    bénéficiaire du tour en cours.
     """
     __tablename__ = "kory_pots"
 
@@ -32,7 +33,7 @@ class KoryPot(Base):
     group_id = Column(Integer, ForeignKey("groups.id", ondelete="SET NULL"), nullable=True, index=True)
     organizer_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     collector_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    kind = Column(String(12), nullable=False, default="CAGNOTTE")  # CAGNOTTE|COTISATION
+    kind = Column(String(12), nullable=False, default="CAGNOTTE")  # CAGNOTTE|COTISATION|TONTINE
     title = Column(String(120), nullable=False)
     description = Column(String(500), nullable=True)
     #: Objectif indicatif de la cagnotte, en FCFA.
@@ -81,7 +82,30 @@ class KoryEntry(Base):
     wallet_reference = Column(String(64), nullable=True)
     #: Période couverte pour une cotisation (« 2026-11 », « 2026-W45 »).
     period_label = Column(String(12), nullable=True)
+    #: Tontine (Kory Plus) : le tour auquel la contribution appartient. Elle
+    #: est confirmée par le bénéficiaire de CE tour, pas par l'organisateur.
+    round_number = Column(Integer, nullable=True, index=True)
     note = Column(String(280), nullable=True)
     status = Column(String(10), nullable=False, default="DECLARED", index=True)  # DECLARED|CONFIRMED|REJECTED
     declared_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     reviewed_at = Column(DateTime, nullable=True)
+
+
+class KoryRound(Base):
+    """Un tour de tontine (Kory Plus, BM-13, maquettes Kory 7 et 8).
+
+    Chaque tour a son bénéficiaire, qui reçoit sur SON wallet les mises de
+    tous les autres et confirme seul ce qu'il a reçu. L'ordre est fixé à
+    l'ouverture et ne change plus : c'est la promesse faite à ceux qui
+    reçoivent en dernier. Pokou ne touche toujours pas l'argent (BM-01).
+    """
+    __tablename__ = "kory_rounds"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pot_id = Column(Integer, ForeignKey("kory_pots.id", ondelete="CASCADE"), nullable=False, index=True)
+    number = Column(Integer, nullable=False)
+    beneficiary_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    due_at = Column(DateTime, nullable=True)
+    #: UPCOMING | CURRENT | DONE
+    status = Column(String(10), nullable=False, default="UPCOMING")
+    closed_at = Column(DateTime, nullable=True)

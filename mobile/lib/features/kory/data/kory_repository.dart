@@ -34,6 +34,7 @@ class KoryRepository {
     int? amountPerMember,
     String? period,
     DateTime? dueAt,
+    List<int>? rotation,
   }) async {
     final response = await _api.post(
       '/kory/pots',
@@ -47,6 +48,7 @@ class KoryRepository {
         'amount_per_member': ?amountPerMember,
         'period': ?period,
         if (dueAt != null) 'due_at': dueAt.toUtc().toIso8601String(),
+        'rotation': ?rotation,
       },
     );
     return KoryPot.fromJson(response as Map<String, dynamic>);
@@ -82,6 +84,11 @@ class KoryRepository {
       '/kory/pots/$potId/entries/$entryId/review',
       body: {'decision': confirm ? 'CONFIRM' : 'REJECT'},
     );
+  }
+
+  /// Tontine : l'organisateur passe au tour suivant.
+  Future<void> nextRound(int potId) async {
+    await _api.post('/kory/pots/$potId/next-round', body: const {});
   }
 
   Future<void> close(int potId) async {

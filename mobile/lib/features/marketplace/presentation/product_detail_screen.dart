@@ -1,3 +1,4 @@
+import 'assime_extras.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -43,6 +44,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   SellerProfile? _seller;
   List<SellerReview>? _reviews;
   bool _contacting = false;
+  bool _favorite = false;
+
+  /// Mettre de côté (Assimé 12) : optimiste, puis confirmé.
+  Future<void> _toggleFavorite() async {
+    final next = !_favorite;
+    setState(() => _favorite = next);
+    try {
+      await ref.read(marketplaceRepositoryProvider).setFavorite(_product.id, next);
+      ref.invalidate(favoritesProvider);
+    } catch (_) {
+      if (mounted) setState(() => _favorite = !next);
+    }
+  }
 
   /// Photo affichée en grand : la principale d'abord, puis celle qu'on
   /// choisit dans la bande de vignettes.
@@ -93,6 +107,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   void initState() {
     super.initState();
     _loadSeller();
+    _loadFavorite();
+  }
+
+  Future<void> _loadFavorite() async {
+    if (_isMine) return;
+    try {
+      final favorites = await ref.read(favoritesProvider.future);
+      if (mounted) setState(() => _favorite = favorites.any((f) => f.id == _product.id));
+    } catch (_) {
+      // Hors ligne : le cœur reste vide, le geste reste possible.
+    }
   }
 
   Future<void> _loadSeller() async {
@@ -301,6 +326,32 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           L.of(context).productTitle,
           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
+        actions: [
+          if (_isMine)
+            IconButton(
+              tooltip: L.of(context).assimeReportTitle,
+              icon: const Icon(Icons.insights_outlined),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => BoostReportScreen(productId: _product.id, productName: _product.name),
+              )),
+            )
+          else ...[
+            if (_product.isBoosted)
+              IconButton(
+                tooltip: L.of(context).assimeWhyTitle,
+                icon: const Icon(Icons.info_outline),
+                onPressed: () => showWhySponsored(context, ref, _product.id),
+              ),
+            IconButton(
+              tooltip: _favorite ? L.of(context).assimeRemoveFavorite : L.of(context).assimeAddFavorite,
+              icon: Icon(
+                _favorite ? Icons.favorite : Icons.favorite_border,
+                color: _favorite ? AppColors.feedbackDanger : null,
+              ),
+              onPressed: _toggleFavorite,
+            ),
+          ],
+        ],
       ),
       bottomNavigationBar: _isMine
           ? null

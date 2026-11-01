@@ -230,6 +230,9 @@ class DirectMessage {
     this.poll,
     this.pendingMedia,
     this.mediaKey,
+    this.proofMode = false,
+    this.deletedAt,
+    this.originalContent,
   });
 
   final String id;
@@ -312,6 +315,19 @@ class DirectMessage {
 
   final PollData? poll;
 
+  // ── Mode preuve à deux ────────────────────────────────────────────────
+  /// Envoyé pendant que la discussion était en mode preuve.
+  final bool proofMode;
+
+  /// « Supprimé pour tous » en mode preuve : le message reste, barré.
+  final DateTime? deletedAt;
+
+  /// Version d'origine d'un message modifié en mode preuve. Pour un
+  /// message chiffré, le serveur ne l'a jamais eue : c'est CET appareil qui
+  /// l'a gardée, au moment où la modification est arrivée (voir
+  /// PokouMessageStore._keepProofTrace).
+  final String? originalContent;
+
   bool get isMedia => mediaAssetId != null;
   bool get isEdited => editedAt != null;
 
@@ -371,6 +387,11 @@ class DirectMessage {
       payload: json['payload'] as Map<String, dynamic>?,
       poll: pollJson != null ? PollData.fromJson(pollJson) : null,
       pendingMedia: enAttente == null ? null : PendingMedia.fromJson(enAttente),
+      proofMode: json['proof_mode'] as bool? ?? false,
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'] as String)
+          : null,
+      originalContent: json['original_content'] as String?,
       mediaKey: fromCache && json['encryption'] == null
           ? _remember(
               json['media_asset_id'] as int?,
@@ -425,6 +446,9 @@ class DirectMessage {
     'viewed_at': viewedAt?.toIso8601String(),
     'payload': payload,
     'poll': poll?.toJson(),
+    'proof_mode': proofMode,
+    'deleted_at': deletedAt?.toIso8601String(),
+    'original_content': originalContent,
     // Cache LOCAL seulement — voir `pendingMedia`.
     if (pendingMedia != null) 'pending_media': pendingMedia!.toJson(),
     // Cache LOCAL seulement — voir `mediaKey`.
@@ -444,6 +468,8 @@ class DirectMessage {
     MediaKey? mediaKey,
     MediaMeta? media,
     DirectMessageStatus? status,
+    DateTime? deletedAt,
+    String? originalContent,
   }) {
     return DirectMessage(
       id: id,
@@ -472,6 +498,9 @@ class DirectMessage {
       payload: payload,
       poll: poll ?? this.poll,
       mediaKey: _remember(mediaAssetId, mediaKey ?? this.mediaKey),
+      proofMode: proofMode,
+      deletedAt: deletedAt ?? this.deletedAt,
+      originalContent: originalContent ?? this.originalContent,
     );
   }
 
@@ -508,4 +537,24 @@ class DirectMessage {
         return DirectMessageStatus.sent;
     }
   }
+}
+
+
+/// Le mode preuve d'une discussion à deux : le même pour les deux côtés.
+class DirectProofMode {
+  const DirectProofMode({required this.enabled, this.since, this.canDisable = false});
+
+  final bool enabled;
+  final DateTime? since;
+
+  /// Seule la personne qui l'a activé peut le couper (maquette 10).
+  final bool canDisable;
+
+  static const off = DirectProofMode(enabled: false);
+
+  factory DirectProofMode.fromJson(Map<String, dynamic> json) => DirectProofMode(
+    enabled: json['enabled'] as bool? ?? false,
+    since: json['since'] != null ? DateTime.parse(json['since'] as String) : null,
+    canDisable: json['can_disable'] as bool? ?? false,
+  );
 }

@@ -455,11 +455,15 @@ class PokouMessageStore {
         case 'message:deleted':
           final messageId = event.payload['message_id']?.toString();
           if (messageId == null) return false;
-          await txn.delete(
-            'direct_messages',
-            where: 'id = ?',
-            whereArgs: [messageId],
-          );
+          if (event.payload['proof'] == true) {
+            await _markDeleted(txn, messageId, DateTime.now().toUtc());
+          } else {
+            await txn.delete(
+              'direct_messages',
+              where: 'id = ?',
+              whereArgs: [messageId],
+            );
+          }
         case 'group:message:new':
           if (groupMessage == null) return false;
           await txn.insert('group_messages', {
@@ -618,7 +622,6 @@ class PokouMessageStore {
     DatabaseExecutor db,
     DirectMessage incoming,
   ) async {
-    if (!incoming.isEncrypted) return incoming;
     final rows = await db.query(
       'direct_messages',
       columns: ['payload'],
@@ -631,11 +634,62 @@ class PokouMessageStore {
       _payloadOf(rows.single),
       fromCache: true,
     );
+    incoming = _keepProofTrace(existing, incoming);
+    if (!incoming.isEncrypted) return incoming;
     final opened = !existing.isEncrypted &&
         (existing.mediaKey != null ||
             (existing.content?.trim().isNotEmpty ?? false));
     if (!opened || existing.editedAt != incoming.editedAt) return incoming;
     return incoming.resolvedWith(existing);
+  }
+
+  /// La trace du mode preuve à deux, gardée par CET appareil.
+  ///
+  /// Le serveur ne peut pas garder la version d'origine d'un message
+  /// chiffré : il ne l'a jamais lue. Quand une modification arrive sur un
+  /// message envoyé en mode preuve, c'est donc ici que l'ancien texte est
+  /// mis de côté, avant que le nouveau chiffré ne le recouvre. Une trace
+  /// déjà posée n'est jamais effacée par une version plus récente.
+  DirectMessage _keepProofTrace(DirectMessage existing, DirectMessage incoming) {
+    var kept = incoming;
+    if (kept.deletedAt == null && existing.deletedAt != null) {
+      kept = kept.copyWith(deletedAt: existing.deletedAt);
+    }
+    if (kept.originalContent == null) {
+      final original = existing.originalContent ??
+          (incoming.proofMode &&
+                  existing.editedAt != incoming.editedAt &&
+                  !existing.isEncrypted
+              ? existing.content
+              : null);
+      if (original != null) kept = kept.copyWith(originalContent: original);
+    }
+    return kept;
+  }
+
+  /// Un message supprimé en mode preuve : marqué, jamais retiré. Le texte
+  /// déjà ouvert sur l'appareil reste lisible, barré.
+  Future<void> markDirectDeleted(String id, DateTime at) async {
+    final db = await _database;
+    await _markDeleted(db, id, at);
+  }
+
+  Future<void> _markDeleted(DatabaseExecutor db, String id, DateTime at) async {
+    final rows = await db.query(
+      'direct_messages',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return;
+    final payload = _payloadOf(rows.single)
+      ..['deleted_at'] = at.toIso8601String();
+    await db.update(
+      'direct_messages',
+      {'payload': jsonEncode(payload)},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   /// Toute la conversation connue localement, la plus ancienne d'abord —
@@ -831,7 +885,10 @@ class PokouMessageStore {
       'direct_messages',
       where:
           '((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)) '
-          'AND created_at >= ? AND pending = 0 AND failed = 0 AND id NOT IN ($placeholders)',
+          'AND created_at >= ? AND pending = 0 AND failed = 0 AND id NOT IN ($placeholders) '
+          // Un message du mode preuve reste chez les autres participants,
+          // même si l'auteur supprime son compte ou la discussion.
+          "AND payload NOT LIKE '%\"proof_mode\":true%'",
       whereArgs: [
         myUserId,
         contactUserId,

@@ -104,10 +104,12 @@ class ApiClient {
       return jsonDecode(response.body);
     }
     String message = _l.apiError(response.statusCode);
+    String? code;
     try {
       final body = jsonDecode(response.body);
       final detail = body is Map ? body['detail'] : null;
       if (detail is Map) {
+        code = detail['code'] as String?;
         // Refus structuré `{code, message}` : le code choisit un texte
         // traduit, le message du serveur sert de repli.
         message = detail['code'] == 'use_honam'
@@ -119,7 +121,7 @@ class ApiClient {
     } catch (_) {
       // Body wasn't JSON — keep the generic message.
     }
-    throw ApiException(response.statusCode, message);
+    throw ApiException(response.statusCode, message, code: code);
   }
 
   /// Le jeton d'accès expire au bout de 30 min côté API (voir

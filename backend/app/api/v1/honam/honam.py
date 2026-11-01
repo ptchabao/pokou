@@ -29,7 +29,9 @@ from app.models import (
     CourierProfile,
     HonamOrder,
     HonamOrderEvent,
+    HonamWaitlistEntry,
     Pharmacy,
+    PharmacyCourier,
     PharmacyStaff,
     User,
     UserRole,
@@ -90,6 +92,25 @@ class CourierApplication(BaseModel):
     zones: str = Field(..., min_length=2, max_length=255)
     wallet_phone: str
     accept_rules: bool
+    #: Ville où la personne livrerait. Hors des villes desservies, la
+    #: candidature est refusée et l'application propose la liste d'attente.
+    city: Optional[str] = Field(None, max_length=80)
+    #: Code de parrainage d'un coursier déjà validé (maquette Coursiers 15).
+    referral_code: Optional[str] = Field(None, max_length=12)
+
+
+class LocationBody(BaseModel):
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+
+
+class WaitlistBody(BaseModel):
+    city: str = Field(..., min_length=2, max_length=80)
+    role: str = "COURIER"  # COURIER | PATIENT
+
+
+class AttachCourierBody(BaseModel):
+    phone: str
 
 
 class DeliverBody(BaseModel):
@@ -684,6 +705,12 @@ def _courier_json(db: Session, courier: CourierProfile) -> dict:
         "defaults_count": courier.defaults_count,
         "membership_price_ht": rules.COURIER_MEMBERSHIP_HT,
         "vat_rate": vat,
+        "city": courier.city,
+        "referral_code": courier.referral_code,
+        "referral_gift_rides": rules.REFERRAL_GIFT_RIDES,
+        "referrals_count": db.query(func.count(CourierProfile.id)).filter(CourierProfile.referred_by_id == courier.id).scalar() or 0,
+        # Fin d'essai : un pack recommandé selon l'activité réelle.
+        "recommended_pack": rules.recommended_pack(db, courier) if courier.status in ("TRIAL", "ENDED") else None,
         "packs": [
             {"code": code, "label": p["label"], "rides": None if p["rides"] == rules.UNLIMITED else p["rides"],
              "price_ht": rules.pack_price(country, code),
@@ -702,6 +729,11 @@ def courier_join(body: CourierApplication, current_user: dict = Depends(get_curr
     if not body.accept_rules:
         raise HTTPException(status_code=422, detail="Les règles d'or doivent être acceptées")
     country = country_of_phone(user.phone) or "TG"
+    if body.city and not rules.city_served(db, country, body.city):
+        raise HTTPException(status_code=409, detail={
+            "code": "waitlist",
+            "message": "Honam ne livre pas encore dans cette ville : inscrivez-vous sur la liste d'attente",
+        })
     wallet = normalize_e164(body.wallet_phone, country)
     if wallet is None:
         raise HTTPException(status_code=422, detail="Numéro de wallet invalide")
@@ -711,8 +743,17 @@ def courier_join(body: CourierApplication, current_user: dict = Depends(get_curr
         db.add(courier)
     if courier.status == "PENDING":
         courier.zones = body.zones.strip()
+        courier.city = (body.city or "").strip() or courier.city
         courier.wallet_phone = wallet
         courier.rules_accepted_at = datetime.utcnow()
+        if body.referral_code and courier.referred_by_id is None:
+            referrer = db.query(CourierProfile).filter(
+                CourierProfile.referral_code == body.referral_code.strip().upper()
+            ).first()
+            if referrer is None or referrer.user_id == user.id:
+                raise HTTPException(status_code=422, detail="Code de parrainage inconnu")
+            db.flush()
+            courier.referred_by_id = referrer.id
     db.commit()
     return _courier_json(db, courier)
 
@@ -733,7 +774,23 @@ def available_rides(current_user: dict = Depends(get_current_user), db: Session 
     pharmacy_ids = db.query(Pharmacy.id).filter(Pharmacy.country == courier.country)
     open_rides = db.query(HonamOrder).filter(
         HonamOrder.status == "READY", HonamOrder.courier_id.is_(None), HonamOrder.pharmacy_id.in_(pharmacy_ids),
-    ).order_by(HonamOrder.updated_at).limit(50).all()
+    ).order_by(HonamOrder.updated_at).limit(100).all()
+    # Les livreurs habituels d'une officine voient ses courses en premier
+    # (Officine 6) ; les autres coursiers, passé ce délai.
+    attached_to = {
+        row[0] for row in db.query(PharmacyCourier.pharmacy_id).filter(PharmacyCourier.courier_id == courier.id)
+    }
+    with_attached = {
+        row[0] for row in db.query(PharmacyCourier.pharmacy_id).filter(
+            PharmacyCourier.pharmacy_id.in_({o.pharmacy_id for o in open_rides} or {0})
+        )
+    }
+    priority_cutoff = datetime.utcnow() - timedelta(minutes=rules.ATTACHED_PRIORITY_MINUTES)
+    open_rides = [
+        o for o in open_rides
+        if o.pharmacy_id in attached_to or o.pharmacy_id not in with_attached or o.updated_at < priority_cutoff
+    ][:50]
+    open_rides.sort(key=lambda o: (o.pharmacy_id not in attached_to, o.updated_at))
     mine = db.query(HonamOrder).filter(
         HonamOrder.courier_id == user.id, HonamOrder.status.in_(("READY", "IN_DELIVERY", "DELIVERED")),
     ).order_by(HonamOrder.updated_at.desc()).limit(50).all()
@@ -789,8 +846,11 @@ def deliver_ride(order_id: int, body: DeliverBody, current_user: dict = Depends(
     if order.original_required:
         order.original_collected_at = datetime.utcnow()
     order.delivered_at = datetime.utcnow()
+    # La position n'est jamais conservée après la livraison.
+    order.courier_latitude = order.courier_longitude = order.courier_location_at = None
     _move(db, order, "DELIVERED", user.id)
     rules.record_ride(db, courier, order)
+    rules.reward_referrer(db, courier)
     db.commit()
     return _order_json(db, order, "courier")
 
@@ -845,6 +905,184 @@ def courier_pack(body: PackBody, current_user: dict = Depends(get_current_user),
     )
     db.commit()
     return payment_json(payment)
+
+
+# ── Suivi de la course ──────────────────────────────────────────────────
+
+#: Le suivi n'existe que pendant la course : de l'acceptation par le
+#: coursier à la remise.
+_TRACKABLE = ("READY", "IN_DELIVERY")
+
+
+@router.post("/courier/rides/{order_id}/location")
+def courier_location(order_id: int, body: LocationBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Envoyée toutes les 15 s par le téléphone du coursier. Une seule
+    position est gardée, écrasée à chaque envoi et effacée à la remise."""
+    user = _user(db, current_user)
+    order = _courier_order(db, order_id, user.id)
+    if order.status not in _TRACKABLE:
+        raise HTTPException(status_code=409, detail="Le suivi s'arrête à la livraison")
+    order.courier_latitude = body.latitude
+    order.courier_longitude = body.longitude
+    order.courier_location_at = datetime.utcnow()
+    db.commit()
+    return {"ok": True}
+
+
+def _tracking_json(order: HonamOrder, db: Session) -> dict:
+    active = order.status in _TRACKABLE and order.courier_id is not None
+    at = order.courier_location_at if active else None
+    data = {
+        "order_id": order.id,
+        "status": order.status,
+        "active": active,
+        "courier_name": _name(db, order.courier_id),
+        "latitude": order.courier_latitude if at else None,
+        "longitude": order.courier_longitude if at else None,
+        "at": at.isoformat() if at else None,
+        "stale": bool(at and (datetime.utcnow() - at).total_seconds() > rules.LOCATION_STALE_SECONDS),
+        "refresh_seconds": 15,
+        "distance_km": None,
+    }
+    if at and order.delivery_latitude is not None and order.delivery_longitude is not None:
+        data["distance_km"] = round(rules.distance_km(
+            order.courier_latitude, order.courier_longitude, order.delivery_latitude, order.delivery_longitude,
+        ), 2)
+    return data
+
+
+@router.get("/orders/{order_id}/tracking")
+def patient_tracking(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Suivi sur la carte » et « Suivi sans carte » lisent la même chose :
+    c'est l'application qui choisit d'afficher une carte, à la demande."""
+    user = _user(db, current_user)
+    return _tracking_json(_patient_order(db, order_id, user.id), db)
+
+
+@router.get("/pharmacy/orders/{order_id}/tracking")
+def pharmacy_tracking(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Officine 7 : l'officine suit la livraison qu'elle a confiée."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    return _tracking_json(_pharmacy_order(db, order_id, pharmacy), db)
+
+
+# ── Villes desservies et liste d'attente ────────────────────────────────
+
+
+@router.get("/cities")
+def cities(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Lisible même là où Honam n'est pas ouvert : c'est ce qui permet de
+    proposer la liste d'attente au lieu de l'offre."""
+    user = db.query(User).filter(User.id == current_user["user_id"]).first()
+    country = country_of_phone(user.phone if user else None)
+    entry = db.query(HonamWaitlistEntry).filter(HonamWaitlistEntry.user_id == current_user["user_id"]).first()
+    return {
+        "country": country,
+        "honam_open": bool(user and module_open(db, user.phone, "honam")),
+        "served_cities": rules.served_cities(db, country),
+        "waitlist": {"city": entry.city, "role": entry.role, "since": entry.created_at.isoformat()} if entry else None,
+    }
+
+
+@router.post("/waitlist", status_code=201)
+def join_waitlist(body: WaitlistBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == current_user["user_id"]).first()
+    role = body.role.upper()
+    if role not in ("COURIER", "PATIENT"):
+        raise HTTPException(status_code=422, detail="Rôle inconnu")
+    country = country_of_phone(user.phone) or "TG"
+    entry = db.query(HonamWaitlistEntry).filter(
+        HonamWaitlistEntry.user_id == user.id, HonamWaitlistEntry.role == role
+    ).first()
+    if entry is None:
+        entry = HonamWaitlistEntry(user_id=user.id, role=role, country=country, city=body.city.strip())
+        db.add(entry)
+    else:
+        entry.city = body.city.strip()
+    db.commit()
+    return {"city": entry.city, "role": entry.role, "since": entry.created_at.isoformat()}
+
+
+@router.delete("/waitlist")
+def leave_waitlist(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    db.query(HonamWaitlistEntry).filter(HonamWaitlistEntry.user_id == current_user["user_id"]).delete()
+    db.commit()
+    return {"ok": True}
+
+
+# ── Vos coursiers (officine) ────────────────────────────────────────────
+
+
+def _attached_json(db: Session, pharmacy: Pharmacy, courier: CourierProfile, link: PharmacyCourier) -> dict:
+    rules.refresh_courier_status(courier)
+    delivered = db.query(func.count(HonamOrder.id)).filter(
+        HonamOrder.pharmacy_id == pharmacy.id, HonamOrder.courier_id == courier.user_id,
+        HonamOrder.status == "DELIVERED",
+    ).scalar() or 0
+    unpaid = db.query(func.count(HonamOrder.id)).filter(
+        HonamOrder.pharmacy_id == pharmacy.id, HonamOrder.courier_id == courier.user_id,
+        HonamOrder.status == "DELIVERED", HonamOrder.courier_paid_at.is_(None),
+    ).scalar() or 0
+    return {
+        "user_id": courier.user_id,
+        "name": _name(db, courier.user_id),
+        "phone": _phone(db, courier.user_id),
+        "status": courier.status,
+        "zones": courier.zones,
+        "delivered_count": delivered,
+        "unpaid_count": unpaid,
+        "defaults_count": courier.defaults_count,
+        "added_at": link.added_at.isoformat(),
+    }
+
+
+@router.get("/pharmacy/couriers")
+def pharmacy_couriers(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    rows = (
+        db.query(PharmacyCourier, CourierProfile)
+        .join(CourierProfile, CourierProfile.id == PharmacyCourier.courier_id)
+        .filter(PharmacyCourier.pharmacy_id == pharmacy.id)
+        .order_by(PharmacyCourier.added_at)
+        .all()
+    )
+    items = [_attached_json(db, pharmacy, courier, link) for link, courier in rows]
+    db.commit()
+    return {"items": items, "priority_minutes": rules.ATTACHED_PRIORITY_MINUTES}
+
+
+@router.post("/pharmacy/couriers", status_code=201)
+def attach_courier(body: AttachCourierBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Rattacher un livreur habituel par son numéro. Il doit déjà être
+    coursier Pokou validé : l'officine ne contourne pas la validation."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    phone = normalize_e164(body.phone, pharmacy.country)
+    target = db.query(User).filter(User.phone == phone).first() if phone else None
+    courier = db.query(CourierProfile).filter(CourierProfile.user_id == target.id).first() if target else None
+    if courier is None or courier.status == "PENDING" or courier.country != pharmacy.country:
+        raise HTTPException(status_code=404, detail="Aucun coursier Pokou validé avec ce numéro")
+    link = db.query(PharmacyCourier).filter(
+        PharmacyCourier.pharmacy_id == pharmacy.id, PharmacyCourier.courier_id == courier.id
+    ).first()
+    if link is None:
+        link = PharmacyCourier(pharmacy_id=pharmacy.id, courier_id=courier.id)
+        db.add(link)
+        db.flush()
+    data = _attached_json(db, pharmacy, courier, link)
+    db.commit()
+    return data
+
+
+@router.delete("/pharmacy/couriers/{courier_user_id}")
+def detach_courier(courier_user_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    courier = db.query(CourierProfile).filter(CourierProfile.user_id == courier_user_id).first()
+    if courier is not None:
+        db.query(PharmacyCourier).filter(
+            PharmacyCourier.pharmacy_id == pharmacy.id, PharmacyCourier.courier_id == courier.id
+        ).delete()
+        db.commit()
+    return {"ok": True}
 
 
 # ── Paiements confirmés (appelé par confirm_payment) ────────────────────
@@ -950,6 +1188,7 @@ def validate_courier(user_id: int, current_user: dict = Depends(require_admin_ro
     if courier is None or courier.status != "PENDING":
         raise HTTPException(status_code=404, detail="Candidature introuvable")
     courier.validated_at = datetime.utcnow()
+    courier.referral_code = courier.referral_code or rules.new_referral_code(db)
     db.flush()
     rules.start_trial(db, courier)
     db.commit()
@@ -966,3 +1205,15 @@ def exclude_pharmacy(pharmacy_id: int, body: ReasonBody, current_user: dict = De
     pharmacy.suspension_reason = body.reason
     db.commit()
     return {"id": pharmacy.id, "status": pharmacy.status}
+
+
+@admin_router.get("/waitlist")
+def waitlist_by_city(current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+    """Où ouvrir ensuite : le nombre d'inscrits par ville et par rôle."""
+    rows = (
+        db.query(HonamWaitlistEntry.country, HonamWaitlistEntry.city, HonamWaitlistEntry.role, func.count(HonamWaitlistEntry.id))
+        .group_by(HonamWaitlistEntry.country, HonamWaitlistEntry.city, HonamWaitlistEntry.role)
+        .order_by(func.count(HonamWaitlistEntry.id).desc())
+        .all()
+    )
+    return {"items": [{"country": c, "city": city, "role": r, "count": n} for c, city, r, n in rows]}

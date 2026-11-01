@@ -111,6 +111,17 @@ class DirectMessage(Base):
     # jeu de colonnes par type. Le TYPE du message dit comment la lire, et
     # ajouter un type demain n'imposera pas une migration de plus.
     payload = Column(JSON, nullable=True)
+    # ── Mode preuve à deux ────────────────────────────────────────────────
+    # Envoyé pendant que la discussion était en mode preuve. Un tel message
+    # ne s'efface plus pour de bon : « Supprimer pour tous » le marque
+    # supprimé (`deleted_at`) et chaque téléphone le garde barré. Le serveur
+    # ne peut pas garder le texte d'un message chiffré : c'est l'appareil de
+    # chaque participant qui conserve la trace (voir DirectProofMode).
+    proof_mode = Column(Boolean, default=False, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)
+    #: Version d'origine d'un message EN CLAIR modifié en mode preuve. Pour
+    #: un message chiffré, elle reste sur les téléphones, jamais ici.
+    original_content = Column(Text, nullable=True)
 
     sender = relationship("User", foreign_keys=[sender_id])
     recipient = relationship("User", foreign_keys=[recipient_id])
@@ -222,3 +233,22 @@ class BroadcastMessage(Base):
     recipient_count = Column(Integer, nullable=False, default=0)
 
     media_asset = relationship("MediaAsset")
+
+
+class DirectProofMode(Base):
+    """Le mode preuve d'une discussion à deux (maquettes 4b et 5b).
+
+    Une ligne par paire, `user_low_id` < `user_high_id` : le mode vaut pour
+    les deux côtés, contrairement aux réglages du carnet d'adresses. Activé
+    par tout titulaire du badge (essai compris) ; seule la personne qui l'a
+    activé peut le couper (maquette 10).
+    """
+    __tablename__ = "direct_proof_modes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_low_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_high_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    enabled_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    since = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("user_low_id", "user_high_id", name="uq_direct_proof_pair"),)

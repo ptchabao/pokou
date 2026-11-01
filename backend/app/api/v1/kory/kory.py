@@ -10,8 +10,8 @@ rattaché et ceux qui l'ont rejointe par son code. Les autres reçoivent 404,
 pour ne pas révéler qu'elle existe.
 """
 import secrets
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from app.core.countries import module_open
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models import GroupMember, KoryEntry, KoryMember, KoryPot, User
+from app.models import GroupMember, KoryEntry, KoryMember, KoryPot, KoryRound, User
 from app.services.events.outbox import record_event
 
 router = APIRouter(prefix="/kory", tags=["Pokou Kory"])
@@ -31,8 +31,12 @@ router = APIRouter(prefix="/kory", tags=["Pokou Kory"])
 #: les consommateurs (statistiques, notifications) n'en ont pas besoin.
 EVENTS_TOPIC = "kory.events"
 
-KINDS = {"CAGNOTTE", "COTISATION"}
+KINDS = {"CAGNOTTE", "COTISATION", "TONTINE"}
 PERIODS = {"WEEKLY", "MONTHLY"}
+_PERIOD_DAYS = {"WEEKLY": 7, "MONTHLY": 30}
+#: Une tontine se tient entre gens qui se connaissent : au moins 2 tours,
+#: et pas plus que ce qu'un groupe de discussion tient raisonnablement.
+MIN_ROUNDS, MAX_ROUNDS = 2, 50
 MAX_AMOUNT = 10_000_000
 #: Sans 0, O, 1, I : un code se dicte au téléphone.
 _CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -48,6 +52,10 @@ class PotCreate(BaseModel):
     amount_per_member: Optional[int] = Field(None, ge=100, le=MAX_AMOUNT)
     period: Optional[str] = None
     due_at: Optional[datetime] = None
+    #: Tontine : l'ordre des bénéficiaires, tour par tour. Fixé à
+    #: l'ouverture, il ne change plus (maquette Kory 8).
+    rotation: Optional[List[int]] = Field(None, max_length=MAX_ROUNDS)
+    starts_at: Optional[datetime] = None
 
 
 class EntryCreate(BaseModel):
@@ -136,6 +144,16 @@ def _pending_count(db: Session, pot_id: int) -> int:
     ).scalar() or 0
 
 
+def _entry_reviewer(db: Session, pot: KoryPot, entry: KoryEntry) -> int:
+    if pot.kind == "TONTINE" and entry.round_number is not None:
+        round_ = db.query(KoryRound).filter(
+            KoryRound.pot_id == pot.id, KoryRound.number == entry.round_number
+        ).first()
+        if round_ is not None:
+            return round_.beneficiary_id
+    return pot.collector_id
+
+
 def _entry_json(db: Session, entry: KoryEntry, viewer_id: int, pot: KoryPot) -> dict:
     data = {
         "id": entry.id,
@@ -148,10 +166,13 @@ def _entry_json(db: Session, entry: KoryEntry, viewer_id: int, pot: KoryPot) -> 
         "declared_at": entry.declared_at.isoformat(),
         "reviewed_at": entry.reviewed_at.isoformat() if entry.reviewed_at else None,
         "is_mine": entry.contributor_id == viewer_id,
+        "round_number": entry.round_number,
     }
+    reviewer_id = _entry_reviewer(db, pot, entry)
+    data["can_review"] = viewer_id == reviewer_id and entry.status == "DECLARED"
     # La référence de transaction ne sert qu'au rapprochement : le collecteur
     # et l'auteur la voient, pas tout le groupe.
-    if viewer_id in (entry.contributor_id, pot.collector_id):
+    if viewer_id in (entry.contributor_id, reviewer_id):
         data["wallet_reference"] = entry.wallet_reference
     return data
 
@@ -191,7 +212,9 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         "pending_count": _pending_count(db, pot.id) if viewer_id == pot.collector_id else None,
         "is_organizer": viewer_id == pot.organizer_id,
         "is_collector": viewer_id == pot.collector_id,
-        "join_code": pot.join_code,
+        # Une tontine ne se rejoint pas par code : l'ordre des tours est
+        # fixé entre les membres du groupe.
+        "join_code": pot.join_code if pot.kind != "TONTINE" else None,
         "created_at": pot.created_at.isoformat(),
         "closed_at": pot.closed_at.isoformat() if pot.closed_at else None,
     }
@@ -199,6 +222,10 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
     # des seuls participants, ce que `_get_visible_pot` a déjà vérifié.
     collector = db.query(User).filter(User.id == pot.collector_id).first()
     data["collector_phone"] = collector.phone if collector else None
+    if pot.kind == "TONTINE":
+        data["rounds"] = _rounds_json(db, pot)
+        current = next((r for r in data["rounds"] if r["status"] == "CURRENT"), None)
+        data["current_round"] = current["number"] if current else None
     if with_entries:
         entries = (
             db.query(KoryEntry)
@@ -219,12 +246,10 @@ def create_pot(
     me = _me(current_user)
     _require_kory_open(db, me)
     kind = body.kind.upper()
-    if kind == "TONTINE":
-        # Kory Plus, ouvert au mois 13 (BM-13) : refusé tant que le pays ne
-        # l'a pas, plutôt que de créer une tontine que personne ne peut payer.
-        raise HTTPException(status_code=403, detail="La tontine en rotation demande Kory Plus")
     if kind not in KINDS:
         raise HTTPException(status_code=422, detail="Type de cagnotte inconnu")
+    if kind == "TONTINE":
+        return _create_tontine(db, me, body)
     if kind == "COTISATION":
         if body.amount_per_member is None or (body.period or "").upper() not in PERIODS:
             raise HTTPException(status_code=422, detail="Une cotisation demande un montant et une période")
@@ -255,6 +280,70 @@ def create_pot(
     db.add(pot)
     db.flush()
     _emit(db, pot, "kory.pot.created", organizer_id=me, collector_id=collector_id)
+    db.commit()
+    db.refresh(pot)
+    return _pot_json(db, pot, me, with_entries=True)
+
+
+def _round_total(db: Session, pot_id: int, number: int) -> int:
+    return int(db.query(func.coalesce(func.sum(KoryEntry.amount), 0)).filter(
+        KoryEntry.pot_id == pot_id, KoryEntry.round_number == number, KoryEntry.status == "CONFIRMED",
+    ).scalar() or 0)
+
+
+def _rounds_json(db: Session, pot: KoryPot) -> list:
+    rounds = db.query(KoryRound).filter(KoryRound.pot_id == pot.id).order_by(KoryRound.number).all()
+    # Chaque tour, chacun des autres membres mise : le bénéficiaire reçoit
+    # la mise de tous sauf la sienne.
+    expected = (pot.amount_per_member or 0) * max(len(rounds) - 1, 0)
+    return [{
+        "number": r.number,
+        "beneficiary_id": r.beneficiary_id,
+        "beneficiary_name": _name(db, r.beneficiary_id),
+        "due_at": r.due_at.isoformat() if r.due_at else None,
+        "status": r.status,
+        "confirmed_total": _round_total(db, pot.id, r.number),
+        "expected_total": expected,
+    } for r in rounds]
+
+
+def _current_round(db: Session, pot: KoryPot) -> Optional[KoryRound]:
+    return db.query(KoryRound).filter(KoryRound.pot_id == pot.id, KoryRound.status == "CURRENT").first()
+
+
+def _create_tontine(db: Session, me: int, body: PotCreate) -> dict:
+    """Kory Plus (BM-13), ouvert par pays (mois 13). Tenue comme le reste de
+    Kory : un journal, jamais un solde. Chaque tour, les membres envoient
+    leur mise au wallet du bénéficiaire, qui confirme seul ce qu'il a reçu."""
+    user = db.query(User).filter(User.id == me).first()
+    if not module_open(db, user.phone, "kory_plus"):
+        raise HTTPException(status_code=403, detail="La tontine en rotation demande Kory Plus")
+    period = (body.period or "").upper()
+    if body.amount_per_member is None or period not in PERIODS:
+        raise HTTPException(status_code=422, detail="Une tontine demande une mise et une période")
+    if body.group_id is None or not _is_group_member(db, body.group_id, me):
+        raise HTTPException(status_code=422, detail="Une tontine s'ouvre depuis un groupe dont vous êtes membre")
+    rotation = list(body.rotation or [])
+    if len(rotation) < MIN_ROUNDS or len(set(rotation)) != len(rotation):
+        raise HTTPException(status_code=422, detail="L'ordre des tours doit nommer au moins deux membres, chacun une fois")
+    if any(not _is_group_member(db, body.group_id, uid) for uid in rotation):
+        raise HTTPException(status_code=422, detail="Chaque bénéficiaire doit être membre du groupe")
+    start = body.starts_at or datetime.utcnow()
+    pot = KoryPot(
+        group_id=body.group_id, organizer_id=me, collector_id=rotation[0], kind="TONTINE",
+        title=body.title.strip(), description=(body.description or "").strip() or None,
+        amount_per_member=body.amount_per_member, period=period, join_code=_new_code(db),
+    )
+    db.add(pot)
+    db.flush()
+    for index, beneficiary in enumerate(rotation):
+        db.add(KoryRound(
+            pot_id=pot.id, number=index + 1, beneficiary_id=beneficiary,
+            due_at=start + timedelta(days=_PERIOD_DAYS[period] * (index + 1)),
+            status="CURRENT" if index == 0 else "UPCOMING",
+        ))
+    db.flush()
+    _emit(db, pot, "kory.pot.created", organizer_id=me, collector_id=rotation[0], rounds=len(rotation))
     db.commit()
     db.refresh(pot)
     return _pot_json(db, pot, me, with_entries=True)
@@ -317,7 +406,7 @@ def join_pot(body: JoinBody, current_user: dict = Depends(get_current_user), db:
     me = _me(current_user)
     _require_kory_open(db, me)
     pot = db.query(KoryPot).filter(KoryPot.join_code == body.code.strip().upper()).first()
-    if pot is None or pot.status != "OPEN":
+    if pot is None or pot.status != "OPEN" or pot.kind == "TONTINE":
         raise HTTPException(status_code=404, detail="Code inconnu ou cagnotte clôturée")
     if not _can_see(db, pot, me):
         db.add(KoryMember(pot_id=pot.id, user_id=me))
@@ -337,7 +426,16 @@ def declare_entry(
     pot = _get_visible_pot(db, pot_id, me)
     if pot.status != "OPEN":
         raise HTTPException(status_code=409, detail="Cette cagnotte est clôturée")
+    round_number = None
+    if pot.kind == "TONTINE":
+        current = _current_round(db, pot)
+        if current is None:
+            raise HTTPException(status_code=409, detail="Aucun tour en cours")
+        if current.beneficiary_id == me:
+            raise HTTPException(status_code=409, detail="C'est votre tour : vous recevez, vous ne misez pas")
+        round_number = current.number
     entry = KoryEntry(
+        round_number=round_number,
         pot_id=pot.id,
         contributor_id=me,
         amount=body.amount,
@@ -372,11 +470,14 @@ def review_entry(
     me = _me(current_user)
     _require_kory_open(db, me)
     pot = _get_visible_pot(db, pot_id, me)
-    if me != pot.collector_id:
-        raise HTTPException(status_code=403, detail="Seul le collecteur confirme une contribution")
     entry = db.query(KoryEntry).filter(KoryEntry.id == entry_id, KoryEntry.pot_id == pot.id).first()
     if entry is None:
         raise HTTPException(status_code=404, detail="Contribution introuvable")
+    # Dans une tontine, c'est le bénéficiaire DU TOUR de la contribution qui
+    # confirme — y compris après le passage au tour suivant.
+    reviewer_id = _entry_reviewer(db, pot, entry)
+    if me != reviewer_id:
+        raise HTTPException(status_code=403, detail="Seul le collecteur confirme une contribution")
     if entry.status != "DECLARED":
         raise HTTPException(status_code=409, detail="Contribution déjà traitée")
     decision = body.decision.upper()
@@ -390,6 +491,39 @@ def review_entry(
     )
     db.commit()
     return _entry_json(db, entry, me, pot)
+
+
+@router.post("/pots/{pot_id}/next-round")
+def next_round(pot_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """L'organisateur passe au tour suivant. Le dernier tour clôt la
+    tontine. Les contributions déjà déclarées restent au journal, à
+    confirmer par le bénéficiaire de leur tour."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    if pot.kind != "TONTINE":
+        raise HTTPException(status_code=409, detail="Seule une tontine a des tours")
+    if me != pot.organizer_id:
+        raise HTTPException(status_code=403, detail="Seul l'organisateur passe au tour suivant")
+    current = _current_round(db, pot)
+    if current is None or pot.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Cette tontine est terminée")
+    now = datetime.utcnow()
+    current.status = "DONE"
+    current.closed_at = now
+    following = db.query(KoryRound).filter(
+        KoryRound.pot_id == pot.id, KoryRound.number == current.number + 1
+    ).first()
+    if following is None:
+        pot.status = "CLOSED"
+        pot.closed_at = now
+        _emit(db, pot, "kory.pot.closed", rounds=current.number)
+    else:
+        following.status = "CURRENT"
+        pot.collector_id = following.beneficiary_id
+        _emit(db, pot, "kory.round.started", number=following.number, beneficiary_id=following.beneficiary_id)
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)
 
 
 @router.post("/pots/{pot_id}/close")

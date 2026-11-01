@@ -9944,6 +9944,558 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Plus tard'**
   String get onbLater;
+
+  /// No description provided for @proofModeDirectHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout ce qui s\'écrit reste prouvable : un message supprimé reste barré, une modification garde l\'original. Seule toi pourras le couper.'**
+  String get proofModeDirectHint;
+
+  /// No description provided for @proofDisableReservedDirect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seule la personne qui a activé le mode preuve peut le désactiver.'**
+  String get proofDisableReservedDirect;
+
+  /// No description provided for @proofExportMe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moi'**
+  String get proofExportMe;
+
+  /// No description provided for @proofExportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou — export du mode preuve'**
+  String get proofExportTitle;
+
+  /// No description provided for @proofExportBetween.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion entre {me} et {contact}'**
+  String proofExportBetween(String me, String contact);
+
+  /// No description provided for @proofExportPeriod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve actif depuis le {since} · exporté le {now} depuis ce téléphone'**
+  String proofExportPeriod(String since, String now);
+
+  /// No description provided for @proofExportFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page {page} sur {pages} — produit sur l\'appareil : le serveur Pokou n\'a pas accès aux messages chiffrés.'**
+  String proofExportFooter(String page, String pages);
+
+  /// No description provided for @proofExportAttachment.
+  ///
+  /// In fr, this message translates to:
+  /// **'[pièce jointe]'**
+  String get proofExportAttachment;
+
+  /// No description provided for @proofExportEdited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifié le {at}'**
+  String proofExportEdited(String at);
+
+  /// No description provided for @proofExportDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimé le {at}, conservé par le mode preuve'**
+  String proofExportDeleted(String at);
+
+  /// No description provided for @proTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié Pro'**
+  String get proTitle;
+
+  /// No description provided for @proTeaser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour une activité : nom commercial et « Géré par »'**
+  String get proTeaser;
+
+  /// No description provided for @proPitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton nom commercial s\'affiche en premier, avec « Géré par » et ton nom vérifié. Le profil Pro accueillera tes annonces Assimé.'**
+  String get proPitch;
+
+  /// No description provided for @proSteps.
+  ///
+  /// In fr, this message translates to:
+  /// **'1. Tu envoies ton justificatif. 2. Le support le vérifie sous {hours} h. 3. Tu ne paies qu\'après la validation.'**
+  String proSteps(String hours);
+
+  /// No description provided for @proPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification en cours. Réponse au plus tard le {due}.'**
+  String proPending(String due);
+
+  /// No description provided for @proApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Justificatif validé : tu peux activer Pokou certifié Pro.'**
+  String get proApproved;
+
+  /// No description provided for @proPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer Pokou certifié Pro'**
+  String get proPay;
+
+  /// No description provided for @proCorrection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Justificatif à corriger'**
+  String get proCorrection;
+
+  /// No description provided for @proRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier refusé'**
+  String get proRejected;
+
+  /// No description provided for @proActivity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton activité'**
+  String get proActivity;
+
+  /// No description provided for @proBusinessName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom commercial'**
+  String get proBusinessName;
+
+  /// No description provided for @proActivityField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activité (couture, boutique, transport…)'**
+  String get proActivityField;
+
+  /// No description provided for @proDocument.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter le justificatif'**
+  String get proDocument;
+
+  /// No description provided for @proDocumentChosen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Justificatif ajouté — toucher pour changer'**
+  String get proDocumentChosen;
+
+  /// No description provided for @proDocumentNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Registre de commerce, carte professionnelle ou patente. Vu par le support seulement, jamais affiché.'**
+  String get proDocumentNote;
+
+  /// No description provided for @proSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer pour vérification'**
+  String get proSend;
+
+  /// No description provided for @proManagedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Géré par {name}'**
+  String proManagedBy(String name);
+
+  /// No description provided for @proProfileNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est ainsi que les autres voient ton profil Pro.'**
+  String get proProfileNote;
+
+  /// No description provided for @honamCity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ville'**
+  String get honamCity;
+
+  /// No description provided for @honamOtherCity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une autre ville'**
+  String get honamOtherCity;
+
+  /// No description provided for @honamYourCity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta ville'**
+  String get honamYourCity;
+
+  /// No description provided for @honamNotServed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam ne livre pas encore dans cette ville. Inscris-toi : on te prévient à l\'ouverture.'**
+  String get honamNotServed;
+
+  /// No description provided for @honamJoinWaitlist.
+  ///
+  /// In fr, this message translates to:
+  /// **'M\'inscrire sur la liste d\'attente'**
+  String get honamJoinWaitlist;
+
+  /// No description provided for @honamWaitlistDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscrit·e pour {city}'**
+  String honamWaitlistDone(String city);
+
+  /// No description provided for @honamWaitlistBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'On te prévient dès que Honam livre dans ta ville. Rien d\'autre.'**
+  String get honamWaitlistBody;
+
+  /// No description provided for @honamReferralCodeField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de parrainage (facultatif)'**
+  String get honamReferralCodeField;
+
+  /// No description provided for @honamReferralTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parraine un coursier'**
+  String get honamReferralTitle;
+
+  /// No description provided for @honamReferralBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rides} courses offertes à la première livraison de ton filleul.'**
+  String honamReferralBody(String rides);
+
+  /// No description provided for @honamReferralShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager mon code'**
+  String get honamReferralShare;
+
+  /// No description provided for @honamReferralMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre pour Honam avec Pokou : utilise mon code de parrainage {code} dans le mode coursier.'**
+  String honamReferralMessage(String code);
+
+  /// No description provided for @honamReferralCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Filleuls : {count}'**
+  String honamReferralCount(String count);
+
+  /// No description provided for @honamTrialEnded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton essai est terminé'**
+  String get honamTrialEnded;
+
+  /// No description provided for @honamRecommendedPack.
+  ///
+  /// In fr, this message translates to:
+  /// **'D\'après tes courses du mois, le pack {pack} te suffit.'**
+  String honamRecommendedPack(String pack);
+
+  /// No description provided for @honamNavigate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Itinéraire dans mon appli de cartes'**
+  String get honamNavigate;
+
+  /// No description provided for @honamLocationShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta position est partagée toutes les 15 s pendant la course, jamais après.'**
+  String get honamLocationShared;
+
+  /// No description provided for @honamLocationDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorise la localisation pour que le patient suive sa livraison.'**
+  String get honamLocationDenied;
+
+  /// No description provided for @honamCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'le coursier'**
+  String get honamCourier;
+
+  /// No description provided for @honamTrackingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est en route'**
+  String honamTrackingTitle(String name);
+
+  /// No description provided for @honamTrackingWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position pas encore reçue.'**
+  String get honamTrackingWaiting;
+
+  /// No description provided for @honamTrackingDistance.
+  ///
+  /// In fr, this message translates to:
+  /// **'À {km} km de chez toi'**
+  String honamTrackingDistance(String km);
+
+  /// No description provided for @honamTrackingUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise à jour il y a {minutes} min'**
+  String honamTrackingUpdated(String minutes);
+
+  /// No description provided for @honamTrackingStale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position non à jour'**
+  String get honamTrackingStale;
+
+  /// No description provided for @honamTrackingShowMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir sur la carte'**
+  String get honamTrackingShowMap;
+
+  /// No description provided for @honamTrackingMapDataSaver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir sur la carte (consomme des données)'**
+  String get honamTrackingMapDataSaver;
+
+  /// No description provided for @assimeFavoritesAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Favoris et alertes'**
+  String get assimeFavoritesAlerts;
+
+  /// No description provided for @assimeFavorites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Favoris'**
+  String get assimeFavorites;
+
+  /// No description provided for @assimeAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alertes'**
+  String get assimeAlerts;
+
+  /// No description provided for @assimeNoFavorites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun favori'**
+  String get assimeNoFavorites;
+
+  /// No description provided for @assimeFavoritesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touche le cœur d\'une annonce pour la garder ici.'**
+  String get assimeFavoritesHint;
+
+  /// No description provided for @assimeAddFavorite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter aux favoris'**
+  String get assimeAddFavorite;
+
+  /// No description provided for @assimeRemoveFavorite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer des favoris'**
+  String get assimeRemoveFavorite;
+
+  /// No description provided for @assimeNewAlert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle alerte'**
+  String get assimeNewAlert;
+
+  /// No description provided for @assimeAlertQuery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que tu cherches'**
+  String get assimeAlertQuery;
+
+  /// No description provided for @assimeAlertMaxPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix maximum (facultatif)'**
+  String get assimeAlertMaxPrice;
+
+  /// No description provided for @assimeAlertNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'On te prévient quand une annonce correspond. L\'alerte ne lit que les annonces, jamais tes messages.'**
+  String get assimeAlertNote;
+
+  /// No description provided for @assimeNoAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune alerte pour l\'instant.'**
+  String get assimeNoAlerts;
+
+  /// No description provided for @assimeAlertUpTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'jusqu\'à {price} FCFA'**
+  String assimeAlertUpTo(String price);
+
+  /// No description provided for @assimeAlertMatches.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} annonce(s) trouvée(s)'**
+  String assimeAlertMatches(String count);
+
+  /// No description provided for @assimeSponsored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sponsorisé'**
+  String get assimeSponsored;
+
+  /// No description provided for @assimeWhyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi je vois ça'**
+  String get assimeWhyTitle;
+
+  /// No description provided for @assimeWhyNotSponsored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette annonce n\'est plus mise en avant.'**
+  String get assimeWhyNotSponsored;
+
+  /// No description provided for @assimeReportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan de la mise en avant'**
+  String get assimeReportTitle;
+
+  /// No description provided for @assimeReportEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de mise en avant pour cette annonce.'**
+  String get assimeReportEmpty;
+
+  /// No description provided for @assimeReportPeriod.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days} jours · du {start} au {end}'**
+  String assimeReportPeriod(String days, String start, String end);
+
+  /// No description provided for @assimeReportImpressions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vue en tête des résultats : {count} fois'**
+  String assimeReportImpressions(String count);
+
+  /// No description provided for @assimeReportStatusViews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vue dans les statuts : {count} fois'**
+  String assimeReportStatusViews(String count);
+
+  /// No description provided for @assimeReportContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnes qui t\'ont contacté : {count}'**
+  String assimeReportContacts(String count);
+
+  /// No description provided for @assimeStatusPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Place dans les statuts : en relecture par la modération'**
+  String get assimeStatusPending;
+
+  /// No description provided for @assimeStatusRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Place dans les statuts refusée par la modération'**
+  String get assimeStatusRejected;
+
+  /// No description provided for @koryKindTontine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tontine'**
+  String get koryKindTontine;
+
+  /// No description provided for @koryFieldStake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise de chacun par tour (FCFA)'**
+  String get koryFieldStake;
+
+  /// No description provided for @koryRotation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordre des tours'**
+  String get koryRotation;
+
+  /// No description provided for @koryRotationHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisse pour ordonner. L\'ordre est fixé à l\'ouverture et ne change plus.'**
+  String get koryRotationHint;
+
+  /// No description provided for @koryRemoveFromRotation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de la tontine'**
+  String get koryRemoveFromRotation;
+
+  /// No description provided for @koryNeedRotation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une tontine demande au moins deux participants.'**
+  String get koryNeedRotation;
+
+  /// No description provided for @koryTontineNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque tour, chacun envoie sa mise au wallet du bénéficiaire, qui confirme ce qu\'il a reçu. Pokou ne touche jamais l\'argent.'**
+  String get koryTontineNote;
+
+  /// No description provided for @koryRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les tours'**
+  String get koryRounds;
+
+  /// No description provided for @koryRoundNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tour {number}'**
+  String koryRoundNumber(String number);
+
+  /// No description provided for @koryRoundConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{confirmed} confirmés sur {expected}'**
+  String koryRoundConfirmed(String confirmed, String expected);
+
+  /// No description provided for @koryNextRound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer au tour suivant'**
+  String get koryNextRound;
+
+  /// No description provided for @koryNextRoundBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le tour en cours se termine. Les contributions déjà déclarées restent à confirmer par son bénéficiaire.'**
+  String get koryNextRoundBody;
+
+  /// No description provided for @koryLastRoundBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'était le dernier tour : la tontine sera clôturée. Le journal reste consultable.'**
+  String get koryLastRoundBody;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

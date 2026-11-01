@@ -32,23 +32,32 @@ class KoryPotScreen extends ConsumerWidget {
       title: pot?.title ?? l.koryTitle,
       subtitle: pot == null
           ? null
-          : (pot.isCotisation ? l.koryKindCotisation : l.koryKindCagnotte),
+          : (pot.isTontine
+                ? l.koryKindTontine
+                : pot.isCotisation ? l.koryKindCotisation : l.koryKindCagnotte),
       actions: [
-        if (pot != null)
+        if (pot != null && !pot.isTontine)
           IconButton(
             tooltip: l.koryShareCode(pot.joinCode),
             icon: const Icon(Icons.share_outlined),
             onPressed: () =>
                 Share.share(l.koryShareText(pot.title, pot.joinCode)),
           ),
-        if (pot != null && pot.isOrganizer && pot.isOpen)
+        if (pot != null && pot.isTontine && pot.isOrganizer && pot.isOpen)
+          IconButton(
+            tooltip: l.koryNextRound,
+            icon: const Icon(Icons.skip_next_outlined),
+            onPressed: () => _nextRound(context, ref, pot),
+          ),
+        if (pot != null && !pot.isTontine && pot.isOrganizer && pot.isOpen)
           IconButton(
             tooltip: l.koryCloseAction,
             icon: const Icon(Icons.lock_outline),
             onPressed: () => _close(context, ref, pot),
           ),
       ],
-      floatingActionButton: pot != null && pot.isOpen
+      // Dans une tontine, le bénéficiaire du tour reçoit : il ne mise pas.
+      floatingActionButton: pot != null && pot.isOpen && !(pot.isTontine && pot.isCollector)
           ? FloatingActionButton.extended(
               backgroundColor: AppColors.accentPrimary,
               foregroundColor: Colors.white,
@@ -75,6 +84,10 @@ class KoryPotScreen extends ConsumerWidget {
               _Header(pot: pot),
               const SizedBox(height: 12),
               _PayTo(pot: pot),
+              if (pot.isTontine) ...[
+                ModuleSectionTitle(l.koryRounds),
+                for (final round in pot.rounds) _RoundTile(round: round),
+              ],
               ModuleSectionTitle(l.koryJournal),
               if (pot.entries.isEmpty)
                 Padding(
@@ -92,6 +105,24 @@ class KoryPotScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _nextRound(BuildContext context, WidgetRef ref, KoryPot pot) async {
+    final l = L.of(context);
+    final last = pot.currentRound != null && pot.currentRound == pot.rounds.length;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.koryNextRound),
+        content: Text(last ? l.koryLastRoundBody : l.koryNextRoundBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(l.actionCancel)),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: Text(l.koryNextRound)),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    await _run(context, ref, () => ref.read(koryRepositoryProvider).nextRound(pot.id));
   }
 
   Future<void> _close(BuildContext context, WidgetRef ref, KoryPot pot) async {
@@ -351,6 +382,7 @@ class _EntryTile extends ConsumerWidget {
     };
     final subtitle = [
       DateFormat.yMMMd(locale).add_Hm().format(entry.declaredAt.toLocal()),
+      if (entry.roundNumber != null) l.koryRoundNumber('${entry.roundNumber}'),
       if (entry.periodLabel != null) entry.periodLabel!,
       if (entry.walletReference != null) entry.walletReference!,
     ].join(' · ');
@@ -394,7 +426,7 @@ class _EntryTile extends ConsumerWidget {
               children: [
                 KoryStatusPill(icon: icon, label: label, color: color),
                 const Spacer(),
-                if (pot.isCollector && entry.isPending) ...[
+                if (entry.isPending && (entry.canReview || (pot.isCollector && !pot.isTontine))) ...[
                   TextButton(
                     onPressed: () => _review(context, ref, confirm: false),
                     child: Text(l.koryReject),
@@ -576,6 +608,35 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// Un tour de tontine : qui reçoit, quand, et ce qu'il a confirmé.
+class _RoundTile extends StatelessWidget {
+  const _RoundTile({required this.round});
+
+  final KoryRound round;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final (icon, color) = switch (round.status) {
+      'CURRENT' => (Icons.play_circle_outline, AppColors.accentPrimary),
+      'DONE' => (Icons.check_circle, AppColors.feedbackSuccess),
+      _ => (Icons.schedule, AppColors.textSecondary),
+    };
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: color),
+      title: Text('${l.koryRoundNumber('${round.number}')} · ${round.beneficiaryName ?? '—'}'),
+      subtitle: Text([
+        if (round.dueAt != null) DateFormat.yMMMd(locale).format(round.dueAt!.toLocal()),
+        l.koryRoundConfirmed(formatFcfa(round.confirmedTotal), formatFcfa(round.expectedTotal)),
+      ].join(' · ')),
+      selected: round.status == 'CURRENT',
     );
   }
 }

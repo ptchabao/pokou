@@ -391,6 +391,19 @@ class MessagingController extends StateNotifier<MessagingState> {
     if (type == 'message:deleted') {
       final deletedId = event['message_id'] as String?;
       if (deletedId == null) return;
+      if (event['proof'] == true) {
+        // Mode preuve : le message reste ici, barré, avec le texte que cet
+        // appareil a déjà ouvert.
+        final at = DateTime.now().toUtc();
+        await _store.markDirectDeleted(deletedId, at);
+        state = state.copyWith(
+          messages: [
+            for (final m in state.messages)
+              if (m.id == deletedId) m.copyWith(deletedAt: at) else m,
+          ],
+        );
+        return;
+      }
       // Retiré aussi du cache, sinon il réapparaîtrait à la réouverture.
       _store.deleteDirect(deletedId);
       state = state.copyWith(
@@ -618,11 +631,17 @@ class MessagingController extends StateNotifier<MessagingState> {
     if (trimmed.isEmpty) return _l.convEmptyEdit;
 
     try {
-      final updated = await _repository.edit(
+      var updated = await _repository.edit(
         messageId: messageId,
         recipientId: _key.contactUserId,
         content: trimmed,
       );
+      if (updated.proofMode && updated.originalContent == null) {
+        // Mode preuve : la version d'origine reste lisible de tous.
+        final before = state.messages.where((m) => m.id == messageId).firstOrNull;
+        final original = before?.originalContent ?? before?.content;
+        if (original != null) updated = updated.copyWith(originalContent: original);
+      }
       await _store.saveDirect([updated]);
       if (!mounted) return null;
       state = state.copyWith(
@@ -687,7 +706,18 @@ class MessagingController extends StateNotifier<MessagingState> {
     }
 
     try {
-      await _repository.delete(messageId);
+      if (await _repository.delete(messageId)) {
+        final at = DateTime.now().toUtc();
+        await _store.markDirectDeleted(messageId, at);
+        if (!mounted) return;
+        state = state.copyWith(
+          messages: [
+            for (final m in state.messages)
+              if (m.id == messageId) m.copyWith(deletedAt: at) else m,
+          ],
+        );
+        return;
+      }
       await _store.deleteDirect(messageId);
       await _store.dropActionsFor(messageId);
       state = state.copyWith(

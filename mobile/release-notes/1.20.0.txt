@@ -1,0 +1,42 @@
+<fr-FR>
+• Mode preuve à deux : message supprimé barré, original gardé, export PDF fait sur le téléphone.
+• Pokou certifié Pro : justificatif vérifié sous 48 h, paiement après validation, nom commercial « Géré par » votre nom.
+• Honam : suivez le coursier pendant la livraison. Coursiers : parrainage et liste d'attente.
+• Assimé : favoris, alertes, « Pourquoi je vois ça ».
+• Kory : la tontine en rotation, là où Kory Plus est ouvert.
+</fr-FR>
+<en-US>
+• Proof mode in one-to-one chats: deleted messages stay struck through, edits keep the original, PDF export made on your phone.
+• Pokou certified Pro: proof checked within 48 h, pay after approval, trade name “Managed by” your name.
+• Honam: follow the courier during delivery. Couriers: referrals and a waiting list.
+• Assimé: favourites, alerts, “Why am I seeing this”.
+• Kory: rotating tontines, where Kory Plus is open.
+</en-US>
+<es-ES>
+• Modo prueba entre dos: mensaje eliminado tachado, original conservado, PDF generado en el teléfono.
+• Pokou certificado Pro: justificante revisado en 48 h, pago tras validación, nombre comercial «Gestionado por» tu nombre.
+• Honam: sigue al repartidor durante la entrega. Repartidores: referidos y lista de espera.
+• Assimé: favoritos, alertas, «Por qué veo esto».
+• Kory: la tontina rotativa, donde Kory Plus está abierto.
+</es-ES>
+<it-IT>
+• Modalità prova a due: messaggio eliminato barrato, originale conservato, PDF creato sul telefono.
+• Pokou certificato Pro: documento verificato entro 48 h, pagamento dopo l'approvazione, nome commerciale «Gestito da» il tuo nome.
+• Honam: segui il corriere durante la consegna. Corrieri: inviti e lista d'attesa.
+• Assimé: preferiti, avvisi, «Perché vedo questo».
+• Kory: la tontina a rotazione, dove Kory Plus è aperto.
+</it-IT>
+<ru-RU>
+• Режим доказательства в личных чатах: удалённое зачёркнуто, оригинал сохранён, PDF создаётся на телефоне.
+• Pokou certified Pro: проверка документа за 48 ч, оплата после одобрения, торговое название и «Управляет».
+• Honam: следите за курьером во время доставки. Курьеры: приглашения и лист ожидания.
+• Assimé: избранное, оповещения, «Почему я это вижу».
+• Kory: тонтина по кругу там, где открыт Kory Plus.
+</ru-RU>
+<ar>
+• وضع الإثبات في المحادثات الثنائية: الرسالة المحذوفة تبقى مشطوبة، والأصل محفوظ، وملف PDF يُنشأ على الهاتف.
+• Pokou موثَّق Pro: تُراجع الوثيقة خلال 48 ساعة، والدفع بعد الموافقة، والاسم التجاري «يديره» اسمك.
+• Honam: تابع الساعي أثناء التوصيل. السعاة: الإحالة وقائمة الانتظار.
+• Assimé: المفضلة والتنبيهات و«لماذا أرى هذا».
+• Kory: التونتين الدوّار حيث يتوفر Kory Plus.
+</ar>

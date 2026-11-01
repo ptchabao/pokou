@@ -37,6 +37,7 @@ from app.models.messaging import (  # noqa: F401
     BroadcastList,
     BroadcastListMember,
     BroadcastMessage,
+    DirectProofMode,
 )
 from app.models.groups import (  # noqa: F401
     Group,
@@ -86,6 +87,8 @@ from app.models.marketplace import (  # noqa: F401
     MarketplaceBoost,
     MarketplaceAd,
     SellerVerificationApplication,
+    MarketplaceFavorite,
+    MarketplaceAlert,
 )
 from app.models.modules import (  # noqa: F401
     AppModule,
@@ -135,12 +138,14 @@ from app.models.kory import (  # noqa: F401
     KoryPot,
     KoryMember,
     KoryEntry,
+    KoryRound,
 )
 from app.models.events import (  # noqa: F401
     OutboxEvent,
 )
 from app.models.certified import (  # noqa: F401
     CertifiedSubscription,
+    CertifiedProApplication,
 )
 from app.models.honam import (  # noqa: F401
     Pharmacy,
@@ -149,4 +154,6 @@ from app.models.honam import (  # noqa: F401
     HonamOrderEvent,
     CourierProfile,
     CourierLedgerEntry,
+    PharmacyCourier,
+    HonamWaitlistEntry,
 )

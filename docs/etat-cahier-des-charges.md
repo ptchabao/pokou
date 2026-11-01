@@ -24,6 +24,18 @@ Valeurs par défaut (`backend/app/core/countries.py`) : Togo = discussions,
 Kory, Pokou certifié ; Côte d'Ivoire = discussions seulement. **HONAM est
 fermé par défaut** : il s'ouvre au pilote de Lomé (mois 4).
 
+## Ce que l'équipe traite à la main
+
+Ces files n'ont pas encore d'écran d'administration ; elles se lisent et se
+traitent par l'API, avec un compte `ADMIN` :
+
+| File | Lire | Décider |
+|---|---|---|
+| Dossiers Pokou certifié Pro (réponse promise sous 48 h) | `GET /api/v1/admin/certified/pro/pending` | `POST /api/v1/admin/certified/pro/{id}/review` `{decision: APPROVE\|CORRECTION\|REJECT, note}` |
+| Candidatures coursiers | `GET /api/v1/admin/honam/couriers/pending` | `POST /api/v1/admin/honam/couriers/{user_id}/validate` |
+| Statuts sponsorisés Assimé | `GET /api/v1/admin/marketplace/sponsored-statuses` | `PUT /api/v1/admin/marketplace/sponsored-statuses/{boost_id}` `{approve}` |
+| Liste d'attente Honam, par ville | `GET /api/v1/admin/honam/waitlist` | ouvrir la ville dans `honam_cities` du pays |
+
 ## Modèle économique
 
 | Règle | État | Où |
@@ -40,8 +52,8 @@ fermé par défaut** : il s'ouvre au pilote de Lomé (mois 4).
 | BM-10 Prix HT, TVA du pays en sus, HT et TTC affichés | Fait sur les écrans de paiement. Factures PDF : **pas faites** | |
 | BM-11 Crédit officine 100 FCFA HT par commande payée, alerte à 10, 7 jours puis pause | Fait | `rules.charge_order_credit` |
 | BM-12 Format annuaire, tri par distance, aucune mise en avant | Fait | `GET /honam/pharmacies` |
-| BM-13 Kory Plus (tontine en rotation) | **Pas fait** : refusé tant que Kory Plus n'est pas ouvert (mois 13) | |
-| Mise en avant Assimé (maquettes) : 600 FCFA TTC / 3 jours ou 1 300 FCFA TTC / 7 jours, « Sponsorisé », 2 au plus par écran | Fait. Place dans la bande des statuts (7 jours), bilan, « Pourquoi je vois ça » : **pas faits** | `marketplace.boost_product` |
+| BM-13 Kory Plus (tontine en rotation) | Fait, fermé tant que le pays n'a pas le module `kory_plus` (mois 13) : ordre des tours fixé à l'ouverture, bénéficiaire du tour qui confirme, passage au tour suivant par l'organisateur | `kory.create_pot`, `KoryRound` |
+| Mise en avant Assimé (maquettes) : 600 FCFA TTC / 3 jours ou 1 300 FCFA TTC / 7 jours, « Sponsorisé », 2 au plus par écran | Fait, avec la place dans la bande des statuts (7 jours), le bilan et « Pourquoi je vois ça » | `marketplace.boost_product`, `marketplace/assime.py` |
 
 ## Navigation et accueil
 
@@ -79,15 +91,15 @@ fermé par défaut** : il s'ouvre au pilote de Lomé (mois 4).
 | Badge vérifié par le nom du titulaire du wallet, **jamais montré** | Fait, comparaison sans accents, casse ni ordre. Nom du champ renvoyé par CashPay = **Hypothèse** (`payer_name`, `customer_name` ou `account_holder_name`) |
 | Écran « noms différents » | Fait : la personne corrige son nom ; le serveur dit seulement s'il correspond |
 | Prix Particulier 500/mois, 5 000/an, Pro 2 500/mois HT | Fait |
-| Inclus pour les officines | **Pas encore relié** à l'abonnement officine |
+| Inclus pour les officines | Fait : le titulaire d'une officine abonnée a le profil Pro, au nom de l'officine |
 | CERT-11 Essai d'un mois : mode preuve oui, badge au premier paiement | Fait |
 | Activation par tout titulaire du badge, admin ou non ; message système ; bandeau permanent | Fait (groupes) |
 | Désactivation : la personne qui l'a activé, ou un admin au badge payant (pas l'essai) | Fait (groupes) |
 | Supprimé : visible, barré, pour tous ; modifié : version d'origine visible avec l'heure | Fait (groupes) |
 | Export PDF daté | Fait (groupes) ; police sans lettres éwé/kabiyè (limite notée dans le code) |
-| Mode preuve à deux | **Pas fait** : les messages à deux sont chiffrés de bout en bout, la trace doit être gardée par les téléphones eux-mêmes — chantier à part |
-| La trace reste chez les autres même si quelqu'un quitte, bloque ou supprime son compte | Vrai pour les groupes (conservée sur le serveur) |
-| Pokou certifié Pro (justificatif, vérification sous 48 h, profil « Géré par ») | **Pas fait** |
+| Mode preuve à deux (maquettes 4b, 5b, 10) | Fait. Le serveur tient le mode (le même pour les deux côtés, coupé par la seule personne qui l'a activé) et ne supprime plus un message envoyé en mode preuve : il le marque. Le texte d'un message chiffré, lui, n'existe que sur les téléphones : c'est chaque appareil qui garde la version d'origine d'une modification et le texte d'un message supprimé. L'export PDF est produit sur le téléphone | `messages.set_proof_mode`, `PokouMessageStore._keepProofTrace`, `proof_export.dart` |
+| La trace reste chez les autres même si quelqu'un quitte, bloque ou supprime son compte | Groupes : conservée sur le serveur. À deux : conservée sur le téléphone de l'autre (un rechargement de l'historique ne l'efface pas). **Limite** : un changement de téléphone sans sauvegarde perd la trace à deux — elle ne vit que sur l'appareil |
+| Pokou certifié Pro (maquettes Pro 1 à 5) | Fait : justificatif (vu du seul support), vérification sous 48 h (`/admin/certified/pro/pending`), « justificatif à corriger » avec motif, paiement seulement après validation, profil « nom commercial · Géré par … » sur la fiche contact | `certified.pro_apply`, `public_badge` |
 
 ## HONAM
 
@@ -108,11 +120,22 @@ règles d'or) validée par l'équipe, 5 courses d'essai à la validation,
 configuration du pays), Queen Pokou débloqué sans défaut le mois précédent,
 une adhésion expirée ne coupe jamais une course en cours.
 
-**Pas fait** : suivi sur carte (position du coursier toutes les 15 s),
-liste d'attente des villes non desservies, parrainage, récapitulatif de fin
-d'essai, « Vos coursiers » de l'officine, notifications push des changements
-d'état, validation réglementaire (à faire par un juriste). Une course
-impayée au coursier suspend l'officine après 72 h (**Hypothèse**).
+Fait aussi : **suivi de la course** (position envoyée toutes les 15 s par le
+téléphone du coursier, une seule position gardée, effacée à la remise ;
+suivi sans carte par défaut, carte OpenStreetMap chargée à la demande ;
+l'officine suit aussi ; le coursier navigue avec son application de cartes),
+**villes desservies** (`honam_cities` dans la configuration du pays) et
+**liste d'attente** ailleurs, **parrainage** (code donné à la validation ;
+2 courses offertes au parrain à la première livraison du filleul —
+**Hypothèse** sur le nombre), **récapitulatif de fin d'essai** avec le pack
+qui couvre l'activité réelle, **« Vos coursiers »** dans l'espace officine
+(rattacher un coursier validé par son numéro ; il voit les courses de
+l'officine 5 minutes avant les autres — **Hypothèse** sur le délai).
+
+**Pas fait** : notifications push des changements d'état, « une fois par
+mois au plus » pour l'offre coursier (l'offre est dans le mode coursier, pas
+encore poussée), validation réglementaire (à faire par un juriste). Une
+course impayée au coursier suspend l'officine après 72 h (**Hypothèse**).
 
 ## Assimé
 
@@ -121,15 +144,27 @@ Corrigé : le nom du vendeur ne retombe plus sur son numéro de téléphone.
 Selon les maquettes : les médicaments sont refusés à la publication et
 renvoient vers Honam.
 
-**Pas fait** : badge Pro et filtre « Vendeurs certifiés », statuts
-sponsorisés, favoris et alertes, partage en statut, ouverture au mois 13 par
-pays (le Marché reste ouvert partout, comme avant).
+Fait aussi : **favoris et alertes** (une alerte est une recherche
+enregistrée, déclenchée à la publication d'une annonce qui y répond, avec
+une notification par personne), **statut sponsorisé** (une seule place dans
+la bande, après 4 statuts de proches au moins, réservée aux vendeurs au
+badge payant, relue par la modération — `/admin/marketplace/sponsored-statuses`
+— et ciblée par ville), **« Pourquoi je vois ça »**, **bilan** (affichages en
+tête, vues dans les statuts, contacts), filtre « Vendeurs certifiés » côté
+serveur (`certified_only=true`).
+
+**Pas fait** : filtre « Vendeurs certifiés » dans l'écran, badge Pro sur
+les annonces, partage d'une annonce en statut, ouverture au mois 13 par pays
+(le Marché reste ouvert partout, comme avant).
 
 ## Kory
 
 Selon les maquettes : « Total confirmé », « Total déclaré », « Reste à
-collecter », contribution « Contestée ». **Pas faits** : la tontine (Kory
-Plus, mois 13) et la confirmation par le bénéficiaire du tour.
+collecter », contribution « Contestée ». La tontine (Kory Plus) est faite :
+elle s'ouvre depuis un groupe, chaque membre mise au wallet du bénéficiaire
+du tour, et c'est ce bénéficiaire qui confirme — y compris après le passage
+au tour suivant. Elle ne se rejoint pas par code. Pour l'ouvrir dans un
+pays, ajoutez `kory_plus` à ses modules.
 
 ## Hors périmètre de ces travaux
 

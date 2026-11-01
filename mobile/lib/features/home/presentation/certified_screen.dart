@@ -10,6 +10,7 @@ import '../../honam/presentation/honam_controller.dart' show openPayment;
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 import '../../kory/presentation/kory_screen.dart' show KoryStatusPill;
 import '../../modules/shared/module_ui.dart';
+import 'certified_pro_screen.dart';
 
 final _certifiedProvider = FutureProvider.autoDispose<
     ({Map<String, dynamic> status, Map<String, dynamic> offer})>((ref) async {
@@ -54,7 +55,12 @@ class CertifiedScreen extends ConsumerWidget {
         data: (data) {
           final status = data.status;
           final state = status['status'] as String;
-          final plans = (data.offer['plans'] as List).cast<Map<String, dynamic>>();
+          // La formule Pro a son propre parcours : justificatif d'abord,
+          // paiement après validation (maquettes Pro).
+          final plans = [
+            for (final plan in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
+              if (!(plan['code'] as String).startsWith('PRO')) plan,
+          ];
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(_certifiedProvider),
             child: ListView(
@@ -139,6 +145,19 @@ class CertifiedScreen extends ConsumerWidget {
                   ),
                 const SizedBox(height: 8),
                 Text(l.honamPriceNote, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                const SizedBox(height: 16),
+                ModuleCard(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.hexagon_outlined, color: AppColors.accentPrimary),
+                    title: Text(l.proTitle),
+                    subtitle: Text(l.proTeaser),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const CertifiedProScreen()),
+                    ),
+                  ),
+                ),
               ],
             ),
           );

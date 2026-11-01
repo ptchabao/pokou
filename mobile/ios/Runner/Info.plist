@@ -41,7 +41,7 @@
 	<key>NSContactsUsageDescription</key>
 	<string>Pokou utilise vos contacts pour retrouver les personnes déjà sur Pokou, comme WhatsApp et Telegram.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Pokou utilise votre position pour afficher les produits les plus proches.</string>
+	<string>Pokou utilise votre position pour afficher les produits et les pharmacies les plus proches et, en mode coursier, pour que le patient suive sa livraison pendant la course.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Pokou a besoin du micro pour enregistrer vos notes vocales.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

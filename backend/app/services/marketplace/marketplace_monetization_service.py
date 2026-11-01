@@ -5,7 +5,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from app.models import ChannelCertificationApplication, MarketplaceAd, MarketplaceBoost, MarketplacePayment, SellerVerificationApplication, User
+from app.models import ChannelCertificationApplication, MarketplaceAd, MarketplaceBoost, MarketplacePayment, MarketplaceProduct, SellerVerificationApplication, User
 from app.services.payments import semoa_client
 
 logger = logging.getLogger(__name__)
@@ -197,6 +197,11 @@ def confirm_payment(db: Session, provider_reference: str) -> dict[str, Any]:
     result: dict[str, Any] = {"status": "confirmed", "payment_id": payment.id, "kind": payment.kind}
 
     if payment.kind in {"PRODUCT_BOOST", "STATUS_BOOST"}:
+        days = metadata.get("days")
+        product = (
+            db.query(MarketplaceProduct).filter(MarketplaceProduct.id == metadata.get("product_id")).first()
+            if metadata.get("product_id") else None
+        )
         boost = MarketplaceBoost(
             seller_id=payment.user_id,
             product_id=metadata.get("product_id"),
@@ -204,6 +209,11 @@ def confirm_payment(db: Session, provider_reference: str) -> dict[str, Any]:
             payment_id=payment.id,
             starts_at=now,
             expires_at=now + timedelta(hours=int(metadata.get("duration_hours") or 48)),
+            days=days,
+            # 7 jours = une place dans la bande des statuts, relue par la
+            # modération avant d'apparaître. Les résultats n'attendent pas.
+            status_moderation="PENDING" if days == 7 else None,
+            city=product.location if product else None,
         )
         db.add(boost)
         db.flush()

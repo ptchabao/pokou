@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/media/media_repository.dart'
     show MediaMeta, mediaExtension;
@@ -62,6 +63,10 @@ import 'messaging_controller.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import 'call_event_row.dart';
 import 'pending_media_bubble.dart';
+import 'proof_export.dart';
+import 'proof_widgets.dart';
+import '../../auth/presentation/auth_controller.dart';
+import '../../home/presentation/certified_screen.dart';
 import 'poll_bubble.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
@@ -132,6 +137,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _hasText = false;
   bool _slashMode = false;
   DirectMessage? _replyingTo;
+
+  /// Le mode preuve de la discussion, le même pour les deux côtés.
+  DirectProofMode _proof = DirectProofMode.off;
 
   /// Préfixe de l'ANCIEN format, gardé en lecture seule.
   ///
@@ -356,6 +364,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void initState() {
     super.initState();
     unawaited(_checkEncryption());
+    unawaited(_reloadProof());
     _shieldController = ref.read(shieldControllerProvider.notifier);
     _activeConversation = ref.read(activeConversationProvider.notifier);
     _typing = TypingSignal(
@@ -420,6 +429,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   /// un fichier « pokou.bin » d'un type inconnu. Une modification
   /// (`edited_at` différent) n'est pas recouverte : son nouveau chiffré
   /// doit être ouvert.
+  String _proofAuthor(DirectMessage message) =>
+      message.senderId == widget.myUserId ? _l.proofExportMe : widget.contactName;
+
   DirectMessage _withLocalClear(DirectMessage server, DirectMessage? local) {
     if (!server.isEncrypted || local == null || local.isEncrypted) return server;
     if (local.editedAt != server.editedAt) return server;
@@ -449,7 +461,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (message.senderId == widget.myUserId &&
               message.recipientId == widget.contactUserId);
       if (!belongs || !mounted) return;
-      final merged = _withLocalClear(message, _findMessage(message.id));
+      final previous = _findMessage(message.id);
+      var merged = _withLocalClear(message, previous);
+      // Mode preuve à deux : la version d'origine d'un message chiffré n'est
+      // QUE sur cet appareil — on la met de côté avant qu'elle ne soit
+      // recouverte.
+      final original = type == 'message:edited' && message.proofMode
+          ? (previous?.originalContent ??
+                (previous != null && !previous.isEncrypted && previous.editedAt != message.editedAt
+                    ? previous.content
+                    : null))
+          : null;
+      if (original != null && merged.originalContent == null) {
+        merged = merged.copyWith(originalContent: original);
+      }
       if (merged.isEncrypted) {
         // Une modification apporte un NOUVEAU chiffré : il faut l'ouvrir.
         unawaited(
@@ -457,7 +482,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               .read(messagingRepositoryProvider)
               .decryptIncoming(merged, widget.contactUserId)
               .then((opened) {
-                if (mounted) setState(() => _patches[opened.id] = opened);
+                final kept = original != null && opened.originalContent == null
+                    ? opened.copyWith(originalContent: original)
+                    : opened;
+                if (mounted) setState(() => _patches[kept.id] = kept);
               }),
         );
         return;
@@ -1089,10 +1117,141 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
+  Future<void> _reloadProof() async {
+    try {
+      final proof = await ref.read(messagingRepositoryProvider).proofMode(widget.contactUserId);
+      if (mounted) setState(() => _proof = proof);
+    } catch (_) {
+      // Hors ligne : le dernier message système dira l'état, voir build.
+    }
+  }
+
+  /// Activer ou couper le mode preuve (maquettes 4b, 7 et 10).
+  Future<void> _toggleProof(bool proofOn) async {
+    try {
+      final proof = await ref
+          .read(messagingRepositoryProvider)
+          .setProofMode(widget.contactUserId, !proofOn);
+      if (!mounted) return;
+      setState(() => _proof = proof);
+      HapticFeedback.lightImpact();
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      if (error.statusCode == 403 && proofOn) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_l.proofDisableReservedDirect)),
+        );
+        return;
+      }
+      if (error.statusCode == 403) {
+        final open = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(_l.proofModeTitle),
+            content: Text(_l.proofModeNeedsCert),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(_l.actionCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(_l.certTitle),
+              ),
+            ],
+          ),
+        );
+        if (open == true && mounted) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CertifiedScreen()),
+          );
+        }
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
+      }
+    }
+  }
+
+  /// L'export daté, produit sur ce téléphone à partir de ce qu'il a gardé.
+  Future<void> _exportProof(List<DirectMessage> messages) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l = _l;
+    try {
+      final file = await exportDirectProof(
+        contactName: widget.contactName,
+        myName: ref.read(authControllerProvider).user?.fullName ?? l.proofExportMe,
+        myUserId: widget.myUserId,
+        since: _proof.since ?? messages.first.createdAt,
+        messages: [for (final m in messages) _patches[m.id] ?? m],
+        labels: ProofExportLabels(
+          title: l.proofExportTitle,
+          between: l.proofExportBetween,
+          period: l.proofExportPeriod,
+          footer: (page, pages) => l.proofExportFooter('$page', '$pages'),
+          attachment: l.proofExportAttachment,
+          original: l.proofOriginal,
+          edited: l.proofExportEdited,
+          deleted: l.proofExportDeleted,
+        ),
+      );
+      await Share.shareXFiles([XFile(file.path, mimeType: 'application/pdf')]);
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l.honamFailed)));
+    }
+  }
+
+  Future<void> _openProofMenu(bool proofOn, List<DirectMessage> messages) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.gavel_outlined),
+              title: Text(proofOn ? _l.proofModeDisable : _l.proofModeEnable),
+              subtitle: proofOn ? null : Text(_l.proofModeDirectHint),
+              onTap: () => Navigator.pop(sheetContext, 'toggle'),
+            ),
+            if (proofOn && messages.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined),
+                title: Text(_l.proofExport),
+                onTap: () => Navigator.pop(sheetContext, 'export'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (action == 'toggle') await _toggleProof(proofOn);
+    if (action == 'export') await _exportProof(messages);
+  }
+
+  /// L'état affiché : le dernier message système fait foi s'il est plus
+  /// récent que ce que le serveur a répondu à l'ouverture — c'est lui qui
+  /// arrive en direct quand l'autre active ou coupe le mode.
+  bool _proofOn(List<DirectMessage> messages) {
+    for (final m in messages.reversed) {
+      if ((m.payload?['kind']) == 'proof_mode') {
+        final since = _proof.since;
+        if (since == null || m.createdAt.isAfter(since)) return m.payload?['enabled'] == true;
+        break;
+      }
+    }
+    return _proof.enabled;
+  }
+
   @override
   Widget build(BuildContext context) {
     _rememberKeyboardHeight(context);
     final state = ref.watch(messagingControllerProvider(_key));
+    final proofOn = _proofOn(state.messages);
     final product = widget.product ?? _productFromMessages(state.messages);
     final isSeller = product?.sellerId == widget.myUserId;
     _scrollToBottom();
@@ -1161,6 +1320,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     // Mode Bouclier — étape 1 : ré-évalue le score de focus de cette
     // conversation à chaque envoi/réception (voir shield_controller.dart).
     ref.listen(messagingControllerProvider(_key), (previous, next) {
+      // L'autre vient d'activer ou de couper le mode preuve : on relit qui
+      // peut le désactiver.
+      if (previous?.messages.length != next.messages.length &&
+          next.messages.isNotEmpty &&
+          (next.messages.last.payload?['kind']) == 'proof_mode') {
+        unawaited(_reloadProof());
+      }
       if (previous?.messages.length != next.messages.length) {
         ref
             .read(shieldControllerProvider.notifier)
@@ -1308,6 +1474,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
                           tooltip: L.of(context).a11yVideoCall,
                         ),
+                        if (!isContactBot)
+                          _ChatIconButton(
+                            icon: proofOn ? Icons.gavel : Icons.more_vert,
+                            onPressed: () => _openProofMenu(proofOn, state.messages),
+                            tooltip: L.of(context).proofModeTitle,
+                          ),
                       ],
                     ),
                   ),
@@ -1345,6 +1517,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             peerName: widget.contactName,
                             onAcceptIdentity: _acceptIdentity,
                           ),
+                        if (proofOn) const ProofModeBanner(),
                         Expanded(
                           child: !state.initialCacheLoaded
                               ? const SizedBox.shrink()
@@ -1412,6 +1585,25 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         // vous a dit quelque chose » là où
                                         // il s'est passé quelque chose
                                         // ENTRE les deux.
+                                        else if ((message.payload?['kind']) ==
+                                            'proof_mode')
+                                          ProofModeNotice(
+                                            text: message.payload?['enabled'] == true
+                                                ? _l.proofModeOn(_proofAuthor(message))
+                                                : _l.proofModeOff(_proofAuthor(message)),
+                                          )
+                                        else if (message.deletedAt != null ||
+                                            message.originalContent != null)
+                                          ProofKeptMessage(
+                                            key: _keyFor(message.id),
+                                            author: _proofAuthor(message),
+                                            content: message.content,
+                                            original: message.deletedAt == null
+                                                ? message.originalContent
+                                                : null,
+                                            editedAt: message.editedAt,
+                                            isMine: message.senderId == widget.myUserId,
+                                          )
                                         else if (message.messageType ==
                                                 'CALL' &&
                                             message.payload != null)
@@ -1794,6 +1986,29 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       return;
     }
     if (action == 'delete') {
+      // Mode preuve : l'auteur est prévenu AVANT que le message restera,
+      // barré, chez l'autre (maquette 6).
+      if (message.proofMode && !PokouMessageStore.isLocalId(message.id)) {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(_l.deleteForAll),
+            content: Text(_l.deleteProofWarning),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(_l.actionCancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: AppColors.feedbackDanger),
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(_l.actionDelete),
+              ),
+            ],
+          ),
+        );
+        if (ok != true || !mounted) return;
+      }
       await ref
           .read(messagingControllerProvider(_key).notifier)
           .deleteMessage(message.id);

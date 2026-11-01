@@ -17,6 +17,11 @@ const STATUS = {
   REJECTED: ["Refusée", "danger"],
   EXPIRED: ["Devis expiré", "danger"],
   CANCELLED: ["Annulée", "danger"],
+  // Statuts d'un coursier (Vos coursiers).
+  TRIAL: ["Essai", "info"],
+  MEMBER: ["Win Pokou", "success"],
+  ENDED: ["Adhésion expirée", "warning"],
+  SUSPENDED: ["Suspendu", "danger"],
 };
 const TABS = [
   ["", "À traiter"], ["SUBMITTED", "Nouvelles"], ["ACCEPTED", "Paiement"], ["PAID", "À préparer"],
@@ -169,7 +174,8 @@ async function showDashboard(tab = "") {
         stat("Livrées", me.stats_month.delivered), stat("Refusées", me.stats_month.rejected)),
     ),
     billing(me),
-    el("h2", {}, "Commandes"),
+    el("div", { class: "row" }, el("h2", { class: "grow" }, "Commandes"),
+      el("button", { on: { click: () => showCouriers() } }, "Vos coursiers")),
     el("div", { class: "tabs", role: "group" }, TABS.map(([code, label]) =>
       el("button", { "aria-pressed": String(code === tab), on: { click: () => showDashboard(code) } }, label))),
     orders.items.length === 0 ? el("p", { class: "muted" }, "Aucune commande ici pour l'instant.") :
@@ -283,6 +289,29 @@ async function showOrder(id) {
     } } }, "Signaler un défaut du coursier"));
   }
 
+  // Officine 7 : le suivi de la livraison confiée, pendant la course
+  // seulement. Sans carte : la position et la distance suffisent à
+  // répondre au patient qui appelle ; la carte s'ouvre à la demande.
+  if (o.courier_name && ["READY", "IN_DELIVERY"].includes(o.status)) {
+    const box = el("div", { class: "card", "aria-live": "polite" }, el("p", { class: "muted m0" }, "Suivi de la livraison…"));
+    sections.unshift(box);
+    const track = async () => {
+      if (!document.body.contains(box)) return;
+      try {
+        const t = await api(`/honam/pharmacy/orders/${id}/tracking`);
+        if (!t.active) return box.replaceChildren(el("p", { class: "muted m0" }, "Course terminée."));
+        box.replaceChildren(el("h2", { class: "mt0" }, `Suivi de la livraison — ${t.courier_name || "coursier"}`),
+          t.latitude == null ? el("p", { class: "muted" }, "Position pas encore reçue.") : el("div", {},
+            t.distance_km != null ? el("p", {}, `À ${t.distance_km.toFixed(1)} km du patient`) : null,
+            el("p", { class: "muted" }, t.stale ? "Position non à jour" : `Mise à jour : ${when(t.at)}`),
+            el("a", { href: `https://www.openstreetmap.org/?mlat=${t.latitude}&mlon=${t.longitude}#map=16/${t.latitude}/${t.longitude}`,
+              target: "_blank", rel: "noopener" }, "Voir sur la carte")));
+        setTimeout(track, 15000);
+      } catch (e) { setTimeout(track, 15000); }
+    };
+    track();
+  }
+
   render(
     el("button", { class: "text", on: { click: () => showDashboard() } }, "← Commandes"),
     el("h1", {}, `Commande n° ${o.id}`),
@@ -298,6 +327,41 @@ async function showOrder(id) {
     sections,
     el("h2", {}, "Suivi"),
     el("div", { class: "card" }, (o.timeline || []).map((e) => el("div", {}, pill(e.status), " ", el("span", { class: "muted" }, when(e.at)), e.note ? ` — ${e.note}` : ""))),
+  );
+}
+
+// ── Vos coursiers (Officine 6) ───────────────────────────────────────────
+
+async function showCouriers() {
+  let data;
+  try { data = await api("/honam/pharmacy/couriers"); } catch (e) { return alert(e.message); }
+  const phone = el("input", { id: "courier-phone", type: "tel", placeholder: "+228 90 00 00 00" });
+  const status = el("div");
+  const add = async () => {
+    status.replaceChildren();
+    try { await api("/honam/pharmacy/couriers", { method: "POST", body: { phone: phone.value } }); showCouriers(); }
+    catch (e) { status.append(errorBox(e.message)); }
+  };
+  const remove = (c) => async () => {
+    if (!confirm(`Retirer ${c.name || c.phone} de vos coursiers ?`)) return;
+    try { await api(`/honam/pharmacy/couriers/${c.user_id}`, { method: "DELETE" }); showCouriers(); }
+    catch (e) { alert(e.message); }
+  };
+  render(
+    el("button", { class: "text", on: { click: () => showDashboard() } }, "← Commandes"),
+    el("h1", {}, "Vos coursiers"),
+    el("p", { class: "muted" }, `Vos livreurs habituels voient vos courses ${data.priority_minutes} minutes avant les autres coursiers Pokou. Ils doivent être coursiers Pokou validés.`),
+    el("div", { class: "card" },
+      el("label", { for: "courier-phone" }, "Numéro du coursier"), phone,
+      el("button", { class: "primary mt", on: { click: add } }, "Rattacher"), status),
+    data.items.length === 0 ? el("p", { class: "muted" }, "Aucun coursier rattaché pour l'instant.") :
+      data.items.map((c) => el("div", { class: "card" },
+        el("div", { class: "row" }, el("strong", { class: "grow" }, c.name || c.phone), pill(c.status)),
+        el("div", { class: "muted" }, c.phone, c.zones ? ` · ${c.zones}` : ""),
+        el("p", {}, `${c.delivered_count} livraison(s) pour vous`,
+          c.unpaid_count ? el("span", { class: "pill warning" }, ` ${c.unpaid_count} course(s) à payer`) : null,
+          c.defaults_count ? el("span", { class: "pill danger" }, ` ${c.defaults_count} défaut(s)`) : null),
+        el("button", { class: "text", on: { click: remove(c) } }, "Retirer"))),
   );
 }
 

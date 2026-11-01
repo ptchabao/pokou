@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/country/country_config.dart';
+import '../../groups/data/group_model.dart';
+import '../../groups/presentation/group_controller.dart';
 import '../../modules/shared/module_ui.dart';
 import 'kory_controller.dart';
 import 'kory_pot_screen.dart';
@@ -35,8 +38,15 @@ class KoryCreateScreen extends ConsumerStatefulWidget {
   ConsumerState<KoryCreateScreen> createState() => _KoryCreateScreenState();
 }
 
+final _groupMembersProvider = FutureProvider.autoDispose.family<List<GroupMember>, int>(
+  (ref, groupId) async => (await ref.watch(groupRepositoryProvider).getGroup(groupId)).members,
+);
+
 class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
-  static const _kinds = ['CAGNOTTE', 'COTISATION'];
+  static const _kinds = ['CAGNOTTE', 'COTISATION', 'TONTINE'];
+
+  /// Tontine : l'ordre des bénéficiaires, tour par tour (maquette Kory 8).
+  List<int> _rotation = const [];
   static const _periods = ['MONTHLY', 'WEEKLY'];
 
   final _title = TextEditingController();
@@ -75,7 +85,11 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
       setState(() => _error = l.koryNeedTitle);
       return;
     }
-    final amountRequired = _kind == 'COTISATION';
+    final amountRequired = _kind != 'CAGNOTTE';
+    if (_kind == 'TONTINE' && _rotation.length < 2) {
+      setState(() => _error = l.koryNeedRotation);
+      return;
+    }
     if ((amountRequired || _amount.text.isNotEmpty) &&
         (amount == null || amount < 100)) {
       setState(() => _error = l.koryNeedAmount);
@@ -94,9 +108,10 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
             description: _description.text.trim(),
             groupId: widget.groupId,
             goalAmount: _kind == 'CAGNOTTE' ? amount : null,
-            amountPerMember: _kind == 'COTISATION' ? amount : null,
-            period: _kind == 'COTISATION' ? _period : null,
-            dueAt: _dueAt,
+            amountPerMember: _kind != 'CAGNOTTE' ? amount : null,
+            period: _kind != 'CAGNOTTE' ? _period : null,
+            dueAt: _kind == 'TONTINE' ? null : _dueAt,
+            rotation: _kind == 'TONTINE' ? _rotation : null,
           );
       if (mounted) Navigator.of(context).pop(pot.id);
     } catch (_) {
@@ -113,6 +128,19 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
+    // Kory Plus (BM-13) : la tontine ne se propose que dans un pays qui l'a
+    // ouverte, et depuis un groupe — l'ordre des tours se fixe entre ses
+    // membres.
+    final tontineOpen = widget.groupId != null &&
+        ref.watch(currentCountryConfigProvider).has('kory_plus');
+    final kinds = tontineOpen ? _kinds : _kinds.sublist(0, 2);
+    final members = widget.groupId == null || _kind != 'TONTINE'
+        ? null
+        : ref.watch(_groupMembersProvider(widget.groupId!)).valueOrNull;
+    if (members != null && _rotation.isEmpty && members.isNotEmpty) {
+      _rotation = [for (final m in members) m.userId];
+    }
+    String nameOf(int id) => members?.where((m) => m.userId == id).firstOrNull?.displayName ?? '—';
     return ModuleScaffold(
       title: l.koryCreateTitle,
       subtitle: l.korySubtitle,
@@ -120,9 +148,13 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
           ModuleSegmented(
-            labels: [l.koryKindCagnotte, l.koryKindCotisation],
-            index: _kinds.indexOf(_kind),
-            onChanged: (i) => setState(() => _kind = _kinds[i]),
+            labels: [
+              l.koryKindCagnotte,
+              l.koryKindCotisation,
+              if (tontineOpen) l.koryKindTontine,
+            ],
+            index: kinds.indexOf(_kind),
+            onChanged: (i) => setState(() => _kind = kinds[i]),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -144,12 +176,14 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
-              labelText: _kind == 'COTISATION'
-                  ? l.koryFieldPerMember
-                  : l.koryFieldGoal,
+              labelText: _kind == 'CAGNOTTE'
+                  ? l.koryFieldGoal
+                  : _kind == 'TONTINE'
+                  ? l.koryFieldStake
+                  : l.koryFieldPerMember,
             ),
           ),
-          if (_kind == 'COTISATION') ...[
+          if (_kind != 'CAGNOTTE') ...[
             const SizedBox(height: 16),
             ModuleSegmented(
               labels: [l.koryPeriodMonthly, l.koryPeriodWeekly],
@@ -157,8 +191,38 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
               onChanged: (i) => setState(() => _period = _periods[i]),
             ),
           ],
+          if (_kind == 'TONTINE') ...[
+            ModuleSectionTitle(l.koryRotation),
+            Text(l.koryRotationHint, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            if (members == null)
+              const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
+            else
+              ReorderableListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                onReorderItem: (from, to) => setState(() {
+                  final next = [..._rotation];
+                  next.insert(to, next.removeAt(from));
+                  _rotation = next;
+                }),
+                children: [
+                  for (final (index, id) in _rotation.indexed)
+                    ListTile(
+                      key: ValueKey(id),
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(child: Text('${index + 1}')),
+                      title: Text(nameOf(id)),
+                      trailing: IconButton(
+                        tooltip: l.koryRemoveFromRotation,
+                        icon: const Icon(Icons.remove_circle_outline),
+                        onPressed: () => setState(() => _rotation = [..._rotation]..remove(id)),
+                      ),
+                    ),
+                ],
+              ),
+          ],
           const SizedBox(height: 16),
-          ListTile(
+          if (_kind != 'TONTINE') ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.event_outlined),
             title: Text(
@@ -176,7 +240,7 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l.koryCollectorIsYou,
+                  _kind == 'TONTINE' ? l.koryTontineNote : l.koryCollectorIsYou,
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,

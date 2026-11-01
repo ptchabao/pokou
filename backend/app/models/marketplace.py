@@ -131,7 +131,50 @@ class MarketplaceBoost(Base):
     payment_id = Column(Integer, ForeignKey("marketplace_payments.id", ondelete="CASCADE"), nullable=False, unique=True)
     starts_at = Column(DateTime, nullable=False)
     expires_at = Column(DateTime, nullable=False, index=True)
+    #: 3 (en tête des résultats) ou 7 (résultats et une place dans la bande
+    #: des statuts).
+    days = Column(Integer, nullable=True)
+    #: La place dans les statuts est relue par la modération : PENDING tant
+    #: qu'un humain ne l'a pas vue, puis APPROVED ou REJECTED. Les résultats
+    #: de recherche, eux, n'attendent pas.
+    status_moderation = Column(String(10), nullable=True, index=True)
+    #: Ville ciblée — celle de l'annonce. Jamais déduite des messages.
+    city = Column(String(80), nullable=True, index=True)
+    #: Bilan de la mise en avant (maquette Assimé 17).
+    impressions = Column(Integer, default=0, nullable=False)
+    status_views = Column(Integer, default=0, nullable=False)
+    contacts = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class MarketplaceFavorite(Base):
+    """Une annonce mise de côté (maquette Assimé 12)."""
+    __tablename__ = "marketplace_favorites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("marketplace_products.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("user_id", "product_id", name="uq_marketplace_favorite"),)
+
+
+class MarketplaceAlert(Base):
+    """Une recherche enregistrée : prévenir quand une annonce correspond.
+
+    Les critères sont ceux de la recherche, rien d'autre — jamais le
+    contenu des discussions."""
+    __tablename__ = "marketplace_alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    query = Column(String(120), nullable=True)
+    category = Column(String(64), nullable=True)
+    location = Column(String(255), nullable=True)
+    max_price = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_matched_at = Column(DateTime, nullable=True)
+    matches_count = Column(Integer, default=0, nullable=False)
 
 
 class MarketplaceAd(Base):

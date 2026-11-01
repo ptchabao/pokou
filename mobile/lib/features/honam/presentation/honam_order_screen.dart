@@ -9,6 +9,7 @@ import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
 import 'honam_controller.dart';
+import 'courier_tracking.dart';
 import 'honam_send_screen.dart';
 
 /// Le suivi d'une commande (fil de suivi, NAV-04) : devis, paiement à
@@ -76,6 +77,8 @@ class HonamOrderScreen extends ConsumerWidget {
               ],
               if (order.status == 'ACCEPTED') _PayStep(order: order, onDeclare: () => run('declare-paid')),
               if (order.deliveryCode != null) _Code(order: order),
+              if (order.status == 'IN_DELIVERY' || (order.status == 'READY' && order.courierName != null))
+                CourierTrackingCard(orderId: order.id),
               if (order.awaitsMissingChoice) ...[
                 const SizedBox(height: 12),
                 ModuleCard(

@@ -115,6 +115,14 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
         viewer = db.query(User).filter(User.id == user_id).first()
         return viewer is not None and viewer.role in _TEAM_ROLES
 
+    # Justificatif Pokou certifié Pro : le support qui le vérifie, et lui
+    # seul. Jamais affiché sur le profil Pro.
+    from app.models.certified import CertifiedProApplication
+
+    if db.query(CertifiedProApplication.id).filter(CertifiedProApplication.document_media_id == asset.id).first():
+        viewer = db.query(User).filter(User.id == user_id).first()
+        return viewer is not None and viewer.role in _TEAM_ROLES
+
     # ── Avatar de profil, TOUT DE SUITE ───────────────────────────────────
     #
     # Visible de ses contacts, comme GET /users/{id}/profile. Cette branche

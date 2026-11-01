@@ -35,3 +35,32 @@ class CertifiedSubscription(Base):
     badge_granted = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class CertifiedProApplication(Base):
+    """Pokou certifié Pro (maquettes Pro 1 à 5).
+
+    Le justificatif d'abord, le paiement ensuite : le support vérifie sous
+    48 h, et la formule Pro ne se paie qu'une fois le dossier validé. Le
+    profil Pro montre le NOM COMMERCIAL en premier, puis « Géré par » suivi
+    du nom vérifié de la personne (celui du badge Pokou certifié).
+    """
+    __tablename__ = "certified_pro_applications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    business_name = Column(String(160), nullable=False)
+    activity = Column(String(120), nullable=False)
+    city = Column(String(80), nullable=True)
+    #: Registre de commerce, carte professionnelle, patente… Visible du seul
+    #: support, jamais affiché sur le profil.
+    document_media_id = Column(Integer, ForeignKey("media_assets.id", ondelete="SET NULL"), nullable=True)
+    #: PENDING (en vérification) | CORRECTION (justificatif à corriger)
+    #: | APPROVED (payable) | REJECTED
+    status = Column(String(12), nullable=False, default="PENDING", index=True)
+    review_note = Column(String(500), nullable=True)
+    submitted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    #: L'engagement affiché à la personne : réponse sous 48 h.
+    review_due_at = Column(DateTime, nullable=False)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewer_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)

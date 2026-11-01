@@ -66,11 +66,39 @@ class HonamRepository {
   Future<CourierStatus> courierJoin({
     required String zones,
     required String walletPhone,
+    String? city,
+    String? referralCode,
   }) async => CourierStatus.fromJson(
     await _api.post(
       '/honam/courier/join',
-      body: {'zones': zones, 'wallet_phone': walletPhone, 'accept_rules': true},
+      body: {
+        'zones': zones,
+        'wallet_phone': walletPhone,
+        'accept_rules': true,
+        'city': ?city,
+        if (referralCode != null && referralCode.isNotEmpty) 'referral_code': referralCode,
+      },
     ) as Map<String, dynamic>,
+  );
+
+  Future<HonamCities> cities() async =>
+      HonamCities.fromJson(await _api.get('/honam/cities') as Map<String, dynamic>);
+
+  Future<void> joinWaitlist(String city, {String role = 'COURIER'}) =>
+      _api.post('/honam/waitlist', body: {'city': city, 'role': role});
+
+  /// [asPharmacy] : le suivi de l'officine (Officine 7), sinon celui du
+  /// patient.
+  Future<CourierTracking> tracking(int orderId, {bool asPharmacy = false}) async =>
+      CourierTracking.fromJson(
+        await _api.get(asPharmacy
+            ? '/honam/pharmacy/orders/$orderId/tracking'
+            : '/honam/orders/$orderId/tracking') as Map<String, dynamic>,
+      );
+
+  Future<void> sendLocation(int orderId, double latitude, double longitude) => _api.post(
+    '/honam/courier/rides/$orderId/location',
+    body: {'latitude': latitude, 'longitude': longitude},
   );
 
   Future<CourierStatus?> courierMe() async {

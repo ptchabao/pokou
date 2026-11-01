@@ -5654,4 +5654,343 @@ class LEn extends L {
 
   @override
   String get onbLater => 'Later';
+
+  @override
+  String get proofModeDirectHint =>
+      'Everything written stays provable: a deleted message stays struck through, an edit keeps the original. Only you will be able to turn it off.';
+
+  @override
+  String get proofDisableReservedDirect =>
+      'Only the person who turned on proof mode can turn it off.';
+
+  @override
+  String get proofExportMe => 'Me';
+
+  @override
+  String get proofExportTitle => 'Pokou — proof mode export';
+
+  @override
+  String proofExportBetween(String me, String contact) {
+    return 'Conversation between $me and $contact';
+  }
+
+  @override
+  String proofExportPeriod(String since, String now) {
+    return 'Proof mode on since $since · exported on $now from this phone';
+  }
+
+  @override
+  String proofExportFooter(String page, String pages) {
+    return 'Page $page of $pages — produced on the device: the Pokou server has no access to encrypted messages.';
+  }
+
+  @override
+  String get proofExportAttachment => '[attachment]';
+
+  @override
+  String proofExportEdited(String at) {
+    return 'Edited on $at';
+  }
+
+  @override
+  String proofExportDeleted(String at) {
+    return 'Deleted on $at, kept by proof mode';
+  }
+
+  @override
+  String get proTitle => 'Pokou certified Pro';
+
+  @override
+  String get proTeaser => 'For a business: trade name and “Managed by”';
+
+  @override
+  String get proPitch =>
+      'Your trade name shows first, with “Managed by” and your verified name. The Pro profile will host your Assimé listings.';
+
+  @override
+  String proSteps(String hours) {
+    return '1. You send your proof. 2. Support checks it within $hours h. 3. You only pay after approval.';
+  }
+
+  @override
+  String proPending(String due) {
+    return 'Verification in progress. Answer by $due at the latest.';
+  }
+
+  @override
+  String get proApproved =>
+      'Proof approved: you can activate Pokou certified Pro.';
+
+  @override
+  String get proPay => 'Pay for Pokou certified Pro';
+
+  @override
+  String get proCorrection => 'Proof needs correcting';
+
+  @override
+  String get proRejected => 'Application declined';
+
+  @override
+  String get proActivity => 'Your business';
+
+  @override
+  String get proBusinessName => 'Trade name';
+
+  @override
+  String get proActivityField => 'Activity (tailoring, shop, transport…)';
+
+  @override
+  String get proDocument => 'Add the proof document';
+
+  @override
+  String get proDocumentChosen => 'Document added — tap to change';
+
+  @override
+  String get proDocumentNote =>
+      'Trade register, professional card or business licence. Seen by support only, never displayed.';
+
+  @override
+  String get proSend => 'Send for verification';
+
+  @override
+  String proManagedBy(String name) {
+    return 'Managed by $name';
+  }
+
+  @override
+  String get proProfileNote => 'This is how others see your Pro profile.';
+
+  @override
+  String get honamCity => 'City';
+
+  @override
+  String get honamOtherCity => 'Another city';
+
+  @override
+  String get honamYourCity => 'Your city';
+
+  @override
+  String get honamNotServed =>
+      'Honam doesn\'t deliver in this city yet. Sign up: we\'ll let you know when it opens.';
+
+  @override
+  String get honamJoinWaitlist => 'Join the waiting list';
+
+  @override
+  String honamWaitlistDone(String city) {
+    return 'On the list for $city';
+  }
+
+  @override
+  String get honamWaitlistBody =>
+      'We\'ll tell you as soon as Honam delivers in your city. Nothing else.';
+
+  @override
+  String get honamReferralCodeField => 'Referral code (optional)';
+
+  @override
+  String get honamReferralTitle => 'Refer a courier';
+
+  @override
+  String honamReferralBody(String rides) {
+    return '$rides free rides when your referral completes their first delivery.';
+  }
+
+  @override
+  String get honamReferralShare => 'Share my code';
+
+  @override
+  String honamReferralMessage(String code) {
+    return 'Deliver for Honam with Pokou: use my referral code $code in courier mode.';
+  }
+
+  @override
+  String honamReferralCount(String count) {
+    return 'Referrals: $count';
+  }
+
+  @override
+  String get honamTrialEnded => 'Your trial is over';
+
+  @override
+  String honamRecommendedPack(String pack) {
+    return 'Based on this month\'s rides, the $pack pack is enough for you.';
+  }
+
+  @override
+  String get honamNavigate => 'Directions in my maps app';
+
+  @override
+  String get honamLocationShared =>
+      'Your location is shared every 15 s during the ride, never after.';
+
+  @override
+  String get honamLocationDenied =>
+      'Allow location so the patient can follow the delivery.';
+
+  @override
+  String get honamCourier => 'the courier';
+
+  @override
+  String honamTrackingTitle(String name) {
+    return '$name is on the way';
+  }
+
+  @override
+  String get honamTrackingWaiting => 'Location not received yet.';
+
+  @override
+  String honamTrackingDistance(String km) {
+    return '$km km from you';
+  }
+
+  @override
+  String honamTrackingUpdated(String minutes) {
+    return 'Updated $minutes min ago';
+  }
+
+  @override
+  String get honamTrackingStale => 'Location not up to date';
+
+  @override
+  String get honamTrackingShowMap => 'Show on the map';
+
+  @override
+  String get honamTrackingMapDataSaver => 'Show on the map (uses data)';
+
+  @override
+  String get assimeFavoritesAlerts => 'Favourites and alerts';
+
+  @override
+  String get assimeFavorites => 'Favourites';
+
+  @override
+  String get assimeAlerts => 'Alerts';
+
+  @override
+  String get assimeNoFavorites => 'No favourites';
+
+  @override
+  String get assimeFavoritesHint =>
+      'Tap the heart on a listing to keep it here.';
+
+  @override
+  String get assimeAddFavorite => 'Add to favourites';
+
+  @override
+  String get assimeRemoveFavorite => 'Remove from favourites';
+
+  @override
+  String get assimeNewAlert => 'New alert';
+
+  @override
+  String get assimeAlertQuery => 'What you\'re looking for';
+
+  @override
+  String get assimeAlertMaxPrice => 'Maximum price (optional)';
+
+  @override
+  String get assimeAlertNote =>
+      'We\'ll notify you when a listing matches. The alert only reads listings, never your messages.';
+
+  @override
+  String get assimeNoAlerts => 'No alerts yet.';
+
+  @override
+  String assimeAlertUpTo(String price) {
+    return 'up to $price FCFA';
+  }
+
+  @override
+  String assimeAlertMatches(String count) {
+    return '$count listing(s) found';
+  }
+
+  @override
+  String get assimeSponsored => 'Sponsored';
+
+  @override
+  String get assimeWhyTitle => 'Why am I seeing this';
+
+  @override
+  String get assimeWhyNotSponsored => 'This listing is no longer promoted.';
+
+  @override
+  String get assimeReportTitle => 'Promotion report';
+
+  @override
+  String get assimeReportEmpty => 'No promotion for this listing yet.';
+
+  @override
+  String assimeReportPeriod(String days, String start, String end) {
+    return '$days days · $start to $end';
+  }
+
+  @override
+  String assimeReportImpressions(String count) {
+    return 'Shown at the top of results: $count times';
+  }
+
+  @override
+  String assimeReportStatusViews(String count) {
+    return 'Seen in statuses: $count times';
+  }
+
+  @override
+  String assimeReportContacts(String count) {
+    return 'People who contacted you: $count';
+  }
+
+  @override
+  String get assimeStatusPending => 'Status spot: under moderation review';
+
+  @override
+  String get assimeStatusRejected => 'Status spot declined by moderation';
+
+  @override
+  String get koryKindTontine => 'Tontine';
+
+  @override
+  String get koryFieldStake => 'Each member\'s stake per round (FCFA)';
+
+  @override
+  String get koryRotation => 'Order of rounds';
+
+  @override
+  String get koryRotationHint =>
+      'Drag to reorder. The order is fixed at opening and won\'t change.';
+
+  @override
+  String get koryRemoveFromRotation => 'Remove from the tontine';
+
+  @override
+  String get koryNeedRotation => 'A tontine needs at least two participants.';
+
+  @override
+  String get koryTontineNote =>
+      'Each round, everyone sends their stake to the beneficiary\'s wallet, who confirms what they received. Pokou never touches the money.';
+
+  @override
+  String get koryRounds => 'Rounds';
+
+  @override
+  String koryRoundNumber(String number) {
+    return 'Round $number';
+  }
+
+  @override
+  String koryRoundConfirmed(String confirmed, String expected) {
+    return '$confirmed confirmed of $expected';
+  }
+
+  @override
+  String get koryNextRound => 'Move to the next round';
+
+  @override
+  String get koryNextRoundBody =>
+      'The current round ends. Contributions already declared remain to be confirmed by its beneficiary.';
+
+  @override
+  String get koryLastRoundBody =>
+      'That was the last round: the tontine will be closed. The log stays available.';
 }

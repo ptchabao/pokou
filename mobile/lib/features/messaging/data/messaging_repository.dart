@@ -448,7 +448,24 @@ class MessagingRepository {
     return DirectMessage.fromJson(response as Map<String, dynamic>);
   }
 
-  Future<void> delete(String messageId) => _api.delete('/messages/$messageId');
+  /// Vrai si le serveur l'a GARDÉ, barré, parce que la discussion est en
+  /// mode preuve.
+  Future<bool> delete(String messageId) async {
+    final json = await _api.delete('/messages/$messageId');
+    return json is Map && json['kept_as_proof'] == true;
+  }
+
+  // ── Mode preuve à deux ──────────────────────────────────────────────────
+
+  Future<DirectProofMode> proofMode(int contactUserId) async => DirectProofMode.fromJson(
+    await _api.get('/messages/$contactUserId/proof-mode') as Map<String, dynamic>,
+  );
+
+  Future<DirectProofMode> setProofMode(int contactUserId, bool enabled) async =>
+      DirectProofMode.fromJson(
+        await _api.put('/messages/$contactUserId/proof-mode', body: {'enabled': enabled})
+            as Map<String, dynamic>,
+      );
 
   /// Pose OU remplace sa réaction (une seule par personne et par message,
   /// voir api/app/routes/messages.py::set_reaction) — le sélecteur rapide

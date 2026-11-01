@@ -1,3 +1,4 @@
+import 'assime_extras.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -164,6 +165,11 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
                   MaterialPageRoute(builder: (_) => const CreateAdScreen()),
                 );
               }
+              if (value == 'favorites') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FavoritesAlertsScreen()),
+                );
+              }
               if (value == 'verification') {
                 Navigator.of(context)
                     .push(
@@ -175,6 +181,10 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
               }
             },
             itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'favorites',
+                child: Text(L.of(context).assimeFavoritesAlerts),
+              ),
               PopupMenuItem(
                 value: 'ad',
                 child: Text(L.of(context).marketCreateAd),

@@ -40,6 +40,14 @@ MAX_COURIER_DEFAULTS = 3
 COURIER_MEMBERSHIP_HT = 1000
 COURIER_TRIAL_RIDES = 5
 UNLIMITED = 9999
+#: Hypothèse (maquette Coursiers 15, montant non dit) : le parrain reçoit
+#: 2 courses offertes à la première course livrée de son filleul.
+REFERRAL_GIFT_RIDES = 2
+#: Les livreurs habituels d'une officine (Officine 6) voient ses courses
+#: seuls pendant ce délai, puis tous les coursiers de la ville. Hypothèse.
+ATTACHED_PRIORITY_MINUTES = 5
+#: Une position plus vieille que ça est montrée « position non à jour ».
+LOCATION_STALE_SECONDS = 60
 
 #: Nombre de courses et prix HT au Togo. La Côte d'Ivoire paie 1,5 fois,
 #: comme le prix de sa course (1 500 FCFA contre 1 000).
@@ -263,6 +271,64 @@ def queen_unlocked(db: Session, courier: CourierProfile, now: Optional[datetime]
         CourierLedgerEntry.created_at >= previous_start,
         CourierLedgerEntry.created_at < month_start,
     ).first() is None
+
+
+def served_cities(db: Session, country: Optional[str]) -> list[str]:
+    return list(country_config(db, country).get("honam_cities") or [])
+
+
+def city_served(db: Session, country: Optional[str], city: Optional[str]) -> bool:
+    """Comparaison sans casse ni accents : « lome » vaut « Lomé »."""
+    import unicodedata
+
+    def key(value: str) -> str:
+        return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode().strip().lower()
+
+    return bool(city) and key(city) in {key(c) for c in served_cities(db, country)}
+
+
+def new_referral_code(db: Session) -> str:
+    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    while True:
+        code = "".join(secrets.choice(alphabet) for _ in range(6))
+        if not db.query(CourierProfile.id).filter(CourierProfile.referral_code == code).first():
+            return code
+
+
+def reward_referrer(db: Session, courier: CourierProfile) -> bool:
+    """À la PREMIÈRE course livrée du filleul, une seule fois : le parrain
+    reçoit ses courses offertes. Écrites au registre comme le reste."""
+    if courier.referred_by_id is None or courier.referral_rewarded_at is not None:
+        return False
+    referrer = db.query(CourierProfile).filter(CourierProfile.id == courier.referred_by_id).first()
+    courier.referral_rewarded_at = datetime.utcnow()
+    if referrer is None or referrer.status == "SUSPENDED":
+        return False
+    now = datetime.utcnow()
+    period_end = max(
+        [d for d in (referrer.pack_until, referrer.trial_ends_at) if d and d > now],
+        default=now + timedelta(days=30),
+    )
+    db.add(CourierLedgerEntry(courier_id=referrer.id, kind="GIFT", rides=REFERRAL_GIFT_RIDES,
+                              pack="GIFT", period_end=period_end))
+    record_event(db, EVENTS_TOPIC, "honam.courier.referral_rewarded",
+                 {"courier_user_id": referrer.user_id, "rides": REFERRAL_GIFT_RIDES}, key=f"courier-{referrer.user_id}")
+    return True
+
+
+def recommended_pack(db: Session, courier: CourierProfile, now: Optional[datetime] = None) -> str:
+    """Fin d'essai (maquette Coursiers 12) : le pack qui couvre l'activité
+    RÉELLE des 30 derniers jours, pas le plus cher."""
+    now = now or datetime.utcnow()
+    delivered = db.query(func.count(CourierLedgerEntry.id)).filter(
+        CourierLedgerEntry.courier_id == courier.id,
+        CourierLedgerEntry.kind.in_(("RIDE", "LAUNCH")),
+        CourierLedgerEntry.created_at >= now - timedelta(days=30),
+    ).scalar() or 0
+    for code in PACK_ORDER[:-1]:
+        if delivered <= PACKS[code]["rides"]:
+            return code
+    return "QUEEN" if queen_unlocked(db, courier, now) else "OSEI_TUTU"
 
 
 def upgrade_price(country: str, current: Optional[str], target: str) -> int:

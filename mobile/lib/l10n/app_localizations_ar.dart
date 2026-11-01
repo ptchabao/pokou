@@ -5661,4 +5661,341 @@ class LAr extends L {
 
   @override
   String get onbLater => 'لاحقًا';
+
+  @override
+  String get proofModeDirectHint =>
+      'كل ما يُكتب يبقى قابلاً للإثبات: الرسالة المحذوفة تبقى مشطوبة، والتعديل يحتفظ بالأصل. أنت وحدك من يستطيع إيقافه.';
+
+  @override
+  String get proofDisableReservedDirect =>
+      'وحده من فعّل وضع الإثبات يمكنه إيقافه.';
+
+  @override
+  String get proofExportMe => 'أنا';
+
+  @override
+  String get proofExportTitle => 'Pokou — تصدير وضع الإثبات';
+
+  @override
+  String proofExportBetween(String me, String contact) {
+    return 'محادثة بين $me و$contact';
+  }
+
+  @override
+  String proofExportPeriod(String since, String now) {
+    return 'وضع الإثبات مفعّل منذ $since · صُدِّر في $now من هذا الهاتف';
+  }
+
+  @override
+  String proofExportFooter(String page, String pages) {
+    return 'الصفحة $page من $pages — أُنشئ على الجهاز: لا يصل خادم Pokou إلى الرسائل المشفّرة.';
+  }
+
+  @override
+  String get proofExportAttachment => '[مرفق]';
+
+  @override
+  String proofExportEdited(String at) {
+    return 'عُدّل في $at';
+  }
+
+  @override
+  String proofExportDeleted(String at) {
+    return 'حُذف في $at، واحتفظ به وضع الإثبات';
+  }
+
+  @override
+  String get proTitle => 'Pokou موثّق Pro';
+
+  @override
+  String get proTeaser => 'لنشاط تجاري: الاسم التجاري و«يديره»';
+
+  @override
+  String get proPitch =>
+      'يظهر اسمك التجاري أولاً، مع «يديره» واسمك الموثّق. سيضم ملف Pro إعلاناتك على Assimé.';
+
+  @override
+  String proSteps(String hours) {
+    return '1. ترسل الوثيقة. 2. يتحقق منها الدعم خلال $hours ساعة. 3. لا تدفع إلا بعد الموافقة.';
+  }
+
+  @override
+  String proPending(String due) {
+    return 'التحقق جارٍ. الرد في موعد أقصاه $due.';
+  }
+
+  @override
+  String get proApproved =>
+      'تمت الموافقة على الوثيقة: يمكنك تفعيل Pokou موثّق Pro.';
+
+  @override
+  String get proPay => 'ادفع Pokou موثّق Pro';
+
+  @override
+  String get proCorrection => 'الوثيقة بحاجة إلى تصحيح';
+
+  @override
+  String get proRejected => 'رُفض الطلب';
+
+  @override
+  String get proActivity => 'نشاطك';
+
+  @override
+  String get proBusinessName => 'الاسم التجاري';
+
+  @override
+  String get proActivityField => 'النشاط (خياطة، متجر، نقل…)';
+
+  @override
+  String get proDocument => 'أضف الوثيقة';
+
+  @override
+  String get proDocumentChosen => 'أُضيفت الوثيقة — المس للتغيير';
+
+  @override
+  String get proDocumentNote =>
+      'السجل التجاري أو البطاقة المهنية أو الرخصة. يراها الدعم فقط، ولا تُعرض أبداً.';
+
+  @override
+  String get proSend => 'أرسل للتحقق';
+
+  @override
+  String proManagedBy(String name) {
+    return 'يديره $name';
+  }
+
+  @override
+  String get proProfileNote => 'هكذا يرى الآخرون ملفك Pro.';
+
+  @override
+  String get honamCity => 'المدينة';
+
+  @override
+  String get honamOtherCity => 'مدينة أخرى';
+
+  @override
+  String get honamYourCity => 'مدينتك';
+
+  @override
+  String get honamNotServed =>
+      'لا يوصّل Honam بعد إلى هذه المدينة. سجّل وسنخبرك عند الافتتاح.';
+
+  @override
+  String get honamJoinWaitlist => 'سجّلني في قائمة الانتظار';
+
+  @override
+  String honamWaitlistDone(String city) {
+    return 'مسجّل لـ$city';
+  }
+
+  @override
+  String get honamWaitlistBody =>
+      'سنخبرك فور بدء Honam التوصيل في مدينتك. لا شيء غير ذلك.';
+
+  @override
+  String get honamReferralCodeField => 'رمز الإحالة (اختياري)';
+
+  @override
+  String get honamReferralTitle => 'ادعُ ساعياً';
+
+  @override
+  String honamReferralBody(String rides) {
+    return '$rides توصيلات مجانية عند أول توصيل لمن دعوته.';
+  }
+
+  @override
+  String get honamReferralShare => 'شارك رمزي';
+
+  @override
+  String honamReferralMessage(String code) {
+    return 'وصّل لـHonam مع Pokou: استخدم رمز الإحالة $code في وضع الساعي.';
+  }
+
+  @override
+  String honamReferralCount(String count) {
+    return 'المدعوون: $count';
+  }
+
+  @override
+  String get honamTrialEnded => 'انتهت فترتك التجريبية';
+
+  @override
+  String honamRecommendedPack(String pack) {
+    return 'بحسب توصيلاتك هذا الشهر، تكفيك باقة $pack.';
+  }
+
+  @override
+  String get honamNavigate => 'المسار في تطبيق الخرائط';
+
+  @override
+  String get honamLocationShared =>
+      'تُشارك موقعك كل 15 ثانية أثناء التوصيل، ولا تُشارك بعده.';
+
+  @override
+  String get honamLocationDenied => 'اسمح بتحديد الموقع ليتابع المريض التوصيل.';
+
+  @override
+  String get honamCourier => 'الساعي';
+
+  @override
+  String honamTrackingTitle(String name) {
+    return '$name في الطريق';
+  }
+
+  @override
+  String get honamTrackingWaiting => 'لم يصل الموقع بعد.';
+
+  @override
+  String honamTrackingDistance(String km) {
+    return 'على بعد $km كم منك';
+  }
+
+  @override
+  String honamTrackingUpdated(String minutes) {
+    return 'حُدّث منذ $minutes دقيقة';
+  }
+
+  @override
+  String get honamTrackingStale => 'الموقع غير محدّث';
+
+  @override
+  String get honamTrackingShowMap => 'اعرض على الخريطة';
+
+  @override
+  String get honamTrackingMapDataSaver => 'اعرض على الخريطة (يستهلك البيانات)';
+
+  @override
+  String get assimeFavoritesAlerts => 'المفضلة والتنبيهات';
+
+  @override
+  String get assimeFavorites => 'المفضلة';
+
+  @override
+  String get assimeAlerts => 'التنبيهات';
+
+  @override
+  String get assimeNoFavorites => 'لا مفضلات';
+
+  @override
+  String get assimeFavoritesHint => 'المس القلب في الإعلان لتحتفظ به هنا.';
+
+  @override
+  String get assimeAddFavorite => 'أضف إلى المفضلة';
+
+  @override
+  String get assimeRemoveFavorite => 'أزل من المفضلة';
+
+  @override
+  String get assimeNewAlert => 'تنبيه جديد';
+
+  @override
+  String get assimeAlertQuery => 'ما تبحث عنه';
+
+  @override
+  String get assimeAlertMaxPrice => 'أقصى سعر (اختياري)';
+
+  @override
+  String get assimeAlertNote =>
+      'سنخبرك عند ظهور إعلان مطابق. لا يقرأ التنبيه سوى الإعلانات، ولا يقرأ رسائلك أبداً.';
+
+  @override
+  String get assimeNoAlerts => 'لا تنبيهات حالياً.';
+
+  @override
+  String assimeAlertUpTo(String price) {
+    return 'حتى $price فرنك';
+  }
+
+  @override
+  String assimeAlertMatches(String count) {
+    return '$count إعلان موجود';
+  }
+
+  @override
+  String get assimeSponsored => 'مُموَّل';
+
+  @override
+  String get assimeWhyTitle => 'لماذا أرى هذا';
+
+  @override
+  String get assimeWhyNotSponsored => 'لم يعد هذا الإعلان مُروَّجاً.';
+
+  @override
+  String get assimeReportTitle => 'حصيلة الترويج';
+
+  @override
+  String get assimeReportEmpty => 'لا ترويج لهذا الإعلان بعد.';
+
+  @override
+  String assimeReportPeriod(String days, String start, String end) {
+    return '$days أيام · من $start إلى $end';
+  }
+
+  @override
+  String assimeReportImpressions(String count) {
+    return 'ظهر أعلى النتائج: $count مرة';
+  }
+
+  @override
+  String assimeReportStatusViews(String count) {
+    return 'شوهد في الحالات: $count مرة';
+  }
+
+  @override
+  String assimeReportContacts(String count) {
+    return 'أشخاص تواصلوا معك: $count';
+  }
+
+  @override
+  String get assimeStatusPending => 'مكان في الحالات: قيد مراجعة الإشراف';
+
+  @override
+  String get assimeStatusRejected => 'رفض الإشراف المكان في الحالات';
+
+  @override
+  String get koryKindTontine => 'تونتين';
+
+  @override
+  String get koryFieldStake => 'مساهمة كل عضو في الدورة (فرنك)';
+
+  @override
+  String get koryRotation => 'ترتيب الدورات';
+
+  @override
+  String get koryRotationHint =>
+      'اسحب للترتيب. يُثبَّت الترتيب عند الفتح ولا يتغير.';
+
+  @override
+  String get koryRemoveFromRotation => 'أزل من التونتين';
+
+  @override
+  String get koryNeedRotation => 'يحتاج التونتين إلى مشاركَين على الأقل.';
+
+  @override
+  String get koryTontineNote =>
+      'في كل دورة، يرسل كل عضو مساهمته إلى محفظة المستفيد، الذي يؤكد ما استلمه. لا يلمس Pokou المال أبداً.';
+
+  @override
+  String get koryRounds => 'الدورات';
+
+  @override
+  String koryRoundNumber(String number) {
+    return 'الدورة $number';
+  }
+
+  @override
+  String koryRoundConfirmed(String confirmed, String expected) {
+    return '$confirmed مؤكَّد من $expected';
+  }
+
+  @override
+  String get koryNextRound => 'انتقل إلى الدورة التالية';
+
+  @override
+  String get koryNextRoundBody =>
+      'تنتهي الدورة الحالية. تبقى المساهمات المعلنة بانتظار تأكيد مستفيدها.';
+
+  @override
+  String get koryLastRoundBody =>
+      'كانت هذه الدورة الأخيرة: سيُغلق التونتين. يبقى السجل متاحاً.';
 }

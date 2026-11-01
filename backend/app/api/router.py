@@ -15,7 +15,7 @@ from app.api.v1.calls import calls
 from app.api.v1.certified import certified
 from app.api.v1.config import country
 from app.api.v1.communities import channels, communities
-from app.api.v1.marketplace import marketplace, marketplace_admin
+from app.api.v1.marketplace import assime, marketplace, marketplace_admin
 from app.api.v1.media import media, stickers, status
 from app.api.v1.honam import honam
 from app.api.v1.kory import kory
@@ -54,6 +54,8 @@ for router in (
     channels.router,
     marketplace.router,
     marketplace_admin.router,
+    assime.router,
+    assime.admin_router,
     modules.router,
     modules.admin_router,
     heart_league.router,
@@ -75,6 +77,7 @@ for router in (
     country.router,
     kory.router,
     certified.router,
+    certified.admin_router,
     honam.router,
     honam.admin_router,
     metrics.router,

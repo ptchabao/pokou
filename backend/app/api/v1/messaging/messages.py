@@ -10,7 +10,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, MarketplaceProduct, DirectMessage, GroupMember, MediaAsset, MessageReaction, MessageStatus, MessageType, Poll, PollOption, User
+from app.models import Contact, MarketplaceProduct, DirectMessage, DirectProofMode, GroupMember, MediaAsset, MessageReaction, MessageStatus, MessageType, Poll, PollOption, User
 from app.services.media import sticker_service
 from app.services.auth.otp_service import OTPInvalidError, normalize_phone
 from app.utils.editing import MESSAGE_EDIT_WINDOW, MESSAGE_EDIT_WINDOW_MINUTES
@@ -206,6 +206,12 @@ def _serialize(message: DirectMessage, viewer_id: Optional[int] = None) -> dict:
         # perdait sa charge utile au premier rechargement de la conversation.
         "payload": message.payload,
         "poll": _serialize_poll(message.poll, viewer_id) if message.poll else None,
+        # Mode preuve à deux : un message supprimé reste, barré, et une
+        # modification garde l'original. Pour un message chiffré, le serveur
+        # n'a pas ce texte : c'est le téléphone qui le garde.
+        "proof_mode": bool(message.proof_mode),
+        "deleted_at": message.deleted_at.isoformat() if message.deleted_at else None,
+        "original_content": message.original_content,
     }
 
 
@@ -694,6 +700,7 @@ async def send_message(
         reply_to_id=payload.reply_to_id,
         view_once=payload.view_once,
         expires_at=expires_at,
+        proof_mode=proof_mode_row(db, sender_id, payload.recipient_id) is not None,
     )
     db.add(message)
     sync_event_ids = _append_message_created_events(db, message)
@@ -961,6 +968,90 @@ async def set_disappearing(
     return {"contact_user_id": contact_user_id, "disappearing_seconds": contact.disappearing_seconds}
 
 
+def proof_mode_row(db: Session, user_a: int, user_b: int) -> Optional[DirectProofMode]:
+    low, high = sorted((user_a, user_b))
+    return db.query(DirectProofMode).filter(
+        DirectProofMode.user_low_id == low, DirectProofMode.user_high_id == high
+    ).first()
+
+
+def _proof_mode_json(row: Optional[DirectProofMode], viewer_id: int, contact_user_id: int) -> dict:
+    return {
+        "contact_user_id": contact_user_id,
+        "enabled": row is not None,
+        "since": row.since.isoformat() if row else None,
+        "enabled_by_me": bool(row and row.enabled_by == viewer_id),
+        # À deux, seule la personne qui l'a activé peut le couper (maquette 10).
+        "can_disable": bool(row and row.enabled_by == viewer_id),
+    }
+
+
+class ProofModeUpdate(BaseModel):
+    enabled: bool
+
+
+@router.get("/{contact_user_id}/proof-mode")
+async def get_proof_mode(
+    contact_user_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    me = current_user["user_id"]
+    return _proof_mode_json(proof_mode_row(db, me, contact_user_id), me, contact_user_id)
+
+
+@router.put("/{contact_user_id}/proof-mode")
+async def set_proof_mode(
+    contact_user_id: int,
+    body: ProofModeUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Le mode preuve d'une discussion à deux (maquettes 4b, 5b et 10).
+
+    Activer : tout titulaire du badge, essai compris. Couper : seule la
+    personne qui l'a activé. Jamais caché : un message système l'annonce
+    dans le fil, en clair — il ne dit rien d'autre que le changement.
+    """
+    from app.api.v1.certified.certified import proof_mode_allowed
+
+    me = current_user["user_id"]
+    if contact_user_id == me:
+        raise HTTPException(status_code=400, detail="Discussion invalide")
+    _require_reachable(db, me, contact_user_id)
+    row = proof_mode_row(db, me, contact_user_id)
+    if body.enabled == (row is not None):
+        return _proof_mode_json(row, me, contact_user_id)
+    if body.enabled:
+        if not proof_mode_allowed(db, me):
+            raise HTTPException(status_code=403, detail="Le mode preuve demande Pokou certifié")
+        low, high = sorted((me, contact_user_id))
+        row = DirectProofMode(user_low_id=low, user_high_id=high, enabled_by=me)
+        db.add(row)
+    else:
+        if row.enabled_by != me:
+            raise HTTPException(
+                status_code=403,
+                detail="Seule la personne qui l'a activé peut désactiver le mode preuve",
+            )
+        db.delete(row)
+        row = None
+    notice = DirectMessage(
+        sender_id=me,
+        recipient_id=contact_user_id,
+        message_type=MessageType.TEXT,
+        content="a activé le mode preuve" if body.enabled else "a désactivé le mode preuve",
+        payload={"kind": "proof_mode", "enabled": body.enabled},
+        proof_mode=body.enabled,
+    )
+    db.add(notice)
+    sync_event_ids = _append_message_created_events(db, notice)
+    db.commit()
+    db.refresh(notice)
+    await _deliver(db, notice, sync_event_ids=sync_event_ids)
+    return {**_proof_mode_json(row, me, contact_user_id), "notice": _serialize(notice, me)}
+
+
 @router.patch("/{message_id}")
 async def edit_message(
     message_id: str,
@@ -996,6 +1087,8 @@ async def edit_message(
         message.ciphertext = payload.ciphertext
         message.envelope = payload.envelope
     else:
+        if message.proof_mode and message.original_content is None:
+            message.original_content = message.content
         message.content = payload.content
     message.edited_at = datetime.utcnow()
     other_id = message.recipient_id if message.sender_id == user_id else message.sender_id
@@ -1197,6 +1290,23 @@ async def delete_message(
     if not message:
         raise HTTPException(status_code=404, detail="Message introuvable")
     recipient_id = message.recipient_id
+    if message.proof_mode:
+        # Mode preuve : « Supprimer pour tous » ne fait que MARQUER le
+        # message. Chaque téléphone le garde barré, avec son texte — le
+        # serveur, lui, n'a jamais eu le texte d'un message chiffré.
+        if message.deleted_at is None:
+            message.deleted_at = datetime.utcnow()
+        kept_event = {
+            "type": "message:deleted",
+            "message_id": message_id,
+            "proof": True,
+            "message": _serialize(message, recipient_id),
+        }
+        sync_event = append_sync_event(db, recipient_id, kept_event)
+        db.commit()
+        kept_event["sync_event_id"] = str(sync_event.id)
+        await manager.send_to_user(recipient_id, kept_event)
+        return {"deleted": True, "kept_as_proof": True, "message": _serialize(message, current_user["user_id"])}
     deleted_event = {"type": "message:deleted", "message_id": message_id}
     sync_event = append_sync_event(db, recipient_id, deleted_event)
     db.delete(message)

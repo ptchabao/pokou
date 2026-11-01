@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/api/api_exceptions.dart';
+import '../../../core/providers.dart';
 import '../../../core/media/media_repository.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -284,6 +285,7 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                         ],
                       ],
                     ),
+                    _ProLine(userId: widget.contactUserId),
                     if (profile?.phone != null) ...[
                       const SizedBox(height: 2),
                       Text(
@@ -929,6 +931,54 @@ class _AttachmentThumbnail extends ConsumerWidget {
       // Pleine largeur : le palier 1080 suffit, l'original pèse dix fois plus.
       decodeWidth: 420,
       placeholder: ColoredBox(color: AppColors.surfaceElevated),
+    );
+  }
+}
+
+
+final _proBadgeProvider = FutureProvider.autoDispose.family<Map<String, dynamic>?, int>((ref, userId) async {
+  try {
+    return await ref.watch(apiClientProvider).get('/certified/profile/$userId') as Map<String, dynamic>;
+  } catch (_) {
+    return null;
+  }
+});
+
+/// Profil Pro (maquette Pro 5) : le nom commercial, puis « Géré par » et
+/// le nom vérifié. Rien pour un profil qui n'est pas Pro.
+class _ProLine extends ConsumerWidget {
+  const _ProLine({required this.userId});
+
+  final int userId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final badge = ref.watch(_proBadgeProvider(userId)).valueOrNull;
+    if (badge == null || badge['badge'] != 'PRO') return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Column(
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.hexagon, size: 16, color: AppColors.accentPrimary),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  badge['display_name'] as String? ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          if (badge['managed_by'] != null)
+            Text(
+              L.of(context).proManagedBy(badge['managed_by'] as String),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+        ],
+      ),
     );
   }
 }

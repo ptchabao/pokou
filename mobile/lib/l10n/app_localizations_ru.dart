@@ -5726,4 +5726,345 @@ class LRu extends L {
 
   @override
   String get onbLater => 'Позже';
+
+  @override
+  String get proofModeDirectHint =>
+      'Всё написанное остаётся доказуемым: удалённое сообщение остаётся зачёркнутым, правка сохраняет оригинал. Отключить сможете только вы.';
+
+  @override
+  String get proofDisableReservedDirect =>
+      'Отключить режим доказательства может только тот, кто его включил.';
+
+  @override
+  String get proofExportMe => 'Я';
+
+  @override
+  String get proofExportTitle => 'Pokou — экспорт режима доказательства';
+
+  @override
+  String proofExportBetween(String me, String contact) {
+    return 'Переписка между $me и $contact';
+  }
+
+  @override
+  String proofExportPeriod(String since, String now) {
+    return 'Режим доказательства включён с $since · экспортировано $now с этого телефона';
+  }
+
+  @override
+  String proofExportFooter(String page, String pages) {
+    return 'Страница $page из $pages — создано на устройстве: сервер Pokou не имеет доступа к зашифрованным сообщениям.';
+  }
+
+  @override
+  String get proofExportAttachment => '[вложение]';
+
+  @override
+  String proofExportEdited(String at) {
+    return 'Изменено $at';
+  }
+
+  @override
+  String proofExportDeleted(String at) {
+    return 'Удалено $at, сохранено режимом доказательства';
+  }
+
+  @override
+  String get proTitle => 'Pokou certified Pro';
+
+  @override
+  String get proTeaser => 'Для бизнеса: торговое название и «Управляет»';
+
+  @override
+  String get proPitch =>
+      'Ваше торговое название показывается первым, с пометкой «Управляет» и вашим подтверждённым именем. В профиле Pro будут ваши объявления Assimé.';
+
+  @override
+  String proSteps(String hours) {
+    return '1. Вы отправляете документ. 2. Поддержка проверяет его в течение $hours ч. 3. Оплата только после одобрения.';
+  }
+
+  @override
+  String proPending(String due) {
+    return 'Идёт проверка. Ответ не позднее $due.';
+  }
+
+  @override
+  String get proApproved =>
+      'Документ одобрен: можно подключить Pokou certified Pro.';
+
+  @override
+  String get proPay => 'Оплатить Pokou certified Pro';
+
+  @override
+  String get proCorrection => 'Документ нужно исправить';
+
+  @override
+  String get proRejected => 'Заявка отклонена';
+
+  @override
+  String get proActivity => 'Ваша деятельность';
+
+  @override
+  String get proBusinessName => 'Торговое название';
+
+  @override
+  String get proActivityField =>
+      'Вид деятельности (пошив, магазин, перевозки…)';
+
+  @override
+  String get proDocument => 'Добавить документ';
+
+  @override
+  String get proDocumentChosen => 'Документ добавлен — нажмите, чтобы заменить';
+
+  @override
+  String get proDocumentNote =>
+      'Выписка из реестра, профессиональная карта или патент. Видит только поддержка, нигде не показывается.';
+
+  @override
+  String get proSend => 'Отправить на проверку';
+
+  @override
+  String proManagedBy(String name) {
+    return 'Управляет: $name';
+  }
+
+  @override
+  String get proProfileNote => 'Так другие видят ваш профиль Pro.';
+
+  @override
+  String get honamCity => 'Город';
+
+  @override
+  String get honamOtherCity => 'Другой город';
+
+  @override
+  String get honamYourCity => 'Ваш город';
+
+  @override
+  String get honamNotServed =>
+      'Honam пока не доставляет в этот город. Запишитесь — мы сообщим об открытии.';
+
+  @override
+  String get honamJoinWaitlist => 'Записаться в лист ожидания';
+
+  @override
+  String honamWaitlistDone(String city) {
+    return 'Вы в списке: $city';
+  }
+
+  @override
+  String get honamWaitlistBody =>
+      'Мы сообщим, как только Honam начнёт доставку в вашем городе. И всё.';
+
+  @override
+  String get honamReferralCodeField => 'Код приглашения (необязательно)';
+
+  @override
+  String get honamReferralTitle => 'Пригласите курьера';
+
+  @override
+  String honamReferralBody(String rides) {
+    return '$rides бесплатных поездки после первой доставки приглашённого.';
+  }
+
+  @override
+  String get honamReferralShare => 'Поделиться кодом';
+
+  @override
+  String honamReferralMessage(String code) {
+    return 'Доставляйте для Honam с Pokou: введите мой код $code в режиме курьера.';
+  }
+
+  @override
+  String honamReferralCount(String count) {
+    return 'Приглашено: $count';
+  }
+
+  @override
+  String get honamTrialEnded => 'Пробный период закончился';
+
+  @override
+  String honamRecommendedPack(String pack) {
+    return 'По вашим поездкам за месяц вам хватит пакета $pack.';
+  }
+
+  @override
+  String get honamNavigate => 'Маршрут в моём приложении карт';
+
+  @override
+  String get honamLocationShared =>
+      'Ваше местоположение передаётся каждые 15 с во время поездки и никогда после.';
+
+  @override
+  String get honamLocationDenied =>
+      'Разрешите геолокацию, чтобы пациент видел доставку.';
+
+  @override
+  String get honamCourier => 'курьер';
+
+  @override
+  String honamTrackingTitle(String name) {
+    return '$name в пути';
+  }
+
+  @override
+  String get honamTrackingWaiting => 'Местоположение ещё не получено.';
+
+  @override
+  String honamTrackingDistance(String km) {
+    return 'В $km км от вас';
+  }
+
+  @override
+  String honamTrackingUpdated(String minutes) {
+    return 'Обновлено $minutes мин назад';
+  }
+
+  @override
+  String get honamTrackingStale => 'Местоположение устарело';
+
+  @override
+  String get honamTrackingShowMap => 'Показать на карте';
+
+  @override
+  String get honamTrackingMapDataSaver =>
+      'Показать на карте (расходует трафик)';
+
+  @override
+  String get assimeFavoritesAlerts => 'Избранное и оповещения';
+
+  @override
+  String get assimeFavorites => 'Избранное';
+
+  @override
+  String get assimeAlerts => 'Оповещения';
+
+  @override
+  String get assimeNoFavorites => 'Нет избранного';
+
+  @override
+  String get assimeFavoritesHint =>
+      'Нажмите на сердечко объявления, чтобы сохранить его здесь.';
+
+  @override
+  String get assimeAddFavorite => 'В избранное';
+
+  @override
+  String get assimeRemoveFavorite => 'Убрать из избранного';
+
+  @override
+  String get assimeNewAlert => 'Новое оповещение';
+
+  @override
+  String get assimeAlertQuery => 'Что вы ищете';
+
+  @override
+  String get assimeAlertMaxPrice => 'Максимальная цена (необязательно)';
+
+  @override
+  String get assimeAlertNote =>
+      'Мы сообщим, когда появится подходящее объявление. Оповещение читает только объявления, не ваши сообщения.';
+
+  @override
+  String get assimeNoAlerts => 'Оповещений пока нет.';
+
+  @override
+  String assimeAlertUpTo(String price) {
+    return 'до $price FCFA';
+  }
+
+  @override
+  String assimeAlertMatches(String count) {
+    return 'Найдено объявлений: $count';
+  }
+
+  @override
+  String get assimeSponsored => 'Реклама';
+
+  @override
+  String get assimeWhyTitle => 'Почему я это вижу';
+
+  @override
+  String get assimeWhyNotSponsored => 'Это объявление больше не продвигается.';
+
+  @override
+  String get assimeReportTitle => 'Итоги продвижения';
+
+  @override
+  String get assimeReportEmpty => 'Это объявление ещё не продвигалось.';
+
+  @override
+  String assimeReportPeriod(String days, String start, String end) {
+    return '$days дн. · с $start по $end';
+  }
+
+  @override
+  String assimeReportImpressions(String count) {
+    return 'Показано вверху результатов: $count раз';
+  }
+
+  @override
+  String assimeReportStatusViews(String count) {
+    return 'Просмотрено в статусах: $count раз';
+  }
+
+  @override
+  String assimeReportContacts(String count) {
+    return 'Связались с вами: $count';
+  }
+
+  @override
+  String get assimeStatusPending => 'Место в статусах: на проверке модерацией';
+
+  @override
+  String get assimeStatusRejected => 'Место в статусах отклонено модерацией';
+
+  @override
+  String get koryKindTontine => 'Тонтина';
+
+  @override
+  String get koryFieldStake => 'Взнос каждого за круг (FCFA)';
+
+  @override
+  String get koryRotation => 'Порядок кругов';
+
+  @override
+  String get koryRotationHint =>
+      'Перетащите для упорядочивания. Порядок фиксируется при открытии и больше не меняется.';
+
+  @override
+  String get koryRemoveFromRotation => 'Убрать из тонтины';
+
+  @override
+  String get koryNeedRotation => 'Для тонтины нужно минимум два участника.';
+
+  @override
+  String get koryTontineNote =>
+      'Каждый круг все отправляют взнос на кошелёк получателя, который подтверждает полученное. Pokou никогда не касается денег.';
+
+  @override
+  String get koryRounds => 'Круги';
+
+  @override
+  String koryRoundNumber(String number) {
+    return 'Круг $number';
+  }
+
+  @override
+  String koryRoundConfirmed(String confirmed, String expected) {
+    return 'Подтверждено $confirmed из $expected';
+  }
+
+  @override
+  String get koryNextRound => 'Следующий круг';
+
+  @override
+  String get koryNextRoundBody =>
+      'Текущий круг завершается. Уже заявленные взносы подтвердит его получатель.';
+
+  @override
+  String get koryLastRoundBody =>
+      'Это был последний круг: тонтина будет закрыта. Журнал останется доступен.';
 }

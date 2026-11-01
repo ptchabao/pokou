@@ -12,7 +12,7 @@ pharmaciens du Togo et de Côte d'Ivoire n'autorisent pas autre chose.
 """
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 
 from app.core.database import Base
 
@@ -112,6 +112,11 @@ class HonamOrder(Base):
     #: répond « paiement non reçu ».
     patient_paid_declared_at = Column(DateTime, nullable=True)
     payment_not_received_at = Column(DateTime, nullable=True)
+    #: Dernière position du coursier, envoyée toutes les 15 s PENDANT la
+    #: course et effacée à la remise : jamais d'historique de trajet.
+    courier_latitude = Column(Float, nullable=True)
+    courier_longitude = Column(Float, nullable=True)
+    courier_location_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     delivered_at = Column(DateTime, nullable=True)
@@ -143,6 +148,8 @@ class CourierProfile(Base):
     #: Candidature (maquettes Coursiers 3 à 6) : zones et créneaux, wallet
     #: qui reçoit le prix des courses, règles d'or acceptées.
     zones = Column(String(255), nullable=True)
+    #: Ville desservie où le coursier livre (configuration `honam_cities`).
+    city = Column(String(80), nullable=True)
     wallet_phone = Column(String(32), nullable=True)
     rules_accepted_at = Column(DateTime, nullable=True)
     validated_at = Column(DateTime, nullable=True)
@@ -153,7 +160,43 @@ class CourierProfile(Base):
     pack_until = Column(DateTime, nullable=True)
     defaults_count = Column(Integer, default=0, nullable=False)
     suspended_at = Column(DateTime, nullable=True)
+    #: Parrainage (maquette Coursiers 15) : code à partager, et le parrain
+    #: de ce coursier. La récompense part à la première course livrée du
+    #: filleul, une seule fois.
+    referral_code = Column(String(12), nullable=True, unique=True, index=True)
+    referred_by_id = Column(Integer, ForeignKey("honam_couriers.id", ondelete="SET NULL"), nullable=True)
+    referral_rewarded_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class PharmacyCourier(Base):
+    """« Vos coursiers » (maquette Officine 6) : les livreurs habituels
+    qu'une officine rattache. Ils voient ses courses avant les autres."""
+    __tablename__ = "honam_pharmacy_couriers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pharmacy_id = Column(Integer, ForeignKey("honam_pharmacies.id", ondelete="CASCADE"), nullable=False, index=True)
+    courier_id = Column(Integer, ForeignKey("honam_couriers.id", ondelete="CASCADE"), nullable=False, index=True)
+    added_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("pharmacy_id", "courier_id", name="uq_pharmacy_courier"),)
+
+
+class HonamWaitlistEntry(Base):
+    """Liste d'attente d'une ville pas encore desservie (maquette Coursiers
+    16) : on prévient la personne à l'ouverture, rien d'autre."""
+    __tablename__ = "honam_waitlist"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    country = Column(String(2), nullable=False, index=True)
+    city = Column(String(80), nullable=False, index=True)
+    #: COURIER | PATIENT
+    role = Column(String(8), nullable=False, default="COURIER")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    notified_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (UniqueConstraint("user_id", "role", name="uq_waitlist_user_role"),)
 
 
 class CourierLedgerEntry(Base):
@@ -169,7 +212,7 @@ class CourierLedgerEntry(Base):
     courier_id = Column(Integer, ForeignKey("honam_couriers.id", ondelete="CASCADE"), nullable=False, index=True)
     #: TRIAL | PURCHASE | UPGRADE | RIDE | LAUNCH (course de la période de
     #: lancement, non décomptée) | DEFAULT (défaut de livraison, 0 course)
-    #: | GIFT | EXPIRY
+    #: | GIFT (parrainage) | EXPIRY
     kind = Column(String(10), nullable=False)
     #: + courses ajoutées, − course décomptée. Un pack illimité porte 9999.
     rides = Column(Integer, nullable=False)

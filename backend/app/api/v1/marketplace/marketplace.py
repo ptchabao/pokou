@@ -257,6 +257,7 @@ async def list_marketplace(
     longitude: Optional[float] = Query(None, ge=-180, le=180),
     limit: int = Query(40, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    certified_only: bool = Query(False, description="Filtre « Vendeurs certifiés »"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -282,6 +283,9 @@ async def list_marketplace(
             )
         )
     items = query.order_by(MarketplaceProduct.created_at.desc()).all()
+    if certified_only:
+        # Vendeur vérifié du Marché, ou badge Pokou certifié (Pro compris).
+        items = [i for i in items if i.seller and (est_vendeur_verifie(i.seller) or i.seller.is_verified)]
     distances: dict[int, float] = {item.id: float("inf") for item in items}
     if latitude is not None and longitude is not None:
         from math import asin, cos, radians, sin, sqrt
@@ -320,6 +324,14 @@ async def list_marketplace(
     regular = [item for item in items if item.id not in sponsored_ids]
     page = sponsored + regular[offset:offset + max(limit - len(sponsored), 0)]
     boosted_ids = sponsored_ids
+    if sponsored_ids:
+        # Bilan de la mise en avant : une impression par affichage en tête.
+        db.query(MarketplaceBoost).filter(
+            MarketplaceBoost.product_id.in_(sponsored_ids),
+            MarketplaceBoost.starts_at <= now,
+            MarketplaceBoost.expires_at > now,
+        ).update({MarketplaceBoost.impressions: MarketplaceBoost.impressions + 1}, synchronize_session=False)
+        db.commit()
     ratings = _rating_summary(db, [item.seller_id for item in page])
     return {
         "items": [_serialize(item, ratings.get(item.seller_id), item.id in boosted_ids) for item in page],
@@ -415,6 +427,9 @@ async def create_product(payload: ProductPayload, db: Session = Depends(get_db),
         # n'existent pas encore.
         if item.image_media_id is None:
             item.image_media_id = payload.gallery_media_ids[0]
+    from app.api.v1.marketplace.assime import notify_alerts
+
+    notify_alerts(db, item)
     db.commit()
     db.refresh(item)
     return _serialize(item, _rating_summary(db, [item.seller_id]).get(item.seller_id))

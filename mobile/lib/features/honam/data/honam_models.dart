@@ -92,7 +92,14 @@ class HonamOrder {
     this.courierName,
     this.courierPaid = false,
     this.timeline = const [],
+    this.deliveryLatitude,
+    this.deliveryLongitude,
   });
+
+  /// Le point de remise, envoyé au seul coursier : il navigue avec
+  /// l'application de cartes de son téléphone, pas dans Pokou.
+  final double? deliveryLatitude;
+  final double? deliveryLongitude;
 
   final int id;
   final String status;
@@ -148,6 +155,8 @@ class HonamOrder {
     rejectionReason: json['rejection_reason'] as String?,
     patientPaidDeclared: json['patient_paid_declared_at'] != null,
     paymentNotReceived: json['payment_not_received_at'] != null,
+    deliveryLatitude: (json['delivery_latitude'] as num?)?.toDouble(),
+    deliveryLongitude: (json['delivery_longitude'] as num?)?.toDouble(),
     missingAmount: json['missing_amount'] as int?,
     missingReason: json['missing_reason'] as String?,
     missingChoice: json['missing_choice'] as String?,
@@ -197,7 +206,21 @@ class CourierStatus {
     this.currentPack,
     this.launchPeriod = false,
     this.queenUnlocked = true,
+    this.referralCode,
+    this.referralsCount = 0,
+    this.referralGiftRides = 0,
+    this.recommendedPack,
   });
+
+  /// Parrainage (maquette Coursiers 15) : le code à partager, posé à la
+  /// validation de la candidature.
+  final String? referralCode;
+  final int referralsCount;
+  final int referralGiftRides;
+
+  /// Fin d'essai (maquette Coursiers 12) : le pack qui couvre l'activité
+  /// réelle.
+  final String? recommendedPack;
 
   final bool launchPeriod;
   final bool queenUnlocked;
@@ -217,9 +240,62 @@ class CourierStatus {
     currentPack: json['current_pack'] as String?,
     launchPeriod: json['launch_period'] as bool? ?? false,
     queenUnlocked: json['queen_unlocked'] as bool? ?? true,
+    referralCode: json['referral_code'] as String?,
+    referralsCount: json['referrals_count'] as int? ?? 0,
+    referralGiftRides: json['referral_gift_rides'] as int? ?? 0,
+    recommendedPack: json['recommended_pack'] as String?,
     packs: [
       for (final pack in (json['packs'] as List? ?? const []))
         CourierPack.fromJson(pack as Map<String, dynamic>),
     ],
+  );
+}
+
+
+/// Où en est la course, vu du patient ou de l'officine. La même chose sert
+/// au suivi sans carte et au suivi sur la carte : c'est l'écran qui choisit.
+class CourierTracking {
+  const CourierTracking({
+    required this.active,
+    this.courierName,
+    this.latitude,
+    this.longitude,
+    this.at,
+    this.stale = false,
+    this.distanceKm,
+  });
+
+  final bool active;
+  final String? courierName;
+  final double? latitude;
+  final double? longitude;
+  final DateTime? at;
+  final bool stale;
+  final double? distanceKm;
+
+  bool get hasPosition => latitude != null && longitude != null;
+
+  factory CourierTracking.fromJson(Map<String, dynamic> json) => CourierTracking(
+    active: json['active'] as bool? ?? false,
+    courierName: json['courier_name'] as String?,
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
+    at: json['at'] != null ? DateTime.parse(json['at'] as String) : null,
+    stale: json['stale'] as bool? ?? false,
+    distanceKm: (json['distance_km'] as num?)?.toDouble(),
+  );
+}
+
+/// Les villes où Honam livre, et l'inscription de la personne sur la liste
+/// d'attente, s'il y en a une.
+class HonamCities {
+  const HonamCities({required this.served, this.waitlistCity});
+
+  final List<String> served;
+  final String? waitlistCity;
+
+  factory HonamCities.fromJson(Map<String, dynamic> json) => HonamCities(
+    served: [for (final c in (json['served_cities'] as List? ?? const [])) c as String],
+    waitlistCity: (json['waitlist'] as Map?)?['city'] as String?,
   );
 }

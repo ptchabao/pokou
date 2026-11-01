@@ -314,4 +314,163 @@ class MarketplaceRepository {
     );
     return DirectMessage.fromJson(response as Map<String, dynamic>);
   }
+
+  // ── Assimé : favoris, alertes, statut sponsorisé, bilan ─────────────────
+
+  Future<List<AssimeSnapshot>> favorites() async {
+    final json = await _api.get('/marketplace/favorites') as Map<String, dynamic>;
+    return [
+      for (final item in (json['items'] as List? ?? const []))
+        AssimeSnapshot.fromJson(item as Map<String, dynamic>),
+    ];
+  }
+
+  Future<void> setFavorite(int productId, bool favorite) => favorite
+      ? _api.put('/marketplace/$productId/favorite')
+      : _api.delete('/marketplace/$productId/favorite');
+
+  Future<List<AssimeAlert>> alerts() async {
+    final json = await _api.get('/marketplace/alerts') as Map<String, dynamic>;
+    return [
+      for (final item in (json['items'] as List? ?? const []))
+        AssimeAlert.fromJson(item as Map<String, dynamic>),
+    ];
+  }
+
+  Future<void> createAlert({String? query, String? category, int? maxPrice}) =>
+      _api.post('/marketplace/alerts', body: {
+        if (query != null && query.trim().isNotEmpty) 'query': query.trim(),
+        'category': ?category,
+        'max_price': ?maxPrice,
+      });
+
+  Future<void> deleteAlert(int id) => _api.delete('/marketplace/alerts/$id');
+
+  /// La seule place sponsorisée de la bande des statuts, ou `null`.
+  Future<SponsoredStatus?> sponsoredStatus({String? city}) async {
+    final query = city != null && city.trim().isNotEmpty ? '?city=${Uri.encodeQueryComponent(city.trim())}' : '';
+    final json = await _api.get('/marketplace/sponsored-status$query') as Map<String, dynamic>;
+    final item = json['item'] as Map<String, dynamic>?;
+    return item == null ? null : SponsoredStatus.fromJson(item, every: json['every'] as int? ?? 5);
+  }
+
+  Future<void> countSponsoredContact(int boostId) => _api.post('/marketplace/boosts/$boostId/contact');
+
+  /// « Pourquoi je vois ça » : `null` si l'annonce n'est plus sponsorisée.
+  Future<String?> whySponsored(int productId) async {
+    final json = await _api.get('/marketplace/$productId/why') as Map<String, dynamic>;
+    return json['sponsored'] == true ? json['text'] as String? : null;
+  }
+
+  Future<List<BoostReport>> boostReport(int productId) async {
+    final json = await _api.get('/marketplace/$productId/boost/report') as Map<String, dynamic>;
+    return [
+      for (final item in (json['items'] as List? ?? const []))
+        BoostReport.fromJson(item as Map<String, dynamic>),
+    ];
+  }
+}
+
+/// Une annonce réduite à ce qu'une carte affiche (favoris, statut
+/// sponsorisé).
+class AssimeSnapshot {
+  const AssimeSnapshot({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.currency,
+    required this.sellerId,
+    required this.sellerName,
+    this.location,
+    this.imageMediaId,
+  });
+
+  final int id;
+  final String name;
+  final String price;
+  final String currency;
+  final int sellerId;
+  final String sellerName;
+  final String? location;
+  final int? imageMediaId;
+
+  factory AssimeSnapshot.fromJson(Map<String, dynamic> json) => AssimeSnapshot(
+    id: json['id'] as int,
+    name: json['name'] as String? ?? '',
+    price: '${json['price'] ?? ''}',
+    currency: json['currency'] as String? ?? 'XOF',
+    sellerId: json['seller_id'] as int,
+    sellerName: json['seller_name'] as String? ?? '',
+    location: json['location'] as String?,
+    imageMediaId: json['image_media_id'] as int?,
+  );
+}
+
+class AssimeAlert {
+  const AssimeAlert({required this.id, this.query, this.category, this.maxPrice, this.matchesCount = 0});
+
+  final int id;
+  final String? query;
+  final String? category;
+  final int? maxPrice;
+  final int matchesCount;
+
+  factory AssimeAlert.fromJson(Map<String, dynamic> json) => AssimeAlert(
+    id: json['id'] as int,
+    query: json['query'] as String?,
+    category: json['category'] as String?,
+    maxPrice: json['max_price'] as int?,
+    matchesCount: json['matches_count'] as int? ?? 0,
+  );
+}
+
+class SponsoredStatus {
+  const SponsoredStatus({required this.boostId, required this.product, required this.why, this.every = 5});
+
+  final int boostId;
+  final AssimeSnapshot product;
+  final String why;
+
+  /// Au plus un statut sponsorisé tous les [every] statuts.
+  final int every;
+
+  factory SponsoredStatus.fromJson(Map<String, dynamic> json, {int every = 5}) => SponsoredStatus(
+    boostId: json['boost_id'] as int,
+    product: AssimeSnapshot.fromJson(json['product'] as Map<String, dynamic>),
+    why: (json['why'] as Map?)?['text'] as String? ?? '',
+    every: every,
+  );
+}
+
+class BoostReport {
+  const BoostReport({
+    required this.days,
+    required this.startsAt,
+    required this.expiresAt,
+    required this.active,
+    required this.impressions,
+    required this.statusViews,
+    required this.contacts,
+    this.statusModeration,
+  });
+
+  final int? days;
+  final DateTime startsAt;
+  final DateTime expiresAt;
+  final bool active;
+  final int impressions;
+  final int statusViews;
+  final int contacts;
+  final String? statusModeration;
+
+  factory BoostReport.fromJson(Map<String, dynamic> json) => BoostReport(
+    days: json['days'] as int?,
+    startsAt: DateTime.parse('${json['starts_at']}Z'),
+    expiresAt: DateTime.parse('${json['expires_at']}Z'),
+    active: json['active'] as bool? ?? false,
+    impressions: json['impressions'] as int? ?? 0,
+    statusViews: json['status_views'] as int? ?? 0,
+    contacts: json['contacts'] as int? ?? 0,
+    statusModeration: json['status_moderation'] as String?,
+  );
 }

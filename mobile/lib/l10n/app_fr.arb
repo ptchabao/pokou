@@ -2623,5 +2623,283 @@
   "onbContactsTitle": "Retrouver tes proches",
   "onbContactsBody": "Baba peut retrouver ceux de tes contacts qui sont déjà sur Pokou. Tu peux refuser : on te le redemandera plus tard.",
   "onbContactsAllow": "Autoriser",
-  "onbLater": "Plus tard"
+  "onbLater": "Plus tard",
+  "proofModeDirectHint": "Tout ce qui s'écrit reste prouvable : un message supprimé reste barré, une modification garde l'original. Seule toi pourras le couper.",
+  "proofDisableReservedDirect": "Seule la personne qui a activé le mode preuve peut le désactiver.",
+  "proofExportMe": "Moi",
+  "proofExportTitle": "Pokou — export du mode preuve",
+  "proofExportBetween": "Discussion entre {me} et {contact}",
+  "@proofExportBetween": {
+    "placeholders": {
+      "me": {
+        "type": "String"
+      },
+      "contact": {
+        "type": "String"
+      }
+    }
+  },
+  "proofExportPeriod": "Mode preuve actif depuis le {since} · exporté le {now} depuis ce téléphone",
+  "@proofExportPeriod": {
+    "placeholders": {
+      "since": {
+        "type": "String"
+      },
+      "now": {
+        "type": "String"
+      }
+    }
+  },
+  "proofExportFooter": "Page {page} sur {pages} — produit sur l'appareil : le serveur Pokou n'a pas accès aux messages chiffrés.",
+  "@proofExportFooter": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "proofExportAttachment": "[pièce jointe]",
+  "proofExportEdited": "Modifié le {at}",
+  "@proofExportEdited": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "proofExportDeleted": "Supprimé le {at}, conservé par le mode preuve",
+  "@proofExportDeleted": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "proTitle": "Pokou certifié Pro",
+  "proTeaser": "Pour une activité : nom commercial et « Géré par »",
+  "proPitch": "Ton nom commercial s'affiche en premier, avec « Géré par » et ton nom vérifié. Le profil Pro accueillera tes annonces Assimé.",
+  "proSteps": "1. Tu envoies ton justificatif. 2. Le support le vérifie sous {hours} h. 3. Tu ne paies qu'après la validation.",
+  "@proSteps": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "proPending": "Vérification en cours. Réponse au plus tard le {due}.",
+  "@proPending": {
+    "placeholders": {
+      "due": {
+        "type": "String"
+      }
+    }
+  },
+  "proApproved": "Justificatif validé : tu peux activer Pokou certifié Pro.",
+  "proPay": "Payer Pokou certifié Pro",
+  "proCorrection": "Justificatif à corriger",
+  "proRejected": "Dossier refusé",
+  "proActivity": "Ton activité",
+  "proBusinessName": "Nom commercial",
+  "proActivityField": "Activité (couture, boutique, transport…)",
+  "proDocument": "Ajouter le justificatif",
+  "proDocumentChosen": "Justificatif ajouté — toucher pour changer",
+  "proDocumentNote": "Registre de commerce, carte professionnelle ou patente. Vu par le support seulement, jamais affiché.",
+  "proSend": "Envoyer pour vérification",
+  "proManagedBy": "Géré par {name}",
+  "@proManagedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proProfileNote": "C'est ainsi que les autres voient ton profil Pro.",
+  "honamCity": "Ville",
+  "honamOtherCity": "Une autre ville",
+  "honamYourCity": "Ta ville",
+  "honamNotServed": "Honam ne livre pas encore dans cette ville. Inscris-toi : on te prévient à l'ouverture.",
+  "honamJoinWaitlist": "M'inscrire sur la liste d'attente",
+  "honamWaitlistDone": "Inscrit·e pour {city}",
+  "@honamWaitlistDone": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "honamWaitlistBody": "On te prévient dès que Honam livre dans ta ville. Rien d'autre.",
+  "honamReferralCodeField": "Code de parrainage (facultatif)",
+  "honamReferralTitle": "Parraine un coursier",
+  "honamReferralBody": "{rides} courses offertes à la première livraison de ton filleul.",
+  "@honamReferralBody": {
+    "placeholders": {
+      "rides": {
+        "type": "String"
+      }
+    }
+  },
+  "honamReferralShare": "Partager mon code",
+  "honamReferralMessage": "Livre pour Honam avec Pokou : utilise mon code de parrainage {code} dans le mode coursier.",
+  "@honamReferralMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "honamReferralCount": "Filleuls : {count}",
+  "@honamReferralCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "honamTrialEnded": "Ton essai est terminé",
+  "honamRecommendedPack": "D'après tes courses du mois, le pack {pack} te suffit.",
+  "@honamRecommendedPack": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "honamNavigate": "Itinéraire dans mon appli de cartes",
+  "honamLocationShared": "Ta position est partagée toutes les 15 s pendant la course, jamais après.",
+  "honamLocationDenied": "Autorise la localisation pour que le patient suive sa livraison.",
+  "honamCourier": "le coursier",
+  "honamTrackingTitle": "{name} est en route",
+  "@honamTrackingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "honamTrackingWaiting": "Position pas encore reçue.",
+  "honamTrackingDistance": "À {km} km de chez toi",
+  "@honamTrackingDistance": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "honamTrackingUpdated": "Mise à jour il y a {minutes} min",
+  "@honamTrackingUpdated": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "honamTrackingStale": "Position non à jour",
+  "honamTrackingShowMap": "Voir sur la carte",
+  "honamTrackingMapDataSaver": "Voir sur la carte (consomme des données)",
+  "assimeFavoritesAlerts": "Favoris et alertes",
+  "assimeFavorites": "Favoris",
+  "assimeAlerts": "Alertes",
+  "assimeNoFavorites": "Aucun favori",
+  "assimeFavoritesHint": "Touche le cœur d'une annonce pour la garder ici.",
+  "assimeAddFavorite": "Ajouter aux favoris",
+  "assimeRemoveFavorite": "Retirer des favoris",
+  "assimeNewAlert": "Nouvelle alerte",
+  "assimeAlertQuery": "Ce que tu cherches",
+  "assimeAlertMaxPrice": "Prix maximum (facultatif)",
+  "assimeAlertNote": "On te prévient quand une annonce correspond. L'alerte ne lit que les annonces, jamais tes messages.",
+  "assimeNoAlerts": "Aucune alerte pour l'instant.",
+  "assimeAlertUpTo": "jusqu'à {price} FCFA",
+  "@assimeAlertUpTo": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeAlertMatches": "{count} annonce(s) trouvée(s)",
+  "@assimeAlertMatches": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeSponsored": "Sponsorisé",
+  "assimeWhyTitle": "Pourquoi je vois ça",
+  "assimeWhyNotSponsored": "Cette annonce n'est plus mise en avant.",
+  "assimeReportTitle": "Bilan de la mise en avant",
+  "assimeReportEmpty": "Pas encore de mise en avant pour cette annonce.",
+  "assimeReportPeriod": "{days} jours · du {start} au {end}",
+  "@assimeReportPeriod": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeReportImpressions": "Vue en tête des résultats : {count} fois",
+  "@assimeReportImpressions": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeReportStatusViews": "Vue dans les statuts : {count} fois",
+  "@assimeReportStatusViews": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeReportContacts": "Personnes qui t'ont contacté : {count}",
+  "@assimeReportContacts": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeStatusPending": "Place dans les statuts : en relecture par la modération",
+  "assimeStatusRejected": "Place dans les statuts refusée par la modération",
+  "koryKindTontine": "Tontine",
+  "koryFieldStake": "Mise de chacun par tour (FCFA)",
+  "koryRotation": "Ordre des tours",
+  "koryRotationHint": "Glisse pour ordonner. L'ordre est fixé à l'ouverture et ne change plus.",
+  "koryRemoveFromRotation": "Retirer de la tontine",
+  "koryNeedRotation": "Une tontine demande au moins deux participants.",
+  "koryTontineNote": "Chaque tour, chacun envoie sa mise au wallet du bénéficiaire, qui confirme ce qu'il a reçu. Pokou ne touche jamais l'argent.",
+  "koryRounds": "Les tours",
+  "koryRoundNumber": "Tour {number}",
+  "@koryRoundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "koryRoundConfirmed": "{confirmed} confirmés sur {expected}",
+  "@koryRoundConfirmed": {
+    "placeholders": {
+      "confirmed": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "koryNextRound": "Passer au tour suivant",
+  "koryNextRoundBody": "Le tour en cours se termine. Les contributions déjà déclarées restent à confirmer par son bénéficiaire.",
+  "koryLastRoundBody": "C'était le dernier tour : la tontine sera clôturée. Le journal reste consultable."
 }
