@@ -122,3 +122,20 @@ def test_relais_publie_dans_l_ordre_et_s_arrete_au_premier_echec():
         assert sent[0][0] == "pokou.kory.events" and sent[0][1] == b"pot-1"
     finally:
         Base.metadata.drop_all(bind=engine)
+
+
+def test_certificat_kafka_en_variable_pour_kubero():
+    """Kubero ne monte pas de fichier depuis un Secret : le certificat de
+    l'autorité arrive en PEM dans une variable, et passe avant le fichier."""
+    from types import SimpleNamespace
+
+    from app.workers import outbox_relay
+
+    settings = SimpleNamespace(
+        kafka_bootstrap_servers="kafka:9093", kafka_security_protocol="SASL_SSL",
+        kafka_ssl_ca_pem="-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----\n",
+        kafka_ssl_cafile="/etc/kafka-ca/ca.crt", kafka_sasl_mechanism="",
+    )
+    with patch.object(outbox_relay.ssl, "create_default_context") as context:
+        outbox_relay._producer_kwargs(settings)
+    context.assert_called_once_with(cadata=settings.kafka_ssl_ca_pem)

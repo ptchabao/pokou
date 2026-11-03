@@ -116,6 +116,21 @@ done
 # RUN_MIGRATIONS=0 sur Kubernetes : les migrations y sont jouées par un Job
 # dédié avant le déploiement (deploy/k8s/base/migrate-job.yaml). Sans ce
 # réglage, chaque réplica lancerait `alembic upgrade head` au même moment.
+#
+# PROC_TYPE (Kubero) : le processus web et le worker partagent la même image
+# et la même commande, seule cette variable les distingue. Le worker est le
+# relais Kafka ; il ne migre jamais — c'est le rôle des pods web.
+if [ "${PROC_TYPE:-}" = "worker" ] && [ "$#" -eq 0 ]; then
+  if [ -z "${KAFKA_BOOTSTRAP_SERVERS:-}" ]; then
+    # Sans Kafka, le relais n'a rien à faire. Il attend plutôt que de
+    # s'arrêter, ce qui ferait redémarrer le pod en boucle.
+    echo "PROC_TYPE=worker sans KAFKA_BOOTSTRAP_SERVERS : relais en veille, les évènements restent en base."
+    exec sleep infinity
+  fi
+  echo "PROC_TYPE=worker : relais des évènements vers Kafka."
+  exec python -m app.workers.outbox_relay
+fi
+
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
   if ! alembic upgrade head; then
     echo "alembic upgrade head a échoué alors que la base répond : l'erreur est dans la migration, pas dans la connexion."

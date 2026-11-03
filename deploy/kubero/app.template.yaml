@@ -1,0 +1,123 @@
+# L'API Pokou en application Kubero (pipeline « pokou », phase
+# « production »). Gabarit : `render.sh` remplace les ${…} et ajoute
+# `envVars` à partir de config.env et secrets.env — ne pas l'appliquer tel
+# quel.
+#
+# Kubero lance deux déploiements avec la MÊME image et la même commande :
+#   - web    (PROC_TYPE=web)    : l'API, qui applique les migrations au
+#                                 démarrage sous verrou PostgreSQL ;
+#   - worker (PROC_TYPE=worker) : le relais des évènements vers Kafka.
+# C'est docker-entrypoint.sh qui choisit selon PROC_TYPE.
+apiVersion: application.kubero.dev/v1alpha1
+kind: KuberoApp
+metadata:
+  name: ${APP_NAME}
+  labels:
+    manager: kubero
+spec:
+  name: ${APP_NAME}
+  pipeline: ${PIPELINE}
+  phase: ${PHASE}
+  # Des noms prévisibles : ${APP_NAME}-web et ${APP_NAME}-worker.
+  fullnameOverride: ${APP_NAME}
+  # L'image est construite et publiée par la CI (docs/deploiement-kubero.md),
+  # pas par Kubero : la même image passe ainsi de la préproduction à la
+  # production sans être reconstruite.
+  deploymentstrategy: docker
+  buildstrategy: dockerfile
+  sleep: disabled
+  image:
+    repository: ${IMAGE_REPOSITORY}
+    tag: "${IMAGE_TAG}"
+    pullPolicy: IfNotPresent
+    containerPort: 8000
+    run:
+      # L'image tourne sans privilège (UID 10001, voir backend/Dockerfile),
+      # système de fichiers en lecture seule : les pièces jointes vont dans
+      # S3, /tmp est un volume du pod.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: [ALL]
+  imagePullSecrets: ${IMAGE_PULL_SECRETS}
+  healthcheck:
+    enabled: true
+    # Kubero utilise le même chemin pour les trois sondes : /health ne
+    # dépend que du processus (pas de la base), une panne de PostgreSQL ne
+    # fait donc pas redémarrer tous les pods en boucle.
+    path: /health
+    timeoutSeconds: 3
+  autoscaling:
+    enabled: true
+  web:
+    replicaCount: 2
+    autoscaling:
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+  worker:
+    # Un seul relais : il prend les évènements sous verrou (FOR UPDATE SKIP
+    # LOCKED), un second ne ferait qu'attendre. 0 si Kafka n'est pas installé.
+    replicaCount: ${WORKER_REPLICAS}
+    autoscaling:
+      minReplicas: ${WORKER_REPLICAS}
+      maxReplicas: ${WORKER_REPLICAS}
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+  resources:
+    requests:
+      cpu: 250m
+      memory: 384Mi
+    limits:
+      memory: 768Mi
+  podsize:
+    name: pokou
+    description: "Pokou (CPU: 0.25, Memory: 0.75Gi)"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 384Mi
+      limits:
+        memory: 768Mi
+  service:
+    port: 80
+    type: ClusterIP
+  serviceAccount:
+    create: true
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: ${CLUSTER_ISSUER}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # Pièces jointes : media_max_size_mb (25 Mo) plus une marge.
+      nginx.ingress.kubernetes.io/proxy-body-size: "30m"
+      # WebSocket : une connexion inactive n'est pas coupée au bout de 60 s.
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    hosts:
+      # Toute l'API, dont l'espace officine HONAM (/officine/).
+      - host: ${API_HOST}
+        paths:
+          - { path: /, pathType: Prefix }
+      # Le domaine public : seulement les liens (App Links, invitations,
+      # textes légaux), sans préfixe /api/v1.
+      - host: ${PUBLIC_HOST}
+        paths:
+          - { path: /.well-known, pathType: Prefix }
+          - { path: /invite, pathType: Prefix }
+          - { path: /c, pathType: Prefix }
+          - { path: /channel, pathType: Prefix }
+          - { path: /bot, pathType: Prefix }
+          - { path: /legal, pathType: Prefix }
+    tls:
+      - hosts: [${API_HOST}, ${PUBLIC_HOST}]
+        secretName: ${APP_NAME}-tls
+  extraVolumes: []
+  cronjobs: []
+  addons: []

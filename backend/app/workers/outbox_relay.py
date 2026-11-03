@@ -37,7 +37,10 @@ def _producer_kwargs(settings) -> dict:
         "compression_type": "gzip",
     }
     if settings.kafka_security_protocol in ("SSL", "SASL_SSL"):
-        context = ssl.create_default_context(cafile=settings.kafka_ssl_cafile or None)
+        if settings.kafka_ssl_ca_pem:
+            context = ssl.create_default_context(cadata=settings.kafka_ssl_ca_pem)
+        else:
+            context = ssl.create_default_context(cafile=settings.kafka_ssl_cafile or None)
         kwargs["ssl_context"] = context
     if settings.kafka_sasl_mechanism:
         kwargs["sasl_mechanism"] = settings.kafka_sasl_mechanism

@@ -42,6 +42,14 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
+        # Plusieurs réplicas peuvent migrer au même démarrage (Kubero lance
+        # les migrations depuis les pods web, faute de Job préalable) : un
+        # verrou PostgreSQL les fait passer l'un après l'autre. Le second
+        # trouve la base déjà à jour et ne fait rien. Libéré à la fermeture
+        # de la connexion, même après une erreur.
+        if connection.dialect.name == "postgresql":
+            connection.exec_driver_sql("SELECT pg_advisory_lock(7468757)")
+            connection.commit()
         context.configure(
             connection=connection,
             target_metadata=target_metadata,

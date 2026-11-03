@@ -6,6 +6,8 @@ Kafka pour les évènements métier. Les manifestes sont dans
 (Firebase, stores, SMS, domaines) est dans
 [`mise-en-service.md`](mise-en-service.md) : elle reste un préalable.
 
+Avec Kubero plutôt que des manifestes : [`deploiement-kubero.md`](deploiement-kubero.md).
+
 ## 1. Ce qui tourne, et où
 
 ```

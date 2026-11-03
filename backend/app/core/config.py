@@ -228,6 +228,10 @@ class Settings(BaseSettings):
     kafka_sasl_username: str = ""
     kafka_sasl_password: str = ""
     kafka_ssl_cafile: str = ""
+    #: Le certificat de l'autorité Kafka EN CLAIR (PEM), pour les
+    #: plateformes qui ne montent pas de fichier depuis un Secret (Kubero).
+    #: Prioritaire sur `kafka_ssl_cafile`.
+    kafka_ssl_ca_pem: str = ""
     kafka_topic_prefix: str = "pokou"
     #: Durée de conservation des lignes déjà publiées, en jours.
     outbox_retention_days: int = 7
