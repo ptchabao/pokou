@@ -184,3 +184,45 @@ par le relais.
 
 Le retour arrière ne défait pas les migrations : c'est pour cela qu'elles
 restent compatibles avec la version précédente.
+
+## 9. L'instance en service (3 novembre 2026)
+
+| | |
+|---|---|
+| Kubero | `https://kubero.169.58.195.18.sslip.io` (v3.1.1, k3s, un nœud, Ingress Traefik) |
+| Pipeline / phase / namespace | `pokou` / `production` / `pokou-production` |
+| API | `https://apipokou.cabinet-p-et-associes.com` (Cloudflare devant, certificat Let's Encrypt à l'origine) |
+| Addons | PostgreSQL 17 `pokou-postgres:5432` (base et utilisateur `pokou`), Redis 8 `pokou-redis:6379`, Kafka 3.4 `pokou-kafka:9092` (PLAINTEXT, interne au cluster) |
+| Pièces jointes | Volume `pokou-media` (10 Gi, local-path) monté sur `/data`, pas de S3 sur ce cluster |
+| Secrets | `deploy/kubero/secrets.env` sur le poste qui a déployé, jamais versionné |
+
+**Mode « plain », pas d'image.** Cette instance ne construit pas d'images
+(`buildPipeline: false`) et le compte GitHub ne peut pas lancer d'Actions
+pour l'instant (facturation). Kubero clone donc le dépôt à chaque démarrage
+de pod, `backend/kubero-build.sh` installe les dépendances dans une image
+`python:3.12-slim`, puis `backend/kubero-run.sh` lance le point d'entrée
+habituel. C'est plus lent à démarrer (une à deux minutes par pod) et chaque
+redémarrage prend le dernier `main`. Dès que les Actions remarchent,
+`.github/workflows/api-image.yml` publie une image : passer l'app en
+déploiement par image (sections 4 et 5).
+
+**Recréer ou modifier l'app** : `deploy/kubero/build_app_json.py` produit
+le corps attendu par l'API de Kubero à partir de `secrets.env` :
+
+```bash
+cd deploy/kubero
+python3 build_app_json.py > app.json        # app.json contient les secrets : ignoré par git
+TOKEN=$(curl -s -X POST https://kubero.169.58.195.18.sslip.io/api/auth/login \
+  -H 'Content-Type: application/json' -d '{"username":"admin","password":"…"}' | jq -r .access_token)
+curl -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  --data @app.json https://kubero.169.58.195.18.sslip.io/api/apps/pokou/production/new
+```
+
+Pour une modification (Twilio renseigné, par exemple), l'interface de Kubero
+suffit : application `pokou-api` → Edit → variables d'environnement, puis
+redémarrer.
+
+**Kafka Bitnami et Zookeeper.** L'image d'origine
+`docker.io/bitnami/zookeeper` n'existe plus (Bitnami a déplacé ses images
+vers `bitnamilegacy`) : l'addon force `bitnamilegacy/zookeeper`. Sans ce
+réglage, Zookeeper reste en `ImagePullBackOff` et Kafka redémarre en boucle.
