@@ -48,18 +48,11 @@ class WelcomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 56,
+                      // Le logo officiel : deux bulles de discussion liées.
+                      Image.asset(
+                        'assets/brand/pokou_logo.png',
                         height: 56,
-                        decoration: BoxDecoration(
-                          color: AppColors.accentPrimary,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.forum_rounded,
-                          color: Colors.white,
-                          size: 32,
-                        ),
+                        semanticLabel: l.appName,
                       ),
                       const SizedBox(width: 12),
                       Text(

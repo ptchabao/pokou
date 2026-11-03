@@ -10,4 +10,9 @@
      visible qu'il arrive au moment où l'œil se pose. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/pokou_launch_background" />
+    <!-- Le logo officiel, centré (Android 11 et avant ; à partir
+         d'Android 12, le système affiche l'icône de l'application). -->
+    <item>
+        <bitmap android:gravity="center" android:src="@drawable/launch_logo" />
+    </item>
 </layer-list>

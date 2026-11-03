@@ -208,6 +208,8 @@ flutter:
     # WebP et non JPEG : sur du trait fin, la compression JPEG laisse des
     # halos visibles sur un aplat clair, et pèse ici trois fois plus lourd.
     - assets/chat_wallpaper.webp
+    # Le logo officiel (IconKitchen), pour l'écran d'accueil.
+    - assets/brand/
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package

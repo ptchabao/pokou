@@ -120,7 +120,7 @@ Future<void> initializeMessageNotificationsPlugin(
 }) {
   return plugin.initialize(
     InitializationSettings(
-      android: const AndroidInitializationSettings('@mipmap/ic_launcher'),
+      android: const AndroidInitializationSettings('@drawable/ic_stat_pokou'),
       iOS: darwin ??
           const DarwinInitializationSettings(
             requestAlertPermission: false,

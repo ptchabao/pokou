@@ -19,7 +19,13 @@ _FILES = {
     "officine.css": ("officine.css", "text/css; charset=utf-8"),
     "manifest.webmanifest": ("manifest.webmanifest", "application/manifest+json"),
     "sw.js": ("sw.js", "text/javascript; charset=utf-8"),
-    "icon.svg": ("icon.svg", "image/svg+xml"),
+    # Le logo officiel (IconKitchen).
+    "favicon.ico": ("favicon.ico", "image/x-icon"),
+    "apple-touch-icon.png": ("apple-touch-icon.png", "image/png"),
+    "icon-192.png": ("icon-192.png", "image/png"),
+    "icon-512.png": ("icon-512.png", "image/png"),
+    "icon-192-maskable.png": ("icon-192-maskable.png", "image/png"),
+    "icon-512-maskable.png": ("icon-512-maskable.png", "image/png"),
 }
 _HEADERS = {
     "Content-Security-Policy": (

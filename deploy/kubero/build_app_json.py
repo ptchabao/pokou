@@ -30,12 +30,23 @@ app_env = {
     "KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
     "KAFKA_TOPIC_PREFIX": "pokou",
     "FCM_ENABLED": "false",
-    "LIVEKIT_ENABLED": "false",
     "SECRET_KEY": env["SECRET_KEY"],
     "WEBHOOK_HMAC_SECRET": env["WEBHOOK_HMAC_SECRET"],
     "DATABASE_URL": env["DATABASE_URL"],
     "REDIS_URL": env["REDIS_URL"],
 }
+# Appels audio et vidéo : l'app Kubero « livekit » (build_livekit_json.py).
+# L'API ne fait que signer les jetons ; le téléphone se connecte lui-même à
+# cette adresse publique.
+if env.get("LIVEKIT_API_KEY") and env.get("LIVEKIT_API_SECRET"):
+    app_env.update({
+        "LIVEKIT_ENABLED": "true",
+        "LIVEKIT_URL": "wss://livekit.169.58.195.18.sslip.io",
+        "LIVEKIT_API_KEY": env["LIVEKIT_API_KEY"],
+        "LIVEKIT_API_SECRET": env["LIVEKIT_API_SECRET"],
+    })
+else:
+    app_env["LIVEKIT_ENABLED"] = "false"
 for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_SMS_FROM", "TWILIO_MESSAGING_SERVICE_SID"):
     if env.get(k):
         app_env[k] = env[k]
