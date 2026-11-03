@@ -86,13 +86,34 @@ for address in addresses:
 PY
 }
 
+# Sans postgresql-client (image Python nue de Kubero, mode « plain »), la
+# même question est posée par une ouverture de connexion TCP : moins précise
+# que pg_isready, mais elle distingue « pas encore prête » de « prête ».
+db_ready() {
+  if command -v pg_isready >/dev/null 2>&1; then
+    pg_isready -d "$LIBPQ_URL" -t 5 2>&1
+    return
+  fi
+  python3 - <<'PY'
+import os, socket, sys, urllib.parse as u
+p = u.urlparse(os.environ["DATABASE_URL"])
+host, port = p.hostname or "localhost", p.port or 5432
+try:
+    socket.create_connection((host, port), timeout=5).close()
+except OSError as exc:
+    print(f"{host}:{port} - no response ({exc.strerror or exc})")
+    sys.exit(2)
+print(f"{host}:{port} - accepting connections")
+PY
+}
+
 attempt=0
 max_attempts=10
 
 while true; do
   # Le `if` sert à lire le message ET le code : set -e ne doit pas sortir avant
   # qu'on ait décidé quoi en faire.
-  if is_ready="$(pg_isready -d "$LIBPQ_URL" -t 5 2>&1)"; then
+  if is_ready="$(db_ready)"; then
     echo "PostgreSQL: ${is_ready}"
     break
   fi
