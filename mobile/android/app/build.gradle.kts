@@ -15,8 +15,23 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // Firebase Cloud Messaging — reads google-services.json in this directory.
-    id("com.google.gms.google-services")
+}
+
+// Firebase Cloud Messaging — lit google-services.json dans ce répertoire,
+// mais SEULEMENT s'il déclare bien com.pokou.pokou. Sans fichier, ou avec
+// celui d'une autre application, le greffon fait échouer tout build release
+// (« No matching client found ») : l'application est alors construite sans
+// Firebase, et démarre sans notifications push (main.dart tolère déjà
+// l'absence de Firebase). Bruyant, pour que ce binaire ne parte pas en
+// production par erreur.
+val googleServicesFile = file("google-services.json")
+if (googleServicesFile.exists() && googleServicesFile.readText().contains("\"com.pokou.pokou\"")) {
+    apply(plugin = "com.google.gms.google-services")
+} else {
+    logger.warn(
+        "\n⚠️  Pokou: google-services.json absent ou d'une autre application — " +
+            "build SANS Firebase : pas de notifications push.\n"
+    )
 }
 
 android {
