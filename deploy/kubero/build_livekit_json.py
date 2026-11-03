@@ -19,7 +19,7 @@ for line in open("secrets.env", encoding="utf-8"):
         env[k] = v
 
 NODE_IP = "169.58.195.18"
-HOST = f"livekit.{NODE_IP}.sslip.io"
+HOST = "rtc.cabinet-p-et-associes.com"
 
 config = f"""port: 7880
 rtc:

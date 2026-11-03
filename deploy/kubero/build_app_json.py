@@ -41,7 +41,7 @@ app_env = {
 if env.get("LIVEKIT_API_KEY") and env.get("LIVEKIT_API_SECRET"):
     app_env.update({
         "LIVEKIT_ENABLED": "true",
-        "LIVEKIT_URL": "wss://livekit.169.58.195.18.sslip.io",
+        "LIVEKIT_URL": "wss://rtc.cabinet-p-et-associes.com",
         "LIVEKIT_API_KEY": env["LIVEKIT_API_KEY"],
         "LIVEKIT_API_SECRET": env["LIVEKIT_API_SECRET"],
     })

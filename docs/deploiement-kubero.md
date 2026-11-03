@@ -193,6 +193,7 @@ restent compatibles avec la version précédente.
 | Pipeline / phase / namespace | `pokou` / `production` / `pokou-production` |
 | API | `https://apipokou.cabinet-p-et-associes.com` (Cloudflare devant, certificat Let's Encrypt à l'origine) |
 | Addons | PostgreSQL 17 `pokou-postgres:5432` (base et utilisateur `pokou`), Redis 8 `pokou-redis:6379`, Kafka 3.4 `pokou-kafka:9092` (PLAINTEXT, interne au cluster) |
+| Appels (LiveKit) | App `livekit` : signalisation `wss://rtc.cabinet-p-et-associes.com`, médias en direct sur `169.58.195.18` : 7881/TCP et 7882/UDP |
 | Pièces jointes | Volume `pokou-media` (10 Gi, local-path) monté sur `/data`, pas de S3 sur ce cluster |
 | Secrets | `deploy/kubero/secrets.env` sur le poste qui a déployé, jamais versionné |
 
@@ -226,3 +227,14 @@ redémarrer.
 `docker.io/bitnami/zookeeper` n'existe plus (Bitnami a déplacé ses images
 vers `bitnamilegacy`) : l'addon force `bitnamilegacy/zookeeper`. Sans ce
 réglage, Zookeeper reste en `ImagePullBackOff` et Kafka redémarre en boucle.
+
+**LiveKit et ses ports média.** Kubero n'expose qu'un port HTTP par
+application ; les médias des appels ne passent pas par l'Ingress (ni par
+Cloudflare) mais vont directement au serveur, sur 7881/TCP et 7882/UDP.
+`deploy/kubero/build_livekit_json.py` les ouvre par un Service
+`LoadBalancer` (`livekit-rtc`), que ServiceLB de k3s publie sur l'adresse du
+nœud ; il passe par les « addons » de l'app, que le chart de Kubero rend
+tels quels. Ces deux ports doivent rester ouverts dans le pare-feu de
+l'hébergeur. Les clés LiveKit sont dans `secrets.env` (`LIVEKIT_API_KEY`,
+`LIVEKIT_API_SECRET`) ; `build_app_json.py` les donne aussi à l'API.
+
