@@ -81,7 +81,7 @@
   "sparkAgeRestricted": "Spark — только для совершеннолетних.",
   "navProfile": "Профиль",
   "authWelcome": "Добро пожаловать в Pokou",
-  "authSubtitle": "Безопасный вход по номеру телефона.",
+  "authSubtitle": "Введите номер — мы отправим код. Впервые в Pokou? Аккаунт создаётся на этом шаге.",
   "authPhoneHint": "Ваш номер",
   "authPrivacyNote": "Безопасный вход. Номер нужен только для подтверждения личности.",
   "authVerifyTitle": "Подтверждение",
@@ -1497,8 +1497,6 @@
   "koryActionFailed": "Не удалось. Попробуйте ещё раз.",
   "welcomePromise": "Больше, чем мессенджер, — сообщество.",
   "welcomeSignature": "Вместе мы сильнее.",
-  "welcomeCreate": "Создать аккаунт",
-  "welcomeSignIn": "Войти",
   "welcomeServiceChats": "Чаты, группы и звонки",
   "welcomeServiceKory": "Сборы и тонтины",
   "legalPrivacy": "Конфиденциальность",
@@ -1731,5 +1729,6 @@
   "koryRoundConfirmed": "Подтверждено {confirmed} из {expected}",
   "koryNextRound": "Следующий круг",
   "koryNextRoundBody": "Текущий круг завершается. Уже заявленные взносы подтвердит его получатель.",
-  "koryLastRoundBody": "Это был последний круг: тонтина будет закрыта. Журнал останется доступен."
+  "koryLastRoundBody": "Это был последний круг: тонтина будет закрыта. Журнал останется доступен.",
+  "welcomeStart": "Начать"
 }

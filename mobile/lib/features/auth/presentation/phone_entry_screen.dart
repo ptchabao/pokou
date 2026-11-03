@@ -151,16 +151,8 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
     _focusNode.requestFocus();
   }
 
-  /// Les conditions se cochent ICI, avant le code (maquette « 1. Bienvenue
-  /// et numéro ») : décochées par défaut, et obligatoires pour continuer.
-  /// Un compte existant les retrouve déjà acceptées côté serveur ; les
-  /// cocher de nouveau ne change rien.
-  bool _terms = false;
-  bool _age = false;
-
   Future<void> _submit() async {
     final phone = _e164;
-    ref.read(signupConsentProvider.notifier).state = (terms: _terms, age: _age);
     setState(() {
       _loading = true;
       _error = null;
@@ -180,14 +172,17 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canSubmit = _isValidNumber && _terms && _age && !_loading;
+    // Le même écran pour se connecter et pour s'inscrire : seul le numéro
+    // est demandé. Les conditions viennent après le code, pour un compte
+    // nouveau seulement (OnboardingScreen).
+    final canSubmit = _isValidNumber && !_loading;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: PokouBackground(
         child: SafeArea(
-          // Défilant : avec les conditions sur ce même écran, la colonne
-          // dépasse la hauteur d'un petit téléphone (ou d'un grand texte).
+          // Défilant : la colonne dépasse la hauteur d'un petit téléphone
+          // dès que le texte est agrandi.
           child: LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -331,16 +326,6 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    _Consent(
-                      value: _terms,
-                      onChanged: (v) => setState(() => _terms = v),
-                      label: L.of(context).onbAcceptTerms,
-                    ),
-                    _Consent(
-                      value: _age,
-                      onChanged: (v) => setState(() => _age = v),
-                      label: L.of(context).onbAge,
-                    ),
                     Wrap(
                       spacing: 8,
                       children: [
@@ -404,42 +389,6 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Une case et son libellé, tout le libellé étant cliquable. Pas de
-/// `CheckboxListTile` : posé sur le fond de l'écran, il cacherait son effet
-/// d'appui.
-class _Consent extends StatelessWidget {
-  const _Consent({
-    required this.value,
-    required this.onChanged,
-    required this.label,
-  });
-
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return MergeSemantics(
-      child: InkWell(
-        onTap: () => onChanged(!value),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Checkbox(value: value, onChanged: (v) => onChanged(v ?? false)),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(label, style: const TextStyle(fontSize: 14)),
-              ),
-            ),
-          ],
         ),
       ),
     );

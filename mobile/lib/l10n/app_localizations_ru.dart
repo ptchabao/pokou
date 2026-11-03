@@ -285,7 +285,8 @@ class LRu extends L {
   String get authWelcome => 'Добро пожаловать в Pokou';
 
   @override
-  String get authSubtitle => 'Безопасный вход по номеру телефона.';
+  String get authSubtitle =>
+      'Введите номер — мы отправим код. Впервые в Pokou? Аккаунт создаётся на этом шаге.';
 
   @override
   String get authPhoneHint => 'Ваш номер';
@@ -5242,12 +5243,6 @@ class LRu extends L {
   String get welcomeSignature => 'Вместе мы сильнее.';
 
   @override
-  String get welcomeCreate => 'Создать аккаунт';
-
-  @override
-  String get welcomeSignIn => 'Войти';
-
-  @override
   String get welcomeServiceChats => 'Чаты, группы и звонки';
 
   @override
@@ -6067,4 +6062,7 @@ class LRu extends L {
   @override
   String get koryLastRoundBody =>
       'Это был последний круг: тонтина будет закрыта. Журнал останется доступен.';
+
+  @override
+  String get welcomeStart => 'Начать';
 }

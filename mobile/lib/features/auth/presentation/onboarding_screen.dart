@@ -32,8 +32,9 @@ Future<String> routeAfterSignIn(WidgetRef ref) async {
 
 /// Après le code (maquettes 3 à 5) : le nom affiché, seul champ
 /// obligatoire, accueilli par Baba ; puis Baba propose de retrouver les
-/// proches. Les conditions se cochent sur l'écran du numéro ; elles ne
-/// reviennent ici que pour un compte qui ne les a jamais acceptées.
+/// proches. Les conditions et l'âge se cochent ici, pour un compte qui ne
+/// les a jamais acceptés : la connexion et l'inscription partagent le même
+/// écran du numéro, et seul un compte nouveau arrive jusqu'ici.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -48,9 +49,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     text: ref.read(authControllerProvider).user?.fullName ?? '',
   );
   _Step _step = _Step.profile;
-  /// Les conditions se cochent d'ordinaire sur l'écran du numéro ; seuls
-  /// les comptes créés avant cette version les voient encore ici.
-  bool _needsTerms = false;
+  /// Vrai tant que le serveur n'a pas dit le contraire : un compte nouveau
+  /// ne doit jamais sauter les conditions parce que la réponse de
+  /// `/auth/me` arrive après qu'il a tapé « Continuer ».
+  bool _needsTerms = true;
   bool _terms = false;
   bool _age = false;
   bool _analytics = false;

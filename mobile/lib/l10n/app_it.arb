@@ -81,7 +81,7 @@
   "sparkAgeRestricted": "Spark è riservato ai maggiori di 18 anni.",
   "navProfile": "Profilo",
   "authWelcome": "Benvenuto su Pokou",
-  "authSubtitle": "Accedi in modo sicuro con il tuo numero.",
+  "authSubtitle": "Inserisci il tuo numero: ti inviamo un codice. Nuovo su Pokou? Il tuo account si crea in questo passaggio.",
   "authPhoneHint": "Il tuo numero",
   "authPrivacyNote": "Accesso sicuro. Il tuo numero serve solo a verificare la tua identità.",
   "authVerifyTitle": "Verifica",
@@ -1497,8 +1497,6 @@
   "koryActionFailed": "Operazione non riuscita. Riprova.",
   "welcomePromise": "Più di una messaggistica, una comunità.",
   "welcomeSignature": "Insieme, più forti.",
-  "welcomeCreate": "Crea un account",
-  "welcomeSignIn": "Accedi",
   "welcomeServiceChats": "Chat, gruppi e chiamate",
   "welcomeServiceKory": "Collette e tontine",
   "legalPrivacy": "Privacy",
@@ -1731,5 +1729,6 @@
   "koryRoundConfirmed": "{confirmed} confermati su {expected}",
   "koryNextRound": "Passa al turno successivo",
   "koryNextRoundBody": "Il turno in corso termina. Le quote già dichiarate restano da confermare dal suo beneficiario.",
-  "koryLastRoundBody": "Era l'ultimo turno: la tontina sarà chiusa. Il registro resta consultabile."
+  "koryLastRoundBody": "Era l'ultimo turno: la tontina sarà chiusa. Il registro resta consultabile.",
+  "welcomeStart": "Inizia"
 }

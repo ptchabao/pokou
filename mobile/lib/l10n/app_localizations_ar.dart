@@ -283,7 +283,8 @@ class LAr extends L {
   String get authWelcome => 'مرحبًا بك في Pokou';
 
   @override
-  String get authSubtitle => 'سجّل الدخول بأمان عبر رقم هاتفك.';
+  String get authSubtitle =>
+      'أدخل رقمك وسنرسل إليك رمزًا. جديد على Pokou؟ يُنشأ حسابك في هذه الخطوة.';
 
   @override
   String get authPhoneHint => 'رقمك';
@@ -5181,12 +5182,6 @@ class LAr extends L {
   String get welcomeSignature => 'معًا، أقوى.';
 
   @override
-  String get welcomeCreate => 'إنشاء حساب';
-
-  @override
-  String get welcomeSignIn => 'تسجيل الدخول';
-
-  @override
   String get welcomeServiceChats => 'محادثات ومجموعات ومكالمات';
 
   @override
@@ -5998,4 +5993,7 @@ class LAr extends L {
   @override
   String get koryLastRoundBody =>
       'كانت هذه الدورة الأخيرة: سيُغلق التونتين. يبقى السجل متاحاً.';
+
+  @override
+  String get welcomeStart => 'ابدأ';
 }

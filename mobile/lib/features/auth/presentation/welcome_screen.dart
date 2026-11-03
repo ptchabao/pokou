@@ -76,14 +76,11 @@ class WelcomeScreen extends StatelessWidget {
                 if (showKory)
                   _Service(icon: Icons.savings_outlined, label: l.welcomeServiceKory),
                 const Spacer(),
+                // Un seul chemin, comme WhatsApp : le numéro, puis le code.
+                // Le serveur sait si le compte existe ; un nouveau compte
+                // passe ensuite par son profil et les conditions.
                 ModuleActionButton(
-                  label: l.welcomeCreate,
-                  expanded: true,
-                  onPressed: () => context.push('/phone'),
-                ),
-                const SizedBox(height: 12),
-                ModuleQuietButton(
-                  label: l.welcomeSignIn,
+                  label: l.welcomeStart,
                   expanded: true,
                   onPressed: () => context.push('/phone'),
                 ),

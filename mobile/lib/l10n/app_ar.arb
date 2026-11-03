@@ -81,7 +81,7 @@
   "sparkAgeRestricted": "Spark مخصّص لمن هم فوق 18 عامًا.",
   "navProfile": "الملف الشخصي",
   "authWelcome": "مرحبًا بك في Pokou",
-  "authSubtitle": "سجّل الدخول بأمان عبر رقم هاتفك.",
+  "authSubtitle": "أدخل رقمك وسنرسل إليك رمزًا. جديد على Pokou؟ يُنشأ حسابك في هذه الخطوة.",
   "authPhoneHint": "رقمك",
   "authPrivacyNote": "تسجيل دخول آمن. يُستخدم رقمك للتحقق من هويتك فقط.",
   "authVerifyTitle": "التحقق",
@@ -1497,8 +1497,6 @@
   "koryActionFailed": "لم تنجح العملية. حاول مرة أخرى.",
   "welcomePromise": "أكثر من تطبيق مراسلة، إنه مجتمع.",
   "welcomeSignature": "معًا، أقوى.",
-  "welcomeCreate": "إنشاء حساب",
-  "welcomeSignIn": "تسجيل الدخول",
   "welcomeServiceChats": "محادثات ومجموعات ومكالمات",
   "welcomeServiceKory": "صناديق وجمعيات ادخار",
   "legalPrivacy": "الخصوصية",
@@ -1731,5 +1729,6 @@
   "koryRoundConfirmed": "{confirmed} مؤكَّد من {expected}",
   "koryNextRound": "انتقل إلى الدورة التالية",
   "koryNextRoundBody": "تنتهي الدورة الحالية. تبقى المساهمات المعلنة بانتظار تأكيد مستفيدها.",
-  "koryLastRoundBody": "كانت هذه الدورة الأخيرة: سيُغلق التونتين. يبقى السجل متاحاً."
+  "koryLastRoundBody": "كانت هذه الدورة الأخيرة: سيُغلق التونتين. يبقى السجل متاحاً.",
+  "welcomeStart": "ابدأ"
 }

@@ -281,7 +281,8 @@ class LIt extends L {
   String get authWelcome => 'Benvenuto su Pokou';
 
   @override
-  String get authSubtitle => 'Accedi in modo sicuro con il tuo numero.';
+  String get authSubtitle =>
+      'Inserisci il tuo numero: ti inviamo un codice. Nuovo su Pokou? Il tuo account si crea in questo passaggio.';
 
   @override
   String get authPhoneHint => 'Il tuo numero';
@@ -5197,12 +5198,6 @@ class LIt extends L {
   String get welcomeSignature => 'Insieme, più forti.';
 
   @override
-  String get welcomeCreate => 'Crea un account';
-
-  @override
-  String get welcomeSignIn => 'Accedi';
-
-  @override
   String get welcomeServiceChats => 'Chat, gruppi e chiamate';
 
   @override
@@ -6030,4 +6025,7 @@ class LIt extends L {
   @override
   String get koryLastRoundBody =>
       'Era l\'ultimo turno: la tontina sarà chiusa. Il registro resta consultabile.';
+
+  @override
+  String get welcomeStart => 'Inizia';
 }

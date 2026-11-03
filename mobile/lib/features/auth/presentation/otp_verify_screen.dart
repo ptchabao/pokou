@@ -102,8 +102,6 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
           .verifyOtp(
             phone: widget.phone,
             code: _codeController.text.trim(),
-            acceptTerms: ref.read(signupConsentProvider).terms,
-            ageConfirmed: ref.read(signupConsentProvider).age,
           );
       // Le numéro vient d'être confirmé par SMS : son pays est le seul que
       // l'application connaisse avec certitude. On le retient pour le

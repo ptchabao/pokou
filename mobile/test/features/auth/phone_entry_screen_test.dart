@@ -56,15 +56,9 @@ Widget _buildApp(_FakeAuthRepository fakeRepo, {required VoidCallback onOtpScree
   );
 }
 
-/// Les conditions se cochent sur cet écran : sans elles, « Continuer »
-/// reste inactif. Le bouton est ensuite amené à l'écran avant d'être touché.
+/// Connexion et inscription partagent cet écran : seul le numéro est
+/// demandé, les conditions viennent après le code (OnboardingScreen).
 Future<void> _acceptTermsAndContinue(WidgetTester tester) async {
-  for (final box in find.byType(Checkbox).evaluate().toList()) {
-    final finder = find.byWidget(box.widget);
-    await tester.ensureVisible(finder);
-    await tester.tap(finder);
-    await tester.pump();
-  }
   await tester.ensureVisible(find.text('Continuer'));
   await tester.tap(find.text('Continuer'));
 }

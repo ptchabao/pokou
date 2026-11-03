@@ -283,7 +283,7 @@ class LFr extends L {
 
   @override
   String get authSubtitle =>
-      'Connectez-vous de manière sécurisée avec votre numéro.';
+      'Entrez votre numéro : nous vous envoyons un code. Nouveau sur Pokou ? Votre compte se crée à cette étape.';
 
   @override
   String get authPhoneHint => 'Votre numéro';
@@ -5210,12 +5210,6 @@ class LFr extends L {
   String get welcomeSignature => 'Ensemble, plus forts.';
 
   @override
-  String get welcomeCreate => 'Créer un compte';
-
-  @override
-  String get welcomeSignIn => 'Se connecter';
-
-  @override
   String get welcomeServiceChats => 'Discussions, groupes et appels';
 
   @override
@@ -6045,4 +6039,7 @@ class LFr extends L {
   @override
   String get koryLastRoundBody =>
       'C\'était le dernier tour : la tontine sera clôturée. Le journal reste consultable.';
+
+  @override
+  String get welcomeStart => 'Commencer';
 }

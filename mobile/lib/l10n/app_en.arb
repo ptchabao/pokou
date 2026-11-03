@@ -81,7 +81,7 @@
   "sparkAgeRestricted": "Spark is for 18 and over.",
   "navProfile": "Profile",
   "authWelcome": "Welcome to Pokou",
-  "authSubtitle": "Sign in securely with your phone number.",
+  "authSubtitle": "Enter your number and we'll send you a code. New to Pokou? Your account is created at this step.",
   "authPhoneHint": "Your number",
   "authPrivacyNote": "Secure sign-in. Your number is only used to verify who you are.",
   "authVerifyTitle": "Verification",
@@ -1497,8 +1497,6 @@
   "koryActionFailed": "That didn't work. Try again.",
   "welcomePromise": "More than a messenger, a community.",
   "welcomeSignature": "Stronger together.",
-  "welcomeCreate": "Create an account",
-  "welcomeSignIn": "Sign in",
   "welcomeServiceChats": "Chats, groups and calls",
   "welcomeServiceKory": "Group pots & savings circles",
   "legalPrivacy": "Privacy",
@@ -1731,5 +1729,6 @@
   "koryRoundConfirmed": "{confirmed} confirmed of {expected}",
   "koryNextRound": "Move to the next round",
   "koryNextRoundBody": "The current round ends. Contributions already declared remain to be confirmed by its beneficiary.",
-  "koryLastRoundBody": "That was the last round: the tontine will be closed. The log stays available."
+  "koryLastRoundBody": "That was the last round: the tontine will be closed. The log stays available.",
+  "welcomeStart": "Get started"
 }

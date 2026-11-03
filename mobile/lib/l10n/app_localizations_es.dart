@@ -281,7 +281,8 @@ class LEs extends L {
   String get authWelcome => 'Bienvenido a Pokou';
 
   @override
-  String get authSubtitle => 'Inicia sesión de forma segura con tu número.';
+  String get authSubtitle =>
+      'Introduce tu número y te enviamos un código. ¿Nuevo en Pokou? Tu cuenta se crea en este paso.';
 
   @override
   String get authPhoneHint => 'Tu número';
@@ -5186,12 +5187,6 @@ class LEs extends L {
   String get welcomeSignature => 'Juntos, más fuertes.';
 
   @override
-  String get welcomeCreate => 'Crear una cuenta';
-
-  @override
-  String get welcomeSignIn => 'Iniciar sesión';
-
-  @override
   String get welcomeServiceChats => 'Chats, grupos y llamadas';
 
   @override
@@ -6015,4 +6010,7 @@ class LEs extends L {
   @override
   String get koryLastRoundBody =>
       'Era el último turno: la tontina se cerrará. El registro sigue disponible.';
+
+  @override
+  String get welcomeStart => 'Empezar';
 }

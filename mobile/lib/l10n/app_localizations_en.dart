@@ -280,7 +280,8 @@ class LEn extends L {
   String get authWelcome => 'Welcome to Pokou';
 
   @override
-  String get authSubtitle => 'Sign in securely with your phone number.';
+  String get authSubtitle =>
+      'Enter your number and we\'ll send you a code. New to Pokou? Your account is created at this step.';
 
   @override
   String get authPhoneHint => 'Your number';
@@ -5168,12 +5169,6 @@ class LEn extends L {
   String get welcomeSignature => 'Stronger together.';
 
   @override
-  String get welcomeCreate => 'Create an account';
-
-  @override
-  String get welcomeSignIn => 'Sign in';
-
-  @override
   String get welcomeServiceChats => 'Chats, groups and calls';
 
   @override
@@ -5993,4 +5988,7 @@ class LEn extends L {
   @override
   String get koryLastRoundBody =>
       'That was the last round: the tontine will be closed. The log stays available.';
+
+  @override
+  String get welcomeStart => 'Get started';
 }

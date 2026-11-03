@@ -594,7 +594,7 @@ abstract class L {
   /// No description provided for @authSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Connectez-vous de manière sécurisée avec votre numéro.'**
+  /// **'Entrez votre numéro : nous vous envoyons un code. Nouveau sur Pokou ? Votre compte se crée à cette étape.'**
   String get authSubtitle;
 
   /// No description provided for @authPhoneHint.
@@ -9087,18 +9087,6 @@ abstract class L {
   /// **'Ensemble, plus forts.'**
   String get welcomeSignature;
 
-  /// No description provided for @welcomeCreate.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créer un compte'**
-  String get welcomeCreate;
-
-  /// No description provided for @welcomeSignIn.
-  ///
-  /// In fr, this message translates to:
-  /// **'Se connecter'**
-  String get welcomeSignIn;
-
   /// No description provided for @welcomeServiceChats.
   ///
   /// In fr, this message translates to:
@@ -10496,6 +10484,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'C\'était le dernier tour : la tontine sera clôturée. Le journal reste consultable.'**
   String get koryLastRoundBody;
+
+  /// No description provided for @welcomeStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer'**
+  String get welcomeStart;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

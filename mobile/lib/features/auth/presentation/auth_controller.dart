@@ -259,12 +259,6 @@ class AuthController extends StateNotifier<AuthState> {
   }
 }
 
-/// Ce qui a été coché sur l'écran du numéro, transmis à la vérification du
-/// code — le serveur ne l'enregistre qu'une fois le numéro prouvé.
-final signupConsentProvider = StateProvider<({bool terms, bool age})>(
-  (ref) => (terms: false, age: false),
-);
-
 final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
   (ref) {
     return AuthController(
