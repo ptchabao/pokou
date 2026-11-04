@@ -1,0 +1,39 @@
+/* Mêmes jetons que l'espace officine (charte Pokou, section 7.2). */
+:root {
+  --terracotta-500: #A65527; --terracotta-700: #8A4520;
+  --ebene-900: #1A1615; --creme-50: #FFF7EC; --beige-100: #F2E5D5;
+  --taupe-500: #8C7D73; --taupe-600: #6B5E57;
+  --danger-500: #B3261E; --success-500: #1E7A46;
+  --radius-md: 12px; --radius-pill: 999px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, Roboto, system-ui, sans-serif; font-size: 16px;
+  line-height: 1.5; background: var(--creme-50); color: var(--ebene-900); }
+.bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
+  background: var(--terracotta-500); color: #fff; position: sticky; top: 0; }
+main { max-width: 720px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 24px; line-height: 32px; margin: 8px 0 16px; font-weight: 600; }
+h2 { font-size: 20px; line-height: 28px; margin: 24px 0 8px; font-weight: 600; }
+h3 { font-size: 17px; margin: 16px 0 4px; font-weight: 600; }
+.card { background: #fff; border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(26, 22, 21, .1); }
+.muted { color: var(--taupe-600); font-size: 14px; }
+ul { margin: 8px 0; padding-left: 20px; }
+li { margin: 4px 0; }
+label { display: block; font-weight: 500; font-size: 15px; margin: 12px 0 4px; }
+input { width: 100%; min-height: 52px; padding: 12px; font: inherit;
+  border: 1px solid var(--taupe-500); border-radius: var(--radius-md); background: #fff; }
+input:focus { outline: 2px solid var(--terracotta-500); border-color: transparent; }
+button { font: inherit; font-weight: 500; min-height: 48px; padding: 0 24px; width: 100%;
+  border-radius: var(--radius-pill); border: 1.5px solid var(--terracotta-500);
+  background: transparent; color: var(--terracotta-500); cursor: pointer; }
+button.primary { background: var(--terracotta-500); color: #fff; }
+button.primary:active { background: var(--terracotta-700); }
+button.danger { background: var(--danger-500); border-color: var(--danger-500); color: #fff; }
+button:disabled { opacity: .38; cursor: default; }
+.mt { margin-top: 12px; } .mt0 { margin-top: 0; }
+.notice { border-radius: var(--radius-md); padding: 12px 16px; margin: 12px 0; }
+.notice.error { background: #F7DEDC; color: var(--danger-500); }
+.notice.ok { background: #DDF0E5; color: var(--success-500); }
+.notice.info { background: var(--beige-100); color: var(--taupe-600); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

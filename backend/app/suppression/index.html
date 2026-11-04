@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#A65527">
+  <title>Supprimer mon compte Pokou</title>
+  <link rel="stylesheet" href="/compte/suppression/suppression.css">
+  <link rel="icon" href="/officine/favicon.ico" sizes="any">
+</head>
+<body>
+  <header class="bar">
+    <strong>Pokou</strong>
+    <span>Supprimer mon compte</span>
+  </header>
+
+  <main>
+    <h1>Supprimer mon compte Pokou</h1>
+
+    <div class="card">
+      <p>Cette page permet de demander la suppression de votre compte Pokou
+        sans passer par l'application. La suppression est <strong>définitive</strong>.</p>
+      <p class="muted">Vous pouvez aussi le faire depuis l'application :
+        <strong>Plus → Confidentialité → Supprimer mon compte</strong>.</p>
+    </div>
+
+    <h2>Ce qui est supprimé</h2>
+    <div class="card">
+      <ul>
+        <li>Votre carnet d'adresses, vos statuts et les vues reçues.</li>
+        <li>Vos appartenances aux groupes et communautés : vous les quittez.</li>
+        <li>Vos votes de sondage, vos réactions, vos réglages de confidentialité.</li>
+        <li>Vos sessions et les notifications envoyées à vos téléphones.</li>
+      </ul>
+      <h3>Ce qui est rendu anonyme</h3>
+      <p>Votre fiche de compte elle-même : numéro, nom, photo et code secret
+        sont effacés, et le compte est désactivé. Votre numéro redevient
+        libre : vous pourrez vous réinscrire, sur un compte neuf.</p>
+      <h3>Ce qui est conservé</h3>
+      <p>Les messages déjà reçus par vos correspondants : ils sont dans
+        <em>leur</em> conversation, et les effacer effacerait aussi les leurs.
+        Il en va de même du journal d'appels, partagé entre deux personnes.
+        Les écritures comptables (paiements, factures) restent rattachées à la
+        fiche rendue anonyme.</p>
+    </div>
+
+    <h2>Demander la suppression</h2>
+
+    <section class="card" id="etape-numero">
+      <h3 class="mt0">1. Votre numéro</h3>
+      <label for="phone">Numéro au format international</label>
+      <input id="phone" type="tel" inputmode="tel" placeholder="+228 90 00 00 00" autocomplete="tel">
+      <button class="primary mt" id="envoyer">Recevoir un code</button>
+      <p class="muted">Un code à 6 chiffres vous est envoyé par SMS, pour
+        vérifier que ce numéro est bien le vôtre.</p>
+    </section>
+
+    <section class="card" id="etape-code" hidden>
+      <h3 class="mt0">2. Le code reçu</h3>
+      <label for="code">Code à 6 chiffres</label>
+      <input id="code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      <button class="primary mt" id="verifier">Vérifier</button>
+    </section>
+
+    <section class="card" id="etape-confirmation" hidden>
+      <h3 class="mt0">3. Confirmation</h3>
+      <p>Retapez votre numéro pour confirmer. Cette action est
+        <strong>irréversible</strong>.</p>
+      <label for="confirm">Votre numéro</label>
+      <input id="confirm" type="tel" inputmode="tel" autocomplete="off">
+      <button class="danger mt" id="supprimer">Supprimer définitivement mon compte</button>
+    </section>
+
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <h2>Une question ?</h2>
+    <div class="card">
+      <p class="muted">Écrivez à <strong>support@pokou.app</strong> en
+        indiquant votre numéro. Nous répondons sous 30 jours.</p>
+    </div>
+  </main>
+
+  <script src="/compte/suppression/suppression.js"></script>
+</body>
+</html>

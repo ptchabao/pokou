@@ -7,7 +7,7 @@ d'atterrissage des liens d'invitation, destinées à un navigateur.
 """
 from fastapi import APIRouter
 
-from app.api.public import deeplinks, legal, officine, wellknown
+from app.api.public import deeplinks, legal, officine, suppression, wellknown
 from app.api.v1.account import account_privacy, contacts, profile
 from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
@@ -88,6 +88,7 @@ public_router = APIRouter()
 public_router.include_router(wellknown.router)
 public_router.include_router(deeplinks.router)
 public_router.include_router(officine.router)
+public_router.include_router(suppression.router)
 # Aussi sous /api/v1, pour que l'application les lise avec son client habituel.
 public_router.include_router(legal.router)
 api_router.include_router(legal.router)
