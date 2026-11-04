@@ -2900,5 +2900,7 @@
   "koryNextRound": "Passer au tour suivant",
   "koryNextRoundBody": "Le tour en cours se termine. Les contributions déjà déclarées restent à confirmer par son bénéficiaire.",
   "koryLastRoundBody": "C'était le dernier tour : la tontine sera clôturée. Le journal reste consultable.",
-  "welcomeStart": "Commencer"
+  "welcomeStart": "Commencer",
+  "authAcceptAndContinue": "Accepter et continuer",
+  "authAcceptNotice": "En touchant « Accepter et continuer », tu acceptes les conditions d'utilisation et la politique de confidentialité, et tu déclares avoir l'âge requis."
 }

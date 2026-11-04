@@ -10490,6 +10490,18 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Commencer'**
   String get welcomeStart;
+
+  /// No description provided for @authAcceptAndContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter et continuer'**
+  String get authAcceptAndContinue;
+
+  /// No description provided for @authAcceptNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'En touchant « Accepter et continuer », tu acceptes les conditions d\'utilisation et la politique de confidentialité, et tu déclares avoir l\'âge requis.'**
+  String get authAcceptNotice;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

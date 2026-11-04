@@ -5996,4 +5996,11 @@ class LAr extends L {
 
   @override
   String get welcomeStart => 'ابدأ';
+
+  @override
+  String get authAcceptAndContinue => 'الموافقة والمتابعة';
+
+  @override
+  String get authAcceptNotice =>
+      'بلمس «الموافقة والمتابعة»، فإنك توافق على شروط الاستخدام وسياسة الخصوصية، وتقرّ بأنك بالغ السن المطلوب.';
 }

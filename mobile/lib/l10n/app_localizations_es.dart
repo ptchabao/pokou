@@ -6013,4 +6013,11 @@ class LEs extends L {
 
   @override
   String get welcomeStart => 'Empezar';
+
+  @override
+  String get authAcceptAndContinue => 'Aceptar y continuar';
+
+  @override
+  String get authAcceptNotice =>
+      'Al tocar «Aceptar y continuar», aceptas las condiciones de uso y la política de privacidad, y declaras tener la edad requerida.';
 }

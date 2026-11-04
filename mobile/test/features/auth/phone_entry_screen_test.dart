@@ -56,11 +56,11 @@ Widget _buildApp(_FakeAuthRepository fakeRepo, {required VoidCallback onOtpScree
   );
 }
 
-/// Connexion et inscription partagent cet écran : seul le numéro est
-/// demandé, les conditions viennent après le code (OnboardingScreen).
+/// INS-1 : connexion et inscription partagent cet écran, et le bouton
+/// « Accepter et continuer » vaut acceptation des conditions et de l'âge.
 Future<void> _acceptTermsAndContinue(WidgetTester tester) async {
-  await tester.ensureVisible(find.text('Continuer'));
-  await tester.tap(find.text('Continuer'));
+  await tester.ensureVisible(find.text('Accepter et continuer'));
+  await tester.tap(find.text('Accepter et continuer'));
 }
 
 void main() {

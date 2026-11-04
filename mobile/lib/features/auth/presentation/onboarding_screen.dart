@@ -11,7 +11,6 @@ import '../../profile/presentation/profile_screen.dart';
 import '../../../core/widgets/assistant_orb.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import 'auth_controller.dart';
-import 'legal_screen.dart';
 
 /// Après le code : faut-il encore le profil ou les conditions ?
 ///
@@ -30,11 +29,12 @@ Future<String> routeAfterSignIn(WidgetRef ref) async {
   }
 }
 
-/// Après le code (maquettes 3 à 5) : le nom affiché, seul champ
-/// obligatoire, accueilli par Baba ; puis Baba propose de retrouver les
-/// proches. Les conditions et l'âge se cochent ici, pour un compte qui ne
-/// les a jamais acceptés : la connexion et l'inscription partagent le même
-/// écran du numéro, et seul un compte nouveau arrive jusqu'ici.
+/// INS-3 (cahier v3.2) : le nom affiché, seul champ obligatoire, accueilli
+/// par Baba, avec les consentements FACULTATIFS (statistiques, nouveautés)
+/// désactivés par défaut ; puis Baba propose de retrouver les proches.
+///
+/// Les conditions et l'âge ne sont plus ici : ils sont acceptés sur INS-1
+/// par le bouton « Accepter et continuer » (AUTH-09).
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -42,32 +42,17 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-enum _Step { profile, consents, contacts }
+enum _Step { profile, contacts }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final _name = TextEditingController(
     text: ref.read(authControllerProvider).user?.fullName ?? '',
   );
   _Step _step = _Step.profile;
-  /// Vrai tant que le serveur n'a pas dit le contraire : un compte nouveau
-  /// ne doit jamais sauter les conditions parce que la réponse de
-  /// `/auth/me` arrive après qu'il a tapé « Continuer ».
-  bool _needsTerms = true;
-  bool _terms = false;
-  bool _age = false;
   bool _analytics = false;
   bool _marketing = false;
   bool _busy = false;
   String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    ref.read(apiClientProvider).get('/auth/me').then((me) {
-      if (!mounted) return;
-      setState(() => _needsTerms = (me as Map<String, dynamic>)['terms_accepted_at'] == null);
-    }).catchError((_) {});
-  }
 
   @override
   void dispose() {
@@ -104,10 +89,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     });
     try {
       await ref.read(profileRepositoryProvider).updateMine(fullName: name);
+      // Les deux consentements facultatifs partent avec le nom : ils sont
+      // horodatés côté serveur et restent modifiables dans Confidentialité.
+      // Les conditions et l'âge, eux, ont déjà été enregistrés à la
+      // vérification du code (INS-1 / AUTH-09).
+      await ref.read(apiClientProvider).post(
+        '/auth/me/consents',
+        body: {
+          'consent_analytics': _analytics,
+          'consent_marketing': _marketing,
+        },
+      );
       await ref.read(authControllerProvider.notifier).reloadProfile();
       setState(() {
         _busy = false;
-        _step = _needsTerms ? _Step.consents : _Step.contacts;
+        _step = _Step.contacts;
       });
     } catch (_) {
       setState(() {
@@ -116,42 +112,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       });
     }
   }
-
-  Future<void> _finish() async {
-    final l = L.of(context);
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await ref.read(apiClientProvider).post(
-        '/auth/me/consents',
-        body: {
-          'accept_terms': true,
-          'age_confirmed': true,
-          'consent_analytics': _analytics,
-          'consent_marketing': _marketing,
-        },
-      );
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _step = _Step.contacts;
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _error = l.onbFailed;
-        });
-      }
-    }
-  }
-
-  void _open(String name) => Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => LegalScreen(name: name)),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +132,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
                 ...switch (_step) {
                   _Step.profile => _profile(l),
-                  _Step.consents => _consents(l),
                   _Step.contacts => _contacts(l),
                 },
                 if (_error != null) ...[
@@ -198,7 +157,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ModuleActionButton(
                   label: switch (_step) {
                     _Step.profile => l.onbContinue,
-                    _Step.consents => l.onbFinish,
                     _Step.contacts => l.onbContactsAllow,
                   },
                   expanded: true,
@@ -207,7 +165,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ? null
                       : switch (_step) {
                           _Step.profile => _saveName,
-                          _Step.consents => _terms && _age ? _finish : null,
                           _Step.contacts => _allowContacts,
                         },
                 ),
@@ -271,40 +228,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       l.onbPhotoLater,
       style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
     ),
-  ];
-
-  List<Widget> _consents(L l) => [
-    Text(
-      l.onbTermsTitle,
-      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-    ),
-    const SizedBox(height: 12),
-    Wrap(
-      spacing: 8,
-      children: [
-        TextButton(onPressed: () => _open('conditions'), child: Text(l.legalTerms)),
-        TextButton(
-          onPressed: () => _open('confidentialite'),
-          child: Text(l.legalPrivacy),
-        ),
-      ],
-    ),
-    CheckboxListTile(
-      contentPadding: EdgeInsets.zero,
-      controlAffinity: ListTileControlAffinity.leading,
-      value: _terms,
-      onChanged: (v) => setState(() => _terms = v ?? false),
-      title: Text(l.onbAcceptTerms),
-    ),
-    CheckboxListTile(
-      contentPadding: EdgeInsets.zero,
-      controlAffinity: ListTileControlAffinity.leading,
-      value: _age,
-      onChanged: (v) => setState(() => _age = v ?? false),
-      title: Text(l.onbAge),
-    ),
+    // Consentements FACULTATIFS, désactivés par défaut (AUTH-09). Séparés
+    // l'un de l'autre : un consentement groupé ne vaut pas consentement.
     const Divider(height: 32),
-    Text(l.onbOptional, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+    Text(
+      l.onbOptional,
+      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+    ),
     SwitchListTile(
       contentPadding: EdgeInsets.zero,
       value: _analytics,

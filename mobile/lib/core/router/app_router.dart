@@ -6,7 +6,6 @@ import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/auth/presentation/otp_verify_screen.dart';
 import '../../features/auth/presentation/phone_entry_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
-import '../../features/auth/presentation/welcome_screen.dart';
 import '../../features/chat/presentation/chat_screen.dart';
 import '../../features/inbox/presentation/inbox_screen.dart';
 
@@ -21,7 +20,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     routes: [
       GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+      // INS-1 (cahier v3.2) : bienvenue, numéro et conditions en un seul
+      // écran. `/welcome` reste l'adresse d'entrée — déconnexion, verrou,
+      // démarrage y mènent — mais sert désormais cet écran-là.
+      GoRoute(path: '/welcome', builder: (context, state) => const PhoneEntryScreen()),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),

@@ -5991,4 +5991,11 @@ class LEn extends L {
 
   @override
   String get welcomeStart => 'Get started';
+
+  @override
+  String get authAcceptAndContinue => 'Accept and continue';
+
+  @override
+  String get authAcceptNotice =>
+      'By tapping “Accept and continue”, you accept the terms of use and the privacy policy, and confirm you are old enough.';
 }

@@ -16,7 +16,7 @@ import 'api_exceptions.dart';
 /// backend started locally instead (10.0.2.2 is the Android emulator's
 /// alias for the host machine's localhost) — defaults to the real deployed
 /// API so `flutter run` works out of the box against it.
-const _defaultBaseUrl = 'https://apipokou.cabinet-p-et-associes.com/api/v1';
+const _defaultBaseUrl = 'https://apipokou-test.169.58.195.18.sslip.io/api/v1';
 
 /// Ce qu'a donné une tentative de rafraîchissement.
 ///

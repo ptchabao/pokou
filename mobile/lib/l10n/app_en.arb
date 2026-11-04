@@ -1730,5 +1730,7 @@
   "koryNextRound": "Move to the next round",
   "koryNextRoundBody": "The current round ends. Contributions already declared remain to be confirmed by its beneficiary.",
   "koryLastRoundBody": "That was the last round: the tontine will be closed. The log stays available.",
-  "welcomeStart": "Get started"
+  "welcomeStart": "Get started",
+  "authAcceptAndContinue": "Accept and continue",
+  "authAcceptNotice": "By tapping “Accept and continue”, you accept the terms of use and the privacy policy, and confirm you are old enough."
 }

@@ -6042,4 +6042,11 @@ class LFr extends L {
 
   @override
   String get welcomeStart => 'Commencer';
+
+  @override
+  String get authAcceptAndContinue => 'Accepter et continuer';
+
+  @override
+  String get authAcceptNotice =>
+      'En touchant « Accepter et continuer », tu acceptes les conditions d\'utilisation et la politique de confidentialité, et tu déclares avoir l\'âge requis.';
 }

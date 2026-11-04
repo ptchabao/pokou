@@ -1730,5 +1730,7 @@
   "koryNextRound": "Passa al turno successivo",
   "koryNextRoundBody": "Il turno in corso termina. Le quote già dichiarate restano da confermare dal suo beneficiario.",
   "koryLastRoundBody": "Era l'ultimo turno: la tontina sarà chiusa. Il registro resta consultabile.",
-  "welcomeStart": "Inizia"
+  "welcomeStart": "Inizia",
+  "authAcceptAndContinue": "Accetta e continua",
+  "authAcceptNotice": "Toccando «Accetta e continua», accetti le condizioni d'uso e l'informativa sulla privacy e dichiari di avere l'età richiesta."
 }

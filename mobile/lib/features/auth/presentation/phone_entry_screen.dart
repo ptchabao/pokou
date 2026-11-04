@@ -10,8 +10,8 @@ import '../../../core/api/api_exceptions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
-import '../../../core/widgets/assistant_orb.dart';
 import '../../../core/widgets/pokou_background.dart';
+import '../../profile/presentation/language_screen.dart';
 import 'auth_controller.dart';
 import 'legal_screen.dart';
 import 'phone_country.dart';
@@ -172,9 +172,11 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Le même écran pour se connecter et pour s'inscrire : seul le numéro
-    // est demandé. Les conditions viennent après le code, pour un compte
-    // nouveau seulement (OnboardingScreen).
+    // INS-1 (cahier v3.2) : bienvenue, numéro et conditions en UN écran, et
+    // une seule entrée pour créer un compte ou se reconnecter (AUTH-08) —
+    // c'est le serveur qui distingue les deux, après le code. Le bouton
+    // « Accepter et continuer » vaut acceptation des conditions et de l'âge
+    // (AUTH-09) : il n'y a donc plus de cases à cocher ici ni plus loin.
     final canSubmit = _isValidNumber && !_loading;
 
     return Scaffold(
@@ -192,24 +194,72 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Center(child: AssistantOrb(size: 80)),
-                    const SizedBox(height: 28),
+                    // INS-1 : bienvenue, numéro et conditions réunis. Le
+                    // sélecteur de langue reste accessible avant toute
+                    // connexion — c'est la première chose dont a besoin
+                    // quelqu'un qui ne lit pas le français.
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip: L.of(context).profileLanguage,
+                        icon: const Icon(Icons.language),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LanguageScreen(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Le logo officiel : deux bulles de discussion liées.
+                          Image.asset(
+                            'assets/brand/pokou_logo.png',
+                            height: 48,
+                            semanticLabel: L.of(context).appName,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            L.of(context).appName,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      L.of(context).welcomePromise,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Les services réellement ouverts : avant la connexion,
+                    // le pays n'est connu que par la région du téléphone.
+                    _Service(
+                      icon: Icons.forum_outlined,
+                      label: L.of(context).welcomeServiceChats,
+                    ),
+                    if (Localizations.localeOf(context).countryCode == null ||
+                        Localizations.localeOf(context).countryCode == 'TG')
+                      _Service(
+                        icon: Icons.savings_outlined,
+                        label: L.of(context).welcomeServiceKory,
+                      ),
+                    const SizedBox(height: 20),
                     Text(
                       L.of(context).onbStep('1'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      L.of(context).authWelcome,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -221,7 +271,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOutCubic,
@@ -349,6 +399,19 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
+                    // AUTH-09 : l'acceptation des conditions et de l'âge est
+                    // portée par le bouton lui-même, pas par des cases à
+                    // cocher. Elle est donc ANNONCÉE juste avant, avec les
+                    // deux documents lisibles au-dessus.
+                    Text(
+                      L.of(context).authAcceptNotice,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: canSubmit ? _submit : null,
@@ -371,7 +434,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : Text(L.of(context).actionContinue),
+                          : Text(L.of(context).authAcceptAndContinue),
                     ),
                     const SizedBox(height: 24),
                     // Formulation honnête : Pokou ne fait PAS de chiffrement de
@@ -390,6 +453,30 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Un service ouvert dans le pays, annoncé sur INS-1. Repris de l'ancien
+/// écran de bienvenue, que cet écran remplace.
+class _Service extends StatelessWidget {
+  const _Service({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20, color: AppColors.accentPrimaryDark),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 15)),
+        ],
       ),
     );
   }

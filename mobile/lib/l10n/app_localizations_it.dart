@@ -6028,4 +6028,11 @@ class LIt extends L {
 
   @override
   String get welcomeStart => 'Inizia';
+
+  @override
+  String get authAcceptAndContinue => 'Accetta e continua';
+
+  @override
+  String get authAcceptNotice =>
+      'Toccando «Accetta e continua», accetti le condizioni d\'uso e l\'informativa sulla privacy e dichiari di avere l\'età richiesta.';
 }

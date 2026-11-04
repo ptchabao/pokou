@@ -6065,4 +6065,11 @@ class LRu extends L {
 
   @override
   String get welcomeStart => 'Начать';
+
+  @override
+  String get authAcceptAndContinue => 'Принять и продолжить';
+
+  @override
+  String get authAcceptNotice =>
+      'Нажимая «Принять и продолжить», вы принимаете условия использования и политику конфиденциальности и подтверждаете, что достигли нужного возраста.';
 }

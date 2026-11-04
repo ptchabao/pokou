@@ -102,6 +102,11 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
           .verifyOtp(
             phone: widget.phone,
             code: _codeController.text.trim(),
+            // On n'arrive ici qu'en ayant touché « Accepter et continuer »
+            // sur INS-1 : l'acceptation des conditions et de l'âge est donc
+            // acquise, et s'enregistre une fois le numéro prouvé (AUTH-09).
+            acceptTerms: true,
+            ageConfirmed: true,
           );
       // Le numéro vient d'être confirmé par SMS : son pays est le seul que
       // l'application connaisse avec certitude. On le retient pour le
