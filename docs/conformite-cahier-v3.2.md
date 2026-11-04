@@ -18,9 +18,9 @@ implémenter dans l'application. Le seul delta applicatif de v3.x est la
 | **AUTH-08** Entrée unique : même écran pour créer un compte et se reconnecter ; le serveur ne révèle pas si le numéro est inscrit avant la vérification du code | **Conforme** | Un seul bouton « Commencer » ; `request-otp` ne renvoie que `expires_in`, jamais l'existence du compte ; la distinction création/reconnexion se fait après le code (`routeAfterSignIn`, `needs_onboarding`) |
 | **AUTH-02** Jeton d'accès court + rafraîchissement rotatif dans Keystore/Keychain ; déconnexion à distance | **Conforme** | `SecureTokenStorage` (flutter_secure_storage) ; `DELETE /devices/{id}` |
 | **AUTH-04 / CNX-1** Code PIN de vérification en deux étapes, demandé à la réinscription | **Conforme** | `TwoStepRequired` → `TwoStepPinScreen` à la reconnexion ; `DELETE /account/two-step` |
-| **AUTH-06** Suppression du compte depuis l'application **et depuis une page web** | **Partiel** | `DELETE /account` + entrée dans l'écran Confidentialité : **côté application fait**. **Page web de suppression : pas faite** (exigée par Google Play / App Store) |
-| **AUTH-09** Conditions et âge acceptés par « Accepter et continuer » **sur INS-1** ; consentements facultatifs (statistiques, nouveautés) désactivés par défaut **sur le profil** | **Partiel / écart** | Les consentements facultatifs sont bien désactivés par défaut et horodatés. **Mais** l'acceptation des conditions et de l'âge a été déplacée **après le code** (étape profil), au lieu d'être portée par le bouton d'INS-1. À rapprocher de v3.2 : porter l'acceptation sur INS-1 (bouton = acceptation, documents lisibles en lien), ne garder sur le profil que statistiques et nouveautés |
-| **3 écrans avant l'application** (INS-1 bienvenue+numéro+conditions, INS-2 code, INS-3 profil) | **Écart** | L'application a encore **Bienvenue** et **Numéro** en **deux écrans séparés** (`/welcome` puis `/phone`), soit 4 écrans avant l'app. v3.2 veut INS-1 = bienvenue + numéro + conditions réunis |
+| **AUTH-06** Suppression du compte depuis l'application **et depuis une page web** | **Conforme** | Application : `DELETE /account-privacy/account` + écran Confidentialité. **Web : page `/compte/suppression/`** — connexion par code à usage unique puis même route de suppression ; explique ce qui est supprimé, anonymisé et conservé (à déclarer dans la fiche des stores) |
+| **AUTH-09** Conditions et âge acceptés par « Accepter et continuer » **sur INS-1** ; consentements facultatifs (statistiques, nouveautés) désactivés par défaut **sur le profil** | **Conforme** | Le bouton d'INS-1 s'appelle « Accepter et continuer » et vaut acceptation (annoncée au-dessus, documents lisibles en lien) ; l'acceptation s'enregistre à la vérification du code. Les consentements facultatifs sont sur le profil (INS-3), désactivés par défaut et horodatés |
+| **3 écrans avant l'application** (INS-1 bienvenue+numéro+conditions, INS-2 code, INS-3 profil) | **Conforme** | Bienvenue et Numéro sont réunis en un seul écran INS-1 ; l'écran de bienvenue séparé a été retiré |
 | **INS-2** Code **rempli automatiquement** (SMS Retriever / User Consent sur Android, `oneTimeCode` sur iOS), collage accepté | **Pas fait** | Saisie manuelle ; collage possible, mais pas de remplissage automatique |
 | **INS-2** « Recevoir le code par appel » si le SMS échoue | **Pas fait** | Aucun fournisseur d'appel vocal configuré |
 | **CNX-2 / CNX-3 / AUTH-03** Sauvegarde et **restauration** du compte et des discussions sur un nouveau téléphone | **Pas fait** | Pas de sauvegarde cloud des discussions ni d'écran de restauration. `database_recovery.dart` ne gère que la clé locale SQLCipher, pas une sauvegarde restaurable |
@@ -58,15 +58,16 @@ flux, etc.).
 
 ## Priorités de mise en conformité v3.2 (section 8)
 
-Par ordre d'impact :
+**Faits** (31 octobre → 4 novembre 2026) :
 
-1. **Réunir INS-1** (bienvenue + numéro + conditions) en un écran, avec
-   acceptation des conditions et de l'âge portée par « Accepter et
-   continuer » (AUTH-09, 3 écrans avant l'app).
-2. **Page web de suppression de compte** (AUTH-06) — exigée par les stores,
-   bloquante pour la publication.
-3. **Remplissage automatique du code** SMS (INS-2) — fort gain d'usage.
-4. **Sauvegarde et restauration** sur nouveau téléphone (CNX-2/CNX-3,
+- ✅ **INS-1 réuni** (bienvenue + numéro + conditions), acceptation portée
+  par « Accepter et continuer » (AUTH-09, 3 écrans avant l'app).
+- ✅ **Page web de suppression de compte** (AUTH-06) — `/compte/suppression/`.
+
+**Reste à faire**, par ordre d'impact :
+
+1. **Remplissage automatique du code** SMS (INS-2) — fort gain d'usage.
+2. **Sauvegarde et restauration** sur nouveau téléphone (CNX-2/CNX-3,
    AUTH-03) — chantier conséquent.
-5. **Attestation d'intégrité** et anti-SMS-pumping (AUTH-01).
-6. Fournir **`pokou-design-tokens.json`** pour aligner le design system.
+3. **Attestation d'intégrité** et anti-SMS-pumping (AUTH-01).
+4. Fournir **`pokou-design-tokens.json`** pour aligner le design system.
