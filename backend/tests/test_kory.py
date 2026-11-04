@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base, get_db
+from app.core.countries import country_config
 from app.main import app
 from app.models import SystemSetting
 from app.services.auth import otp_service
@@ -60,9 +61,16 @@ def test_configuration_du_pays_suit_le_numero(client):
     ci = client.get("/api/v1/config/country", headers=ivoire).json()
 
     assert tg["country"] == "TG" and "kory" in tg["modules"]
+    assert "honam" in tg["modules"]
     assert tg["delivery_price"] == 1000
     assert ci["country"] == "CI" and "kory" not in ci["modules"]
+    assert "honam" in ci["modules"]
     assert ci["pharmacy_monthly_price"] == 7500
+
+
+def test_honam_est_actif_par_defaut_meme_sans_pays_connu(client):
+    with TestingSessionLocal() as db:
+        assert "honam" in country_config(db, None)["modules"]
 
 
 def test_reglage_systeme_ouvre_un_module_sans_publication(client):
@@ -70,7 +78,9 @@ def test_reglage_systeme_ouvre_un_module_sans_publication(client):
     with TestingSessionLocal() as db:
         db.add(SystemSetting(key="country.CI", value='{"modules": ["discussions", "kory"]}'))
         db.commit()
-    assert "kory" in client.get("/api/v1/config/country", headers=ivoire).json()["modules"]
+    modules = client.get("/api/v1/config/country", headers=ivoire).json()["modules"]
+    assert "kory" in modules
+    assert "honam" not in modules
     assert client.get("/api/v1/kory/pots", headers=ivoire).status_code == 200
 
 

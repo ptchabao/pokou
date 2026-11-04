@@ -153,7 +153,23 @@ def _rating_summary(db: Session, seller_ids: List[int]) -> dict:
     return {row[0]: {"rating": round(float(row[1]), 2), "count": row[2]} for row in rows}
 
 
-def _serialize(product: MarketplaceProduct, rating: Optional[dict] = None, boosted: bool = False) -> dict:
+def _pro_seller_ids(db: Session, seller_ids: List[int]) -> set[int]:
+    """Paid Pro status, separate from the marketplace seller certification."""
+    ids = set(seller_ids)
+    if not ids:
+        return set()
+    from app.api.v1.certified.certified import public_badge
+
+    sellers = db.query(User).filter(User.id.in_(ids)).all()
+    return {seller.id for seller in sellers if public_badge(db, seller)["badge"] == "PRO"}
+
+
+def _serialize(
+    product: MarketplaceProduct,
+    rating: Optional[dict] = None,
+    boosted: bool = False,
+    seller_is_pro: bool = False,
+) -> dict:
     seller = product.seller
     return {
         "id": product.id,
@@ -164,6 +180,8 @@ def _serialize(product: MarketplaceProduct, rating: Optional[dict] = None, boost
         # Le badge de certification vient du COMPTE vendeur, pas du produit :
         # un vendeur certifié l'est sur tout son catalogue.
         "seller_is_certified": est_vendeur_verifie(seller) if seller else False,
+        # Le statut Pro rémunéré est distinct de la certification vendeur.
+        "seller_is_pro": seller_is_pro,
         "seller_rating": (rating or {}).get("rating"),
         "seller_review_count": (rating or {}).get("count", 0),
         "name": product.name,
@@ -333,8 +351,17 @@ async def list_marketplace(
         ).update({MarketplaceBoost.impressions: MarketplaceBoost.impressions + 1}, synchronize_session=False)
         db.commit()
     ratings = _rating_summary(db, [item.seller_id for item in page])
+    pro_seller_ids = _pro_seller_ids(db, [item.seller_id for item in page])
     return {
-        "items": [_serialize(item, ratings.get(item.seller_id), item.id in boosted_ids) for item in page],
+        "items": [
+            _serialize(
+                item,
+                ratings.get(item.seller_id),
+                item.id in boosted_ids,
+                item.seller_id in pro_seller_ids,
+            )
+            for item in page
+        ],
         "has_more": offset + limit < len(items),
         "next_offset": offset + limit if offset + limit < len(items) else None,
     }
@@ -355,6 +382,7 @@ async def list_my_products(db: Session = Depends(get_db), current_user: dict = D
         .all()
     )
     ratings = _rating_summary(db, [item.seller_id for item in items])
+    pro_seller_ids = _pro_seller_ids(db, [item.seller_id for item in items])
     now = datetime.utcnow()
     boosted_ids = {
         row[0]
@@ -369,7 +397,12 @@ async def list_my_products(db: Session = Depends(get_db), current_user: dict = D
     }
     return {
         "items": [
-            _serialize(item, ratings.get(item.seller_id), item.id in boosted_ids)
+            _serialize(
+                item,
+                ratings.get(item.seller_id),
+                item.id in boosted_ids,
+                item.seller_id in pro_seller_ids,
+            )
             for item in items
         ]
     }
@@ -432,7 +465,11 @@ async def create_product(payload: ProductPayload, db: Session = Depends(get_db),
     notify_alerts(db, item)
     db.commit()
     db.refresh(item)
-    return _serialize(item, _rating_summary(db, [item.seller_id]).get(item.seller_id))
+    return _serialize(
+        item,
+        _rating_summary(db, [item.seller_id]).get(item.seller_id),
+        seller_is_pro=item.seller_id in _pro_seller_ids(db, [item.seller_id]),
+    )
 
 
 @router.patch("/{product_id}")
@@ -469,7 +506,11 @@ async def update_product(product_id: int, payload: ProductPayload, db: Session =
         _apply_gallery(db, item, payload.gallery_media_ids, user_id)
     db.commit()
     db.refresh(item)
-    return _serialize(item, _rating_summary(db, [item.seller_id]).get(item.seller_id))
+    return _serialize(
+        item,
+        _rating_summary(db, [item.seller_id]).get(item.seller_id),
+        seller_is_pro=item.seller_id in _pro_seller_ids(db, [item.seller_id]),
+    )
 
 
 @router.delete("/{product_id}")
@@ -783,6 +824,7 @@ async def get_seller_profile(
         "seller_id": seller.id,
         "seller_name": seller.full_name or seller.phone or "Vendeur",
         "is_certified": est_vendeur_verifie(seller),
+        "is_pro": seller.id in _pro_seller_ids(db, [seller.id]),
         "certified_at": seller.certified_seller_at.isoformat() if seller.certified_seller_at else None,
         "rating": summary.get("rating"),
         "review_count": summary.get("count", 0),

@@ -39,6 +39,7 @@ class MarketplaceRepository {
     String? location,
     double? latitude,
     double? longitude,
+    bool certifiedOnly = false,
     int limit = 20,
     int offset = 0,
   }) async => PaginatedProducts.fromJson(
@@ -49,6 +50,7 @@ class MarketplaceRepository {
       location: location,
       latitude: latitude,
       longitude: longitude,
+      certifiedOnly: certifiedOnly,
       limit: limit,
       offset: offset,
     ),
@@ -63,6 +65,7 @@ class MarketplaceRepository {
     String? location,
     double? latitude,
     double? longitude,
+    bool certifiedOnly = false,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -76,6 +79,7 @@ class MarketplaceRepository {
         'location=${Uri.encodeQueryComponent(location.trim())}',
       if (latitude != null) 'latitude=$latitude',
       if (longitude != null) 'longitude=$longitude',
+      if (certifiedOnly) 'certified_only=true',
       'limit=$limit',
       'offset=$offset',
     ];

@@ -4599,6 +4599,9 @@ class LEn extends L {
   String get marketFilterAll => 'All';
 
   @override
+  String get marketCertifiedSellers => 'Certified sellers';
+
+  @override
   String get marketCatalogueNoneInFilter => 'No listing matches this filter.';
 
   @override
@@ -5392,6 +5395,12 @@ class LEn extends L {
 
   @override
   String get honamTimeline => 'Tracking';
+
+  @override
+  String get honamOrderMessages => 'Order messages';
+
+  @override
+  String get honamWriteMessage => 'Write a message';
 
   @override
   String get honamCourierMode => 'Courier mode';

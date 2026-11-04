@@ -345,3 +345,102 @@ def test_honam_ferme_hors_pays_lance(client):
         db.commit()
     patient, _ = _signup(client)
     assert client.get("/api/v1/honam/pharmacies", headers=patient).status_code == 404
+
+
+def test_push_etats_commande_limites_aux_participants_et_sans_donnees_sensibles(client):
+    patient, patient_id = _signup(client)
+    pharmacist, pharmacist_id = _signup(client)
+    colleague, colleague_id = _signup(client)
+    outsider, outsider_id = _signup(client)
+    pharmacy_id = _pharmacy(pharmacist_id)
+    with TestingSessionLocal() as db:
+        db.add(PharmacyStaff(pharmacy_id=pharmacy_id, user_id=colleague_id, role="COLLABORATEUR"))
+        db.commit()
+
+    with patch("app.services.honam.order_notifications.send_push") as send_push:
+        submitted = _submit(client, patient, pharmacy_id)
+        assert submitted.status_code == 201
+        assert {call.args[1] for call in send_push.call_args_list} == {pharmacist_id, colleague_id}
+
+        order_id = submitted.json()["id"]
+        send_push.reset_mock()
+        quoted = _quote(client, pharmacist, order_id)
+        assert quoted.status_code == 200
+        assert {call.args[1] for call in send_push.call_args_list} == {patient_id, colleague_id}
+        quote_calls = send_push.call_args_list[:]
+
+        with TestingSessionLocal() as db:
+            db.query(HonamOrder).filter(HonamOrder.id == order_id).update(
+                {"quote_expires_at": datetime.utcnow() - timedelta(seconds=1)}
+            )
+            db.commit()
+        send_push.reset_mock()
+        expired = client.get(f"/api/v1/honam/orders/{order_id}", headers=patient)
+        assert expired.status_code == 200 and expired.json()["status"] == "EXPIRED"
+        assert {call.args[1] for call in send_push.call_args_list} == {
+            patient_id,
+            pharmacist_id,
+            colleague_id,
+        }
+        expiration_calls = send_push.call_args_list[:]
+
+    for calls, expected_status in ((quote_calls, "QUOTED"), (expiration_calls, "EXPIRED")):
+        assert outsider_id not in {call.args[1] for call in calls}
+        for call in calls:
+            _, _, title, body = call.args[:4]
+            payload = call.kwargs["data"]
+            assert title == "Mise à jour HONAM"
+            assert "ordonnance" not in body.lower()
+            assert payload == {
+                "type": "honam_order_status",
+                "order_id": str(order_id),
+                "status": expected_status,
+                "priority": "normal",
+                "muted": "0",
+            }
+            assert not any(
+                sensitive in str(payload) + title + body
+                for sensitive in ("Amoxicilline", "Tokoin", "ordonnance.jpg", "prescription_media_id")
+            )
+
+
+def test_messages_commande_visibles_aux_participants_seulement(client):
+    patient, patient_id = _signup(client)
+    pharmacist, pharmacist_id = _signup(client)
+    outsider, _ = _signup(client)
+    pharmacy_id = _pharmacy(pharmacist_id)
+    order_id = _submit(client, patient, pharmacy_id).json()["id"]
+
+    sent = client.post(
+        f"/api/v1/honam/orders/{order_id}/messages",
+        json={"body": "Votre commande est prête"},
+        headers=patient,
+    )
+    assert sent.status_code == 201
+    assert sent.json()["sender_id"] == patient_id
+    assert sent.json()["sender_role"] == "PATIENT"
+
+    received = client.get(
+        f"/api/v1/honam/orders/{order_id}/messages",
+        headers=pharmacist,
+    )
+    assert received.status_code == 200
+    assert [message["body"] for message in received.json()["items"]] == [
+        "Votre commande est prête"
+    ]
+
+    assert client.get(
+        f"/api/v1/honam/orders/{order_id}/messages",
+        headers=outsider,
+    ).status_code == 404
+    assert client.post(
+        f"/api/v1/honam/orders/{order_id}/messages",
+        json={"body": "Accès indu"},
+        headers=outsider,
+    ).status_code == 404
+
+    assert client.post(
+        f"/api/v1/honam/orders/{order_id}/messages",
+        json={"body": " "},
+        headers=patient,
+    ).status_code == 422

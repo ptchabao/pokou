@@ -4615,6 +4615,9 @@ class LEs extends L {
   String get marketFilterAll => 'Todos';
 
   @override
+  String get marketCertifiedSellers => 'Vendedores certificados';
+
+  @override
   String get marketCatalogueNoneInFilter =>
       'Ningún anuncio coincide con este filtro.';
 
@@ -5410,6 +5413,12 @@ class LEs extends L {
 
   @override
   String get honamTimeline => 'Seguimiento';
+
+  @override
+  String get honamOrderMessages => 'Mensajes del pedido';
+
+  @override
+  String get honamWriteMessage => 'Escribe un mensaje';
 
   @override
   String get honamCourierMode => 'Modo repartidor';

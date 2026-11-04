@@ -87,6 +87,7 @@ class MarketplaceConfigNotifier extends StateNotifier<MarketplaceConfig> {
 final marketplaceQueryProvider = StateProvider<String>((ref) => '');
 final marketplaceCategoryProvider = StateProvider<String>((ref) => 'TOUT');
 final marketplaceLocationProvider = StateProvider<String>((ref) => '');
+final marketplaceCertifiedOnlyProvider = StateProvider<bool>((ref) => false);
 
 final marketplacePositionProvider = FutureProvider.autoDispose<Position?>((
   ref,
@@ -156,12 +157,16 @@ class ProductsPaginationNotifier
   }
 
   void _watchFilters() {
-    ref.listen<String>(marketplaceQueryProvider, (_, __) => _resetAndLoad());
-    ref.listen<String>(marketplaceCategoryProvider, (_, __) => _resetAndLoad());
-    ref.listen<String>(marketplaceLocationProvider, (_, __) => _resetAndLoad());
+    ref.listen<String>(marketplaceQueryProvider, (_, _) => _resetAndLoad());
+    ref.listen<String>(marketplaceCategoryProvider, (_, _) => _resetAndLoad());
+    ref.listen<String>(marketplaceLocationProvider, (_, _) => _resetAndLoad());
+    ref.listen<bool>(
+      marketplaceCertifiedOnlyProvider,
+      (_, _) => _resetAndLoad(),
+    );
     ref.listen<AsyncValue<Position?>>(
       marketplacePositionProvider,
-      (_, __) => _resetAndLoad(),
+      (_, _) => _resetAndLoad(),
     );
   }
 
@@ -177,7 +182,8 @@ class ProductsPaginationNotifier
   bool get _isDefaultView =>
       ref.read(marketplaceQueryProvider).trim().isEmpty &&
       ref.read(marketplaceCategoryProvider) == 'TOUT' &&
-      ref.read(marketplaceLocationProvider).trim().isEmpty;
+      ref.read(marketplaceLocationProvider).trim().isEmpty &&
+      !ref.read(marketplaceCertifiedOnlyProvider);
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -212,6 +218,7 @@ class ProductsPaginationNotifier
             location: ref.read(marketplaceLocationProvider),
             latitude: position?.latitude,
             longitude: position?.longitude,
+            certifiedOnly: ref.read(marketplaceCertifiedOnlyProvider),
             limit: _pageSize,
             offset: 0,
           );
@@ -257,6 +264,7 @@ class ProductsPaginationNotifier
             location: ref.read(marketplaceLocationProvider),
             latitude: position?.latitude,
             longitude: position?.longitude,
+            certifiedOnly: ref.read(marketplaceCertifiedOnlyProvider),
             limit: _pageSize,
             offset: state.nextOffset ?? state.items.length,
           );

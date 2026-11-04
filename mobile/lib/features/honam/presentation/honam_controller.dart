@@ -15,11 +15,21 @@ final honamOrdersProvider = FutureProvider.autoDispose<List<HonamOrder>>((ref) {
   return ref.watch(honamRepositoryProvider).orders();
 });
 
-final honamOrderProvider = FutureProvider.autoDispose.family<HonamOrder, int>((ref, id) {
+final honamOrderProvider = FutureProvider.autoDispose.family<HonamOrder, int>((
+  ref,
+  id,
+) {
   return ref.watch(honamRepositoryProvider).order(id);
 });
 
-final honamEmergencyProvider = FutureProvider.autoDispose<Map<String, String>>((ref) {
+final honamOrderMessagesProvider = FutureProvider.autoDispose
+    .family<List<HonamOrderMessage>, int>((ref, id) {
+      return ref.watch(honamRepositoryProvider).orderMessages(id);
+    });
+
+final honamEmergencyProvider = FutureProvider.autoDispose<Map<String, String>>((
+  ref,
+) {
   return ref.watch(honamRepositoryProvider).emergencyNumbers();
 });
 

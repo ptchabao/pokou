@@ -45,6 +45,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   late final AnimationController _successController;
   bool _success = false;
   String? _error;
+
   /// 50 s, comme le serveur (RESEND_MIN_SECONDS, égal à la durée de vie du
   /// code) : un bouton qui se réactive avant que le serveur accepte ne
   /// produirait qu'un refus, et après, le code aurait déjà expiré.
@@ -355,6 +356,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
                 controller: _codeController,
                 focusNode: _focusNode,
                 keyboardType: TextInputType.number,
+                autofillHints: const [AutofillHints.oneTimeCode],
                 maxLength: _codeLength,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(

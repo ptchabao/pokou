@@ -81,11 +81,18 @@ def test_apple_app_site_association_is_served_without_api_prefix(client):
 
     body = response.json()
     details = body["applinks"]["details"]
-    # LES TROIS formes que l'application produit — groupes, communautés et
-    # chaînes. N'en déclarer qu'une laissait les deux autres s'ouvrir dans le
-    # navigateur, sans que rien n'explique pourquoi seuls les groupes
-    # marchaient.
-    assert details[0]["paths"] == ["/invite/*", "/c/*", "/channel/*"]
+    # Toutes les formes de liens gérées par l'application doivent être
+    # déclarées ; sinon iOS les ouvre dans le navigateur.
+    assert details[0]["paths"] == [
+        "/invite/*",
+        "/c/*",
+        "/channel/*",
+        "/bot/*",
+        "/kory/*",
+        "/honam/order/*",
+        "/kory/pots/*",
+        "/honam/orders/*",
+    ]
 
 
 def test_la_cle_de_signature_du_play_store_peut_etre_ajoutee_sans_toucher_au_code(client, monkeypatch):

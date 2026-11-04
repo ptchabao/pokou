@@ -8151,6 +8151,12 @@ abstract class L {
   /// **'Toutes'**
   String get marketFilterAll;
 
+  /// No description provided for @marketCertifiedSellers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendeurs certifiés'**
+  String get marketCertifiedSellers;
+
   /// No description provided for @marketCatalogueNoneInFilter.
   ///
   /// In fr, this message translates to:
@@ -9506,6 +9512,18 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Suivi'**
   String get honamTimeline;
+
+  /// No description provided for @honamOrderMessages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages de la commande'**
+  String get honamOrderMessages;
+
+  /// No description provided for @honamWriteMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire un message'**
+  String get honamWriteMessage;
 
   /// No description provided for @honamCourierMode.
   ///

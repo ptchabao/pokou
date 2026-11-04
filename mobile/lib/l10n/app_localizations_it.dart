@@ -4628,6 +4628,9 @@ class LIt extends L {
   String get marketFilterAll => 'Tutti';
 
   @override
+  String get marketCertifiedSellers => 'Venditori certificati';
+
+  @override
   String get marketCatalogueNoneInFilter => 'Nessun annuncio in questo filtro.';
 
   @override
@@ -5423,6 +5426,12 @@ class LIt extends L {
 
   @override
   String get honamTimeline => 'Tracciamento';
+
+  @override
+  String get honamOrderMessages => 'Messaggi dell\'ordine';
+
+  @override
+  String get honamWriteMessage => 'Scrivi un messaggio';
 
   @override
   String get honamCourierMode => 'Modalità corriere';

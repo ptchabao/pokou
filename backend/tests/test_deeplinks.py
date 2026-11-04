@@ -26,6 +26,8 @@ client = TestClient(app)
         # Format historique des communautés — community_model.dart.
         "/c/AB12CD34",
         "/channel/AB12CD34",
+        "/kory/42",
+        "/honam/order/314",
     ],
 )
 def test_chaque_forme_de_lien_sert_une_page(path):
@@ -81,6 +83,21 @@ def test_les_pages_ne_demandent_aucune_authentification():
     assert response.status_code == 200
 
 
+def test_les_liens_kory_et_honam_ne_revelent_pas_les_donnees_de_la_ressource():
+    for path in ("/kory/42", "/honam/order/314"):
+        response = client.get(path, headers={})
+        assert response.status_code == 200
+        assert f"intent://pok.app{path}" in response.text
+
+
+def test_universal_links_ios_declare_les_routes_kory_et_honam():
+    response = client.get("/.well-known/apple-app-site-association")
+    assert response.status_code == 200
+    paths = response.json()["applinks"]["details"][0]["paths"]
+    assert "/kory/*" in paths
+    assert "/honam/order/*" in paths
+
+
 def test_les_pages_incluent_les_balises_open_graph_et_twitter():
     """Vérifie que les balises Open Graph et Twitter Cards sont présentes
     pour permettre aux applications externes (WhatsApp, Telegram, etc.)
@@ -102,4 +119,3 @@ def test_lien_publication_chaine_sert_une_page():
     assert response.status_code == 200
     assert "intent://pok.app/channel/CHANN123/post/42" in response.text
     assert '<meta property="og:title"' in response.text
-

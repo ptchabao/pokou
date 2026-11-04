@@ -135,6 +135,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
     final mine = ref.watch(myProductsProvider);
     final myUserId = ref.watch(authControllerProvider).user?.id;
     final selectedCategory = ref.watch(marketplaceCategoryProvider);
+    final certifiedOnly = ref.watch(marketplaceCertifiedOnlyProvider);
     final config = ref.watch(marketplaceConfigProvider);
     final authUser = ref.watch(authControllerProvider).user;
     final sellerStatus = ref.watch(mySellerCertificationProvider).valueOrNull;
@@ -167,7 +168,9 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
               }
               if (value == 'favorites') {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const FavoritesAlertsScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const FavoritesAlertsScreen(),
+                  ),
                 );
               }
               if (value == 'verification') {
@@ -281,9 +284,41 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
               height: 38,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: config.filterSlugs.length,
+                itemCount: config.filterSlugs.length + 1,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
+                  if (index == config.filterSlugs.length) {
+                    return FilterChip(
+                      label: Text(L.of(context).marketCertifiedSellers),
+                      selected: certifiedOnly,
+                      onSelected: (selected) =>
+                          ref
+                                  .read(
+                                    marketplaceCertifiedOnlyProvider.notifier,
+                                  )
+                                  .state =
+                              selected,
+                      backgroundColor: AppColors.surfaceElevated,
+                      selectedColor: AppColors.accentPrimaryLight,
+                      side: BorderSide(
+                        color: certifiedOnly
+                            ? AppColors.accentPrimaryDark
+                            : AppColors.border,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      labelStyle: TextStyle(
+                        color: certifiedOnly
+                            ? Colors.white
+                            : AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: certifiedOnly
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    );
+                  }
                   final category = config.filterSlugs[index];
                   return ChoiceChip(
                     // Le LIBELLÉ vient de l'admin, la valeur reste le code :
@@ -1049,6 +1084,25 @@ class _SellerTrustLine extends StatelessWidget {
         if (product.sellerIsCertified) ...[
           const VerifiedBadge(size: 13),
           const SizedBox(width: 3),
+        ],
+        if (product.sellerIsPro) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimaryLight,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: const Text(
+              'PRO',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 8,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
         ],
         Flexible(
           child: Text(

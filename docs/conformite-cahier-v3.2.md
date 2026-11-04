@@ -21,7 +21,7 @@ implémenter dans l'application. Le seul delta applicatif de v3.x est la
 | **AUTH-06** Suppression du compte depuis l'application **et depuis une page web** | **Conforme** | Application : `DELETE /account-privacy/account` + écran Confidentialité. **Web : page `/compte/suppression/`** — connexion par code à usage unique puis même route de suppression ; explique ce qui est supprimé, anonymisé et conservé (à déclarer dans la fiche des stores) |
 | **AUTH-09** Conditions et âge acceptés par « Accepter et continuer » **sur INS-1** ; consentements facultatifs (statistiques, nouveautés) désactivés par défaut **sur le profil** | **Conforme** | Le bouton d'INS-1 s'appelle « Accepter et continuer » et vaut acceptation (annoncée au-dessus, documents lisibles en lien) ; l'acceptation s'enregistre à la vérification du code. Les consentements facultatifs sont sur le profil (INS-3), désactivés par défaut et horodatés |
 | **3 écrans avant l'application** (INS-1 bienvenue+numéro+conditions, INS-2 code, INS-3 profil) | **Conforme** | Bienvenue et Numéro sont réunis en un seul écran INS-1 ; l'écran de bienvenue séparé a été retiré |
-| **INS-2** Code **rempli automatiquement** (SMS Retriever / User Consent sur Android, `oneTimeCode` sur iOS), collage accepté | **Pas fait** | Saisie manuelle ; collage possible, mais pas de remplissage automatique |
+| **INS-2** Code **rempli automatiquement** (SMS Retriever / User Consent sur Android, `oneTimeCode` sur iOS), collage accepté | **Partiel** | Le champ expose `oneTimeCode` pour l’autoremplissage iOS et accepte le collage. L’intégration SMS Retriever / User Consent Android reste à faire ; le remplissage automatique doit être vérifié sur appareils réels |
 | **INS-2** « Recevoir le code par appel » si le SMS échoue | **Pas fait** | Aucun fournisseur d'appel vocal configuré |
 | **CNX-2 / CNX-3 / AUTH-03** Sauvegarde et **restauration** du compte et des discussions sur un nouveau téléphone | **Pas fait** | Pas de sauvegarde cloud des discussions ni d'écran de restauration. `database_recovery.dart` ne gère que la clé locale SQLCipher, pas une sauvegarde restaurable |
 | **AUTH-01** Attestation d'intégrité (Play Integrity / App Attest) et protection anti-SMS-pumping | **Pas fait** | Limitation par numéro, appareil et blocage après 5 essais : fait. Attestation d'intégrité et listes de préfixes : pas faites |
@@ -66,7 +66,7 @@ flux, etc.).
 
 **Reste à faire**, par ordre d'impact :
 
-1. **Remplissage automatique du code** SMS (INS-2) — fort gain d'usage.
+1. **Remplissage automatique du code** SMS sur Android (INS-2) — fort gain d'usage ; l’indication iOS `oneTimeCode` est en place, à valider sur appareils réels.
 2. **Sauvegarde et restauration** sur nouveau téléphone (CNX-2/CNX-3,
    AUTH-03) — chantier conséquent.
 3. **Attestation d'intégrité** et anti-SMS-pumping (AUTH-01).

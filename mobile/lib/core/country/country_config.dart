@@ -49,7 +49,7 @@ class CountryConfig {
     if (phone != null && phone.startsWith('+228')) {
       return const CountryConfig(
         country: 'TG',
-        modules: {'discussions', 'kory', 'certified'},
+        modules: {'discussions', 'kory', 'honam', 'certified'},
         vatRate: 0.18,
         deliveryPrice: 1000,
       );
@@ -57,12 +57,15 @@ class CountryConfig {
     if (phone != null && phone.startsWith('+225')) {
       return const CountryConfig(
         country: 'CI',
-        modules: {'discussions'},
+        modules: {'discussions', 'honam'},
         vatRate: 0.18,
         deliveryPrice: 1500,
       );
     }
-    return const CountryConfig(country: null, modules: {'discussions'});
+    return const CountryConfig(
+      country: null,
+      modules: {'discussions', 'honam'},
+    );
   }
 }
 

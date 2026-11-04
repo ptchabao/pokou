@@ -29,6 +29,7 @@ from app.models import (
     CourierProfile,
     HonamOrder,
     HonamOrderEvent,
+    HonamOrderMessage,
     HonamWaitlistEntry,
     Pharmacy,
     PharmacyCourier,
@@ -37,6 +38,7 @@ from app.models import (
     UserRole,
 )
 from app.services.honam import rules
+from app.services.honam.order_notifications import notify_order_state_changed
 from app.utils.phone import normalize_e164
 
 router = APIRouter(prefix="/honam", tags=["HONAM"])
@@ -86,6 +88,10 @@ class RefundBody(BaseModel):
 
 class MissingChoiceBody(BaseModel):
     choice: str  # KEEP (recevoir le reste) | CANCEL (tout annuler)
+
+
+class OrderMessageBody(BaseModel):
+    body: str = Field(..., min_length=1, max_length=1000)
 
 
 class CourierApplication(BaseModel):
@@ -156,6 +162,16 @@ def _user(db: Session, current_user: dict) -> User:
     return user
 
 
+def _expire_quote_and_notify(db: Session, order: HonamOrder) -> bool:
+    previous_status = order.status
+    rules.expire_quote_if_due(db, order)
+    if order.status == previous_status:
+        return False
+    db.commit()
+    notify_order_state_changed(db, order, actor_id=None)
+    return True
+
+
 def _staff_pharmacy(db: Session, user_id: int) -> Pharmacy:
     staff = db.query(PharmacyStaff).filter(PharmacyStaff.user_id == user_id).first()
     if staff is None:
@@ -167,7 +183,7 @@ def _patient_order(db: Session, order_id: int, user_id: int) -> HonamOrder:
     order = db.query(HonamOrder).filter(HonamOrder.id == order_id, HonamOrder.patient_id == user_id).first()
     if order is None:
         raise HTTPException(status_code=404, detail="Commande introuvable")
-    rules.expire_quote_if_due(db, order)
+    _expire_quote_and_notify(db, order)
     return order
 
 
@@ -175,7 +191,7 @@ def _pharmacy_order(db: Session, order_id: int, pharmacy: Pharmacy) -> HonamOrde
     order = db.query(HonamOrder).filter(HonamOrder.id == order_id, HonamOrder.pharmacy_id == pharmacy.id).first()
     if order is None:
         raise HTTPException(status_code=404, detail="Commande introuvable")
-    rules.expire_quote_if_due(db, order)
+    _expire_quote_and_notify(db, order)
     return order
 
 
@@ -191,6 +207,11 @@ def _move(db: Session, order: HonamOrder, status: str, actor_id: int, note: Opti
         rules.transition(db, order, status, actor_id, note)
     except rules.TransitionError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+def _commit_order_change(db: Session, order: HonamOrder, actor_id: int) -> None:
+    db.commit()
+    notify_order_state_changed(db, order, actor_id=actor_id)
 
 
 # ── Représentations ─────────────────────────────────────────────────────
@@ -281,6 +302,31 @@ def _order_json(db: Session, order: HonamOrder, viewer: str) -> dict:
     return data
 
 
+def _order_message_json(db: Session, message: HonamOrderMessage) -> dict:
+    sender = db.query(User).filter(User.id == message.sender_id).first() if message.sender_id else None
+    return {
+        "id": message.id,
+        "sender_id": message.sender_id,
+        "sender_name": sender.full_name if sender else None,
+        "sender_role": message.sender_role,
+        "body": message.body,
+        "created_at": message.created_at.isoformat(),
+    }
+
+
+def _order_message_role(db: Session, order: HonamOrder, user_id: int) -> Optional[str]:
+    if order.patient_id == user_id:
+        return "PATIENT"
+    if order.courier_id == user_id:
+        return "COURIER"
+    if db.query(PharmacyStaff.id).filter(
+        PharmacyStaff.pharmacy_id == order.pharmacy_id,
+        PharmacyStaff.user_id == user_id,
+    ).first():
+        return "PHARMACY"
+    return None
+
+
 # ── Annuaire et configuration ───────────────────────────────────────────
 
 
@@ -359,6 +405,7 @@ def submit_prescription(body: OrderCreate, current_user: dict = Depends(get_curr
         raise HTTPException(status_code=422, detail="Photo d'ordonnance introuvable")
     order = _create_order(db, user, body)
     db.commit()
+    notify_order_state_changed(db, order, actor_id=user.id)
     return _order_json(db, order, "patient")
 
 
@@ -366,9 +413,15 @@ def submit_prescription(body: OrderCreate, current_user: dict = Depends(get_curr
 def my_orders(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = _user(db, current_user)
     orders = db.query(HonamOrder).filter(HonamOrder.patient_id == user.id).order_by(HonamOrder.created_at.desc()).limit(50).all()
+    expired = []
     for order in orders:
+        previous_status = order.status
         rules.expire_quote_if_due(db, order)
+        if order.status != previous_status:
+            expired.append(order)
     db.commit()
+    for order in expired:
+        notify_order_state_changed(db, order, actor_id=None)
     return {"items": [_order_json(db, o, "patient") for o in orders]}
 
 
@@ -380,12 +433,58 @@ def my_order(order_id: int, current_user: dict = Depends(get_current_user), db: 
     return _order_json(db, order, "patient")
 
 
+@router.get("/orders/{order_id}/messages")
+def order_messages(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = _user(db, current_user)
+    order = db.query(HonamOrder).filter(HonamOrder.id == order_id).first()
+    if order is None or _order_message_role(db, order, user.id) is None:
+        raise HTTPException(status_code=404, detail="Commande introuvable")
+    messages = (
+        db.query(HonamOrderMessage)
+        .filter(HonamOrderMessage.order_id == order.id)
+        .order_by(HonamOrderMessage.created_at, HonamOrderMessage.id)
+        .limit(500)
+        .all()
+    )
+    return {"items": [_order_message_json(db, message) for message in messages]}
+
+
+@router.post("/orders/{order_id}/messages", status_code=201)
+def send_order_message(
+    order_id: int,
+    body: OrderMessageBody,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = _user(db, current_user)
+    order = db.query(HonamOrder).filter(HonamOrder.id == order_id).first()
+    role = _order_message_role(db, order, user.id) if order else None
+    if order is None or role is None:
+        raise HTTPException(status_code=404, detail="Commande introuvable")
+    message = HonamOrderMessage(
+        order_id=order.id,
+        sender_id=user.id,
+        sender_role=role,
+        body=body.body.strip(),
+    )
+    if not message.body:
+        raise HTTPException(status_code=422, detail="Le message ne peut pas être vide")
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return _order_message_json(db, message)
+
+
 @router.post("/orders/{order_id}/accept")
 def accept_quote(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = _user(db, current_user)
     order = _patient_order(db, order_id, user.id)
     _move(db, order, "ACCEPTED", user.id)
-    db.commit()
+    _commit_order_change(db, order, user.id)
     return _order_json(db, order, "patient")
 
 
@@ -408,7 +507,7 @@ def cancel_order(order_id: int, current_user: dict = Depends(get_current_user), 
     user = _user(db, current_user)
     order = _patient_order(db, order_id, user.id)
     _move(db, order, "CANCELLED", user.id)
-    db.commit()
+    _commit_order_change(db, order, user.id)
     return _order_json(db, order, "patient")
 
 
@@ -456,7 +555,10 @@ def missing_choice(order_id: int, body: MissingChoiceBody, current_user: dict = 
     else:
         order.refund_due = (order.medicines_total or 0) + (order.delivery_price or 0)
         _move(db, order, "CANCELLED", user.id, "Commande annulée après un produit manquant ; remboursement complet attendu")
-    db.commit()
+    if choice == "CANCEL":
+        _commit_order_change(db, order, user.id)
+    else:
+        db.commit()
     return _order_json(db, order, "patient")
 
 
@@ -525,9 +627,15 @@ def pharmacy_orders(
     query = db.query(HonamOrder).filter(HonamOrder.pharmacy_id == pharmacy.id)
     query = query.filter(HonamOrder.status == status.upper()) if status else query.filter(HonamOrder.status.in_(_PHARMACY_QUEUE + ("QUOTED",)))
     orders = query.order_by(HonamOrder.created_at).limit(200).all()
+    expired = []
     for order in orders:
+        previous_status = order.status
         rules.expire_quote_if_due(db, order)
+        if order.status != previous_status:
+            expired.append(order)
     db.commit()
+    for order in expired:
+        notify_order_state_changed(db, order, actor_id=None)
     return {"items": [_order_json(db, o, "pharmacy") for o in orders]}
 
 
@@ -555,7 +663,7 @@ def send_quote(order_id: int, body: QuoteBody, current_user: dict = Depends(get_
     order.original_required = body.original_required
     order.quote_expires_at = datetime.utcnow() + timedelta(hours=rules.QUOTE_TTL_HOURS)
     _move(db, order, "QUOTED", current_user["user_id"])
-    db.commit()
+    _commit_order_change(db, order, current_user["user_id"])
     return _order_json(db, order, "pharmacy")
 
 
@@ -565,7 +673,7 @@ def reject_prescription(order_id: int, body: ReasonBody, current_user: dict = De
     order = _pharmacy_order(db, order_id, pharmacy)
     order.rejection_reason = body.reason.strip()
     _move(db, order, "REJECTED", current_user["user_id"], body.reason.strip())
-    db.commit()
+    _commit_order_change(db, order, current_user["user_id"])
     return _order_json(db, order, "pharmacy")
 
 
@@ -579,7 +687,7 @@ def confirm_patient_payment(order_id: int, current_user: dict = Depends(get_curr
     order.delivery_code = rules.new_delivery_code()
     order.payment_not_received_at = None
     rules.charge_order_credit(db, pharmacy, order)
-    db.commit()
+    _commit_order_change(db, order, current_user["user_id"])
     return _order_json(db, order, "pharmacy")
 
 
@@ -604,7 +712,7 @@ def mark_ready(order_id: int, current_user: dict = Depends(get_current_user), db
     if order.missing_amount is not None and order.missing_choice is None:
         raise HTTPException(status_code=409, detail="La patiente n'a pas encore choisi après le produit manquant")
     _move(db, order, "READY", current_user["user_id"])
-    db.commit()
+    _commit_order_change(db, order, current_user["user_id"])
     return _order_json(db, order, "pharmacy")
 
 
@@ -641,10 +749,13 @@ def report_courier_default(order_id: int, body: ReasonBody, current_user: dict =
         raise HTTPException(status_code=409, detail="Aucun coursier sur cette commande")
     courier = db.query(CourierProfile).filter(CourierProfile.user_id == order.courier_id).first()
     suspended = rules.record_default(db, courier, order) if courier else False
-    if order.status == "IN_DELIVERY":
+    state_changed = order.status == "IN_DELIVERY"
+    if state_changed:
         _move(db, order, "READY", current_user["user_id"], f"Défaut du coursier : {body.reason}")
     order.courier_id = None
     db.commit()
+    if state_changed:
+        notify_order_state_changed(db, order, actor_id=current_user["user_id"])
     return {"courier_suspended": suspended, "order": _order_json(db, order, "pharmacy")}
 
 
@@ -828,7 +939,7 @@ def pickup_ride(order_id: int, current_user: dict = Depends(get_current_user), d
     user = _user(db, current_user)
     order = _courier_order(db, order_id, user.id)
     _move(db, order, "IN_DELIVERY", user.id)
-    db.commit()
+    _commit_order_change(db, order, user.id)
     return _order_json(db, order, "courier")
 
 
@@ -851,7 +962,7 @@ def deliver_ride(order_id: int, body: DeliverBody, current_user: dict = Depends(
     _move(db, order, "DELIVERED", user.id)
     rules.record_ride(db, courier, order)
     rules.reward_referrer(db, courier)
-    db.commit()
+    _commit_order_change(db, order, user.id)
     return _order_json(db, order, "courier")
 
 

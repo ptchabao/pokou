@@ -20,9 +20,10 @@ INSERT INTO system_settings (key, value, updated_at)
 VALUES ('country.TG', '{"modules": ["discussions", "kory", "certified", "honam"]}', now());
 ```
 
-Valeurs par défaut (`backend/app/core/countries.py`) : Togo = discussions,
-Kory, Pokou certifié ; Côte d'Ivoire = discussions seulement. **HONAM est
-fermé par défaut** : il s'ouvre au pilote de Lomé (mois 4).
+Valeurs par défaut (`backend/app/core/countries.py`) : HONAM et les discussions
+sont actifs dans tous les pays ; Kory et Pokou certifié restent ouverts selon
+le pays. Un réglage `country.<CC>` contenant une liste `modules` explicite
+remplace ces valeurs par défaut et peut donc désactiver HONAM pour ce pays.
 
 ## Ce que l'équipe traite à la main
 
@@ -45,7 +46,7 @@ traitent par l'API, avec un compte `ADMIN` :
 | BM-03 Coursier : essai, ou adhésion et course restante ; pack supérieur à la différence | Fait | `rules.courier_can_accept`, `upgrade_price` |
 | BM-04 Course décomptée à la remise seulement | Fait | `rules.record_ride` |
 | BM-05 Suspension au 3e défaut | Fait ; un défaut = signalement de l'officine (**Hypothèse**) | `report_courier_default` |
-| BM-06 Encaissement CashPay (Semoa), activation au webhook | Fait pour l'abonnement officine, le crédit, l'adhésion, les packs, le badge. Relances J-7 et J-1 : **pas faites** | `honam.apply_confirmed_payment` |
+| BM-06 Encaissement CashPay (Semoa), activation au webhook | Fait pour l'abonnement officine, le crédit, l'adhésion, les packs, le badge. Relances push J-7 et J-1 : faites, une fois par échéance | `honam.apply_confirmed_payment`, `services/honam/subscription_reminders.py` |
 | BM-07 Registre des courses en écriture seule | Fait, solde recalculé | `CourierLedgerEntry` |
 | BM-08 Espace officine web installable, mode coursier dans l'app | Fait | `/officine/`, `CourierScreen` |
 | BM-09 Prix de la course par pays, ajouté au devis | Fait (1 000 / 1 500 FCFA) | `send_quote` |
@@ -62,9 +63,9 @@ traitent par l'API, avec un compte `ADMIN` :
 | Barre Accueil, Discussions, Kory, Honam, Plus | Fait ; Kory et Honam selon le pays |
 | NAV-01 Onglets pilotés par pays | Fait (`/config/country`) |
 | NAV-03 Cagnotte créée depuis un groupe | Fait (menu des pièces jointes du groupe) |
-| NAV-04 Fil de suivi d'une commande | Fait (états et notes). Messages patient/officine/coursier dans le fil : **pas faits** |
-| NAV-05/06 Liens profonds `/kory/{id}`, `/honam/order/{id}` | **Pas faits** (le routeur existant gère les invitations) |
-| NAV-07 Recherche globale segmentée | **Pas faite** |
+| NAV-04 Fil de suivi d'une commande | Fait : états, notes, notifications push des changements d'état et messages patient/officine/coursier (texte, participants uniquement) |
+| NAV-05/06 Liens profonds `/kory/{id}`, `/honam/order/{id}` | Fait : Android, iOS et pages web d'atterrissage ; les anciennes formes restent acceptées |
+| NAV-07 Recherche globale segmentée | Fait côté application : messages accessibles, chaînes publiques et annonces, groupés par module. Les messages chiffrés restent exclus de la recherche serveur |
 | NAV-08/09 Accueil avec une carte par module, action de départ si vide | Fait (APP-1) |
 | APP-6 Plus | Fait |
 
@@ -132,10 +133,16 @@ qui couvre l'activité réelle, **« Vos coursiers »** dans l'espace officine
 (rattacher un coursier validé par son numéro ; il voit les courses de
 l'officine 5 minutes avant les autres — **Hypothèse** sur le délai).
 
-**Pas fait** : notifications push des changements d'état, « une fois par
-mois au plus » pour l'offre coursier (l'offre est dans le mode coursier, pas
-encore poussée), validation réglementaire (à faire par un juriste). Une
-course impayée au coursier suspend l'officine après 72 h (**Hypothèse**).
+Fait : notifications push des changements d'état, adressées au patient, à
+l'équipe de l'officine et au coursier affecté ; l'acteur du changement est
+exclu et les données de santé/adresse ne sont pas incluses dans le payload.
+Les relances push d'abonnement à J-7 et J-1 sont également faites, une fois
+par échéance.
+
+**Pas fait** : « une fois par mois au plus » pour l'offre coursier (l'offre
+est dans le mode coursier, pas encore poussée), validation réglementaire (à
+faire par un juriste). Une course impayée au coursier suspend l'officine
+après 72 h (**Hypothèse**).
 
 ## Assimé
 
@@ -153,9 +160,14 @@ badge payant, relue par la modération — `/admin/marketplace/sponsored-statuse
 tête, vues dans les statuts, contacts), filtre « Vendeurs certifiés » côté
 serveur (`certified_only=true`).
 
-**Pas fait** : filtre « Vendeurs certifiés » dans l'écran, badge Pro sur
-les annonces, partage d'une annonce en statut, ouverture au mois 13 par pays
-(le Marché reste ouvert partout, comme avant).
+Fait : filtre « Vendeurs certifiés » dans l'écran et badge Pro distinct sur
+les annonces.
+
+**Pas fait** : partage d'une annonce en statut ; ouverture au mois 13 par
+pays (le Marché reste ouvert partout, comme avant). Le partage en statut
+attend une évolution du modèle des statuts, actuellement texte/média
+uniquement. Le calendrier du Marché par pays reste à confirmer avant
+d'ajouter un contrôle d'accès.
 
 ## Kory
 

@@ -4625,6 +4625,9 @@ class LAr extends L {
   String get marketFilterAll => 'الكل';
 
   @override
+  String get marketCertifiedSellers => 'البائعون المعتمدون';
+
+  @override
   String get marketCatalogueNoneInFilter => 'لا توجد إعلانات ضمن هذا التصنيف.';
 
   @override
@@ -5403,6 +5406,12 @@ class LAr extends L {
 
   @override
   String get honamTimeline => 'التتبع';
+
+  @override
+  String get honamOrderMessages => 'رسائل الطلب';
+
+  @override
+  String get honamWriteMessage => 'اكتب رسالة';
 
   @override
   String get honamCourierMode => 'وضع المندوب';

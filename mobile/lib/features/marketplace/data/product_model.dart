@@ -185,6 +185,7 @@ class MarketplaceProduct {
     this.image,
     this.gallery = const [],
     this.sellerIsCertified = false,
+    this.sellerIsPro = false,
     this.sellerRating,
     this.sellerReviewCount = 0,
     this.isActive = true,
@@ -205,6 +206,7 @@ class MarketplaceProduct {
   final MediaMeta? image;
   final List<MediaMeta> gallery;
   final bool sellerIsCertified;
+  final bool sellerIsPro;
 
   /// `null` tant que personne n'a noté ce vendeur — à distinguer de 0, qui
   /// serait une très mauvaise note et non une absence d'avis.
@@ -256,6 +258,7 @@ class MarketplaceProduct {
                 .map(MediaMeta.fromJson)
                 .toList(),
       sellerIsCertified: json['seller_is_certified'] as bool? ?? false,
+      sellerIsPro: json['seller_is_pro'] as bool? ?? false,
       // Le serveur renvoie un nombre JSON (int ou double selon la moyenne) —
       // `as double?` casserait sur une note ronde comme 4.
       sellerRating: rating == null ? null : (rating as num).toDouble(),
@@ -272,6 +275,7 @@ class SellerProfile {
     required this.sellerId,
     required this.sellerName,
     required this.isCertified,
+    this.isPro = false,
     required this.rating,
     required this.reviewCount,
     required this.productCount,
@@ -280,6 +284,7 @@ class SellerProfile {
   final int sellerId;
   final String sellerName;
   final bool isCertified;
+  final bool isPro;
   final double? rating;
   final int reviewCount;
   final int productCount;
@@ -290,6 +295,7 @@ class SellerProfile {
       sellerId: json['seller_id'] as int,
       sellerName: json['seller_name'] as String? ?? 'Vendeur',
       isCertified: json['is_certified'] as bool? ?? false,
+      isPro: json['is_pro'] as bool? ?? false,
       rating: rating == null ? null : (rating as num).toDouble(),
       reviewCount: json['review_count'] as int? ?? 0,
       productCount: json['product_count'] as int? ?? 0,

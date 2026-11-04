@@ -16,6 +16,7 @@ import '../../kory/presentation/kory_controller.dart';
 import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
 import '../../modules/shared/module_ui.dart';
+import 'global_search_screen.dart';
 
 /// L'accueil après connexion (écran APP-1) : une carte par module ouvert
 /// dans le pays (NAV-08), chacune menant à son module.
@@ -46,14 +47,14 @@ class HomeScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(bottom: 120),
           children: [
             PokouAppBar(
-              title: firstName.isEmpty
-                  ? l.navHome
-                  : l.homeGreeting(firstName),
+              title: firstName.isEmpty ? l.navHome : l.homeGreeting(firstName),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: _SearchEntry(
-                onTap: () => onOpenTab(PokouTab.discussions),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+                ),
               ),
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),

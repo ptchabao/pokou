@@ -9,6 +9,7 @@ void main() {
         'seller_id': 3,
         'seller_name': 'Fatou',
         'seller_is_certified': true,
+        'seller_is_pro': true,
         'seller_rating': 4.5,
         'seller_review_count': 12,
         'name': 'Sac de ciment',
@@ -26,6 +27,7 @@ void main() {
       expect(product.image!.id, 1);
       expect(product.gallery.map((m) => m.id), [2, 3]);
       expect(product.sellerIsCertified, isTrue);
+      expect(product.sellerIsPro, isTrue);
       expect(product.sellerRating, 4.5);
       expect(product.sellerReviewCount, 12);
     });
@@ -70,6 +72,7 @@ void main() {
       expect(product.sellerRating, isNull);
       expect(product.sellerReviewCount, 0);
       expect(product.sellerIsCertified, isFalse);
+      expect(product.sellerIsPro, isFalse);
       expect(product.gallery, isEmpty);
       expect(product.allImages, isEmpty);
     });
@@ -81,12 +84,14 @@ void main() {
         'seller_id': 5,
         'seller_name': 'Koffi',
         'is_certified': true,
+        'is_pro': true,
         'certified_at': '2026-09-07T10:00:00',
         'rating': 3,
         'review_count': 2,
         'product_count': 8,
       });
       expect(profile.isCertified, isTrue);
+      expect(profile.isPro, isTrue);
       expect(profile.rating, 3.0);
       expect(profile.productCount, 8);
     });

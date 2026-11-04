@@ -41,7 +41,9 @@ void main() {
 
   test('hors ligne, les modules se déduisent de l\'indicatif', () {
     expect(CountryConfig.guessFromPhone('+22890112233').has('kory'), isTrue);
+    expect(CountryConfig.guessFromPhone('+22890112233').has('honam'), isTrue);
     expect(CountryConfig.guessFromPhone('+2250700112233').has('kory'), isFalse);
-    expect(CountryConfig.guessFromPhone(null).modules, {'discussions'});
+    expect(CountryConfig.guessFromPhone('+2250700112233').has('honam'), isTrue);
+    expect(CountryConfig.guessFromPhone(null).modules, {'discussions', 'honam'});
   });
 }

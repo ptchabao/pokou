@@ -38,6 +38,10 @@ class Pharmacy(Base):
     #: WETRI (mensuel) | EPE (annuel) — Wétri HONAM et ÉPÉ HONAM.
     subscription_plan = Column(String(8), nullable=True)
     subscription_until = Column(DateTime, nullable=True)
+    #: Fin d'abonnement couverte par chaque relance, pour éviter de la
+    #: renvoyer à chaque passage du scheduler.
+    subscription_reminder_7d_for = Column(DateTime, nullable=True)
+    subscription_reminder_1d_for = Column(DateTime, nullable=True)
     #: Crédit prépayé, en FCFA HT, décompté de 100 à chaque commande PAYÉE
     #: (BM-11).
     credit_balance = Column(Integer, default=0, nullable=False)
@@ -131,6 +135,18 @@ class HonamOrderEvent(Base):
     actor_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     status = Column(String(12), nullable=False)
     note = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class HonamOrderMessage(Base):
+    """Un message texte visible uniquement aux participants d'une commande."""
+    __tablename__ = "honam_order_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("honam_orders.id", ondelete="CASCADE"), nullable=False, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    sender_role = Column(String(12), nullable=False)
+    body = Column(String(1000), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 

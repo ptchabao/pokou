@@ -114,4 +114,56 @@ void main() {
       expect(parseInviteLink(Uri.parse('https://pok.app/bot/1abc')), isNull);
     });
   });
+
+  group('liens de ressources', () {
+    test('/kory/{id} ouvre la cagnotte identifiée', () {
+      final link = parseInviteLink(Uri.parse('https://pok.app/kory/42'));
+      expect(link, isNotNull);
+      expect(link!.kind, DeepLinkInviteKind.koryPot);
+      expect(link.resourceId, 42);
+    });
+
+    test('/honam/order/{id} ouvre la commande identifiée', () {
+      final link = parseInviteLink(
+        Uri.parse('https://pok.app/honam/order/314'),
+      );
+      expect(link, isNotNull);
+      expect(link!.kind, DeepLinkInviteKind.honamOrder);
+      expect(link.resourceId, 314);
+    });
+
+    test('/kory/pots/{id} ouvre la cagnotte identifiée', () {
+      final link = parseInviteLink(Uri.parse('https://pok.app/kory/pots/42'));
+      expect(link, isNotNull);
+      expect(link!.kind, DeepLinkInviteKind.koryPot);
+      expect(link.resourceId, 42);
+    });
+
+    test('/honam/orders/{id} ouvre la commande identifiée', () {
+      final link = parseInviteLink(
+        Uri.parse('https://pok.app/honam/orders/314'),
+      );
+      expect(link, isNotNull);
+      expect(link!.kind, DeepLinkInviteKind.honamOrder);
+      expect(link.resourceId, 314);
+    });
+
+    test('rejette les identifiants invalides et les chemins ambigus', () {
+      for (final path in [
+        '/kory/pots/0',
+        '/kory/pots/not-an-id',
+        '/kory/pots/42/extra',
+        '/honam/orders/-1',
+        '/honam/orders/',
+        '/kory/42/extra',
+        '/honam/order/314/extra',
+      ]) {
+        expect(
+          parseInviteLink(Uri.parse('https://pok.app$path')),
+          isNull,
+          reason: path,
+        );
+      }
+    });
+  });
 }

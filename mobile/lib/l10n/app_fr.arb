@@ -2097,6 +2097,7 @@
   "marketCatalogueBoostedLabel": "Boostées",
   "marketCatalogueWithdrawn": "Retirées",
   "marketFilterAll": "Toutes",
+  "marketCertifiedSellers": "Vendeurs certifiés",
   "marketCatalogueNoneInFilter": "Aucune annonce dans ce filtre.",
   "marketStatusModerated": "Retirée du marché",
   "marketStatusModeratedBody": "Elle n'est plus visible par les acheteurs. Écrivez au support si vous pensez que c'est une erreur.",
@@ -2454,6 +2455,8 @@
     }
   },
   "honamTimeline": "Suivi",
+  "honamOrderMessages": "Messages de la commande",
+  "honamWriteMessage": "Écrire un message",
   "honamCourierMode": "Mode coursier",
   "honamCourierJoin": "Devenir coursier Win Pokou",
   "honamCourierJoinBody": "5 courses d'essai sans commission pendant un mois. Ensuite : adhésion Win Pokou et pack de courses payé d'avance.",

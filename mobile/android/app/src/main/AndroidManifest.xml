@@ -110,19 +110,15 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- LES TROIS formes de lien que l'application produit —
-                     invite_link_parser.dart les accepte toutes les trois,
-                     mais seule la première était déclarée ici. Un lien de
-                     communauté ou de chaîne n'était donc même pas proposé à
-                     l'application : Android ouvrait le navigateur sans
-                     poser de question, et rien nulle part n'expliquait
-                     pourquoi ça marchait pour les groupes seulement.
-                     Voir group_model.dart, community_model.dart et
-                     channel_model.dart pour les générateurs. -->
+                <!-- Préfixes des liens Pokou gérés par invite_link_parser.dart. -->
                 <data android:scheme="https" android:host="pok.app" android:pathPrefix="/invite"/>
                 <data android:scheme="https" android:host="pok.app" android:pathPrefix="/c/"/>
                 <data android:scheme="https" android:host="pok.app" android:pathPrefix="/channel/"/>
                 <data android:scheme="https" android:host="pok.app" android:pathPrefix="/bot/"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/kory/pots/"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/honam/orders/"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/kory/"/>
+                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/honam/order/"/>
             </intent-filter>
         </activity>
         <!-- Éditeur de recadrage d'image (uCrop), requis par image_cropper.

@@ -2,11 +2,11 @@
 
 Les valeurs par défaut sont écrites ici ; chacune se surcharge sans
 publication par un réglage système `country.<CC>` (JSON partiel), que
-l'équipe modifie depuis la base. C'est ce qui permet d'ouvrir HONAM à Lomé
-au mois 4 sans attendre une revue de store (NAV-01).
+l'équipe modifie depuis la base. HONAM et les discussions sont ouverts par
+défaut dans tous les pays (NAV-01).
 
-Un pays absent de la table n'a aucun module de service : la messagerie
-reste disponible partout, Kory et HONAM ne le sont que là où Pokou est lancé.
+Un pays absent de la table utilise les modules de repli : discussions et
+HONAM. Kory et les autres modules restent limités aux pays configurés.
 """
 import json
 from typing import Any, Optional
@@ -31,7 +31,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         #: Villes où Honam livre. Ailleurs, l'offre coursier laisse place à
         #: la liste d'attente (maquette Coursiers 16).
         "honam_cities": ["Lomé"],
-        "modules": ["discussions", "kory", "certified"],
+        "modules": ["discussions", "kory", "honam", "certified"],
     },
     "CI": {
         "currency": "XOF",
@@ -41,9 +41,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         "pharmacy_yearly_price": 75000,
         "emergency_numbers": {"police": "110", "pompiers": "180", "samu": "185"},
         "honam_cities": ["Abidjan"],
-        # Lancement au mois 13 : la Côte d'Ivoire n'ouvre que la messagerie
-        # tant que l'équipe ne surcharge pas ce réglage.
-        "modules": ["discussions"],
+        "modules": ["discussions", "honam"],
     },
 }
 
@@ -55,7 +53,7 @@ _FALLBACK: dict[str, Any] = {
     "pharmacy_yearly_price": None,
     "emergency_numbers": {},
     "honam_cities": [],
-    "modules": ["discussions"],
+    "modules": ["discussions", "honam"],
 }
 
 

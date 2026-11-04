@@ -157,10 +157,18 @@ async def apple_app_site_association():
             "details": [
                 {
                     "appID": _apple_app_id(),
-                    # Les TROIS formes que l'application produit et que
-                    # invite_link_parser.dart sait lire. N'en déclarer qu'une
-                    # laisse les deux autres s'ouvrir dans le navigateur.
-                    "paths": ["/invite/*", "/c/*", "/channel/*"],
+                    # Chaque chemin reconnu par invite_link_parser.dart doit
+                    # être déclaré ici, sinon iOS l'ouvre dans le navigateur.
+                    "paths": [
+                        "/invite/*",
+                        "/c/*",
+                        "/channel/*",
+                        "/bot/*",
+                        "/kory/*",
+                        "/honam/order/*",
+                        "/kory/pots/*",
+                        "/honam/orders/*",
+                    ],
                 }
             ],
         }

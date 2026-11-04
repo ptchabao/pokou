@@ -48,6 +48,8 @@ _KIND_LABELS = {
     "group": ("une invitation à un groupe", "Rejoignez la conversation"),
     "community": ("une invitation à une communauté", "Rejoignez la communauté"),
     "channel": ("une invitation à une chaîne", "Suivez cette chaîne"),
+    "kory": ("une cagnotte Kory", "Ouvrez cette cagnotte dans Pokou"),
+    "honam": ("une commande HONAM", "Ouvrez le suivi de cette commande dans Pokou"),
     "unknown": ("une invitation Pokou", "Ouvrez-la dans Pokou"),
 }
 
@@ -171,6 +173,18 @@ def _page(
 </body>
 </html>"""
     return HTMLResponse(content=html, headers={"Cache-Control": "no-store"})
+
+
+@router.get("/kory/{pot_id}", response_class=HTMLResponse)
+async def kory_pot_link(pot_id: int):
+    """Public landing page for a Kory pot deep link; no pot data is exposed."""
+    return _page(f"/kory/{pot_id}", "kory")
+
+
+@router.get("/honam/order/{order_id}", response_class=HTMLResponse)
+async def honam_order_link(order_id: int):
+    """Public landing page for a HONAM order deep link; no order data is exposed."""
+    return _page(f"/honam/order/{order_id}", "honam")
 
 
 @router.get("/invite/channel/{code}/post/{post_id}", response_class=HTMLResponse)

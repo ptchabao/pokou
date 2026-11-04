@@ -51,7 +51,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final next = !_favorite;
     setState(() => _favorite = next);
     try {
-      await ref.read(marketplaceRepositoryProvider).setFavorite(_product.id, next);
+      await ref
+          .read(marketplaceRepositoryProvider)
+          .setFavorite(_product.id, next);
       ref.invalidate(favoritesProvider);
     } catch (_) {
       if (mounted) setState(() => _favorite = !next);
@@ -114,7 +116,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (_isMine) return;
     try {
       final favorites = await ref.read(favoritesProvider.future);
-      if (mounted) setState(() => _favorite = favorites.any((f) => f.id == _product.id));
+      if (mounted)
+        setState(() => _favorite = favorites.any((f) => f.id == _product.id));
     } catch (_) {
       // Hors ligne : le cœur reste vide, le geste reste possible.
     }
@@ -331,9 +334,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             IconButton(
               tooltip: L.of(context).assimeReportTitle,
               icon: const Icon(Icons.insights_outlined),
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => BoostReportScreen(productId: _product.id, productName: _product.name),
-              )),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => BoostReportScreen(
+                    productId: _product.id,
+                    productName: _product.name,
+                  ),
+                ),
+              ),
             )
           else ...[
             if (_product.isBoosted)
@@ -343,7 +351,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 onPressed: () => showWhySponsored(context, ref, _product.id),
               ),
             IconButton(
-              tooltip: _favorite ? L.of(context).assimeRemoveFavorite : L.of(context).assimeAddFavorite,
+              tooltip: _favorite
+                  ? L.of(context).assimeRemoveFavorite
+                  : L.of(context).assimeAddFavorite,
               icon: Icon(
                 _favorite ? Icons.favorite : Icons.favorite_border,
                 color: _favorite ? AppColors.feedbackDanger : null,
@@ -457,6 +467,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           _SellerCard(
             name: seller?.sellerName ?? _product.sellerName,
             isCertified: seller?.isCertified ?? _product.sellerIsCertified,
+            isPro: seller?.isPro ?? _product.sellerIsPro,
             rating: seller?.rating ?? _product.sellerRating,
             reviewCount: seller?.reviewCount ?? _product.sellerReviewCount,
             productCount: seller?.productCount,
@@ -481,6 +492,7 @@ class _SellerCard extends StatelessWidget {
   const _SellerCard({
     required this.name,
     required this.isCertified,
+    required this.isPro,
     required this.rating,
     required this.reviewCount,
     required this.productCount,
@@ -489,6 +501,7 @@ class _SellerCard extends StatelessWidget {
 
   final String name;
   final bool isCertified;
+  final bool isPro;
   final double? rating;
   final int reviewCount;
   final int? productCount;
@@ -533,6 +546,28 @@ class _SellerCard extends StatelessWidget {
                         if (isCertified) ...[
                           const SizedBox(width: 4),
                           const VerifiedBadge(size: 15),
+                        ],
+                        if (isPro) ...[
+                          const SizedBox(width: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.accentPrimaryLight,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: const Text(
+                              'PRO',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
                         ],
                       ],
                     ),

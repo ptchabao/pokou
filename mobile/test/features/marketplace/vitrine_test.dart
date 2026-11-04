@@ -45,6 +45,7 @@ class _Catalogue extends Fake implements MarketplaceRepository {
     String? location,
     double? latitude,
     double? longitude,
+    bool certifiedOnly = false,
     int limit = 20,
     int offset = 0,
   }) async {

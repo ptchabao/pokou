@@ -27,13 +27,17 @@ class HonamOrderScreen extends ConsumerWidget {
 
     Future<void> runWith(String action, Map<String, dynamic>? body) async {
       try {
-        await ref.read(honamRepositoryProvider).action(orderId, action, body: body);
+        await ref
+            .read(honamRepositoryProvider)
+            .action(orderId, action, body: body);
         HapticFeedback.lightImpact();
         ref.invalidate(honamOrderProvider(orderId));
         ref.invalidate(honamOrdersProvider);
       } catch (_) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
       }
     }
 
@@ -65,7 +69,8 @@ class HonamOrderScreen extends ConsumerWidget {
                   label: l.honamResend,
                   onPressed: () => Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => HonamSendScreen(resendFromOrderId: order.id),
+                      builder: (_) =>
+                          HonamSendScreen(resendFromOrderId: order.id),
                     ),
                   ),
                 ),
@@ -73,11 +78,16 @@ class HonamOrderScreen extends ConsumerWidget {
               if (order.quoteItems.isNotEmpty) _Quote(order: order),
               if (order.status == 'QUOTED') ...[
                 const SizedBox(height: 12),
-                ModuleActionButton(label: l.honamAcceptQuote, onPressed: () => run('accept')),
+                ModuleActionButton(
+                  label: l.honamAcceptQuote,
+                  onPressed: () => run('accept'),
+                ),
               ],
-              if (order.status == 'ACCEPTED') _PayStep(order: order, onDeclare: () => run('declare-paid')),
+              if (order.status == 'ACCEPTED')
+                _PayStep(order: order, onDeclare: () => run('declare-paid')),
               if (order.deliveryCode != null) _Code(order: order),
-              if (order.status == 'IN_DELIVERY' || (order.status == 'READY' && order.courierName != null))
+              if (order.status == 'IN_DELIVERY' ||
+                  (order.status == 'READY' && order.courierName != null))
                 CourierTrackingCard(orderId: order.id),
               if (order.awaitsMissingChoice) ...[
                 const SizedBox(height: 12),
@@ -85,21 +95,37 @@ class HonamOrderScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l.honamMissingTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Text(
+                        l.honamMissingTitle,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 4),
-                      Text(l.honamMissingBody(formatFcfa(order.missingAmount!), order.missingReason ?? '')),
+                      Text(
+                        l.honamMissingBody(
+                          formatFcfa(order.missingAmount!),
+                          order.missingReason ?? '',
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       ModuleActionButton(
                         label: l.honamKeepRest,
-                        onPressed: () => runWith('missing-choice', {'choice': 'KEEP'}),
+                        onPressed: () =>
+                            runWith('missing-choice', {'choice': 'KEEP'}),
                       ),
                       const SizedBox(height: 8),
                       ModuleQuietButton(
                         label: l.honamCancelAll,
-                        onPressed: () => runWith('missing-choice', {'choice': 'CANCEL'}),
+                        onPressed: () =>
+                            runWith('missing-choice', {'choice': 'CANCEL'}),
                       ),
                       const SizedBox(height: 8),
-                      Text(l.honamRefundDelay, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                      Text(
+                        l.honamRefundDelay,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -110,8 +136,19 @@ class HonamOrderScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l.honamRefundDue(formatFcfa(order.refundDue), order.refundReason ?? '')),
-                      Text(l.honamRefundDelay, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                      Text(
+                        l.honamRefundDue(
+                          formatFcfa(order.refundDue),
+                          order.refundReason ?? '',
+                        ),
+                      ),
+                      Text(
+                        l.honamRefundDelay,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       ModuleQuietButton(
                         label: l.honamRefundReceived,
@@ -121,16 +158,128 @@ class HonamOrderScreen extends ConsumerWidget {
                   ),
                 ),
               ],
-              if (const {'SUBMITTED', 'QUOTED', 'ACCEPTED'}.contains(order.status)) ...[
+              if (const {
+                'SUBMITTED',
+                'QUOTED',
+                'ACCEPTED',
+              }.contains(order.status)) ...[
                 const SizedBox(height: 12),
-                TextButton(onPressed: () => run('cancel'), child: Text(l.honamCancel)),
+                TextButton(
+                  onPressed: () => run('cancel'),
+                  child: Text(l.honamCancel),
+                ),
               ],
               ModuleSectionTitle(l.honamTimeline),
               for (final step in order.timeline) _Step(step: step),
+              _OrderMessages(orderId: order.id),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _OrderMessages extends ConsumerStatefulWidget {
+  const _OrderMessages({required this.orderId});
+
+  final int orderId;
+
+  @override
+  ConsumerState<_OrderMessages> createState() => _OrderMessagesState();
+}
+
+class _OrderMessagesState extends ConsumerState<_OrderMessages> {
+  final _controller = TextEditingController();
+  bool _sending = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final body = _controller.text.trim();
+    if (body.isEmpty || _sending) return;
+    setState(() => _sending = true);
+    try {
+      await ref
+          .read(honamRepositoryProvider)
+          .sendOrderMessage(widget.orderId, body);
+      _controller.clear();
+      ref.invalidate(honamOrderMessagesProvider(widget.orderId));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(L.of(context).honamFailed)));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final messages = ref.watch(honamOrderMessagesProvider(widget.orderId));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ModuleSectionTitle(L.of(context).honamOrderMessages),
+        messages.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, _) => Text(
+            L.of(context).honamFailed,
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+          data: (items) => Column(
+            children: [
+              for (final message in items)
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(message.senderName ?? message.senderRole),
+                  subtitle: Text(message.body),
+                  trailing: Text(
+                    DateFormat.Hm().format(message.createdAt.toLocal()),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                maxLength: 1000,
+                minLines: 1,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: L.of(context).honamWriteMessage,
+                  counterText: '',
+                ),
+                onSubmitted: (_) => _send(),
+              ),
+            ),
+            IconButton(
+              onPressed: _sending ? null : _send,
+              icon: _sending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send),
+              tooltip: L.of(context).actionSend,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -146,7 +295,10 @@ class _StatusHeader extends StatelessWidget {
     return ModuleCard(
       child: Row(
         children: [
-          const Icon(Icons.local_pharmacy_outlined, color: AppColors.feedbackSuccess),
+          const Icon(
+            Icons.local_pharmacy_outlined,
+            color: AppColors.feedbackSuccess,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -154,11 +306,20 @@ class _StatusHeader extends StatelessWidget {
               children: [
                 Text(
                   honamStatusLabel(l, order.status),
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                Text(order.deliveryAddress, style: TextStyle(color: AppColors.textSecondary)),
+                Text(
+                  order.deliveryAddress,
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
                 if (order.courierName != null)
-                  Text(order.courierName!, style: TextStyle(color: AppColors.textSecondary)),
+                  Text(
+                    order.courierName!,
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
               ],
             ),
           ),
@@ -217,7 +378,11 @@ class _Quote extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.description_outlined, size: 18, color: AppColors.feedbackInfo),
+                    const Icon(
+                      Icons.description_outlined,
+                      size: 18,
+                      color: AppColors.feedbackInfo,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(child: Text(l.honamOriginal)),
                   ],
@@ -234,7 +399,12 @@ class _Quote extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 2),
     child: Row(
       children: [
-        Expanded(child: Text(label, style: TextStyle(fontWeight: bold ? FontWeight.w600 : null))),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(fontWeight: bold ? FontWeight.w600 : null),
+          ),
+        ),
         Text(
           value,
           style: TextStyle(
@@ -272,7 +442,11 @@ class _PayStep extends StatelessWidget {
             if (order.paymentNotReceived)
               Row(
                 children: [
-                  const Icon(Icons.error_outline, color: AppColors.feedbackDanger, size: 18),
+                  const Icon(
+                    Icons.error_outline,
+                    color: AppColors.feedbackDanger,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -286,12 +460,19 @@ class _PayStep extends StatelessWidget {
             order.patientPaidDeclared
                 ? Row(
                     children: [
-                      const Icon(Icons.hourglass_top, color: AppColors.feedbackWarning, size: 18),
+                      const Icon(
+                        Icons.hourglass_top,
+                        color: AppColors.feedbackWarning,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(child: Text(l.honamPaidDeclared)),
                     ],
                   )
-                : ModuleActionButton(label: l.honamDeclarePaid, onPressed: onDeclare),
+                : ModuleActionButton(
+                    label: l.honamDeclarePaid,
+                    onPressed: onDeclare,
+                  ),
           ],
         ),
       ),
@@ -349,7 +530,9 @@ class _Step extends StatelessWidget {
       dense: true,
       leading: const Icon(Icons.radio_button_checked, size: 16),
       title: Text(step.note ?? honamStatusLabel(l, step.status)),
-      subtitle: Text(DateFormat.yMMMd(locale).add_Hm().format(step.at.toLocal())),
+      subtitle: Text(
+        DateFormat.yMMMd(locale).add_Hm().format(step.at.toLocal()),
+      ),
     );
   }
 }

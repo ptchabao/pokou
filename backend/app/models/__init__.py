@@ -152,6 +152,7 @@ from app.models.honam import (  # noqa: F401
     PharmacyStaff,
     HonamOrder,
     HonamOrderEvent,
+    HonamOrderMessage,
     CourierProfile,
     CourierLedgerEntry,
     PharmacyCourier,

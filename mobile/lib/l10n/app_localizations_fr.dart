@@ -4637,6 +4637,9 @@ class LFr extends L {
   String get marketFilterAll => 'Toutes';
 
   @override
+  String get marketCertifiedSellers => 'Vendeurs certifiés';
+
+  @override
   String get marketCatalogueNoneInFilter => 'Aucune annonce dans ce filtre.';
 
   @override
@@ -5435,6 +5438,12 @@ class LFr extends L {
 
   @override
   String get honamTimeline => 'Suivi';
+
+  @override
+  String get honamOrderMessages => 'Messages de la commande';
+
+  @override
+  String get honamWriteMessage => 'Écrire un message';
 
   @override
   String get honamCourierMode => 'Mode coursier';

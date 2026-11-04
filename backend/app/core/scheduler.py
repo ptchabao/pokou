@@ -58,6 +58,7 @@ class Scheduler:
             asyncio.create_task(self._renew_lock_loop()),
             asyncio.create_task(self._calls_housekeeping_loop()),
             asyncio.create_task(self._business_loop()),
+            asyncio.create_task(self._pharmacy_subscription_reminders_loop()),
             asyncio.create_task(self._status_purge_loop()),
         ]
 
@@ -149,6 +150,26 @@ class Scheduler:
                 logger.error("Business loop error: %s", str(exc), exc_info=True)
             tours += 1
             await self._sleep_interval(20)
+
+    async def _pharmacy_subscription_reminders_loop(self):
+        """Relance les officines à J-7/J-1, sans doublons entre passages."""
+        while not self.stop_event.is_set():
+            try:
+                sent = await asyncio.to_thread(self._send_pharmacy_subscription_reminders)
+                if any(sent.values()):
+                    logger.info("[HONAM] relances abonnement %s", sent)
+            except Exception as exc:
+                logger.error("Pharmacy subscription reminder error: %s", str(exc), exc_info=True)
+            await self._sleep_interval(60)
+
+    def _send_pharmacy_subscription_reminders(self):
+        from app.services.honam.subscription_reminders import send_due_subscription_reminders
+
+        db = SessionLocal()
+        try:
+            return send_due_subscription_reminders(db)
+        finally:
+            db.close()
 
     async def _status_purge_loop(self):
         """Purge les statuts expirés (TTL 24 h), toutes les heures — premier

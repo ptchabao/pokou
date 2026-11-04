@@ -4671,6 +4671,9 @@ class LRu extends L {
   String get marketFilterAll => 'Все';
 
   @override
+  String get marketCertifiedSellers => 'Сертифицированные продавцы';
+
+  @override
   String get marketCatalogueNoneInFilter => 'Нет объявлений по этому фильтру.';
 
   @override
@@ -5465,6 +5468,12 @@ class LRu extends L {
 
   @override
   String get honamTimeline => 'Отслеживание';
+
+  @override
+  String get honamOrderMessages => 'Сообщения о заказе';
+
+  @override
+  String get honamWriteMessage => 'Написать сообщение';
 
   @override
   String get honamCourierMode => 'Режим курьера';

@@ -199,6 +199,26 @@ def test_a_review_sets_the_sellers_rating(client):
     assert listed[0]["seller_review_count"] == 1
 
 
+def test_paid_pro_status_is_exposed_separately_from_seller_certification(client):
+    headers, seller_id = _signup(client, "+22897200014")
+    _create_product(client, headers)
+
+    with patch(
+        "app.api.v1.certified.certified.public_badge",
+        return_value={"badge": "PRO"},
+    ):
+        listed = client.get("/api/v1/marketplace", headers=headers).json()["items"][0]
+        profile = client.get(
+            f"/api/v1/marketplace/sellers/{seller_id}",
+            headers=headers,
+        ).json()
+
+    assert listed["seller_is_pro"] is True
+    assert listed["seller_is_certified"] is False
+    assert profile["is_pro"] is True
+    assert profile["is_certified"] is False
+
+
 def test_a_second_review_by_the_same_person_replaces_the_first(client):
     """Un avis par personne : sinon la note se gonfle depuis un seul compte."""
     headers_seller, seller_id = _signup(client, "+22897200012")
