@@ -75,10 +75,12 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       textTheme: textTheme,
       colorScheme: base.colorScheme.copyWith(
-        primary: AppColors.accentPrimaryDark,
+        primary: AppColors.actionButtonBackground,
+        onPrimary: AppColors.actionButtonForeground,
         secondary: AppColors.securityVerified,
-        error: AppColors.securityCritical,
+        error: AppColors.feedbackDanger,
         surface: AppColors.surface,
+        onSurface: AppColors.textPrimary,
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -99,12 +101,6 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.sheet),
           borderSide: BorderSide.none,
         ),
-        // Pas de bordure au focus non plus.
-        //
-        // Le champ est déjà distingué par son fond plein, et le curseur dit
-        // où l'on écrit. Un liseré vert par-dessus ajoutait une deuxième
-        // marque pour la même information, et faisait sauter la hauteur du
-        // champ au moment précis où l'on commence à taper.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.sheet),
           borderSide: BorderSide.none,
@@ -113,8 +109,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accentPrimaryDark,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.actionButtonBackground,
+          foregroundColor: AppColors.actionButtonForeground,
           minimumSize: const Size.fromHeight(56),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sheet)),

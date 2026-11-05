@@ -10,6 +10,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'web_notifications_stub.dart'
+    if (dart.library.js_interop) 'web_notifications_web.dart'
+    as web_notifications;
 
 import '../../features/calls/presentation/call_controller.dart';
 import '../../features/calls/presentation/call_screen.dart';
@@ -91,6 +94,8 @@ const DarwinInitializationSettings _darwinInit = DarwinInitializationSettings(
 /// (`CallNotification.NOTIFICATION_ID`) ; ce nombre-ci n'a pas à lui
 /// correspondre, les deux ne coexistent jamais sur la même plateforme.
 const int kIncomingCallNotificationId = 424243;
+const String kWebPushVapidKey =
+    'BH-gXJw22FwfaCTW-SPbHph6hKmObX658YXLP2Mj9Apwc89nxGhyUo3gh25IYERcpdzZVg3_kMCLWjfduBoIfsg';
 
 /// Ce gestionnaire doit-il construire la notification d'appel ?
 ///
@@ -130,7 +135,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final callsChannel = _callsChannelOf(l);
 
   final notifications = FlutterLocalNotificationsPlugin();
-  await initializeMessageNotificationsPlugin(notifications, darwin: _darwinInit);
+  await initializeMessageNotificationsPlugin(
+    notifications,
+    darwin: _darwinInit,
+  );
   await notifications
       .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin
@@ -175,7 +183,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Les deux canaux Android. Leur nom et leur description s'affichent dans
 /// les réglages système du téléphone, donc ils suivent la langue de l'app —
 /// d'où des fonctions plutôt que des constantes.
-AndroidNotificationChannel _messagesChannelOf(L l) => AndroidNotificationChannel(
+AndroidNotificationChannel _messagesChannelOf(L l) =>
+    AndroidNotificationChannel(
       'pokou_messages',
       l.pushMessagesChannel,
       description: l.pushMessagesChannelDesc,
@@ -212,17 +221,17 @@ AndroidNotificationChannel _messagesChannelOf(L l) => AndroidNotificationChannel
 /// — voir le relevé d'architecture. Cette étape-ci donne le premier signal,
 /// immédiat ; elle ne remplace pas la couche native.
 AndroidNotificationChannel _callsChannelOf(L l) => AndroidNotificationChannel(
-      callsChannelId,
-      l.pushCallsChannel,
-      description: l.pushCallsChannelDesc,
-      importance: Importance.max,
-      sound: const RawResourceAndroidNotificationSound('pokou_ringtone'),
-      // Le flux SONNERIE et non le flux notification : c'est lui que porte
-      // le volume de sonnerie du téléphone, et lui que le mode silencieux et
-      // « Ne pas déranger » traitent comme un appel.
-      audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
-      enableVibration: true,
-    );
+  callsChannelId,
+  l.pushCallsChannel,
+  description: l.pushCallsChannelDesc,
+  importance: Importance.max,
+  sound: const RawResourceAndroidNotificationSound('pokou_ringtone'),
+  // Le flux SONNERIE et non le flux notification : c'est lui que porte
+  // le volume de sonnerie du téléphone, et lui que le mode silencieux et
+  // « Ne pas déranger » traitent comme un appel.
+  audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
+  enableVibration: true,
+);
 
 /// L'identifiant du canal d'appel EN VIGUEUR.
 ///
@@ -252,6 +261,7 @@ class PushService {
 
   final Ref _ref;
   Future<void>? _initialization;
+  StreamSubscription<String>? _tokenRefreshSubscription;
   String? _pendingToken;
 
   /// Y a-t-il une session ouverte ?
@@ -315,59 +325,70 @@ class PushService {
     // notification. Le serveur journalisait « Aucun jeton FCM » et l'appareil
     // ne disait rien.
     //
-    // Obtenir un jeton FCM ne demande ni le greffon de notifications locales
-    // ni la permission POST_NOTIFICATIONS : cette étape n'a aucune raison
-    // d'attendre les suivantes.
-    await _acquireAndRegisterToken();
+    // Sur mobile, le jeton ne dépend ni du greffon local ni de la permission
+    // d'affichage. Sur Web, FCM exige la permission avant getToken().
+    if (!kIsWeb) await _acquireAndRegisterToken();
 
     try {
       final messaging = FirebaseMessaging.instance;
 
-      final androidPlugin = _localNotifications
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-      final l = _ref.read(appL10nProvider);
-      await androidPlugin?.createNotificationChannel(_messagesChannelOf(l));
-      await androidPlugin?.createNotificationChannel(_callsChannelOf(l));
-      for (final retired in _retiredCallChannelIds) {
-        await androidPlugin?.deleteNotificationChannel(retired);
-      }
+      final AndroidFlutterLocalNotificationsPlugin? androidPlugin;
+      if (kIsWeb) {
+        if (web_notifications.notificationPermission == 'granted') {
+          await _acquireAndRegisterToken();
+        }
+        androidPlugin = null;
+      } else {
+        androidPlugin = _localNotifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+        final l = _ref.read(appL10nProvider);
+        await androidPlugin?.createNotificationChannel(_messagesChannelOf(l));
+        await androidPlugin?.createNotificationChannel(_callsChannelOf(l));
+        for (final retired in _retiredCallChannelIds) {
+          await androidPlugin?.deleteNotificationChannel(retired);
+        }
 
-      await initializeMessageNotificationsPlugin(
-        _localNotifications,
-        darwin: _darwinInit,
-        onResponse: (response) {
-          final payload = response.payload;
-          if (payload == null) return;
-          final data = jsonDecode(payload) as Map<String, dynamic>;
-          final actionId = response.actionId;
-          if (actionId == kReplyActionId || actionId == kMarkReadActionId) {
-            unawaited(
-              _messageHandler().onAction(actionId!, data, input: response.input),
-            );
-            return;
-          }
-          _handleResponse(actionId, data);
-        },
-      );
-      _listenForHandOffs();
-      _clearNotificationsOfOpenConversation();
-      // Notification touchée alors que l'app était complètement fermée
-      // (cold start) — `onDidReceiveNotificationResponse` ne se déclenche
-      // pas pour celle-ci, contrairement à un simple arrière-plan.
-      final launchDetails = await _localNotifications
-          .getNotificationAppLaunchDetails();
-      final launchPayload = launchDetails?.notificationResponse?.payload;
-      if (launchDetails?.didNotificationLaunchApp == true &&
-          launchPayload != null) {
-        _handleResponse(
-          launchDetails!.notificationResponse!.actionId,
-          jsonDecode(launchPayload) as Map<String, dynamic>,
+        await initializeMessageNotificationsPlugin(
+          _localNotifications,
+          darwin: _darwinInit,
+          onResponse: (response) {
+            final payload = response.payload;
+            if (payload == null) return;
+            final data = jsonDecode(payload) as Map<String, dynamic>;
+            final actionId = response.actionId;
+            if (actionId == kReplyActionId || actionId == kMarkReadActionId) {
+              unawaited(
+                _messageHandler().onAction(
+                  actionId!,
+                  data,
+                  input: response.input,
+                ),
+              );
+              return;
+            }
+            _handleResponse(actionId, data);
+          },
         );
-      }
+        _listenForHandOffs();
+        _clearNotificationsOfOpenConversation();
+        // Notification touchée alors que l'app était complètement fermée
+        // (cold start) — `onDidReceiveNotificationResponse` ne se déclenche
+        // pas pour celle-ci, contrairement à un simple arrière-plan.
+        final launchDetails = await _localNotifications
+            .getNotificationAppLaunchDetails();
+        final launchPayload = launchDetails?.notificationResponse?.payload;
+        if (launchDetails?.didNotificationLaunchApp == true &&
+            launchPayload != null) {
+          _handleResponse(
+            launchDetails!.notificationResponse!.actionId,
+            jsonDecode(launchPayload) as Map<String, dynamic>,
+          );
+        }
 
-      await messaging.requestPermission();
+        await messaging.requestPermission();
+      }
 
       // Android 14+ (API 34) ne concède plus USE_FULL_SCREEN_INTENT à
       // l'installation, même déclarée au manifeste : sans cet accord, un
@@ -375,24 +396,27 @@ class PushService {
       // lieu de prendre l'écran. C'est très exactement le symptôme observé.
       // Best-effort et non bloquant : refusée, l'app reste utilisable, la
       // notification d'appel est juste moins visible.
-      try {
-        await androidPlugin?.requestFullScreenIntentPermission();
-      } catch (exc) {
-        debugPrint('[Push] Autorisation plein écran indisponible: $exc');
+      if (!kIsWeb) {
+        try {
+          await androidPlugin?.requestFullScreenIntentPermission();
+        } catch (exc) {
+          debugPrint('[Push] Autorisation plein écran indisponible: $exc');
+        }
       }
 
-      // Android n'affiche PAS automatiquement une notification "notification"
-      // FCM quand l'app est au premier plan — il faut la construire nous-mêmes.
-      FirebaseMessaging.onMessage.listen(_showForegroundNotification);
-
-      // Notification système (payload "notification") touchée alors que
-      // l'app tournait déjà en arrière-plan / cold start via Firebase.
-      FirebaseMessaging.onMessageOpenedApp.listen(
-        (message) => _handleResponse(null, message.data),
+      FirebaseMessaging.onMessage.listen(
+        kIsWeb ? _showWebForegroundNotification : _showForegroundNotification,
       );
-      final initial = await messaging.getInitialMessage();
-      if (initial != null) _handleResponse(null, initial.data);
 
+      if (!kIsWeb) {
+        // Notification système (payload "notification") touchée alors que
+        // l'app tournait déjà en arrière-plan / cold start via Firebase.
+        FirebaseMessaging.onMessageOpenedApp.listen(
+          (message) => _handleResponse(null, message.data),
+        );
+        final initial = await messaging.getInitialMessage();
+        if (initial != null) _handleResponse(null, initial.data);
+      }
     } catch (exc) {
       // L'affichage des notifications est cassé sur cet appareil, mais le
       // jeton, lui, est peut-être déjà enregistré : les deux échecs sont
@@ -402,22 +426,51 @@ class PushService {
     }
   }
 
+  Future<bool> enableWebPush() async {
+    if (!kIsWeb) return false;
+
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission();
+      if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+        pushFailureReason = 'Browser notification permission was not granted.';
+        return false;
+      }
+
+      _pendingToken = null;
+      pushFailureReason = null;
+      await _acquireAndRegisterToken();
+      return _pendingToken != null && pushFailureReason == null;
+    } catch (exc) {
+      debugPrint('[Push] Autorisation Web refusée: $exc');
+      pushFailureReason = '$exc';
+      return false;
+    }
+  }
+
   /// Lit le jeton FCM de cet appareil et l'envoie au serveur.
   ///
   /// C'est la seule étape indispensable pour RECEVOIR une notification : le
   /// reste (canaux, permission d'affichage, plein écran) décide de ce qui est
   /// MONTRÉ une fois le message arrivé.
   Future<void> _acquireAndRegisterToken() async {
+    if (kIsWeb && web_notifications.notificationPermission != 'granted') {
+      return;
+    }
+
     try {
       // `FirebaseMessaging.instance` lève de façon SYNCHRONE si
       // `Firebase.initializeApp()` n'a jamais tourné (tests widget, appareil
       // sans Google Play Services) — d'où sa lecture à l'intérieur du try.
       final messaging = FirebaseMessaging.instance;
-      messaging.onTokenRefresh.listen((token) async {
+      _tokenRefreshSubscription ??= messaging.onTokenRefresh.listen((
+        token,
+      ) async {
         _pendingToken = token;
         await _registerToken(token);
       });
-      final token = await messaging.getToken();
+      final token = await messaging.getToken(
+        vapidKey: kIsWeb ? kWebPushVapidKey : null,
+      );
       if (token == null) {
         pushFailureReason =
             'Firebase n\'a pas fourni de jeton pour cet appareil.';
@@ -431,6 +484,25 @@ class PushService {
       debugPrint('[Push] Lecture du token FCM impossible: $exc');
       pushFailureReason = '$exc';
     }
+  }
+
+  void _showWebForegroundNotification(RemoteMessage message) {
+    final notification = message.notification;
+    final data = message.data;
+    final isCall = data['type'] == 'call';
+    final title =
+        notification?.title ??
+        (isCall ? data['caller_name'] as String? ?? 'Appel entrant' : null);
+    if (title == null || title.isEmpty) return;
+
+    final body =
+        notification?.body ??
+        (isCall
+            ? data['is_video'] == '1'
+                  ? 'Appel vidéo entrant'
+                  : 'Appel audio entrant'
+            : '');
+    web_notifications.showNotification(title, body);
   }
 
   bool _isVideo(Map<String, dynamic> data) {
@@ -447,7 +519,9 @@ class PushService {
     if (notification == null) return;
 
     final data = message.data;
-    final contactUserId = int.tryParse(data['contact_user_id']?.toString() ?? '');
+    final contactUserId = int.tryParse(
+      data['contact_user_id']?.toString() ?? '',
+    );
     final groupId = int.tryParse(data['group_id']?.toString() ?? '');
 
     // La décision de PRÉSENTATION, séparée de la décision d'envoyer (prise
@@ -469,7 +543,8 @@ class PushService {
     final l = _ref.read(appL10nProvider);
     // Le son suit la présentation ET le réglage global : une notification
     // silencieuse le reste même si l'utilisateur a laissé le son activé.
-    final withSound = presentation != NotificationPresentation.silent &&
+    final withSound =
+        presentation != NotificationPresentation.silent &&
         _ref.read(appSettingsProvider).notificationSound;
 
     // Un identifiant STABLE par conversation : trois messages de la même
@@ -485,7 +560,9 @@ class PushService {
     final notificationId = isCall
         ? kIncomingCallNotificationId
         : conversationNotificationId(
-            contactUserId: contactUserId, groupId: groupId);
+            contactUserId: contactUserId,
+            groupId: groupId,
+          );
 
     _localNotifications.show(
       notificationId,
@@ -508,7 +585,8 @@ class PushService {
             NotificationPresentation.silent => Importance.low,
             _ => Importance.defaultImportance,
           },
-          priority: presentation == NotificationPresentation.heads_up ||
+          priority:
+              presentation == NotificationPresentation.heads_up ||
                   presentation == NotificationPresentation.fullScreen
               ? Priority.high
               : Priority.defaultPriority,
@@ -536,8 +614,6 @@ class PushService {
       payload: jsonEncode(data),
     );
   }
-
-
 
   /// La notification d'un message enrichi, construite dans l'application —
   /// qu'elle soit au premier plan, ou en arrière-plan et sollicitée par
@@ -747,7 +823,8 @@ class PushService {
           myUserId: myUserId,
           contactUserId: contactUserId,
           contactName:
-              data['contact_name'] as String? ?? _ref.read(appL10nProvider).mediaContact,
+              data['contact_name'] as String? ??
+              _ref.read(appL10nProvider).mediaContact,
         ),
       ),
     );
@@ -766,7 +843,8 @@ class PushService {
           myUserId: myUserId,
           groupId: groupId,
           groupName:
-              data['group_name'] as String? ?? _ref.read(appL10nProvider).pushGroupFallback,
+              data['group_name'] as String? ??
+              _ref.read(appL10nProvider).pushGroupFallback,
         ),
       ),
     );
@@ -793,7 +871,9 @@ class PushService {
         // l'appel pendant le démarrage de Flutter.
         _pendingAcceptedCall = Map<String, dynamic>.from(data);
       } else {
-        unawaited(_acceptCall(room: room, fromUserId: fromUserId, isVideo: isVideo));
+        unawaited(
+          _acceptCall(room: room, fromUserId: fromUserId, isVideo: isVideo),
+        );
       }
       return;
     }
@@ -860,7 +940,9 @@ class PushService {
         );
       }
     } catch (_) {
-      debugPrint('[Push] Réponse à l’appel impossible; il a peut-être déjà pris fin.');
+      debugPrint(
+        '[Push] Réponse à l’appel impossible; il a peut-être déjà pris fin.',
+      );
     } finally {
       _acceptingCall = false;
     }
@@ -873,7 +955,9 @@ class PushService {
     final room = data['room'] as String?;
     final fromUserId = int.tryParse(data['from_user_id']?.toString() ?? '');
     if (room == null || fromUserId == null) return;
-    unawaited(_acceptCall(room: room, fromUserId: fromUserId, isVideo: _isVideo(data)));
+    unawaited(
+      _acceptCall(room: room, fromUserId: fromUserId, isVideo: _isVideo(data)),
+    );
   }
 }
 

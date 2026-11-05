@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/push/push_service.dart';
 import '../../../core/settings/app_settings.dart';
 import 'settings_widgets.dart';
 
@@ -22,66 +24,93 @@ class NotificationsSettingsScreen extends ConsumerWidget {
     final settings = ref.watch(appSettingsProvider);
     final controller = ref.read(appSettingsProvider.notifier);
 
+    final l = L.of(context);
     return SettingsScaffold(
-      title: L.of(context).profileNotifications,
+      title: l.profileNotifications,
       children: [
-        SettingsSectionTitle(L.of(context).notifInApp),
+        SettingsSectionTitle(l.notifInApp),
         SettingsCard(
           children: [
             SettingsRow(
               icon: Icons.chat_bubble_outline,
-              label: L.of(context).notifMessages,
-              subtitle: L.of(context).notifMessagesSub,
+              label: l.notifMessages,
+              subtitle: l.notifMessagesSub,
               trailing: SettingsSwitch(
                 value: settings.messageNotifications,
-                semanticLabel: L.of(context).notifMessagesSemantic,
+                semanticLabel: l.notifMessagesSemantic,
                 onChanged: controller.setMessageNotifications,
               ),
             ),
             SettingsRow(
               icon: Icons.groups_outlined,
-              label: L.of(context).notifGroups,
-              subtitle: L.of(context).notifGroupsSub,
+              label: l.notifGroups,
+              subtitle: l.notifGroupsSub,
               trailing: SettingsSwitch(
                 value: settings.groupNotifications,
-                semanticLabel: L.of(context).notifGroupsSemantic,
+                semanticLabel: l.notifGroupsSemantic,
                 onChanged: controller.setGroupNotifications,
               ),
             ),
             SettingsRow(
               icon: Icons.call_outlined,
-              label: L.of(context).navCalls,
-              subtitle: L.of(context).notifCallsSub,
+              label: l.navCalls,
+              subtitle: l.notifCallsSub,
               trailing: SettingsSwitch(
                 value: settings.callNotifications,
-                semanticLabel: L.of(context).notifCallsSemantic,
+                semanticLabel: l.notifCallsSemantic,
                 onChanged: controller.setCallNotifications,
               ),
             ),
             SettingsRow(
               icon: Icons.volume_up_outlined,
-              label: L.of(context).notifSound,
+              label: l.notifSound,
               trailing: SettingsSwitch(
                 value: settings.notificationSound,
-                semanticLabel: L.of(context).notifSoundSemantic,
+                semanticLabel: l.notifSoundSemantic,
                 onChanged: controller.setNotificationSound,
               ),
             ),
           ],
         ),
-        SettingsFootnote(L.of(context).notifCallsFootnote),
-        SettingsSectionTitle(L.of(context).notifSystem),
-        SettingsCard(
-          children: [
-            SettingsRow(
-              icon: Icons.android,
-              label: L.of(context).notifAndroidSettings,
-              subtitle: L.of(context).notifAndroidSettingsSub,
-              onTap: openAppSettings,
-            ),
-          ],
-        ),
-        SettingsFootnote(L.of(context).notifSystemFootnote),
+        SettingsFootnote(l.notifCallsFootnote),
+        SettingsSectionTitle(l.notifSystem),
+        if (kIsWeb)
+          SettingsCard(
+            children: [
+              SettingsRow(
+                icon: Icons.notifications_active_outlined,
+                label: l.notifWebEnable,
+                subtitle: l.notifWebEnableSub,
+                onTap: () async {
+                  final enabled = await ref
+                      .read(pushServiceProvider)
+                      .enableWebPush();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          enabled ? l.notifWebEnabled : l.notifWebEnableFailed,
+                        ),
+                      ),
+                    );
+                },
+              ),
+            ],
+          )
+        else
+          SettingsCard(
+            children: [
+              SettingsRow(
+                icon: Icons.android,
+                label: l.notifAndroidSettings,
+                subtitle: l.notifAndroidSettingsSub,
+                onTap: openAppSettings,
+              ),
+            ],
+          ),
+        if (!kIsWeb) SettingsFootnote(l.notifSystemFootnote),
       ],
     );
   }

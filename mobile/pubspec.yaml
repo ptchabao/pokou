@@ -99,10 +99,11 @@ dependencies:
   # Pokou — appels audio/vidéo/de groupe (Phase D), LiveKit Cloud.
   livekit_client: ^2.11.0
 
-  # Pokou — notifications push (messages/appels app fermée), Firebase Cloud
-  # Messaging. Nécessite android/app/google-services.json (projet Firebase).
+  # Pokou — notifications push via Firebase Cloud Messaging.
+  # Android : android/app/google-services.json ; Web : Firebase options + VAPID.
   firebase_core: ^3.8.0
   firebase_messaging: ^15.1.5
+  web: ^1.1.1
   # Affiche une notification quand un message FCM arrive pendant que l'app
   # est au premier plan — Android ne le fait pas automatiquement dans ce cas.
   flutter_local_notifications: ^18.0.1

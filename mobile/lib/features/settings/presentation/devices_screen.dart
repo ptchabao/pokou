@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -24,7 +25,9 @@ final devicesRepositoryProvider = Provider<DevicesRepository>((ref) {
 /// alors que le vrai problème est local.
 final _currentPushTokenProvider = FutureProvider<String?>((ref) async {
   try {
-    return await FirebaseMessaging.instance.getToken();
+    return await FirebaseMessaging.instance.getToken(
+      vapidKey: kIsWeb ? kWebPushVapidKey : null,
+    );
   } catch (_) {
     return null;
   }

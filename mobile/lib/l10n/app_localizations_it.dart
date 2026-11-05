@@ -2328,6 +2328,20 @@ class LIt extends L {
   String get notifSystem => 'Sistema';
 
   @override
+  String get notifWebEnable => 'Attiva le notifiche del browser';
+
+  @override
+  String get notifWebEnableSub =>
+      'Consenti a questo browser di ricevere le notifiche di Pokou.';
+
+  @override
+  String get notifWebEnabled => 'Notifiche del browser attivate.';
+
+  @override
+  String get notifWebEnableFailed =>
+      'Impossibile attivarle. Controlla le impostazioni del sito nel browser.';
+
+  @override
   String get notifAndroidSettings => 'Impostazioni Android';
 
   @override

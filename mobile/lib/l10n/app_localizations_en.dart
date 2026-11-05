@@ -2317,6 +2317,20 @@ class LEn extends L {
   String get notifSystem => 'System';
 
   @override
+  String get notifWebEnable => 'Enable browser notifications';
+
+  @override
+  String get notifWebEnableSub =>
+      'Allow this browser to receive Pokou notifications.';
+
+  @override
+  String get notifWebEnabled => 'Browser notifications enabled.';
+
+  @override
+  String get notifWebEnableFailed =>
+      'Could not enable notifications. Check this site\'s browser settings.';
+
+  @override
   String get notifAndroidSettings => 'Android settings';
 
   @override

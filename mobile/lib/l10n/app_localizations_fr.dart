@@ -2331,6 +2331,20 @@ class LFr extends L {
   String get notifSystem => 'Système';
 
   @override
+  String get notifWebEnable => 'Activer les notifications Web';
+
+  @override
+  String get notifWebEnableSub =>
+      'Autoriser ce navigateur à recevoir les notifications Pokou.';
+
+  @override
+  String get notifWebEnabled => 'Notifications du navigateur activées.';
+
+  @override
+  String get notifWebEnableFailed =>
+      'Impossible d\'activer les notifications. Vérifiez les réglages de ce site dans le navigateur.';
+
+  @override
   String get notifAndroidSettings => 'Réglages Android';
 
   @override

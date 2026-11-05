@@ -17,15 +17,11 @@ import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
 import 'honam_controller.dart';
 
-final _courierProvider = FutureProvider.autoDispose<CourierStatus?>((ref) {
-  return ref.watch(honamRepositoryProvider).courierMe();
-});
-
 final _ridesProvider = FutureProvider.autoDispose<({List<HonamOrder> available, List<HonamOrder> mine})>((ref) {
   return ref.watch(honamRepositoryProvider).rides();
 });
 
-/// Le mode coursier Win Pokou (BM-08) : un mode de l'application, pas une
+/// Le mode coursier Win Pokou (BM-08, COU-8, COU-26) : un mode de l'application, pas une
 /// application à part.
 class CourierScreen extends ConsumerWidget {
   const CourierScreen({super.key});
@@ -33,10 +29,10 @@ class CourierScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    final courier = ref.watch(_courierProvider);
+    final courier = ref.watch(courierStatusProvider);
 
     void refresh() {
-      ref.invalidate(_courierProvider);
+      ref.invalidate(courierStatusProvider);
       ref.invalidate(_ridesProvider);
     }
 
@@ -307,15 +303,249 @@ class _RideCard extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: 8),
-            if (!mine)
-              ModuleActionButton(label: l.honamAcceptRide, onPressed: () => act('accept'))
-            else if (order.status == 'READY')
+            if (!mine) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ModuleActionButton(
+                      label: l.honamAcceptRide,
+                      onPressed: () => act('accept'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
+                    tooltip: 'Aperçu plein écran (COU-27)',
+                    icon: const Icon(Icons.fullscreen),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CourierIncomingRideScreen(
+                          order: order,
+                          onAccept: () => act('accept'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (order.status == 'READY')
               ModuleActionButton(label: l.honamPickup, onPressed: () => act('pickup'))
             else if (order.status == 'IN_DELIVERY')
               ModuleActionButton(label: l.honamDeliver, onPressed: deliver)
             else if (order.status == 'DELIVERED' && !order.courierPaid)
               ModuleQuietButton(label: l.honamCoursePaid, onPressed: () => act('paid')),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// COU-27 · Course reçue pendant une discussion / Proposition plein écran.
+///
+/// Propose une course à un coursier disponible en plein écran, avec un compte
+/// à rebours de 30 secondes, les adresses de retrait et livraison, le gain
+/// versé par l'officine et la mention de retour à l'activité en cours.
+class CourierIncomingRideScreen extends StatefulWidget {
+  const CourierIncomingRideScreen({
+    super.key,
+    required this.order,
+    required this.onAccept,
+  });
+
+  final HonamOrder order;
+  final VoidCallback onAccept;
+
+  @override
+  State<CourierIncomingRideScreen> createState() => _CourierIncomingRideScreenState();
+}
+
+class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
+  int _secondsRemaining = 30;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 1) {
+        setState(() => _secondsRemaining--);
+      } else {
+        timer.cancel();
+        if (mounted) Navigator.of(context).maybePop();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pharmacy = widget.order.pharmacy;
+    final gain = formatFcfa(widget.order.deliveryPrice ?? 0);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // En-tête type appel entrant
+              Row(
+                children: [
+                  const Icon(Icons.delivery_dining, color: AppColors.accentPrimary),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Nouvelle course · mode coursier',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppColors.accentPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.feedbackWarning.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${_secondsRemaining}s',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.feedbackWarning,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Montant du gain
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      gain,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Payés directement par l’officine sur ton wallet',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // Détails du trajet
+              ModuleCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.storefront, color: AppColors.feedbackSuccess, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Retrait en pharmacie', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                              Text(pharmacy?.name ?? 'Pharmacie', style: const TextStyle(fontSize: 15)),
+                              if (pharmacy?.address != null)
+                                Text(pharmacy!.address, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Divider(),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.location_on, color: AppColors.accentPrimary, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Livraison au patient', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                              Text(widget.order.deliveryAddress, style: const TextStyle(fontSize: 15)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              // Rappel contextuel COU-27
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, size: 18, color: AppColors.accentPrimary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tu étais dans une autre section : tu y reviens après ta réponse.',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(),
+
+              // Boutons d'action
+              ModuleActionButton(
+                label: 'Accepter la course',
+                icon: Icons.check,
+                onPressed: () {
+                  _timer?.cancel();
+                  widget.onAccept();
+                  Navigator.of(context).pop();
+                },
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                onPressed: () {
+                  _timer?.cancel();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Passer la course'),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );

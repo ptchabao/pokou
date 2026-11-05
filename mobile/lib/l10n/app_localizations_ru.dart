@@ -2329,6 +2329,20 @@ class LRu extends L {
   String get notifSystem => 'Система';
 
   @override
+  String get notifWebEnable => 'Включить уведомления браузера';
+
+  @override
+  String get notifWebEnableSub =>
+      'Разрешить этому браузеру получать уведомления Pokou.';
+
+  @override
+  String get notifWebEnabled => 'Уведомления браузера включены.';
+
+  @override
+  String get notifWebEnableFailed =>
+      'Не удалось включить уведомления. Проверьте настройки сайта в браузере.';
+
+  @override
   String get notifAndroidSettings => 'Настройки Android';
 
   @override

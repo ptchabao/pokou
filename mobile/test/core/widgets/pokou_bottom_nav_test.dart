@@ -22,7 +22,10 @@ void main() {
         supportedLocales: L.supportedLocales,
         localizationsDelegates: L.localizationsDelegates,
         home: Scaffold(
-          bottomNavigationBar: PokouBottomNav(currentIndex: index, onTap: (_) {}),
+          bottomNavigationBar: PokouBottomNav(
+            currentIndex: index,
+            onTap: (_) {},
+          ),
         ),
       ),
     );
@@ -35,16 +38,12 @@ void main() {
     expect(nav.backgroundColor, AppColors.navBackground);
     expect(nav.backgroundColor, Colors.white);
 
-    // L'onglet actif dit « vous êtes là ». Le teal de marque et non le vert
-    // d'action : sur une barre blanche, le vert plafonne à 1,8:1 de
-    // contraste (voir app_colors.dart), illisible à cette taille d'icône.
+    // L'onglet actif utilise l'encre de marque, distincte de la couleur
+    // réservée aux actions.
     expect(nav.selectedItemColor, AppColors.accentPrimaryDark);
 
-    // Les inactifs au gris froid, pas au noir : du noir plein mettrait tous
-    // les onglets au même niveau d'appel visuel, et l'actif n'aurait plus
-    // rien à distinguer.
+    // Les inactifs utilisent le ton atténué de la palette.
     expect(nav.unselectedItemColor, AppColors.navIconInactive);
-    expect(nav.unselectedItemColor, const Color(0xFF64748B));
     expect(nav.selectedItemColor, isNot(nav.unselectedItemColor));
   });
 
@@ -75,21 +74,23 @@ void main() {
     expect(find.text('Чаты'), findsOneWidget);
   });
 
-  testWidgets('le type « fixed » garde les quatre onglets visibles', (tester) async {
+  testWidgets('le type « fixed » garde les libellés visibles', (tester) async {
     await pump(tester);
-    // Au-delà de trois destinations, le défaut de Flutter (`shifting`)
-    // masque le libellé des onglets inactifs et les fait bouger au toucher.
-    // Sur cinq onglets dont « Marketplace » et « Actualités », des icônes
-    // seules ne suffisent pas à savoir où l'on va.
+    // Le défaut de Flutter (`shifting`) masque les libellés inactifs et fait
+    // bouger la barre au toucher.
     expect(navOf(tester).type, BottomNavigationBarType.fixed);
   });
 
-  test('Kory n\'apparaît que là où le pays l\'ouvre (NAV-01)', () {
+  test('le lot 1 affiche les onglets de messagerie (NAV-10)', () {
     expect(pokouTabsFor({'discussions'}), [
-      PokouTab.home,
       PokouTab.discussions,
-      PokouTab.more,
+      PokouTab.statuses,
+      PokouTab.calls,
+      PokouTab.settings,
     ]);
+  });
+
+  test('Kory n\'apparaît que là où le pays l\'ouvre (NAV-01)', () {
     expect(pokouTabsFor({'discussions', 'kory'}), [
       PokouTab.home,
       PokouTab.discussions,

@@ -2325,6 +2325,20 @@ class LEs extends L {
   String get notifSystem => 'Sistema';
 
   @override
+  String get notifWebEnable => 'Activar notificaciones del navegador';
+
+  @override
+  String get notifWebEnableSub =>
+      'Permite que este navegador reciba notificaciones de Pokou.';
+
+  @override
+  String get notifWebEnabled => 'Notificaciones del navegador activadas.';
+
+  @override
+  String get notifWebEnableFailed =>
+      'No se pudieron activar. Revisa los ajustes del sitio en el navegador.';
+
+  @override
   String get notifAndroidSettings => 'Ajustes de Android';
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,7 @@ import 'features/shield/presentation/deferred_call_bubble.dart';
 import 'features/shield/presentation/shield_controller.dart';
 import 'features/calls/presentation/ongoing_call_banner.dart';
 import 'features/modules/verses/verse_controller.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,16 +55,21 @@ void main() async {
 
   // Sans configuration Firebase (iOS tant que GoogleService-Info.plist n'est
   // pas fourni), l'application démarre sans notifications push au lieu de
-  // s'arrêter sur un écran noir. PushService tolère déjà l'absence de
-  // Firebase — c'est le cas d'un téléphone sans Google Play Services.
+  // s'arrêter sur un écran noir. Le Web utilise ses options dédiées.
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: kIsWeb ? DefaultFirebaseOptions.web : null,
+    );
     // Doit être enregistré tôt, avant runApp — voir push_service.dart pour
     // le reste de l'initialisation FCM (permission, écoute au premier plan,
     // navigation au tap), déclenché par pushServiceProvider dans PokouApp.
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    if (!kIsWeb) {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    }
   } catch (error) {
-    debugPrint('[Pokou/push] Firebase indisponible, pas de notifications : $error');
+    debugPrint(
+      '[Pokou/push] Firebase indisponible, pas de notifications : $error',
+    );
   }
 
   // Préchauffer le répertoire de cache pour accélérer la résolution synchrone des médias.

@@ -15,6 +15,10 @@ final honamOrdersProvider = FutureProvider.autoDispose<List<HonamOrder>>((ref) {
   return ref.watch(honamRepositoryProvider).orders();
 });
 
+final courierStatusProvider = FutureProvider.autoDispose<CourierStatus?>((ref) {
+  return ref.watch(honamRepositoryProvider).courierMe();
+});
+
 final honamOrderProvider = FutureProvider.autoDispose.family<HonamOrder, int>((
   ref,
   id,

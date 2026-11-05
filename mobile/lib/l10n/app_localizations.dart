@@ -4257,6 +4257,30 @@ abstract class L {
   /// **'Système'**
   String get notifSystem;
 
+  /// No description provided for @notifWebEnable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer les notifications Web'**
+  String get notifWebEnable;
+
+  /// No description provided for @notifWebEnableSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser ce navigateur à recevoir les notifications Pokou.'**
+  String get notifWebEnableSub;
+
+  /// No description provided for @notifWebEnabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications du navigateur activées.'**
+  String get notifWebEnabled;
+
+  /// No description provided for @notifWebEnableFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'activer les notifications. Vérifiez les réglages de ce site dans le navigateur.'**
+  String get notifWebEnableFailed;
+
   /// No description provided for @notifAndroidSettings.
   ///
   /// In fr, this message translates to:

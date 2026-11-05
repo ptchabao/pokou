@@ -4,14 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/country/country_config.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
+import '../../calls/presentation/call_log_screen.dart';
 import '../../contacts/presentation/contacts_screen.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../honam/presentation/honam_screen.dart';
 import '../../home/presentation/more_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
+import '../../status/presentation/status_list_screen.dart';
 
-/// Coquille persistante de l'app — Accueil | Discussions | Kory | Plus
-/// (cahier des charges, section 6.1).
+/// Coquille persistante de l'app — Accueil | Discussions | Kory | Honam |
+/// Plus dans l'application complète (section 6.1), Discussions | Statuts |
+/// Appels | Réglages au lot 1 (section 6.3).
 ///
 /// Les onglets suivent les modules ouverts dans le pays (NAV-01) : Kory
 /// n'apparaît pas là où il n'est pas lancé. L'onglet courant est retenu par
@@ -46,6 +49,11 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     PokouTab.kory => const KoryScreen(),
     PokouTab.honam => const HonamScreen(),
     PokouTab.more => const MoreScreen(),
+    // Lot 1 (NAV-10) : les mêmes écrans que dans l'application complète,
+    // portés en onglets — aucun écran n'est dupliqué (NAV-11).
+    PokouTab.statuses => const StatusListScreen(),
+    PokouTab.calls => const CallLogScreen(),
+    PokouTab.settings => const MoreScreen(lot1: true),
   };
 
   @override
@@ -54,7 +62,10 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       currentCountryConfigProvider.select((config) => config.modules),
     );
     final tabs = pokouTabsFor(modules);
-    final current = tabs.contains(_current) ? _current : PokouTab.home;
+    // L'onglet de départ : l'Accueil dans l'application complète, les
+    // Discussions au lot 1, qui n'a pas d'Accueil.
+    final current = tabs.contains(_current) ? _current : tabs.first;
+    if (!_visited.contains(current)) _visited.add(current);
     final index = tabs.indexOf(current);
 
     return PokouBackground(

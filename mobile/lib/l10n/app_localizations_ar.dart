@@ -2306,6 +2306,19 @@ class LAr extends L {
   String get notifSystem => 'النظام';
 
   @override
+  String get notifWebEnable => 'تفعيل إشعارات المتصفح';
+
+  @override
+  String get notifWebEnableSub => 'السماح لهذا المتصفح بتلقي إشعارات Pokou.';
+
+  @override
+  String get notifWebEnabled => 'تم تفعيل إشعارات المتصفح.';
+
+  @override
+  String get notifWebEnableFailed =>
+      'تعذر تفعيل الإشعارات. تحقق من إعدادات الموقع في المتصفح.';
+
+  @override
   String get notifAndroidSettings => 'إعدادات أندرويد';
 
   @override

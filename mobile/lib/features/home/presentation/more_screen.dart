@@ -11,35 +11,123 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../broadcasts/presentation/broadcast_lists_screen.dart';
 import '../../calls/presentation/call_log_screen.dart';
+import '../../honam/presentation/courier_screen.dart';
+import '../../honam/presentation/honam_controller.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../modules/presentation/modules_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../../profile/presentation/language_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
+import '../../profile/presentation/theme_screen.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
+import '../../settings/presentation/storage_settings_screen.dart';
 import '../../status/presentation/status_list_screen.dart';
 
-/// « Plus » (écran APP-6) : le profil, les services secondaires et les
-/// réglages. Les onglets Actus, Appels et Marché de la barre précédente
-/// vivent ici, pour que la barre basse ne porte que les modules.
+/// « Plus » (écran APP-6) ou « Réglages » au lot 1 (écran LOT-4).
+///
+/// Dans l'application complète : profil, services secondaires, mode coursier
+/// (COU-26) et réglages.
+/// Au lot 1 (« Discussions d'abord ») : profil, Pokou certifié (CRT-1), réglages
+/// complets (REG-1 à REG-11) et l'encart « Bientôt : Kory, Honam, Assimé » avec
+/// « Me prévenir » (NAV-12), sans services secondaires ni offre coursier.
 class MoreScreen extends ConsumerWidget {
-  const MoreScreen({super.key});
+  const MoreScreen({super.key, this.lot1 = false});
+
+  final bool lot1;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     final user = ref.watch(authControllerProvider).user;
     final config = ref.watch(currentCountryConfigProvider);
+    final courier = ref.watch(courierStatusProvider).valueOrNull;
 
     void push(Widget screen) => Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => _Pushed(child: screen)));
 
+    void showAbout() {
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('À propos de Pokou'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Pokou v3.4 (Lot 1 & Services)'),
+              const SizedBox(height: 8),
+              Text(
+                'Deux rives réunies — Plus qu’une messagerie, une communauté.',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Le sens de nos noms :',
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              Text(
+                '• Pokou : reine de paix et d’unité\n• Kory : calebasse et tontines solidaires\n• Honam : santé et bien-être\n• Assimé : grand marché\n• Win Pokou : modèle équitable coursiers',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Fermer'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    void showHelp() {
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Aide et support (REG-10)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.smart_toy_outlined, color: AppColors.accentPrimary),
+                title: const Text('Demander à Baba (IA)'),
+                subtitle: const Text('Réponses instantanées sur le fonctionnement de Pokou'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  // Baba est dans la liste des discussions
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text('Questions fréquentes'),
+                subtitle: const Text('Sécurité, mode preuve, codes SMS, livraisons'),
+                onTap: () => Navigator.of(ctx).pop(),
+              ),
+              ListTile(
+                leading: const Icon(Icons.support_agent_outlined),
+                title: const Text('Écrire au support'),
+                subtitle: const Text('Réponse garantie directement dans l’application'),
+                onTap: () => Navigator.of(ctx).pop(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
       children: [
-        PokouAppBar(title: l.navMore),
+        PokouAppBar(title: lot1 ? l.moreSectionSettings : l.navMore),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: ModuleCard(
@@ -84,7 +172,9 @@ class MoreScreen extends ConsumerWidget {
             ),
           ),
         ),
-        if (config.has('certified'))
+
+        // Carte Pokou certifié (CRT-1)
+        if (lot1 || config.has('certified'))
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: ModuleCard(
@@ -93,7 +183,7 @@ class MoreScreen extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  ModuleBadge(
+                  const ModuleBadge(
                     icon: Icons.verified_outlined,
                     color: AppColors.accentPrimary,
                   ),
@@ -107,7 +197,7 @@ class MoreScreen extends ConsumerWidget {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          l.certPitch,
+                          lot1 ? 'Essai gratuit d’un mois offert · Badge et mode preuve' : l.certPitch,
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,
@@ -120,32 +210,150 @@ class MoreScreen extends ConsumerWidget {
               ),
             ),
           ),
-        _Section(
-          title: l.moreSectionServices,
-          rows: [
-            _Row(Icons.donut_large_outlined, l.navStatus,
-                () => push(const StatusListScreen())),
-            _Row(Icons.call_outlined, l.navCalls,
-                () => push(const CallLogScreen())),
-            _Row(Icons.storefront_outlined, l.navMarket,
-                () => push(const MarketplaceScreen())),
-            _Row(Icons.apps_rounded, l.navModules,
-                () => push(const ModulesScreen())),
-            _Row(Icons.campaign_outlined, l.navBroadcasts,
-                () => push(const BroadcastListsScreen())),
-          ],
-        ),
+
+        // COU-26 · Carte « Mode coursier » dans Plus si actif, ou proposition
+        if (!lot1 && config.has('honam'))
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: ModuleCard(
+              onTap: () => push(const CourierScreen()),
+              child: Row(
+                children: [
+                  ModuleBadge(
+                    icon: Icons.delivery_dining,
+                    color: courier != null && courier.status != 'SUSPENDED' && courier.status != 'PENDING'
+                        ? AppColors.feedbackSuccess
+                        : AppColors.accentPrimary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              courier != null ? 'Mode coursier' : 'Devenir coursier Honam',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            if (courier != null && courier.status != 'SUSPENDED' && courier.status != 'PENDING') ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.feedbackSuccess.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Disponible',
+                                  style: TextStyle(
+                                    color: AppColors.feedbackSuccess,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          courier != null
+                              ? (courier.launchPeriod
+                                  ? 'Période de lancement · courses illimitées'
+                                  : (courier.unlimited
+                                      ? 'Pack Queen Pokou illimité'
+                                      : '${courier.ridesLeft} courses restantes'))
+                              : 'Rejoignez la flotte Win Pokou dans votre ville',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: AppColors.accentPrimary),
+                ],
+              ),
+            ),
+          ),
+
+        // Lot 1 : Encart « Bientôt : Kory, Honam, Assimé » (LOT-4 / NAV-12)
+        if (lot1)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: ModuleCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.auto_awesome, color: AppColors.brandOr, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Bientôt disponibles',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Kory (Cagnottes et tontines), Honam (Pharmacies & livraison) et Assimé (Petites annonces) arrivent bientôt dans votre ville.',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Votre intérêt est enregistré. Vous serez alerté dès l’ouverture !'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.notifications_active_outlined, size: 16),
+                    label: const Text('Me prévenir'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Section Services (application complète uniquement)
+        if (!lot1)
+          _Section(
+            title: l.moreSectionServices,
+            rows: [
+              _Row(Icons.donut_large_outlined, l.navStatus,
+                  () => push(const StatusListScreen())),
+              _Row(Icons.call_outlined, l.navCalls,
+                  () => push(const CallLogScreen())),
+              _Row(Icons.storefront_outlined, l.navMarket,
+                  () => push(const MarketplaceScreen())),
+              _Row(Icons.apps_rounded, l.navModules,
+                  () => push(const ModulesScreen())),
+              _Row(Icons.campaign_outlined, l.navBroadcasts,
+                  () => push(const BroadcastListsScreen())),
+            ],
+          ),
+
+        // Section Réglages
         _Section(
           title: l.moreSectionSettings,
           rows: [
             _Row(Icons.lock_outline, l.moreAccount,
                 () => push(const ProfileScreen())),
-            _Row(Icons.notifications_outlined, l.profileNotifications,
-                () => push(const NotificationsSettingsScreen())),
             _Row(Icons.visibility_outlined, l.privacyTitle,
                 () => push(const PrivacySettingsScreen())),
+            _Row(Icons.notifications_outlined, l.profileNotifications,
+                () => push(const NotificationsSettingsScreen())),
+            _Row(Icons.storage_outlined, l.storageTitle,
+                () => push(const StorageSettingsScreen())),
+            _Row(Icons.palette_outlined, l.profileTheme,
+                () => push(const ThemeScreen())),
             _Row(Icons.language, l.profileLanguage,
                 () => push(const LanguageScreen())),
+            _Row(Icons.help_outline, 'Aide et support', showHelp),
+            _Row(Icons.info_outline, 'À propos de Pokou', showAbout),
           ],
         ),
       ],

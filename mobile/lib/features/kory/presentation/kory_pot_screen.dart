@@ -363,6 +363,9 @@ class _EntryTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final diff = DateTime.now().difference(entry.declaredAt);
+    final isModifiable = entry.isPending && diff < const Duration(hours: 8);
+
     final (icon, label, color) = switch (entry.status) {
       'CONFIRMED' => (
         Icons.check_circle,
@@ -374,11 +377,17 @@ class _EntryTile extends ConsumerWidget {
         l.koryStatusRejected,
         AppColors.feedbackDanger,
       ),
-      _ => (
-        Icons.hourglass_top,
-        l.koryStatusDeclared,
-        AppColors.feedbackWarning,
-      ),
+      _ => isModifiable
+          ? (
+              Icons.schedule,
+              'Modifiable (${8 - diff.inHours}h)',
+              AppColors.feedbackWarning,
+            )
+          : (
+              Icons.lock_clock,
+              'Engagement ferme',
+              AppColors.feedbackInfo,
+            ),
     };
     final subtitle = [
       DateFormat.yMMMd(locale).add_Hm().format(entry.declaredAt.toLocal()),
@@ -546,6 +555,11 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ModuleSheetTitle(l.koryDeclareTitle),
+            const SizedBox(height: 4),
+            Text(
+              'Je m’engage : modifiable pendant 8 h avant de devenir ferme (KOR-12). Pokou ne touche aucun fonds.',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: _amount,

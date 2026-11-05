@@ -32,6 +32,16 @@ adresse joignable depuis le téléphone (IP locale, tunnel, ou déploiement).
 |---|---|---|
 | Android | `./build-production.sh --apk` | `android/key.properties` + keystore ; `google-services.json` de l'app Firebase **`com.pokou.pokou`** ; JDK 17 ou 21 (`flutter config --jdk-dir …`), Gradle 8.14 ne prend pas Java 25 |
 | iOS | `./build-ios.sh` | Xcode, CocoaPods sur le `PATH`, `ios/Runner/GoogleService-Info.plist`, équipe de signature dans Xcode |
+| Web | `flutter build web --release` | Application Web Firebase configurée dans `lib/firebase_options.dart` ; notifications servies en HTTPS |
+
+### Notifications Web
+
+L'application Web utilise l'application Firebase `pokou-3b047` et son
+service worker `web/firebase-messaging-sw.js`. Le worker doit rester accessible
+à la racine du site, sur une origine HTTPS (ou `localhost` en développement).
+La clé VAPID publique est configurée dans `lib/core/push/push_service.dart`;
+l'autorisation se demande depuis Profil > Notifications > Activer les
+notifications Web, car les navigateurs peuvent bloquer une demande au démarrage.
 
 Le Ruby 2.6 de macOS ne compile plus les extensions natives de CocoaPods
 avec le SDK de Xcode 26. Sur la machine de build, CocoaPods tourne sur un

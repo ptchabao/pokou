@@ -183,8 +183,8 @@ class ModuleActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = FilledButton.styleFrom(
-      backgroundColor: AppColors.accentPrimaryDark,
-      foregroundColor: Colors.white,
+      backgroundColor: AppColors.actionButtonBackground,
+      foregroundColor: AppColors.actionButtonForeground,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.sheet),
@@ -192,12 +192,12 @@ class ModuleActionButton extends StatelessWidget {
       textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
     );
     final child = busy
-        ? const SizedBox(
+        ? SizedBox(
             width: 18,
             height: 18,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: AppColors.actionButtonForeground,
             ),
           )
         : Text(label);

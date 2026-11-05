@@ -14,7 +14,7 @@ class PushRepository {
       '/devices/register',
       body: {
         'token': token,
-        'platform': 'android',
+        'platform': kIsWeb ? 'web' : 'android',
         // Cet appareil met lui-même en forme ses notifications de message
         // (une par conversation, avec le contenu) : le serveur lui envoie
         // des données au lieu d'une notification toute faite. Android

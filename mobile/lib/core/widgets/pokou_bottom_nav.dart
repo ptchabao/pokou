@@ -16,22 +16,45 @@ class PokouNavDestination {
 
 }
 
-/// Les onglets possibles, dans l'ordre du cahier des charges (section 6.1) :
-/// Accueil | Discussions | Kory | Honam | Plus.
+/// Les onglets possibles.
+///
+/// Deux barres, selon le pays (cahier v3.4, section 6) :
+/// - **application complète** (6.1) : Accueil | Discussions | Kory | Honam |
+///   Plus ;
+/// - **lot 1, « Discussions d'abord »** (6.3, NAV-10) : Discussions |
+///   Statuts | Appels | Réglages, tant que seule la messagerie est ouverte.
 ///
 /// Un ENUM et non un index : la liste des onglets dépend du pays (NAV-01),
 /// et un index partagé entre la barre et la coquille ouvrait le mauvais
 /// écran dès qu'un onglet apparaissait ou disparaissait.
-enum PokouTab { home, discussions, kory, honam, more }
+enum PokouTab { home, discussions, statuses, calls, kory, honam, more, settings }
 
-/// Les onglets à montrer, selon les modules ouverts dans le pays.
-List<PokouTab> pokouTabsFor(Set<String> modules) => [
-  PokouTab.home,
-  PokouTab.discussions,
-  if (modules.contains('kory')) PokouTab.kory,
-  if (modules.contains('honam')) PokouTab.honam,
-  PokouTab.more,
-];
+/// Les modules de service. Tant qu'aucun n'est ouvert dans le pays,
+/// l'application se présente en lot 1.
+const pokouServiceModules = {'kory', 'kory_plus', 'honam', 'assime'};
+
+/// Vrai quand seule la messagerie est ouverte (NAV-10). Pokou certifié et
+/// le mode preuve ne comptent pas : ils sont ouverts dès le lancement.
+bool isLot1(Set<String> modules) =>
+    !modules.any(pokouServiceModules.contains);
+
+/// Les onglets à montrer, selon les modules ouverts dans le pays. Quand un
+/// module s'ouvre, la barre passe d'elle-même à cinq entrées, sans nouvelle
+/// version de l'application (NAV-12).
+List<PokouTab> pokouTabsFor(Set<String> modules) => isLot1(modules)
+    ? const [
+        PokouTab.discussions,
+        PokouTab.statuses,
+        PokouTab.calls,
+        PokouTab.settings,
+      ]
+    : [
+        PokouTab.home,
+        PokouTab.discussions,
+        if (modules.contains('kory')) PokouTab.kory,
+        if (modules.contains('honam')) PokouTab.honam,
+        PokouTab.more,
+      ];
 
 /// Les destinations, construites AVEC un contexte.
 ///
@@ -69,6 +92,21 @@ List<PokouNavDestination> pokouNavDestinationsOf(
           icon: Icons.menu,
           activeIcon: Icons.menu_open,
           label: l.navMore,
+        ),
+        PokouTab.statuses => PokouNavDestination(
+          icon: Icons.donut_large_outlined,
+          activeIcon: Icons.donut_large,
+          label: l.navStatus,
+        ),
+        PokouTab.calls => PokouNavDestination(
+          icon: Icons.call_outlined,
+          activeIcon: Icons.call,
+          label: l.navCalls,
+        ),
+        PokouTab.settings => PokouNavDestination(
+          icon: Icons.settings_outlined,
+          activeIcon: Icons.settings,
+          label: l.moreSectionSettings,
         ),
       },
   ];
