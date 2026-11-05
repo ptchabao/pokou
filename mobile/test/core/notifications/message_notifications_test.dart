@@ -7,11 +7,16 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:pokou/core/api/api_client.dart';
+import 'package:pokou/core/crypto/e2ee_service.dart';
+import 'package:pokou/core/crypto/group_sender_keys.dart';
 import 'package:pokou/core/notifications/message_notification_handler.dart';
 import 'package:pokou/core/notifications/message_notifications.dart';
 import 'package:pokou/core/notifications/notification_policy.dart';
+import 'package:pokou/core/storage/pokou_message_store.dart';
 import 'package:pokou/core/storage/secure_token_storage.dart';
+import 'package:pokou/features/groups/data/group_repository.dart';
 import 'package:pokou/features/messaging/data/messaging_repository.dart';
 import 'package:pokou/l10n/app_localizations.dart';
 
@@ -151,9 +156,11 @@ void main() {
 
   tearDown(() => dir.delete(recursive: true));
 
-  ({MessageNotificationHandler handler, List<http.Request> requests}) handlerWith(
+  ({MessageNotificationHandler handler, List<http.Request> requests})
+  handlerWith(
     Future<http.Response> Function(http.Request) respond, {
     Future<bool> Function(int, String)? sendDirect,
+    Future<bool> Function(int, String)? sendGroup,
   }) {
     final requests = <http.Request>[];
     final api = ApiClient(
@@ -164,11 +171,20 @@ void main() {
         return respond(request);
       }),
     );
+    final groupStore = PokouMessageStore();
     final handler = MessageNotificationHandler(
       presenter: presenter,
       api: api,
       messaging: MessagingRepository(apiClient: api),
+      groups: GroupRepository(
+        apiClient: api,
+        e2ee: E2EEService(apiClient: api),
+        senderKeys: GroupSenderKeys(store: InMemorySenderKeyStore()),
+        store: groupStore,
+      ),
+      groupStore: groupStore,
       sendDirect: sendDirect ?? (_, _) async => true,
+      sendGroup: sendGroup ?? (_, _) async => true,
     );
     return (handler: handler, requests: requests);
   }
@@ -228,21 +244,25 @@ void main() {
       expect(summary.body, contains('2 messages'));
     });
 
-    test('« Nouveau message » d\'abord, puis son texte — sans resonner', () async {
-      final h = handlerWith(
-        (_) async => http.Response(_directJson('Le colis part demain'), 200),
-      );
-      await h.handler.handle(
-        MessagePush.tryParse(_directPush())!,
-        presentation: NotificationPresentation.standard,
-        withSound: true,
-        fallbackFirst: true,
-      );
-      final shown = plugin.visible[conversationNotificationKeyId('contact:8')]!;
-      // Remplacé, pas ajouté : un seul message, une seule ligne.
-      expect(shown.lines.map((m) => m.text), ['Le colis part demain']);
-      expect(shown.android.onlyAlertOnce, isTrue);
-    });
+    test(
+      '« Nouveau message » d\'abord, puis son texte — sans resonner',
+      () async {
+        final h = handlerWith(
+          (_) async => http.Response(_directJson('Le colis part demain'), 200),
+        );
+        await h.handler.handle(
+          MessagePush.tryParse(_directPush())!,
+          presentation: NotificationPresentation.standard,
+          withSound: true,
+          fallbackFirst: true,
+        );
+        final shown =
+            plugin.visible[conversationNotificationKeyId('contact:8')]!;
+        // Remplacé, pas ajouté : un seul message, une seule ligne.
+        expect(shown.lines.map((m) => m.text), ['Le colis part demain']);
+        expect(shown.android.onlyAlertOnce, isTrue);
+      },
+    );
 
     test('un contenu introuvable laisse « Nouveau message »', () async {
       final h = handlerWith((_) async => http.Response('{}', 503));
@@ -287,57 +307,100 @@ void main() {
 
   group('les boutons', () {
     test('« Marquer comme lu » accuse la lecture et efface', () async {
-      final h = handlerWith((_) async => http.Response(_directJson('Salut'), 200));
+      final h = handlerWith(
+        (_) async => http.Response(_directJson('Salut'), 200),
+      );
       final push = MessagePush.tryParse(_directPush())!;
-      await h.handler.handle(push, presentation: NotificationPresentation.standard, withSound: true);
-      final payload = jsonDecode(plugin.visible[push.notificationId]!.payload!) as Map<String, dynamic>;
+      await h.handler.handle(
+        push,
+        presentation: NotificationPresentation.standard,
+        withSound: true,
+      );
+      final payload =
+          jsonDecode(plugin.visible[push.notificationId]!.payload!)
+              as Map<String, dynamic>;
 
       await h.handler.onAction(kMarkReadActionId, payload);
 
-      expect(h.requests.map((r) => r.url.path), contains('/api/v1/messages/m1/read'));
-      expect(plugin.visible, isEmpty, reason: 'ni la conversation, ni le résumé');
-    });
-
-    test('une réponse de groupe part tout de suite et rejoint le fil', () async {
-      final h = handlerWith((_) async => http.Response(jsonEncode({'content': 'On commence ?'}), 200));
-      final push = MessagePush.tryParse(_groupPush())!;
-      await h.handler.handle(push, presentation: NotificationPresentation.standard, withSound: true);
-      final payload = jsonDecode(plugin.visible[push.notificationId]!.payload!) as Map<String, dynamic>;
-
-      await h.handler.onAction(kReplyActionId, payload, input: 'J\'arrive');
-
-      final sent = h.requests.where((r) => r.method == 'POST').single;
-      expect(sent.url.path, '/api/v1/groups/5/messages');
-      expect(jsonDecode(sent.body), {'content': 'J\'arrive'});
-      final shown = plugin.visible[push.notificationId]!;
-      expect(shown.lines.map((m) => m.text), ['On commence ?', 'J\'arrive']);
-      expect(shown.lines.last.person?.key, 'me');
-      expect(shown.android.onlyAlertOnce, isTrue);
-    });
-
-    test('une réponse privée hors de Pokou attend son ouverture, et le dit', () async {
-      final queued = <String>[];
-      final h = handlerWith(
-        (_) async => http.Response(_directJson('Tu passes ?'), 200),
-        sendDirect: (recipientId, text) async {
-          queued.add('$recipientId:$text');
-          return false;
-        },
-      );
-      final push = MessagePush.tryParse(_directPush())!;
-      await h.handler.handle(push, presentation: NotificationPresentation.standard, withSound: true);
-      final payload = jsonDecode(plugin.visible[push.notificationId]!.payload!) as Map<String, dynamic>;
-
-      await h.handler.onAction(kReplyActionId, payload, input: 'Oui');
-
-      expect(queued, ['8:Oui']);
-      // Pas encore partie : pas d'accusé de lecture non plus.
-      expect(h.requests.where((r) => r.url.path.endsWith('/read')), isEmpty);
       expect(
-        plugin.visible[push.notificationId]!.lines.last.text,
-        'Oui · ${l.notifReplyQueued}',
+        h.requests.map((r) => r.url.path),
+        contains('/api/v1/messages/m1/read'),
+      );
+      expect(
+        plugin.visible,
+        isEmpty,
+        reason: 'ni la conversation, ni le résumé',
       );
     });
+
+    test(
+      'une réponse de groupe part tout de suite et rejoint le fil',
+      () async {
+        final replies = <String>[];
+        final h = handlerWith(
+          (_) async =>
+              http.Response(jsonEncode({'content': 'On commence ?'}), 200),
+          sendGroup: (groupId, text) async {
+            replies.add('$groupId:$text');
+            return true;
+          },
+        );
+        final push = MessagePush.tryParse(_groupPush())!;
+        await h.handler.handle(
+          push,
+          presentation: NotificationPresentation.standard,
+          withSound: true,
+        );
+        final payload =
+            jsonDecode(plugin.visible[push.notificationId]!.payload!)
+                as Map<String, dynamic>;
+
+        await h.handler.onAction(kReplyActionId, payload, input: 'J\'arrive');
+
+        expect(replies, ['5:J\'arrive']);
+        expect(h.requests.where((r) => r.method == 'POST'), isEmpty);
+        final shown = plugin.visible[push.notificationId]!;
+        expect(shown.lines.map((m) => m.text), [
+          l.notifNewMessage,
+          'J\'arrive',
+        ]);
+        expect(shown.lines.last.person?.key, 'me');
+        expect(shown.android.onlyAlertOnce, isTrue);
+      },
+    );
+
+    test(
+      'une réponse privée hors de Pokou attend son ouverture, et le dit',
+      () async {
+        final queued = <String>[];
+        final h = handlerWith(
+          (_) async => http.Response(_directJson('Tu passes ?'), 200),
+          sendDirect: (recipientId, text) async {
+            queued.add('$recipientId:$text');
+            return false;
+          },
+        );
+        final push = MessagePush.tryParse(_directPush())!;
+        await h.handler.handle(
+          push,
+          presentation: NotificationPresentation.standard,
+          withSound: true,
+        );
+        final payload =
+            jsonDecode(plugin.visible[push.notificationId]!.payload!)
+                as Map<String, dynamic>;
+
+        await h.handler.onAction(kReplyActionId, payload, input: 'Oui');
+
+        expect(queued, ['8:Oui']);
+        // Pas encore partie : pas d'accusé de lecture non plus.
+        expect(h.requests.where((r) => r.url.path.endsWith('/read')), isEmpty);
+        expect(
+          plugin.visible[push.notificationId]!.lines.last.text,
+          'Oui · ${l.notifReplyQueued}',
+        );
+      },
+    );
   });
 
   group('les réponses en attente', () {

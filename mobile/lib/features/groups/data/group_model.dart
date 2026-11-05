@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/crypto/media_cipher.dart' show MediaKey;
 import '../../../core/time/server_time.dart';
 import '../../../core/deeplink/invite_link_parser.dart' show pokouLinkBaseUrl;
 import '../../messaging/data/direct_message_model.dart'
@@ -69,6 +70,7 @@ class Group {
     this.communityId,
     this.isAnnouncement = false,
     this.proofMode = false,
+    this.cryptoEpoch = 1,
   });
 
   final int id;
@@ -79,6 +81,7 @@ class Group {
   /// Mode preuve (Pokou certifié) : un message supprimé reste visible,
   /// barré, pour tous, et plus rien ne se modifie.
   final bool proofMode;
+  final int cryptoEpoch;
   final String? communityName;
   final int? avatarMediaId;
 
@@ -148,6 +151,7 @@ class Group {
       communityId: json['community_id'] as int?,
       isAnnouncement: json['is_announcement'] as bool? ?? false,
       proofMode: json['proof_mode'] as bool? ?? false,
+      cryptoEpoch: json['crypto_epoch'] as int? ?? 1,
       members: membersJson == null
           ? const []
           : membersJson
@@ -220,8 +224,12 @@ class GroupMessage {
     this.senderIsVerified = false,
     required this.messageType,
     required this.content,
+    this.encryption,
+    this.ciphertext,
+    this.cryptoEpoch,
     required this.mediaAssetId,
     required this.media,
+    this.mediaKey,
     required this.createdAt,
     this.replyToId,
     this.replyTo,
@@ -268,8 +276,12 @@ class GroupMessage {
   final bool senderIsVerified;
   final String messageType;
   final String? content;
+  final String? encryption;
+  final String? ciphertext;
+  final int? cryptoEpoch;
   final int? mediaAssetId;
   final MediaMeta? media;
+  final MediaKey? mediaKey;
   final DateTime createdAt;
 
   /// Message cité — même forme qu'en 1:1 (voir direct_message_model.dart),
@@ -297,6 +309,7 @@ class GroupMessage {
 
   bool get isMedia => mediaAssetId != null;
   bool get isEdited => editedAt != null;
+  bool get isEncrypted => encryption == 'sender-key-v1' && ciphertext != null;
 
   /// Réciproque de `fromJson`, pour le cache local hors ligne — même forme
   /// que l'API (voir core/storage/pokou_message_store.dart).
@@ -309,8 +322,12 @@ class GroupMessage {
     'sender_is_verified': senderIsVerified,
     'message_type': messageType,
     'content': content,
+    if (encryption != null) 'encryption': encryption,
+    if (ciphertext != null) 'ciphertext': ciphertext,
+    if (cryptoEpoch != null) 'crypto_epoch': cryptoEpoch,
     'media_asset_id': mediaAssetId,
     'media': media?.toJson(),
+    if (mediaKey != null) 'media_key': mediaKey!.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'reply_to_id': replyToId,
     'reply_to': replyTo?.toJson(),
@@ -340,8 +357,12 @@ class GroupMessage {
       senderIsVerified: json['sender_is_verified'] as bool? ?? false,
       messageType: json['message_type'] as String? ?? 'TEXT',
       content: json['content'] as String?,
+      encryption: json['encryption'] as String?,
+      ciphertext: json['ciphertext'] as String?,
+      cryptoEpoch: json['crypto_epoch'] as int?,
       mediaAssetId: json['media_asset_id'] as int?,
       media: mediaJson != null ? MediaMeta.fromJson(mediaJson) : null,
+      mediaKey: MediaKey.tryFromJson(json['media_key']),
       createdAt: parseServerTime(json['created_at'] as String),
       replyToId: json['reply_to_id'] as String?,
       replyTo: replyToJson != null
@@ -381,6 +402,14 @@ class GroupMessage {
     String? content,
     PollData? poll,
     DateTime? deletedAt,
+    String? encryption,
+    String? ciphertext,
+    int? cryptoEpoch,
+    bool clearCiphertext = false,
+    MessageReplyPreview? replyTo,
+    Map<String, dynamic>? payload,
+    MediaMeta? media,
+    MediaKey? mediaKey,
   }) {
     return GroupMessage(
       id: id,
@@ -391,19 +420,38 @@ class GroupMessage {
       senderIsVerified: senderIsVerified,
       messageType: messageType,
       content: content ?? this.content,
+      encryption: clearCiphertext ? null : encryption ?? this.encryption,
+      ciphertext: clearCiphertext ? null : ciphertext ?? this.ciphertext,
+      cryptoEpoch: cryptoEpoch ?? this.cryptoEpoch,
       mediaAssetId: mediaAssetId,
-      media: media,
+      media: media ?? this.media,
+      mediaKey: mediaKey ?? this.mediaKey,
       createdAt: createdAt,
       replyToId: replyToId,
-      replyTo: replyTo,
+      replyTo: replyTo ?? this.replyTo,
       reactions: reactions ?? this.reactions,
       editedAt: editedAt ?? this.editedAt,
       expiresAt: expiresAt,
       mentions: mentions,
-      payload: payload,
+      payload: payload ?? this.payload,
       poll: poll ?? this.poll,
       deletedAt: deletedAt ?? this.deletedAt,
       originalContent: originalContent,
     );
   }
+
+  GroupMessage resolvedWith({
+    required String content,
+    required Map<String, dynamic>? payload,
+    required MessageReplyPreview? replyTo,
+    MediaMeta? media,
+    MediaKey? mediaKey,
+  }) => copyWith(
+    content: content,
+    payload: payload,
+    replyTo: replyTo,
+    media: media,
+    mediaKey: mediaKey,
+    clearCiphertext: true,
+  );
 }

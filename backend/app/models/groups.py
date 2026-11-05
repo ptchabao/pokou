@@ -49,6 +49,9 @@ class Group(Base):
     proof_mode = Column(Boolean, default=False, nullable=False)
     proof_mode_since = Column(DateTime, nullable=True)
     proof_mode_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # Incremented on each real membership change. Sender keys are scoped to
+    # this value, so a departed member cannot derive subsequent chains.
+    crypto_epoch = Column(Integer, default=1, nullable=False)
 
     creator = relationship("User", foreign_keys=[created_by])
     avatar_media = relationship("MediaAsset")
@@ -287,7 +290,11 @@ class GroupMessage(Base):
     group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"), nullable=False, index=True)
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     message_type = Column(SQLEnum(MessageType, name="message_type"), default=MessageType.TEXT, nullable=False)
-    content = Column(Text, nullable=True)  # texte, ou légende pour un média
+    # Kept nullable for schema compatibility; group routes never write it.
+    content = Column(Text, nullable=True)
+    encryption = Column(String(16), nullable=True)
+    ciphertext = Column(Text, nullable=True)
+    crypto_epoch = Column(Integer, nullable=True)
     media_asset_id = Column(Integer, ForeignKey("media_assets.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     # Voir DirectMessage : SET NULL pour ne pas emporter les réponses avec le
@@ -301,8 +308,8 @@ class GroupMessage(Base):
     # suppression efface la ligne.
     deleted_at = Column(DateTime, nullable=True)
     deleted_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    # La version d'origine d'un message modifié EN MODE PREUVE : elle reste
-    # visible de tous, avec l'heure de la modification (maquette 14).
+    # Retained for schema compatibility; encrypted group message versions
+    # and proof exports never place plaintext here.
     original_content = Column(Text, nullable=True)
     poll_id = Column(String(36), ForeignKey("polls.id", ondelete="CASCADE"), nullable=True)
     payload = Column(JSON, nullable=True)
@@ -314,3 +321,22 @@ class GroupMessage(Base):
     poll = relationship("Poll")
     reactions = relationship("GroupMessageReaction", cascade="all, delete-orphan", backref="message")
     mentions = relationship("GroupMessageMention", cascade="all, delete-orphan", backref="message")
+
+
+class GroupSenderKeyDistribution(Base):
+    """Pairwise-sealed sender-key distribution, addressed to one current member."""
+    __tablename__ = "group_sender_key_distributions"
+
+    id = Column(Integer, primary_key=True)
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"), nullable=False, index=True)
+    epoch = Column(Integer, nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    encryption = Column(String(16), nullable=False)
+    ciphertext = Column(Text, nullable=False)
+    envelope = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("group_id", "epoch", "sender_id", "recipient_id", name="uq_group_sender_key_recipient"),
+    )

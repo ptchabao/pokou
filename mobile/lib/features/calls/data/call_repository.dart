@@ -176,21 +176,26 @@ class CallRepository {
   /// Un appel à deux est chiffré de bout en bout quand le correspondant sait
   /// le recevoir ET qu'une session chiffrée existe déjà avec l'identité
   /// qu'il publie ; sinon il part comme avant, en clair pour le serveur de
-  /// média, et l'écran le dit. Un appel à plusieurs reste standard.
+  /// média, et l'écran le dit. Les appels de groupe, eux, exigent une clé.
   Future<CallToken> startCall(
     List<int> contactIds, {
     bool isVideo = true,
   }) async {
     final me = _myUserId();
-    final peer = contactIds.length == 1 ? contactIds.single : null;
+    final invitees = contactIds.toSet().toList();
+    final peer = invitees.length == 1 ? invitees.single : null;
     final key = peer != null && me != null ? await _keyFor(peer) : null;
+    final groupKeys = invitees.length > 1
+        ? await _sealedGroupKeys(invitees, from: me)
+        : null;
     final response = await _api.post(
       '/calls/token',
       body: {
-        'contact_ids': contactIds,
+        'contact_ids': invitees,
         'is_video': isVideo,
         if (key != null)
           'sealed_keys': {'$peer': await _seal(peer!, key, from: me!)},
+        if (groupKeys != null) 'sealed_keys': groupKeys.sealedKeys,
       },
     );
     final token = CallToken.fromJson(response as Map<String, dynamic>);
@@ -198,7 +203,17 @@ class CallRepository {
     // `sealed_keys` sans erreur, et l'invité rejoindrait alors sans clé.
     // Chiffrer de notre côté seulement ferait un appel où personne
     // n'entend personne.
+    if (invitees.length > 1 && !token.e2ee) {
+      throw const CallEncryptionException(
+        'le serveur n’a pas confirmé le chiffrement de groupe',
+      );
+    }
     if (key != null && token.e2ee) CallKeys.remember(token.room, key);
+    if (groupKeys != null && token.e2ee && !token.joinedExisting) {
+      CallKeys.remember(token.room, groupKeys.key);
+    } else if (groupKeys != null && token.joinedExisting) {
+      await _rememberReturnedKey(response, token, inviter: null);
+    }
     return token;
   }
 
@@ -216,6 +231,28 @@ class CallRepository {
   Future<CallKey?> _keyFor(int peerUserId) async {
     if (!await _canEncryptFor(peerUserId)) return null;
     return CallKey.generate();
+  }
+
+  Future<({CallKey key, Map<String, dynamic> sealedKeys})> _sealedGroupKeys(
+    List<int> inviteeIds, {
+    required int? from,
+  }) async {
+    if (from == null || inviteeIds.isEmpty || inviteeIds.contains(from)) {
+      throw const CallEncryptionException('participants de groupe invalides');
+    }
+    for (final inviteeId in inviteeIds) {
+      if (!await _canEncryptFor(inviteeId)) {
+        throw const CallEncryptionException(
+          'un membre ne peut pas recevoir la clé de cet appel',
+        );
+      }
+    }
+    final key = CallKey.generate();
+    final sealedKeys = <String, dynamic>{};
+    for (final inviteeId in inviteeIds) {
+      sealedKeys['$inviteeId'] = await _seal(inviteeId, key, from: from);
+    }
+    return (key: key, sealedKeys: sealedKeys);
   }
 
   Future<bool> _canEncryptFor(int peerUserId) async {
@@ -266,21 +303,34 @@ class CallRepository {
   /// Sinon on lève plutôt que d'entrer : on ne verrait et n'entendrait que
   /// du bruit.
   Future<CallToken> joinCall(String room, {int? inviter}) =>
-      _joining[room] ??= _join(room, inviter).whenComplete(
-        () => _joining.remove(room),
-      );
+      _joining[room] ??= _join(room, inviter).whenComplete(() {
+        _joining.remove(room);
+      });
 
   Future<CallToken> _join(String room, int? inviter) async {
     final response = await _api.post('/calls/token', body: {'room': room});
     final json = response as Map<String, dynamic>;
     final token = CallToken.fromJson(json);
     if (token.e2ee && CallKeys.of(token.room) == null) {
-      CallKeys.remember(
-        token.room,
-        await _open(json['sealed_key'], inviter: inviter),
-      );
+      await _rememberReturnedKey(json, token, inviter: inviter);
     }
     return token;
+  }
+
+  Future<void> _rememberReturnedKey(
+    Object? response,
+    CallToken token, {
+    required int? inviter,
+  }) async {
+    final json = response as Map<String, dynamic>;
+    if (!token.e2ee || CallKeys.of(token.room) != null) return;
+    final sealed = json['sealed_key'];
+    final sender =
+        inviter ??
+        (sealed is Map<String, dynamic>
+            ? sealed['from_user_id'] as int?
+            : null);
+    CallKeys.remember(token.room, await _open(sealed, inviter: sender));
   }
 
   Future<CallKey> _open(Object? sealed, {required int? inviter}) async {
@@ -300,7 +350,9 @@ class CallRepository {
     // La clé vient de CELUI qui nous a sonnés, et de personne d'autre — le
     // serveur ne choisit pas qui nous la remet.
     if (sealed['from_user_id'] != inviter) {
-      throw const CallEncryptionException('clé d\'appel d\'un autre expéditeur');
+      throw const CallEncryptionException(
+        'clé d\'appel d\'un autre expéditeur',
+      );
     }
     // Jamais par une enveloppe qui OUVRE une session (préambule) : une clé
     // d'appel n'est scellée que sur une session existante (voir _keyFor).
@@ -329,12 +381,38 @@ class CallRepository {
   /// Appelle tous les membres d'un groupe. Si un appel est déjà en cours dans
   /// ce groupe, le serveur renvoie SON salon (`joinedExisting`) plutôt que
   /// d'ouvrir un appel parallèle.
-  Future<CallToken> startGroupCall(int groupId, {bool isVideo = true}) async {
+  Future<CallToken> startGroupCall(
+    int groupId, {
+    required List<int> memberUserIds,
+    bool isVideo = true,
+  }) async {
+    final active = await activeGroupCall(groupId);
+    if (active != null) {
+      return joinCall(active.room);
+    }
+    final invitees = memberUserIds.toSet().toList();
+    final keys = await _sealedGroupKeys(invitees, from: _myUserId());
     final response = await _api.post(
       '/calls/token',
-      body: {'group_id': groupId, 'is_video': isVideo},
+      body: {
+        'group_id': groupId,
+        'is_video': isVideo,
+        'sealed_keys': keys.sealedKeys,
+      },
     );
-    return CallToken.fromJson(response as Map<String, dynamic>);
+    final json = response as Map<String, dynamic>;
+    final token = CallToken.fromJson(json);
+    if (!token.e2ee) {
+      throw const CallEncryptionException(
+        'le serveur n’a pas confirmé le chiffrement de groupe',
+      );
+    }
+    if (token.joinedExisting) {
+      await _rememberReturnedKey(json, token, inviter: null);
+    } else {
+      CallKeys.remember(token.room, keys.key);
+    }
+    return token;
   }
 
   Future<ActiveGroupCall?> activeGroupCall(int groupId) async {
@@ -353,30 +431,26 @@ class CallRepository {
     required List<int> userIds,
   }) async {
     final key = CallKeys.of(room);
-    Map<String, dynamic>? sealedKeys;
-    if (key != null) {
-      final me = _myUserId();
-      // Tous vérifiés AVANT d'en sceller un seul : s'arrêter au deuxième
-      // laisserait au premier une clé qu'on ne lui envoie jamais.
-      for (final userId in userIds) {
-        if (me == null || !await _canEncryptFor(userId)) {
-          throw const CallEncryptionException(
-            'cette personne ne peut pas rejoindre un appel chiffré',
-          );
-        }
-      }
-      sealedKeys = {
-        for (final userId in userIds)
-          '$userId': await _seal(userId, key, from: me!),
-      };
+    if (key == null) {
+      throw const CallEncryptionException(
+        'les invitations exigent un appel chiffré',
+      );
     }
+    final me = _myUserId();
+    for (final userId in userIds) {
+      if (me == null || !await _canEncryptFor(userId)) {
+        throw const CallEncryptionException(
+          'cette personne ne peut pas rejoindre un appel chiffré',
+        );
+      }
+    }
+    final sealedKeys = {
+      for (final userId in userIds)
+        '$userId': await _seal(userId, key, from: me!),
+    };
     final response = await _api.post(
       '/calls/invite',
-      body: {
-        'room': room,
-        'user_ids': userIds,
-        'sealed_keys': ?sealedKeys,
-      },
+      body: {'room': room, 'user_ids': userIds, 'sealed_keys': ?sealedKeys},
     );
     return ((response['participant_ids'] as List?) ?? const []).cast<int>();
   }

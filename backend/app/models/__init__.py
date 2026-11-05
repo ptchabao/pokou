@@ -50,6 +50,7 @@ from app.models.groups import (  # noqa: F401
     GroupMessageReaction,
     GroupMessageMention,
     GroupMessage,
+    GroupSenderKeyDistribution,
 )
 from app.models.communities import (  # noqa: F401
     Community,
@@ -67,6 +68,7 @@ from app.models.status import (  # noqa: F401
     StatusPrivacy,
     StatusPrivacyEntry,
     StatusView,
+    StatusRecipient,
 )
 from app.models.calls import (  # noqa: F401
     CallLog,

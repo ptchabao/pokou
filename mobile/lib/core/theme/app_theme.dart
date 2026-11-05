@@ -22,28 +22,8 @@ class AppTheme {
   static ThemeData get light => _build(ThemeData.light(useMaterial3: true));
 
   static ThemeData _build(ThemeData base) {
-    // ── Outfit pour les titres, Inter pour le reste ─────────────────────
-    //
-    // Le système de design choisit Outfit pour ses « distinct character
-    // openings » : des lettres qui restent distinctes quand le soleil
-    // écrase le contraste. Elle porte aussi les MONTANTS, là où un chiffre
-    // mal lu coûte de l'argent. Inter porte le corps, les libellés et les
-    // données, pour sa netteté aux petites tailles.
-    //
-    // Ce choix revient sur une décision antérieure — la police système —
-    // qui invoquait deux raisons. Une seule tenait :
-    //
-    // - la TAILLE de texte d'accessibilité ne dépend pas de la famille.
-    //   `textScaler` s'applique quelle que soit la police, et rien ici ne
-    //   le désactive. Pokou continue d'obéir aux réglages du système ;
-    // - la SUBSTITUTION des écritures non latines, elle, est réelle. Ni
-    //   Outfit ni Inter ne contiennent l'arabe, que Pokou parle. Sans repli
-    //   explicite, un texte arabe s'afficherait en carrés vides sur les
-    //   plateformes qui ne comblent pas d'elles-mêmes.
-    //
-    // D'où `fontFamilyFallback` : Flutter descend la liste glyphe par
-    // glyphe. Le russe est couvert par Inter (le cyrillique est conservé au
-    // sous-ensemble) ; l'arabe tombe sur la police système.
+    // Inter is the design system's UI and heading family. The explicit
+    // fallback list preserves Arabic and other script coverage.
     const fallback = <String>[
       // Noms Android ; sur iOS ils sont ignorés et le moteur retombe sur sa
       // propre chaîne, qui couvre l'arabe.
@@ -59,21 +39,9 @@ class AppTheme {
       fontFamilyFallback: fallback,
     );
 
-    TextStyle? outfit(TextStyle? s) =>
-        s?.copyWith(fontFamily: 'Outfit', fontFamilyFallback: fallback);
-
-    final textTheme = corps.copyWith(
-      displayLarge: outfit(corps.displayLarge),
-      displayMedium: outfit(corps.displayMedium),
-      displaySmall: outfit(corps.displaySmall),
-      headlineLarge: outfit(corps.headlineLarge),
-      headlineMedium: outfit(corps.headlineMedium),
-      headlineSmall: outfit(corps.headlineSmall),
-    );
-
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
-      textTheme: textTheme,
+      textTheme: corps,
       colorScheme: base.colorScheme.copyWith(
         primary: AppColors.actionButtonBackground,
         onPrimary: AppColors.actionButtonForeground,
@@ -92,7 +60,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.sheet),
           borderSide: BorderSide.none,
@@ -113,7 +84,9 @@ class AppTheme {
           foregroundColor: AppColors.actionButtonForeground,
           minimumSize: const Size.fromHeight(56),
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sheet)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sheet),
+          ),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),

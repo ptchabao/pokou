@@ -18,6 +18,7 @@ import '../../features/calls/presentation/call_controller.dart';
 import '../../features/calls/presentation/call_screen.dart';
 import '../../features/calls/presentation/incoming_call_screen.dart';
 import '../../features/groups/presentation/group_conversation_screen.dart';
+import '../../features/groups/presentation/group_controller.dart';
 import '../../features/messaging/presentation/conversation_screen.dart';
 import '../../features/messaging/presentation/messaging_controller.dart';
 import '../../features/modules/verses/verse_data.dart';
@@ -657,11 +658,14 @@ class PushService {
       ),
       api: api,
       messaging: messaging,
+      groups: _ref.read(groupRepositoryProvider),
+      groupStore: _ref.read(pokouMessageStoreProvider),
       myUserId: _myUserId,
       sendDirect: (recipientId, text) async {
         await _sendDirectReply(recipientId, text);
         return true;
       },
+      sendGroup: _sendGroupReply,
     );
   }
 
@@ -673,6 +677,21 @@ class PushService {
         .read(messagingRepositoryProvider)
         .send(recipientId: recipientId, content: text);
     await _ref.read(pokouMessageStoreProvider).saveDirect([saved]);
+  }
+
+  Future<bool> _sendGroupReply(int groupId, String text) async {
+    final userId = _myUserId;
+    if (userId == null) return false;
+    final repository = _ref.read(groupRepositoryProvider);
+    final group = await repository.getGroup(groupId);
+    final sent = await repository.send(
+      group: group,
+      senderId: userId,
+      content: text,
+      messageType: 'TEXT',
+    );
+    await _ref.read(pokouMessageStoreProvider).saveGroup([sent]);
+    return true;
   }
 
   /// Les réponses écrites depuis une notification pendant que Pokou était

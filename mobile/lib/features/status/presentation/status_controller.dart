@@ -6,12 +6,44 @@ import '../../../core/sync/offline_list.dart';
 import '../../../core/media/media_repository.dart';
 import '../../../core/sync/pokou_sync_engine.dart';
 import '../../../core/providers.dart';
+import '../../../core/crypto/e2ee_service.dart';
+import '../../../core/crypto/e2ee_outcome.dart';
+import '../../../core/crypto/media_cipher.dart';
 import '../data/status_model.dart';
 import '../data/status_repository.dart';
+
+class _StatusCryptoAdapter implements StatusCrypto {
+  const _StatusCryptoAdapter(this.service);
+
+  final E2EEService service;
+
+  @override
+  Future<Set<String>> capabilitiesOf(int peerUserId) =>
+      service.capabilitiesOf(peerUserId);
+
+  @override
+  Future<String> open({
+    required int peerUserId,
+    required Map<String, dynamic> envelope,
+    required String ciphertext,
+  }) => service.open(
+    peerUserId: peerUserId,
+    envelope: envelope,
+    ciphertext: ciphertext,
+  );
+
+  @override
+  Future<SealOutcome> seal({
+    required int peerUserId,
+    required String plaintext,
+  }) => service.seal(peerUserId: peerUserId, plaintext: plaintext);
+}
 
 final statusRepositoryProvider = Provider<StatusRepository>((ref) {
   return StatusRepository(
     apiClient: ref.watch(apiClientProvider),
+    crypto: _StatusCryptoAdapter(ref.watch(e2eeServiceProvider)),
+    store: ref.watch(pokouMessageStoreProvider),
     mutations: ref.watch(mutationQueueProvider),
   );
 });
@@ -24,7 +56,7 @@ final statusFeedProvider = StreamProvider.autoDispose<List<StatusFeedItem>>((
     store: ref.watch(pokouMessageStoreProvider),
     scope: 'status_feed',
     fetch: repository.getFeedRaw,
-    parse: StatusFeedItem.fromJson,
+    parse: repository.parseFeedItem,
   );
 });
 
@@ -99,17 +131,33 @@ class StatusPostController extends StateNotifier<bool> {
   }) async {
     state = true;
     try {
-      final uploaded = await _media.upload(
-        bytes: bytes,
-        filename: filename,
+      final encrypted = await MediaCipher.encrypt(
+        bytes,
         mimeType: mimeType,
-        messageType: contentType,
-      );
-      return await _repository.createMedia(
-        contentType: contentType,
-        mediaAssetId: uploaded.id,
+        filename: filename,
         caption: caption,
       );
+      final uploaded = await _media.upload(
+        bytes: encrypted.blob,
+        filename: MediaCipher.uploadFilename,
+        mimeType: MediaCipher.uploadMimeType,
+        messageType: 'DOCUMENT',
+        memoriser: false,
+      );
+      final status = await _repository.createMedia(
+        contentType: contentType,
+        mediaAssetId: uploaded.id,
+        mediaKey: encrypted.key.withAssetId(uploaded.id),
+      );
+      final extension = filename.contains('.')
+          ? filename.split('.').last
+          : mimeType.split('/').last;
+      await _media.memoriserDansCache(
+        uploaded.id,
+        bytes: bytes,
+        extension: extension,
+      );
+      return status;
     } finally {
       state = false;
     }

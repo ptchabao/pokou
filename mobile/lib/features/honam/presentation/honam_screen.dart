@@ -8,10 +8,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../kory/presentation/kory_screen.dart' show KoryStatusPill;
 import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
-import 'courier_screen.dart';
 import 'honam_controller.dart';
 import 'honam_order_screen.dart';
 import 'honam_send_screen.dart';
+import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 
 /// Honam côté patient (écran APP-4).
 ///
@@ -36,32 +36,82 @@ class HonamScreen extends ConsumerWidget {
           children: [
             PokouAppBar(
               title: l.navHonam,
+              subtitle: l.honamSubtitle,
+              showStatus: false,
+              leading: Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.neutralBeige,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.waving_hand_outlined,
+                  color: AppColors.accentPrimary,
+                ),
+              ),
               actions: [
                 IconButton(
-                  tooltip: l.honamCourierMode,
-                  icon: const Icon(Icons.delivery_dining_outlined),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const CourierScreen()),
-                  ),
+                  tooltip: l.honamMyOrders,
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  onPressed: () {
+                    final order = current.firstOrNull;
+                    if (order != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => HonamOrderScreen(orderId: order.id),
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: ModuleCard(
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppColors.accentPrimary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       l.honamSend,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l.honamIntro,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    ModuleActionButton(
-                      label: l.honamPhotograph,
-                      icon: Icons.photo_camera_outlined,
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const HonamSendScreen()),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.accentPrimaryDark,
+                          minimumSize: const Size.fromHeight(52),
+                        ),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const HonamSendScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.photo_camera_outlined),
+                        label: Text(l.honamPhotograph),
                       ),
                     ),
                   ],
@@ -109,40 +159,100 @@ class HonamOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final (icon, color) = switch (order.status) {
-      'DELIVERED' => (Icons.check_circle, AppColors.feedbackSuccess),
-      'REJECTED' || 'EXPIRED' || 'CANCELLED' => (Icons.cancel_outlined, AppColors.feedbackDanger),
-      'QUOTED' || 'ACCEPTED' => (Icons.hourglass_top, AppColors.feedbackWarning),
-      _ => (Icons.local_pharmacy_outlined, AppColors.feedbackInfo),
-    };
     return ModuleCard(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => HonamOrderScreen(orderId: order.id)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ModuleBadge(icon: Icons.local_pharmacy_outlined, color: AppColors.accentPrimary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.honamOrderTitle('${order.id}'),
+          Row(
+            children: [
+              ModuleBadge(
+                icon: Icons.local_pharmacy_outlined,
+                color: AppColors.accentPrimary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l.honamCurrentOrder,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                Text(
-                  order.pharmacy?.name ?? '',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-                const SizedBox(height: 6),
-                KoryStatusPill(icon: icon, label: honamStatusLabel(l, order.status), color: color),
-              ],
-            ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.textMuted),
+            ],
           ),
-          Icon(Icons.chevron_right, color: AppColors.textMuted),
+          const SizedBox(height: 8),
+          Text(order.pharmacy?.name ?? ''),
+          if (order.total != null)
+            Text(
+              '${formatFcfa(order.total!)} · course comprise',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+          const SizedBox(height: 12),
+          _OrderSteps(order: order, label: honamStatusLabel(l, order.status)),
         ],
       ),
+    );
+  }
+}
+
+class _OrderSteps extends StatelessWidget {
+  const _OrderSteps({required this.order, required this.label});
+
+  final HonamOrder order;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final steps = [
+      (Icons.upload_file_outlined, 'Envoyée'),
+      (Icons.receipt_long_outlined, 'Devis'),
+      (Icons.payments_outlined, 'Payée'),
+      (Icons.delivery_dining_outlined, 'En route'),
+      (Icons.check_circle_outline, 'Livrée'),
+    ];
+    final active = switch (order.status) {
+      'SUBMITTED' => 0,
+      'QUOTED' => 1,
+      'ACCEPTED' => 1,
+      'PAID' => 2,
+      'READY' || 'IN_DELIVERY' => 3,
+      'DELIVERED' => 4,
+      _ => 0,
+    };
+    return Column(
+      children: [
+        for (var index = 0; index < steps.length; index++)
+          Row(
+            children: [
+              Icon(
+                steps[index].$1,
+                size: 18,
+                color: index <= active
+                    ? AppColors.accentPrimary
+                    : AppColors.textMuted,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  steps[index].$2,
+                  style: TextStyle(
+                    color: index <= active
+                        ? AppColors.textPrimary
+                        : AppColors.textMuted,
+                  ),
+                ),
+              ),
+              if (index == active)
+                KoryStatusPill(
+                  icon: Icons.circle,
+                  label: label,
+                  color: AppColors.feedbackWarning,
+                ),
+            ],
+          ),
+      ],
     );
   }
 }
@@ -167,7 +277,10 @@ class _Emergency extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.emergency_outlined, color: AppColors.feedbackDanger),
+                const Icon(
+                  Icons.emergency_outlined,
+                  color: AppColors.feedbackDanger,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   l.honamUrgent,
@@ -188,7 +301,9 @@ class _Emergency extends ConsumerWidget {
               children: [
                 for (final entry in numbers.entries)
                   FilledButton.icon(
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.feedbackDanger),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.feedbackDanger,
+                    ),
                     onPressed: () => launchUrl(Uri.parse('tel:${entry.value}')),
                     icon: const Icon(Icons.call, size: 18),
                     label: Text('${_label(entry.key)} ${entry.value}'),
@@ -233,7 +348,12 @@ class _Nearby extends ConsumerWidget {
             loading: () => const [Center(child: CircularProgressIndicator())],
             error: (_, _) => [Text(l.modulesCheckNetwork)],
             data: (items) => items.isEmpty
-                ? [Text(l.honamNoPharmacy, style: TextStyle(color: AppColors.textSecondary))]
+                ? [
+                    Text(
+                      l.honamNoPharmacy,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ]
                 : [for (final p in items.take(8)) PharmacyTile(pharmacy: p)],
           ),
         ],
@@ -245,7 +365,12 @@ class _Nearby extends ConsumerWidget {
 /// Une officine, au format annuaire : les mêmes informations pour toutes
 /// (BM-12). La croix verte dit « officine », pas « recommandée ».
 class PharmacyTile extends StatelessWidget {
-  const PharmacyTile({super.key, required this.pharmacy, this.onTap, this.selected = false});
+  const PharmacyTile({
+    super.key,
+    required this.pharmacy,
+    this.onTap,
+    this.selected = false,
+  });
 
   final Pharmacy pharmacy;
   final VoidCallback? onTap;
@@ -256,14 +381,18 @@ class PharmacyTile extends StatelessWidget {
     final l = L.of(context);
     final details = [
       pharmacy.address,
-      if (pharmacy.distanceKm != null) '${pharmacy.distanceKm!.toStringAsFixed(1)} km',
+      if (pharmacy.distanceKm != null)
+        '${pharmacy.distanceKm!.toStringAsFixed(1)} km',
       if (pharmacy.openingHours != null) pharmacy.openingHours!,
     ].join(' · ');
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
       selected: selected,
-      leading: const Icon(Icons.local_hospital, color: AppColors.feedbackSuccess),
+      leading: const Icon(
+        Icons.local_hospital,
+        color: AppColors.feedbackSuccess,
+      ),
       title: Text(pharmacy.name),
       subtitle: Text(details),
       trailing: onTap != null

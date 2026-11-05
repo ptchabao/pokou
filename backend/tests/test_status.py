@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import base64
 from unittest.mock import patch
 
 import pytest
@@ -66,6 +67,59 @@ def _upload(client, headers, message_type="IMAGE", content=b"fake-bytes", mime="
     ).json()
 
 
+def _upload_opaque(client, headers):
+    return _upload(
+        client,
+        headers,
+        message_type="DOCUMENT",
+        content=b"\x00" * 32,
+        mime="application/octet-stream",
+        name="pokou.bin",
+    )
+
+
+def _recipient_payload(client, headers):
+    audience = client.get("/api/v1/status/audience", headers=headers).json()["recipient_ids"]
+    return [
+        {
+            "user_id": user_id,
+            "encryption": "v1",
+            "ciphertext": base64.b64encode(b"\x00" * 32).decode(),
+            "envelope": {
+                "v": 1,
+                "sid": f"test-{user_id}",
+                "n": 0,
+                "iv": base64.b64encode(b"\x00" * 12).decode(),
+            },
+        }
+        for user_id in audience
+    ]
+
+
+def _post_text_status(client, headers, text="bonjour"):
+    response = client.post(
+        "/api/v1/status",
+        json={"content_type": "TEXT", "recipients": _recipient_payload(client, headers)},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def _post_media_status(client, headers, media_asset_id, content_type="IMAGE"):
+    response = client.post(
+        "/api/v1/status",
+        json={
+            "content_type": content_type,
+            "media_asset_id": media_asset_id,
+            "recipients": _recipient_payload(client, headers),
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
 def _expire(status_id: str) -> None:
     # Passe par app.dependency_overrides[get_db] plutôt que par
     # TestingSessionLocal directement : quand ce fichier tourne aux côtés
@@ -88,35 +142,81 @@ def _expire(status_id: str) -> None:
 
 def test_create_text_status(client):
     headers, _, _ = _signup(client, "+22892000001")
-    response = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "Bonne journée !"}, headers=headers
-    )
-    assert response.status_code == 200, response.text
-    body = response.json()
+    body = _post_text_status(client, headers, "Bonne journée !")
     assert body["content_type"] == "TEXT"
-    assert body["text_content"] == "Bonne journée !"
+    assert body["text_content"] is None
+    assert body["encrypted_content"] is None
     assert body["media"] is None
     assert body["view_count"] == 0
 
 
-def test_text_status_requires_text_content(client):
+def test_plaintext_status_content_is_rejected(client):
     headers, _, _ = _signup(client, "+22892000002")
-    response = client.post("/api/v1/status", json={"content_type": "TEXT"}, headers=headers)
-    assert response.status_code == 400
+    plaintext = client.post(
+        "/api/v1/status",
+        json={"content_type": "TEXT", "text_content": "must not reach server"},
+        headers=headers,
+    )
+    assert plaintext.status_code == 422
 
 
 def test_create_media_status(client):
     headers, _, _ = _signup(client, "+22892000003")
+    uploaded = _upload_opaque(client, headers)
+    body = _post_media_status(client, headers, uploaded["id"])
+    assert body["media"]["id"] == uploaded["id"]
+    assert body["text_content"] is None
+
+
+def test_status_audience_is_authoritative_and_cannot_fall_back_to_plaintext(client):
+    headers_a, _, _ = _signup(client, "+22892000030")
+    headers_b, user_id_b, _ = _signup(client, "+22892000031")
+    client.post(
+        "/api/v1/contacts",
+        json={"phone": "+22892000031", "display_name": "Bob"},
+        headers=headers_a,
+    )
+    client.post(
+        "/api/v1/contacts",
+        json={"phone": "+22892000030", "display_name": "Alice"},
+        headers=headers_b,
+    )
+    audience = client.get("/api/v1/status/audience", headers=headers_a).json()
+    assert audience["recipient_ids"] == [user_id_b]
+
+    stale = {
+        "content_type": "TEXT",
+        "recipients": [],
+    }
+    response = client.post("/api/v1/status", json=stale, headers=headers_a)
+    assert response.status_code == 409
+
+    created = _post_text_status(client, headers_a, "secret text")
+    feed = client.get("/api/v1/status/feed", headers=headers_b).json()["items"]
+    status = feed[0]["statuses"][0]
+    assert status["text_content"] is None
+    assert status["encrypted_content"]["ciphertext"]
+    assert status["encrypted_content"]["envelope"]
+
+    owner_feed = client.get("/api/v1/status/feed", headers=headers_a).json()["items"]
+    own = next(item for item in owner_feed if item["user_id"] == created["user_id"])
+    assert own["statuses"][0]["text_content"] is None
+    assert own["statuses"][0]["encrypted_content"] is None
+
+
+def test_plaintext_media_markers_are_rejected(client):
+    headers, _, _ = _signup(client, "+22892000032")
     uploaded = _upload(client, headers)
     response = client.post(
         "/api/v1/status",
-        json={"content_type": "IMAGE", "media_asset_id": uploaded["id"], "text_content": "légende"},
+        json={
+            "content_type": "IMAGE",
+            "media_asset_id": uploaded["id"],
+            "recipients": _recipient_payload(client, headers),
+        },
         headers=headers,
     )
-    assert response.status_code == 200, response.text
-    body = response.json()
-    assert body["media"]["id"] == uploaded["id"]
-    assert body["text_content"] == "légende"
+    assert response.status_code == 400
 
 
 def test_media_status_requires_media_asset_id(client):
@@ -133,12 +233,8 @@ def test_status_media_downloadable_by_contact_viewing_the_feed(client):
     client.post("/api/v1/contacts", json={"phone": "+22892000009", "display_name": "Bob"}, headers=headers_a)
     client.post("/api/v1/contacts", json={"phone": "+22892000008", "display_name": "Alice"}, headers=headers_b)
 
-    uploaded = _upload(client, headers_a)
-    created = client.post(
-        "/api/v1/status",
-        json={"content_type": "IMAGE", "media_asset_id": uploaded["id"]},
-        headers=headers_a,
-    ).json()
+    uploaded = _upload_opaque(client, headers_a)
+    created = _post_media_status(client, headers_a, uploaded["id"])
 
     # B fait partie du public de A — il peut télécharger le média du statut.
     response = client.get(f"/api/v1/media/{created['media']['id']}", headers=headers_b)
@@ -149,12 +245,8 @@ def test_status_media_not_downloadable_by_non_contact(client):
     headers_a, _, _ = _signup(client, "+22892000010")
     headers_c, _, _ = _signup(client, "+22892000011")  # pas dans les contacts de A
 
-    uploaded = _upload(client, headers_a)
-    created = client.post(
-        "/api/v1/status",
-        json={"content_type": "IMAGE", "media_asset_id": uploaded["id"]},
-        headers=headers_a,
-    ).json()
+    uploaded = _upload_opaque(client, headers_a)
+    created = _post_media_status(client, headers_a, uploaded["id"])
 
     response = client.get(f"/api/v1/media/{created['media']['id']}", headers=headers_c)
     assert response.status_code == 404
@@ -163,11 +255,15 @@ def test_status_media_not_downloadable_by_non_contact(client):
 def test_cannot_create_status_with_someone_elses_asset(client):
     headers_a, _, _ = _signup(client, "+22892000005")
     headers_b, _, _ = _signup(client, "+22892000006")
-    uploaded_by_b = _upload(client, headers_b)
+    uploaded_by_b = _upload_opaque(client, headers_b)
 
     response = client.post(
         "/api/v1/status",
-        json={"content_type": "IMAGE", "media_asset_id": uploaded_by_b["id"]},
+        json={
+            "content_type": "IMAGE",
+            "media_asset_id": uploaded_by_b["id"],
+            "recipients": _recipient_payload(client, headers_a),
+        },
         headers=headers_a,
     )
     assert response.status_code == 404
@@ -175,7 +271,7 @@ def test_cannot_create_status_with_someone_elses_asset(client):
 
 def test_invalid_content_type_rejected(client):
     headers, _, _ = _signup(client, "+22892000007")
-    response = client.post("/api/v1/status", json={"content_type": "GIF", "text_content": "x"}, headers=headers)
+    response = client.post("/api/v1/status", json={"content_type": "GIF"}, headers=headers)
     assert response.status_code == 400
 
 
@@ -192,9 +288,9 @@ def test_feed_includes_own_and_contacts_statuses_not_strangers(client):
     # donne pas accès à ses statuts.
     client.post("/api/v1/contacts", json={"phone": "+22892000010", "display_name": "Alice"}, headers=headers_b)
 
-    client.post("/api/v1/status", json={"content_type": "TEXT", "text_content": "moi"}, headers=headers_a)
-    client.post("/api/v1/status", json={"content_type": "TEXT", "text_content": "bob"}, headers=headers_b)
-    client.post("/api/v1/status", json={"content_type": "TEXT", "text_content": "charlie"}, headers=headers_c)
+    _post_text_status(client, headers_a, "moi")
+    _post_text_status(client, headers_b, "bob")
+    _post_text_status(client, headers_c, "charlie")
 
     feed = client.get("/api/v1/status/feed", headers=headers_a).json()["items"]
     author_ids = {item["user_id"] for item in feed}
@@ -204,9 +300,7 @@ def test_feed_includes_own_and_contacts_statuses_not_strangers(client):
 
 def test_feed_excludes_expired_statuses(client):
     headers, _, _ = _signup(client, "+22892000013")
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "va expirer"}, headers=headers
-    ).json()
+    created = _post_text_status(client, headers, "va expirer")
     _expire(created["id"])
 
     feed = client.get("/api/v1/status/feed", headers=headers).json()["items"]
@@ -224,9 +318,7 @@ def test_view_status_records_view_and_increments_count(client):
     # d'adresses du *spectateur*, comme pour le feed (voir _require_contact).
     client.post("/api/v1/contacts", json={"phone": "+22892000020", "display_name": "Alice"}, headers=headers_b)
 
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "salut"}, headers=headers_a
-    ).json()
+    created = _post_text_status(client, headers_a, "salut")
 
     viewed = client.post(f"/api/v1/status/{created['id']}/view", headers=headers_b)
     assert viewed.status_code == 200
@@ -239,9 +331,7 @@ def test_view_status_records_view_and_increments_count(client):
 
 def test_viewing_own_status_does_not_count(client):
     headers_a, user_id_a, _ = _signup(client, "+22892000022")
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "salut"}, headers=headers_a
-    ).json()
+    created = _post_text_status(client, headers_a, "salut")
 
     response = client.post(f"/api/v1/status/{created['id']}/view", headers=headers_a)
     assert response.status_code == 200
@@ -255,12 +345,10 @@ def test_cannot_view_status_of_non_contact(client):
     headers_a, _, _ = _signup(client, "+22892000023")
     headers_b, _, _ = _signup(client, "+22892000024")  # not a contact of A
 
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "salut"}, headers=headers_a
-    ).json()
+    created = _post_text_status(client, headers_a, "salut")
 
     response = client.post(f"/api/v1/status/{created['id']}/view", headers=headers_b)
-    assert response.status_code == 403
+    assert response.status_code == 404
 
 
 def test_view_expired_status_returns_404(client):
@@ -268,9 +356,7 @@ def test_view_expired_status_returns_404(client):
     headers_b, _, _ = _signup(client, "+22892000026")
     client.post("/api/v1/contacts", json={"phone": "+22892000026", "display_name": "Bob"}, headers=headers_a)
 
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "salut"}, headers=headers_a
-    ).json()
+    created = _post_text_status(client, headers_a, "salut")
     _expire(created["id"])
 
     response = client.post(f"/api/v1/status/{created['id']}/view", headers=headers_b)
@@ -278,14 +364,6 @@ def test_view_expired_status_returns_404(client):
 
 
 # ─── Visibilité choisie par l'auteur ─────────────────────────────────────────
-
-def _post_text_status(client, headers, text="bonjour"):
-    response = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": text}, headers=headers
-    )
-    assert response.status_code == 200, response.text
-    return response.json()
-
 
 def _feed_author_ids(client, headers):
     feed = client.get("/api/v1/status/feed", headers=headers).json()
@@ -422,17 +500,8 @@ def test_status_media_cannot_be_fetched_by_someone_who_cannot_see_the_status(cli
     client.post("/api/v1/contacts", json={"phone": "+22893300020", "display_name": "Bob"}, headers=headers_a)
     client.post("/api/v1/contacts", json={"phone": "+22893300019", "display_name": "Alice"}, headers=headers_b)
 
-    uploaded = client.post(
-        "/api/v1/media/upload",
-        data={"message_type": "IMAGE"},
-        files={"file": ("story.jpg", b"fake-jpeg", "image/jpeg")},
-        headers=headers_a,
-    ).json()
-    client.post(
-        "/api/v1/status",
-        json={"content_type": "IMAGE", "media_asset_id": uploaded["id"]},
-        headers=headers_a,
-    )
+    uploaded = _upload_opaque(client, headers_a)
+    _post_media_status(client, headers_a, uploaded["id"])
 
     # Visible tant que le mode est CONTACTS…
     assert client.get(f"/api/v1/media/{uploaded['id']}", headers=headers_b).status_code == 200
@@ -460,9 +529,7 @@ def test_the_author_sees_who_viewed_and_when(client):
     client.post("/api/v1/contacts", json={"phone": "+22894500001", "display_name": "Ama"}, headers=headers_b)
     client.post("/api/v1/contacts", json={"phone": "+22894500001", "display_name": "Ama"}, headers=headers_c)
 
-    status_id = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "Dépôt ouvert"}, headers=headers_a
-    ).json()["id"]
+    status_id = _post_text_status(client, headers_a, "Dépôt ouvert")["id"]
 
     client.post(f"/api/v1/status/{status_id}/view", headers=headers_b)
     client.post(f"/api/v1/status/{status_id}/view", headers=headers_c)
@@ -482,9 +549,7 @@ def test_viewing_twice_counts_once(client):
     headers_b, user_id_b, _ = _signup(client, "+22894500005")
     client.post("/api/v1/contacts", json={"phone": "+22894500005", "display_name": "Bob"}, headers=headers_a)
     client.post("/api/v1/contacts", json={"phone": "+22894500004", "display_name": "Ama"}, headers=headers_b)
-    status_id = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "Coucou"}, headers=headers_a
-    ).json()["id"]
+    status_id = _post_text_status(client, headers_a, "Coucou")["id"]
 
     for _ in range(3):
         client.post(f"/api/v1/status/{status_id}/view", headers=headers_b)
@@ -502,9 +567,7 @@ def test_nobody_else_can_see_who_viewed_a_status(client):
     headers_b, user_id_b, _ = _signup(client, "+22894500007")
     client.post("/api/v1/contacts", json={"phone": "+22894500007", "display_name": "Bob"}, headers=headers_a)
     client.post("/api/v1/contacts", json={"phone": "+22894500006", "display_name": "Ama"}, headers=headers_b)
-    status_id = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "Privé"}, headers=headers_a
-    ).json()["id"]
+    status_id = _post_text_status(client, headers_a, "Privé")["id"]
     client.post(f"/api/v1/status/{status_id}/view", headers=headers_b)
 
     # B a VU le statut, mais ne doit pas savoir qui d'autre l'a vu.
@@ -513,9 +576,7 @@ def test_nobody_else_can_see_who_viewed_a_status(client):
 
 def test_a_status_nobody_watched_reports_zero_views(client):
     headers_a, _, _ = _signup(client, "+22894500008")
-    status_id = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "Personne"}, headers=headers_a
-    ).json()["id"]
+    status_id = _post_text_status(client, headers_a, "Personne")["id"]
 
     views = client.get(f"/api/v1/status/{status_id}/views", headers=headers_a).json()
     assert views["view_count"] == 0
@@ -531,9 +592,7 @@ def test_l_auteur_retire_son_statut_avant_les_24h(client):
     headers_b, _, _ = _signup(client, "+22892000091")
     client.post("/api/v1/contacts", json={"phone": "+22892000091", "display_name": "Bob"}, headers=headers_a)
     client.post("/api/v1/contacts", json={"phone": "+22892000090", "display_name": "Alice"}, headers=headers_b)
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "mauvais prix"}, headers=headers_a
-    ).json()
+    created = _post_text_status(client, headers_a, "mauvais prix")
     client.post(f"/api/v1/status/{created['id']}/view", headers=headers_b)
 
     response = client.delete(f"/api/v1/status/{created['id']}", headers=headers_a)
@@ -551,9 +610,7 @@ def test_l_auteur_retire_son_statut_avant_les_24h(client):
 def test_on_ne_retire_pas_le_statut_d_un_autre(client):
     headers_a, _, _ = _signup(client, "+22892000092")
     headers_b, _, _ = _signup(client, "+22892000093")
-    created = client.post(
-        "/api/v1/status", json={"content_type": "TEXT", "text_content": "à moi"}, headers=headers_a
-    ).json()
+    created = _post_text_status(client, headers_a, "à moi")
 
     # 404 et non 403 : « interdit » confirmerait l'existence du statut.
     assert client.delete(f"/api/v1/status/{created['id']}", headers=headers_b).status_code == 404

@@ -2,11 +2,11 @@
 
 Les valeurs par défaut sont écrites ici ; chacune se surcharge sans
 publication par un réglage système `country.<CC>` (JSON partiel), que
-l'équipe modifie depuis la base. HONAM et les discussions sont ouverts par
-défaut dans tous les pays (NAV-01).
+l'équipe modifie depuis la base. Kory et HONAM sont ouverts dans tous les
+pays ; les réglages pays ne peuvent désactiver que les autres modules.
 
-Un pays absent de la table utilise les modules de repli : discussions et
-HONAM. Kory et les autres modules restent limités aux pays configurés.
+Un pays absent de la table conserve les discussions, Kory et HONAM. Les
+autres modules restent limités aux pays configurés.
 """
 import json
 from typing import Any, Optional
@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 from app.services.settings_service import get_setting
 from app.utils.phone import country_for_e164
 
-#: Les modules connus. Un module qui n'est pas listé dans `modules` est
-#: fermé, et son onglet n'apparaît pas.
+#: Les modules connus. Kory et HONAM restent ouverts même s'ils sont absents
+#: d'un réglage pays ; les autres modules doivent être listés.
 MODULES = ("discussions", "kory", "kory_plus", "honam", "assime", "certified")
 
 _DEFAULTS: dict[str, dict[str, Any]] = {
@@ -41,7 +41,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         "pharmacy_yearly_price": 75000,
         "emergency_numbers": {"police": "110", "pompiers": "180", "samu": "185"},
         "honam_cities": ["Abidjan"],
-        "modules": ["discussions", "honam"],
+        "modules": ["discussions", "kory", "honam"],
     },
 }
 
@@ -53,7 +53,7 @@ _FALLBACK: dict[str, Any] = {
     "pharmacy_yearly_price": None,
     "emergency_numbers": {},
     "honam_cities": [],
-    "modules": ["discussions", "honam"],
+    "modules": ["discussions", "kory", "honam"],
 }
 
 
@@ -70,7 +70,15 @@ def country_config(db: Session, country: Optional[str]) -> dict[str, Any]:
         # entier : il est ignoré, et la valeur par défaut reste en vigueur.
         if isinstance(patch, dict):
             config.update(patch)
-    config["modules"] = [m for m in config.get("modules", []) if m in MODULES]
+    configured_modules = config.get("modules", [])
+    if not isinstance(configured_modules, list):
+        configured_modules = []
+    enabled = {
+        module
+        for module in configured_modules
+        if isinstance(module, str) and module in MODULES
+    } | {"kory", "honam"}
+    config["modules"] = [module for module in MODULES if module in enabled]
     config["country"] = code or None
     return config
 

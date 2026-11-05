@@ -2,15 +2,17 @@
 app/utils/scheduler.py::_status_purge_loop). L'audience est choisie par
 l'auteur (voir app/services/status_privacy_service.py)."""
 import logging
+import base64
+import binascii
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
-from app.models import Contact, MarketplaceBoost, MediaAsset, Status, StatusContentType, StatusView, User
+from app.models import Contact, MarketplaceBoost, MediaAsset, Status, StatusContentType, StatusRecipient, StatusView, User
 from app.api.v1.messaging.ws import manager
 from app.services.privacy import status_privacy_service
 from app.utils.identity import est_certifie, nom_affiche
@@ -21,11 +23,42 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/status", tags=["Pokou status"])
 
 
+class StatusRecipientCreate(BaseModel):
+    user_id: int
+    encryption: str = Field(min_length=1, max_length=32)
+    ciphertext: str = Field(min_length=1, max_length=8192)
+    envelope: Dict[str, Any]
+
+    class Config:
+        extra = "forbid"
+
+    def valid_e2ee_payload(self) -> bool:
+        nonce = self.envelope.get("iv")
+        try:
+            nonce_bytes = base64.b64decode(nonce, validate=True)
+            ciphertext_bytes = base64.b64decode(self.ciphertext, validate=True)
+        except (TypeError, ValueError, binascii.Error):
+            return False
+        return (
+            self.encryption == "v1"
+            and self.envelope.get("v") == 1
+            and isinstance(self.envelope.get("sid"), str)
+            and bool(self.envelope.get("sid"))
+            and isinstance(self.envelope.get("n"), int)
+            and self.envelope["n"] >= 0
+            and len(nonce_bytes) == 12
+            and len(ciphertext_bytes) >= 16
+        )
+
+
 class StatusCreate(BaseModel):
     content_type: str
-    text_content: Optional[str] = Field(None, max_length=700)
     media_asset_id: Optional[int] = None
     background_color: Optional[str] = Field(None, max_length=9, pattern=r"^#[0-9A-Fa-f]{6}$")
+    recipients: List[StatusRecipientCreate] = Field(default_factory=list, max_length=1000)
+
+    class Config:
+        extra = "forbid"
 
 
 def _require_contact(db: Session, owner_id: int, contact_user_id: int) -> None:
@@ -49,12 +82,28 @@ def _serialize_avatar(asset: Optional[MediaAsset]) -> Optional[dict]:
     return _serialize_media(asset) if asset is not None else None
 
 
-def _serialize_status(status: Status, viewed_by_me: bool, view_count: int) -> dict:
+def _serialize_status(
+    status: Status,
+    viewed_by_me: bool,
+    view_count: int,
+    encrypted_content: Optional[StatusRecipient] = None,
+) -> dict:
     return {
         "id": status.id,
         "user_id": status.user_id,
         "content_type": status.content_type.value,
-        "text_content": status.text_content,
+        # Never a plaintext compatibility fallback: an author's own
+        # plaintext lives only in their encrypted local cache.
+        "text_content": None,
+        "encrypted_content": (
+            {
+                "encryption": encrypted_content.encryption,
+                "ciphertext": encrypted_content.ciphertext,
+                "envelope": encrypted_content.envelope,
+            }
+            if encrypted_content is not None
+            else None
+        ),
         "background_color": status.background_color,
         "media": _serialize_media(status.media_asset) if status.media_asset else None,
         "created_at": status.created_at.isoformat(),
@@ -76,34 +125,75 @@ async def create_status(
     except ValueError:
         raise HTTPException(status_code=400, detail="Type de statut invalide")
 
+    audience = status_privacy_service.viewer_ids_for(db, user_id)
+    recipient_ids = [recipient.user_id for recipient in payload.recipients]
+    if len(recipient_ids) != len(set(recipient_ids)) or set(recipient_ids) != audience:
+        raise HTTPException(
+            status_code=409,
+            detail="L'audience a changé. Rechargez-la puis chiffrez à nouveau le statut.",
+        )
+    if any(not recipient.valid_e2ee_payload() for recipient in payload.recipients):
+        raise HTTPException(status_code=400, detail="Enveloppe E2EE de statut invalide")
+    if user_id in recipient_ids:
+        raise HTTPException(status_code=400, detail="L'auteur ne doit pas être un destinataire E2EE")
+
     media_asset = None
     if content_type == StatusContentType.TEXT:
-        if not payload.text_content or not payload.text_content.strip():
-            raise HTTPException(status_code=400, detail="Le texte du statut est requis")
+        if payload.media_asset_id is not None:
+            raise HTTPException(status_code=400, detail="Un statut texte ne peut pas avoir de pièce jointe")
     else:
         if not payload.media_asset_id:
             raise HTTPException(status_code=400, detail="Une pièce jointe est requise pour ce type de statut")
         media_asset = db.query(MediaAsset).filter(MediaAsset.id == payload.media_asset_id).first()
         if not media_asset or media_asset.uploader_id != user_id:
             raise HTTPException(status_code=404, detail="Pièce jointe introuvable")
+        if (
+            media_asset.mime_type != "application/octet-stream"
+            or media_asset.original_filename != "pokou.bin"
+            or media_asset.size_bytes < 16
+        ):
+            raise HTTPException(status_code=400, detail="Le média du statut doit être chiffré et opaque")
 
     now = datetime.utcnow()
     status_row = Status(
         user_id=user_id,
         content_type=content_type,
-        text_content=payload.text_content,
         background_color=payload.background_color or "#3F6212",
         media_asset_id=media_asset.id if media_asset else None,
         created_at=now,
         expires_at=now + timedelta(hours=24),
     )
     db.add(status_row)
+    db.flush()
+    for recipient in payload.recipients:
+        db.add(
+            StatusRecipient(
+                status_id=status_row.id,
+                recipient_id=recipient.user_id,
+                encryption=recipient.encryption,
+                ciphertext=recipient.ciphertext,
+                envelope=recipient.envelope,
+            )
+        )
     db.commit()
     db.refresh(status_row)
 
     serialized = _serialize_status(status_row, viewed_by_me=False, view_count=0)
     await _announce_status(db, current_user, status_row, serialized)
     return serialized
+
+
+@router.get("/audience")
+async def status_audience(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Return the exact current feed audience, for client-side E2EE wrapping."""
+    user_id = current_user["user_id"]
+    return {
+        "author_id": user_id,
+        "recipient_ids": sorted(status_privacy_service.viewer_ids_for(db, user_id)),
+    }
 
 
 
@@ -166,6 +256,19 @@ async def get_feed(db: Session = Depends(get_db), current_user: dict = Depends(g
         .order_by(Status.user_id, Status.created_at.asc())
         .all()
     )
+    recipient_rows = (
+        db.query(StatusRecipient)
+        .filter(
+            StatusRecipient.status_id.in_([status.id for status in statuses] or [""]),
+            StatusRecipient.recipient_id == user_id,
+        )
+        .all()
+    )
+    recipient_content = {row.status_id: row for row in recipient_rows}
+    statuses = [
+        status for status in statuses
+        if status.user_id == user_id or status.id in recipient_content
+    ]
     boosted_status_ids = {
         row[0]
         for row in db.query(MarketplaceBoost.status_id)
@@ -192,6 +295,7 @@ async def get_feed(db: Session = Depends(get_db), current_user: dict = Depends(g
                 status_row,
                 viewed_by_me=status_row.id in viewed_by_me_ids,
                 view_count=view_counts.get(status_row.id, 0),
+                encrypted_content=recipient_content.get(status_row.id),
             )
         )
 
@@ -349,7 +453,13 @@ async def view_status(
     if status_row.user_id == user_id:
         return {"ok": True}
 
-    _require_contact(db, user_id, status_row.user_id)
+    if not status_privacy_service.can_view_statuses_of(db, status_row.user_id, user_id):
+        raise HTTPException(status_code=404, detail="Statut introuvable")
+    if not db.query(StatusRecipient.id).filter(
+        StatusRecipient.status_id == status_id,
+        StatusRecipient.recipient_id == user_id,
+    ).first():
+        raise HTTPException(status_code=404, detail="Statut introuvable")
 
     existing = db.query(StatusView).filter(
         StatusView.status_id == status_id, StatusView.viewer_id == user_id

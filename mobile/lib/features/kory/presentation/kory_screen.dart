@@ -35,28 +35,77 @@ class KoryScreen extends ConsumerWidget {
         },
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: PokouAppBar(title: l.koryTitle)),
+            SliverToBoxAdapter(
+              child: PokouAppBar(
+                title: l.koryTitle,
+                subtitle: l.korySubtitle,
+                showStatus: false,
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.brandEbene,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: const Icon(
+                    Icons.savings_outlined,
+                    color: AppColors.brandOr,
+                  ),
+                ),
+              ),
+            ),
             const SliverToBoxAdapter(child: _SummaryCard()),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Row(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: ModuleActionButton(
-                        label: l.koryCreate,
-                        icon: Icons.add,
-                        expanded: true,
-                        onPressed: () => openKoryCreate(context, ref),
-                      ),
+                    ModuleActionButton(
+                      label: l.koryCreate,
+                      icon: Icons.add,
+                      onPressed: () => openKoryCreate(context, ref),
                     ),
-                    const SizedBox(width: 12),
-                    ModuleQuietButton(
-                      label: l.koryJoin,
-                      expanded: false,
-                      onPressed: () => _join(context, ref),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ModuleQuietButton(
+                            label: l.koryJoin,
+                            onPressed: () => _join(context, ref),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ModuleQuietButton(
+                            label: l.koryJournalTab,
+                            onPressed: () {
+                              final first = pots.valueOrNull?.firstOrNull;
+                              if (first == null) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      KoryPotScreen(potId: first.id),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                child: Text(
+                  l.koryMyPots,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -96,7 +145,11 @@ class KoryScreen extends ConsumerWidget {
                           separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (_, index) => index == items.length
-                              ? const _TontineTeaser()
+                              ? _TontineCard(
+                                  pot: items
+                                      .where((pot) => pot.isTontine)
+                                      .firstOrNull,
+                                )
                               : KoryPotCard(pot: items[index]),
                         ),
                       ),
@@ -140,9 +193,9 @@ class KoryScreen extends ConsumerWidget {
       final pot = await ref.read(koryRepositoryProvider).join(code);
       refreshKory(ref);
       if (!context.mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
-      );
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)));
     } catch (_) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(
@@ -161,18 +214,27 @@ class _SummaryCard extends ConsumerWidget {
     final summary = ref.watch(korySummaryProvider).valueOrNull;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: ModuleCard(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.brandEbene,
+          borderRadius: AppRadius.card,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l.koryMonthTotal,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style: const TextStyle(
+                color: AppColors.neutralCreme,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               formatFcfa(summary?.monthConfirmedTotal ?? 0),
               style: const TextStyle(
+                color: AppColors.neutralCreme,
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 fontFeatures: [FontFeature.tabularFigures()],
@@ -183,7 +245,7 @@ class _SummaryCard extends ConsumerWidget {
               KoryStatusPill(
                 icon: Icons.hourglass_top,
                 label: l.koryToReview('${summary!.toReviewCount}'),
-                color: AppColors.feedbackWarning,
+                color: AppColors.brandOr,
               ),
             ],
             const SizedBox(height: 10),
@@ -193,14 +255,14 @@ class _SummaryCard extends ConsumerWidget {
                 Icon(
                   Icons.shield_outlined,
                   size: 18,
-                  color: AppColors.textSecondary,
+                  color: AppColors.neutralCreme,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     l.koryNoMoney,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
+                    style: const TextStyle(
+                      color: AppColors.neutralCreme,
                       fontSize: 13,
                     ),
                   ),
@@ -216,18 +278,20 @@ class _SummaryCard extends ConsumerWidget {
 
 /// Une cagnotte dans une liste — réutilisée par l'accueil.
 class KoryPotCard extends StatelessWidget {
-  const KoryPotCard({super.key, required this.pot});
+  const KoryPotCard({super.key, required this.pot, this.dark = false});
 
   final KoryPot pot;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final progress = pot.progress;
     return ModuleCard(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
-      ),
+      backgroundColor: dark ? AppColors.brandEbene : null,
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -237,7 +301,7 @@ class KoryPotCard extends StatelessWidget {
                 icon: pot.isCotisation
                     ? Icons.event_repeat_outlined
                     : Icons.savings_outlined,
-                color: AppColors.accentPrimary,
+                color: dark ? AppColors.brandOr : AppColors.accentPrimary,
                 muted: !pot.isOpen,
               ),
               const SizedBox(width: 12),
@@ -249,7 +313,10 @@ class KoryPotCard extends StatelessWidget {
                       pot.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
+                        color: dark
+                            ? AppColors.neutralCreme
+                            : AppColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -259,10 +326,22 @@ class KoryPotCard extends StatelessWidget {
                           ? l.koryKindCotisation
                           : l.koryKindCagnotte,
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: dark
+                            ? AppColors.neutralCreme.withValues(alpha: 0.8)
+                            : AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
+                    if (pot.organizerName != null)
+                      Text(
+                        '${pot.organizerName} · ${pot.entries.length} contributions confirmées',
+                        style: TextStyle(
+                          color: dark
+                              ? AppColors.neutralCreme.withValues(alpha: 0.8)
+                              : AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -270,20 +349,25 @@ class KoryPotCard extends StatelessWidget {
                 KoryStatusPill(
                   icon: Icons.lock_outline,
                   label: l.koryClosed,
-                  color: AppColors.textSecondary,
+                  color: dark
+                      ? AppColors.neutralCreme
+                      : AppColors.textSecondary,
                 )
               else if ((pot.pendingCount ?? 0) > 0)
                 KoryStatusPill(
                   icon: Icons.hourglass_top,
                   label: l.koryToReview('${pot.pendingCount}'),
-                  color: AppColors.feedbackWarning,
+                  color: dark ? AppColors.brandOr : AppColors.feedbackWarning,
                 ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             l.koryTotalConfirmed,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            style: TextStyle(
+              color: dark ? AppColors.neutralCreme : AppColors.textSecondary,
+              fontSize: 12,
+            ),
           ),
           Text(
             formatFcfa(pot.confirmedTotal),
@@ -297,14 +381,19 @@ class KoryPotCard extends StatelessWidget {
             const SizedBox(height: 8),
             ModuleProgressBar(
               value: progress,
-              color: AppColors.accentPrimary,
+              color: dark ? AppColors.brandOr : AppColors.accentPrimary,
               done: progress >= 1,
             ),
             const SizedBox(height: 4),
             // Le pourcentage en TEXTE, pas seulement en barre (section 7.6).
             Text(
               '${(progress * 100).round()} % · ${l.koryGoal(formatFcfa(pot.goalAmount!))}',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: TextStyle(
+                color: dark
+                    ? AppColors.neutralCreme.withValues(alpha: 0.8)
+                    : AppColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
           ],
           if (pot.dueAt != null) ...[
@@ -315,7 +404,12 @@ class KoryPotCard extends StatelessWidget {
                   Localizations.localeOf(context).toLanguageTag(),
                 ).format(pot.dueAt!.toLocal()),
               ),
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: TextStyle(
+                color: dark
+                    ? AppColors.neutralCreme.withValues(alpha: 0.8)
+                    : AppColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
           ],
         ],
@@ -326,27 +420,56 @@ class KoryPotCard extends StatelessWidget {
 
 /// La tontine en rotation existe dans le cahier des charges, mais pas
 /// avant Kory Plus (mois 13). On l'annonce sans la proposer.
-class _TontineTeaser extends StatelessWidget {
-  const _TontineTeaser();
+class _TontineCard extends StatelessWidget {
+  const _TontineCard({required this.pot});
+
+  final KoryPot? pot;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.card,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
+    if (pot == null) return const SizedBox.shrink();
+    final round =
+        pot!.currentRound != null &&
+            pot!.currentRound! > 0 &&
+            pot!.currentRound! <= pot!.rounds.length
+        ? pot!.rounds[pot!.currentRound! - 1]
+        : pot!.rounds.firstOrNull;
+    return ModuleCard(
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot!.id))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.autorenew, color: AppColors.textSecondary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              L.of(context).koryTontinePlus,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
+          Text(
+            '${pot!.title} · Kory Plus · tour ${pot!.currentRound ?? 0} sur ${pot!.rounds.length}',
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
+          const SizedBox(height: 6),
+          Text(
+            'Tontine · ${pot!.groupId == null ? '' : pot!.organizerName ?? ''} · bénéficiaire du mois : ${round?.beneficiaryName ?? '—'}',
+          ),
+          if (round != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                KoryStatusPill(
+                  icon: Icons.schedule,
+                  label:
+                      '${formatFcfa(round.expectedTotal)} attendus aujourd’hui',
+                  color: AppColors.feedbackWarning,
+                ),
+                const Spacer(),
+                Text(
+                  'Contribuer',
+                  style: TextStyle(
+                    color: AppColors.accentPrimaryDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

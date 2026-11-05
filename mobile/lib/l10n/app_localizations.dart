@@ -5127,6 +5127,24 @@ abstract class L {
   /// **'Impossible d\'ajouter ce participant.'**
   String get callAddFailed;
 
+  /// No description provided for @callReactionFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'envoyer cette réaction.'**
+  String get callReactionFailed;
+
+  /// No description provided for @callLeaveConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quitter l\'appel ?'**
+  String get callLeaveConfirmTitle;
+
+  /// No description provided for @callLeaveConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les autres participants peuvent encore parler. Pour revenir à l\'appel, vous pouvez fermer cet écran sans raccrocher.'**
+  String get callLeaveConfirmBody;
+
   /// No description provided for @callYou.
   ///
   /// In fr, this message translates to:
@@ -8757,6 +8775,12 @@ abstract class L {
   /// **'Cagnottes & tontines'**
   String get korySubtitle;
 
+  /// No description provided for @koryMyPots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes cagnottes'**
+  String get koryMyPots;
+
   /// No description provided for @koryMonthTotal.
   ///
   /// In fr, this message translates to:
@@ -9254,6 +9278,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Pharmacies & livraison'**
   String get honamSubtitle;
+
+  /// No description provided for @honamIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une pharmacie proche t\'envoie un devis. Tu la paies depuis ton wallet, puis un coursier te la livre.'**
+  String get honamIntro;
 
   /// No description provided for @honamSend.
   ///

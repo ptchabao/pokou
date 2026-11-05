@@ -112,6 +112,11 @@ class _OngoingCallBarState extends State<_OngoingCallBar> {
     );
   }
 
+  Future<void> _hangUp() async {
+    final shouldHangUp = await confirmCallHangUp(context);
+    if (shouldHangUp == true) await widget.session.hangUp();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
@@ -144,7 +149,7 @@ class _OngoingCallBarState extends State<_OngoingCallBar> {
                   ),
                 ),
                 IconButton(
-                  onPressed: widget.session.hangUp,
+                  onPressed: _hangUp,
                   tooltip: l.callHangUp,
                   icon: const Icon(Icons.call_end, color: Colors.white),
                 ),

@@ -211,24 +211,11 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       ),
                     ),
                     Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Le logo officiel : deux bulles de discussion liées.
-                          Image.asset(
-                            'assets/brand/pokou_logo.png',
-                            height: 48,
-                            semanticLabel: L.of(context).appName,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            L.of(context).appName,
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      child: Image.asset(
+                        'assets/brand/pokou_logotype_couleur.png',
+                        height: 48,
+                        fit: BoxFit.contain,
+                        semanticLabel: L.of(context).appName,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -241,18 +228,28 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Les services réellement ouverts : avant la connexion,
-                    // le pays n'est connu que par la région du téléphone.
+                    // Kory et Honam sont désormais disponibles dans tous les
+                    // pays, y compris avant que le compte soit identifié.
                     _Service(
                       icon: Icons.forum_outlined,
                       label: L.of(context).welcomeServiceChats,
                     ),
-                    if (Localizations.localeOf(context).countryCode == null ||
-                        Localizations.localeOf(context).countryCode == 'TG')
-                      _Service(
-                        icon: Icons.savings_outlined,
-                        label: L.of(context).welcomeServiceKory,
-                      ),
+                    _Service(
+                      icon: Icons.savings_outlined,
+                      label: L.of(context).welcomeServiceKory,
+                    ),
+                    _Service(
+                      icon: Icons.local_pharmacy_outlined,
+                      label: L.of(context).honamSubtitle,
+                    ),
+                    const _Service(
+                      icon: Icons.donut_large_outlined,
+                      label: 'Partage tes statuts, visibles 24 h',
+                    ),
+                    const _Service(
+                      icon: Icons.verified_outlined,
+                      label: 'Garde la preuve de tes échanges',
+                    ),
                     const SizedBox(height: 20),
                     Text(
                       L.of(context).onbStep('1'),

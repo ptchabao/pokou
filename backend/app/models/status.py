@@ -4,6 +4,7 @@ import enum
 import uuid
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum as SQLEnum, UniqueConstraint
+from sqlalchemy.types import JSON
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -21,15 +22,14 @@ class StatusContentType(str, enum.Enum):
 class Status(Base):
     """Pokou — statut/story façon WhatsApp : visible 24h par mes contacts,
     purgé automatiquement ensuite (voir DataSourceScheduler._status_purge_loop).
-    `text_content` porte soit le texte d'un statut TEXT, soit la légende d'un
-    statut média (même rôle que `DirectMessage.content`)."""
+    Le contenu est exclusivement stocké dans `StatusRecipient` sous forme de
+    chiffrement de bout en bout ; les octets média associés sont opaques."""
     __tablename__ = "statuses"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     content_type = Column(SQLEnum(StatusContentType, name="status_content_type"), nullable=False)
     media_asset_id = Column(Integer, ForeignKey("media_assets.id"), nullable=True)
-    text_content = Column(Text, nullable=True)
     # Couleur de fond d'un statut TEXTE, choisie par son auteur avant
     # publication. Chaîne hexadécimale et non un index dans une palette
     # figée : la palette de l'app peut changer sans réécrire les statuts
@@ -41,6 +41,25 @@ class Status(Base):
     user = relationship("User")
     media_asset = relationship("MediaAsset")
     views = relationship("StatusView", cascade="all, delete-orphan", backref="status")
+    recipients = relationship("StatusRecipient", cascade="all, delete-orphan", backref="status")
+
+
+class StatusRecipient(Base):
+    """Enveloppe E2EE individuelle, scellée par l'auteur pour un spectateur."""
+    __tablename__ = "status_recipients"
+
+    id = Column(Integer, primary_key=True)
+    status_id = Column(String(36), ForeignKey("statuses.id", ondelete="CASCADE"), nullable=False, index=True)
+    recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    encryption = Column(String(32), nullable=False)
+    ciphertext = Column(Text, nullable=False)
+    envelope = Column(JSON, nullable=False)
+
+    recipient = relationship("User")
+
+    __table_args__ = (
+        UniqueConstraint("status_id", "recipient_id", name="uq_status_recipient_status_user"),
+    )
 
 
 class StatusPrivacy(Base):

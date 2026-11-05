@@ -131,16 +131,11 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     unawaited(_ringtonePlayer.stop());
     setState(() => _responding = true);
     try {
-      final token = await ref
-          .read(callRepositoryProvider)
-          .joinCall(widget.room, inviter: widget.fromUserId);
-      await ref
-          .read(callRepositoryProvider)
-          .signal(
-            room: widget.room,
-            targetUserId: widget.fromUserId,
-            event: 'accept',
-          );
+      final calls = ref.read(callRepositoryProvider);
+      final token = await calls.joinCall(
+        widget.room,
+        inviter: widget.fromUserId,
+      );
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -162,6 +157,20 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
             joiningExistingCall: true,
           ),
         ),
+      );
+      // L'API du jeton a déjà inscrit l'invité comme participant accepté.
+      // La notification WebSocket complète l'état chez l'appelant, mais ne
+      // doit pas retarder l'ouverture du média si son réseau est lent.
+      unawaited(
+        calls
+            .signal(
+              room: widget.room,
+              targetUserId: widget.fromUserId,
+              event: 'accept',
+            )
+            .catchError((Object error) {
+              debugPrint('[Calls] accept signal failed: $error');
+            }),
       );
     } on CallEncryptionException {
       // La clé ne s'ouvre pas ici : on le dit à l'appelant, qui sinon
@@ -270,24 +279,33 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
               style: const TextStyle(color: Colors.white70),
             ),
             const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _ResponseButton(
-                    icon: Icons.call_end,
-                    color: Colors.black,
-                    onTap: _responding ? null : _decline,
-                  ),
-                  _ResponseButton(
-                    icon: Icons.call,
-                    color: AppColors.accentPrimary,
-                    onTap: _responding ? null : _accept,
-                  ),
-                ],
+            if (_responding)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 52),
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 40,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _ResponseButton(
+                      icon: Icons.call_end,
+                      color: Colors.black,
+                      onTap: _decline,
+                    ),
+                    _ResponseButton(
+                      icon: Icons.call,
+                      color: AppColors.accentPrimary,
+                      onTap: _accept,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

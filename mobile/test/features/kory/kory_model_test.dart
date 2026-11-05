@@ -39,11 +39,15 @@ void main() {
     expect(formatFcfa(25000), '25 000 FCFA');
   });
 
-  test('hors ligne, les modules se déduisent de l\'indicatif', () {
+  test('hors ligne, Kory et Honam restent ouverts dans tous les pays', () {
     expect(CountryConfig.guessFromPhone('+22890112233').has('kory'), isTrue);
     expect(CountryConfig.guessFromPhone('+22890112233').has('honam'), isTrue);
-    expect(CountryConfig.guessFromPhone('+2250700112233').has('kory'), isFalse);
+    expect(CountryConfig.guessFromPhone('+2250700112233').has('kory'), isTrue);
     expect(CountryConfig.guessFromPhone('+2250700112233').has('honam'), isTrue);
-    expect(CountryConfig.guessFromPhone(null).modules, {'discussions', 'honam'});
+    expect(CountryConfig.guessFromPhone(null).modules, {
+      'discussions',
+      'kory',
+      'honam',
+    });
   });
 }

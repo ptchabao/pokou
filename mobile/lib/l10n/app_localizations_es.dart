@@ -2847,6 +2847,16 @@ class LEs extends L {
   String get callAddFailed => 'No se pudo añadir a este participante.';
 
   @override
+  String get callReactionFailed => 'No se pudo enviar esta reacción.';
+
+  @override
+  String get callLeaveConfirmTitle => '¿Salir de la llamada?';
+
+  @override
+  String get callLeaveConfirmBody =>
+      'Los demás participantes pueden seguir hablando. Puedes cerrar esta pantalla sin colgar y volver desde el aviso de llamada.';
+
+  @override
   String get callYou => 'Tú';
 
   @override
@@ -4999,6 +5009,9 @@ class LEs extends L {
   String get korySubtitle => 'Colectas y tontinas';
 
   @override
+  String get koryMyPots => 'Mis colectas';
+
+  @override
   String get koryMonthTotal => 'Mis contribuciones confirmadas este mes';
 
   @override
@@ -5276,6 +5289,10 @@ class LEs extends L {
 
   @override
   String get honamSubtitle => 'Farmacias y entrega';
+
+  @override
+  String get honamIntro =>
+      'Una farmacia cercana te envía un presupuesto. Págalo desde tu billetera y un mensajero te lo entrega.';
 
   @override
   String get honamSend => 'Enviar una receta';

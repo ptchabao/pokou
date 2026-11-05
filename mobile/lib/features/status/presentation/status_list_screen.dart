@@ -2,6 +2,8 @@ import '../../marketplace/presentation/assime_extras.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/country/country_config.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../core/theme/app_radius.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -48,6 +50,7 @@ class StatusListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final myUserId = ref.watch(authControllerProvider).user?.id;
     final feedAsync = ref.watch(statusFeedProvider);
+    final lot1 = isLot1(ref.watch(currentCountryConfigProvider).modules);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -64,9 +67,11 @@ class StatusListScreen extends ConsumerWidget {
                 // Les deux listes se rafraîchissent ensemble : le geste
                 // porte sur la page, pas sur la bande de statuts.
                 onRefresh: () async {
-                  ref.invalidate(myChannelsProvider);
-                  ref.invalidate(suggestedChannelsProvider);
-                  ref.invalidate(adFeedProvider('STATUS'));
+                  if (!lot1) {
+                    ref.invalidate(myChannelsProvider);
+                    ref.invalidate(suggestedChannelsProvider);
+                    ref.invalidate(adFeedProvider('STATUS'));
+                  }
                   ref.invalidate(statusFeedProvider);
                   await ref.read(statusFeedProvider.future);
                 },
@@ -143,14 +148,21 @@ class StatusListScreen extends ConsumerWidget {
                           // plus un statut sponsorisé tous les 5 : elle ne
                           // vient qu'après 4 statuts de proches, jamais
                           // devant eux.
-                          final sponsored = ref.watch(sponsoredStatusProvider).valueOrNull;
-                          final sponsoredAt = sponsored != null && others.length >= sponsored.every - 1
+                          final sponsored = lot1
+                              ? null
+                              : ref.watch(sponsoredStatusProvider).valueOrNull;
+                          final sponsoredAt =
+                              sponsored != null &&
+                                  others.length >= sponsored.every - 1
                               ? sponsored.every - 1
                               : null;
 
                           return ListView.separated(
                             scrollDirection: Axis.horizontal,
-                            itemCount: others.length + 1 + (sponsoredAt != null ? 1 : 0),
+                            itemCount:
+                                others.length +
+                                1 +
+                                (sponsoredAt != null ? 1 : 0),
                             separatorBuilder: (_, _) =>
                                 const SizedBox(width: 4),
                             itemBuilder: (context, index) {
@@ -168,10 +180,19 @@ class StatusListScreen extends ConsumerWidget {
                                   onAddTap: () => _openComposer(context, ref),
                                 );
                               }
-                              if (sponsoredAt != null && index == sponsoredAt + 1) {
-                                return SponsoredStatusTile(sponsored: sponsored!);
+                              if (sponsoredAt != null &&
+                                  index == sponsoredAt + 1) {
+                                return SponsoredStatusTile(
+                                  sponsored: sponsored!,
+                                );
                               }
-                              final item = others[index - 1 - (sponsoredAt != null && index > sponsoredAt + 1 ? 1 : 0)];
+                              final item =
+                                  others[index -
+                                      1 -
+                                      (sponsoredAt != null &&
+                                              index > sponsoredAt + 1
+                                          ? 1
+                                          : 0)];
                               return _StatusTile(
                                 status: item.statuses.lastOrNull,
                                 avatar: item.avatar,
@@ -192,21 +213,22 @@ class StatusListScreen extends ConsumerWidget {
                     // Entre les statuts et les chaînes, jamais dans la bande
                     // elle-même : une publicité déguisée en statut d'ami se
                     // lit comme une tromperie.
-                    if (ref
-                            .watch(adFeedProvider('STATUS'))
-                            .valueOrNull
-                            ?.firstOrNull
-                        case final ad?) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: AdCard(ad: ad),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                    if (!lot1)
+                      if (ref
+                              .watch(adFeedProvider('STATUS'))
+                              .valueOrNull
+                              ?.firstOrNull
+                          case final ad?) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: AdCard(ad: ad),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     // Pas de titre « Chaînes » ici : ChannelsSection porte
                     // le sien, avec les boutons rechercher et créer. Les
                     // deux se suivaient, et le mot s'affichait deux fois.
-                    const ChannelsSection(),
+                    if (!lot1) const ChannelsSection(),
                   ],
                 ),
               ),

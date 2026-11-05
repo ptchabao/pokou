@@ -2838,6 +2838,16 @@ class LAr extends L {
   String get callAddFailed => 'تعذّرت إضافة هذا المشارك.';
 
   @override
+  String get callReactionFailed => 'تعذّر إرسال هذا التفاعل.';
+
+  @override
+  String get callLeaveConfirmTitle => 'مغادرة المكالمة؟';
+
+  @override
+  String get callLeaveConfirmBody =>
+      'قد يواصل المشاركون الآخرون الحديث. يمكنك إغلاق هذه الشاشة دون إنهاء المكالمة والعودة من شريط المكالمة.';
+
+  @override
   String get callYou => 'أنت';
 
   @override
@@ -4995,6 +5005,9 @@ class LAr extends L {
   String get korySubtitle => 'صناديق وجمعيات ادخار';
 
   @override
+  String get koryMyPots => 'صناديقي';
+
+  @override
   String get koryMonthTotal => 'مساهماتي المؤكَّدة هذا الشهر';
 
   @override
@@ -5268,6 +5281,10 @@ class LAr extends L {
 
   @override
   String get honamSubtitle => 'صيدليات وتوصيل';
+
+  @override
+  String get honamIntro =>
+      'ترسل إليك صيدلية قريبة عرض السعر. ادفع من محفظتك وسيوصل الطلب مندوب.';
 
   @override
   String get honamSend => 'إرسال وصفة طبية';

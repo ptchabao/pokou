@@ -46,12 +46,14 @@ class PokouAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const PokouAppBar({
     super.key,
     required this.title,
+    this.subtitle,
     this.actions = const [],
     this.showStatus = true,
     this.leading,
   });
 
   final String title;
+  final String? subtitle;
   final List<Widget> actions;
 
   /// Le bouton de retour, sur les écrans poussés par-dessus un onglet.
@@ -89,71 +91,80 @@ class PokouAppBar extends ConsumerWidget implements PreferredSizeWidget {
           ),
           child: SizedBox(
             height: 64,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                if (leading != null) ...[
-                  leading!,
-                  const SizedBox(width: 4),
-                ],
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          // Outfit : c'est la police des titres, et la
-                          // seule chose écrite ici en grand.
-                          fontFamily: 'Outfit',
-                          fontSize: 21,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                          height: 1.1,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  if (leading != null) ...[leading!, const SizedBox(width: 4)],
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 21,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                            height: 1.1,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (showStatus) ...[
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                // Vert clair en ligne, ambre hors ligne.
-                                // Pas de rouge : une coupure réseau n'est
-                                // pas une erreur de l'utilisateur, et Pokou
-                                // reste utilisable — les conversations sont
-                                // en cache.
-                                // Sur blanc, les teintes claires de la
-                                // maquette disparaissent — le vert d'eau
-                                // tombait à 1,51:1. On reprend le vert et
-                                // l'ambre pleins, à 4,89 et 5,02:1.
-                                color: enLigne
-                                    ? AppColors.accentPrimary
-                                    : AppColors.chatAiLinkColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              enLigne ? l.appBarOnline : l.appBarOffline,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
-                        ),
+                        if (subtitle != null || showStatus) ...[
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              if (subtitle != null)
+                                Expanded(
+                                  child: Text(
+                                    subtitle!,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textSecondary,
+                                      height: 1.2,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              if (showStatus) ...[
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    // Vert clair en ligne, ambre hors ligne.
+                                    // Pas de rouge : une coupure réseau n'est
+                                    // pas une erreur de l'utilisateur, et Pokou
+                                    // reste utilisable — les conversations sont
+                                    // en cache.
+                                    // Sur blanc, les teintes claires de la
+                                    // maquette disparaissent — le vert d'eau
+                                    // tombait à 1,51:1. On reprend le vert et
+                                    // l'ambre pleins, à 4,89 et 5,02:1.
+                                    color: enLigne
+                                        ? AppColors.accentPrimary
+                                        : AppColors.chatAiLinkColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  enLigne ? l.appBarOnline : l.appBarOffline,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
                   ...actions,
                 ],
               ),

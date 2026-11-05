@@ -52,10 +52,11 @@ dependencies:
   http_parser: ^4.1.2
   # Bearer token storage (Keychain/Keystore, not SharedPreferences)
   flutter_secure_storage: ^9.2.2
-  # Chiffrement de bout en bout — X25519, Ed25519, AES-GCM, HKDF, HMAC.
-  # Apache-2.0, et non GPL : toutes les implémentations Dart du protocole
-  # Signal sont sous GPL/AGPL, ce qui obligerait à ouvrir le code de Pokou.
+  # Primitives du chiffrement individuel et des pièces jointes — X25519,
+  # Ed25519, AES-GCM, HKDF, HMAC (Apache-2.0).
   cryptography: ^2.9.0
+  # Signal Sender Keys pour les messages de groupe (GPL-3.0).
+  libsignal_protocol_dart: ^0.8.2
   # Empreinte SHA-1 pour nommer les fichiers du cache d'apercu de lien.
   crypto: ^3.0.0
   # Local chat history persistence (offline-first "memory")

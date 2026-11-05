@@ -18,6 +18,7 @@ import 'package:flutter/gestures.dart';
 
 import '../../../core/media/image_cropper.dart';
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/crypto/call_keys.dart' show CallEncryptionException;
 import '../../../core/country/country_config.dart';
 import '../../../core/providers.dart';
 import '../../kory/presentation/kory_create_screen.dart';
@@ -187,22 +188,10 @@ class _GroupConversationScreenState
   GlobalKey _keyFor(String messageId) =>
       _bubbleKeys.putIfAbsent(messageId, () => GlobalKey());
 
-  /// GroupChatController ne traite que `group:message:new`/`group:updated`/
-  /// `group:member:*` (voir group_controller.dart::_onEvent) — hors de notre
-  /// périmètre à modifier. Réaction, modification et vote de sondage sont
-  /// donc écoutés ICI, en plus, pour mettre à jour l'affichage sans recharger
-  /// toute la conversation.
+  /// Rich events are handled by GroupChatController so encrypted edits are
+  /// decrypted once and saved only in the SQLCipher cache.
   void _onRichContentEvent(Map<String, dynamic> event) {
     final type = event['type'] as String?;
-
-    if (type == 'group:message:edited') {
-      final raw = event['message'] as Map<String, dynamic>?;
-      if (raw == null) return;
-      final message = GroupMessage.fromJson(raw);
-      if (message.groupId != widget.groupId || !mounted) return;
-      setState(() => _patches[message.id] = message);
-      return;
-    }
 
     if (type == 'group:message:reaction') {
       final eventGroupId = event['group_id'] as int?;
@@ -317,11 +306,29 @@ class _GroupConversationScreenState
                 _inputFocus.requestFocus();
               },
             ),
+            if (ref
+                .read(groupChatControllerProvider(widget.groupId).notifier)
+                .canEdit(message))
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: Text(_l.conversationEdit),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _editMessage(message);
+                },
+              ),
             if (message.deletedAt == null &&
                 (message.senderId == widget.myUserId ||
-                    (ref.read(groupChatControllerProvider(widget.groupId)).group?.canManage ?? false)))
+                    (ref
+                            .read(groupChatControllerProvider(widget.groupId))
+                            .group
+                            ?.canManage ??
+                        false)))
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.feedbackDanger),
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.feedbackDanger,
+                ),
                 title: Text(_l.deleteForAll),
                 onTap: () {
                   Navigator.pop(sheetContext);
@@ -349,11 +356,55 @@ class _GroupConversationScreenState
     );
   }
 
+  Future<void> _editMessage(GroupMessage message) async {
+    final controller = TextEditingController(text: message.content ?? '');
+    final edited = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_l.convEditTitle),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 4000,
+          decoration: InputDecoration(hintText: _l.convEditHint),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(_l.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(_l.actionSave),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (edited == null || !mounted) return;
+    if (edited.trim().isEmpty || edited.trim() == message.content?.trim()) {
+      return;
+    }
+    try {
+      await ref
+          .read(groupChatControllerProvider(widget.groupId).notifier)
+          .editMessage(message.id, edited);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_l.convEditFailed)));
+    }
+  }
+
   /// Supprimer pour tous. En mode preuve, l'auteur est prévenu AVANT que
   /// le message restera visible, barré : sinon il croirait l'avoir effacé.
   Future<void> _deleteForEveryone(GroupMessage message) async {
     final proof =
-        ref.read(groupChatControllerProvider(widget.groupId)).group?.proofMode ??
+        ref
+            .read(groupChatControllerProvider(widget.groupId))
+            .group
+            ?.proofMode ??
         false;
     final ok = await showDialog<bool>(
       context: context,
@@ -366,7 +417,9 @@ class _GroupConversationScreenState
             child: Text(_l.actionCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.feedbackDanger),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.feedbackDanger,
+            ),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(_l.actionDelete),
           ),
@@ -381,9 +434,9 @@ class _GroupConversationScreenState
       _patches.remove(message.id);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_l.honamFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
     }
   }
 
@@ -395,9 +448,9 @@ class _GroupConversationScreenState
     } on ApiException catch (error) {
       if (!mounted) return;
       if (error.statusCode == 403 && group.proofMode) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_l.proofDisableReserved)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l.proofDisableReserved)));
       } else if (error.statusCode == 403) {
         final open = await showDialog<bool>(
           context: context,
@@ -417,14 +470,14 @@ class _GroupConversationScreenState
           ),
         );
         if (open == true && mounted) {
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CertifiedScreen()),
-          );
+          await Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const CertifiedScreen()));
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
       }
     }
   }
@@ -439,7 +492,9 @@ class _GroupConversationScreenState
           .getBytes('/groups/${widget.groupId}/proof-export');
       final dir = await getTemporaryDirectory();
       final stamp = DateFormat('yyyyMMdd-HHmm').format(DateTime.now());
-      final file = File('${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf');
+      final file = File(
+        '${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf',
+      );
       await file.writeAsBytes(bytes, flush: true);
       await Share.shareXFiles([XFile(file.path, mimeType: 'application/pdf')]);
     } catch (_) {
@@ -802,7 +857,8 @@ class _GroupConversationScreenState
       case 'poll':
         await _createGroupPoll();
       case 'kory':
-        if (mounted) await openKoryCreate(context, ref, groupId: widget.groupId);
+        if (mounted)
+          await openKoryCreate(context, ref, groupId: widget.groupId);
     }
   }
 
@@ -996,7 +1052,14 @@ class _GroupConversationScreenState
     try {
       final token = await ref
           .read(callRepositoryProvider)
-          .startGroupCall(widget.groupId, isVideo: withVideo);
+          .startGroupCall(
+            widget.groupId,
+            isVideo: withVideo,
+            memberUserIds: [
+              for (final member in group?.members ?? const <GroupMember>[])
+                if (member.userId != widget.myUserId) member.userId,
+            ],
+          );
       if (!mounted) return;
       setState(() => _startingCall = false);
       await Navigator.of(context).push(
@@ -1008,6 +1071,7 @@ class _GroupConversationScreenState
             otherParticipantIds: token.participantIds,
             startWithVideo: withVideo,
             groupId: widget.groupId,
+            joiningExistingCall: token.joinedExisting,
             groupMembers: [
               for (final member in group?.members ?? const <GroupMember>[])
                 if (member.userId != widget.myUserId)
@@ -1018,6 +1082,16 @@ class _GroupConversationScreenState
       );
       if (!mounted) return;
       ref.invalidate(activeGroupCallProvider(widget.groupId));
+    } on CallEncryptionException catch (error) {
+      if (!mounted) return;
+      setState(() => _startingCall = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.message.isEmpty ? _l.contactCallFailed : error.message,
+          ),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() => _startingCall = false);
@@ -1788,11 +1862,22 @@ class _GroupConversationScreenState
                                   onCallBack: ({required video}) =>
                                       _startOrJoinCall(withVideo: video),
                                 )
-                              else if ((message.payload?['kind']) == 'proof_mode')
+                              else if ((message.payload?['kind']) ==
+                                  'proof_mode')
                                 ProofModeNotice(
                                   text: message.payload?['enabled'] == true
-                                      ? _l.proofModeOn(_authorName(message.senderId, message.senderName))
-                                      : _l.proofModeOff(_authorName(message.senderId, message.senderName)),
+                                      ? _l.proofModeOn(
+                                          _authorName(
+                                            message.senderId,
+                                            message.senderName,
+                                          ),
+                                        )
+                                      : _l.proofModeOff(
+                                          _authorName(
+                                            message.senderId,
+                                            message.senderName,
+                                          ),
+                                        ),
                                 )
                               else if (message.deletedAt != null)
                                 ProofKeptMessage(
@@ -1828,56 +1913,57 @@ class _GroupConversationScreenState
                                     isMine: message.senderId == widget.myUserId,
                                     isLast: index == messages.length - 1,
                                     child: _GroupBubble(
-                                    message: message,
-                                    senderDisplayName: _authorName(
-                                      message.senderId,
-                                      message.senderName,
-                                      certifiedName:
-                                          message.senderCertifiedName,
+                                      message: message,
+                                      senderDisplayName: _authorName(
+                                        message.senderId,
+                                        message.senderName,
+                                        certifiedName:
+                                            message.senderCertifiedName,
+                                      ),
+                                      replySenderDisplayName:
+                                          message.replyTo == null
+                                          ? null
+                                          : _authorName(
+                                              message.replyTo!.senderId,
+                                              message.replyTo!.senderName ??
+                                                  _l.commonUnknownName,
+                                              certifiedName: message
+                                                  .replyTo!
+                                                  .senderCertifiedName,
+                                            ),
+                                      isMine:
+                                          message.senderId == widget.myUserId,
+                                      isFirstInGroup: isFirstInGroup,
+                                      isLastInGroup: isLastInGroup,
+                                      isPending: state.pendingIds.contains(
+                                        message.id,
+                                      ),
+                                      isFailed: state.failedIds.contains(
+                                        message.id,
+                                      ),
+                                      onRetry: () => ref
+                                          .read(
+                                            groupChatControllerProvider(
+                                              widget.groupId,
+                                            ).notifier,
+                                          )
+                                          .retry(message.id),
+                                      onLongPress: () =>
+                                          _showReactionSheet(message),
+                                      onReactionPick: (emoji) =>
+                                          _reactTo(message, emoji),
+                                      onTapReply: message.replyToId == null
+                                          ? null
+                                          : () => _scrollToMessage(
+                                              message.replyToId!,
+                                            ),
+                                      onPollVoted: (updated) {
+                                        setState(
+                                          () => _patches[message.id] = message
+                                              .copyWith(poll: updated),
+                                        );
+                                      },
                                     ),
-                                    replySenderDisplayName:
-                                        message.replyTo == null
-                                        ? null
-                                        : _authorName(
-                                            message.replyTo!.senderId,
-                                            message.replyTo!.senderName ??
-                                                _l.commonUnknownName,
-                                            certifiedName: message
-                                                .replyTo!
-                                                .senderCertifiedName,
-                                          ),
-                                    isMine: message.senderId == widget.myUserId,
-                                    isFirstInGroup: isFirstInGroup,
-                                    isLastInGroup: isLastInGroup,
-                                    isPending: state.pendingIds.contains(
-                                      message.id,
-                                    ),
-                                    isFailed: state.failedIds.contains(
-                                      message.id,
-                                    ),
-                                    onRetry: () => ref
-                                        .read(
-                                          groupChatControllerProvider(
-                                            widget.groupId,
-                                          ).notifier,
-                                        )
-                                        .retry(message.id),
-                                    onLongPress: () =>
-                                        _showReactionSheet(message),
-                                    onReactionPick: (emoji) =>
-                                        _reactTo(message, emoji),
-                                    onTapReply: message.replyToId == null
-                                        ? null
-                                        : () => _scrollToMessage(
-                                            message.replyToId!,
-                                          ),
-                                    onPollVoted: (updated) {
-                                      setState(
-                                        () => _patches[message.id] = message
-                                            .copyWith(poll: updated),
-                                      );
-                                    },
-                                  ),
                                   ),
                                 ),
                             ],
@@ -2795,5 +2881,3 @@ class GroupEncryptionNotice extends StatelessWidget {
     );
   }
 }
-
-

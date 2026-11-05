@@ -339,12 +339,12 @@ def test_registre_coursier_et_pack_superieur(client):
     assert client.post("/api/v1/honam/courier/pack", json={"pack": "QUEEN"}, headers=courier_headers).status_code == 403
 
 
-def test_honam_ferme_hors_pays_lance(client):
+def test_honam_reste_actif_sans_surcharge_pays(client):
     with TestingSessionLocal() as db:
         db.query(SystemSetting).filter(SystemSetting.key == "country.TG").delete()
         db.commit()
     patient, _ = _signup(client)
-    assert client.get("/api/v1/honam/pharmacies", headers=patient).status_code == 404
+    assert client.get("/api/v1/honam/pharmacies", headers=patient).status_code == 200
 
 
 def test_push_etats_commande_limites_aux_participants_et_sans_donnees_sensibles(client):

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/groups/presentation/group_controller.dart';
 import '../../features/groups/data/group_model.dart';
 import '../../features/messaging/data/direct_message_model.dart';
@@ -227,6 +228,7 @@ final outboxServiceProvider = Provider<OutboxService>((ref) {
   final store = ref.watch(pokouMessageStoreProvider);
   final messaging = ref.watch(messagingRepositoryProvider);
   final groups = ref.watch(groupRepositoryProvider);
+  final userId = ref.watch(authControllerProvider).user?.id;
 
   final service = OutboxService(
     store: store,
@@ -246,9 +248,14 @@ final outboxServiceProvider = Provider<OutboxService>((ref) {
       final queued = await store.pendingGroup();
       final message = queued.where((m) => m.id == localId).firstOrNull;
       if (message == null) return;
+      if (userId == null) return;
       final sent = await groups.send(
-        groupId: message.groupId,
+        group: await groups.getGroup(message.groupId),
+        senderId: userId,
         content: message.content ?? '',
+        messageType: message.messageType,
+        replyToId: message.replyToId,
+        replyTo: message.replyTo,
       );
       await store.confirmGroup(localId, sent);
     },

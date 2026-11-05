@@ -116,9 +116,13 @@ object CallManager {
             val ok = PokouApi.callAction(context, token, "accept")
             synchronized(this) {
                 if (current?.room != call.room) return@synchronized
-                transition(context, if (ok) CallState.CONNECTING else CallState.FAILED)
+                // Un jeton de push expiré ou une coupure réseau ne doit pas
+                // condamner l'appel : Flutter peut encore l'accepter avec
+                // la session authentifiée. CONNECTING déclenche ce repli.
+                transition(context, CallState.CONNECTING)
             }
-            if (ok) launchFlutter(context, call) else CallNotification.dismiss(context)
+            if (!ok) Log.i(TAG, "Action native échouée; reprise authentifiée par Flutter")
+            launchFlutter(context, call)
         }.start()
     }
 

@@ -149,7 +149,12 @@ def _announcement_group(db: Session, community_id: int) -> Optional[Group]:
 def _add_to_announcements(db: Session, community_id: int, user_id: int) -> None:
     """Tous les membres de la communauté lisent les annonces — c'est la
     raison d'être du groupe. Inscrire à part serait un oubli garanti."""
-    group = _announcement_group(db, community_id)
+    group = (
+        db.query(Group)
+        .filter(Group.community_id == community_id, Group.is_announcement.is_(True))
+        .with_for_update()
+        .first()
+    )
     if group is None:
         return
     existing = db.query(GroupMember).filter(
@@ -157,6 +162,7 @@ def _add_to_announcements(db: Session, community_id: int, user_id: int) -> None:
     ).first()
     if existing is None:
         db.add(GroupMember(group_id=group.id, user_id=user_id, role="MEMBER"))
+        group.crypto_epoch += 1
 
 
 def _new_invite_code() -> str:
@@ -376,7 +382,12 @@ async def set_community_member_role(
     membership.role = payload.role
     # Un administrateur de communauté doit pouvoir écrire les annonces :
     # sinon son rôle serait purement décoratif là où il compte le plus.
-    announcements = _announcement_group(db, community_id)
+    announcements = (
+        db.query(Group)
+        .filter(Group.community_id == community_id, Group.is_announcement.is_(True))
+        .with_for_update()
+        .first()
+    )
     if announcements is not None:
         group_membership = db.query(GroupMember).filter(
             GroupMember.group_id == announcements.id, GroupMember.user_id == user_id
@@ -414,11 +425,18 @@ async def leave_community(
     if target.role == "OWNER" and user_id != requester_id:
         raise HTTPException(status_code=403, detail="Le créateur ne peut pas être retiré")
 
-    announcements = _announcement_group(db, community_id)
+    announcements = (
+        db.query(Group)
+        .filter(Group.community_id == community_id, Group.is_announcement.is_(True))
+        .with_for_update()
+        .first()
+    )
     if announcements is not None:
-        db.query(GroupMember).filter(
+        removed = db.query(GroupMember).filter(
             GroupMember.group_id == announcements.id, GroupMember.user_id == user_id
         ).delete()
+        if removed:
+            announcements.crypto_epoch += 1
 
     db.delete(target)
     db.commit()

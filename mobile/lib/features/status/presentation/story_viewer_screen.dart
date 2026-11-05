@@ -384,6 +384,14 @@ class _StoryContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (status.contentUnavailable) {
+      return const ColoredBox(
+        color: Colors.black,
+        child: Center(
+          child: Icon(Icons.lock_outline, color: Colors.white70, size: 42),
+        ),
+      );
+    }
     if (status.contentType == 'TEXT') {
       return Container(
         alignment: Alignment.center,

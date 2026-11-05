@@ -90,7 +90,7 @@ void main() {
     ]);
   });
 
-  test('Kory n\'apparaît que là où le pays l\'ouvre (NAV-01)', () {
+  test('les onglets suivent les modules configurés', () {
     expect(pokouTabsFor({'discussions', 'kory'}), [
       PokouTab.home,
       PokouTab.discussions,
@@ -98,6 +98,16 @@ void main() {
       PokouTab.more,
     ]);
     // L'ordre du cahier des charges : Accueil | Discussions | Kory | Honam | Plus.
+    expect(pokouTabsFor({'discussions', 'kory', 'honam'}), [
+      PokouTab.home,
+      PokouTab.discussions,
+      PokouTab.kory,
+      PokouTab.honam,
+      PokouTab.more,
+    ]);
+  });
+
+  test('Kory et Honam actifs affichent les onglets de service partout', () {
     expect(pokouTabsFor({'discussions', 'kory', 'honam'}), [
       PokouTab.home,
       PokouTab.discussions,

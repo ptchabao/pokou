@@ -13,34 +13,36 @@ class PokouNavDestination {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-
 }
 
-/// Les onglets possibles.
-///
-/// Deux barres, selon le pays (cahier v3.4, section 6) :
-/// - **application complète** (6.1) : Accueil | Discussions | Kory | Honam |
-///   Plus ;
-/// - **lot 1, « Discussions d'abord »** (6.3, NAV-10) : Discussions |
-///   Statuts | Appels | Réglages, tant que seule la messagerie est ouverte.
+/// Les onglets possibles. Kory et Honam sont désormais ouverts dans tous les
+/// pays ; les autres modules restent pilotés par la configuration reçue.
+/// Le mode allégé reste disponible si une configuration ne contient que la
+/// messagerie.
 ///
 /// Un ENUM et non un index : la liste des onglets dépend du pays (NAV-01),
 /// et un index partagé entre la barre et la coquille ouvrait le mauvais
 /// écran dès qu'un onglet apparaissait ou disparaissait.
-enum PokouTab { home, discussions, statuses, calls, kory, honam, more, settings }
+enum PokouTab {
+  home,
+  discussions,
+  statuses,
+  calls,
+  kory,
+  honam,
+  more,
+  settings,
+}
 
 /// Les modules de service. Tant qu'aucun n'est ouvert dans le pays,
 /// l'application se présente en lot 1.
 const pokouServiceModules = {'kory', 'kory_plus', 'honam', 'assime'};
 
-/// Vrai quand seule la messagerie est ouverte (NAV-10). Pokou certifié et
-/// le mode preuve ne comptent pas : ils sont ouverts dès le lancement.
-bool isLot1(Set<String> modules) =>
-    !modules.any(pokouServiceModules.contains);
+/// Vrai quand seule la messagerie est ouverte. Pokou certifié et le mode
+/// preuve ne comptent pas : ils sont ouverts dès le lancement.
+bool isLot1(Set<String> modules) => !modules.any(pokouServiceModules.contains);
 
-/// Les onglets à montrer, selon les modules ouverts dans le pays. Quand un
-/// module s'ouvre, la barre passe d'elle-même à cinq entrées, sans nouvelle
-/// version de l'application (NAV-12).
+/// Les onglets à montrer, selon les modules ouverts dans le pays.
 List<PokouTab> pokouTabsFor(Set<String> modules) => isLot1(modules)
     ? const [
         PokouTab.discussions,
@@ -136,26 +138,26 @@ class PokouBottomNav extends StatelessWidget {
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
         child: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: onTap,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.navBackground,
-        selectedItemColor: AppColors.accentPrimaryDark,
-        unselectedItemColor: AppColors.navIconInactive,
-        selectedFontSize: 11,
-        unselectedFontSize: 10,
-        // AUCUNE élévation : le système de design supprime les ombres
-        // diffuses pour tenir la fréquence d'images sur les appareils
-        // d'entrée de gamme. La barre se détache par un trait d'un point,
-        // posé par le `Container` ci-dessus.
-        elevation: 0,
-        items: [
-          for (final destination in pokouNavDestinationsOf(context, tabs))
-            BottomNavigationBarItem(
-              icon: _Glyph(icon: destination.icon, active: false),
-              activeIcon: _Glyph(icon: destination.activeIcon, active: true),
-              label: destination.label,
-            ),
+          currentIndex: currentIndex,
+          onTap: onTap,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: AppColors.navBackground,
+          selectedItemColor: AppColors.accentPrimaryDark,
+          unselectedItemColor: AppColors.navIconInactive,
+          selectedFontSize: 11,
+          unselectedFontSize: 10,
+          // AUCUNE élévation : le système de design supprime les ombres
+          // diffuses pour tenir la fréquence d'images sur les appareils
+          // d'entrée de gamme. La barre se détache par un trait d'un point,
+          // posé par le `Container` ci-dessus.
+          elevation: 0,
+          items: [
+            for (final destination in pokouNavDestinationsOf(context, tabs))
+              BottomNavigationBarItem(
+                icon: _Glyph(icon: destination.icon, active: false),
+                activeIcon: _Glyph(icon: destination.activeIcon, active: true),
+                label: destination.label,
+              ),
           ],
         ),
       ),

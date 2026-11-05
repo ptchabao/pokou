@@ -10,7 +10,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import Channel, ChannelMember, ChannelPost, Community, CommunityMember, Contact, DirectMessage, Group, GroupMember, GroupMessage, MarketplaceProduct, MarketplaceProductImage, MediaAsset, MessageType, SellerVerificationApplication, Status, SparkLike, SparkMatch, SparkPhoto, SparkProfile, SparkRoomMessage, User, UserRole, VipPost, VipRoom, VipSubscription
+from app.models import Channel, ChannelMember, ChannelPost, Community, CommunityMember, Contact, DirectMessage, Group, GroupMember, GroupMessage, MarketplaceProduct, MarketplaceProductImage, MediaAsset, MessageType, SellerVerificationApplication, Status, StatusRecipient, SparkLike, SparkMatch, SparkPhoto, SparkProfile, SparkRoomMessage, User, UserRole, VipPost, VipRoom, VipSubscription
 from app.services.media import media_storage, object_storage, sticker_service, thumbnail_service
 from app.services.privacy import privacy_service, status_privacy_service
 from app.core.security import get_current_user
@@ -193,7 +193,10 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
     linked_status = db.query(Status).filter(Status.media_asset_id == asset.id).first()
     if linked_status is not None and status_privacy_service.can_view_statuses_of(
         db, linked_status.user_id, user_id
-    ):
+    ) and db.query(StatusRecipient.id).filter(
+        StatusRecipient.status_id == linked_status.id,
+        StatusRecipient.recipient_id == user_id,
+    ).first():
         return True
 
     # Photo d'un produit en vente — visible de TOUT utilisateur authentifié,

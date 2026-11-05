@@ -2859,6 +2859,16 @@ class LRu extends L {
   String get callAddFailed => 'Не удалось добавить участника.';
 
   @override
+  String get callReactionFailed => 'Не удалось отправить реакцию.';
+
+  @override
+  String get callLeaveConfirmTitle => 'Выйти из звонка?';
+
+  @override
+  String get callLeaveConfirmBody =>
+      'Остальные участники могут продолжать разговор. Можно закрыть этот экран, не завершая звонок, и вернуться через панель звонка.';
+
+  @override
   String get callYou => 'Вы';
 
   @override
@@ -5057,6 +5067,9 @@ class LRu extends L {
   String get korySubtitle => 'Сборы и тонтины';
 
   @override
+  String get koryMyPots => 'Мои сборы';
+
+  @override
   String get koryMonthTotal => 'Мои подтверждённые взносы за месяц';
 
   @override
@@ -5331,6 +5344,10 @@ class LRu extends L {
 
   @override
   String get honamSubtitle => 'Аптеки и доставка';
+
+  @override
+  String get honamIntro =>
+      'Ближайшая аптека пришлёт вам смету. Оплатите её из кошелька, и курьер доставит заказ.';
 
   @override
   String get honamSend => 'Отправить рецепт';

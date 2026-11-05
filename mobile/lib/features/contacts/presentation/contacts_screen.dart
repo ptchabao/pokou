@@ -1,4 +1,3 @@
-import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -1509,12 +1508,14 @@ class _PinnedMahizuTile extends ConsumerWidget {
 enum ChatFilter {
   all,
   unread,
+  favorites,
   groups;
 
   List<ConversationSummary> apply(List<ConversationSummary> items) =>
       switch (this) {
         ChatFilter.all => items,
         ChatFilter.unread => items.where((d) => d.unreadCount > 0).toList(),
+        ChatFilter.favorites => items.where((d) => d.isPinned).toList(),
         // Les communautés comptent comme des groupes : pour qui filtre, la
         // distinction entre « groupe » et « communauté » n'existe pas — il
         // cherche ce qui n'est pas une conversation à deux.
@@ -1524,6 +1525,7 @@ enum ChatFilter {
   String labelOf(L l) => switch (this) {
     ChatFilter.all => l.chatsFilterAll,
     ChatFilter.unread => l.chatsFilterUnread,
+    ChatFilter.favorites => l.assimeFavorites,
     ChatFilter.groups => l.chatsFilterGroups,
   };
 }

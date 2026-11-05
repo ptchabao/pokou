@@ -16,7 +16,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, Group, GroupInvitation, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, MediaAsset, MessageType, Poll, PollOption, User
+from app.models import Contact, Group, GroupInvitation, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
 from app.utils.editing import MESSAGE_EDIT_WINDOW_MINUTES
 from app.utils.identity import est_certifie, nom_certifie
 from app.services.messaging import group_invitation_service
@@ -74,17 +74,37 @@ class GroupMemberRole(BaseModel):
 
 
 class GroupMessageCreate(BaseModel):
+    # `content` remains parseable only to return a clear rejection to older
+    # clients; it is never persisted or serialized for group messages.
     content: Optional[str] = Field(None, max_length=4000)
     message_type: str = "TEXT"
     media_asset_id: Optional[int] = None
     reply_to_id: Optional[str] = None
+    encryption: Optional[str] = None
+    ciphertext: Optional[str] = Field(None, max_length=1000000)
+    crypto_epoch: Optional[int] = None
     # Les identifiants des personnes citées par @, et non le texte « @Bob » :
     # le nom affiché change (renommage, contact), le user_id non.
     mention_user_ids: List[int] = Field(default_factory=list)
 
 
 class GroupMessageEdit(BaseModel):
-    content: str = Field(..., min_length=1, max_length=4000)
+    content: Optional[str] = Field(None, max_length=4000)
+    encryption: Optional[str] = None
+    ciphertext: Optional[str] = Field(None, max_length=1000000)
+    crypto_epoch: Optional[int] = None
+
+
+class SenderKeyEnvelope(BaseModel):
+    recipient_id: int
+    encryption: str = Field(..., pattern="^v1$")
+    ciphertext: str = Field(..., min_length=1, max_length=1000000)
+    envelope: Dict[str, Any]
+
+
+class SenderKeyDistributionCreate(BaseModel):
+    epoch: int
+    distributions: List[SenderKeyEnvelope] = Field(default_factory=list, max_length=500)
 
 
 class GroupMessageReactionSet(BaseModel):
@@ -144,6 +164,7 @@ def _serialize_group(group: Group, *, with_members: bool = False) -> dict:
         "disappearing_seconds": group.disappearing_seconds,
         "proof_mode": bool(group.proof_mode),
         "proof_mode_since": group.proof_mode_since.isoformat() if group.proof_mode_since else None,
+        "crypto_epoch": group.crypto_epoch,
     }
     if with_members:
         payload["members"] = [_serialize_member(member) for member in group.members]
@@ -177,16 +198,14 @@ def _serialize_reply_preview(quoted: Optional[GroupMessage]) -> Optional[dict]:
     éphémère le rendrait lisible indéfiniment à travers la réponse."""
     if quoted is None or _is_expired(quoted):
         return None
-    content = quoted.content or ""
-    if len(content) > _REPLY_PREVIEW_CHARS:
-        content = content[:_REPLY_PREVIEW_CHARS].rstrip() + "…"
     return {
         "id": quoted.id,
         "sender_id": quoted.sender_id,
         "sender_name": _display_name(quoted.sender),
         "sender_certified_name": nom_certifie(quoted.sender),
         "message_type": quoted.message_type.value,
-        "content": content or None,
+        # A quoted message is opaque to the server too.
+        "content": None,
         "media": _serialize_media(quoted.media_asset) if quoted.media_asset else None,
     }
 
@@ -265,7 +284,10 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
         "sender_certified_name": nom_certifie(message.sender),
         "sender_is_verified": est_certifie(message.sender),
         "message_type": message.message_type.value,
-        "content": message.content,
+        "content": None,
+        "encryption": message.encryption,
+        "ciphertext": message.ciphertext,
+        "crypto_epoch": message.crypto_epoch,
         "media_asset_id": message.media_asset_id,
         "media": _serialize_media(message.media_asset) if message.media_asset else None,
         "created_at": message.created_at.isoformat(),
@@ -281,13 +303,13 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
         # position de groupe perdait sa charge utile dès que la conversation
         # était relue via GET /groups/{id}/messages (seul l'événement WebSocket
         # initial de polls.py la portait).
-        "payload": message.payload,
-        "poll": _serialize_poll(message.poll, viewer_id) if message.poll else None,
+        "payload": None,
+        "poll": None,
         # Mode preuve : le message supprimé reste lisible, et le client le
         # barre. Hors mode preuve, une suppression efface la ligne.
         "deleted_at": message.deleted_at.isoformat() if message.deleted_at else None,
         "deleted_by": message.deleted_by,
-        "original_content": message.original_content,
+        "original_content": None,
     }
 
 
@@ -587,15 +609,25 @@ async def accept_invitation(
 ):
     user_id = current_user["user_id"]
     invitation = _mon_invitation(db, invitation_id, user_id)
+    already_member = db.query(GroupMember.id).filter_by(
+        group_id=invitation.group_id, user_id=user_id
+    ).first() is not None
+    group = (
+        db.query(Group)
+        .filter(Group.id == invitation.group_id)
+        .with_for_update()
+        .first()
+    )
     try:
         member = group_invitation_service.accepter(db, invitation)
     except group_invitation_service.InvitationImpossible as exc:
         # 409 et non 400 : l'invitation a existé, elle n'est simplement plus
         # valable. Le client distingue « jamais reçue » de « trop tard ».
         raise HTTPException(status_code=409, detail=str(exc))
+    if not already_member:
+        group.crypto_epoch += 1
     db.commit()
-
-    group = db.query(Group).filter(Group.id == invitation.group_id).first()
+    db.refresh(group)
     await _broadcast(
         db,
         invitation.group_id,
@@ -865,7 +897,12 @@ async def preview_invite(
     s'agit et combien de personnes y sont. Volontairement sans la liste des
     membres — on ne révèle pas qui est dans un groupe à quelqu'un qui n'y
     est pas encore."""
-    group = db.query(Group).filter(Group.invite_code == invite_code).first()
+    group = (
+        db.query(Group)
+        .filter(Group.invite_code == invite_code)
+        .with_for_update()
+        .first()
+    )
     if not group:
         raise HTTPException(status_code=404, detail="Ce lien d'invitation n'est plus valide")
 
@@ -903,6 +940,7 @@ async def join_by_invite(
         # Idempotent : toucher deux fois le lien ne doit pas être une erreur.
         return _serialize_group_for(group, user_id, with_members=True)
 
+    group.crypto_epoch += 1
     db.add(GroupMember(group_id=group.id, user_id=user_id, role="MEMBER"))
     db.commit()
     db.refresh(group)
@@ -951,7 +989,9 @@ async def remove_member(
     if target.role == "OWNER" and user_id != requester_id:
         raise HTTPException(status_code=403, detail="Le créateur du groupe ne peut pas être retiré")
 
+    group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
     db.delete(target)
+    group.crypto_epoch += 1
     db.commit()
 
     # Le membre retiré reçoit aussi l'événement (extra_user_ids) : sans ça il
@@ -991,6 +1031,89 @@ async def get_group_message(
     if message is None:
         raise HTTPException(status_code=404, detail="Message introuvable")
     return _serialize_message(message, user_id)
+
+
+@router.get("/{group_id}/sender-key-distributions")
+async def list_sender_key_distributions(
+    group_id: int,
+    epoch: Optional[int] = Query(None, ge=1),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    _require_membership(db, group_id, user_id)
+    group = db.query(Group).filter(Group.id == group_id).first()
+    requested_epoch = group.crypto_epoch if epoch is None else epoch
+    if requested_epoch > group.crypto_epoch:
+        raise HTTPException(status_code=409, detail="Époque de chiffrement invalide")
+    rows = (
+        db.query(GroupSenderKeyDistribution)
+        .filter(
+            GroupSenderKeyDistribution.group_id == group_id,
+            GroupSenderKeyDistribution.epoch == requested_epoch,
+            GroupSenderKeyDistribution.recipient_id == user_id,
+        )
+        .order_by(GroupSenderKeyDistribution.sender_id)
+        .all()
+    )
+    return {
+        "epoch": requested_epoch,
+        "items": [
+            {
+                "sender_id": row.sender_id,
+                "recipient_id": row.recipient_id,
+                "epoch": row.epoch,
+                "encryption": row.encryption,
+                "ciphertext": row.ciphertext,
+                "envelope": row.envelope,
+            }
+            for row in rows
+        ],
+    }
+
+
+@router.post("/{group_id}/sender-key-distributions")
+async def publish_sender_key_distributions(
+    group_id: int,
+    payload: SenderKeyDistributionCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    sender_id = current_user["user_id"]
+    _require_membership(db, group_id, sender_id)
+    group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
+    if payload.epoch != group.crypto_epoch:
+        raise HTTPException(status_code=409, detail="Époque de chiffrement obsolète")
+    expected = {
+        member.user_id for member in group.members if member.user_id != sender_id
+    }
+    submitted = [item.recipient_id for item in payload.distributions]
+    if len(set(submitted)) != len(submitted) or set(submitted) != expected:
+        raise HTTPException(
+            status_code=400,
+            detail="Une enveloppe pairwise est requise pour chaque membre actuel",
+        )
+    for item in payload.distributions:
+        existing = db.query(GroupSenderKeyDistribution.id).filter_by(
+            group_id=group_id,
+            epoch=group.crypto_epoch,
+            sender_id=sender_id,
+            recipient_id=item.recipient_id,
+        ).first()
+        if existing is None:
+            db.add(
+                GroupSenderKeyDistribution(
+                    group_id=group_id,
+                    epoch=group.crypto_epoch,
+                    sender_id=sender_id,
+                    recipient_id=item.recipient_id,
+                    encryption=item.encryption,
+                    ciphertext=item.ciphertext,
+                    envelope=item.envelope,
+                )
+            )
+    db.commit()
+    return {"accepted": True, "epoch": group.crypto_epoch}
 
 
 @router.get("/{group_id}/messages")
@@ -1061,6 +1184,17 @@ async def send_group_message(
     if not group:
         raise HTTPException(status_code=404, detail="Groupe introuvable")
     _require_can_post(db, group, sender_id)
+    if payload.content is not None:
+        raise HTTPException(status_code=400, detail="Les messages de groupe doivent être chiffrés")
+    if payload.encryption != "sender-key-v1" or not payload.ciphertext:
+        raise HTTPException(status_code=400, detail="Message de groupe chiffré requis")
+    if payload.crypto_epoch != group.crypto_epoch:
+        raise HTTPException(status_code=409, detail="Époque de chiffrement obsolète")
+    if payload.mention_user_ids:
+        raise HTTPException(
+            status_code=400,
+            detail="Les mentions de groupe doivent être incluses dans le contenu chiffré",
+        )
 
     try:
         message_type = MessageType(payload.message_type.upper())
@@ -1069,8 +1203,7 @@ async def send_group_message(
 
     media_asset = None
     if message_type == MessageType.TEXT:
-        if not payload.content or not payload.content.strip():
-            raise HTTPException(status_code=400, detail="Le contenu du message est requis")
+        pass
     else:
         if not payload.media_asset_id:
             raise HTTPException(status_code=400, detail="Une pièce jointe est requise pour ce type de message")
@@ -1088,6 +1221,8 @@ async def send_group_message(
             and sticker_service.sender_may_attach(db, media_asset.id, sender_id)
         ):
             raise HTTPException(status_code=404, detail="Pièce jointe introuvable")
+        if message_type != MessageType.STICKER and media_asset.mime_type != "application/octet-stream":
+            raise HTTPException(status_code=400, detail="Les fichiers de groupe doivent être chiffrés")
 
     if payload.reply_to_id:
         # Le message cité doit appartenir à CE groupe : sans cette
@@ -1099,25 +1234,30 @@ async def send_group_message(
         if not quoted:
             raise HTTPException(status_code=404, detail="Message cité introuvable")
 
-    # Les personnes citées qui ne sont pas (ou plus) membres sont écartées en
-    # silence : le texte est déjà écrit et « @Bob » y reste lisible, refuser
-    # tout le message parce que Bob a quitté le groupe ferait perdre le
-    # message pour un détail d'affichage.
+    expected_recipients = {
+        member.user_id for member in group.members if member.user_id != sender_id
+    }
+    delivered_recipients = {
+        row.recipient_id
+        for row in db.query(GroupSenderKeyDistribution).filter_by(
+            group_id=group_id, epoch=group.crypto_epoch, sender_id=sender_id
+        ).all()
+    }
+    if expected_recipients and delivered_recipients != expected_recipients:
+        raise HTTPException(status_code=409, detail="Distribution de clé incomplète")
+
+    # Mentions are currently carried only inside the ciphertext; the server
+    # intentionally stores no per-user plaintext mention index.
     mention_ids: List[int] = []
-    wanted_mentions = {user_id for user_id in payload.mention_user_ids if user_id != sender_id}
-    if wanted_mentions:
-        mention_ids = [
-            row[0]
-            for row in db.query(GroupMember.user_id)
-            .filter(GroupMember.group_id == group_id, GroupMember.user_id.in_(wanted_mentions))
-            .all()
-        ]
 
     message = GroupMessage(
         group_id=group_id,
         sender_id=sender_id,
         message_type=message_type,
-        content=payload.content,
+        content=None,
+        encryption=payload.encryption,
+        ciphertext=payload.ciphertext,
+        crypto_epoch=payload.crypto_epoch,
         media_asset_id=media_asset.id if media_asset else None,
         reply_to_id=payload.reply_to_id,
         # Échéance figée à l'envoi, jamais recalculée à la lecture : c'est ce
@@ -1147,7 +1287,7 @@ async def send_group_message(
     )
 
     group = db.query(Group).filter(Group.id == group_id).first()
-    body = payload.content if message_type == MessageType.TEXT else f"[{message_type.value.capitalize()}]"
+    body = "Nouveau message chiffré"
     mentioned = set(mention_ids)
     for member in group.members:
         if member.user_id == sender_id:
@@ -1228,6 +1368,24 @@ async def edit_group_message(
     user_id = current_user["user_id"]
     _require_membership(db, group_id, user_id)
     message = _get_group_message(db, group_id, message_id)
+    if payload.content is not None:
+        raise HTTPException(status_code=400, detail="Les modifications doivent être chiffrées")
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if payload.encryption != "sender-key-v1" or not payload.ciphertext:
+        raise HTTPException(status_code=400, detail="Modification chiffrée requise")
+    if payload.crypto_epoch != group.crypto_epoch:
+        raise HTTPException(status_code=409, detail="Époque de chiffrement obsolète")
+    expected_recipients = {
+        member.user_id for member in group.members if member.user_id != user_id
+    }
+    delivered_recipients = {
+        row.recipient_id
+        for row in db.query(GroupSenderKeyDistribution).filter_by(
+            group_id=group_id, epoch=group.crypto_epoch, sender_id=user_id
+        ).all()
+    }
+    if expected_recipients and delivered_recipients != expected_recipients:
+        raise HTTPException(status_code=409, detail="Distribution de clé incomplète")
 
     if message.sender_id != user_id:
         # 403 et non 404 : le message est bien visible de tout le groupe,
@@ -1235,6 +1393,8 @@ async def edit_group_message(
         raise HTTPException(status_code=403, detail="Vous ne pouvez modifier que vos propres messages")
     if message.deleted_at is not None:
         raise HTTPException(status_code=409, detail="Un message supprimé ne se modifie plus")
+    if group.proof_mode:
+        raise HTTPException(status_code=409, detail="La modification est désactivée en mode preuve")
     if message.message_type != MessageType.TEXT:
         # Remplacer une pièce jointe n'est pas une modification, c'est un
         # autre message : la précédente est déjà téléchargée chez les autres.
@@ -1245,15 +1405,13 @@ async def edit_group_message(
             detail=f"Un message ne peut plus être modifié après {_EDIT_WINDOW_MINUTES} minutes",
         )
 
-    content = payload.content.strip()
-    if not content:
-        raise HTTPException(status_code=400, detail="Le contenu du message est requis")
-
-    # En mode preuve, la PREMIÈRE version reste lisible de tous : modifier
-    # ne permet pas de réécrire ce qui a été dit.
-    if message.group is not None and message.group.proof_mode and message.original_content is None:
-        message.original_content = message.content
-    message.content = content
+    # Neither the old nor new version is retained in clear, including proof
+    # mode. The server stores only the latest sender-key ciphertext.
+    message.encryption = payload.encryption
+    message.ciphertext = payload.ciphertext
+    message.crypto_epoch = payload.crypto_epoch
+    message.content = None
+    message.original_content = None
     message.edited_at = datetime.utcnow()
     db.commit()
     db.refresh(message)
@@ -1309,17 +1467,7 @@ async def set_proof_mode(
     group.proof_mode = body.enabled
     group.proof_mode_since = datetime.utcnow() if body.enabled else None
     group.proof_mode_by = user_id if body.enabled else None
-    notice = GroupMessage(
-        group_id=group_id,
-        sender_id=user_id,
-        message_type=MessageType.TEXT,
-        content="a activé le mode preuve" if body.enabled else "a désactivé le mode preuve",
-        payload={"kind": "proof_mode", "enabled": body.enabled},
-    )
-    db.add(notice)
     db.commit()
-    db.refresh(notice)
-    await _broadcast(db, group_id, {"type": "group:message:new", "message": _serialize_message(notice)})
     await _broadcast(db, group_id, {
         "type": "group:proof_mode",
         "group_id": group_id,
@@ -1357,9 +1505,9 @@ def export_proof(
         "sender": _display_name(m.sender),
         "created_at": m.created_at,
         "type": m.message_type.value,
-        "content": m.content,
+        "content": None,
         "deleted_at": m.deleted_at,
-        "original_content": m.original_content,
+        "original_content": None,
         "edited_at": m.edited_at,
     } for m in rows]
     me = db.query(User).filter(User.id == user_id).first()
@@ -1378,8 +1526,8 @@ async def delete_group_message(
 ):
     """Supprimer un message pour tout le groupe : son auteur, ou un admin.
 
-    En mode preuve, la ligne reste avec son contenu, marquée supprimée, et
-    chaque membre la voit barrée. Hors mode preuve, elle est effacée.
+    En mode preuve, la ligne chiffrée reste marquée supprimée. Hors mode
+    preuve, elle est effacée.
     """
     user_id = current_user["user_id"]
     membership = _require_membership(db, group_id, user_id)

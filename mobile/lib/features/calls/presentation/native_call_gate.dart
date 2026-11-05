@@ -80,8 +80,14 @@ class NativeCallGateDecision {
       return null;
     }
 
-    // RINGING appartient au natif — voir l'en-tête.
-    if (call.state == NativeCallState.ringing) return null;
+    // La couche native termine sa requête d'acceptation avant CONNECTING.
+    // ANSWERING indique seulement que l'utilisateur a touché le bouton ;
+    // démarrer ici ferait courir LiveKit en parallèle de cette requête et
+    // laisserait l'appel sans réponse signalée si elle échoue.
+    if (call.state == NativeCallState.ringing ||
+        call.state == NativeCallState.answering) {
+      return null;
+    }
 
     final room = call.room;
     if (room == null || room == _handledRoom) return null;
@@ -112,9 +118,18 @@ class _NativeCallGate {
       // Le jeton LiveKit : le natif a accepté l'appel côté serveur, mais il
       // ne sait pas parler média — c'est la frontière exacte entre les deux
       // couches.
-      final token = await _ref
-          .read(callRepositoryProvider)
-          .joinCall(room, inviter: call.fromUserId);
+      final calls = _ref.read(callRepositoryProvider);
+      final token = await calls.joinCall(room, inviter: call.fromUserId);
+      final inviter = call.fromUserId;
+      if (inviter != null) {
+        unawaited(
+          calls
+              .signal(room: room, targetUserId: inviter, event: 'accept')
+              .catchError((Object error) {
+                debugPrint('[Calls] native accept signal failed: $error');
+              }),
+        );
+      }
       final navigator = rootNavigatorKey.currentState;
       if (navigator == null) {
         // Flutter n'a pas encore d'arbre : très tôt au démarrage à froid.

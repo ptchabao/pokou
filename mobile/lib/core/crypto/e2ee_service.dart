@@ -11,7 +11,6 @@ import 'e2ee_envelope.dart';
 import 'e2ee_session.dart';
 import 'e2ee_store.dart';
 
-
 /// Le chiffrement de bout en bout, vu depuis le reste de l'application.
 ///
 /// Trois choses seulement sortent d'ici : publier ses clés, chiffrer pour
@@ -33,16 +32,18 @@ import 'e2ee_store.dart';
 /// - ❌ **pas de sécurité post-compromission** : qui vole l'état d'une
 ///   session lit ce qui suit jusqu'à la prochaine session. Le vrai protocole
 ///   Signal ajoute un second cliquet pour ça ;
-/// - ❌ **les groupes, les chaînes et les statuts ne sont PAS chiffrés.** Ne
-///   pas laisser croire le contraire ;
+/// - ✅ les messages de groupe utilisent Signal Sender Keys, avec rotation
+///   d'époque après chaque changement d'appartenance ;
+/// - ❌ les chaînes et les statuts ne sont PAS chiffrés. Ne pas laisser croire
+///   le contraire ;
 /// - ❌ l'assistant Baba ne l'est pas non plus, et ne peut pas l'être : il
 ///   doit lire pour répondre ;
 /// - ❌ **aucun audit externe.** C'est la limite la plus importante, et elle
 ///   n'est pas technique.
 class E2EEService {
   E2EEService({required ApiClient apiClient, E2EEStore? store})
-      : _api = apiClient,
-        _store = store ?? E2EEStore();
+    : _api = apiClient,
+      _store = store ?? E2EEStore();
 
   final ApiClient _api;
   final E2EEStore _store;
@@ -58,7 +59,12 @@ class E2EEService {
   /// plus ancienne recevrait sinon un bloc qu'elle ne sait pas ouvrir.
   static const mediaCapability = 'media-v1';
   static const callCapability = 'call-v1';
-  static const capabilities = [mediaCapability, callCapability];
+  static const groupCapability = 'group-sender-key-v1';
+  static const capabilities = [
+    mediaCapability,
+    callCapability,
+    groupCapability,
+  ];
 
   /// Ce que l'on sait du correspondant, gardé deux minutes : une photo
   /// envoyée après une autre n'a pas à reposer la question, mais une
@@ -78,7 +84,8 @@ class E2EEService {
   /// les recevoir chiffrées. Une erreur n'est jamais mise en cache.
   Future<PeerCrypto> peerCrypto(int peerUserId) async {
     final cached = _peerCrypto[peerUserId];
-    if (cached != null && DateTime.now().difference(cached.at) < _peerCryptoTtl) {
+    if (cached != null &&
+        DateTime.now().difference(cached.at) < _peerCryptoTtl) {
       return cached.value;
     }
     PeerCrypto value;
@@ -88,7 +95,10 @@ class E2EEService {
       if (raw is! List) throw const FormatException('capabilities');
       final identity = response['identity_key'];
       value = PeerCrypto(
-        capabilities: {for (final c in raw) if (c is String) c},
+        capabilities: {
+          for (final c in raw)
+            if (c is String) c,
+        },
         identityKey: identity is String ? identity : null,
       );
     } on ApiException catch (exc) {
@@ -179,15 +189,23 @@ class E2EEService {
       // qui empêcherait qui que ce soit de nous écrire chiffré.
     }
 
-    final prekeys = needed > 0 ? await _store.generateOneTimePrekeys(needed) : const [];
-    await _api.put('/e2ee/bundle', body: {
-      ...bundle,
-      'capabilities': capabilities,
-      'one_time_prekeys': [
-        for (final prekey in prekeys)
-          {'key_id': prekey.keyId, 'public_key': base64.encode(prekey.publicKey)},
-      ],
-    });
+    final prekeys = needed > 0
+        ? await _store.generateOneTimePrekeys(needed)
+        : const [];
+    await _api.put(
+      '/e2ee/bundle',
+      body: {
+        ...bundle,
+        'capabilities': capabilities,
+        'one_time_prekeys': [
+          for (final prekey in prekeys)
+            {
+              'key_id': prekey.keyId,
+              'public_key': base64.encode(prekey.publicKey),
+            },
+        ],
+      },
+    );
   }
 
   /// Chiffre pour quelqu'un, en ouvrant une session au besoin.
@@ -202,10 +220,18 @@ class E2EEService {
   /// rattrape par distraction dans un `catch` large — c'est même exactement
   /// ce qui s'était passé ici — alors qu'une issue non traitée fait échouer
   /// l'analyse statique grâce au `switch` exhaustif sur une classe scellée.
-  Future<SealOutcome> seal({required int peerUserId, required String plaintext}) =>
-      _exclusive(peerUserId, () => _seal(peerUserId: peerUserId, plaintext: plaintext));
+  Future<SealOutcome> seal({
+    required int peerUserId,
+    required String plaintext,
+  }) => _exclusive(
+    peerUserId,
+    () => _seal(peerUserId: peerUserId, plaintext: plaintext),
+  );
 
-  Future<SealOutcome> _seal({required int peerUserId, required String plaintext}) async {
+  Future<SealOutcome> _seal({
+    required int peerUserId,
+    required String plaintext,
+  }) async {
     final E2EEIdentity identity;
     final Map<String, E2EESession> sessions;
     try {
@@ -220,7 +246,10 @@ class E2EEService {
     if (sessions.isNotEmpty) {
       final session = sessions.values.last;
       try {
-        final sealed = await E2EEEnvelope.seal(session: session, plaintext: plaintext);
+        final sealed = await E2EEEnvelope.seal(
+          session: session,
+          plaintext: plaintext,
+        );
         await _store.saveSession(peerUserId, session);
         return SealEncrypted(
           encryption: E2EEEnvelope.version,
@@ -234,7 +263,8 @@ class E2EEService {
 
     final Map<String, dynamic> bundleJson;
     try {
-      bundleJson = await _api.get('/e2ee/bundle/$peerUserId') as Map<String, dynamic>;
+      bundleJson =
+          await _api.get('/e2ee/bundle/$peerUserId') as Map<String, dynamic>;
     } on ApiException catch (exc) {
       // 404 et 404 SEULEMENT : le serveur affirme que cette personne n'a pas
       // publié de trousseau. N'importe quel autre code est une panne, ou une
@@ -295,7 +325,11 @@ class E2EEService {
     required String ciphertext,
   }) => _exclusive(
     peerUserId,
-    () => _open(peerUserId: peerUserId, envelope: envelope, ciphertext: ciphertext),
+    () => _open(
+      peerUserId: peerUserId,
+      envelope: envelope,
+      ciphertext: ciphertext,
+    ),
   );
 
   Future<String> _open({
@@ -312,7 +346,9 @@ class E2EEService {
       // Premier message d'une nouvelle session : le préambule contient de
       // quoi la reconstituer.
       if (envelope['ik'] == null || envelope['ek'] == null) {
-        throw const FormatException('session inconnue et message sans préambule');
+        throw const FormatException(
+          'session inconnue et message sans préambule',
+        );
       }
       final identity = await _store.loadOrCreateIdentity();
       final prekeyId = envelope['pk'] as int?;
@@ -320,7 +356,9 @@ class E2EEService {
         preamble: envelope,
         myIdentity: identity.identityKeyPair,
         mySignedPrekey: identity.signedPrekeyPair,
-        myOneTimePrekey: prekeyId == null ? null : await _store.takeOneTimePrekey(prekeyId),
+        myOneTimePrekey: prekeyId == null
+            ? null
+            : await _store.takeOneTimePrekey(prekeyId),
       );
     }
 
@@ -341,7 +379,10 @@ class E2EEService {
   /// L'utilisateur doit le savoir dans les deux cas : c'est le seul moment
   /// où le chiffrement de bout en bout lui demande quelque chose, et le seul
   /// endroit où une attaque devient visible.
-  Future<bool> identityChanged({required int peerUserId, required String publishedIdentityKey}) async {
+  Future<bool> identityChanged({
+    required int peerUserId,
+    required String publishedIdentityKey,
+  }) async {
     final sessions = await _store.sessionsWith(peerUserId);
     if (sessions.isEmpty) return false;
     final known = base64.encode(sessions.values.last.peerIdentityKey);
@@ -376,12 +417,15 @@ class E2EEService {
 
     final Map<String, dynamic> bundleJson;
     try {
-      bundleJson = await _api.get('/e2ee/bundle/$peerUserId') as Map<String, dynamic>;
+      bundleJson =
+          await _api.get('/e2ee/bundle/$peerUserId') as Map<String, dynamic>;
     } on ApiException catch (exc) {
       // 404 alors qu'une session existe : la personne a retiré son
       // trousseau. Ce n'est pas un changement d'identité, mais ce n'est pas
       // normal non plus — on ne prétend pas savoir.
-      return exc.statusCode == 404 ? PeerIdentity.unknown : PeerIdentity.unknown;
+      return exc.statusCode == 404
+          ? PeerIdentity.unknown
+          : PeerIdentity.unknown;
     } catch (_) {
       return PeerIdentity.unknown;
     }
@@ -480,4 +524,3 @@ enum PeerSessionState {
   /// Une session ouverte avec une AUTRE identité que celle publiée.
   changed,
 }
-

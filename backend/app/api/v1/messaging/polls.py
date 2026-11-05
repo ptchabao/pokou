@@ -283,7 +283,12 @@ def _resolve_target(db: Session, kind: str, target_id: int, sender_id: int) -> _
         if not group:
             raise HTTPException(status_code=403, detail="Vous n'êtes pas membre de ce groupe")
         _require_can_post(group, membership)
-        return _Target("group", group, None, None)
+        # Rich objects are currently modeled as server-readable rows. Never
+        # route group polls, locations, or contact cards through those tables.
+        raise HTTPException(
+            status_code=409,
+            detail="Le contenu riche de groupe n'est pas encore pris en charge en E2EE",
+        )
 
     if target_id == sender_id:
         raise HTTPException(status_code=400, detail="Impossible de s'envoyer un message à soi-même")

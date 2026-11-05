@@ -2838,6 +2838,16 @@ class LEn extends L {
   String get callAddFailed => 'Could not add this participant.';
 
   @override
+  String get callReactionFailed => 'Could not send this reaction.';
+
+  @override
+  String get callLeaveConfirmTitle => 'Leave the call?';
+
+  @override
+  String get callLeaveConfirmBody =>
+      'Other participants may still be talking. You can return to the call banner instead of hanging up.';
+
+  @override
   String get callYou => 'You';
 
   @override
@@ -4981,6 +4991,9 @@ class LEn extends L {
   String get korySubtitle => 'Group pots & savings circles';
 
   @override
+  String get koryMyPots => 'My pots';
+
+  @override
   String get koryMonthTotal => 'My confirmed contributions this month';
 
   @override
@@ -5256,6 +5269,10 @@ class LEn extends L {
 
   @override
   String get honamSubtitle => 'Pharmacies & delivery';
+
+  @override
+  String get honamIntro =>
+      'A nearby pharmacy sends you a quote. Pay from your wallet and a courier delivers it to you.';
 
   @override
   String get honamSend => 'Send a prescription';

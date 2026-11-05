@@ -89,20 +89,27 @@ class ModuleScaffold extends StatelessWidget {
   }
 }
 
-/// La carte blanche à filet — la seule forme de conteneur de ces écrans.
+/// Carte à filet, avec couleur personnalisable pour les résumés accentués.
 class ModuleCard extends StatelessWidget {
-  const ModuleCard({super.key, required this.child, this.padding, this.onTap});
+  const ModuleCard({
+    super.key,
+    required this.child,
+    this.padding,
+    this.onTap,
+    this.backgroundColor,
+  });
 
   final Widget child;
   final EdgeInsets? padding;
   final VoidCallback? onTap;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final card = Container(
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: backgroundColor ?? AppColors.surface,
         borderRadius: AppRadius.card,
         border: Border.all(color: AppColors.border),
         boxShadow: AppElevation.subtle,
@@ -117,7 +124,7 @@ class ModuleCard extends StatelessWidget {
   }
 }
 
-/// La pastille d'icône — vert plein, icône blanche, comme dans la galerie.
+/// La pastille d'icône utilise le couple action/texte de la palette Pokou.
 ///
 /// Elle ne porte plus la couleur du module : une teinte par module donnait à
 /// une liste l'allure d'un nuancier, où plus aucune couleur ne signifiait
@@ -151,12 +158,14 @@ class ModuleBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: muted ? AppColors.surfaceElevated : AppColors.accentPrimaryDark,
+        color: muted
+            ? AppColors.surfaceElevated
+            : AppColors.actionButtonBackground,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Icon(
         icon,
-        color: muted ? AppColors.textMuted : Colors.white,
+        color: muted ? AppColors.textMuted : AppColors.actionButtonForeground,
         size: size * 0.5,
       ),
     );

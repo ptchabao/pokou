@@ -279,6 +279,37 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Mes annonces',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const MyCatalogScreen()),
+                  ),
+                  child: const Text('Mes annonces'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CreateAdScreen()),
+                ),
+                icon: const Icon(Icons.add),
+                label: const Text('Publier une annonce'),
+              ),
+            ),
             const SizedBox(height: 10),
             SizedBox(
               height: 38,

@@ -2857,6 +2857,16 @@ class LFr extends L {
   String get callAddFailed => 'Impossible d\'ajouter ce participant.';
 
   @override
+  String get callReactionFailed => 'Impossible d\'envoyer cette réaction.';
+
+  @override
+  String get callLeaveConfirmTitle => 'Quitter l\'appel ?';
+
+  @override
+  String get callLeaveConfirmBody =>
+      'Les autres participants peuvent encore parler. Pour revenir à l\'appel, vous pouvez fermer cet écran sans raccrocher.';
+
+  @override
   String get callYou => 'Vous';
 
   @override
@@ -5022,6 +5032,9 @@ class LFr extends L {
   String get korySubtitle => 'Cagnottes & tontines';
 
   @override
+  String get koryMyPots => 'Mes cagnottes';
+
+  @override
   String get koryMonthTotal => 'Mes contributions confirmées ce mois-ci';
 
   @override
@@ -5300,6 +5313,10 @@ class LFr extends L {
 
   @override
   String get honamSubtitle => 'Pharmacies & livraison';
+
+  @override
+  String get honamIntro =>
+      'Une pharmacie proche t\'envoie un devis. Tu la paies depuis ton wallet, puis un coursier te la livre.';
 
   @override
   String get honamSend => 'Envoyer une ordonnance';

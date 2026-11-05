@@ -15,6 +15,7 @@ import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../contacts/presentation/contacts_controller.dart';
+import '../../messaging/presentation/conversation_screen.dart';
 import 'call_controller.dart';
 import 'call_session.dart';
 import 'ringtone_player.dart';
@@ -85,6 +86,9 @@ class _CallScreenState extends ConsumerState<CallScreen> {
   /// La session de cet appel — qui survit à cet écran (voir CallSession).
   late final CallSession _s;
   StreamSubscription<CallNotice>? _noticeSubscription;
+  StreamSubscription<CallReaction>? _reactionSubscription;
+  Timer? _reactionTimer;
+  String? _visibleReaction;
   bool _closing = false;
 
   @override
@@ -121,6 +125,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     _s.attachScreen();
     _s.addListener(_onSessionChanged);
     _noticeSubscription = _s.notices.listen(_onNotice);
+    _reactionSubscription = _s.reactions.listen(_showReaction);
   }
 
   void _onSessionChanged() {
@@ -142,17 +147,58 @@ class _CallScreenState extends ConsumerState<CallScreen> {
       CallNotice.noAnswer => l.callNoAnswer,
       CallNotice.flipFailed => l.callFlipCameraFailed,
       CallNotice.inviteFailed => l.callAddFailed,
+      CallNotice.reactionFailed => l.callReactionFailed,
     };
     ScaffoldMessenger.maybeOf(
       context,
     )?.showSnackBar(SnackBar(content: Text(text)));
   }
 
-  Future<void> _hangUp() => _s.hangUp();
   Future<void> _toggleMic() => _s.toggleMic();
   Future<void> _toggleCamera() => _s.toggleCamera();
   Future<void> _toggleSpeaker() => _s.toggleSpeaker();
   Future<void> _flipCamera() => _s.flipCamera();
+
+  void _showReaction(CallReaction reaction) {
+    if (!mounted) return;
+    setState(() => _visibleReaction = reaction.emoji);
+    _reactionTimer?.cancel();
+    _reactionTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _visibleReaction = null);
+    });
+  }
+
+  Future<void> _sendReaction(String emoji) async {
+    _showReaction(CallReaction(emoji: emoji, senderId: null));
+    await _s.sendReaction(emoji);
+  }
+
+  Future<void> _openParticipantConversation(
+    Participant participant,
+    String displayName,
+  ) async {
+    final participantId = int.tryParse(participant.identity);
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    if (participantId == null ||
+        myUserId == null ||
+        participantId == myUserId) {
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ConversationScreen(
+          myUserId: myUserId,
+          contactUserId: participantId,
+          contactName: displayName,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmHangUp() async {
+    final shouldHangUp = await confirmCallHangUp(context);
+    if (shouldHangUp == true && mounted) await _s.hangUp();
+  }
 
   /// Ajoute quelqu'un à l'appel EN COURS : le salon ne change pas, personne
   /// ne se reconnecte, l'invité reçoit un `call:invite` sur le salon existant.
@@ -232,7 +278,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
   Future<List<({int userId, String displayName})>> _inviteCandidates() async {
     if (widget.groupId != null) {
       return widget.groupMembers
-          .where((member) => !_s.participantIds.contains(member.userId))
+          .where((member) => _s.canInvite(member.userId))
           .toList();
     }
     try {
@@ -242,7 +288,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
             (contact) =>
                 contact.isRegistered &&
                 contact.contactUserId != null &&
-                !_s.participantIds.contains(contact.contactUserId),
+                _s.canInvite(contact.contactUserId!),
           )
           .map(
             (contact) => (
@@ -262,6 +308,8 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     // message, le bandeau « Appel en cours » ramène ici. Seul le raccroché
     // (ou celui de l'autre) termine la session.
     _noticeSubscription?.cancel();
+    _reactionSubscription?.cancel();
+    _reactionTimer?.cancel();
     _s.removeListener(_onSessionChanged);
     _s.detachScreen();
     super.dispose();
@@ -282,7 +330,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
               orElse: () => null,
             );
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.neutralBeige,
         body: SafeArea(
           child: Column(
             children: [
@@ -312,7 +360,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
               Text(
                 L.of(context).callConnecting,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.brandEbene,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -320,7 +368,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
               const SizedBox(height: 8),
               Text(
                 L.of(context).callPreparing,
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(color: AppColors.textSecondary),
               ),
               const Spacer(),
               Padding(
@@ -328,7 +376,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
                 child: _CallActionButton(
                   icon: Icons.call_end,
                   background: AppColors.accentPrimary,
-                  onTap: _hangUp,
+                  onTap: _confirmHangUp,
                 ),
               ),
             ],
@@ -339,14 +387,14 @@ class _CallScreenState extends ConsumerState<CallScreen> {
 
     if (_s.joinFailed) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.neutralBeige,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 L.of(context).callJoinFailed,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 16),
               const PokouBackButton(),
@@ -406,199 +454,263 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: remotes.isEmpty
-                  ? Stack(
-                      children: [
-                        Center(
-                          child: Text(
-                            L.of(context).callWaiting,
-                            style: const TextStyle(color: Colors.white70),
+      backgroundColor: AppColors.neutralBeige,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: remotes.isEmpty
+                      ? Stack(
+                          children: [
+                            Center(
+                              child: Text(
+                                L.of(context).callWaiting,
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            if (local != null)
+                              Positioned(
+                                top: 16,
+                                right: 16,
+                                width: 110,
+                                height: 150,
+                                child: _ParticipantTile(
+                                  participant: local,
+                                  displayName: localName,
+                                  avatar: localAvatar,
+                                  onFlipCamera: _s.cameraEnabled
+                                      ? _flipCamera
+                                      : null,
+                                ),
+                              ),
+                          ],
+                        )
+                      : remotes.length == 1
+                      ? Stack(
+                          children: [
+                            Positioned.fill(
+                              child: _ParticipantTile(
+                                participant: remotes.first,
+                                displayName: nameForParticipant(remotes.first),
+                                isVerified: verifiedParticipant(remotes.first),
+                                avatar: avatarForParticipant(remotes.first),
+                                onTap: () => _openParticipantConversation(
+                                  remotes.first,
+                                  nameForParticipant(remotes.first),
+                                ),
+                              ),
+                            ),
+                            if (_s.encrypted || _s.encryptionDowngraded)
+                              Positioned(
+                                top: 16,
+                                left: 16,
+                                child: _EncryptedCallLabel(
+                                  encrypted: _s.encrypted,
+                                ),
+                              ),
+                            if (local != null)
+                              Positioned(
+                                top: 16,
+                                right: 16,
+                                width: 110,
+                                height: 150,
+                                child: _ParticipantTile(
+                                  participant: local,
+                                  displayName: localName,
+                                  avatar: localAvatar,
+                                  onFlipCamera: _s.cameraEnabled
+                                      ? _flipCamera
+                                      : null,
+                                ),
+                              ),
+                          ],
+                        )
+                      : _WithSecurityNote(
+                          encrypted: _s.encrypted,
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            // Gouttière de 12 points, comme le système de design
+                            // le fixe pour les grilles. Les tuiles se touchaient.
+                            padding: const EdgeInsets.all(12),
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.8,
+                            children: [
+                              if (local != null)
+                                _ParticipantTile(
+                                  participant: local,
+                                  displayName: localName,
+                                  avatar: localAvatar,
+                                  isMe: true,
+                                  onFlipCamera: _s.cameraEnabled
+                                      ? _flipCamera
+                                      : null,
+                                ),
+                              for (final p in remotes)
+                                _ParticipantTile(
+                                  participant: p,
+                                  displayName: nameForParticipant(p),
+                                  isVerified: verifiedParticipant(p),
+                                  avatar: avatarForParticipant(p),
+                                  showMuteButton: true,
+                                  onTap: () => _openParticipantConversation(
+                                    p,
+                                    nameForParticipant(p),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        if (local != null)
-                          Positioned(
-                            top: 16,
-                            right: 16,
-                            width: 110,
-                            height: 150,
-                            child: _ParticipantTile(
-                              participant: local,
-                              displayName: localName,
-                              avatar: localAvatar,
-                              onFlipCamera: _s.cameraEnabled
-                                  ? _flipCamera
-                                  : null,
-                            ),
-                          ),
-                      ],
-                    )
-                  : remotes.length == 1
-                  ? Stack(
-                      children: [
-                        Positioned.fill(
-                          child: _ParticipantTile(
-                            participant: remotes.first,
-                            displayName: nameForParticipant(remotes.first),
-                            isVerified: verifiedParticipant(remotes.first),
-                            avatar: avatarForParticipant(remotes.first),
-                          ),
-                        ),
-                        if (_s.encrypted || _s.encryptionDowngraded)
-                          Positioned(
-                            top: 16,
-                            left: 16,
-                            child: _EncryptedCallLabel(
-                              encrypted: _s.encrypted,
-                            ),
-                          ),
-                        if (local != null)
-                          Positioned(
-                            top: 16,
-                            right: 16,
-                            width: 110,
-                            height: 150,
-                            child: _ParticipantTile(
-                              participant: local,
-                              displayName: localName,
-                              avatar: localAvatar,
-                              onFlipCamera: _s.cameraEnabled
-                                  ? _flipCamera
-                                  : null,
-                            ),
-                          ),
-                      ],
-                    )
-                  : _WithSecurityNote(
-                      encrypted: _s.encrypted,
-                      child: GridView.count(
-                        crossAxisCount: 2,
-                        // Gouttière de 12 points, comme le système de design
-                        // le fixe pour les grilles. Les tuiles se touchaient.
-                        padding: const EdgeInsets.all(12),
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.8,
+                ),
+                // ── La barre de contrôle ─────────────────────────────────
+                //
+                // Des boutons ÉTIQUETÉS, et non quatre ronds muets. Sur un
+                // appel de groupe, couper son micro et quitter l'appel sont
+                // deux gestes très différents et voisins d'un centimètre : un
+                // pictogramme seul se confond, surtout dans l'urgence.
+                //
+                // Et « raccrocher » sort de cette rangée. Il était un rond
+                // VERT au milieu des autres, de la même taille — la seule
+                // action irréversible de l'écran avait l'apparence de ses
+                // voisines et leur couleur d'accord. Il devient une barre
+                // rouge, pleine largeur, sous les autres.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          if (local != null)
-                            _ParticipantTile(
-                              participant: local,
-                              displayName: localName,
-                              avatar: localAvatar,
-                              isMe: true,
-                              onFlipCamera: _s.cameraEnabled
-                                  ? _flipCamera
-                                  : null,
-                            ),
-                          for (final p in remotes)
-                            _ParticipantTile(
-                              participant: p,
-                              displayName: nameForParticipant(p),
-                              isVerified: verifiedParticipant(p),
-                              avatar: avatarForParticipant(p),
-                              showMuteButton: true,
+                          for (final emoji in callReactionEmojis)
+                            IconButton(
+                              tooltip: emoji,
+                              onPressed: () => _sendReaction(emoji),
+                              icon: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 24),
+                              ),
                             ),
                         ],
                       ),
-                    ),
-            ),
-            // ── La barre de contrôle ─────────────────────────────────
-            //
-            // Des boutons ÉTIQUETÉS, et non quatre ronds muets. Sur un
-            // appel de groupe, couper son micro et quitter l'appel sont
-            // deux gestes très différents et voisins d'un centimètre : un
-            // pictogramme seul se confond, surtout dans l'urgence.
-            //
-            // Et « raccrocher » sort de cette rangée. Il était un rond
-            // VERT au milieu des autres, de la même taille — la seule
-            // action irréversible de l'écran avait l'apparence de ses
-            // voisines et leur couleur d'accord. Il devient une barre
-            // rouge, pleine largeur, sous les autres.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _CallControl(
-                          icon: _s.micEnabled ? Icons.mic : Icons.mic_off,
-                          label: L.of(context).callMuteLabel,
-                          active: !_s.micEnabled,
-                          onTap: _toggleMic,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _CallControl(
-                          icon: _s.cameraEnabled
-                              ? Icons.videocam
-                              : Icons.videocam_off,
-                          label: L.of(context).callCameraLabel,
-                          active: !_s.cameraEnabled,
-                          onTap: _toggleCamera,
-                        ),
-                      ),
-                      if (_s.canSwitchSpeaker) ...[
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _CallControl(
-                            icon: _s.speakerOn
-                                ? Icons.volume_up
-                                : Icons.volume_down_outlined,
-                            label: L.of(context).callSpeakerLabel,
-                            active: _s.speakerOn,
-                            onTap: _toggleSpeaker,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _CallControl(
+                              icon: _s.micEnabled ? Icons.mic : Icons.mic_off,
+                              label: L.of(context).callMuteLabel,
+                              active: !_s.micEnabled,
+                              onTap: _toggleMic,
+                            ),
                           ),
-                        ),
-                      ],
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _CallControl(
-                          icon: Icons.person_add_alt,
-                          label: L.of(context).callInviteLabel,
-                          active: false,
-                          onTap: _s.inviting ? null : _addParticipants,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _CallControl(
+                              icon: _s.cameraEnabled
+                                  ? Icons.videocam
+                                  : Icons.videocam_off,
+                              label: L.of(context).callCameraLabel,
+                              active: !_s.cameraEnabled,
+                              onTap: _toggleCamera,
+                            ),
+                          ),
+                          if (_s.canSwitchSpeaker) ...[
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _CallControl(
+                                icon: _s.speakerOn
+                                    ? Icons.volume_up
+                                    : Icons.volume_down_outlined,
+                                label: L.of(context).callSpeakerLabel,
+                                active: _s.speakerOn,
+                                onTap: _toggleSpeaker,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _CallControl(
+                              icon: Icons.person_add_alt,
+                              label: L.of(context).callInviteLabel,
+                              active: false,
+                              onTap: _s.inviting ? null : _addParticipants,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _confirmHangUp,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.semanticError,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 52),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppRadius.chip,
+                            ),
+                          ),
+                          icon: const Icon(Icons.call_end, size: 20),
+                          label: Text(
+                            L.of(context).callLeaveConference,
+                            style: const TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _hangUp,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.semanticError,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(0, 52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.chip,
-                        ),
-                      ),
-                      icon: const Icon(Icons.call_end, size: 20),
-                      label: Text(
-                        L.of(context).callLeaveConference,
-                        style: const TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                ),
+              ],
+            ),
+          ),
+          if (_visibleReaction != null)
+            Positioned(
+              top: 96,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Center(
+                  child: Text(
+                    _visibleReaction!,
+                    style: const TextStyle(fontSize: 72),
                   ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
+}
+
+Future<bool?> confirmCallHangUp(BuildContext context) {
+  final l = L.of(context);
+  return showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l.callLeaveConfirmTitle),
+      content: Text(l.callLeaveConfirmBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l.actionCancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l.callHangUp),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ParticipantTile extends StatefulWidget {
@@ -610,6 +722,7 @@ class _ParticipantTile extends StatefulWidget {
     this.isMe = false,
     this.isVerified = false,
     this.onFlipCamera,
+    this.onTap,
   });
 
   final Participant participant;
@@ -629,6 +742,7 @@ class _ParticipantTile extends StatefulWidget {
   /// là qu'on regarde ce qu'on montre, et la barre du bas n'a plus la place
   /// d'un cinquième libellé lisible.
   final VoidCallback? onFlipCamera;
+  final VoidCallback? onTap;
 
   @override
   State<_ParticipantTile> createState() => _ParticipantTileState();
@@ -745,180 +859,188 @@ class _ParticipantTileState extends State<_ParticipantTile>
     final parle = widget.participant.isSpeaking;
     final (qualite, couleurQualite) = _quality(l);
 
-    return Container(
-      decoration: BoxDecoration(
-        // Ma tuile est teintée ; celles des autres sont blanches.
-        color: widget.isMe
-            ? AppColors.accentPrimary.withValues(alpha: 0.07)
-            : AppColors.surface,
-        borderRadius: AppRadius.chip,
-        border: Border.all(
-          // L'anneau de parole passe aussi par la BORDURE de la tuile :
-          // dans une grille, on repère une tuite entière avant un détail
-          // à l'intérieur.
-          color: parle ? AppColors.accentPrimary : AppColors.border,
-          width: parle ? 2 : 1,
+    return InkWell(
+      onTap: widget.onTap,
+      borderRadius: AppRadius.chip,
+      child: Container(
+        decoration: BoxDecoration(
+          // Ma tuile est teintée ; celles des autres sont blanches.
+          color: widget.isMe
+              ? AppColors.accentPrimary.withValues(alpha: 0.07)
+              : AppColors.surface,
+          borderRadius: AppRadius.chip,
+          border: Border.all(
+            // L'anneau de parole passe aussi par la BORDURE de la tuile :
+            // dans une grille, on repère une tuite entière avant un détail
+            // à l'intérieur.
+            color: parle ? AppColors.accentPrimary : AppColors.border,
+            width: parle ? 2 : 1,
+          ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: AppRadius.chip,
-        child: Stack(
-          children: [
-            if (video)
-              Positioned.fill(child: VideoTrackRenderer(track))
-            else
-              Positioned.fill(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _SpeakingRing(
-                      pulse: _pulse,
-                      speaking: parle,
-                      child: ContactAvatar(
-                        avatar: widget.avatar,
-                        displayName: widget.displayName,
-                        size: 66,
-                        fallbackBackgroundColor: AppColors.accentPrimary,
+        child: ClipRRect(
+          borderRadius: AppRadius.chip,
+          child: Stack(
+            children: [
+              if (video)
+                Positioned.fill(child: VideoTrackRenderer(track))
+              else
+                Positioned.fill(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _SpeakingRing(
+                        pulse: _pulse,
+                        speaking: parle,
+                        child: ContactAvatar(
+                          avatar: widget.avatar,
+                          displayName: widget.displayName,
+                          size: 66,
+                          fallbackBackgroundColor: AppColors.accentPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.isMe
+                                    ? l.callYouShort
+                                    : widget.displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Outfit',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            if (widget.isVerified && !widget.isMe) ...[
+                              const SizedBox(width: 4),
+                              const VerifiedBadge(size: 15),
+                            ],
+                          ],
+                        ),
+                      ),
+                      if (qualite.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            qualite,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: couleurQualite,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+              // ── Le micro à la source, en haut à droite ────────────────
+              //
+              // La maquette pose ici une pastille de réseau (4G, LTE, Fibre).
+              // Le TYPE de réseau n'est pas connu de l'application — seule la
+              // QUALITÉ l'est, et elle est déjà écrite sous le nom. Inventer
+              // « 4G » aurait donné une tuile qui affirme ce qu'elle ignore.
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: _sourceMuted
+                        ? AppColors.semanticError.withValues(alpha: 0.12)
+                        : AppColors.accentPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _sourceMuted ? Icons.mic_off : Icons.mic,
+                    size: 15,
+                    color: _sourceMuted
+                        ? AppColors.semanticError
+                        : Colors.white,
+                  ),
+                ),
+              ),
+
+              if (widget.showMuteButton)
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: Semantics(
+                    button: true,
+                    label: l.callMutedShort,
+                    child: InkWell(
+                      onTap: _toggleLocalMute,
+                      customBorder: const CircleBorder(),
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.surfaceElevated,
+                        ),
+                        child: Icon(
+                          _locallyMuted ? Icons.volume_off : Icons.volume_up,
+                          size: 16,
+                          color: _locallyMuted
+                              ? AppColors.semanticError
+                              : AppColors.textSecondary,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              widget.isMe ? l.callYouShort : widget.displayName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                  ),
+                ),
+
+              // En bas à droite, la place que le bouton « couper le son »
+              // occupe sur les tuiles des autres : ma tuile ne l'a pas.
+              if (video && widget.onFlipCamera != null)
+                Positioned(
+                  bottom: 2,
+                  right: 2,
+                  child: Semantics(
+                    button: true,
+                    label: l.callFlipCamera,
+                    child: Tooltip(
+                      message: l.callFlipCamera,
+                      child: InkWell(
+                        onTap: widget.onFlipCamera,
+                        customBorder: const CircleBorder(),
+                        // 44 points de cible pour un rond de 34 : la tuile
+                        // incrustée ne fait que 110 points de large.
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Center(
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.black.withValues(alpha: 0.55),
+                              ),
+                              child: const Icon(
+                                Icons.flip_camera_ios_outlined,
+                                size: 18,
+                                color: Colors.white,
                               ),
                             ),
                           ),
-                          if (widget.isVerified && !widget.isMe) ...[
-                            const SizedBox(width: 4),
-                            const VerifiedBadge(size: 15),
-                          ],
-                        ],
-                      ),
-                    ),
-                    if (qualite.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          qualite,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: couleurQualite,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-            // ── Le micro à la source, en haut à droite ────────────────
-            //
-            // La maquette pose ici une pastille de réseau (4G, LTE, Fibre).
-            // Le TYPE de réseau n'est pas connu de l'application — seule la
-            // QUALITÉ l'est, et elle est déjà écrite sous le nom. Inventer
-            // « 4G » aurait donné une tuile qui affirme ce qu'elle ignore.
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: _sourceMuted
-                      ? AppColors.semanticError.withValues(alpha: 0.12)
-                      : AppColors.accentPrimary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _sourceMuted ? Icons.mic_off : Icons.mic,
-                  size: 15,
-                  color: _sourceMuted ? AppColors.semanticError : Colors.white,
-                ),
-              ),
-            ),
-
-            if (widget.showMuteButton)
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Semantics(
-                  button: true,
-                  label: l.callMutedShort,
-                  child: InkWell(
-                    onTap: _toggleLocalMute,
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.surfaceElevated,
-                      ),
-                      child: Icon(
-                        _locallyMuted ? Icons.volume_off : Icons.volume_up,
-                        size: 16,
-                        color: _locallyMuted
-                            ? AppColors.semanticError
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-            // En bas à droite, la place que le bouton « couper le son »
-            // occupe sur les tuiles des autres : ma tuile ne l'a pas.
-            if (video && widget.onFlipCamera != null)
-              Positioned(
-                bottom: 2,
-                right: 2,
-                child: Semantics(
-                  button: true,
-                  label: l.callFlipCamera,
-                  child: Tooltip(
-                    message: l.callFlipCamera,
-                    child: InkWell(
-                      onTap: widget.onFlipCamera,
-                      customBorder: const CircleBorder(),
-                      // 44 points de cible pour un rond de 34 : la tuile
-                      // incrustée ne fait que 110 points de large.
-                      child: SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: Center(
-                          child: Container(
-                            width: 34,
-                            height: 34,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.black.withValues(alpha: 0.55),
-                            ),
-                            child: const Icon(
-                              Icons.flip_camera_ios_outlined,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

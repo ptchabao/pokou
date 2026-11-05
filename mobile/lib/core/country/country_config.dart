@@ -5,8 +5,8 @@ import '../providers.dart';
 
 /// Ce que Pokou ouvre dans le pays de la personne connectée (NAV-01).
 ///
-/// La décision vient du serveur (`/config/country`) : ouvrir HONAM à Lomé
-/// ou Kory à Abidjan ne demande pas de nouvelle version de l'application.
+/// La décision vient du serveur (`/config/country`). Kory et HONAM sont
+/// ouverts dans tous les pays ; les autres modules peuvent varier par pays.
 class CountryConfig {
   const CountryConfig({
     required this.country,
@@ -30,21 +30,20 @@ class CountryConfig {
     country: json['country'] as String?,
     modules: {
       for (final m in (json['modules'] as List? ?? const [])) m as String,
+      'kory',
+      'honam',
     },
     currency: json['currency'] as String? ?? 'XOF',
     vatRate: (json['vat_rate'] as num?)?.toDouble() ?? 0,
     deliveryPrice: json['delivery_price'] as int?,
     emergencyNumbers: {
-      for (final e
-          in ((json['emergency_numbers'] as Map?) ?? const {}).entries)
+      for (final e in ((json['emergency_numbers'] as Map?) ?? const {}).entries)
         e.key as String: e.value as String,
     },
   );
 
-  /// Ce qu'on suppose quand le serveur ne répond pas : le même découpage
-  /// que ses valeurs par défaut, déduit de l'indicatif. Sans ce repli, un
-  /// démarrage hors ligne ferait disparaître l'onglet Kory, puis le ferait
-  /// revenir à la reconnexion.
+  /// Ce qu'on suppose quand le serveur ne répond pas : les modules communs
+  /// restent visibles quel que soit l'indicatif.
   factory CountryConfig.guessFromPhone(String? phone) {
     if (phone != null && phone.startsWith('+228')) {
       return const CountryConfig(
@@ -57,14 +56,14 @@ class CountryConfig {
     if (phone != null && phone.startsWith('+225')) {
       return const CountryConfig(
         country: 'CI',
-        modules: {'discussions', 'honam'},
+        modules: {'discussions', 'kory', 'honam'},
         vatRate: 0.18,
         deliveryPrice: 1500,
       );
     }
     return const CountryConfig(
       country: null,
-      modules: {'discussions', 'honam'},
+      modules: {'discussions', 'kory', 'honam'},
     );
   }
 }

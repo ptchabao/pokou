@@ -2854,6 +2854,16 @@ class LIt extends L {
   String get callAddFailed => 'Impossibile aggiungere questo partecipante.';
 
   @override
+  String get callReactionFailed => 'Impossibile inviare questa reazione.';
+
+  @override
+  String get callLeaveConfirmTitle => 'Uscire dalla chiamata?';
+
+  @override
+  String get callLeaveConfirmBody =>
+      'Gli altri partecipanti potrebbero stare ancora parlando. Puoi chiudere questa schermata senza riagganciare e tornare dall\'avviso della chiamata.';
+
+  @override
   String get callYou => 'Tu';
 
   @override
@@ -5011,6 +5021,9 @@ class LIt extends L {
   String get korySubtitle => 'Collette e tontine';
 
   @override
+  String get koryMyPots => 'Le mie collette';
+
+  @override
   String get koryMonthTotal => 'I miei contributi confermati questo mese';
 
   @override
@@ -5288,6 +5301,10 @@ class LIt extends L {
 
   @override
   String get honamSubtitle => 'Farmacie e consegna';
+
+  @override
+  String get honamIntro =>
+      'Una farmacia vicina ti invia un preventivo. Pagalo dal tuo wallet e un corriere te lo consegna.';
 
   @override
   String get honamSend => 'Invia una ricetta';

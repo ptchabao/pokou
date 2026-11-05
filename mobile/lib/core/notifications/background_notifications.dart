@@ -8,8 +8,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../features/messaging/data/messaging_repository.dart';
+import '../../features/groups/data/group_repository.dart';
 import '../api/api_client.dart';
 import '../crypto/e2ee_service.dart';
+import '../crypto/group_sender_keys.dart';
 import '../l10n/l10n_standalone.dart';
 import '../settings/app_settings.dart';
 import '../storage/secure_token_storage.dart';
@@ -85,7 +87,9 @@ Future<void> handleRichPushInBackground(Map<String, dynamic> data) async {
 /// en arrière-plan. Enregistré auprès du greffon dans les deux isolats —
 /// voir [initializeMessageNotificationsPlugin].
 @pragma('vm:entry-point')
-Future<void> notificationResponseInBackground(NotificationResponse response) async {
+Future<void> notificationResponseInBackground(
+  NotificationResponse response,
+) async {
   final actionId = response.actionId;
   final payload = response.payload;
   if (actionId == null || payload == null) return;
@@ -118,19 +122,25 @@ Future<void> initializeMessageNotificationsPlugin(
   DarwinInitializationSettings? darwin,
   DidReceiveNotificationResponseCallback? onResponse,
 }) {
-  return plugin.initialize(
-    InitializationSettings(
-      android: const AndroidInitializationSettings('@drawable/ic_stat_pokou'),
-      iOS: darwin ??
-          const DarwinInitializationSettings(
-            requestAlertPermission: false,
-            requestBadgePermission: false,
-            requestSoundPermission: false,
+  return plugin
+      .initialize(
+        InitializationSettings(
+          android: const AndroidInitializationSettings(
+            '@drawable/ic_stat_pokou',
           ),
-    ),
-    onDidReceiveNotificationResponse: onResponse,
-    onDidReceiveBackgroundNotificationResponse: notificationResponseInBackground,
-  ).then((_) {});
+          iOS:
+              darwin ??
+              const DarwinInitializationSettings(
+                requestAlertPermission: false,
+                requestBadgePermission: false,
+                requestSoundPermission: false,
+              ),
+        ),
+        onDidReceiveNotificationResponse: onResponse,
+        onDidReceiveBackgroundNotificationResponse:
+            notificationResponseInBackground,
+      )
+      .then((_) {});
 }
 
 /// Ce que l'application fournit d'ordinaire par Riverpod, reconstruit à la
@@ -154,22 +164,45 @@ class _StandaloneNotifications {
 
     final tokens = SecureTokenStorage();
     final api = ApiClient(tokenStorage: tokens, l: l);
+    final e2ee = E2EEService(apiClient: api);
+    final groupStore = PokouMessageStore();
     final messaging = MessagingRepository(
       apiClient: api,
-      e2ee: E2EEService(apiClient: api),
-      store: PokouMessageStore(),
+      e2ee: e2ee,
+      store: groupStore,
+    );
+    final groups = GroupRepository(
+      apiClient: api,
+      e2ee: e2ee,
+      senderKeys: GroupSenderKeys(),
+      store: groupStore,
     );
     final pending = PendingReplies();
+    final userId = await _myUserId(tokens);
     final handler = MessageNotificationHandler(
       presenter: presenter,
       api: api,
       messaging: messaging,
-      myUserId: await _myUserId(tokens),
+      groups: groups,
+      groupStore: groupStore,
+      myUserId: userId,
       // Une réponse privée attend l'application — voir
       // MessageNotificationHandler.
       sendDirect: (recipientId, text) async {
         await pending.add(recipientId, text);
         return false;
+      },
+      sendGroup: (groupId, text) async {
+        if (userId == null) return false;
+        final group = await groups.getGroup(groupId);
+        final message = await groups.send(
+          group: group,
+          senderId: userId,
+          content: text,
+          messageType: 'TEXT',
+        );
+        await groupStore.saveGroup([message]);
+        return true;
       },
     );
     return _StandaloneNotifications(handler, await _settings());
@@ -187,7 +220,9 @@ class _StandaloneNotifications {
 
   static Future<AppSettings> _settings() async {
     try {
-      final raw = await const FlutterSecureStorage().read(key: 'pokou_app_settings');
+      final raw = await const FlutterSecureStorage().read(
+        key: 'pokou_app_settings',
+      );
       if (raw == null) return const AppSettings();
       return AppSettings.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (_) {

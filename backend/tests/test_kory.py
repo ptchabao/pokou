@@ -63,7 +63,7 @@ def test_configuration_du_pays_suit_le_numero(client):
     assert tg["country"] == "TG" and "kory" in tg["modules"]
     assert "honam" in tg["modules"]
     assert tg["delivery_price"] == 1000
-    assert ci["country"] == "CI" and "kory" not in ci["modules"]
+    assert ci["country"] == "CI" and "kory" in ci["modules"]
     assert "honam" in ci["modules"]
     assert ci["pharmacy_monthly_price"] == 7500
 
@@ -73,20 +73,27 @@ def test_honam_est_actif_par_defaut_meme_sans_pays_connu(client):
         assert "honam" in country_config(db, None)["modules"]
 
 
-def test_reglage_systeme_ouvre_un_module_sans_publication(client):
+def test_reglage_systeme_ne_ferme_pas_kory_ni_honam(client):
     ivoire, _ = _signup(client, "+2250700445566")
     with TestingSessionLocal() as db:
         db.add(SystemSetting(key="country.CI", value='{"modules": ["discussions", "kory"]}'))
         db.commit()
     modules = client.get("/api/v1/config/country", headers=ivoire).json()["modules"]
     assert "kory" in modules
-    assert "honam" not in modules
+    assert "honam" in modules
     assert client.get("/api/v1/kory/pots", headers=ivoire).status_code == 200
 
 
-def test_kory_ferme_hors_pays_lance(client):
+def test_kory_est_ouvert_en_cote_divoire(client):
     ivoire, _ = _signup(client, "+2250700778899")
-    assert client.get("/api/v1/kory/pots", headers=ivoire).status_code == 404
+    assert client.get("/api/v1/kory/pots", headers=ivoire).status_code == 200
+
+
+def test_pays_sans_configuration_active_kory_et_honam(client):
+    with TestingSessionLocal() as db:
+        modules = country_config(db, "BJ")["modules"]
+    assert "kory" in modules
+    assert "honam" in modules
 
 
 def test_journal_declaration_puis_confirmation_par_le_collecteur(client):

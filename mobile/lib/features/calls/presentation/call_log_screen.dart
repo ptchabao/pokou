@@ -430,8 +430,7 @@ class _CallAction extends StatelessWidget {
 /// Elle dit maintenant ce que le filtre fait vraiment.
 enum CallFilter {
   all,
-  missed,
-  direct;
+  missed;
 
   List<CallLogEntry> apply(List<CallLogEntry> entries) => switch (this) {
     CallFilter.all => entries,
@@ -439,13 +438,11 @@ enum CallFilter {
       entries
           .where((e) => e.isMissedOrDeclined && e.direction == 'incoming')
           .toList(),
-    CallFilter.direct => entries.where((e) => e.callType == '1:1').toList(),
   };
 
   String labelOf(L l) => switch (this) {
     CallFilter.all => l.callsFilterAll,
     CallFilter.missed => l.callsFilterMissed,
-    CallFilter.direct => l.callsFilterDirect,
   };
 }
 
@@ -467,7 +464,6 @@ class _CallFilters extends StatelessWidget {
           for (final f in CallFilter.values) ...[
             _Chip(
               label: f.labelOf(l),
-              icon: f == CallFilter.direct ? Icons.person_outline : null,
               selected: f == current,
               onTap: () => onChanged(f),
             ),
@@ -484,14 +480,11 @@ class _Chip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    this.icon,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final IconData? icon;
-
   @override
   Widget build(BuildContext context) {
     final encre = selected ? Colors.white : AppColors.textSecondary;
@@ -512,10 +505,6 @@ class _Chip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) ...[
-                Icon(icon, size: 14, color: encre),
-                const SizedBox(width: 5),
-              ],
               Text(
                 label,
                 style: TextStyle(

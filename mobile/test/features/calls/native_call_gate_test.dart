@@ -17,8 +17,13 @@ NativeCall _call(NativeCallState state, {String? room = 'salon-1'}) =>
 
 void main() {
   group('NativeCallGateDecision', () {
-    test('un appel décroché se rejoint', () {
-      // Le cas nominal : le natif a répondu, il passe la main.
+    test('ANSWERING attend la fin de la réponse native', () {
+      final decision = NativeCallGateDecision();
+
+      expect(decision.roomToJoin(_call(NativeCallState.answering)), isNull);
+    });
+
+    test('un appel accepté se rejoint au passage à CONNECTING', () {
       final decision = NativeCallGateDecision();
 
       expect(decision.roomToJoin(_call(NativeCallState.connecting)), 'salon-1');
@@ -34,13 +39,16 @@ void main() {
     });
 
     test('un même appel ne se rejoint pas deux fois', () {
-      // Le natif rejoue son état à chaque observateur, et émet ANSWERING
-      // PUIS CONNECTING pour un seul décrochage. Sans garde-fou : deux
+      // Le natif rejoue son état à chaque observateur, et émet CONNECTING
+      // puis CONNECTED pour un seul décrochage. Sans garde-fou : deux
       // écrans d'appel et deux jetons LiveKit demandés.
       final decision = NativeCallGateDecision();
 
-      expect(decision.roomToJoin(_call(NativeCallState.answering)), 'salon-1');
-      expect(decision.roomToJoin(_call(NativeCallState.connecting)), isNull);
+      expect(decision.roomToJoin(_call(NativeCallState.answering)), isNull);
+      expect(
+        decision.roomToJoin(_call(NativeCallState.connecting)),
+        'salon-1',
+      );
       expect(decision.roomToJoin(_call(NativeCallState.connected)), isNull);
     });
 
@@ -95,9 +103,7 @@ void main() {
       decision.roomToJoin(_call(NativeCallState.connecting));
 
       expect(
-        decision.roomToJoin(
-          _call(NativeCallState.connecting, room: 'salon-2'),
-        ),
+        decision.roomToJoin(_call(NativeCallState.connecting, room: 'salon-2')),
         'salon-2',
       );
     });

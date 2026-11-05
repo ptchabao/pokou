@@ -86,8 +86,7 @@ class MediaSender {
       fichier: fichier,
       messageType: enAttente.messageType,
       // En conversation privée, le fichier est chiffré de bout en bout dès
-      // que le correspondant sait l'ouvrir. Un groupe n'est pas chiffré :
-      // voir envoyerGroupe, qui ne passe pas ce paramètre.
+      // que le correspondant sait l'ouvrir.
       chiffrer: () => _correspondantDechiffre(enAttente.recipientId),
       confirmer: (mediaId, mediaKey) async {
         final envoye = await _messaging.sendMedia(
@@ -106,10 +105,8 @@ class MediaSender {
 
   /// La même chose dans un groupe.
   ///
-  /// Les deux conversations ne doivent pas se comporter différemment pour
-  /// une photo : c'est le genre d'écart qui fait dire qu'une application a
-  /// été faite en plusieurs fois. Seule la dernière étape diffère — la
-  /// route d'envoi — d'où le découpage en `_faire`.
+  /// Bytes and metadata are encrypted before upload; the media key is then
+  /// protected by the group's Signal Sender Key.
   Future<bool> envoyerGroupe(GroupMessage enAttente) {
     final fichier = enAttente.pendingMedia;
     if (fichier == null) return Future.value(false);
@@ -117,11 +114,14 @@ class MediaSender {
       localId: enAttente.id,
       fichier: fichier,
       messageType: enAttente.messageType,
-      confirmer: (mediaId, _) async {
+      chiffrer: () async => true,
+      confirmer: (mediaId, mediaKey) async {
         final envoye = await _groups.sendMedia(
-          groupId: enAttente.groupId,
+          group: await _groups.getGroup(enAttente.groupId),
+          senderId: enAttente.senderId,
           messageType: enAttente.messageType,
           mediaAssetId: mediaId,
+          mediaKey: mediaKey,
           caption: fichier.caption,
         );
         await _store.confirmGroup(enAttente.id, envoye);
@@ -180,8 +180,12 @@ class MediaSender {
       _progress.set(localId, MediaSendPhase.envoi, fraction: 0);
       final televerse = await _media.upload(
         bytes: chiffre?.blob ?? octets,
-        filename: chiffre != null ? MediaCipher.uploadFilename : fichier.filename,
-        mimeType: chiffre != null ? MediaCipher.uploadMimeType : fichier.mimeType,
+        filename: chiffre != null
+            ? MediaCipher.uploadFilename
+            : fichier.filename,
+        mimeType: chiffre != null
+            ? MediaCipher.uploadMimeType
+            : fichier.mimeType,
         // Le serveur n'accepte un bloc sans type reconnaissable que comme
         // document ; le VRAI type part dans le message, chiffré.
         messageType: chiffre != null ? 'DOCUMENT' : messageType,

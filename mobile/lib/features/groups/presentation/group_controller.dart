@@ -13,6 +13,9 @@ import '../../../core/sync/media_sender.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/storage/pokou_message_store.dart';
 import '../../../core/ws/ws_client.dart';
+import '../../../core/crypto/e2ee_service.dart';
+import '../../../core/crypto/group_sender_keys.dart';
+import '../../../core/crypto/media_cipher.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../messaging/data/direct_message_model.dart'
     show MessageReplyPreview, PendingMedia;
@@ -20,8 +23,17 @@ import '../data/group_model.dart';
 import '../data/group_repository.dart';
 
 final groupRepositoryProvider = Provider<GroupRepository>((ref) {
-  return GroupRepository(apiClient: ref.watch(apiClientProvider));
+  return GroupRepository(
+    apiClient: ref.watch(apiClientProvider),
+    e2ee: ref.watch(e2eeServiceProvider),
+    senderKeys: ref.watch(groupSenderKeysProvider),
+    store: ref.watch(pokouMessageStoreProvider),
+  );
 });
+
+final groupSenderKeysProvider = Provider<GroupSenderKeys>(
+  (ref) => GroupSenderKeys(),
+);
 
 /// Liste des groupes de l'utilisateur. `FutureProvider` (et non un
 /// StateNotifier) : c'est une lecture simple, rafraîchie par `ref.invalidate`
@@ -156,13 +168,16 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     if (event.type != 'group:message:new') return;
     final raw = event.payload['message'];
     if (raw is! Map<String, dynamic> || raw['group_id'] != groupId) return;
-    final mediaId = raw['media_asset_id'] as int?;
-    final mediaType = raw['message_type'] as String?;
-    if (mediaId != null && (mediaType == 'IMAGE' || mediaType == 'VIDEO')) {
-      unawaited(_media.resolveLocalFile(mediaId));
+    try {
+      final group = state.group ?? await _repository.getGroup(groupId);
+      final message = GroupMessage.fromJson(raw);
+      final opened = await _decryptPage(group, [message]);
+      if (!opened.first.isEncrypted) await _store.saveGroup(opened);
+      if (!mounted) return;
+      _applyCache(await _store.groupConversation(groupId));
+    } catch (_) {
+      // Plaintext/unknown formats never enter the local conversation cache.
     }
-    if (!mounted) return;
-    _applyCache(await _store.groupConversation(groupId));
   }
 
   /// Cache d'abord, réseau ensuite — voir MessagingController._loadHistory.
@@ -177,10 +192,14 @@ class GroupChatController extends StateNotifier<GroupChatState> {
 
     try {
       final group = await _repository.getGroup(groupId);
+      final myUserId = _myUserId;
+      if (myUserId != null) {
+        await _repository.prepareReceiverKeys(group, myUserId);
+      }
       final page = await _repository.getMessagesPage(groupId);
-      final messages = page.items;
+      final messages = await _decryptPage(group, page.items);
       _oldestFetched = messages.isEmpty ? null : messages.first.createdAt;
-      await _store.saveGroup(messages);
+      await _store.saveGroup(messages.where((message) => !message.isEncrypted));
       await _store.reconcileGroup(groupId: groupId, serverMessages: messages);
       if (!mounted) return;
       state = state.copyWith(group: group, hasOlder: page.hasMore);
@@ -215,6 +234,54 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     }
   }
 
+  Future<List<GroupMessage>> _decryptPage(
+    Group group,
+    List<GroupMessage> messages,
+  ) async {
+    if (messages.any((message) => !message.isEncrypted)) {
+      throw const FormatException('Plaintext group message rejected');
+    }
+    final cached = await _store.groupConversation(groupId);
+    final byId = {for (final message in cached.messages) message.id: message};
+    final unknown = <GroupMessage>[];
+    final resolved = <String, GroupMessage>{};
+    for (final message in messages) {
+      final previous = byId[message.id];
+      if (previous != null &&
+          !previous.isEncrypted &&
+          previous.editedAt == message.editedAt) {
+        resolved[message.id] = previous.copyWith(
+          deletedAt: message.deletedAt,
+          reactions: message.reactions,
+        );
+      } else {
+        unknown.add(message);
+      }
+    }
+    final opened = await _repository.decryptMessages(
+      group,
+      unknown,
+      _myUserId ?? 0,
+    );
+    for (final message in opened) {
+      if (!message.isEncrypted) {
+        resolved[message.id] = message;
+        if (message.mediaKey != null && message.mediaAssetId != null) {
+          MediaKeyRing.remember(message.mediaAssetId!, message.mediaKey!);
+        }
+      }
+    }
+    final result = [
+      for (final message in messages) resolved[message.id] ?? message,
+    ];
+    for (final message in result) {
+      if (message.mediaKey != null && message.mediaAssetId != null) {
+        MediaKeyRing.remember(message.mediaAssetId!, message.mediaKey!);
+      }
+    }
+    return result;
+  }
+
   /// Le plus ancien message reçu DU SERVEUR, curseur de la page suivante.
   /// Pas le plus ancien du cache : un vieux cache avec un trou au milieu
   /// ferait reprendre la pagination après le trou.
@@ -228,13 +295,15 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     state = state.copyWith(loadingOlder: true);
     try {
       final page = await _repository.getMessagesPage(groupId, before: cursor);
-      if (page.items.isNotEmpty) _oldestFetched = page.items.first.createdAt;
-      await _store.saveGroup(page.items);
+      final group = state.group ?? await _repository.getGroup(groupId);
+      final older = await _decryptPage(group, page.items);
+      if (older.isNotEmpty) _oldestFetched = older.first.createdAt;
+      await _store.saveGroup(older.where((message) => !message.isEncrypted));
       if (!mounted) return;
       _applyCache(await _store.groupConversation(groupId));
       state = state.copyWith(
         loadingOlder: false,
-        hasOlder: page.items.isNotEmpty && page.hasMore,
+        hasOlder: older.isNotEmpty && page.hasMore,
       );
     } catch (_) {
       if (mounted) state = state.copyWith(loadingOlder: false);
@@ -275,22 +344,10 @@ class GroupChatController extends StateNotifier<GroupChatState> {
   void _onEvent(Map<String, dynamic> event) {
     final type = event['type'];
 
-    if (type == 'group:message:new') {
-      final message = GroupMessage.fromJson(
-        event['message'] as Map<String, dynamic>,
-      );
-      if (message.groupId != groupId) return;
-      _store.saveGroup([message]);
-      state = state.copyWith(messages: [...state.messages, message]);
-      if (message.media != null &&
-          (message.messageType == 'IMAGE' || message.messageType == 'VIDEO')) {
-        unawaited(
-          _media.resolveLocalFile(
-            message.media!.id,
-            extension: mediaExtension(message.media!),
-          ),
-        );
-      }
+    if (type == 'group:message:new' || type == 'group:message:edited') {
+      final raw = event['message'] as Map<String, dynamic>?;
+      if (raw == null || raw['group_id'] != groupId) return;
+      unawaited(_receiveGroupMessage(raw));
       return;
     }
 
@@ -336,13 +393,55 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     }
   }
 
+  Future<void> _receiveGroupMessage(Map<String, dynamic> raw) async {
+    try {
+      final group = await _repository.getGroup(groupId);
+      final message = GroupMessage.fromJson(raw);
+      final resolved = (await _decryptPage(group, [message])).first;
+      if (resolved.isEncrypted) return;
+      await _store.saveGroup([resolved]);
+      if (!mounted) return;
+      state = state.copyWith(
+        messages: [
+          for (final existing in state.messages)
+            if (existing.id != resolved.id) existing,
+          resolved,
+        ],
+      );
+      if (resolved.media != null &&
+          (resolved.messageType == 'IMAGE' ||
+              resolved.messageType == 'VIDEO')) {
+        unawaited(
+          _media.resolveLocalFile(
+            resolved.media!.id,
+            extension: mediaExtension(resolved.media!),
+          ),
+        );
+      }
+    } catch (_) {
+      // Never replace an opaque message with a plaintext fallback.
+    }
+  }
+
   /// Supprimer pour tous ; en mode preuve, le message reste, barré.
   Future<void> deleteForEveryone(String messageId) async {
     final kept = await _repository.deleteMessage(groupId, messageId);
+    final previous = state.messages.where((m) => m.id == messageId).firstOrNull;
+    final resolved = kept != null && previous != null
+        ? kept.copyWith(
+            content: previous.content,
+            payload: previous.payload,
+            media: previous.media,
+            mediaKey: previous.mediaKey,
+            replyTo: previous.replyTo,
+            clearCiphertext: true,
+          )
+        : kept;
+    if (resolved != null) await _store.saveGroup([resolved]);
     state = state.copyWith(
       messages: [
         for (final m in state.messages)
-          if (m.id != messageId) m else ?kept,
+          if (m.id != messageId) m else ?resolved,
       ],
     );
   }
@@ -355,7 +454,12 @@ class GroupChatController extends StateNotifier<GroupChatState> {
 
   Future<void> _refreshGroup() async {
     try {
-      state = state.copyWith(group: await _repository.getGroup(groupId));
+      final group = await _repository.getGroup(groupId);
+      final myUserId = _myUserId;
+      if (myUserId != null) {
+        await _repository.prepareReceiverKeys(group, myUserId);
+      }
+      state = state.copyWith(group: group);
     } catch (_) {
       // Retiré du groupe entre-temps : l'écran se ferme via l'événement WS
       // côté UI, inutile de polluer l'état avec une erreur ici.
@@ -426,6 +530,35 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     }
   }
 
+  Future<void> editMessage(String messageId, String content) async {
+    final original = state.messages.where((m) => m.id == messageId).firstOrNull;
+    final myUserId = _myUserId;
+    final group = state.group;
+    if (original == null || myUserId == null || group == null) return;
+    final edited = await _repository.edit(
+      group: group,
+      senderId: myUserId,
+      original: original,
+      content: content,
+    );
+    await _store.saveGroup([edited]);
+    if (!mounted) return;
+    state = state.copyWith(
+      messages: [
+        for (final message in state.messages)
+          if (message.id == messageId) edited else message,
+      ],
+    );
+  }
+
+  bool canEdit(GroupMessage message) =>
+      message.senderId == _myUserId &&
+      message.messageType == 'TEXT' &&
+      message.deletedAt == null &&
+      !(state.group?.proofMode ?? false) &&
+      DateTime.now().difference(message.createdAt) <
+          const Duration(minutes: 15);
+
   Future<void> retry(String localId) async {
     final message = state.messages.where((m) => m.id == localId).firstOrNull;
     if (message == null) return;
@@ -441,10 +574,16 @@ class GroupChatController extends StateNotifier<GroupChatState> {
 
   Future<void> _attemptSend(GroupMessage optimistic) async {
     try {
+      final group = state.group ?? await _repository.getGroup(groupId);
+      final myUserId = _myUserId;
+      if (myUserId == null) throw StateError('Missing authenticated user');
       final confirmed = await _repository.send(
-        groupId: groupId,
+        group: group,
+        senderId: myUserId,
         content: optimistic.content ?? '',
+        messageType: optimistic.messageType,
         replyToId: optimistic.replyToId,
+        replyTo: optimistic.replyTo,
       );
       await _store.confirmGroup(optimistic.id, confirmed);
       if (!mounted) return;
@@ -531,7 +670,8 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     state = state.copyWith(sending: true, error: null);
     try {
       final sent = await _repository.sendMedia(
-        groupId: groupId,
+        group: state.group ?? await _repository.getGroup(groupId),
+        senderId: _myUserId ?? 0,
         messageType: messageType,
         mediaAssetId: mediaAssetId,
       );

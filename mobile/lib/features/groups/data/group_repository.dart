@@ -1,17 +1,36 @@
+import 'dart:convert';
+
 import '../../../core/api/api_client.dart';
+import '../../../core/crypto/e2ee_outcome.dart';
+import '../../../core/crypto/e2ee_service.dart';
+import '../../../core/crypto/group_sender_keys.dart';
+import '../../../core/crypto/media_cipher.dart';
+import '../../../core/storage/pokou_message_store.dart';
 import '../../messaging/data/direct_message_model.dart'
-    show MessageReactionSummary, PollData;
+    show MessageReactionSummary, PollData, MessageReplyPreview;
 import 'group_invitation_model.dart';
 import 'group_model.dart';
 import '../../../core/time/server_time.dart';
 
-/// Pendant de MessagingRepository pour les conversations de groupe : simple
-/// enveloppe HTTP, aucune persistance locale (même choix qu'en 1:1, l'historique
-/// est refetché à l'ouverture de l'écran).
+/// Chiffrement et enveloppe HTTP pour les conversations de groupe. Cleartext
+/// is returned only to the controller, which persists it in SQLCipher.
 class GroupRepository {
-  GroupRepository({required ApiClient apiClient}) : _api = apiClient;
+  GroupRepository({
+    required ApiClient apiClient,
+    required E2EEService e2ee,
+    required GroupSenderKeys senderKeys,
+    required PokouMessageStore store,
+  }) : _api = apiClient,
+       _e2ee = e2ee,
+       _senderKeys = senderKeys,
+       _store = store;
 
   final ApiClient _api;
+  final E2EEService _e2ee;
+  final GroupSenderKeys _senderKeys;
+  final PokouMessageStore _store;
+  static final Set<String> _publishedEpochs = {};
+  static final Map<String, Future<GroupMessage>> _incomingDecryptions = {};
 
   /// Voir contacts_repository.dart::listRaw — même raison : c'est ce JSON
   /// qu'on garde pour rouvrir l'app sans réseau.
@@ -28,6 +47,235 @@ class GroupRepository {
   Future<Group> getGroup(int groupId) async {
     final response = await _api.get('/groups/$groupId');
     return Group.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Opens only sender-key payloads pairwise-enveloped for this device.
+  Future<void> prepareReceiverKeys(
+    Group group,
+    int myUserId, {
+    int? epoch,
+  }) async {
+    final requestedEpoch = epoch ?? group.cryptoEpoch;
+    if (requestedEpoch > group.cryptoEpoch) {
+      throw StateError('Future group crypto epoch');
+    }
+    final response = await _api.get(
+      '/groups/${group.id}/sender-key-distributions?epoch=$requestedEpoch',
+    );
+    if (response['epoch'] != requestedEpoch) {
+      throw StateError('Stale group crypto epoch');
+    }
+    for (final raw in (response['items'] as List? ?? const [])) {
+      final item = raw as Map<String, dynamic>;
+      if (item['recipient_id'] != myUserId ||
+          item['encryption'] != 'v1' ||
+          item['epoch'] != null && item['epoch'] != requestedEpoch) {
+        throw const FormatException('Invalid sender-key envelope context');
+      }
+      final distribution = await _e2ee.open(
+        peerUserId: item['sender_id'] as int,
+        envelope: item['envelope'] as Map<String, dynamic>,
+        ciphertext: item['ciphertext'] as String,
+      );
+      await _senderKeys.acceptDistribution(
+        groupId: group.id,
+        epoch: requestedEpoch,
+        senderId: item['sender_id'] as int,
+        distribution: distribution,
+      );
+    }
+  }
+
+  Future<void> _ensureSenderKeyDistributed(Group group, int senderId) async {
+    final cacheKey = '${group.id}:${group.cryptoEpoch}:$senderId';
+    if (_publishedEpochs.contains(cacheKey)) return;
+    final recipients = group.members
+        .map((member) => member.userId)
+        .where((id) => id != senderId)
+        .toSet();
+    final distribution = await _senderKeys.createDistribution(
+      groupId: group.id,
+      epoch: group.cryptoEpoch,
+      senderId: senderId,
+    );
+    final sealed = <Map<String, dynamic>>[];
+    for (final recipientId in recipients) {
+      final peer = await _e2ee.peerCrypto(recipientId);
+      if (!peer.capabilities.contains(E2EEService.groupCapability)) {
+        throw StateError('A current group member cannot receive Sender Keys');
+      }
+      if (peer.identityKey != null &&
+          await _e2ee.sessionState(
+                recipientId,
+                publishedIdentityKey: peer.identityKey,
+              ) ==
+              PeerSessionState.changed) {
+        throw StateError('Group member identity changed');
+      }
+      final envelope = await _e2ee.seal(
+        peerUserId: recipientId,
+        plaintext: distribution,
+      );
+      if (envelope is! SealEncrypted) {
+        throw StateError('Unable to pairwise-encrypt sender-key distribution');
+      }
+      sealed.add({
+        'recipient_id': recipientId,
+        'encryption': envelope.encryption,
+        'ciphertext': envelope.ciphertext,
+        'envelope': envelope.envelope,
+      });
+    }
+    await _api.post(
+      '/groups/${group.id}/sender-key-distributions',
+      body: {'epoch': group.cryptoEpoch, 'distributions': sealed},
+    );
+    _publishedEpochs.add(cacheKey);
+  }
+
+  Future<GroupMessage> _sendEncrypted({
+    required Group group,
+    required int senderId,
+    required String messageType,
+    required Map<String, dynamic> body,
+    String? replyToId,
+    int? mediaAssetId,
+  }) async {
+    await _ensureSenderKeyDistributed(group, senderId);
+    final ciphertext = await _senderKeys.encrypt(
+      groupId: group.id,
+      epoch: group.cryptoEpoch,
+      senderId: senderId,
+      plaintext: jsonEncode(body),
+    );
+    final response = await _api.post(
+      '/groups/${group.id}/messages',
+      body: {
+        'message_type': messageType,
+        'media_asset_id': ?mediaAssetId,
+        'reply_to_id': ?replyToId,
+        'encryption': 'sender-key-v1',
+        'ciphertext': ciphertext,
+        'crypto_epoch': group.cryptoEpoch,
+      },
+    );
+    final serverMessage = GroupMessage.fromJson(
+      response as Map<String, dynamic>,
+    );
+    final rawReply = body['reply_to'];
+    final reply = rawReply is Map<String, dynamic>
+        ? MessageReplyPreview.fromJson(rawReply)
+        : null;
+    final mediaKey = MediaKey.tryFromJson(body['media_key']);
+    if (mediaKey != null && mediaAssetId != null) {
+      if (mediaKey.assetId != mediaAssetId ||
+          !_encryptedMediaTypes.contains(messageType)) {
+        throw const FormatException('Group media key context mismatch');
+      }
+      MediaKeyRing.remember(mediaAssetId, mediaKey);
+    }
+    return serverMessage.resolvedWith(
+      content: body['content'] as String? ?? mediaKey?.caption ?? '',
+      payload: body['payload'] as Map<String, dynamic>?,
+      replyTo: reply,
+      media: mediaKey?.toMeta(mediaAssetId!),
+      mediaKey: mediaKey,
+    );
+  }
+
+  static const _encryptedMediaTypes = {'IMAGE', 'VIDEO', 'AUDIO', 'DOCUMENT'};
+
+  Future<List<GroupMessage>> decryptMessages(
+    Group group,
+    List<GroupMessage> messages,
+    int myUserId,
+  ) async {
+    if (messages.any((message) => !message.isEncrypted)) {
+      throw const FormatException('Plaintext group message rejected');
+    }
+    final result = <GroupMessage>[];
+    final epochs = messages
+        .where(
+          (message) =>
+              message.isEncrypted &&
+              message.cryptoEpoch != null &&
+              message.cryptoEpoch! <= group.cryptoEpoch,
+        )
+        .map((message) => message.cryptoEpoch!)
+        .toSet();
+    for (final epoch in epochs) {
+      await prepareReceiverKeys(group, myUserId, epoch: epoch);
+    }
+    for (final message in messages) {
+      if (!message.isEncrypted ||
+          message.cryptoEpoch == null ||
+          message.cryptoEpoch! > group.cryptoEpoch ||
+          message.senderId == myUserId) {
+        result.add(message);
+        continue;
+      }
+      result.add(await decryptIncoming(group, message));
+    }
+    return result;
+  }
+
+  Future<GroupMessage> decryptIncoming(Group group, GroupMessage message) {
+    final existing = _incomingDecryptions[message.id];
+    if (existing != null) return existing;
+    final future = _decryptIncomingOnce(group, message);
+    _incomingDecryptions[message.id] = future;
+    return future.whenComplete(() {
+      if (identical(_incomingDecryptions[message.id], future)) {
+        _incomingDecryptions.remove(message.id);
+      }
+    });
+  }
+
+  Future<GroupMessage> _decryptIncomingOnce(
+    Group group,
+    GroupMessage message,
+  ) async {
+    GroupMessage resolved;
+    MediaKey? mediaKey;
+    try {
+      final clear = await _senderKeys.decrypt(
+        groupId: group.id,
+        epoch: message.cryptoEpoch!,
+        senderId: message.senderId,
+        ciphertext: message.ciphertext!,
+      );
+      final decoded = jsonDecode(clear);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Invalid encrypted group payload');
+      }
+      mediaKey = MediaKey.tryFromJson(decoded['media_key']);
+      if (mediaKey != null) {
+        if (message.mediaAssetId == null ||
+            mediaKey.assetId != message.mediaAssetId ||
+            !_encryptedMediaTypes.contains(message.messageType)) {
+          throw const FormatException('Group media key context mismatch');
+        }
+      }
+      final replyJson = decoded['reply_to'] as Map<String, dynamic>?;
+      resolved = message.resolvedWith(
+        content: decoded['content'] as String? ?? mediaKey?.caption ?? '',
+        payload: decoded['payload'] as Map<String, dynamic>?,
+        replyTo: replyJson == null
+            ? null
+            : MessageReplyPreview.fromJson(replyJson),
+        media: mediaKey?.toMeta(message.mediaAssetId!),
+        mediaKey: mediaKey,
+      );
+    } catch (_) {
+      return message;
+    }
+    // The Signal receive chain has advanced. Persist cleartext into SQLCipher
+    // before allowing another incoming message to consume the next key.
+    await _store.saveGroup([resolved]);
+    if (mediaKey != null && message.mediaAssetId != null) {
+      MediaKeyRing.remember(message.mediaAssetId!, mediaKey);
+    }
+    return resolved;
   }
 
   /// Supprimer pour tous. Renvoie le message conservé en mode preuve, ou
@@ -189,15 +437,23 @@ class GroupRepository {
   }
 
   Future<GroupMessage> send({
-    required int groupId,
+    required Group group,
+    required int senderId,
     required String content,
+    required String messageType,
     String? replyToId,
+    MessageReplyPreview? replyTo,
   }) async {
-    final response = await _api.post(
-      '/groups/$groupId/messages',
-      body: {'content': content, 'reply_to_id': replyToId},
+    return _sendEncrypted(
+      group: group,
+      senderId: senderId,
+      messageType: messageType,
+      replyToId: replyToId,
+      body: {
+        'content': content,
+        if (replyTo != null) 'reply_to': replyTo.toJson(),
+      },
     );
-    return GroupMessage.fromJson(response as Map<String, dynamic>);
   }
 
   Future<GroupMessage> createPoll({
@@ -206,34 +462,56 @@ class GroupRepository {
     required List<String> options,
     required bool allowsMultiple,
   }) async {
-    final response = await _api.post(
-      '/polls',
-      body: {
-        'kind': 'group',
-        'target_id': groupId,
-        'question': question,
-        'options': options,
-        'allows_multiple': allowsMultiple,
-      },
+    throw UnsupportedError(
+      'Group polls are disabled until their schema is end-to-end encrypted.',
     );
-    return GroupMessage.fromJson(response as Map<String, dynamic>);
   }
 
   Future<GroupMessage> sendMedia({
-    required int groupId,
+    required Group group,
+    required int senderId,
     required String messageType,
     required int mediaAssetId,
+    MediaKey? mediaKey,
     String? caption,
   }) async {
-    final response = await _api.post(
-      '/groups/$groupId/messages',
+    return _sendEncrypted(
+      group: group,
+      senderId: senderId,
+      messageType: messageType,
+      mediaAssetId: mediaAssetId,
       body: {
-        'message_type': messageType,
-        'media_asset_id': mediaAssetId,
-        if (caption != null && caption.trim().isNotEmpty) 'content': caption,
+        'content': caption,
+        if (mediaKey != null)
+          'media_key': mediaKey.withAssetId(mediaAssetId).toJson(),
       },
     );
-    return GroupMessage.fromJson(response as Map<String, dynamic>);
+  }
+
+  Future<GroupMessage> edit({
+    required Group group,
+    required int senderId,
+    required GroupMessage original,
+    required String content,
+  }) async {
+    await _ensureSenderKeyDistributed(group, senderId);
+    final ciphertext = await _senderKeys.encrypt(
+      groupId: group.id,
+      epoch: group.cryptoEpoch,
+      senderId: senderId,
+      plaintext: jsonEncode({'content': content}),
+    );
+    final response = await _api.patch(
+      '/groups/${group.id}/messages/${original.id}',
+      body: {
+        'encryption': 'sender-key-v1',
+        'ciphertext': ciphertext,
+        'crypto_epoch': group.cryptoEpoch,
+      },
+    );
+    return GroupMessage.fromJson(
+      response as Map<String, dynamic>,
+    ).resolvedWith(content: content, payload: null, replyTo: original.replyTo);
   }
 
   /// Pose OU remplace sa réaction sur un message de groupe (une seule par

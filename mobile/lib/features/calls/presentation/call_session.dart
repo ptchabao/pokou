@@ -78,7 +78,16 @@ List<int> endSignalTargets({
 }
 
 /// Ce que la session signale à l'écran, qui seul sait l'afficher.
-enum CallNotice { noAnswer, flipFailed, inviteFailed }
+enum CallNotice { noAnswer, flipFailed, inviteFailed, reactionFailed }
+
+class CallReaction {
+  const CallReaction({required this.emoji, required this.senderId});
+
+  final String emoji;
+  final int? senderId;
+}
+
+const callReactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '👏'];
 
 /// L'appel en cours dans l'application — un seul à la fois.
 ///
@@ -151,6 +160,7 @@ class CallSession extends ChangeNotifier {
   StreamSubscription<Map<String, dynamic>>? _signalSubscription;
   Timer? _noAnswerTimer;
   final _notices = StreamController<CallNotice>.broadcast();
+  final _reactions = StreamController<CallReaction>.broadcast();
 
   bool connecting = true;
   bool joinFailed = false;
@@ -202,6 +212,11 @@ class CallSession extends ChangeNotifier {
   int attachedScreens = 0;
 
   Stream<CallNotice> get notices => _notices.stream;
+  Stream<CallReaction> get reactions => _reactions.stream;
+
+  bool canInvite(int userId) =>
+      !_remoteIds.contains(userId) &&
+      (!participantIds.contains(userId) || _gone.contains(userId));
 
   bool get canSwitchSpeaker => AudioManager.instance.canSwitchSpeakerphone;
 
@@ -277,8 +292,10 @@ class CallSession extends ChangeNotifier {
         _markJoined();
         _changed();
       })
-      ..on<ParticipantDisconnectedEvent>((_) {
+      ..on<ParticipantDisconnectedEvent>((event) {
         _changed();
+        final userId = int.tryParse(event.participant.identity);
+        if (userId != null) _gone.add(userId);
         // Filet de sécurité si le signal `end` n'arrive pas : un salon vidé
         // de tous ses pairs après en avoir eu au moins un, c'est un appel
         // terminé.
@@ -290,12 +307,19 @@ class CallSession extends ChangeNotifier {
         if (CallKeys.of(roomName) != null &&
             event.publication.encryptionType == EncryptionType.kNone) {
           encryptionDowngraded = true;
+          unawaited(hangUp());
         }
         _changed();
       })
       ..on<TrackUnsubscribedEvent>((_) => _changed());
+    _listener!.on<DataReceivedEvent>(_onDataReceived);
 
     try {
+      if (_isGroup && CallKeys.of(roomName) == null) {
+        throw const CallEncryptionException(
+          'un appel de groupe ne peut pas rejoindre sans clé',
+        );
+      }
       await _applySpeaker();
       await lkRoom.connect(
         livekitUrl,
@@ -373,6 +397,42 @@ class CallSession extends ChangeNotifier {
     speakerOn = !speakerOn;
     _changed();
     await _applySpeaker();
+  }
+
+  Future<void> sendReaction(String emoji) async {
+    if (ended || !callReactionEmojis.contains(emoji)) return;
+    try {
+      await lkRoom.localParticipant?.publishData(
+        utf8.encode(jsonEncode({'type': 'call_reaction', 'emoji': emoji})),
+        reliable: true,
+        topic: 'pokou.call.reaction',
+      );
+      _reactions.add(CallReaction(emoji: emoji, senderId: null));
+    } catch (_) {
+      _notices.add(CallNotice.reactionFailed);
+    }
+  }
+
+  void _onDataReceived(DataReceivedEvent event) {
+    if (event.topic != 'pokou.call.reaction') return;
+    try {
+      final payload = jsonDecode(utf8.decode(event.data));
+      if (payload is! Map<String, dynamic> ||
+          payload['type'] != 'call_reaction' ||
+          payload['emoji'] is! String) {
+        return;
+      }
+      final emoji = payload['emoji'] as String;
+      if (!callReactionEmojis.contains(emoji)) return;
+      _reactions.add(
+        CallReaction(
+          emoji: emoji,
+          senderId: int.tryParse(event.participant?.identity ?? ''),
+        ),
+      );
+    } on FormatException {
+      return;
+    }
   }
 
   /// Avant ↔ arrière. C'est ce qui permet à un vendeur de MONTRER l'article
@@ -484,5 +544,6 @@ class CallSession extends ChangeNotifier {
     await lkRoom.dispose();
     if (_ownsRingtonePlayer) unawaited(_ringtonePlayer.dispose());
     await _notices.close();
+    await _reactions.close();
   }
 }

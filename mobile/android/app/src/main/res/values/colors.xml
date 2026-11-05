@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Doit rester égal à AppColors.background (lib/core/theme/app_colors.dart).
-         C'est la couleur de la fenêtre AVANT la première image Flutter : la
-         moindre différence se voit comme un clignotement au lancement. -->
     <color name="pokou_launch_background">#FFFFFFFF</color>
-    <!-- Teinte des notifications (petite icône, bouton « Répondre » d'un
-         appel entrant). Doit rester égal à AppColors.accentPrimary :
-         sans elle, Android retombe sur le vert du système. -->
     <color name="pokou_notification_accent">#FFA65527</color>
 </resources>

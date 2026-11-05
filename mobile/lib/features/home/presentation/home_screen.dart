@@ -16,6 +16,7 @@ import '../../kory/presentation/kory_controller.dart';
 import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
 import '../../modules/shared/module_ui.dart';
+import '../../settings/presentation/notifications_settings_screen.dart';
 import 'global_search_screen.dart';
 
 /// L'accueil après connexion (écran APP-1) : une carte par module ouvert
@@ -48,53 +49,47 @@ class HomeScreen extends ConsumerWidget {
           children: [
             PokouAppBar(
               title: firstName.isEmpty ? l.navHome : l.homeGreeting(firstName),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: _SearchEntry(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+              showStatus: false,
+              leading: user == null
+                  ? Image.asset(
+                      'assets/brand/pokou_logo.png',
+                      width: 36,
+                      height: 36,
+                      semanticLabel: 'Pokou',
+                    )
+                  : ContactAvatar(
+                      avatar: user.avatar,
+                      displayName: user.fullName ?? '',
+                      size: 36,
+                    ),
+              actions: [
+                PokouAppBarAction(
+                  icon: Icons.search,
+                  tooltip: l.homeSearchHint,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const GlobalSearchScreen(),
+                    ),
+                  ),
                 ),
-              ),
+                PokouAppBarAction(
+                  icon: Icons.notifications_none_outlined,
+                  tooltip: l.profileNotifications,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsSettingsScreen(),
+                    ),
+                  ),
+                ),
+              ],
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
             if (config.has('kory'))
               _KoryCard(onSeeAll: () => onOpenTab(PokouTab.kory)),
             if (config.has('honam'))
               _HonamCard(onSeeAll: () => onOpenTab(PokouTab.honam)),
+            if (config.has('assime')) const _AssimeEntry(),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchEntry extends StatelessWidget {
-  const _SearchEntry({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceElevated,
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: SizedBox(
-          height: 48,
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              Icon(Icons.search, color: AppColors.textSecondary),
-              const SizedBox(width: 10),
-              Text(
-                L.of(context).homeSearchHint,
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -148,6 +143,38 @@ class _HomeSection extends StatelessWidget {
   }
 }
 
+class _AssimeEntry extends StatelessWidget {
+  const _AssimeEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: ModuleCard(
+        child: Row(
+          children: [
+            const Icon(Icons.shopping_bag_outlined),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Assimé · Petites annonces',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Text('Achète et vends près de chez toi'),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DiscussionsCard extends ConsumerWidget {
   const _DiscussionsCard({required this.onSeeAll});
 
@@ -164,11 +191,18 @@ class _DiscussionsCard extends ConsumerWidget {
       title: l.navChats,
       onSeeAll: onSeeAll,
       child: ModuleCard(
+        backgroundColor: AppColors.accentPrimary,
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: recent.isEmpty
             ? ListTile(
-                leading: const Icon(Icons.chat_bubble_outline),
-                title: Text(l.homeNoChats),
+                leading: const Icon(
+                  Icons.chat_bubble_outline,
+                  color: AppColors.neutralCreme,
+                ),
+                title: Text(
+                  l.homeNoChats,
+                  style: const TextStyle(color: AppColors.neutralCreme),
+                ),
                 onTap: onSeeAll,
               )
             : Column(
@@ -185,7 +219,10 @@ class _DiscussionsCard extends ConsumerWidget {
                         d.displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          color: AppColors.neutralCreme,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       subtitle: d.lastMessage == null
                           ? null
@@ -193,6 +230,9 @@ class _DiscussionsCard extends ConsumerWidget {
                               d.lastMessage!.displayTextOf(l),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppColors.neutralCreme,
+                              ),
                             ),
                       trailing: d.unreadCount > 0
                           ? Container(
@@ -202,14 +242,14 @@ class _DiscussionsCard extends ConsumerWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.accentPrimary,
+                                color: AppColors.neutralCreme,
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
                                 '${d.unreadCount}',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.accentPrimary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -241,13 +281,14 @@ class _KoryCard extends ConsumerWidget {
       onSeeAll: onSeeAll,
       child: open.isEmpty
           ? ModuleCard(
+              backgroundColor: AppColors.brandEbene,
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       l.koryNoMoney,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
+                      style: const TextStyle(
+                        color: AppColors.neutralCreme,
                         fontSize: 13,
                       ),
                     ),
@@ -262,7 +303,7 @@ class _KoryCard extends ConsumerWidget {
                 ],
               ),
             )
-          : KoryPotCard(pot: open.first),
+          : KoryPotCard(pot: open.first, dark: true),
     );
   }
 }

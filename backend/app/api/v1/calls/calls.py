@@ -327,6 +327,16 @@ async def get_call_token(
             raise HTTPException(status_code=404, detail="Appel introuvable")
         if _is_over(joined):
             raise HTTPException(status_code=409, detail="Cet appel est terminé")
+        # A group call cannot be joined as a plaintext client, and knowing a
+        # room name (or being a group member) is not enough to obtain its key.
+        if joined.call_type == "group" and not joined.e2ee:
+            raise HTTPException(status_code=409, detail="Les appels de groupe doivent être chiffrés")
+        if (
+            joined.e2ee
+            and joined.caller_id != user_id
+            and _sealed_key_of(joined, user_id) is None
+        ):
+            raise HTTPException(status_code=409, detail="Aucune clé pour cet appel")
         room_name = joined.room
         call_type = None
     elif payload.group_id:
@@ -336,6 +346,12 @@ async def get_call_token(
             # Convergence : un seul appel par groupe. Deux membres qui
             # appuient sur « appeler » au même moment rejoignent le même
             # salon au lieu d'ouvrir deux appels parallèles.
+            if not joined.e2ee:
+                raise HTTPException(
+                    status_code=409, detail="Les appels de groupe doivent être chiffrés"
+                )
+            if joined.caller_id != user_id and _sealed_key_of(joined, user_id) is None:
+                raise HTTPException(status_code=409, detail="Aucune clé pour cet appel")
             room_name = joined.room
             call_type = None
         else:
@@ -359,14 +375,21 @@ async def get_call_token(
     else:
         raise HTTPException(status_code=400, detail="contact_ids, group_id ou room requis")
 
-    # Seul un NOUVEL appel vers des contacts peut être chiffré : un appel de
-    # groupe sonne des membres que l'appelant n'énumère pas, et rejoindre un
-    # salon reprend le chiffrement que son créateur a choisi.
-    if payload.sealed_keys and not (call_type and payload.contact_ids):
+    # Group calls always carry a key wrapped for every ringable invitee.
+    # 1:1 calls retain the existing optional-encryption behavior.
+    if payload.sealed_keys and not (
+        (call_type and (payload.contact_ids or payload.group_id))
+        or (payload.group_id and joined is not None)
+    ):
         raise HTTPException(
-            status_code=400, detail="Seul un nouvel appel vers des contacts peut être chiffré"
+            status_code=400, detail="Seul un nouvel appel peut recevoir des clés"
         )
     sealed_by_invitee = _sealed_keys_for(payload.sealed_keys, invitee_ids, user_id)
+    if call_type == "group" and len(sealed_by_invitee) != len(invitee_ids):
+        raise HTTPException(
+            status_code=400,
+            detail="Les appels de groupe doivent être chiffrés pour chaque invité",
+        )
 
     try:
         token = livekit_service.generate_token(room_name, user)
@@ -381,7 +404,7 @@ async def get_call_token(
             call_type=call_type,
             is_video=payload.is_video,
             status="ringing",
-            e2ee=bool(sealed_by_invitee),
+            e2ee=call_type == "group" or bool(sealed_by_invitee),
         )
         db.add(call_log)
         db.flush()
@@ -440,16 +463,22 @@ def _join_existing(db: Session, call: CallLog, user_id: int) -> None:
     cas du membre qui rejoint de son propre chef depuis le bandeau « Appel en
     cours » : sans ça l'appel n'apparaîtrait pas dans son journal et il ne
     recevrait pas le signal de fin."""
-    if call.caller_id == user_id:
-        return
     participant = db.query(CallParticipant).filter(
         CallParticipant.call_log_id == call.id, CallParticipant.user_id == user_id
     ).first()
+    if call.caller_id == user_id and participant is None:
+        return
     now = datetime.utcnow()
     if participant is None:
-        db.add(CallParticipant(
+        db.add(
+            CallParticipant(
             call_log_id=call.id, user_id=user_id, status="accepted", responded_at=now
-        ))
+            )
+        )
+    else:
+        participant.status = "accepted"
+        participant.responded_at = now
+        participant.left_at = None
     if call.status == "ringing":
         call.status = "ongoing"
     db.commit()
@@ -507,22 +536,48 @@ async def invite_to_call(
 
     group = db.query(Group).filter(Group.id == call.group_id).first() if call.group_id else None
     already = set(_participant_user_ids(call))
-    # Un appel chiffré n'accueille que des invités à qui l'on a donné la clé.
-    if call.e2ee:
-        new_ids = [i for i in payload.user_ids if i not in already]
-        sealed_by_invitee = (
-            _sealed_keys_for(payload.sealed_keys, new_ids, user_id) if new_ids else {}
+    participants_by_user = {participant.user_id: participant for participant in call.participants}
+
+    def can_reinvite(invitee_id: int) -> bool:
+        participant = participants_by_user.get(invitee_id)
+        return participant is not None and (
+            participant.left_at is not None
+            or participant.status in {"declined", "missed"}
         )
-        if new_ids and not payload.sealed_keys:
-            raise HTTPException(
-                status_code=409,
-                detail="Cet appel est chiffré : chaque invité doit recevoir sa clé",
-            )
-    else:
-        sealed_by_invitee = {}
+
+    new_ids = list(dict.fromkeys(
+        i for i in payload.user_ids if i not in already or can_reinvite(i)
+    ))
+    # Check who may be invited before reporting the encryption requirement;
+    # this preserves the existing authorization boundary for unknown users.
+    for invitee_id in new_ids:
+        if group is not None and db.query(GroupMember.id).filter(
+            GroupMember.group_id == group.id, GroupMember.user_id == invitee_id
+        ).first():
+            from app.api.v1.messaging.conversations import is_blocked_between
+
+            if is_blocked_between(db, user_id, invitee_id):
+                raise HTTPException(status_code=403, detail="Impossible d'inviter cette personne")
+        else:
+            _require_contact(db, user_id, invitee_id)
+    # Every invitation turns the room into a group call (or adds to one).
+    # Existing unencrypted 1:1 calls cannot be upgraded in-place because
+    # their connected LiveKit clients do not share a room key.
+    if new_ids and not call.e2ee:
+        raise HTTPException(
+            status_code=409,
+            detail="Un appel non chiffré ne peut pas devenir un appel de groupe",
+        )
+    sealed_by_invitee = _sealed_keys_for(payload.sealed_keys, new_ids, user_id) if new_ids else {}
+    if new_ids and not payload.sealed_keys:
+        raise HTTPException(
+            status_code=409,
+            detail="Chaque invité doit recevoir la clé de cet appel chiffré",
+        )
     invitee_ids: List[int] = []
-    for invitee_id in payload.user_ids:
-        if invitee_id in already:
+    for invitee_id in dict.fromkeys(payload.user_ids):
+        participant = participants_by_user.get(invitee_id)
+        if invitee_id in already and not can_reinvite(invitee_id):
             continue
         # Un membre du groupe est joignable sans être dans le carnet
         # d'adresses — sauf blocage ; hors groupe, la règle habituelle
@@ -536,14 +591,21 @@ async def invite_to_call(
                 raise HTTPException(status_code=403, detail="Impossible d'inviter cette personne")
         else:
             _require_contact(db, user_id, invitee_id)
-        db.add(
-            CallParticipant(
+        if participant is None:
+            participant = CallParticipant(
                 call_log_id=call.id,
                 user_id=invitee_id,
                 status="invited",
                 sealed_key=sealed_by_invitee.get(invitee_id),
             )
-        )
+            db.add(participant)
+            participants_by_user[invitee_id] = participant
+        else:
+            participant.status = "invited"
+            participant.responded_at = None
+            participant.left_at = None
+            if call.e2ee:
+                participant.sealed_key = sealed_by_invitee[invitee_id]
         invitee_ids.append(invitee_id)
         already.add(invitee_id)
 

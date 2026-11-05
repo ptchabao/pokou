@@ -13,6 +13,7 @@ class PokouStatus {
     required this.expiresAt,
     required this.viewedByMe,
     required this.viewCount,
+    this.contentUnavailable = false,
   });
 
   final String id;
@@ -24,6 +25,7 @@ class PokouStatus {
   final DateTime expiresAt;
   final bool viewedByMe;
   final int viewCount;
+  final bool contentUnavailable;
 
   factory PokouStatus.fromJson(Map<String, dynamic> json) {
     final mediaJson = json['media'] as Map<String, dynamic>?;
@@ -37,6 +39,7 @@ class PokouStatus {
       expiresAt: parseServerTime(json['expires_at'] as String),
       viewedByMe: json['viewed_by_me'] as bool? ?? false,
       viewCount: json['view_count'] as int? ?? 0,
+      contentUnavailable: json['status_unavailable'] as bool? ?? false,
     );
   }
 }

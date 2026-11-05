@@ -46,6 +46,7 @@ class _FakeCallRepository extends CallRepository {
   /// qui ne peut pas aboutir, sans jamais pousser un vrai CallScreen (qui
   /// ouvrirait une connexion LiveKit réelle, hors de propos pour ce test).
   final Object? joinCallError;
+  Completer<CallToken>? joinCallCompleter;
   String? signalledEvent;
 
   int? joinedWithInviter;
@@ -53,6 +54,7 @@ class _FakeCallRepository extends CallRepository {
   @override
   Future<CallToken> joinCall(String room, {int? inviter}) async {
     joinedWithInviter = inviter;
+    if (joinCallCompleter != null) return joinCallCompleter!.future;
     if (joinCallError != null) throw joinCallError!;
     return const CallToken(
       room: 'pokou-call-test',
@@ -87,9 +89,7 @@ Widget _buildApp({
           apiClient: ApiClient(baseUrl: 'https://unused'),
         ),
       ),
-      contactsProvider.overrideWith(
-        (ref) => Stream.value(<PokouContact>[]),
-      ),
+      contactsProvider.overrideWith((ref) => Stream.value(<PokouContact>[])),
     ],
     child: MaterialApp(
       localizationsDelegates: L.localizationsDelegates,
@@ -108,7 +108,9 @@ Widget _buildApp({
 
 void main() {
   group('IncomingCallScreen — RingtonePlayer', () {
-    testWidgets('joue la sonnerie en boucle dès l’ouverture de l’écran', (tester) async {
+    testWidgets('joue la sonnerie en boucle dès l’ouverture de l’écran', (
+      tester,
+    ) async {
       final player = _FakeRingtonePlayer();
       await tester.pumpWidget(
         _buildApp(ringtonePlayer: player, repository: _FakeCallRepository()),
@@ -121,7 +123,9 @@ void main() {
     testWidgets('refuser l’appel arrête la sonnerie', (tester) async {
       final player = _FakeRingtonePlayer();
       final repo = _FakeCallRepository();
-      await tester.pumpWidget(_buildApp(ringtonePlayer: player, repository: repo));
+      await tester.pumpWidget(
+        _buildApp(ringtonePlayer: player, repository: repo),
+      );
 
       await tester.tap(find.byIcon(Icons.call_end));
       await tester.pump();
@@ -130,42 +134,71 @@ void main() {
       expect(repo.signalledEvent, 'decline');
     });
 
-    testWidgets('accepter l’appel arrête la sonnerie immédiatement (avant même la navigation)', (
+    testWidgets(
+      'accepter l’appel arrête la sonnerie immédiatement (avant même la navigation)',
+      (tester) async {
+        final player = _FakeRingtonePlayer();
+        // joinCall échoue volontairement : on vérifie que le ringtone est déjà
+        // coupé au moment où l'utilisateur répond, indépendamment de l'issue du
+        // réseau — pas de vrai CallScreen/LiveKit engagé par ce test.
+        final repo = _FakeCallRepository(joinCallError: Exception('boom'));
+        await tester.pumpWidget(
+          _buildApp(ringtonePlayer: player, repository: repo),
+        );
+
+        await tester.tap(find.byIcon(Icons.call));
+        await tester.pump();
+
+        expect(player.stopCalls, greaterThanOrEqualTo(1));
+        expect(find.byType(IncomingCallScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets('accepter affiche un indicateur pendant la requête réseau', (
       tester,
     ) async {
       final player = _FakeRingtonePlayer();
-      // joinCall échoue volontairement : on vérifie que le ringtone est déjà
-      // coupé au moment où l'utilisateur répond, indépendamment de l'issue du
-      // réseau — pas de vrai CallScreen/LiveKit engagé par ce test.
-      final repo = _FakeCallRepository(joinCallError: Exception('boom'));
-      await tester.pumpWidget(_buildApp(ringtonePlayer: player, repository: repo));
-
-      await tester.tap(find.byIcon(Icons.call));
-      await tester.pump();
-
-      expect(player.stopCalls, greaterThanOrEqualTo(1));
-      expect(find.byType(IncomingCallScreen), findsOneWidget);
-    });
-
-    testWidgets('une clé d’appel illisible prévient l’appelant au lieu de le laisser sonner', (
-      tester,
-    ) async {
-      final player = _FakeRingtonePlayer();
-      final repo = _FakeCallRepository(
-        joinCallError: const CallEncryptionException('clé illisible'),
+      final repo = _FakeCallRepository()
+        ..joinCallCompleter = Completer<CallToken>();
+      await tester.pumpWidget(
+        _buildApp(ringtonePlayer: player, repository: repo),
       );
-      await tester.pumpWidget(_buildApp(ringtonePlayer: player, repository: repo));
 
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
-      await tester.pump();
 
-      // La clé est ouverte avec la session de CELUI qui sonne, et de lui seul.
-      expect(repo.joinedWithInviter, 42);
-      expect(repo.signalledEvent, 'decline');
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byIcon(Icons.call), findsNothing);
+
+      repo.joinCallCompleter!.completeError(Exception('offline'));
+      await tester.pump();
+      await tester.pump();
     });
 
-    testWidgets('fermer l’écran arrête la sonnerie et libère le lecteur', (tester) async {
+    testWidgets(
+      'une clé d’appel illisible prévient l’appelant au lieu de le laisser sonner',
+      (tester) async {
+        final player = _FakeRingtonePlayer();
+        final repo = _FakeCallRepository(
+          joinCallError: const CallEncryptionException('clé illisible'),
+        );
+        await tester.pumpWidget(
+          _buildApp(ringtonePlayer: player, repository: repo),
+        );
+
+        await tester.tap(find.byIcon(Icons.call));
+        await tester.pump();
+        await tester.pump();
+
+        // La clé est ouverte avec la session de CELUI qui sonne, et de lui seul.
+        expect(repo.joinedWithInviter, 42);
+        expect(repo.signalledEvent, 'decline');
+      },
+    );
+
+    testWidgets('fermer l’écran arrête la sonnerie et libère le lecteur', (
+      tester,
+    ) async {
       final player = _FakeRingtonePlayer();
       await tester.pumpWidget(
         _buildApp(ringtonePlayer: player, repository: _FakeCallRepository()),

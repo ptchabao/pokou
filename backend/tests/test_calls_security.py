@@ -24,6 +24,7 @@ from tests.test_calls import (  # noqa: F401 — `client` est une fixture
     _make_group,
     _patched_livekit,
     _signup,
+    _start_group_call,
     client,
 )
 
@@ -165,7 +166,7 @@ def test_un_membre_du_groupe_rejoint_l_appel_de_groupe_mais_pas_un_etranger(clie
     group = _make_group(client, headers_a, "Chantier", [("+22894200018", user_id_b)])
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        room = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_a).json()["room"]
+        room = _start_group_call(client, headers_a, group).json()["room"]
 
     assert _token(client, headers_b, room).status_code == 200
     assert _token(client, headers_c, room).status_code == 404
@@ -205,7 +206,7 @@ def test_un_appel_de_groupe_ne_fait_pas_sonner_qui_a_bloque_l_appelant(client):
     with patch("app.api.v1.calls.calls.manager.send_to_user", new=AsyncMock(return_value=True)) as relayed:
         patch_service, patch_route = _patched_livekit()
         with patch_service, patch_route:
-            response = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_b)
+            response = _start_group_call(client, headers_b, group)
 
     assert response.status_code == 200, response.text
     rung = {call.args[0] for call in relayed.call_args_list}
@@ -221,7 +222,7 @@ def test_un_appel_de_groupe_ou_tout_le_monde_a_bloque_l_appelant_est_refuse(clie
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        response = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_b)
+        response = _start_group_call(client, headers_b, group)
     assert response.status_code == 400
 
 
@@ -234,7 +235,7 @@ def test_un_groupe_trop_grand_ne_peut_pas_tout_faire_sonner(client):
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route as route_settings:
         route_settings.return_value.call_max_group_ring = 1
-        response = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_a)
+        response = _start_group_call(client, headers_a, group)
     assert response.status_code == 400
     assert "trop grand" in response.json()["detail"]
 

@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.main import app
 from app.core.database import Base, get_db
-from app.models import User
+from app.models import CallParticipant, CallLog, GroupMember, User
 from app.services.auth import otp_service
 
 TEST_DATABASE_URL = "sqlite:///./test_pokou_calls.db"
@@ -145,7 +145,15 @@ def test_call_token_group_call_has_group_call_type(client):
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
         response = client.post(
-            "/api/v1/calls/token", json={"contact_ids": [user_id_b, user_id_c]}, headers=headers_a
+            "/api/v1/calls/token",
+            json={
+                "contact_ids": [user_id_b, user_id_c],
+                "sealed_keys": {
+                    str(user_id_b): _sealed("bob"),
+                    str(user_id_c): _sealed("charlie"),
+                },
+            },
+            headers=headers_a,
         )
     assert response.status_code == 200, response.text
 
@@ -458,6 +466,26 @@ def _make_group(client, headers, name, member_phones_and_ids):
     return created.json()
 
 
+def _start_group_call(client, headers, group, **fields):
+    db = TestingSessionLocal()
+    try:
+        member_ids = [
+            row.user_id
+            for row in db.query(GroupMember).filter(GroupMember.group_id == group["id"]).all()
+        ]
+    finally:
+        db.close()
+    return client.post(
+        "/api/v1/calls/token",
+        json={
+            "group_id": group["id"],
+            "sealed_keys": {str(user_id): _sealed(str(user_id)) for user_id in member_ids},
+            **fields,
+        },
+        headers=headers,
+    )
+
+
 def test_group_call_rings_every_member_without_needing_contacts(client):
     headers_a, user_id_a, _ = _signup(client, "+22893100001")
     _, user_id_b, token_b = _signup(client, "+22893100002")
@@ -467,8 +495,8 @@ def test_group_call_rings_every_member_without_needing_contacts(client):
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
         with client.websocket_connect(f"/api/v1/ws?token={token_b}") as ws:
-            response = client.post(
-                "/api/v1/calls/token", json={"group_id": group["id"], "is_video": False}, headers=headers_a
+            response = _start_group_call(
+                client, headers_a, group, is_video=False
             )
             assert response.status_code == 200, response.text
             body = response.json()
@@ -510,7 +538,7 @@ def test_group_call_does_not_require_members_to_be_in_the_address_book(client):
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        response = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_b)
+        response = _start_group_call(client, headers_b, group)
     assert response.status_code == 200, response.text
     assert sorted(response.json()["participant_ids"]) == sorted([user_id_a, user_id_c])
 
@@ -523,24 +551,27 @@ def test_non_member_cannot_call_a_group(client):
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        response = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_b)
+        response = _start_group_call(client, headers_b, group)
     assert response.status_code == 403
 
 
 def test_second_caller_joins_the_ongoing_call_instead_of_opening_a_second_room(client):
-    headers_a, _, _ = _signup(client, "+22893100010")
+    headers_a, user_id_a, _ = _signup(client, "+22893100010")
     headers_b, user_id_b, _ = _signup(client, "+22893100011")
     _, user_id_c, _ = _signup(client, "+22893100012")
     group = _make_group(client, headers_a, "Convergence", [("+22893100011", user_id_b), ("+22893100012", user_id_c)])
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        first = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_a).json()
-        second = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_b).json()
+        first = _start_group_call(client, headers_a, group).json()
+        second = _start_group_call(client, headers_b, group).json()
 
     # Même salon : les deux se retrouvent dans le même appel.
     assert second["room"] == first["room"]
     assert second["joined_existing"] is True
+    assert second["e2ee"] is True
+    assert second["sealed_key"]["ciphertext"] == f"chiffre-{user_id_b}"
+    assert second["sealed_key"]["from_user_id"] == user_id_a
     # Un seul appel journalisé, pas deux.
     assert len(client.get("/api/v1/calls/log", headers=headers_a).json()["items"]) == 1
 
@@ -557,7 +588,7 @@ def test_active_call_endpoint_reports_the_ongoing_group_call(client):
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        started = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_a).json()
+        started = _start_group_call(client, headers_a, group).json()
 
     active = client.get(f"/api/v1/calls/active?group_id={group['id']}", headers=headers_b).json()
     assert active["active"] is True
@@ -585,7 +616,7 @@ def test_group_call_survives_the_first_participant_hanging_up(client):
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        started = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_a).json()
+        started = _start_group_call(client, headers_a, group).json()
     room = started["room"]
 
     for headers, target in ((headers_b, user_id_a), (headers_c, user_id_a)):
@@ -636,11 +667,24 @@ def test_invite_turns_a_one_to_one_call_into_a_group_call(client):
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        started = client.post("/api/v1/calls/token", json={"contact_ids": [user_id_b]}, headers=headers_a).json()
+        started = client.post(
+            "/api/v1/calls/token",
+            json={
+                "contact_ids": [user_id_b],
+                "sealed_keys": {str(user_id_b): _sealed("bob")},
+            },
+            headers=headers_a,
+        ).json()
 
         with client.websocket_connect(f"/api/v1/ws?token={token_c}") as ws:
             invited = client.post(
-                "/api/v1/calls/invite", json={"room": started["room"], "user_ids": [user_id_c]}, headers=headers_a
+                "/api/v1/calls/invite",
+                json={
+                    "room": started["room"],
+                    "user_ids": [user_id_c],
+                    "sealed_keys": {str(user_id_c): _sealed("charlie")},
+                },
+                headers=headers_a,
             )
             assert invited.status_code == 200, invited.text
             assert invited.json()["invited"] == [user_id_c]
@@ -743,7 +787,7 @@ def test_group_member_can_be_invited_to_an_ongoing_call_without_being_a_contact(
     with patch_service, patch_route:
         # B lance l'appel de groupe (C est sonné), C refuse, puis B le rappelle
         # dans l'appel alors que C n'est PAS dans son carnet d'adresses.
-        started = client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_b).json()
+        started = _start_group_call(client, headers_b, group).json()
         response = client.post(
             "/api/v1/calls/invite", json={"room": started["room"], "user_ids": [user_id_c]}, headers=headers_b
         )
@@ -753,6 +797,63 @@ def test_group_member_can_be_invited_to_an_ongoing_call_without_being_a_contact(
     assert response.json()["invited"] == []
 
 
+def test_a_departed_group_call_participant_can_be_invited_back(client):
+    headers_a, user_id_a, _ = _signup(client, "+22893100046")
+    headers_b, user_id_b, token_b = _signup(client, "+22893100047")
+    headers_c, user_id_c, _ = _signup(client, "+22893100048")
+    group = _make_group(
+        client,
+        headers_a,
+        "Retour d'appel",
+        [("+22893100047", user_id_b), ("+22893100048", user_id_c)],
+    )
+
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        started = _start_group_call(client, headers_a, group).json()
+        room = started["room"]
+        client.post("/api/v1/calls/token", json={"room": room}, headers=headers_b)
+        client.post("/api/v1/calls/token", json={"room": room}, headers=headers_c)
+        left = client.post(
+            "/api/v1/calls/signal",
+            json={"room": room, "target_user_id": user_id_a, "event": "end"},
+            headers=headers_b,
+        )
+        assert left.status_code == 200
+
+        with client.websocket_connect(f"/api/v1/ws?token={token_b}") as ws:
+            reinvited = client.post(
+                "/api/v1/calls/invite",
+                json={
+                    "room": room,
+                    "user_ids": [user_id_b],
+                    "sealed_keys": {str(user_id_b): _sealed("bob-return")},
+                },
+                headers=headers_a,
+            )
+            assert reinvited.status_code == 200, reinvited.text
+            assert reinvited.json()["invited"] == [user_id_b]
+            assert ws.receive_json()["type"] == "call:invite"
+
+        client.post("/api/v1/calls/token", json={"room": room}, headers=headers_b)
+
+    db = TestingSessionLocal()
+    try:
+        call = db.query(CallLog).filter(CallLog.room == room).one()
+        participant = (
+            db.query(CallParticipant)
+            .filter(
+                CallParticipant.call_log_id == call.id,
+                CallParticipant.user_id == user_id_b,
+            )
+            .one()
+        )
+        assert participant.status == "accepted"
+        assert participant.left_at is None
+    finally:
+        db.close()
+
+
 def test_call_log_names_the_group(client):
     headers_a, _, _ = _signup(client, "+22893100041")
     _, user_id_b, _ = _signup(client, "+22893100042")
@@ -760,7 +861,7 @@ def test_call_log_names_the_group(client):
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
-        client.post("/api/v1/calls/token", json={"group_id": group["id"]}, headers=headers_a)
+        _start_group_call(client, headers_a, group)
 
     entry = client.get("/api/v1/calls/log", headers=headers_a).json()["items"][0]
     assert entry["group_id"] == group["id"]
@@ -865,19 +966,36 @@ def test_on_n_ajoute_pas_a_un_appel_chiffre_quelqu_un_sans_sa_cle(client):
     assert joined["sealed_key"]["ciphertext"] == "chiffre-charlie"
 
 
-def test_un_appel_de_groupe_ne_peut_pas_porter_de_cles(client):
+def test_un_appel_de_groupe_exige_une_cle_pour_chaque_invite(client):
     headers_a, _, _ = _signup(client, "+22893200011")
     _, user_id_b, _ = _signup(client, "+22893200012")
     group_id = _make_group(client, headers_a, "Famille", [("+22893200012", user_id_b)])["id"]
 
     patch_service, patch_route = _patched_livekit()
     with patch_service, patch_route:
+        missing = client.post(
+            "/api/v1/calls/token", json={"group_id": group_id}, headers=headers_a
+        )
         response = client.post(
             "/api/v1/calls/token",
             json={"group_id": group_id, "sealed_keys": {str(user_id_b): _sealed()}},
             headers=headers_a,
         )
-    assert response.status_code == 400
+    assert missing.status_code == 400
+    assert response.status_code == 200, response.text
+    assert response.json()["e2ee"] is True
+    assert response.json()["sealed_key"] is None
+
+    db = TestingSessionLocal()
+    try:
+        call = db.query(CallLog).filter(CallLog.room == response.json()["room"]).one()
+        stored = db.query(CallParticipant).filter(
+            CallParticipant.call_log_id == call.id, CallParticipant.user_id == user_id_b
+        ).one().sealed_key
+        assert stored["ciphertext"] == "chiffre-clé"
+        assert set(stored) == {"encryption", "ciphertext", "envelope", "from_user_id"}
+    finally:
+        db.close()
 
 
 def test_un_refus_apres_avoir_rejoint_un_appel_chiffre_le_clot(client):

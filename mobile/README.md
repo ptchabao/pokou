@@ -142,18 +142,19 @@ erreur, ou un changement de clé d'identité, **bloque** l'envoi.
 
 ### La limite la plus importante
 
-**Ce protocole n'a fait l'objet d'aucun audit externe.**
+**Les protocoles et leur intégration n'ont fait l'objet d'aucun audit externe.**
 
-Il est écrit à la main (`lib/core/crypto/`) sur des primitives éprouvées
+Le chiffrement individuel est assemblé à la main (`lib/core/crypto/`) sur des primitives éprouvées
 — `package:cryptography`, Apache-2.0, X25519 / Ed25519 / AES-256-GCM /
 HKDF / HMAC-SHA256. Aucune primitive n'est réimplémentée : ce qui est écrit
 ici, c'est leur ASSEMBLAGE, et c'est déjà bien assez pour se tromper.
 
-Pourquoi pas une bibliothèque du protocole Signal ? Parce qu'en Dart elles
-sont **toutes** sous GPL-3.0 ou AGPL-3.0 (`libsignal_protocol_dart`,
-`libsignal_dart`), ce qui obligerait à publier le code source de Pokou
-entière. Le choix n'était donc pas « maison contre éprouvé », mais « maison
-contre ouvrir tout le produit ».
+Les groupes utilisent Signal Sender Keys via `libsignal_protocol_dart`
+(GPL-3.0). Le dépôt est placé sous GNU AGPL-3.0 ; voir le fichier `LICENSE`
+à la racine. Toute distribution de l'application ou mise à disposition de
+versions modifiées doit respecter les obligations de cette licence, notamment
+la disponibilité du code source correspondant. Cette décision n'est pas un
+avis juridique.
 
 Conséquence pratique : présenter cette fonctionnalité aux utilisateurs comme
 une garantie de sécurité demande d'abord un audit par un tiers compétent.
@@ -171,6 +172,7 @@ garantie.
 | `lib/core/crypto/e2ee_store.dart` | Clés privées — Keychain / Keystore matériel |
 | `lib/core/crypto/e2ee_service.dart` | Façade ; le reste de l'app ne voit que ça |
 | `lib/core/crypto/media_cipher.dart` | Chiffrement des pièces jointes |
+| `lib/core/crypto/group_sender_keys.dart` | Signal Sender Keys et stockage sécurisé des états de groupe |
 | `lib/core/crypto/call_keys.dart` | Clé d'appel 1:1 scellée |
 | `backend/app/api/v1/auth/e2ee.py` | Annuaire de clés PUBLIQUES, côté serveur |
 
