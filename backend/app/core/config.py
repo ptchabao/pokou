@@ -145,6 +145,9 @@ class Settings(BaseSettings):
     # construire les URL de rappel des paiements (voir semoa_client).
     public_api_url: str = "https://api.pok.app"
 
+    # Domaine public des invitations et liens profonds, servi par l'API.
+    public_link_base_url: str = "https://apipokou.cabinet-p-et-associes.com"
+
     # API Configuration
     debug: bool = True
     log_level: str = "INFO"

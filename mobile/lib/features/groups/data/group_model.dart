@@ -1,5 +1,6 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../core/time/server_time.dart';
+import '../../../core/deeplink/invite_link_parser.dart' show pokouLinkBaseUrl;
 import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, MessageReplyPreview, PendingMedia, PollData;
 
@@ -157,8 +158,7 @@ class Group {
 }
 
 /// Forme canonique d'un lien d'invitation de groupe (Android App Links / iOS Universal Links).
-String inviteLinkFor(String code) =>
-    'https://pok.app/invite/group/$code';
+String inviteLinkFor(String code) => '$pokouLinkBaseUrl/invite/group/$code';
 
 /// Extrait le code d'un lien collé (format canonique `/invite/group/CODE` ou
 /// historique `/invite/CODE`), ou rend l'entrée telle quelle si c'est déjà un code.

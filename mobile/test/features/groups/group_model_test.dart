@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokou/core/deeplink/invite_link_parser.dart'
+    show pokouLinkBaseUrl;
 import 'package:pokou/features/groups/data/group_model.dart';
 
 void main() {
@@ -158,13 +160,34 @@ void main() {
     });
 
     test('le rôle d\'un membre distingue créateur, admin et membre', () {
-      final owner = GroupMember.fromJson({'user_id': 1, 'role': 'OWNER', 'display_name': 'Kodjo'});
-      final admin = GroupMember.fromJson({'user_id': 2, 'role': 'ADMIN', 'display_name': 'Ama'});
-      final member = GroupMember.fromJson({'user_id': 3, 'role': 'MEMBER', 'display_name': 'Yao'});
+      final owner = GroupMember.fromJson({
+        'user_id': 1,
+        'role': 'OWNER',
+        'display_name': 'Kodjo',
+      });
+      final admin = GroupMember.fromJson({
+        'user_id': 2,
+        'role': 'ADMIN',
+        'display_name': 'Ama',
+      });
+      final member = GroupMember.fromJson({
+        'user_id': 3,
+        'role': 'MEMBER',
+        'display_name': 'Yao',
+      });
 
-      expect((owner.isOwner, owner.isAdmin, owner.canManage), (true, false, true));
-      expect((admin.isOwner, admin.isAdmin, admin.canManage), (false, true, true));
-      expect((member.isOwner, member.isAdmin, member.canManage), (false, false, false));
+      expect(
+        (owner.isOwner, owner.isAdmin, owner.canManage),
+        (true, false, true),
+      );
+      expect(
+        (admin.isOwner, admin.isAdmin, admin.canManage),
+        (false, true, true),
+      );
+      expect(
+        (member.isOwner, member.isAdmin, member.canManage),
+        (false, false, false),
+      );
     });
 
     test('la photo du groupe arrive avec sa métadonnée', () {
@@ -191,7 +214,7 @@ void main() {
 
   group('lien d\'invitation', () {
     test('un lien complet se réduit à son code', () {
-      expect(inviteCodeFrom('https://pok.app/invite/AbC123xyz'), 'AbC123xyz');
+      expect(inviteCodeFrom('$pokouLinkBaseUrl/invite/AbC123xyz'), 'AbC123xyz');
     });
 
     test('un code seul est accepté tel quel', () {
@@ -201,13 +224,16 @@ void main() {
     test('la ponctuation d\'URL après le code est écartée', () {
       // Un lien collé depuis une messagerie traîne souvent un paramètre ou
       // une ancre.
-      expect(inviteCodeFrom('https://pok.app/invite/AbC123?utm=wa'), 'AbC123');
-      expect(inviteCodeFrom('https://pok.app/invite/AbC123#x'), 'AbC123');
-      expect(inviteCodeFrom('https://pok.app/invite/AbC123/'), 'AbC123');
+      expect(
+        inviteCodeFrom('$pokouLinkBaseUrl/invite/AbC123?utm=wa'),
+        'AbC123',
+      );
+      expect(inviteCodeFrom('$pokouLinkBaseUrl/invite/AbC123#x'), 'AbC123');
+      expect(inviteCodeFrom('$pokouLinkBaseUrl/invite/AbC123/'), 'AbC123');
     });
 
     test('le lien partageable se construit depuis le code', () {
-      expect(inviteLinkFor('AbC123'), 'https://pok.app/invite/group/AbC123');
+      expect(inviteLinkFor('AbC123'), '$pokouLinkBaseUrl/invite/group/AbC123');
       expect(inviteCodeFrom(inviteLinkFor('AbC123')), 'AbC123');
     });
   });

@@ -74,13 +74,15 @@ def test_android_asset_links_is_served_without_api_prefix(client):
         assert all(len(octet) == 2 and int(octet, 16) >= 0 for octet in octets), fingerprint
 
 
-def test_apple_app_site_association_is_served_without_api_prefix(client):
+def test_apple_app_site_association_is_served_without_api_prefix(client, monkeypatch):
+    monkeypatch.setenv("APPLE_TEAM_ID", "ABCDE12345")
     response = client.get("/.well-known/apple-app-site-association")
     assert response.status_code == 200
     assert "application/json" in response.headers["content-type"]
 
     body = response.json()
     details = body["applinks"]["details"]
+    assert details[0]["appID"] == "ABCDE12345.com.pokou.pokou"
     # Toutes les formes de liens gérées par l'application doivent être
     # déclarées ; sinon iOS les ouvre dans le navigateur.
     assert details[0]["paths"] == [
@@ -93,6 +95,23 @@ def test_apple_app_site_association_is_served_without_api_prefix(client):
         "/kory/pots/*",
         "/honam/orders/*",
     ]
+
+
+def test_apple_app_site_association_fails_explicitly_without_team_id(client, monkeypatch):
+    monkeypatch.delenv("APPLE_TEAM_ID", raising=False)
+    response = client.get("/.well-known/apple-app-site-association")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == (
+        "A valid 10-character APPLE_TEAM_ID is required for iOS Universal Links"
+    )
+
+
+def test_apple_app_site_association_rejects_placeholder_team_id(client, monkeypatch):
+    monkeypatch.setenv("APPLE_TEAM_ID", "TEAMID")
+    response = client.get("/.well-known/apple-app-site-association")
+
+    assert response.status_code == 503
 
 
 def test_la_cle_de_signature_du_play_store_peut_etre_ajoutee_sans_toucher_au_code(client, monkeypatch):

@@ -42,7 +42,7 @@ def test_la_page_propose_d_ouvrir_l_application_et_de_l_installer():
     response = client.get("/invite/group/AB12CD34")
     # `intent://` fait ce qu'un lien https ne peut pas depuis une page déjà
     # ouverte : forcer l'ouverture de CETTE application.
-    assert "intent://pok.app/invite/group/AB12CD34" in response.text
+    assert "intent://apipokou.cabinet-p-et-associes.com/invite/group/AB12CD34" in response.text
     assert "package=com.pokou.pokou" in response.text
     # Et le repli pour qui ne l'a pas — c'est tout l'intérêt d'un lien
     # d'invitation.
@@ -57,7 +57,7 @@ def test_la_page_ne_revele_rien_du_contenu_prive():
     lowered = response.text.lower()
     assert "membre" not in lowered
     assert "SECRET99" not in response.text.replace(
-        "intent://pok.app/invite/community/SECRET99", ""
+        "intent://apipokou.cabinet-p-et-associes.com/invite/community/SECRET99", ""
     ).replace(f"{PLAY_STORE_URL}", ""), "le code ne doit pas s'afficher en clair"
 
 
@@ -87,10 +87,11 @@ def test_les_liens_kory_et_honam_ne_revelent_pas_les_donnees_de_la_ressource():
     for path in ("/kory/42", "/honam/order/314"):
         response = client.get(path, headers={})
         assert response.status_code == 200
-        assert f"intent://pok.app{path}" in response.text
+        assert f"intent://apipokou.cabinet-p-et-associes.com{path}" in response.text
 
 
-def test_universal_links_ios_declare_les_routes_kory_et_honam():
+def test_universal_links_ios_declare_les_routes_kory_et_honam(monkeypatch):
+    monkeypatch.setenv("APPLE_TEAM_ID", "ABCDE12345")
     response = client.get("/.well-known/apple-app-site-association")
     assert response.status_code == 200
     paths = response.json()["applinks"]["details"][0]["paths"]
@@ -117,5 +118,5 @@ def test_lien_publication_chaine_sert_une_page():
     avoir sa propre URL profonde avec métadonnées article."""
     response = client.get("/channel/CHANN123/post/42")
     assert response.status_code == 200
-    assert "intent://pok.app/channel/CHANN123/post/42" in response.text
+    assert "intent://apipokou.cabinet-p-et-associes.com/channel/CHANN123/post/42" in response.text
     assert '<meta property="og:title"' in response.text

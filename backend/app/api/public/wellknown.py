@@ -18,7 +18,7 @@ Ces deux routes sont enregistrées SANS le préfixe `/api/v1` (voir
 `app/main.py`) — les vérificateurs de domaine d'Android/iOS vont chercher
 ces fichiers à un chemin fixe, ils n'ont aucune notion de version d'API.
 
-Domaine : `pok.app`.
+Domaine : celui défini par `PUBLIC_LINK_BASE_URL`.
 
 ────────────────────────────────────────────────────────────────────────────
 TROIS CONDITIONS, ET AUCUNE NE SE SIGNALE QUAND ELLE MANQUE
@@ -44,25 +44,26 @@ D'où cette liste, et la commande qui va avec.
 
 Vérification, dans l'ordre — la première qui échoue est la cause :
 
-    dig +short pok.app
-    curl -sS https://pok.app/.well-known/assetlinks.json | jq .
+    dig +short apipokou.cabinet-p-et-associes.com
+    curl -sS https://apipokou.cabinet-p-et-associes.com/.well-known/assetlinks.json | jq .
     curl -sS "https://digitalassetlinks.googleapis.com/v1/statements:list\
-?source.web.site=https://pok.app\
+?source.web.site=https://apipokou.cabinet-p-et-associes.com\
 &relation=delegate_permission/common.handle_all_urls" | jq .
 
 La troisième est le vérificateur de Google lui-même : c'est exactement ce que
 l'appareil interroge, et il dit pourquoi il refuse.
 """
 import os
+import re
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter(tags=["well-known"])
 
 
 # Empreintes SHA-256 des certificats autorisés à ouvrir les liens
-# pok.app. Une LISTE, et non une valeur : Android accepte plusieurs
+# Le domaine des liens. Une LISTE, et non une valeur : Android accepte plusieurs
 # empreintes pour un même paquet, ce qui est nécessaire ici parce que trois
 # certificats différents coexistent légitimement.
 #
@@ -126,13 +127,19 @@ _IOS_BUNDLE_ID = "com.pokou.pokou"
 # Apple Team ID du compte développeur qui signe l'application (APPLE_TEAM_ID).
 # Sans lui, iOS ne vérifie pas les Universal Links.
 def _apple_app_id() -> str:
-    return f"{os.getenv('APPLE_TEAM_ID', 'TEAMID').strip() or 'TEAMID'}.{_IOS_BUNDLE_ID}"
+    team_id = os.getenv("APPLE_TEAM_ID", "").strip()
+    if not re.fullmatch(r"[A-Z0-9]{10}", team_id):
+        raise HTTPException(
+            status_code=503,
+            detail="A valid 10-character APPLE_TEAM_ID is required for iOS Universal Links",
+        )
+    return f"{team_id}.{_IOS_BUNDLE_ID}"
 
 
 @router.get("/.well-known/assetlinks.json")
 async def android_asset_links():
     """Déclare Pokou comme gestionnaire autorisé des liens
-    `https://pok.app/invite/...` pour Android App Links."""
+    du domaine public des invitations pour Android App Links."""
     return [
         {
             "relation": ["delegate_permission/common.handle_all_urls"],

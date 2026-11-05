@@ -1,6 +1,7 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../messaging/data/direct_message_model.dart' show PollData;
 import '../../../core/time/server_time.dart';
+import '../../../core/deeplink/invite_link_parser.dart' show pokouLinkBaseUrl;
 
 class PokouChannel {
   const PokouChannel({
@@ -84,11 +85,10 @@ class PokouChannel {
   }
 }
 
-String channelInviteLinkFor(String code) =>
-    'https://pok.app/channel/$code';
+String channelInviteLinkFor(String code) => '$pokouLinkBaseUrl/channel/$code';
 
 String channelPostLinkFor(String code, Object postId) =>
-    'https://pok.app/channel/$code/post/$postId';
+    '$pokouLinkBaseUrl/channel/$code/post/$postId';
 
 /// Publication d'une chaîne — diffusion à sens unique : on lit et on réagit,
 /// on ne répond pas (c'est ce qui distingue une chaîne d'un groupe).

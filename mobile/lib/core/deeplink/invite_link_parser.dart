@@ -4,6 +4,10 @@
 /// par le même chemin — y compris l'attente de la connexion.
 enum DeepLinkInviteKind { group, community, channel, bot, koryPot, honamOrder }
 
+const pokouLinkHost = 'apipokou.cabinet-p-et-associes.com';
+const pokouLinkBaseUrl = 'https://$pokouLinkHost';
+const _legacyLinkHost = 'pok.app';
+
 /// Intention extraite d'un lien — invitation, ouverture de ressource ou post.
 class PendingInvite {
   const PendingInvite({
@@ -37,7 +41,9 @@ class PendingInvite {
 /// Extrait une intention d'un lien Pokou, ou `null` si l'URI ne correspond
 /// à aucun format connu.
 PendingInvite? parseInviteLink(Uri uri) {
-  if (uri.scheme != 'https' || uri.host.toLowerCase() != 'pok.app') {
+  final host = uri.host.toLowerCase();
+  if (uri.scheme != 'https' ||
+      (host != pokouLinkHost && host != _legacyLinkHost)) {
     return null;
   }
 

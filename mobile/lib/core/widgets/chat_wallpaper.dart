@@ -18,10 +18,10 @@ import '../theme/app_colors.dart';
 /// - **Opacité basse.** Le motif doit se deviner, pas se lire : il passe
 ///   derrière du texte, et tout ce qu'il gagne en présence, la conversation
 ///   le perd en lisibilité.
-/// - **Échelle 3.** L'image fait 1024 pixels de côté ; à cette échelle chaque
-///   griffonnage mesure une trentaine de points logiques et le motif se
-///   répète plusieurs fois par écran. Rendue à l'échelle 1, une seule tuile
-///   couvrirait tout l'écran et le motif se lirait comme un dessin.
+/// - **Échelle 3.** La tuile fait 941 x 1672 pixels ; à cette échelle ses
+///   motifs restent discrets et se répètent sur un écran de téléphone.
+///   Rendue à l'échelle 1, une seule tuile couvrirait tout l'écran et le
+///   motif se lirait comme un dessin.
 class ChatWallpaper extends StatelessWidget {
   const ChatWallpaper({super.key, required this.child});
 

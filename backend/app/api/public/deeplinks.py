@@ -6,7 +6,7 @@ vérification de domaine — elle marche — mais dans le fait que **rien ne
 servait ces URL**.
 
 `assetlinks.json` dit à Android que Pokou a le droit d'ouvrir
-`https://pok.app/invite/…`. Il ne rend pas cette adresse existante
+`https://apipokou.cabinet-p-et-associes.com/invite/…`. Il ne rend pas cette adresse existante
 pour autant. Dès qu'un lien n'est PAS intercepté par l'application — parce
 qu'elle n'est pas installée, parce qu'on a choisi « ouvrir dans le
 navigateur » une fois, ou parce que le lien est ouvert dans le navigateur
@@ -29,9 +29,11 @@ comment l'ouvrir.
 """
 import html as html_lib
 from typing import Optional
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
+from app.core.config import get_settings
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -41,7 +43,8 @@ router = APIRouter(tags=["liens d'invitation"])
 
 PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.pokou.pokou"
 ANDROID_PACKAGE = "com.pokou.pokou"
-DEFAULT_OG_IMAGE = "https://pok.app/static/pokou-banner.png"
+LINK_BASE_URL = get_settings().public_link_base_url.rstrip("/")
+LINK_HOST = urlsplit(LINK_BASE_URL).netloc
 
 _KIND_LABELS = {
     "bot": ("un bot", "Discutez avec ce bot sur Pokou"),
@@ -63,7 +66,7 @@ def _intent_url(path: str) -> str:
     exactement ce qu'on veut d'un lien d'invitation.
     """
     return (
-        f"intent://pok.app{path}#Intent;scheme=https;"
+        f"intent://{LINK_HOST}{path}#Intent;scheme=https;"
         f"package={ANDROID_PACKAGE};"
         f"S.browser_fallback_url={PLAY_STORE_URL};end"
     )
@@ -86,7 +89,7 @@ def _page(
         custom_description
         or f"Vous avez reçu {label}. Ouvrez-la dans Pokou Messenger, la messagerie instantanée fluide et sécurisée."
     )
-    image_url = custom_image or DEFAULT_OG_IMAGE
+    image_url = custom_image or f"{LINK_BASE_URL}/static/pokou-banner.png"
     intent = _intent_url(path)
 
     escaped_title = html_lib.escape(title)
@@ -95,9 +98,9 @@ def _page(
     escaped_label = html_lib.escape(label)
     escaped_image = html_lib.escape(image_url)
     if kind in ("group", "community", "unknown"):
-        canonical_url = f"https://pok.app/invite/{kind}"
+        canonical_url = f"{LINK_BASE_URL}/invite/{kind}"
     else:
-        canonical_url = f"https://pok.app{path}"
+        canonical_url = f"{LINK_BASE_URL}{path}"
 
     html = f"""<!DOCTYPE html>
 <html lang="fr">
@@ -287,7 +290,7 @@ async def channel_link(code: str, db: Session = Depends(get_db)):
 
 @router.get("/bot/{handle}", response_class=HTMLResponse)
 async def bot_link(handle: str, db: Session = Depends(get_db)):
-    """Le lien d'un bot Pokou Business (`pok.app/bot/<handle>`).
+    """Le lien d'un bot Pokou Business (`/bot/<handle>`).
     L'aperçu ne montre que les bots d'entreprises VÉRIFIÉES : un bot de bac
     à sable n'a pas à se présenter au public sous son nom."""
     try:

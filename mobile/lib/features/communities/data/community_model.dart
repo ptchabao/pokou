@@ -1,4 +1,5 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
+import '../../../core/deeplink/invite_link_parser.dart' show pokouLinkBaseUrl;
 
 /// Un groupe vu depuis sa communauté — juste ce qu'il faut pour le lister et
 /// l'ouvrir. Le détail complet reste `Group` (features/groups).
@@ -133,8 +134,7 @@ class CommunityInvitePreview {
 
 /// Même forme que pour les groupes — le lien ne s'ouvre pas encore d'un clic
 /// (App Links non configurés), il se colle dans « Rejoindre ».
-String communityInviteLinkFor(String code) =>
-    'https://pok.app/c/$code';
+String communityInviteLinkFor(String code) => '$pokouLinkBaseUrl/c/$code';
 
 String communityInviteCodeFrom(String input) {
   final trimmed = input.trim();

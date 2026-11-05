@@ -62,6 +62,17 @@ void main() {
   FlutterSecureStoragePlatform.instance = _InMemorySecureStorage();
 
   group('ApiClient', () {
+    test('utilise par défaut l’hôte de production actuellement actif', () {
+      final client = ApiClient(
+        httpClient: MockClient((_) async => http.Response('', 200)),
+      );
+
+      expect(
+        client.baseUrl,
+        'https://apipokou.cabinet-p-et-associes.com/api/v1',
+      );
+    });
+
     test(
       'deux clients sur le même stockage ne rafraîchissent qu’UNE fois',
       () async {

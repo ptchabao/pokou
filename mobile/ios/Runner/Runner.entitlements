@@ -16,13 +16,13 @@
 	     même domaine ; iOS ne filtre pas par chemin ici, c'est le fichier
 	     apple-app-site-association servi par le domaine qui le fait.
 
-	     ⚠️ Exige que https://pok.app/.well-known/apple-app-site-association
+	     ⚠️ Exige que https://apipokou.cabinet-p-et-associes.com/.well-known/apple-app-site-association
 	     existe et renvoie le bon applicationID (TEAMID.com.pokou.pokou).
 	     Voir api/app/routes/wellknown.py, qui sert déjà l'équivalent
 	     Android (assetlinks.json). -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:pok.app</string>
+		<string>applinks:apipokou.cabinet-p-et-associes.com</string>
 	</array>
 </dict>
 </plist>

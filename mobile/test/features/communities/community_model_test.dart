@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokou/core/deeplink/invite_link_parser.dart'
+    show pokouLinkBaseUrl;
 import 'package:pokou/features/communities/data/community_model.dart';
 import 'package:pokou/features/groups/data/group_model.dart';
 
@@ -15,8 +17,18 @@ void main() {
         'can_manage': true,
         'invite_code': 'abc123',
         'groups': [
-          {'id': 1, 'name': 'Annonces', 'member_count': 12, 'is_announcement': true},
-          {'id': 2, 'name': 'Vendeurs', 'member_count': 8, 'is_announcement': false},
+          {
+            'id': 1,
+            'name': 'Annonces',
+            'member_count': 12,
+            'is_announcement': true,
+          },
+          {
+            'id': 2,
+            'name': 'Vendeurs',
+            'member_count': 8,
+            'is_announcement': false,
+          },
         ],
       });
 
@@ -47,13 +59,19 @@ void main() {
 
   group('lien de communauté', () {
     test('aller-retour lien / code', () {
-      expect(communityInviteLinkFor('AbC123'), 'https://pok.app/c/AbC123');
-      expect(communityInviteCodeFrom(communityInviteLinkFor('AbC123')), 'AbC123');
+      expect(communityInviteLinkFor('AbC123'), '$pokouLinkBaseUrl/c/AbC123');
+      expect(
+        communityInviteCodeFrom(communityInviteLinkFor('AbC123')),
+        'AbC123',
+      );
     });
 
     test('un code seul est accepté, la ponctuation d\'URL écartée', () {
       expect(communityInviteCodeFrom('  AbC123 '), 'AbC123');
-      expect(communityInviteCodeFrom('https://pok.app/c/AbC123?x=1'), 'AbC123');
+      expect(
+        communityInviteCodeFrom('$pokouLinkBaseUrl/c/AbC123?x=1'),
+        'AbC123',
+      );
     });
 
     test('le préfixe des communautés est distinct de celui des groupes', () {
@@ -65,7 +83,8 @@ void main() {
   });
 
   group('droit de publier dans un groupe', () {
-    Group build({required bool isAnnouncement, required bool canManage}) => Group.fromJson({
+    Group build({required bool isAnnouncement, required bool canManage}) =>
+        Group.fromJson({
           'id': 1,
           'name': 'Annonces',
           'created_by': 1,

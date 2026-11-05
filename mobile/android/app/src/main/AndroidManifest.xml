@@ -100,7 +100,8 @@
                  vérification du domaine via le fichier
                  /.well-known/assetlinks.json (voir
                  api/app/routes/wellknown.py) : si elle réussit, un clic sur
-                 un lien https://pok.app/invite/... ouvre l'app
+                 un lien https://apipokou.cabinet-p-et-associes.com/invite/...
+                 ouvre l'app
                  directement plutôt que le navigateur, et DeepLinkService
                  (core/deeplink/) rejoint le groupe/la communauté sans étape
                  manuelle supplémentaire. La propriété DNS de ce domaine et
@@ -111,14 +112,14 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <!-- Préfixes des liens Pokou gérés par invite_link_parser.dart. -->
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/invite"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/c/"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/channel/"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/bot/"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/kory/pots/"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/honam/orders/"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/kory/"/>
-                <data android:scheme="https" android:host="pok.app" android:pathPrefix="/honam/order/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/invite"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/c/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/channel/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/bot/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/kory/pots/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/honam/orders/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/kory/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/honam/order/"/>
             </intent-filter>
         </activity>
         <!-- Éditeur de recadrage d'image (uCrop), requis par image_cropper.

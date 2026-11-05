@@ -19,7 +19,7 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1  # émulateur
 
 | `--dart-define` | Défaut |
 |---|---|
-| `API_BASE_URL` | `https://api.pok.app/api/v1` |
+| `API_BASE_URL` | `https://apipokou.cabinet-p-et-associes.com/api/v1` |
 | `MAHIZU_API_BASE_URL` | `https://api.mahizu.com/api/v1` |
 
 `10.0.2.2` est l'alias de l'émulateur Android vers `localhost` de la machine

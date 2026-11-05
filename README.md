@@ -88,7 +88,8 @@ Comptes et services à ouvrir avant : [docs/mise-en-service.md](docs/mise-en-ser
 ## Mobile
 
 Voir `mobile/README.md`. L'API visée se règle au build :
-`--dart-define=API_BASE_URL=…` (défaut `https://api.pok.app/api/v1`).
+`--dart-define=API_BASE_URL=…` (défaut
+`https://apipokou.cabinet-p-et-associes.com/api/v1`).
 
 ## Pokou et Mahizu
 
