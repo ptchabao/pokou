@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_elevation.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
@@ -49,40 +51,92 @@ class HomeScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(bottom: 120),
           children: [
             PokouAppBar(
-              title: firstName.isEmpty ? l.navHome : l.homeGreeting(firstName),
+              title: l.navHome,
               showStatus: false,
-              leading: user == null
-                  ? Image.asset(
-                      'assets/brand/pokou_logo.png',
-                      width: 36,
-                      height: 36,
-                      semanticLabel: 'Pokou',
-                    )
-                  : ContactAvatar(
-                      avatar: user.avatar,
-                      displayName: user.fullName ?? '',
-                      size: 36,
-                    ),
+              leading: Image.asset(
+                'assets/brand/pokou_logo.png',
+                width: 36,
+                height: 36,
+                semanticLabel: 'Pokou',
+              ),
               actions: [
-                PokouAppBarAction(
-                  icon: Icons.search,
-                  tooltip: l.homeSearchHint,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const GlobalSearchScreen(),
-                    ),
+                if (user != null)
+                  ContactAvatar(
+                    avatar: user.avatar,
+                    displayName: user.fullName ?? '',
+                    size: 32,
                   ),
-                ),
-                PokouAppBarAction(
-                  icon: Icons.notifications_none_outlined,
-                  tooltip: l.profileNotifications,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const NotificationsSettingsScreen(),
-                    ),
-                  ),
-                ),
               ],
+            ),
+            // Maquette APP-1 : « BONJOUR • » en surtitre, le prénom en
+            // grand, recherche et notifications en ronds beiges.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              l.homeHelloOverline.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                height: 16 / 11,
+                                letterSpacing: 0.6,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: AppColors.accentPrimary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          firstName.isEmpty ? l.navHome : firstName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 28,
+                            height: 36 / 28,
+                            letterSpacing: -0.2,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _RoundAction(
+                    icon: Icons.search,
+                    tooltip: l.homeSearchHint,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const GlobalSearchScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _RoundAction(
+                    icon: Icons.notifications_none_outlined,
+                    tooltip: l.profileNotifications,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsSettingsScreen(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
             if (config.has('kory'))
@@ -97,48 +151,169 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
+/// Une section de l'Accueil : UNE carte qui porte son propre en-tête
+/// (maquette APP-1) — rond teinté, titre, « Tout voir ». La carte des
+/// Discussions est terracotta, les autres blanches.
 class _HomeSection extends StatelessWidget {
   const _HomeSection({
     required this.icon,
     required this.title,
     required this.onSeeAll,
     required this.child,
+    this.subtitle,
+    this.accent = false,
   });
 
   final IconData icon;
   final String title;
+  final String? subtitle;
   final VoidCallback onSeeAll;
   final Widget child;
+  final bool accent;
 
   @override
   Widget build(BuildContext context) {
+    final ink = accent ? AppColors.neutralCreme : AppColors.textPrimary;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: AppColors.accentPrimaryDark),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 8, 16),
+        decoration: BoxDecoration(
+          color: accent ? AppColors.accentPrimary : AppColors.surface,
+          borderRadius: AppRadius.card,
+          boxShadow: AppElevation.subtle,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: accent
+                        ? Colors.white.withValues(alpha: 0.16)
+                        : AppColors.terracottaTint,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: accent ? Colors.white : AppColors.accentPrimary,
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: onSeeAll,
-                child: Text(L.of(context).homeSeeAll),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: title,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: ink,
+                          ),
+                        ),
+                        if (subtitle != null)
+                          TextSpan(
+                            text: ' · $subtitle',
+                            style: TextStyle(
+                              fontSize: 12,
+                              letterSpacing: 0.2,
+                              color: accent
+                                  ? AppColors.neutralCreme.withValues(
+                                      alpha: 0.8,
+                                    )
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Spacer(),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: accent
+                        ? AppColors.neutralCreme
+                        : AppColors.accentPrimary,
+                  ),
+                  onPressed: onSeeAll,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(L.of(context).homeSeeAll),
+                      const Icon(Icons.chevron_right, size: 18),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Padding(padding: const EdgeInsets.only(right: 8), child: child),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Rond beige de 44 pt (recherche, notifications) — maquette APP-1.
+class _RoundAction extends StatelessWidget {
+  const _RoundAction({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: AppColors.surfaceElevated,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Icon(icon, size: 22, color: AppColors.textPrimary),
           ),
-          const SizedBox(height: 4),
-          child,
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tuile intérieure d'une section (maquette : `rounded-lg`, fond beige).
+class _InnerTile extends StatelessWidget {
+  const _InnerTile({required this.child, this.onDark = false, this.onTap});
+
+  final Widget child;
+  final bool onDark;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: onDark
+          ? Colors.black.withValues(alpha: 0.10)
+          : AppColors.surfaceElevated,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        onTap: onTap,
+        child: Padding(padding: const EdgeInsets.all(12), child: child),
       ),
     );
   }
@@ -153,26 +328,72 @@ class _AssimeEntry extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: ModuleCard(
         // APP-1 → APP-5 : l'entrée d'Assimé ouvre les petites annonces.
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
-        ),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen())),
         child: Row(
           children: [
-            const Icon(Icons.shopping_bag_outlined),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.feedbackInfo.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.storefront_outlined,
+                color: AppColors.feedbackInfo,
+              ),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Assimé · Petites annonces',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Assimé',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' · Petites annonces',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  Text('Achète et vends près de chez toi'),
+                  Text(
+                    'Achète et vends près de chez toi',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.terracottaTint,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_forward,
+                size: 18,
+                color: AppColors.accentPrimary,
+              ),
+            ),
           ],
         ),
       ),
@@ -194,77 +415,91 @@ class _DiscussionsCard extends ConsumerWidget {
     return _HomeSection(
       icon: Icons.forum_outlined,
       title: l.navChats,
+      accent: true,
       onSeeAll: onSeeAll,
-      child: ModuleCard(
-        backgroundColor: AppColors.accentPrimary,
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: recent.isEmpty
-            ? ListTile(
-                leading: const Icon(
-                  Icons.chat_bubble_outline,
-                  color: AppColors.neutralCreme,
-                ),
-                title: Text(
-                  l.homeNoChats,
-                  style: const TextStyle(color: AppColors.neutralCreme),
-                ),
-                onTap: onSeeAll,
-              )
-            : Column(
-                children: [
-                  for (final d in recent)
-                    ListTile(
+      child: recent.isEmpty
+          ? _InnerTile(
+              onDark: true,
+              onTap: onSeeAll,
+              child: Text(
+                l.homeNoChats,
+                style: const TextStyle(color: AppColors.neutralCreme),
+              ),
+            )
+          : Column(
+              children: [
+                for (final d in recent)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: _InnerTile(
+                      onDark: true,
                       onTap: onSeeAll,
-                      leading: ContactAvatar(
-                        avatar: d.avatar,
-                        displayName: d.displayName,
-                        size: 44,
-                      ),
-                      title: Text(
-                        d.displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.neutralCreme,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: d.lastMessage == null
-                          ? null
-                          : Text(
-                              d.lastMessage!.displayTextOf(l),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: AppColors.neutralCreme,
-                              ),
+                      child: Row(
+                        children: [
+                          ContactAvatar(
+                            avatar: d.avatar,
+                            displayName: d.displayName,
+                            size: 44,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  d.displayName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.neutralCreme,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (d.lastMessage != null)
+                                  Text(
+                                    d.lastMessage!.displayTextOf(l),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AppColors.neutralCreme.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                              ],
                             ),
-                      trailing: d.unreadCount > 0
-                          ? Container(
-                              constraints: const BoxConstraints(minWidth: 20),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                          ),
+                          if (d.unreadCount > 0)
+                            Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 20,
+                                minHeight: 20,
                               ),
-                              decoration: BoxDecoration(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                              ),
+                              decoration: const BoxDecoration(
                                 color: AppColors.neutralCreme,
-                                borderRadius: BorderRadius.circular(999),
+                                shape: BoxShape.circle,
                               ),
                               child: Text(
                                 '${d.unreadCount}',
-                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: AppColors.accentPrimary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                            )
-                          : null,
+                            ),
+                        ],
+                      ),
                     ),
-                ],
-              ),
-      ),
+                  ),
+              ],
+            ),
     );
   }
 }
@@ -282,18 +517,18 @@ class _KoryCard extends ConsumerWidget {
 
     return _HomeSection(
       icon: Icons.savings_outlined,
-      title: l.korySubtitle,
+      title: l.navKory,
+      subtitle: l.korySubtitle,
       onSeeAll: onSeeAll,
       child: open.isEmpty
-          ? ModuleCard(
-              backgroundColor: AppColors.brandEbene,
+          ? _InnerTile(
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       l.koryNoMoney,
-                      style: const TextStyle(
-                        color: AppColors.neutralCreme,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -308,7 +543,7 @@ class _KoryCard extends ConsumerWidget {
                 ],
               ),
             )
-          : KoryPotCard(pot: open.first, dark: true),
+          : KoryPotCard(pot: open.first),
     );
   }
 }
@@ -327,13 +562,15 @@ class _HonamCard extends ConsumerWidget {
     final current = orders.where((o) => !o.isFinished).toList();
     return _HomeSection(
       icon: Icons.local_pharmacy_outlined,
-      title: l.honamSubtitle,
+      title: l.navHonam,
+      subtitle: l.honamSubtitle,
       onSeeAll: onSeeAll,
       child: current.isEmpty
-          ? ModuleCard(
-              child: ModuleActionButton(
-                label: l.honamSend,
-                icon: Icons.photo_camera_outlined,
+          ? SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.document_scanner_outlined),
+                label: Text(l.honamSend),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const HonamSendScreen()),
                 ),

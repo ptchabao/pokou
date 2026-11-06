@@ -9,14 +9,16 @@ class AppElevation {
   AppElevation._();
 
   static final subtle = [
-    BoxShadow(color: AppColors.shadowTint, blurRadius: 8, offset: Offset(0, 3)),
+    // shadow-[0px_1px_2px_0px_rgba(26,22,21,0.08)] des maquettes.
+    BoxShadow(color: AppColors.shadowTint, blurRadius: 2, offset: Offset(0, 1)),
   ];
 
   static final card = [
-    BoxShadow(color: AppColors.shadowTint, blurRadius: 12, offset: Offset(0, 4)),
+    BoxShadow(color: AppColors.shadowTint, blurRadius: 2, offset: Offset(0, 1)),
   ];
 
   static final prominent = [
-    BoxShadow(color: AppColors.shadowTint, blurRadius: 16, offset: Offset(0, 6)),
+    // Bouton d'action flottant : 0 4px 12px rgba(26,22,21,0.10).
+    BoxShadow(color: Color(0x1A1A1615), blurRadius: 12, offset: Offset(0, 4)),
   ];
 }

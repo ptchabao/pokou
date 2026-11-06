@@ -154,7 +154,15 @@ class AppColors {
   /// Ombre neutre — voir app_elevation.dart. Extrêmement retenue : ce
   /// système est plat, une bulle ne se décolle que d'un ou deux points.
   static Color get shadowTint =>
-      _pick(const Color(0x14000000), const Color(0x33000000));
+      _pick(const Color(0x141A1615), const Color(0x33000000));
+
+  /// brand.terracotta-100 des maquettes : pastille active, avatar, badge.
+  static Color get terracottaTint =>
+      _pick(const Color(0xFFF5DCCB), const Color(0xFF4A2E20));
+
+  /// brand.terracotta-700 : texte posé sur [terracottaTint].
+  static Color get onTerracottaTint =>
+      _pick(const Color(0xFF8A4520), const Color(0xFFF5DCCB));
 
   /// Accents de badge — déclinaisons de la marque.
   static const badgeGreen = Color(0xFFA65527);

@@ -384,6 +384,17 @@ async def get_call_token(
         raise HTTPException(
             status_code=400, detail="Seul un nouvel appel peut recevoir des clés"
         )
+    if call_type == "group" and payload.group_id and payload.sealed_keys:
+        # Un membre que l'appelant n'a pas pu chiffrer (application trop
+        # ancienne, aucune session encore) ne fait plus échouer l'appel de
+        # tous : on fait sonner ceux qui ont reçu la clé, et eux seuls —
+        # l'appel reste chiffré de bout en bout pour chacun.
+        invitee_ids = [i for i in invitee_ids if str(i) in payload.sealed_keys]
+        if not invitee_ids:
+            raise HTTPException(
+                status_code=400,
+                detail="Aucun membre ne peut encore recevoir un appel chiffré",
+            )
     sealed_by_invitee = _sealed_keys_for(payload.sealed_keys, invitee_ids, user_id)
     if call_type == "group" and len(sealed_by_invitee) != len(invitee_ids):
         raise HTTPException(

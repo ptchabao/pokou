@@ -6423,4 +6423,15 @@ class LAr extends L {
 
   @override
   String get callEndAndAccept => 'إنهاء وقبول';
+
+  @override
+  String get homeHelloOverline => 'مرحبًا';
+
+  @override
+  String get koryOverline => 'ادخار تضامني';
+
+  @override
+  String koryActiveCount(String count) {
+    return '$count نشطة';
+  }
 }

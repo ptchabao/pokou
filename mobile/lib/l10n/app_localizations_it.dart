@@ -6465,4 +6465,15 @@ class LIt extends L {
 
   @override
   String get callEndAndAccept => 'Termina e accetta';
+
+  @override
+  String get homeHelloOverline => 'Ciao';
+
+  @override
+  String get koryOverline => 'Risparmio solidale';
+
+  @override
+  String koryActiveCount(String count) {
+    return '$count attive';
+  }
 }

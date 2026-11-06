@@ -6467,4 +6467,15 @@ class LFr extends L {
 
   @override
   String get callEndAndAccept => 'Terminer et accepter';
+
+  @override
+  String get homeHelloOverline => 'Bonjour';
+
+  @override
+  String get koryOverline => 'Épargne solidaire';
+
+  @override
+  String koryActiveCount(String count) {
+    return '$count actives';
+  }
 }

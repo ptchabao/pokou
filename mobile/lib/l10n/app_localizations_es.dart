@@ -6449,4 +6449,15 @@ class LEs extends L {
 
   @override
   String get callEndAndAccept => 'Terminar y aceptar';
+
+  @override
+  String get homeHelloOverline => 'Hola';
+
+  @override
+  String get koryOverline => 'Ahorro solidario';
+
+  @override
+  String koryActiveCount(String count) {
+    return '$count activas';
+  }
 }

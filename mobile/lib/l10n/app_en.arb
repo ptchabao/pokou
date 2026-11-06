@@ -1859,5 +1859,8 @@
   "groupLeaveKoryNote": "Leaving the group doesn't delete the ongoing pot: your contributions stay in the Kory log.",
   "messageWaiting": "Waiting for this message. It will appear as soon as the sender's phone resends it.",
   "callWaitingNotice": "You're already on a call. Decline to keep it; accept to end it.",
-  "callEndAndAccept": "End and accept"
+  "callEndAndAccept": "End and accept",
+  "homeHelloOverline": "Hello",
+  "koryOverline": "Solidarity savings",
+  "koryActiveCount": "{count} active"
 }

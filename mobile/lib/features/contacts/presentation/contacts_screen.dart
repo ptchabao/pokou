@@ -11,6 +11,7 @@ import '../../../core/api/api_exceptions.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
 import '../../../core/widgets/contact_avatar.dart';
@@ -39,10 +40,6 @@ import '../../channels/presentation/channel_search_screen.dart';
 import '../../../core/sharing/invite_sharing.dart';
 
 const _kPriorityTags = ['BUSINESS', 'FOURNISSEUR', 'CLIENT', 'BOSS', 'AMI'];
-
-// Filet gris 6% — assez présent pour séparer deux conversations, assez
-// discret pour ne pas quadriller l'écran.
-const _listHairline = Color(0x0F000000);
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -478,23 +475,6 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       // zone sûre vaut 0 sur un appareil à bouton physique et une trentaine
       // de points sur un écran à encoche, et une constante serait juste sur
       // l'un des deux.
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(
-          bottom:
-              MediaQuery.paddingOf(context).bottom +
-              kBottomNavigationBarHeight +
-              8,
-        ),
-        child: FloatingActionButton(
-          onPressed: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const NewChatScreen())),
-          backgroundColor: AppColors.accentPrimary,
-          foregroundColor: Colors.white,
-          tooltip: L.of(context).newChatTitle,
-          child: const Icon(Icons.chat),
-        ),
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await forceContactSync(ref);
@@ -564,35 +544,74 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 ),
               ],
             ),
-            // Les statuts, puis des articles du Marché — au-dessus de la
-            // recherche, comme la bande des stories.
-            const DiscoveryStrip(),
+            // Maquette « Discussions » : recherche en pastille blanche et
+            // « + » terracotta (nouvelle discussion), PUIS la bande des
+            // statuts, puis les filtres.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-              child: SizedBox(
-                height: 44,
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: L.of(context).chatsSearchHint,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: AppColors.textMuted,
-                      size: 19,
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: AppElevation.subtle,
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: L.of(context).chatsSearchHint,
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: AppColors.textMuted,
+                            size: 20,
+                          ),
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 12,
+                          ),
+                          isDense: true,
+                        ),
+                      ),
                     ),
-                    prefixIconConstraints: BoxConstraints(
-                      minWidth: 42,
-                      minHeight: 42,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    isDense: true,
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: L.of(context).newChatTitle,
+                    child: Material(
+                      color: AppColors.accentPrimary,
+                      shape: const CircleBorder(),
+                      elevation: 3,
+                      shadowColor: const Color(0x1A1A1615),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const NewChatScreen(),
+                          ),
+                        ),
+                        child: const SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(Icons.add, color: Colors.white, size: 22),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            const DiscoveryStrip(),
             _ChatFilterRow(
               current: _filter,
               onChanged: (f) => setState(() => _filter = f),
@@ -712,21 +731,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             open: _showArchived,
             onTap: () => setState(() => _showArchived = !_showArchived),
           ),
-        for (final (index, discussion) in discussions.indexed) ...[
+        for (final discussion in discussions) ...[
           _DiscussionTile(
             discussion: discussion,
             myUserId: myUserId,
             onLongPress: () => _openDiscussionMenu(discussion),
           ),
+
           // Filet fin plutôt qu'un blanc de 10px : deux conversations
           // restent distinctes en occupant moins de place. En retrait des
           // bords (comme les séparateurs de listes groupées) et absent
           // après la dernière ligne, où il ne séparerait rien.
-          if (index != discussions.length - 1)
-            const Padding(
-              padding: EdgeInsets.only(left: 70, right: 14),
-              child: Divider(height: 1, thickness: 1, color: _listHairline),
-            ),
         ],
         // Le pied de liste rappelle le chiffrement.
         //
@@ -1205,134 +1220,147 @@ class _DiscussionTile extends ConsumerWidget {
         ? L.of(context).contactsPreviewMine(last.displayTextOf(L.of(context)))
         : last.displayTextOf(L.of(context));
 
-    return InkWell(
-      borderRadius: AppRadius.card,
-      onTap: () => _open(context, ref),
-      onLongPress: onLongPress,
-      child: Container(
-        // Vertical resserré : c'est le filet qui sépare désormais deux
-        // conversations, plus le blanc. Une liste dense fait tenir plus de
-        // conversations à l'écran sans les coller.
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        // À plat, à même le fond de l'app (pas de carte blanche ni d'ombre) :
-        // la liste se lit comme un fil continu.
-        decoration: const BoxDecoration(borderRadius: AppRadius.card),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _AvatarWithKind(discussion: discussion),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+    // Maquette Stitch « Discussions » : chaque fil est une carte blanche
+    // (rounded-xl, p-3.5, ombre d'un point) posée sur le fond crème.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: AppRadius.card,
+        shadowColor: AppColors.shadowTint,
+        elevation: 0.6,
+        child: InkWell(
+          borderRadius: AppRadius.card,
+          onTap: () => _open(context, ref),
+          onLongPress: onLongPress,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _AvatarWithKind(discussion: discussion),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (discussion.isPinned) ...[
-                        Icon(
-                          Icons.push_pin,
-                          size: 13,
-                          color: AppColors.textMuted,
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      Expanded(
-                        // `VerifiedName` et non `Text` : le badge se pose
-                        // ici, avec le nom, pour qu'un nom trop long perde
-                        // ses dernières lettres et JAMAIS son badge — sinon
-                        // la certification disparaîtrait précisément pour
-                        // les noms longs, sans que rien ne l'explique.
-                        child: VerifiedName(
-                          name: discussion.displayName,
-                          isVerified: discussion.isVerified,
-                          isBot: discussion.isBot,
-                          maxLines: 1,
-                          // Outfit 15,5/700.
-                          //
-                          // Le système dit 18, et c'était trop : à cette
-                          // taille, les noms écrasaient les aperçus et la
-                          // liste devenait un empilement de titres. La
-                          // maquette a des noms courts dans une colonne
-                          // large ; une vraie liste a « Coopérative des
-                          // Maraîchers de Tsévié » et l'heure sur la même
-                          // ligne.
-                          //
-                          // La hiérarchie avec l'aperçu se joue de toute
-                          // façon sur la POLICE autant que sur la taille :
-                          // Outfit pour le nom, Inter pour ce qui suit.
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                      Row(
+                        children: [
+                          Expanded(
+                            // `VerifiedName` et non `Text` : le badge se pose
+                            // ici, avec le nom, pour qu'un nom trop long perde
+                            // ses dernières lettres et JAMAIS son badge — sinon
+                            // la certification disparaîtrait précisément pour
+                            // les noms longs, sans que rien ne l'explique.
+                            child: VerifiedName(
+                              name: discussion.displayName,
+                              isVerified: discussion.isVerified,
+                              isBot: discussion.isBot,
+                              maxLines: 1,
+                              // Outfit 15,5/700.
+                              //
+                              // Le système dit 18, et c'était trop : à cette
+                              // taille, les noms écrasaient les aperçus et la
+                              // liste devenait un empilement de titres. La
+                              // maquette a des noms courts dans une colonne
+                              // large ; une vraie liste a « Coopérative des
+                              // Maraîchers de Tsévié » et l'heure sur la même
+                              // ligne.
+                              //
+                              // La hiérarchie avec l'aperçu se joue de toute
+                              // façon sur la POLICE autant que sur la taille :
+                              // Outfit pour le nom, Inter pour ce qui suit.
+                              // Jeton « title » des maquettes : Inter 17/600.
+                              style: TextStyle(
+                                fontSize: 17,
+                                height: 24 / 17,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
                           ),
-                        ),
+                          if (discussion.isPinned) ...[
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.push_pin,
+                              size: 15,
+                              color: AppColors.accentPrimary,
+                            ),
+                          ],
+                          if (last != null) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              _timeLabel(context, last.createdAt),
+                              style: TextStyle(
+                                fontSize: 12,
+                                letterSpacing: 0.2,
+                                // Vert quand il reste des non-lus : l'heure
+                                // devient alors un signal d'état, pas une simple
+                                // métadonnée — c'est le même vert que la pastille
+                                // juste en dessous.
+                                color: discussion.unreadCount > 0
+                                    ? AppColors.accentPrimary
+                                    : AppColors.textSecondary,
+                                fontWeight: discussion.unreadCount > 0
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      if (last != null) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          _timeLabel(context, last.createdAt),
-                          style: TextStyle(
-                            fontSize: 12,
-                            // Vert quand il reste des non-lus : l'heure
-                            // devient alors un signal d'état, pas une simple
-                            // métadonnée — c'est le même vert que la pastille
-                            // juste en dessous.
-                            color: discussion.unreadCount > 0
-                                ? AppColors.accentPrimary
-                                : AppColors.textSecondary,
-                            fontWeight: discussion.unreadCount > 0
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          if (discussion.isMuted) ...[
+                            Icon(
+                              Icons.notifications_off,
+                              size: 14,
+                              color: AppColors.textMuted,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Expanded(
+                            child: Text(
+                              // Un bot n'est pas « pas dans vos contacts » : on
+                              // ne l'ajoute pas à un carnet, il n'a pas de numéro.
+                              discussion.isUnknownContact && !discussion.isBot
+                                  ? L.of(context).contactsNotInContacts(preview)
+                                  : preview,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                // Vert pendant la frappe : c'est un état vivant,
+                                // pas un aperçu de plus. Le même vert que la
+                                // pastille de non-lus, pour la même raison — il
+                                // signale que quelque chose bouge maintenant.
+                                // body-sm : 14/20 ; encre pleine quand il reste
+                                // des non-lus, taupe sinon (maquette).
+                                color: typingName != null
+                                    ? AppColors.accentPrimary
+                                    : discussion.unreadCount > 0
+                                    ? AppColors.textPrimary
+                                    : AppColors.textSecondary,
+                                fontSize: 14,
+                                height: 20 / 14,
+                                fontWeight:
+                                    typingName != null ||
+                                        discussion.unreadCount > 0
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                          if (discussion.unreadCount > 0)
+                            _UnreadBadge(count: discussion.unreadCount),
+                        ],
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      if (discussion.isMuted) ...[
-                        Icon(
-                          Icons.notifications_off,
-                          size: 14,
-                          color: AppColors.textMuted,
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      Expanded(
-                        child: Text(
-                          // Un bot n'est pas « pas dans vos contacts » : on
-                          // ne l'ajoute pas à un carnet, il n'a pas de numéro.
-                          discussion.isUnknownContact && !discussion.isBot
-                              ? L.of(context).contactsNotInContacts(preview)
-                              : preview,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            // Vert pendant la frappe : c'est un état vivant,
-                            // pas un aperçu de plus. Le même vert que la
-                            // pastille de non-lus, pour la même raison — il
-                            // signale que quelque chose bouge maintenant.
-                            color: typingName != null
-                                ? AppColors.accentPrimary
-                                : AppColors.textSecondary,
-                            fontSize: 12,
-                            fontWeight:
-                                typingName != null || discussion.unreadCount > 0
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                      if (discussion.unreadCount > 0)
-                        _UnreadBadge(count: discussion.unreadCount),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -1347,9 +1375,10 @@ class _UnreadBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 20),
-      margin: const EdgeInsets.only(right: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+      margin: const EdgeInsets.only(left: 6),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 5),
       decoration: const BoxDecoration(
         // Pastille de non-lus : vert d'action. Elle ne décore pas, elle
         // réclame — c'est le même vert que le bouton d'envoi, et c'est
@@ -1591,20 +1620,28 @@ class _FilterChip extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(999),
         onTap: onTap,
+        // Maquette : h-8, pastille ; active terracotta-100 / -700, inactive
+        // beige-100 / taupe-600.
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          height: 32,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.accentPrimary
+                ? AppColors.terracottaTint
                 : AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(999),
+            boxShadow: selected ? AppElevation.subtle : null,
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-              color: selected ? Colors.white : AppColors.textSecondary,
+              fontSize: 12,
+              letterSpacing: 0.2,
+              fontWeight: FontWeight.w500,
+              color: selected
+                  ? AppColors.onTerracottaTint
+                  : AppColors.textSecondary,
             ),
           ),
         ),
@@ -1644,7 +1681,7 @@ class _ArchivedRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: AppRadius.chip,
-            border: Border.all(color: AppColors.border),
+            boxShadow: AppElevation.subtle,
           ),
           child: Row(
             children: [

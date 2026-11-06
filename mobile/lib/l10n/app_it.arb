@@ -1859,5 +1859,8 @@
   "groupLeaveKoryNote": "Lasciare il gruppo non elimina la colletta in corso: i tuoi contributi restano nel registro Kory.",
   "messageWaiting": "In attesa di questo messaggio. Apparirà non appena il telefono del mittente lo reinvierà.",
   "callWaitingNotice": "Sei già in chiamata. Rifiuta per mantenerla; accetta per terminarla.",
-  "callEndAndAccept": "Termina e accetta"
+  "callEndAndAccept": "Termina e accetta",
+  "homeHelloOverline": "Ciao",
+  "koryOverline": "Risparmio solidale",
+  "koryActiveCount": "{count} attive"
 }

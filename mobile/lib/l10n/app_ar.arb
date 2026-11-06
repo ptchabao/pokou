@@ -1859,5 +1859,8 @@
   "groupLeaveKoryNote": "مغادرة المجموعة لا تحذف الصندوق الجاري: تبقى مساهماتك في سجل Kory.",
   "messageWaiting": "بانتظار هذه الرسالة. ستظهر فور إعادة إرسالها من هاتف المرسل.",
   "callWaitingNotice": "أنت في مكالمة بالفعل. الرفض يبقيها؛ القبول ينهيها.",
-  "callEndAndAccept": "إنهاء وقبول"
+  "callEndAndAccept": "إنهاء وقبول",
+  "homeHelloOverline": "مرحبًا",
+  "koryOverline": "ادخار تضامني",
+  "koryActiveCount": "{count} نشطة"
 }

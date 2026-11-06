@@ -25,42 +25,49 @@ class AppTextStyles {
   AppTextStyles._();
 
   /// Grand titre d'écran, façon « large title » iOS.
+  /// display-mobile : 28/36, 600, -0.2.
   static final display = TextStyle(
     fontSize: 28,
-    fontWeight: FontWeight.w700,
-    height: 1.15,
-    letterSpacing: 0.37,
+    fontWeight: FontWeight.w600,
+    height: 36 / 28,
+    letterSpacing: -0.2,
     color: AppColors.textPrimary,
   );
 
+  /// headline-md : 20/28, 600.
   static final title = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    letterSpacing: -0.4,
+    height: 28 / 20,
+    letterSpacing: 0,
     color: AppColors.textPrimary,
   );
 
   /// Nom de contact dans une liste de discussions.
+  /// title : 17/24, 600.
   static final subtitle = TextStyle(
     fontSize: 17,
     fontWeight: FontWeight.w600,
-    letterSpacing: -0.4,
+    height: 24 / 17,
+    letterSpacing: 0,
     color: AppColors.textPrimary,
   );
 
   /// Texte d'une bulle de message.
+  /// body-lg : 16/24.
   static final body = TextStyle(
-    fontSize: 17,
-    height: 1.29,
-    letterSpacing: -0.4,
+    fontSize: 16,
+    height: 1.5,
+    letterSpacing: 0,
     color: AppColors.textPrimary,
   );
 
   /// Aperçu du dernier message sous un nom de contact.
+  /// body-sm : 14/20.
   static final bodySecondary = TextStyle(
-    fontSize: 15,
-    height: 1.33,
-    letterSpacing: -0.2,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 0,
     color: AppColors.textSecondary,
   );
 
@@ -73,8 +80,11 @@ class AppTextStyles {
   /// Horodatage. Taille FIXE, volontairement : ces deux lignes doivent tenir
   /// côte à côte dans une bulle à toutes les tailles d'affichage, et un
   /// horodatage agrandi casserait la mise en page qu'il accompagne.
+  /// caption : 12/16, +0.2.
   static final caption = TextStyle(
-    fontSize: 11,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 0.2,
     color: AppColors.textSecondary,
   );
 

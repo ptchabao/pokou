@@ -6424,4 +6424,15 @@ class LEn extends L {
 
   @override
   String get callEndAndAccept => 'End and accept';
+
+  @override
+  String get homeHelloOverline => 'Hello';
+
+  @override
+  String get koryOverline => 'Solidarity savings';
+
+  @override
+  String koryActiveCount(String count) {
+    return '$count active';
+  }
 }

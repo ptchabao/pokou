@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../l10n/app_localizations.dart';
@@ -40,18 +41,67 @@ class KoryScreen extends ConsumerWidget {
                 title: l.koryTitle,
                 subtitle: l.korySubtitle,
                 showStatus: false,
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.brandEbene,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: const Icon(
-                    Icons.savings_outlined,
-                    color: AppColors.brandOr,
-                  ),
+                leading: const ModuleBadge(
+                  icon: Icons.savings_outlined,
+                  color: AppColors.accentPrimary,
+                  size: 36,
+                ),
+              ),
+            ),
+            // Maquette APP-3 : surtitre « ÉPARGNE SOLIDAIRE », grand titre,
+            // pastille du sous-titre.
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.koryOverline.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              letterSpacing: 0.6,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.accentPrimary,
+                            ),
+                          ),
+                          Text(
+                            l.navKory,
+                            style: TextStyle(
+                              fontSize: 28,
+                              height: 36 / 28,
+                              letterSpacing: -0.2,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l.korySubtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          letterSpacing: 0.2,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -71,6 +121,7 @@ class KoryScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: ModuleQuietButton(
+                            icon: Icons.person_add_alt_1_outlined,
                             label: l.koryJoin,
                             onPressed: () => _join(context, ref),
                           ),
@@ -78,6 +129,7 @@ class KoryScreen extends ConsumerWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: ModuleQuietButton(
+                            icon: Icons.receipt_long_outlined,
                             label: l.koryJournalTab,
                             onPressed: () {
                               final first = pots.valueOrNull?.firstOrNull;
@@ -99,13 +151,30 @@ class KoryScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                child: Text(
-                  l.koryMyPots,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l.koryMyPots,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          height: 28 / 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if ((pots.valueOrNull ?? const []).any((p) => p.isOpen))
+                      Text(
+                        l.koryActiveCount(
+                          '${pots.valueOrNull!.where((p) => p.isOpen).length}',
+                        ),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -212,32 +281,65 @@ class _SummaryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     final summary = ref.watch(korySummaryProvider).valueOrNull;
+    final amount = formatFcfa(summary?.monthConfirmedTotal ?? 0);
+    // « 15 000 FCFA » : le chiffre en grand, la devise en terracotta.
+    final split = amount.lastIndexOf(' ');
+    final figure = split > 0 ? amount.substring(0, split) : amount;
+    final currency = split > 0 ? amount.substring(split + 1) : '';
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.brandEbene,
+          color: AppColors.surfaceElevated,
           borderRadius: AppRadius.card,
+          boxShadow: AppElevation.subtle,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l.koryMonthTotal,
-              style: const TextStyle(
-                color: AppColors.neutralCreme,
-                fontSize: 13,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    l.koryMonthTotal,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const ModuleBadge(
+                  icon: Icons.savings_outlined,
+                  color: AppColors.accentPrimary,
+                  size: 44,
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              formatFcfa(summary?.monthConfirmedTotal ?? 0),
-              style: const TextStyle(
-                color: AppColors.neutralCreme,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                fontFeatures: [FontFeature.tabularFigures()],
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: figure,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 40,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.5,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  if (currency.isNotEmpty)
+                    TextSpan(
+                      text: ' $currency',
+                      style: const TextStyle(
+                        color: AppColors.accentPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
               ),
             ),
             if ((summary?.toReviewCount ?? 0) > 0) ...[
@@ -245,25 +347,25 @@ class _SummaryCard extends ConsumerWidget {
               KoryStatusPill(
                 icon: Icons.hourglass_top,
                 label: l.koryToReview('${summary!.toReviewCount}'),
-                color: AppColors.brandOr,
+                color: AppColors.feedbackWarning,
               ),
             ],
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.shield_outlined,
                   size: 18,
-                  color: AppColors.neutralCreme,
+                  color: AppColors.accentPrimary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     l.koryNoMoney,
-                    style: const TextStyle(
-                      color: AppColors.neutralCreme,
-                      fontSize: 13,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
                     ),
                   ),
                 ),
@@ -317,7 +419,7 @@ class KoryPotCard extends StatelessWidget {
                         color: dark
                             ? AppColors.neutralCreme
                             : AppColors.textPrimary,
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

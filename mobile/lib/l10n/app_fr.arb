@@ -3057,5 +3057,15 @@
   "groupLeaveKoryNote": "Quitter le groupe ne supprime pas la cagnotte en cours : tes contributions restent dans le journal Kory.",
   "messageWaiting": "En attente de ce message. Il s’affichera dès que le téléphone de l’expéditeur l’aura renvoyé.",
   "callWaitingNotice": "Tu es déjà en appel. Refuser le garde ; accepter le termine.",
-  "callEndAndAccept": "Terminer et accepter"
+  "callEndAndAccept": "Terminer et accepter",
+  "homeHelloOverline": "Bonjour",
+  "koryOverline": "Épargne solidaire",
+  "koryActiveCount": "{count} actives",
+  "@koryActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

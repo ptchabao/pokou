@@ -237,20 +237,29 @@ class CallRepository {
     List<int> inviteeIds, {
     required int? from,
   }) async {
-    if (from == null || inviteeIds.isEmpty || inviteeIds.contains(from)) {
-      throw const CallEncryptionException('participants de groupe invalides');
+    if (from == null) {
+      throw const CallEncryptionException('session expirée, reconnecte-toi');
     }
-    for (final inviteeId in inviteeIds) {
-      if (!await _canEncryptFor(inviteeId)) {
-        throw const CallEncryptionException(
-          'un membre ne peut pas recevoir la clé de cet appel',
-        );
-      }
-    }
+    // Moi-même n'est jamais un invité : on l'écarte au lieu d'échouer.
+    final targets = inviteeIds.where((id) => id != from).toSet();
     final key = CallKey.generate();
     final sealedKeys = <String, dynamic>{};
-    for (final inviteeId in inviteeIds) {
-      sealedKeys['$inviteeId'] = await _seal(inviteeId, key, from: from);
+    // Un membre qui ne peut pas recevoir la clé (application trop ancienne,
+    // aucune session chiffrée encore) ne bloque plus l'appel de TOUS : il
+    // n'est simplement pas appelé. Le serveur ne fait sonner que ceux pour
+    // qui une clé a été scellée.
+    for (final inviteeId in targets) {
+      try {
+        if (!await _canEncryptFor(inviteeId)) continue;
+        sealedKeys['$inviteeId'] = await _seal(inviteeId, key, from: from);
+      } catch (_) {
+        continue;
+      }
+    }
+    if (sealedKeys.isEmpty) {
+      throw const CallEncryptionException(
+        'aucun membre ne peut encore recevoir un appel chiffré',
+      );
     }
     return (key: key, sealedKeys: sealedKeys);
   }
@@ -390,7 +399,18 @@ class CallRepository {
     if (active != null) {
       return joinCall(active.room);
     }
-    final invitees = memberUserIds.toSet().toList();
+    // La liste vient du SERVEUR, pas de l'écran : celui-ci pouvait n'avoir
+    // pas encore chargé les membres, et l'appel partait sans personne.
+    var invitees = memberUserIds.toSet().toList();
+    try {
+      final detail = await _api.get('/groups/$groupId') as Map<String, dynamic>;
+      invitees = [
+        for (final m in (detail['members'] as List? ?? const []))
+          (m as Map<String, dynamic>)['user_id'] as int,
+      ];
+    } catch (_) {
+      // Hors ligne : on garde la liste de l'écran.
+    }
     final keys = await _sealedGroupKeys(invitees, from: _myUserId());
     final response = await _api.post(
       '/calls/token',

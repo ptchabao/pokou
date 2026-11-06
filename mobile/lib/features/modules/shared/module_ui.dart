@@ -111,7 +111,7 @@ class ModuleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.surface,
         borderRadius: AppRadius.card,
-        border: Border.all(color: AppColors.border),
+        // Maquettes : pas de filet, une ombre d'un point.
         boxShadow: AppElevation.subtle,
       ),
       child: child,
@@ -157,15 +157,14 @@ class ModuleBadge extends StatelessWidget {
     return Container(
       width: size,
       height: size,
+      // Maquettes : icône terracotta dans un rond terracotta-100.
       decoration: BoxDecoration(
-        color: muted
-            ? AppColors.surfaceElevated
-            : AppColors.actionButtonBackground,
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: muted ? AppColors.surfaceElevated : AppColors.terracottaTint,
+        shape: BoxShape.circle,
       ),
       child: Icon(
         icon,
-        color: muted ? AppColors.textMuted : AppColors.actionButtonForeground,
+        color: muted ? AppColors.textMuted : AppColors.accentPrimary,
         size: size * 0.5,
       ),
     );
@@ -191,14 +190,16 @@ class ModuleActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Maquettes : pastille terracotta pleine, 52 pt, ombre chaude.
     final style = FilledButton.styleFrom(
       backgroundColor: AppColors.actionButtonBackground,
       foregroundColor: AppColors.actionButtonForeground,
+      minimumSize: const Size(64, 52),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.sheet),
-      ),
-      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      shape: const StadiumBorder(),
+      elevation: 3,
+      shadowColor: const Color(0x40A65527),
+      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
     );
     final child = busy
         ? SizedBox(
@@ -237,27 +238,36 @@ class ModuleQuietButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.expanded = true,
+    this.icon,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool expanded;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
-    final button = OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
-        side: BorderSide(color: AppColors.border),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.sheet),
-        ),
-        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-      ),
-      child: Text(label),
+    // Maquettes : pastille blanche, sans filet, ombre d'un point.
+    final style = OutlinedButton.styleFrom(
+      foregroundColor: AppColors.accentPrimaryDark,
+      backgroundColor: AppColors.surface,
+      side: BorderSide.none,
+      minimumSize: const Size(64, 52),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      shape: const StadiumBorder(),
+      elevation: 0.6,
+      shadowColor: AppColors.shadowTint,
+      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
     );
+    final button = icon == null
+        ? OutlinedButton(onPressed: onPressed, style: style, child: Text(label))
+        : OutlinedButton.icon(
+            onPressed: onPressed,
+            style: style,
+            icon: Icon(icon, size: 20),
+            label: Text(label),
+          );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }
 }

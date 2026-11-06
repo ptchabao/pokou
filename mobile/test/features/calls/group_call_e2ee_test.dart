@@ -147,12 +147,31 @@ void main() {
   );
 
   test(
-    'group start fails before the API when any member cannot receive the key',
+    'a member who cannot receive the key is skipped, the others are called',
     () async {
       final api = _Api();
       final calls = CallRepository(
         apiClient: api,
         e2ee: _E2EE(unavailable: {3}),
+        myUserId: () => 1,
+      );
+
+      await calls.startGroupCall(9, memberUserIds: [1, 2, 3]);
+
+      final sealed =
+          api.posts.single.body['sealed_keys'] as Map<String, dynamic>;
+      // Ni moi-même, ni le membre sans clé : seulement celui qui la reçoit.
+      expect(sealed.keys, ['2']);
+    },
+  );
+
+  test(
+    'group start fails before the API when NO member can receive the key',
+    () async {
+      final api = _Api();
+      final calls = CallRepository(
+        apiClient: api,
+        e2ee: _E2EE(unavailable: {2, 3}),
         myUserId: () => 1,
       );
 

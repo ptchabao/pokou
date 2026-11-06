@@ -6500,4 +6500,15 @@ class LRu extends L {
 
   @override
   String get callEndAndAccept => 'Завершить и принять';
+
+  @override
+  String get homeHelloOverline => 'Здравствуй';
+
+  @override
+  String get koryOverline => 'Солидарные сбережения';
+
+  @override
+  String koryActiveCount(String count) {
+    return 'активных: $count';
+  }
 }

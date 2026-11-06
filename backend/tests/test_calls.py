@@ -1022,3 +1022,41 @@ def test_un_refus_apres_avoir_rejoint_un_appel_chiffre_le_clot(client):
     assert declined.status_code == 200, declined.text
     entry = client.get("/api/v1/calls/log", headers=headers_a).json()["items"][0]
     assert entry["status"] == "declined"
+
+
+def test_un_membre_sans_cle_ne_bloque_pas_l_appel_de_groupe(client):
+    """Un membre que l'appelant n'a pas pu chiffrer n'est pas appelé, mais
+    l'appel part pour les autres (avant : « participants invalides »)."""
+    import re as _re
+    from unittest.mock import patch as _patch
+
+    from app.services.auth import otp_service as _otp
+
+    def signup(phone):
+        with _patch.object(_otp.sms_service, "send_sms", return_value=True) as send:
+            client.post("/api/v1/auth/phone/request-otp", json={"phone": phone})
+        code = _re.search(r"\b(\d{6})\b", send.call_args.args[2]).group(1)
+        body = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": code}).json()
+        return {"Authorization": f"Bearer {body['access_token']}"}, body["user"]["id"]
+
+    owner, _ = signup("+22890000801")
+    a, a_id = signup("+22890000802")
+    b, b_id = signup("+22890000803")
+    for phone, name in (("+22890000802", "A"), ("+22890000803", "B")):
+        client.post("/api/v1/contacts", json={"phone": phone, "display_name": name}, headers=owner)
+    group = client.post("/api/v1/groups", json={"name": "G", "member_user_ids": [a_id, b_id]}, headers=owner).json()
+    for headers in (a, b):
+        for inv in client.get("/api/v1/groups/invitations", headers=headers).json()["items"]:
+            client.post(f"/api/v1/groups/invitations/{inv['id']}/accept", headers=headers)
+
+    sealed = {str(a_id): {"encryption": "v1", "ciphertext": "k", "envelope": {"sid": "s"}}}
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        started = client.post(
+            "/api/v1/calls/token",
+            json={"group_id": group["id"], "is_video": False, "sealed_keys": sealed},
+            headers=owner,
+        )
+    assert started.status_code == 200, started.text
+    assert started.json()["e2ee"] is True
+    assert started.json()["participant_ids"] == [a_id]

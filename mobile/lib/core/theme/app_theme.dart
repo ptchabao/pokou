@@ -118,9 +118,9 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
+        shadowColor: AppColors.shadowTint,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.tile),
-          side: BorderSide(color: AppColors.border),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -160,16 +160,24 @@ class AppTheme {
         ),
       ),
       chipTheme: base.chipTheme.copyWith(
-        backgroundColor: AppColors.neutralBeige,
-        selectedColor: AppColors.accentPrimaryLight,
+        backgroundColor: AppColors.surfaceElevated,
+        selectedColor: AppColors.terracottaTint,
+        checkmarkColor: AppColors.onTerracottaTint,
+        secondaryLabelStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.w500,
+          color: AppColors.onTerracottaTint,
+        ),
         side: BorderSide.none,
         shape: const StadiumBorder(),
         labelStyle: TextStyle(
           fontFamily: 'Inter',
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          fontSize: 12,
+          letterSpacing: 0.2,
+          color: AppColors.textSecondary,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.accentPrimary,

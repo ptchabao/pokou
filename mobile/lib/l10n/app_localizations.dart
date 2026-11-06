@@ -11264,6 +11264,24 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Terminer et accepter'**
   String get callEndAndAccept;
+
+  /// No description provided for @homeHelloOverline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour'**
+  String get homeHelloOverline;
+
+  /// No description provided for @koryOverline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne solidaire'**
+  String get koryOverline;
+
+  /// No description provided for @koryActiveCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} actives'**
+  String koryActiveCount(String count);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
