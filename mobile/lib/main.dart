@@ -28,8 +28,6 @@ import 'features/contacts/presentation/discussions_controller.dart';
 import 'features/presence/presentation/typing_controller.dart';
 import 'features/status/presentation/status_controller.dart';
 import 'features/communities/presentation/community_controller.dart';
-import 'features/shield/presentation/deferred_call_bubble.dart';
-import 'features/shield/presentation/shield_controller.dart';
 import 'features/calls/presentation/ongoing_call_banner.dart';
 import 'features/modules/verses/verse_controller.dart';
 import 'firebase_options.dart';
@@ -92,9 +90,6 @@ class PokouApp extends ConsumerWidget {
     // d'accueil et perdait l'appel : le pont existait, rien ne l'appelait.
     ref.watch(nativeCallGateProvider);
     ref.watch(communityMembershipSyncProvider);
-    // Mode Bouclier — écoute globale des messages entrants d'autres
-    // conversations, voir shield_controller.dart.
-    ref.watch(shieldControllerProvider);
     // Notifications push (FCM) — voir push_service.dart.
     ref.watch(pushServiceProvider);
     // Les versets de 6 h et 18 h : réserve rechargée à chaque ouverture,
@@ -215,7 +210,6 @@ class PokouApp extends ConsumerWidget {
             // — voir OngoingCallFrame pour la structure qui ne doit jamais
             // changer.
             if (child != null) OngoingCallFrame(child: child),
-            const DeferredCallBubble(),
           ],
         ),
       ),

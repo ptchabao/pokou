@@ -7,7 +7,6 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../../core/providers.dart';
 import '../../../core/sync/offline_list.dart';
 import '../../../core/router/app_router.dart';
-import '../../shield/presentation/shield_controller.dart';
 import '../data/call_repository.dart';
 import 'incoming_call_screen.dart';
 
@@ -53,18 +52,6 @@ final callSignalingProvider = Provider<void>((ref) {
     final groupName = event['group_name'] as String?;
     final callerIsVerified = event['caller_is_verified'] as bool? ?? false;
     final callerCertifiedName = event['caller_certified_name'] as String?;
-
-    // Mode Bouclier — si actif, l'appel peut être mis en attente (bulle
-    // flottante, voir DeferredCallBubble) au lieu de sonner normalement.
-    final deferred = await ref
-        .read(shieldControllerProvider.notifier)
-        .shouldDeferIncomingCall(
-          fromUserId: fromUserId,
-          callType: callType,
-          isVideo: isVideo,
-          room: room,
-        );
-    if (deferred) return;
 
     rootNavigatorKey.currentState?.push(
       MaterialPageRoute(

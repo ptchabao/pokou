@@ -33,7 +33,6 @@ import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
 import '../../status/presentation/status_privacy_screen.dart';
-import '../../shield/presentation/shield_controller.dart';
 import '../data/profile_repository.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
@@ -350,7 +349,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isPending =
         _isCertificationPending || (authUser?.isCertificationPending ?? false);
     final sellerUntil = _certifiedSellerUntil;
-    final shieldState = ref.watch(shieldControllerProvider);
     final lockState = ref.watch(appLockProvider);
     final settings = ref.watch(appSettingsProvider);
     final minouAsync = ref.watch(minouStatusProvider);
@@ -542,24 +540,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       _SettingsGroup(
                         title: L.of(context).profilePrivacySecurity,
                         children: [
-                          _SettingsRow(
-                            icon: Icons.shield_outlined,
-                            label: L.of(context).profileShieldMode,
-                            subtitle: L.of(context).profileShieldModeBody,
-                            trailing: Semantics(
-                              label: shieldState.masterEnabled
-                                  ? L.of(context).profileShieldOn
-                                  : L.of(context).profileShieldOff,
-                              child: Switch(
-                                value: shieldState.masterEnabled,
-                                activeThumbColor: Colors.white,
-                                activeTrackColor: AppColors.accentPrimary,
-                                onChanged: (value) => ref
-                                    .read(shieldControllerProvider.notifier)
-                                    .setMasterEnabled(value),
-                              ),
-                            ),
-                          ),
                           _SettingsRow(
                             icon: Icons.lock_outline,
                             label: L.of(context).profileConnection,

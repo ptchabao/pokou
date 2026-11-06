@@ -122,17 +122,21 @@ class ShieldController extends StateNotifier<ShieldState> {
   ShieldRepository get _repo => _ref.read(shieldRepositoryProvider);
   ShieldPreferences get _prefs => _ref.read(shieldPreferencesProvider);
 
+  /// Le Mode Bouclier est RETIRÉ de l'application : plus de réglage, plus
+  /// d'appel mis en attente, plus de message mis en veilleuse, plus aucun
+  /// extrait envoyé au serveur pour évaluation. Ceux qui l'avaient activé
+  /// le voient éteint, et le reste pour de bon.
   Future<void> _loadMasterEnabled() async {
-    final enabled = await _prefs.readEnabled();
-    if (mounted) state = state.copyWith(masterEnabled: enabled);
+    if (await _prefs.readEnabled()) await _prefs.writeEnabled(false);
+    if (mounted) state = state.copyWith(masterEnabled: false, active: false);
   }
 
-  /// Appelé depuis l'écran Profil — Réglages > Confidentialité & Sécurité.
+  /// Sans effet : le Mode Bouclier n'existe plus.
   Future<void> setMasterEnabled(bool enabled) async {
-    await _prefs.writeEnabled(enabled);
+    await _prefs.writeEnabled(false);
     if (!mounted) return;
-    state = state.copyWith(masterEnabled: enabled);
-    if (!enabled) _deactivate();
+    state = state.copyWith(masterEnabled: false);
+    _deactivate();
   }
 
   /// Appelé par ConversationScreen à l'ouverture/fermeture d'une conversation.

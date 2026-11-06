@@ -44,9 +44,6 @@ import '../../calls/presentation/call_screen.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../../marketplace/data/product_model.dart';
 import '../../profile/presentation/contact_profile_screen.dart';
-import '../../shield/presentation/shield_controller.dart'
-    show ShieldController, shieldControllerProvider;
-import '../../shield/presentation/shield_overlay.dart';
 import '../data/direct_message_model.dart';
 import 'bubble_widgets.dart';
 import 'contact_card_bubble.dart';
@@ -71,15 +68,6 @@ import 'poll_bubble.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../contacts/presentation/discussions_controller.dart';
-
-List<String> _lastMessagesForShield(List<DirectMessage> messages) {
-  return messages.reversed
-      .take(5)
-      .toList()
-      .reversed
-      .map((m) => m.content ?? '[${m.messageType}]')
-      .toList();
-}
 
 class ConversationScreen extends ConsumerStatefulWidget {
   const ConversationScreen({
@@ -223,7 +211,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   // Captured in initState rather than read from `ref` in dispose() — by the
   // time dispose() runs the element may already be unmounted, and reading
   // a provider off a disposed ConsumerStatefulElement throws.
-  late final ShieldController _shieldController;
 
   /// Capturé en même temps que le contrôleur de bouclier, et pour la même
   /// raison : au démontage, lire un provider depuis un élément déjà retiré
@@ -365,7 +352,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     super.initState();
     unawaited(_checkEncryption());
     unawaited(_reloadProof());
-    _shieldController = ref.read(shieldControllerProvider.notifier);
     _activeConversation = ref.read(activeConversationProvider.notifier);
     _typing = TypingSignal(
       ref.read(presenceRepositoryProvider),
@@ -374,7 +360,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     );
     _inputController.addListener(_onInputChanged);
     _scrollController.addListener(_maybeLoadOlder);
-    _shieldController.setActiveConversation(widget.contactUserId);
     // Se notifier soi-même pendant qu'on lit la conversation est le défaut
     // le plus visible qu'une messagerie puisse avoir. Le serveur ne peut pas
     // le savoir — il voit une socket ouverte, pas l'écran affiché.
@@ -414,7 +399,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     // widget tree was building". Le contrôleur est persistant, on peut donc
     // faire ce nettoyage juste après la phase de démontage.
     Future<void>.delayed(Duration.zero, () {
-      _shieldController.setActiveConversation(null);
       _activeConversation.state = null;
     });
     _richContentSub?.cancel();
@@ -430,10 +414,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   /// (`edited_at` différent) n'est pas recouverte : son nouveau chiffré
   /// doit être ouvert.
   String _proofAuthor(DirectMessage message) =>
-      message.senderId == widget.myUserId ? _l.proofExportMe : widget.contactName;
+      message.senderId == widget.myUserId
+      ? _l.proofExportMe
+      : widget.contactName;
 
   DirectMessage _withLocalClear(DirectMessage server, DirectMessage? local) {
-    if (!server.isEncrypted || local == null || local.isEncrypted) return server;
+    if (!server.isEncrypted || local == null || local.isEncrypted)
+      return server;
     if (local.editedAt != server.editedAt) return server;
     return server.resolvedWith(local);
   }
@@ -468,7 +455,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       // recouverte.
       final original = type == 'message:edited' && message.proofMode
           ? (previous?.originalContent ??
-                (previous != null && !previous.isEncrypted && previous.editedAt != message.editedAt
+                (previous != null &&
+                        !previous.isEncrypted &&
+                        previous.editedAt != message.editedAt
                     ? previous.content
                     : null))
           : null;
@@ -1127,7 +1116,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   Future<void> _reloadProof() async {
     try {
-      final proof = await ref.read(messagingRepositoryProvider).proofMode(widget.contactUserId);
+      final proof = await ref
+          .read(messagingRepositoryProvider)
+          .proofMode(widget.contactUserId);
       if (mounted) setState(() => _proof = proof);
     } catch (_) {
       // Hors ligne : le dernier message système dira l'état, voir build.
@@ -1146,9 +1137,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     } on ApiException catch (error) {
       if (!mounted) return;
       if (error.statusCode == 403 && proofOn) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_l.proofDisableReservedDirect)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l.proofDisableReservedDirect)));
         return;
       }
       if (error.statusCode == 403) {
@@ -1170,16 +1161,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           ),
         );
         if (open == true && mounted) {
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CertifiedScreen()),
-          );
+          await Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const CertifiedScreen()));
         }
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
       }
     }
   }
@@ -1191,7 +1186,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     try {
       final file = await exportDirectProof(
         contactName: widget.contactName,
-        myName: ref.read(authControllerProvider).user?.fullName ?? l.proofExportMe,
+        myName:
+            ref.read(authControllerProvider).user?.fullName ?? l.proofExportMe,
         myUserId: widget.myUserId,
         since: _proof.since ?? messages.first.createdAt,
         messages: [for (final m in messages) _patches[m.id] ?? m],
@@ -1212,7 +1208,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  Future<void> _openProofMenu(bool proofOn, List<DirectMessage> messages) async {
+  Future<void> _openProofMenu(
+    bool proofOn,
+    List<DirectMessage> messages,
+  ) async {
     final action = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: AppColors.surface,
@@ -1248,7 +1247,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     for (final m in messages.reversed) {
       if ((m.payload?['kind']) == 'proof_mode') {
         final since = _proof.since;
-        if (since == null || m.createdAt.isAfter(since)) return m.payload?['enabled'] == true;
+        if (since == null || m.createdAt.isAfter(since))
+          return m.payload?['enabled'] == true;
         break;
       }
     }
@@ -1325,8 +1325,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           orElse: () => false,
         );
 
-    // Mode Bouclier — étape 1 : ré-évalue le score de focus de cette
-    // conversation à chaque envoi/réception (voir shield_controller.dart).
     ref.listen(messagingControllerProvider(_key), (previous, next) {
       // L'autre vient d'activer ou de couper le mode preuve : on relit qui
       // peut le désactiver.
@@ -1335,308 +1333,300 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (next.messages.last.payload?['kind']) == 'proof_mode') {
         unawaited(_reloadProof());
       }
-      if (previous?.messages.length != next.messages.length) {
-        ref
-            .read(shieldControllerProvider.notifier)
-            .evaluateActiveConversation(_lastMessagesForShield(next.messages));
-      }
     });
 
-    final shieldActive = ref.watch(
-      shieldControllerProvider.select((s) => s.active),
-    );
+    return Scaffold(
+      backgroundColor: AppColors.chatBackground,
+      body: ChatWallpaper(
+        // `top: false` : la barre du haut gère elle-même l'encoche, pour
+        // que son blanc monte jusqu'en haut de l'écran. Laissé à SafeArea,
+        // le motif du papier peint réapparaissait dans la bande de statut,
+        // au-dessus d'une barre pourtant opaque.
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Container(
+                // Barre opaque, et non plus transparente sur le papier
+                // peint : elle porte le nom du contact, son état de saisie
+                // et les boutons d'appel — de l'information qui doit rester
+                // lisible quel que soit le motif qui défile dessous.
+                color: AppColors.surface,
+                padding: EdgeInsets.only(
+                  top: MediaQuery.paddingOf(context).top,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+                  child: Row(
+                    children: [
+                      _ChatIconButton(
+                        icon: Icons.arrow_back,
+                        onPressed: () => context.canPop()
+                            ? context.pop()
+                            : Navigator.of(context).maybePop(),
 
-    return ShieldOverlay(
-      child: Scaffold(
-        backgroundColor: AppColors.chatBackground,
-        body: ChatWallpaper(
-          // `top: false` : la barre du haut gère elle-même l'encoche, pour
-          // que son blanc monte jusqu'en haut de l'écran. Laissé à SafeArea,
-          // le motif du papier peint réapparaissait dans la bande de statut,
-          // au-dessus d'une barre pourtant opaque.
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                Container(
-                  // Barre opaque, et non plus transparente sur le papier
-                  // peint : elle porte le nom du contact, son état de saisie
-                  // et les boutons d'appel — de l'information qui doit rester
-                  // lisible quel que soit le motif qui défile dessous.
-                  color: AppColors.surface,
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.paddingOf(context).top,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
-                    child: Row(
-                      children: [
-                        _ChatIconButton(
-                          icon: Icons.arrow_back,
-                          onPressed: () => context.canPop()
-                              ? context.pop()
-                              : Navigator.of(context).maybePop(),
-
-                          tooltip: L.of(context).a11yBack,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            onTap: _openContactProfile,
-                            child: Row(
-                              children: [
-                                _AvatarRing(
+                        tooltip: L.of(context).a11yBack,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          onTap: _openContactProfile,
+                          child: Row(
+                            children: [
+                              _AvatarRing(
+                                size: 36,
+                                // L'en-tête montre l'anneau et le point
+                                // comme partout ailleurs : c'est le
+                                // dernier endroit où l'on devrait avoir
+                                // à deviner si quelqu'un est joignable.
+                                child: IdentityAvatar(
+                                  userId: widget.contactUserId,
+                                  avatar: contactAvatar,
+                                  displayName: widget.contactName,
                                   size: 36,
-                                  // L'en-tête montre l'anneau et le point
-                                  // comme partout ailleurs : c'est le
-                                  // dernier endroit où l'on devrait avoir
-                                  // à deviner si quelqu'un est joignable.
-                                  child: IdentityAvatar(
-                                    userId: widget.contactUserId,
-                                    avatar: contactAvatar,
-                                    displayName: widget.contactName,
-                                    size: 36,
-                                  ),
                                 ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              widget.contactName,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 16,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            widget.contactName,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
+                                              color: AppColors.textPrimary,
                                             ),
-                                          ),
-                                          if (isContactVerified) ...[
-                                            const SizedBox(width: 5),
-                                            const VerifiedBadge(size: 15),
-                                          ],
-                                          if (isContactBot) ...[
-                                            const SizedBox(width: 5),
-                                            const BotPill(),
-                                          ],
-                                        ],
-                                      ),
-                                      // L'état du chiffrement, sous le nom.
-                                      // Discret quand tout va bien, mais
-                                      // TOUJOURS là : c'est ce qui rend la
-                                      // garantie vérifiable par celui qui
-                                      // écrit, au lieu d'être une promesse
-                                      // faite ailleurs.
-                                      EncryptionHeaderLabel(state: _encryption),
-                                      // « écrit… » sous le nom, à la place
-                                      // qu'occupe le « vu à » dans les autres
-                                      // messageries. Il n'apparaît que
-                                      // lorsqu'il y a quelque chose à dire :
-                                      // une seconde ligne permanente et vide
-                                      // décalerait le nom pour rien.
-                                      if (ref
-                                          .watch(typingProvider)
-                                          .isTyping(
-                                            'contact',
-                                            widget.contactUserId,
-                                          ))
-                                        Text(
-                                          _l.chatsTyping,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.accentPrimary,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                    ],
-                                  ),
+                                        if (isContactVerified) ...[
+                                          const SizedBox(width: 5),
+                                          const VerifiedBadge(size: 15),
+                                        ],
+                                        if (isContactBot) ...[
+                                          const SizedBox(width: 5),
+                                          const BotPill(),
+                                        ],
+                                      ],
+                                    ),
+                                    // L'état du chiffrement, sous le nom.
+                                    // Discret quand tout va bien, mais
+                                    // TOUJOURS là : c'est ce qui rend la
+                                    // garantie vérifiable par celui qui
+                                    // écrit, au lieu d'être une promesse
+                                    // faite ailleurs.
+                                    EncryptionHeaderLabel(state: _encryption),
+                                    // « écrit… » sous le nom, à la place
+                                    // qu'occupe le « vu à » dans les autres
+                                    // messageries. Il n'apparaît que
+                                    // lorsqu'il y a quelque chose à dire :
+                                    // une seconde ligne permanente et vide
+                                    // décalerait le nom pour rien.
+                                    if (ref
+                                        .watch(typingProvider)
+                                        .isTyping(
+                                          'contact',
+                                          widget.contactUserId,
+                                        ))
+                                      Text(
+                                        _l.chatsTyping,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.accentPrimary,
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        _ChatIconButton(
-                          icon: Icons.search,
-                          onPressed: _openSearch,
+                      ),
+                      _ChatIconButton(
+                        icon: Icons.search,
+                        onPressed: _openSearch,
 
-                          tooltip: L.of(context).actionSearch,
-                        ),
-                        _ChatIconButton(
-                          icon: Icons.call_outlined,
-                          onPressed: () => _startCall(startWithVideo: false),
+                        tooltip: L.of(context).actionSearch,
+                      ),
+                      _ChatIconButton(
+                        icon: Icons.call_outlined,
+                        onPressed: () => _startCall(startWithVideo: false),
 
-                          tooltip: L.of(context).a11yVoiceCall,
-                        ),
-                        _ChatIconButton(
-                          icon: Icons.videocam_outlined,
-                          onPressed: () => _startCall(startWithVideo: true),
+                        tooltip: L.of(context).a11yVoiceCall,
+                      ),
+                      _ChatIconButton(
+                        icon: Icons.videocam_outlined,
+                        onPressed: () => _startCall(startWithVideo: true),
 
-                          tooltip: L.of(context).a11yVideoCall,
+                        tooltip: L.of(context).a11yVideoCall,
+                      ),
+                      if (!isContactBot)
+                        _ChatIconButton(
+                          icon: proofOn ? Icons.gavel : Icons.more_vert,
+                          onPressed: () =>
+                              _openProofMenu(proofOn, state.messages),
+                          tooltip: L.of(context).proofModeTitle,
                         ),
-                        if (!isContactBot)
-                          _ChatIconButton(
-                            icon: proofOn ? Icons.gavel : Icons.more_vert,
-                            onPressed: () => _openProofMenu(proofOn, state.messages),
-                            tooltip: L.of(context).proofModeTitle,
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-                Expanded(
-                  // Mode Bouclier "shrine" — pas de couleur, un retrait
-                  // spatial : la zone de discussion se resserre vers le
-                  // centre (marge noire qui grandit en haut/bas) plutôt que
-                  // d'afficher un liseré coloré. Le paradoxe de l'attention :
-                  // réduire l'espace visuel augmente le focus perçu.
-                  child: AnimatedPadding(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.slowMiddle,
-                    padding: EdgeInsets.symmetric(
-                      vertical: shieldActive ? 28 : 0,
-                    ),
-                    child: Column(
-                      children: [
-                        if (product != null) ...[
-                          _PinnedProductCard(product: product),
-                          if (isSeller)
-                            _OrderActions(
-                              currentStatus: _orderStatusFrom(state.messages),
-                              onAction: _sendOrderUpdate,
-                            ),
-                        ],
-                        // Au-dessus du fil, et non dans un menu : une
-                        // alerte de sécurité qu'il faut aller chercher n'est
-                        // pas une alerte.
-                        if (isContactBot)
-                          const BotConversationNotice()
-                        else
-                          EncryptionBanner(
-                            state: _encryption,
-                            peerName: widget.contactName,
-                            onAcceptIdentity: _acceptIdentity,
+              ),
+              Expanded(
+                // Mode Bouclier "shrine" — pas de couleur, un retrait
+                // spatial : la zone de discussion se resserre vers le
+                // centre (marge noire qui grandit en haut/bas) plutôt que
+                // d'afficher un liseré coloré. Le paradoxe de l'attention :
+                // réduire l'espace visuel augmente le focus perçu.
+                child: AnimatedPadding(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.slowMiddle,
+                  padding: EdgeInsets.symmetric(vertical: 0),
+                  child: Column(
+                    children: [
+                      if (product != null) ...[
+                        _PinnedProductCard(product: product),
+                        if (isSeller)
+                          _OrderActions(
+                            currentStatus: _orderStatusFrom(state.messages),
+                            onAction: _sendOrderUpdate,
                           ),
-                        if (proofOn) const ProofModeBanner(),
-                        Expanded(
-                          child: !state.initialCacheLoaded
-                              ? const SizedBox.shrink()
-                              : state.messages.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    _l.conversationSayHello(widget.contactName),
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                    ),
+                      ],
+                      // Au-dessus du fil, et non dans un menu : une
+                      // alerte de sécurité qu'il faut aller chercher n'est
+                      // pas une alerte.
+                      if (isContactBot)
+                        const BotConversationNotice()
+                      else
+                        EncryptionBanner(
+                          state: _encryption,
+                          peerName: widget.contactName,
+                          onAcceptIdentity: _acceptIdentity,
+                        ),
+                      if (proofOn) const ProofModeBanner(),
+                      Expanded(
+                        child: !state.initialCacheLoaded
+                            ? const SizedBox.shrink()
+                            : state.messages.isEmpty
+                            ? Center(
+                                child: Text(
+                                  _l.conversationSayHello(widget.contactName),
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
                                   ),
-                                )
-                              : ListView.builder(
-                                  controller: _scrollController,
-                                  padding: const EdgeInsets.all(16),
-                                  itemCount: state.messages.length,
-                                  itemBuilder: (context, index) {
-                                    final messages = state.messages;
-                                    final rawMessage = messages[index];
-                                    // Superposition des mises à jour temps réel non
-                                    // portées par MessagingController — voir
-                                    // _onRichContentEvent.
-                                    final message =
-                                        _patches[rawMessage.id] ?? rawMessage;
-                                    final isFirstInGroup =
-                                        index == 0 ||
-                                        messages[index - 1].senderId !=
-                                            message.senderId;
-                                    final isLastInGroup =
-                                        index == messages.length - 1 ||
-                                        messages[index + 1].senderId !=
-                                            message.senderId;
-                                    // Séparateur de date au changement de
-                                    // journée, façon WhatsApp — inséré dans le
-                                    // MÊME élément que la bulle plutôt qu'en
-                                    // doublant itemCount, pour que les index de
-                                    // `messages` restent ceux du fil.
-                                    final needsDaySeparator =
-                                        index == 0 ||
-                                        isDifferentDay(
-                                          messages[index - 1].createdAt,
-                                          message.createdAt,
-                                        );
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        if (index == 0 && state.loadingOlder)
-                                          const OlderMessagesLoader(),
-                                        if (needsDaySeparator)
-                                          DaySeparator(
-                                            instant: message.createdAt,
-                                          ),
-                                        if (_orderOf(message) != null)
-                                          _OrderStatusBubble(
-                                            label:
-                                                _orderOf(message)!['label']
-                                                    as String? ??
-                                                L.of(context).convOrderUpdated,
-                                          )
-                                        // Un appel terminé n'est pas une
-                                        // bulle : les deux personnes y
-                                        // étaient, donc l'aligner à droite
-                                        // ou à gauche raconterait « untel
-                                        // vous a dit quelque chose » là où
-                                        // il s'est passé quelque chose
-                                        // ENTRE les deux.
-                                        else if ((message.payload?['kind']) ==
-                                            'proof_mode')
-                                          ProofModeNotice(
-                                            text: message.payload?['enabled'] == true
-                                                ? _l.proofModeOn(_proofAuthor(message))
-                                                : _l.proofModeOff(_proofAuthor(message)),
-                                          )
-                                        else if (message.deletedAt != null ||
-                                            message.originalContent != null)
-                                          ProofKeptMessage(
-                                            key: _keyFor(message.id),
-                                            author: _proofAuthor(message),
-                                            content: message.content,
-                                            original: message.deletedAt == null
-                                                ? message.originalContent
-                                                : null,
-                                            editedAt: message.editedAt,
-                                            isMine: message.senderId == widget.myUserId,
-                                          )
-                                        else if (message.messageType ==
-                                                'CALL' &&
-                                            message.payload != null)
-                                          CallEventRow(
-                                            payload: message.payload!,
+                                ),
+                              )
+                            : ListView.builder(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(16),
+                                itemCount: state.messages.length,
+                                itemBuilder: (context, index) {
+                                  final messages = state.messages;
+                                  final rawMessage = messages[index];
+                                  // Superposition des mises à jour temps réel non
+                                  // portées par MessagingController — voir
+                                  // _onRichContentEvent.
+                                  final message =
+                                      _patches[rawMessage.id] ?? rawMessage;
+                                  final isFirstInGroup =
+                                      index == 0 ||
+                                      messages[index - 1].senderId !=
+                                          message.senderId;
+                                  final isLastInGroup =
+                                      index == messages.length - 1 ||
+                                      messages[index + 1].senderId !=
+                                          message.senderId;
+                                  // Séparateur de date au changement de
+                                  // journée, façon WhatsApp — inséré dans le
+                                  // MÊME élément que la bulle plutôt qu'en
+                                  // doublant itemCount, pour que les index de
+                                  // `messages` restent ceux du fil.
+                                  final needsDaySeparator =
+                                      index == 0 ||
+                                      isDifferentDay(
+                                        messages[index - 1].createdAt,
+                                        message.createdAt,
+                                      );
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      if (index == 0 && state.loadingOlder)
+                                        const OlderMessagesLoader(),
+                                      if (needsDaySeparator)
+                                        DaySeparator(
+                                          instant: message.createdAt,
+                                        ),
+                                      if (_orderOf(message) != null)
+                                        _OrderStatusBubble(
+                                          label:
+                                              _orderOf(message)!['label']
+                                                  as String? ??
+                                              L.of(context).convOrderUpdated,
+                                        )
+                                      // Un appel terminé n'est pas une
+                                      // bulle : les deux personnes y
+                                      // étaient, donc l'aligner à droite
+                                      // ou à gauche raconterait « untel
+                                      // vous a dit quelque chose » là où
+                                      // il s'est passé quelque chose
+                                      // ENTRE les deux.
+                                      else if ((message.payload?['kind']) ==
+                                          'proof_mode')
+                                        ProofModeNotice(
+                                          text:
+                                              message.payload?['enabled'] ==
+                                                  true
+                                              ? _l.proofModeOn(
+                                                  _proofAuthor(message),
+                                                )
+                                              : _l.proofModeOff(
+                                                  _proofAuthor(message),
+                                                ),
+                                        )
+                                      else if (message.deletedAt != null ||
+                                          message.originalContent != null)
+                                        ProofKeptMessage(
+                                          key: _keyFor(message.id),
+                                          author: _proofAuthor(message),
+                                          content: message.content,
+                                          original: message.deletedAt == null
+                                              ? message.originalContent
+                                              : null,
+                                          editedAt: message.editedAt,
+                                          isMine:
+                                              message.senderId ==
+                                              widget.myUserId,
+                                        )
+                                      else if (message.messageType == 'CALL' &&
+                                          message.payload != null)
+                                        CallEventRow(
+                                          payload: message.payload!,
+                                          isMine:
+                                              message.senderId ==
+                                              widget.myUserId,
+                                          onCallBack: ({required video}) =>
+                                              _startCall(startWithVideo: video),
+                                        )
+                                      else
+                                        KeyedSubtree(
+                                          key: _keyFor(message.id),
+                                          child: MessageAppear(
+                                            messageId: message.id,
                                             isMine:
                                                 message.senderId ==
                                                 widget.myUserId,
-                                            onCallBack: ({required video}) =>
-                                                _startCall(
-                                                  startWithVideo: video,
-                                                ),
-                                          )
-                                        else
-                                          KeyedSubtree(
-                                            key: _keyFor(message.id),
-                                            child: MessageAppear(
-                                              messageId: message.id,
-                                              isMine:
-                                                  message.senderId ==
-                                                  widget.myUserId,
-                                              isLast:
-                                                  index ==
-                                                  messages.length - 1,
-                                              child: _Bubble(
+                                            isLast:
+                                                index == messages.length - 1,
+                                            child: _Bubble(
                                               message: message,
                                               onBotButton: isContactBot
                                                   ? (title) => _sendBotButton(
@@ -1684,108 +1674,107 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 );
                                               },
                                             ),
-                                            ),
                                           ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                        ),
-                        if (state.error != null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  size: 14,
-                                  color: AppColors.semanticError,
-                                ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    state.error!,
-                                    style: const TextStyle(
-                                      color: AppColors.semanticError,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              ),
+                      ),
+                      if (state.error != null)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                          child: Column(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (_replyingTo != null)
-                                _ReplyingToBar(
-                                  message: _replyingTo!,
-                                  onClose: () =>
-                                      setState(() => _replyingTo = null),
-                                ),
-                              // Le cadenas n'apparaît QUE pendant un
-                              // enregistrement non verrouillé : un cadenas
-                              // affiché en permanence n'apprend rien, et le
-                              // garder après verrouillage répéterait ce que
-                              // la barre dit déjà.
-                              if (_composer.mode == ComposerMode.recording ||
-                                  _composer.mode == ComposerMode.cancelling)
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: 8,
-                                      bottom: 8,
-                                    ),
-                                    child: LockAffordance(
-                                      progress: _composer.lockProgress,
-                                    ),
+                              const Icon(
+                                Icons.error_outline,
+                                size: 14,
+                                color: AppColors.semanticError,
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  state.error!,
+                                  style: const TextStyle(
+                                    color: AppColors.semanticError,
+                                    fontSize: 12,
                                   ),
                                 ),
-                              _composerRow(state),
-                              // Le panneau emoji, SOUS la barre — à la place
-                              // exacte du clavier, dont il reprend la
-                              // hauteur. Le mettre ailleurs ferait sauter la
-                              // conversation à chaque ouverture.
-                              // Les suggestions, SOUS la barre de saisie.
-                              // Jamais en même temps que le panneau : il
-                              // montre déjà des stickers, et les deux
-                              // feraient deux grilles superposées.
-                              if (!_emojiOpen)
-                                StickerSuggestionBar(
-                                  emoji: _trailingEmoji,
-                                  onSelected: _sendSticker,
-                                ),
-                              if (_emojiOpen)
-                                ComposerPanel(
-                                  controller: _inputController,
-                                  height: _keyboardHeight,
-                                  onBackspace: _emojiBackspace,
-                                  tab: _panelTab,
-                                  onTabChanged: (tab) =>
-                                      setState(() => _panelTab = tab),
-                                  onStickerSelected: _sendSticker,
-                                  // Le panneau se referme : le sélecteur de
-                                  // fichiers prend l'écran, et le retrouver
-                                  // ouvert derrière au retour ferait un
-                                  // empilement que personne n'a demandé.
-                                  onGifRequested: () {
-                                    setState(() => _emojiOpen = false);
-                                    _pickAndSendGif();
-                                  },
-                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_replyingTo != null)
+                              _ReplyingToBar(
+                                message: _replyingTo!,
+                                onClose: () =>
+                                    setState(() => _replyingTo = null),
+                              ),
+                            // Le cadenas n'apparaît QUE pendant un
+                            // enregistrement non verrouillé : un cadenas
+                            // affiché en permanence n'apprend rien, et le
+                            // garder après verrouillage répéterait ce que
+                            // la barre dit déjà.
+                            if (_composer.mode == ComposerMode.recording ||
+                                _composer.mode == ComposerMode.cancelling)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: 8,
+                                    bottom: 8,
+                                  ),
+                                  child: LockAffordance(
+                                    progress: _composer.lockProgress,
+                                  ),
+                                ),
+                              ),
+                            _composerRow(state),
+                            // Le panneau emoji, SOUS la barre — à la place
+                            // exacte du clavier, dont il reprend la
+                            // hauteur. Le mettre ailleurs ferait sauter la
+                            // conversation à chaque ouverture.
+                            // Les suggestions, SOUS la barre de saisie.
+                            // Jamais en même temps que le panneau : il
+                            // montre déjà des stickers, et les deux
+                            // feraient deux grilles superposées.
+                            if (!_emojiOpen)
+                              StickerSuggestionBar(
+                                emoji: _trailingEmoji,
+                                onSelected: _sendSticker,
+                              ),
+                            if (_emojiOpen)
+                              ComposerPanel(
+                                controller: _inputController,
+                                height: _keyboardHeight,
+                                onBackspace: _emojiBackspace,
+                                tab: _panelTab,
+                                onTabChanged: (tab) =>
+                                    setState(() => _panelTab = tab),
+                                onStickerSelected: _sendSticker,
+                                // Le panneau se referme : le sélecteur de
+                                // fichiers prend l'écran, et le retrouver
+                                // ouvert derrière au retour ferait un
+                                // empilement que personne n'a demandé.
+                                onGifRequested: () {
+                                  setState(() => _emojiOpen = false);
+                                  _pickAndSendGif();
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -2008,7 +1997,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 child: Text(_l.actionCancel),
               ),
               FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.feedbackDanger),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.feedbackDanger,
+                ),
                 onPressed: () => Navigator.pop(dialogContext, true),
                 child: Text(_l.actionDelete),
               ),
