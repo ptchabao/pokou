@@ -466,13 +466,14 @@ class PokouMessageStore {
           }
         case 'group:message:new':
           if (groupMessage == null) return false;
+          final keptGroup = await _keepOpenedGroup(txn, groupMessage);
           await txn.insert('group_messages', {
-            'id': groupMessage.id,
-            'group_id': groupMessage.groupId,
-            'created_at': groupMessage.createdAt.toUtc().toIso8601String(),
+            'id': keptGroup.id,
+            'group_id': keptGroup.groupId,
+            'created_at': keptGroup.createdAt.toUtc().toIso8601String(),
             'pending': _pendingFalse,
             'failed': _pendingFalse,
-            'payload': jsonEncode(groupMessage.toJson()),
+            'payload': jsonEncode(keptGroup.toJson()),
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         default:
           return false;
@@ -910,7 +911,8 @@ class PokouMessageStore {
   }) async {
     final db = await _database;
     final batch = db.batch();
-    for (final message in messages) {
+    for (final incoming in messages) {
+      final message = await _keepOpenedGroup(db, incoming);
       batch.insert('group_messages', {
         'id': message.id,
         'group_id': message.groupId,
@@ -982,6 +984,40 @@ class PokouMessageStore {
       orderBy: 'created_at ASC',
     );
     return [for (final row in rows) GroupMessage.fromJson(_payloadOf(row))];
+  }
+
+  /// Le pendant de [_keepOpened] pour les groupes.
+  ///
+  /// Une clé d'expéditeur (Signal sender key) ne déchiffre un message
+  /// qu'UNE fois. Le moteur de synchronisation rangeait chaque
+  /// `group:message:new` tel quel, CHIFFRÉ, en remplaçant la ligne — et
+  /// quand la conversation ouverte l'avait déjà déchiffré une seconde plus
+  /// tôt, le clair était écrasé pour de bon : une bulle vide, qu'aucun
+  /// rechargement ne pouvait plus ouvrir. Un message encore chiffré ne
+  /// recouvre donc jamais une ligne déjà ouverte ; il n'en apporte que les
+  /// champs du serveur (réactions, suppression). Une modification
+  /// (`edited_at` différent) apporte un nouveau chiffré : celle-là passe.
+  Future<GroupMessage> _keepOpenedGroup(
+    DatabaseExecutor db,
+    GroupMessage incoming,
+  ) async {
+    if (!incoming.isEncrypted) return incoming;
+    final rows = await db.query(
+      'group_messages',
+      columns: ['payload'],
+      where: 'id = ?',
+      whereArgs: [incoming.id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return incoming;
+    final existing = GroupMessage.fromJson(_payloadOf(rows.single));
+    if (existing.isEncrypted || existing.editedAt != incoming.editedAt) {
+      return incoming;
+    }
+    return existing.copyWith(
+      reactions: incoming.reactions,
+      deletedAt: incoming.deletedAt ?? existing.deletedAt,
+    );
   }
 
   Future<void> reconcileGroup({

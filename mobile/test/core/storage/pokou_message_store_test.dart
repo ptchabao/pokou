@@ -371,6 +371,37 @@ void main() {
       expect(cached.failedIds, {localId});
       expect(await store.pendingGroup(), isEmpty);
     });
+
+    test(
+      'un message déjà déchiffré n\'est jamais recouvert par son chiffré',
+      () async {
+        // La conversation ouverte déchiffre le message (une clé
+        // d'expéditeur ne sert qu'une fois)…
+        await store.saveGroup([_group(id: 'g-kanle', content: 'coucou')]);
+        // … puis la synchronisation range la version CHIFFRÉE reçue du
+        // serveur. Avant le correctif, elle écrasait le clair : bulle vide.
+        final chiffre = GroupMessage(
+          id: 'g-kanle',
+          groupId: 7,
+          senderId: 2,
+          senderName: 'Kanle',
+          messageType: 'TEXT',
+          content: null,
+          mediaAssetId: null,
+          media: null,
+          createdAt: DateTime(2026, 9, 4, 10),
+          encryption: 'sender-key-v1',
+          ciphertext: 'opaque',
+          cryptoEpoch: 2,
+        );
+        await store.saveGroup([chiffre]);
+
+        final cached = await store.groupConversation(7);
+        final kept = cached.messages.single;
+        expect(kept.isEncrypted, isFalse);
+        expect(kept.content, 'coucou');
+      },
+    );
   });
 
   test('la déconnexion efface les conversations', () async {
