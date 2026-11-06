@@ -26,6 +26,7 @@ import '../../chat/data/minou_repository.dart';
 import '../../chat/presentation/chat_controller.dart'
     show kNoMonitor, minouStatusProvider;
 import '../../settings/presentation/app_lock_screen.dart';
+import '../../settings/presentation/delete_account_screen.dart';
 import '../../settings/presentation/devices_screen.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
@@ -662,6 +663,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             icon: Icons.devices_outlined,
                             label: L.of(context).profileDevices,
                             onTap: () => _push(const DevicesScreen()),
+                          ),
+                          // REG-7 : la suppression du compte, depuis
+                          // « Compte et sécurité » (AUTH-06).
+                          _SettingsRow(
+                            icon: Icons.delete_forever_outlined,
+                            label: L.of(context).deleteAccountTitle,
+                            onTap: () => _push(const DeleteAccountScreen()),
                           ),
                         ],
                       ),

@@ -1,6 +1,7 @@
 """Pokou — profil utilisateur (nom, bio, avatar). L'avatar est un
 MediaAsset comme les autres pièces jointes (voir media_storage.py) —
 uploadé via POST /media/upload puis référencé ici par son id."""
+import logging
 import re
 from typing import Optional
 
@@ -21,6 +22,8 @@ from app.core.security import get_current_user
 _SHARED_MEDIA_LIMIT = 100
 _SHARED_LINK_SCAN_LIMIT = 200
 _LINK_PATTERN = re.compile(r"https?://[^\s]+|www\.[^\s]+")
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Pokou profile"])
 
@@ -126,7 +129,63 @@ async def update_my_profile(
 
     db.commit()
     db.refresh(user)
+    await _announce_profile_change(db, user.id)
     return _serialize(user)
+
+
+def _profile_audience(db: Session, user_id: int) -> set[int]:
+    """Ceux qui AFFICHENT ce profil : qui m'a dans son carnet, avec qui
+    j'ai une discussion, avec qui je partage un groupe. Les mêmes cercles
+    que `_se_connaissent`, lus dans l'autre sens et en une fois."""
+    audience: set[int] = set()
+    audience.update(
+        owner
+        for (owner,) in db.query(Contact.owner_user_id)
+        .filter(Contact.contact_user_id == user_id)
+        .distinct()
+    )
+    audience.update(
+        other
+        for (other,) in db.query(DirectMessage.recipient_id)
+        .filter(DirectMessage.sender_id == user_id)
+        .distinct()
+    )
+    audience.update(
+        other
+        for (other,) in db.query(DirectMessage.sender_id)
+        .filter(DirectMessage.recipient_id == user_id)
+        .distinct()
+    )
+    mine = aliased(GroupMember)
+    theirs = aliased(GroupMember)
+    audience.update(
+        other
+        for (other,) in db.query(theirs.user_id)
+        .join(mine, mine.group_id == theirs.group_id)
+        .filter(mine.user_id == user_id)
+        .distinct()
+    )
+    audience.discard(user_id)
+    return audience
+
+
+async def _announce_profile_change(db: Session, user_id: int) -> None:
+    """Temps réel : nom, photo et « à propos » changent tout de suite chez
+    les autres, au lieu d'attendre leur prochain rechargement.
+
+    L'événement ne porte QUE l'identifiant : chacun relit le profil par
+    l'API, qui applique les réglages de confidentialité (photo visible par
+    « mes contacts » seulement, etc.). Pousser la photo ici la montrerait à
+    qui n'a pas le droit de la voir. Best-effort : un échec d'envoi ne doit
+    pas faire échouer l'enregistrement du profil."""
+    from app.api.v1.messaging.ws import manager
+
+    event = {"type": "user:profile_updated", "user_id": user_id}
+    for other_id in _profile_audience(db, user_id):
+        try:
+            await manager.send_to_user(other_id, event)
+        except Exception:  # pragma: no cover - transport best-effort
+            logger.warning("profile_updated non remis à %s", other_id, exc_info=True)
 
 
 @router.get("/users/{user_id}/profile")

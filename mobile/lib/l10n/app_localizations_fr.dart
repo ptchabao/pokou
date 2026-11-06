@@ -6089,4 +6089,49 @@ class LFr extends L {
   @override
   String get authAcceptNotice =>
       'En touchant « Accepter et continuer », tu acceptes les conditions d\'utilisation et la politique de confidentialité, et tu déclares avoir l\'âge requis.';
+
+  @override
+  String get deleteAccountTitle => 'Supprimer mon compte';
+
+  @override
+  String get deleteAccountWarning => 'Cette action est définitive.';
+
+  @override
+  String get deleteAccountRemovedTitle => 'Ce qui est supprimé';
+
+  @override
+  String get deleteAccountRemovedProfile =>
+      'Ton profil, ta photo et ta sauvegarde';
+
+  @override
+  String get deleteAccountRemovedChats => 'Tes discussions sur ce téléphone';
+
+  @override
+  String get deleteAccountRemovedBadge =>
+      'Ton badge, sans remboursement du mois en cours';
+
+  @override
+  String get deleteAccountKeptTitle => 'Ce qui reste';
+
+  @override
+  String get deleteAccountKeptMessages =>
+      'Les messages déjà reçus par tes contacts';
+
+  @override
+  String get deleteAccountKeptProof =>
+      'Les traces du mode preuve chez les autres participants';
+
+  @override
+  String get deleteAccountKeptKory =>
+      'Le journal des cagnottes Kory, qui ne s’efface pas';
+
+  @override
+  String get deleteAccountConfirmLabel => 'Confirme ton numéro';
+
+  @override
+  String get deleteAccountMismatch =>
+      'Ce numéro ne correspond pas à ton compte.';
+
+  @override
+  String get deleteAccountFailed => 'La suppression a échoué. Réessaie.';
 }

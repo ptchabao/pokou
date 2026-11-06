@@ -96,6 +96,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                 hintText: l.homeSearchHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
+                  tooltip: l.actionSearch,
                   onPressed: _searching ? null : _search,
                   icon: _searching
                       ? const SizedBox(

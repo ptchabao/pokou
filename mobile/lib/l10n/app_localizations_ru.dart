@@ -6112,4 +6112,49 @@ class LRu extends L {
   @override
   String get authAcceptNotice =>
       'Нажимая «Принять и продолжить», вы принимаете условия использования и политику конфиденциальности и подтверждаете, что достигли нужного возраста.';
+
+  @override
+  String get deleteAccountTitle => 'Удалить мой аккаунт';
+
+  @override
+  String get deleteAccountWarning => 'Это действие необратимо.';
+
+  @override
+  String get deleteAccountRemovedTitle => 'Что будет удалено';
+
+  @override
+  String get deleteAccountRemovedProfile =>
+      'Твой профиль, фото и резервная копия';
+
+  @override
+  String get deleteAccountRemovedChats => 'Твои чаты на этом телефоне';
+
+  @override
+  String get deleteAccountRemovedBadge =>
+      'Твой значок, без возврата за текущий месяц';
+
+  @override
+  String get deleteAccountKeptTitle => 'Что останется';
+
+  @override
+  String get deleteAccountKeptMessages =>
+      'Сообщения, уже полученные твоими контактами';
+
+  @override
+  String get deleteAccountKeptProof =>
+      'Записи режима доказательства у других участников';
+
+  @override
+  String get deleteAccountKeptKory =>
+      'Журнал копилок Kory, который не удаляется';
+
+  @override
+  String get deleteAccountConfirmLabel => 'Подтверди свой номер';
+
+  @override
+  String get deleteAccountMismatch =>
+      'Этот номер не совпадает с твоим аккаунтом.';
+
+  @override
+  String get deleteAccountFailed => 'Не удалось удалить. Попробуй ещё раз.';
 }

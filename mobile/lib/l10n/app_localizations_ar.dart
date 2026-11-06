@@ -6042,4 +6042,46 @@ class LAr extends L {
   @override
   String get authAcceptNotice =>
       'بلمس «الموافقة والمتابعة»، فإنك توافق على شروط الاستخدام وسياسة الخصوصية، وتقرّ بأنك بالغ السن المطلوب.';
+
+  @override
+  String get deleteAccountTitle => 'حذف حسابي';
+
+  @override
+  String get deleteAccountWarning => 'هذا الإجراء نهائي.';
+
+  @override
+  String get deleteAccountRemovedTitle => 'ما سيُحذف';
+
+  @override
+  String get deleteAccountRemovedProfile =>
+      'ملفك الشخصي وصورتك ونسختك الاحتياطية';
+
+  @override
+  String get deleteAccountRemovedChats => 'محادثاتك على هذا الهاتف';
+
+  @override
+  String get deleteAccountRemovedBadge => 'شارتك، دون استرداد الشهر الجاري';
+
+  @override
+  String get deleteAccountKeptTitle => 'ما يبقى';
+
+  @override
+  String get deleteAccountKeptMessages =>
+      'الرسائل التي استلمها جهات اتصالك بالفعل';
+
+  @override
+  String get deleteAccountKeptProof =>
+      'سجلات وضع الإثبات لدى المشاركين الآخرين';
+
+  @override
+  String get deleteAccountKeptKory => 'سجل صناديق Kory الذي لا يُمحى';
+
+  @override
+  String get deleteAccountConfirmLabel => 'أكّد رقمك';
+
+  @override
+  String get deleteAccountMismatch => 'هذا الرقم لا يطابق حسابك.';
+
+  @override
+  String get deleteAccountFailed => 'فشل الحذف. حاول مرة أخرى.';
 }

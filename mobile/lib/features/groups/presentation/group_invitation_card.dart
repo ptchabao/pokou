@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/sync/pokou_sync_engine.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../l10n/app_localizations.dart';
@@ -21,6 +22,18 @@ import 'group_controller.dart';
 /// dire qu'il ne se passe rien.
 final pendingInvitationsProvider =
     FutureProvider.autoDispose<List<GroupInvitation>>((ref) async {
+      // Temps réel : le serveur pousse `group:invitation` à l'invité dès
+      // qu'on l'ajoute. Sans cette écoute, la carte n'apparaissait qu'au
+      // prochain rechargement de la liste — sur 72 heures de validité.
+      // `listenDurableEventTypes` couvre aussi le rattrapage après une
+      // coupure réseau.
+      listenDurableEventTypes(ref, (type) {
+        if (type == 'group:invitation' ||
+            type == 'group:member:added' ||
+            type == 'group:member:removed') {
+          ref.invalidateSelf();
+        }
+      });
       try {
         return await ref.watch(groupRepositoryProvider).myInvitations();
       } catch (_) {

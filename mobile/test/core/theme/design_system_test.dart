@@ -132,7 +132,8 @@ void main() {
       // supprime toutes, pour tenir la fréquence d'images sur les appareils
       // d'entrée de gamme. La retirer rendrait un message reçu flottant,
       // sans contour, indiscernable du canevas.
-      expect(AppColors.chatBackground, const Color(0xFFF8FAFC));
+      // Crème du cahier v3.4 (7.2, neutral.creme-50) : le fond principal.
+      expect(AppColors.chatBackground, const Color(0xFFFFF7EC));
       expect(AppColors.chatBubbleReceived, const Color(0xFFFFFFFF));
       expect(
         AppColors.chatBubbleReceivedBorder.a,
@@ -197,15 +198,16 @@ void main() {
   });
 
   group('Polices embarquées', () {
-    test('le corps est en Inter, les titres et montants en Outfit', () {
+    test('toute l\'interface est en Inter, titres compris', () {
+      // Cahier v3.4, section 7.3 : Inter est LA police d'interface. Elle
+      // seule couvre les lettres éwé, mina et kabiyè (ɖ ɛ ƒ ɣ ŋ ɔ ʋ) et
+      // l'espace fine des montants (« 25 000 FCFA »).
       final clair = AppTheme.light.textTheme;
       expect(clair.bodyLarge?.fontFamily, 'Inter');
       expect(clair.labelLarge?.fontFamily, 'Inter');
-      // Les `title` restent en Inter : libellés d'en-tête et noms de
-      // listes, où la netteté aux petites tailles prime sur le caractère.
       expect(clair.titleMedium?.fontFamily, 'Inter');
-      expect(clair.headlineMedium?.fontFamily, 'Outfit');
-      expect(clair.displayLarge?.fontFamily, 'Outfit');
+      expect(clair.headlineMedium?.fontFamily, 'Inter');
+      expect(clair.displayLarge?.fontFamily, 'Inter');
     });
 
     test('la chaîne de repli couvre l\'arabe', () {

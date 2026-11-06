@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -48,11 +50,37 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
   String? _error;
   ContactProfile? _profile;
   bool _togglingBlock = false;
+  StreamSubscription<Map<String, dynamic>>? _live;
 
   @override
   void initState() {
     super.initState();
     _load();
+    // Temps réel : la personne change de nom, de photo ou d'« à propos »
+    // pendant qu'on regarde sa fiche — on relit sans spinner.
+    _live = ref.read(wsClientProvider).events.listen((event) {
+      if (event['type'] == 'user:profile_updated' &&
+          event['user_id'] == widget.contactUserId) {
+        _refreshQuietly();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _live?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _refreshQuietly() async {
+    try {
+      final profile = await ref
+          .read(profileRepositoryProvider)
+          .getContactProfile(widget.contactUserId);
+      if (mounted) setState(() => _profile = profile);
+    } catch (_) {
+      // La fiche affichée reste valable ; la prochaine ouverture rattrapera.
+    }
   }
 
   Future<void> _load() async {

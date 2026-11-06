@@ -1744,5 +1744,18 @@
   "koryLastRoundBody": "Era l'ultimo turno: la tontina sarà chiusa. Il registro resta consultabile.",
   "welcomeStart": "Inizia",
   "authAcceptAndContinue": "Accetta e continua",
-  "authAcceptNotice": "Toccando «Accetta e continua», accetti le condizioni d'uso e l'informativa sulla privacy e dichiari di avere l'età richiesta."
+  "authAcceptNotice": "Toccando «Accetta e continua», accetti le condizioni d'uso e l'informativa sulla privacy e dichiari di avere l'età richiesta.",
+  "deleteAccountTitle": "Elimina il mio account",
+  "deleteAccountWarning": "Questa azione è definitiva.",
+  "deleteAccountRemovedTitle": "Cosa viene eliminato",
+  "deleteAccountRemovedProfile": "Il tuo profilo, la tua foto e il tuo backup",
+  "deleteAccountRemovedChats": "Le tue chat su questo telefono",
+  "deleteAccountRemovedBadge": "Il tuo badge, senza rimborso del mese in corso",
+  "deleteAccountKeptTitle": "Cosa rimane",
+  "deleteAccountKeptMessages": "I messaggi già ricevuti dai tuoi contatti",
+  "deleteAccountKeptProof": "Le tracce della modalità prova presso gli altri partecipanti",
+  "deleteAccountKeptKory": "Il registro delle collette Kory, che non si cancella",
+  "deleteAccountConfirmLabel": "Conferma il tuo numero",
+  "deleteAccountMismatch": "Questo numero non corrisponde al tuo account.",
+  "deleteAccountFailed": "Eliminazione non riuscita. Riprova."
 }

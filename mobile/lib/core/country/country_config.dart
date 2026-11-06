@@ -48,7 +48,7 @@ class CountryConfig {
     if (phone != null && phone.startsWith('+228')) {
       return const CountryConfig(
         country: 'TG',
-        modules: {'discussions', 'kory', 'honam', 'certified'},
+        modules: {'discussions', 'kory', 'honam', 'assime', 'certified'},
         vatRate: 0.18,
         deliveryPrice: 1000,
       );
@@ -56,7 +56,7 @@ class CountryConfig {
     if (phone != null && phone.startsWith('+225')) {
       return const CountryConfig(
         country: 'CI',
-        modules: {'discussions', 'kory', 'honam'},
+        modules: {'discussions', 'kory', 'honam', 'assime'},
         vatRate: 0.18,
         deliveryPrice: 1500,
       );

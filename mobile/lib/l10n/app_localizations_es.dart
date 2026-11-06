@@ -6060,4 +6060,48 @@ class LEs extends L {
   @override
   String get authAcceptNotice =>
       'Al tocar «Aceptar y continuar», aceptas las condiciones de uso y la política de privacidad, y declaras tener la edad requerida.';
+
+  @override
+  String get deleteAccountTitle => 'Eliminar mi cuenta';
+
+  @override
+  String get deleteAccountWarning => 'Esta acción es definitiva.';
+
+  @override
+  String get deleteAccountRemovedTitle => 'Lo que se elimina';
+
+  @override
+  String get deleteAccountRemovedProfile =>
+      'Tu perfil, tu foto y tu copia de seguridad';
+
+  @override
+  String get deleteAccountRemovedChats => 'Tus conversaciones en este teléfono';
+
+  @override
+  String get deleteAccountRemovedBadge =>
+      'Tu insignia, sin reembolso del mes en curso';
+
+  @override
+  String get deleteAccountKeptTitle => 'Lo que permanece';
+
+  @override
+  String get deleteAccountKeptMessages =>
+      'Los mensajes ya recibidos por tus contactos';
+
+  @override
+  String get deleteAccountKeptProof =>
+      'Los registros del modo prueba de los demás participantes';
+
+  @override
+  String get deleteAccountKeptKory =>
+      'El registro de las colectas Kory, que no se borra';
+
+  @override
+  String get deleteAccountConfirmLabel => 'Confirma tu número';
+
+  @override
+  String get deleteAccountMismatch => 'Este número no corresponde a tu cuenta.';
+
+  @override
+  String get deleteAccountFailed => 'La eliminación falló. Inténtalo de nuevo.';
 }

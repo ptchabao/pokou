@@ -1744,5 +1744,18 @@
   "koryLastRoundBody": "Era el último turno: la tontina se cerrará. El registro sigue disponible.",
   "welcomeStart": "Empezar",
   "authAcceptAndContinue": "Aceptar y continuar",
-  "authAcceptNotice": "Al tocar «Aceptar y continuar», aceptas las condiciones de uso y la política de privacidad, y declaras tener la edad requerida."
+  "authAcceptNotice": "Al tocar «Aceptar y continuar», aceptas las condiciones de uso y la política de privacidad, y declaras tener la edad requerida.",
+  "deleteAccountTitle": "Eliminar mi cuenta",
+  "deleteAccountWarning": "Esta acción es definitiva.",
+  "deleteAccountRemovedTitle": "Lo que se elimina",
+  "deleteAccountRemovedProfile": "Tu perfil, tu foto y tu copia de seguridad",
+  "deleteAccountRemovedChats": "Tus conversaciones en este teléfono",
+  "deleteAccountRemovedBadge": "Tu insignia, sin reembolso del mes en curso",
+  "deleteAccountKeptTitle": "Lo que permanece",
+  "deleteAccountKeptMessages": "Los mensajes ya recibidos por tus contactos",
+  "deleteAccountKeptProof": "Los registros del modo prueba de los demás participantes",
+  "deleteAccountKeptKory": "El registro de las colectas Kory, que no se borra",
+  "deleteAccountConfirmLabel": "Confirma tu número",
+  "deleteAccountMismatch": "Este número no corresponde a tu cuenta.",
+  "deleteAccountFailed": "La eliminación falló. Inténtalo de nuevo."
 }

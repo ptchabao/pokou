@@ -179,6 +179,13 @@ final discussionsRealtimeProvider = Provider<void>((ref) {
     if (type == 'contact:registered') {
       ref.invalidate(contactsProvider);
     }
+    // Un contact a changé de nom, de photo ou d'« à propos » : la liste des
+    // discussions, le carnet et les groupes affichent son identité.
+    if (type == 'user:profile_updated') {
+      ref.invalidate(contactsProvider);
+      ref.invalidate(discussionsProvider);
+      ref.invalidate(myGroupsProvider);
+    }
     if (type == 'community:member:added' ||
         type == 'community:member:removed' ||
         type == 'group:member:added' ||

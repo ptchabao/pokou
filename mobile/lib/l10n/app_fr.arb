@@ -2914,5 +2914,18 @@
   "koryLastRoundBody": "C'était le dernier tour : la tontine sera clôturée. Le journal reste consultable.",
   "welcomeStart": "Commencer",
   "authAcceptAndContinue": "Accepter et continuer",
-  "authAcceptNotice": "En touchant « Accepter et continuer », tu acceptes les conditions d'utilisation et la politique de confidentialité, et tu déclares avoir l'âge requis."
+  "authAcceptNotice": "En touchant « Accepter et continuer », tu acceptes les conditions d'utilisation et la politique de confidentialité, et tu déclares avoir l'âge requis.",
+  "deleteAccountTitle": "Supprimer mon compte",
+  "deleteAccountWarning": "Cette action est définitive.",
+  "deleteAccountRemovedTitle": "Ce qui est supprimé",
+  "deleteAccountRemovedProfile": "Ton profil, ta photo et ta sauvegarde",
+  "deleteAccountRemovedChats": "Tes discussions sur ce téléphone",
+  "deleteAccountRemovedBadge": "Ton badge, sans remboursement du mois en cours",
+  "deleteAccountKeptTitle": "Ce qui reste",
+  "deleteAccountKeptMessages": "Les messages déjà reçus par tes contacts",
+  "deleteAccountKeptProof": "Les traces du mode preuve chez les autres participants",
+  "deleteAccountKeptKory": "Le journal des cagnottes Kory, qui ne s’efface pas",
+  "deleteAccountConfirmLabel": "Confirme ton numéro",
+  "deleteAccountMismatch": "Ce numéro ne correspond pas à ton compte.",
+  "deleteAccountFailed": "La suppression a échoué. Réessaie."
 }

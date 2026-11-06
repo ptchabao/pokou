@@ -42,7 +42,7 @@ class _FakeApi extends ApiClient {
   }) => _answer('PUT', path);
 
   @override
-  Future<dynamic> delete(String path, {bool authenticated = true}) =>
+  Future<dynamic> delete(String path, {Map<String, dynamic>? body, bool authenticated = true}) =>
       _answer('DELETE', path);
 }
 

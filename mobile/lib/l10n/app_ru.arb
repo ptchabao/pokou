@@ -1744,5 +1744,18 @@
   "koryLastRoundBody": "Это был последний круг: тонтина будет закрыта. Журнал останется доступен.",
   "welcomeStart": "Начать",
   "authAcceptAndContinue": "Принять и продолжить",
-  "authAcceptNotice": "Нажимая «Принять и продолжить», вы принимаете условия использования и политику конфиденциальности и подтверждаете, что достигли нужного возраста."
+  "authAcceptNotice": "Нажимая «Принять и продолжить», вы принимаете условия использования и политику конфиденциальности и подтверждаете, что достигли нужного возраста.",
+  "deleteAccountTitle": "Удалить мой аккаунт",
+  "deleteAccountWarning": "Это действие необратимо.",
+  "deleteAccountRemovedTitle": "Что будет удалено",
+  "deleteAccountRemovedProfile": "Твой профиль, фото и резервная копия",
+  "deleteAccountRemovedChats": "Твои чаты на этом телефоне",
+  "deleteAccountRemovedBadge": "Твой значок, без возврата за текущий месяц",
+  "deleteAccountKeptTitle": "Что останется",
+  "deleteAccountKeptMessages": "Сообщения, уже полученные твоими контактами",
+  "deleteAccountKeptProof": "Записи режима доказательства у других участников",
+  "deleteAccountKeptKory": "Журнал копилок Kory, который не удаляется",
+  "deleteAccountConfirmLabel": "Подтверди свой номер",
+  "deleteAccountMismatch": "Этот номер не совпадает с твоим аккаунтом.",
+  "deleteAccountFailed": "Не удалось удалить. Попробуй ещё раз."
 }

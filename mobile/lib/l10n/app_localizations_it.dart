@@ -6075,4 +6075,49 @@ class LIt extends L {
   @override
   String get authAcceptNotice =>
       'Toccando «Accetta e continua», accetti le condizioni d\'uso e l\'informativa sulla privacy e dichiari di avere l\'età richiesta.';
+
+  @override
+  String get deleteAccountTitle => 'Elimina il mio account';
+
+  @override
+  String get deleteAccountWarning => 'Questa azione è definitiva.';
+
+  @override
+  String get deleteAccountRemovedTitle => 'Cosa viene eliminato';
+
+  @override
+  String get deleteAccountRemovedProfile =>
+      'Il tuo profilo, la tua foto e il tuo backup';
+
+  @override
+  String get deleteAccountRemovedChats => 'Le tue chat su questo telefono';
+
+  @override
+  String get deleteAccountRemovedBadge =>
+      'Il tuo badge, senza rimborso del mese in corso';
+
+  @override
+  String get deleteAccountKeptTitle => 'Cosa rimane';
+
+  @override
+  String get deleteAccountKeptMessages =>
+      'I messaggi già ricevuti dai tuoi contatti';
+
+  @override
+  String get deleteAccountKeptProof =>
+      'Le tracce della modalità prova presso gli altri partecipanti';
+
+  @override
+  String get deleteAccountKeptKory =>
+      'Il registro delle collette Kory, che non si cancella';
+
+  @override
+  String get deleteAccountConfirmLabel => 'Conferma il tuo numero';
+
+  @override
+  String get deleteAccountMismatch =>
+      'Questo numero non corrisponde al tuo account.';
+
+  @override
+  String get deleteAccountFailed => 'Eliminazione non riuscita. Riprova.';
 }

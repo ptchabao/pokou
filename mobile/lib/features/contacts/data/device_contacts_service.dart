@@ -43,10 +43,18 @@ class DeviceContactsService {
     // le temps de tout analyser. Rien de tout cela ne touche à l'interface :
     // ça n'a aucune raison de bloquer une image.
     final raw = <({String name, List<String> numbers})>[
+      // Une fiche SANS NOM compte aussi : « j'ai son numéro » suffit pour
+      // la retrouver sur Pokou. Elle était ignorée — et la personne
+      // n'apparaissait jamais dans le carnet. Le numéro tient lieu de nom.
       for (final contact in deviceContacts)
-        if (contact.displayName.trim().isNotEmpty)
+        if (contact.phones.any((p) => p.number.trim().isNotEmpty))
           (
-            name: contact.displayName.trim(),
+            name: contact.displayName.trim().isNotEmpty
+                ? contact.displayName.trim()
+                : contact.phones
+                      .firstWhere((p) => p.number.trim().isNotEmpty)
+                      .number
+                      .trim(),
             numbers: [
               for (final phone in contact.phones)
                 if (phone.number.trim().isNotEmpty) phone.number.trim(),

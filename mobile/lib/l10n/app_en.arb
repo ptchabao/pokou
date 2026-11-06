@@ -1744,5 +1744,18 @@
   "koryLastRoundBody": "That was the last round: the tontine will be closed. The log stays available.",
   "welcomeStart": "Get started",
   "authAcceptAndContinue": "Accept and continue",
-  "authAcceptNotice": "By tapping “Accept and continue”, you accept the terms of use and the privacy policy, and confirm you are old enough."
+  "authAcceptNotice": "By tapping “Accept and continue”, you accept the terms of use and the privacy policy, and confirm you are old enough.",
+  "deleteAccountTitle": "Delete my account",
+  "deleteAccountWarning": "This action is permanent.",
+  "deleteAccountRemovedTitle": "What is deleted",
+  "deleteAccountRemovedProfile": "Your profile, photo and backup",
+  "deleteAccountRemovedChats": "Your chats on this phone",
+  "deleteAccountRemovedBadge": "Your badge, with no refund for the current month",
+  "deleteAccountKeptTitle": "What remains",
+  "deleteAccountKeptMessages": "Messages your contacts have already received",
+  "deleteAccountKeptProof": "Proof mode records held by other participants",
+  "deleteAccountKeptKory": "The Kory pot log, which cannot be erased",
+  "deleteAccountConfirmLabel": "Confirm your number",
+  "deleteAccountMismatch": "This number doesn't match your account.",
+  "deleteAccountFailed": "Deletion failed. Try again."
 }

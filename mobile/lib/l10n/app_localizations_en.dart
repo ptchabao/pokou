@@ -6038,4 +6038,48 @@ class LEn extends L {
   @override
   String get authAcceptNotice =>
       'By tapping “Accept and continue”, you accept the terms of use and the privacy policy, and confirm you are old enough.';
+
+  @override
+  String get deleteAccountTitle => 'Delete my account';
+
+  @override
+  String get deleteAccountWarning => 'This action is permanent.';
+
+  @override
+  String get deleteAccountRemovedTitle => 'What is deleted';
+
+  @override
+  String get deleteAccountRemovedProfile => 'Your profile, photo and backup';
+
+  @override
+  String get deleteAccountRemovedChats => 'Your chats on this phone';
+
+  @override
+  String get deleteAccountRemovedBadge =>
+      'Your badge, with no refund for the current month';
+
+  @override
+  String get deleteAccountKeptTitle => 'What remains';
+
+  @override
+  String get deleteAccountKeptMessages =>
+      'Messages your contacts have already received';
+
+  @override
+  String get deleteAccountKeptProof =>
+      'Proof mode records held by other participants';
+
+  @override
+  String get deleteAccountKeptKory =>
+      'The Kory pot log, which cannot be erased';
+
+  @override
+  String get deleteAccountConfirmLabel => 'Confirm your number';
+
+  @override
+  String get deleteAccountMismatch =>
+      'This number doesn\'t match your account.';
+
+  @override
+  String get deleteAccountFailed => 'Deletion failed. Try again.';
 }

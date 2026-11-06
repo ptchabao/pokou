@@ -1744,5 +1744,18 @@
   "koryLastRoundBody": "كانت هذه الدورة الأخيرة: سيُغلق التونتين. يبقى السجل متاحاً.",
   "welcomeStart": "ابدأ",
   "authAcceptAndContinue": "الموافقة والمتابعة",
-  "authAcceptNotice": "بلمس «الموافقة والمتابعة»، فإنك توافق على شروط الاستخدام وسياسة الخصوصية، وتقرّ بأنك بالغ السن المطلوب."
+  "authAcceptNotice": "بلمس «الموافقة والمتابعة»، فإنك توافق على شروط الاستخدام وسياسة الخصوصية، وتقرّ بأنك بالغ السن المطلوب.",
+  "deleteAccountTitle": "حذف حسابي",
+  "deleteAccountWarning": "هذا الإجراء نهائي.",
+  "deleteAccountRemovedTitle": "ما سيُحذف",
+  "deleteAccountRemovedProfile": "ملفك الشخصي وصورتك ونسختك الاحتياطية",
+  "deleteAccountRemovedChats": "محادثاتك على هذا الهاتف",
+  "deleteAccountRemovedBadge": "شارتك، دون استرداد الشهر الجاري",
+  "deleteAccountKeptTitle": "ما يبقى",
+  "deleteAccountKeptMessages": "الرسائل التي استلمها جهات اتصالك بالفعل",
+  "deleteAccountKeptProof": "سجلات وضع الإثبات لدى المشاركين الآخرين",
+  "deleteAccountKeptKory": "سجل صناديق Kory الذي لا يُمحى",
+  "deleteAccountConfirmLabel": "أكّد رقمك",
+  "deleteAccountMismatch": "هذا الرقم لا يطابق حسابك.",
+  "deleteAccountFailed": "فشل الحذف. حاول مرة أخرى."
 }

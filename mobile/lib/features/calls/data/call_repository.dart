@@ -450,7 +450,7 @@ class CallRepository {
     };
     final response = await _api.post(
       '/calls/invite',
-      body: {'room': room, 'user_ids': userIds, 'sealed_keys': ?sealedKeys},
+      body: {'room': room, 'user_ids': userIds, 'sealed_keys': sealedKeys},
     );
     return ((response['participant_ids'] as List?) ?? const []).cast<int>();
   }

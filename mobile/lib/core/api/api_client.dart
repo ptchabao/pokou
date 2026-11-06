@@ -410,13 +410,18 @@ class ApiClient {
     }
   }
 
-  Future<dynamic> delete(String path, {bool authenticated = true}) async {
+  Future<dynamic> delete(
+    String path, {
+    Map<String, dynamic>? body,
+    bool authenticated = true,
+  }) async {
     try {
       final response = await _sendWithRefresh(
         () async => _http
             .delete(
               Uri.parse('$baseUrl$path'),
               headers: await _headers(authenticated: authenticated),
+              body: body != null ? jsonEncode(body) : null,
             )
             .timeout(const Duration(seconds: 20)),
         authenticated: authenticated,

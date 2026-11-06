@@ -10574,6 +10574,84 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'En touchant « Accepter et continuer », tu acceptes les conditions d\'utilisation et la politique de confidentialité, et tu déclares avoir l\'âge requis.'**
   String get authAcceptNotice;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette action est définitive.'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @deleteAccountRemovedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui est supprimé'**
+  String get deleteAccountRemovedTitle;
+
+  /// No description provided for @deleteAccountRemovedProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton profil, ta photo et ta sauvegarde'**
+  String get deleteAccountRemovedProfile;
+
+  /// No description provided for @deleteAccountRemovedChats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes discussions sur ce téléphone'**
+  String get deleteAccountRemovedChats;
+
+  /// No description provided for @deleteAccountRemovedBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton badge, sans remboursement du mois en cours'**
+  String get deleteAccountRemovedBadge;
+
+  /// No description provided for @deleteAccountKeptTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui reste'**
+  String get deleteAccountKeptTitle;
+
+  /// No description provided for @deleteAccountKeptMessages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les messages déjà reçus par tes contacts'**
+  String get deleteAccountKeptMessages;
+
+  /// No description provided for @deleteAccountKeptProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les traces du mode preuve chez les autres participants'**
+  String get deleteAccountKeptProof;
+
+  /// No description provided for @deleteAccountKeptKory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le journal des cagnottes Kory, qui ne s’efface pas'**
+  String get deleteAccountKeptKory;
+
+  /// No description provided for @deleteAccountConfirmLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirme ton numéro'**
+  String get deleteAccountConfirmLabel;
+
+  /// No description provided for @deleteAccountMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro ne correspond pas à ton compte.'**
+  String get deleteAccountMismatch;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La suppression a échoué. Réessaie.'**
+  String get deleteAccountFailed;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
