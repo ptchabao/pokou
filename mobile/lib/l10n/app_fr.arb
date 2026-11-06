@@ -858,7 +858,7 @@
   },
   "groupLeaveAction": "Quitter",
   "groupNoMessage": "Aucun message. Lance la discussion.",
-  "groupNotEncryptedNotice": "Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écris en privé.",
+  "groupNotEncryptedNotice": "Les messages de ce groupe sont chiffrés de bout en bout : seuls ses membres peuvent les lire, pas même Pokou. Chaque arrivée ou départ change les clés.",
   "botLabel": "Bot",
   "botConversationNotice": "Tu écris au bot d'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l'entreprise lit ce que tu lui envoies.",
   "groupAdminsOnly": "Seuls les administrateurs peuvent publier dans les annonces.",

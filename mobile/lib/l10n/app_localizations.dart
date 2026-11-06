@@ -3624,7 +3624,7 @@ abstract class L {
   /// No description provided for @groupNotEncryptedNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écris en privé.'**
+  /// **'Les messages de ce groupe sont chiffrés de bout en bout : seuls ses membres peuvent les lire, pas même Pokou. Chaque arrivée ou départ change les clés.'**
   String get groupNotEncryptedNotice;
 
   /// No description provided for @botLabel.

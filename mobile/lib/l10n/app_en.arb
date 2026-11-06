@@ -586,7 +586,7 @@
   "groupLeaveBody": "You'll stop receiving messages from \"{name}\".",
   "groupLeaveAction": "Leave",
   "groupNoMessage": "No messages. Start the conversation.",
-  "groupNotEncryptedNotice": "Messages in this group are not end-to-end encrypted: they are protected in transit, but the Pokou server can read them. For anything confidential, write privately.",
+  "groupNotEncryptedNotice": "Messages in this group are end-to-end encrypted: only its members can read them, not even Pokou. Keys change whenever someone joins or leaves.",
   "botLabel": "Bot",
   "botConversationNotice": "You are writing to a business's bot. These messages are not end-to-end encrypted: the business reads what you send.",
   "groupAdminsOnly": "Only admins can post in announcements.",

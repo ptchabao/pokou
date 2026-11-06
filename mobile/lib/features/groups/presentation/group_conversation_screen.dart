@@ -2880,11 +2880,9 @@ class _GroupMessageTextState extends State<_GroupMessageText> {
 
 /// Ce que le fil d'un groupe dit du chiffrement — en tête, une fois.
 ///
-/// Les groupes ne sont PAS chiffrés de bout en bout (voir pokou/README.md,
-/// § Chiffrement de bout en bout) : le serveur peut lire leurs messages. Le
-/// dire est la seule assurance honnête possible. Rien n'était affiché, et
-/// l'absence de mention se lisait comme l'assurance des conversations
-/// privées, qui elles portent la leur.
+/// Les groupes sont chiffrés de bout en bout par clés d'expéditeur (Signal
+/// sender keys) : le serveur refuse tout message en clair et ne stocke que
+/// du chiffré. Les clés changent à chaque arrivée ou départ (crypto_epoch).
 class GroupEncryptionNotice extends StatelessWidget {
   const GroupEncryptionNotice({super.key});
 
@@ -2905,7 +2903,7 @@ class GroupEncryptionNotice extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                Icons.lock_open_outlined,
+                Icons.lock_outline,
                 size: 16,
                 color: AppColors.textSecondary,
               ),

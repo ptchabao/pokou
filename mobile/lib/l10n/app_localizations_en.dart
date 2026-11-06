@@ -1962,7 +1962,7 @@ class LEn extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'Messages in this group are not end-to-end encrypted: they are protected in transit, but the Pokou server can read them. For anything confidential, write privately.';
+      'Messages in this group are end-to-end encrypted: only its members can read them, not even Pokou. Keys change whenever someone joins or leaves.';
 
   @override
   String get botLabel => 'Bot';

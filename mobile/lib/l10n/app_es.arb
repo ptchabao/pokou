@@ -586,7 +586,7 @@
   "groupLeaveBody": "Dejarás de recibir los mensajes de «{name}».",
   "groupLeaveAction": "Salir",
   "groupNoMessage": "Sin mensajes. Empieza la conversación.",
-  "groupNotEncryptedNotice": "Los mensajes de este grupo no están cifrados de extremo a extremo: están protegidos durante el envío, pero el servidor de Pokou puede leerlos. Para algo confidencial, escribe en privado.",
+  "groupNotEncryptedNotice": "Los mensajes de este grupo están cifrados de extremo a extremo: solo sus miembros pueden leerlos, ni siquiera Pokou. Las claves cambian cada vez que alguien entra o sale.",
   "botLabel": "Bot",
   "botConversationNotice": "Estás escribiendo al bot de una empresa. Estos mensajes no están cifrados de extremo a extremo: la empresa lee lo que le envías.",
   "groupAdminsOnly": "Solo los administradores pueden publicar en anuncios.",

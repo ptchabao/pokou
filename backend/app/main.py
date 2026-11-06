@@ -11,6 +11,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
 from app import models  # noqa: F401 — enregistre toutes les tables sur Base.metadata
+from app.services.events import live_updates
 from app.api.router import api_router, public_router
 from app.core.config import get_settings
 from app.core.database import Base, engine
@@ -120,6 +121,9 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
 @app.middleware("http")
 async def add_trace_id_and_metrics(request: Request, call_next):
     """Ajoute un X-Trace-ID à chaque réponse et alimente les métriques."""
+    # Les routes synchrones (pool de threads) poussent le temps réel dans
+    # CETTE boucle — voir live_updates.py.
+    live_updates.bind_loop()
     if request.method == "OPTIONS":
         return await call_next(request)
 
@@ -168,6 +172,9 @@ async def internal_error_handler(request: Request, exc: Exception):
         },
     )
 
+
+# Temps réel Kory / Honam : écoute des commits (voir live_updates.py).
+live_updates.install()
 
 app.include_router(api_router)
 app.include_router(public_router)

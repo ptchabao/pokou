@@ -1970,7 +1970,7 @@ class LIt extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'I messaggi di questo gruppo non sono crittografati end-to-end: sono protetti durante il trasporto, ma il server di Pokou può leggerli. Per qualcosa di riservato, scrivi in privato.';
+      'I messaggi di questo gruppo sono crittografati end-to-end: solo i membri possono leggerli, nemmeno Pokou. Le chiavi cambiano a ogni ingresso o uscita.';
 
   @override
   String get botLabel => 'Bot';

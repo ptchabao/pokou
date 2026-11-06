@@ -1968,7 +1968,7 @@ class LEs extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'Los mensajes de este grupo no están cifrados de extremo a extremo: están protegidos durante el envío, pero el servidor de Pokou puede leerlos. Para algo confidencial, escribe en privado.';
+      'Los mensajes de este grupo están cifrados de extremo a extremo: solo sus miembros pueden leerlos, ni siquiera Pokou. Las claves cambian cada vez que alguien entra o sale.';
 
   @override
   String get botLabel => 'Bot';

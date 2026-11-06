@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/sync/pokou_sync_engine.dart';
 import '../data/kory_model.dart';
 import '../data/kory_repository.dart';
 
@@ -9,11 +10,19 @@ final koryRepositoryProvider = Provider<KoryRepository>((ref) {
   return KoryRepository(apiClient: ref.watch(apiClientProvider));
 });
 
+/// Temps réel : le serveur pousse `kory:updated` à chaque contribution,
+/// confirmation, tour ou clôture — l'écran se relit tout seul.
+void _liveKory(Ref ref) => listenDurableEventTypes(ref, (type) {
+  if (type == 'kory:updated') ref.invalidateSelf();
+});
+
 final koryPotsProvider = FutureProvider.autoDispose<List<KoryPot>>((ref) {
+  _liveKory(ref);
   return ref.watch(koryRepositoryProvider).pots();
 });
 
 final korySummaryProvider = FutureProvider.autoDispose<KorySummary>((ref) {
+  _liveKory(ref);
   return ref.watch(koryRepositoryProvider).summary();
 });
 
@@ -21,6 +30,7 @@ final koryPotProvider = FutureProvider.autoDispose.family<KoryPot, int>((
   ref,
   potId,
 ) {
+  _liveKory(ref);
   return ref.watch(koryRepositoryProvider).pot(potId);
 });
 

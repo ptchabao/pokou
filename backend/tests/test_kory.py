@@ -204,3 +204,26 @@ def test_cloture_par_l_organisateur_seulement(client):
     assert client.post(f"/api/v1/kory/pots/{pot['id']}/close", headers=organizer).json()["status"] == "CLOSED"
     late = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 500}, headers=member)
     assert late.status_code == 409
+
+
+def test_une_contribution_previent_le_collecteur_en_temps_reel(client):
+    from unittest.mock import AsyncMock
+
+    from app.api.v1.messaging.ws import manager
+
+    organizer, organizer_id = _signup(client)
+    member, _ = _signup(client)
+    pot = client.post("/api/v1/kory/pots", json={"title": "Baptême"}, headers=organizer).json()
+    client.post("/api/v1/kory/join", json={"code": pot["join_code"]}, headers=member)
+
+    with patch.object(manager, "send_to_user", new=AsyncMock(return_value=True)) as envoi:
+        client.post(
+            f"/api/v1/kory/pots/{pot['id']}/entries",
+            json={"amount": 1500, "wallet_reference": "MP1"},
+            headers=member,
+        )
+        # La poussée part APRÈS le commit, dans une tâche : une requête de
+        # plus laisse à la boucle le temps de l'exécuter.
+        client.get(f"/api/v1/kory/pots/{pot['id']}", headers=organizer)
+        events = [(c.args[0], c.args[1]) for c in envoi.await_args_list]
+    assert (organizer_id, {"type": "kory:updated", "pot_id": pot["id"]}) in events

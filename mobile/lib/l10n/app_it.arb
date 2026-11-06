@@ -586,7 +586,7 @@
   "groupLeaveBody": "Non riceverai più i messaggi di «{name}».",
   "groupLeaveAction": "Esci",
   "groupNoMessage": "Nessun messaggio. Avvia la conversazione.",
-  "groupNotEncryptedNotice": "I messaggi di questo gruppo non sono crittografati end-to-end: sono protetti durante il trasporto, ma il server di Pokou può leggerli. Per qualcosa di riservato, scrivi in privato.",
+  "groupNotEncryptedNotice": "I messaggi di questo gruppo sono crittografati end-to-end: solo i membri possono leggerli, nemmeno Pokou. Le chiavi cambiano a ogni ingresso o uscita.",
   "botLabel": "Bot",
   "botConversationNotice": "Stai scrivendo al bot di un'azienda. Questi messaggi non sono crittografati end-to-end: l'azienda legge ciò che invii.",
   "groupAdminsOnly": "Solo gli amministratori possono pubblicare negli annunci.",
