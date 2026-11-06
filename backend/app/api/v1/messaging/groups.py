@@ -7,6 +7,7 @@ membre — le ConnectionManager n'a délibérément aucune notion de groupe, c'e
 ici qu'on résout l'appartenance (la session DB est déjà à portée de main).
 """
 import secrets
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -27,6 +28,7 @@ from app.services.messaging import notification_policy
 from app.services.media import sticker_service
 from app.services.notifications.push_service import send_push
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/groups", tags=["Pokou groups"])
 
 # Fenêtre de modification d'un message, alignée sur WhatsApp. Une limite est
@@ -958,6 +960,79 @@ async def join_by_invite(
         exclude_user_id=user_id,
     )
     return _serialize_group_for(group, user_id, with_members=True)
+
+
+@router.delete("/{group_id}")
+async def delete_group(
+    group_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Supprimer le groupe — réservé à son CRÉATEUR.
+
+    Pour tous : la conversation, ses messages, ses invitations et ses clés
+    disparaissent. Les cagnottes Kory et le journal d'appels ne pointent
+    plus vers lui, mais restent (leur clé étrangère passe à NULL).
+
+    Deux refus :
+    - en mode preuve, la conversation sert de trace aux autres membres ;
+      la supprimer reviendrait à effacer la preuve par la porte de service ;
+    - le groupe d'annonces d'une communauté appartient à la communauté.
+    """
+    user_id = current_user["user_id"]
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Groupe introuvable")
+    _require_membership(db, group_id, user_id)
+    if group.created_by != user_id:
+        raise HTTPException(
+            status_code=403, detail="Seul le créateur peut supprimer le groupe"
+        )
+    if group.proof_mode:
+        raise HTTPException(
+            status_code=409,
+            detail="Le mode preuve est actif : la discussion sert de trace aux membres et ne peut pas être supprimée.",
+        )
+    if group.is_announcement and group.community_id is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="Le groupe d'annonces appartient à sa communauté.",
+        )
+
+    member_ids = [
+        row[0]
+        for row in db.query(GroupMember.user_id).filter(GroupMember.group_id == group_id).all()
+    ]
+    # Explicite plutôt que de compter sur le ON DELETE CASCADE de la base :
+    # même résultat, et vrai aussi là où les clés étrangères ne sont pas
+    # appliquées (SQLite des tests).
+    message_ids = [
+        row[0] for row in db.query(GroupMessage.id).filter(GroupMessage.group_id == group_id).all()
+    ]
+    if message_ids:
+        db.query(GroupMessageReaction).filter(
+            GroupMessageReaction.message_id.in_(message_ids)
+        ).delete(synchronize_session=False)
+        db.query(GroupMessageMention).filter(
+            GroupMessageMention.message_id.in_(message_ids)
+        ).delete(synchronize_session=False)
+    db.query(GroupMessage).filter(GroupMessage.group_id == group_id).delete(synchronize_session=False)
+    db.query(GroupInvitation).filter(GroupInvitation.group_id == group_id).delete(synchronize_session=False)
+    db.query(GroupSenderKeyDistribution).filter(
+        GroupSenderKeyDistribution.group_id == group_id
+    ).delete(synchronize_session=False)
+    db.delete(group)
+    db.commit()
+
+    event = {"type": "group:deleted", "group_id": group_id}
+    for member_id in member_ids:
+        if member_id == user_id:
+            continue
+        try:
+            await manager.send_to_user(member_id, event)
+        except Exception:  # pragma: no cover - transport best-effort
+            logger.warning("group:deleted non remis à %s", member_id, exc_info=True)
+    return {"deleted": True, "group_id": group_id}
 
 
 @router.delete("/{group_id}/members/{user_id}")

@@ -517,7 +517,7 @@
   "marketBoostDone": "تم الدفع: الإعلان مموَّل.",
   "marketBoostPending": "دفع التعزيز قيد الانتظار.",
   "marketBoostFailed": "تعذّر التعزيز الآن.",
-  "marketTitle": "السوق",
+  "marketTitle": "Assimé",
   "marketBecomeSeller": "كن بائعًا موثّقًا",
   "marketAddProduct": "أضف منتجًا",
   "marketAroundYou": "حولك",
@@ -1832,5 +1832,9 @@
   "pinForgotWarning": "تمنع مهلة 7 أيام من سرق شريحتك من الاستيلاء على حسابك فورًا.",
   "pinForgotMeanwhile": "أثناء الانتظار، تظل جهات اتصالك تراك ورسائلك بانتظارك.",
   "pinForgotContinue": "متابعة",
-  "pinForgotScheduled": "تم. ابتداءً من {date} سيكفي رمز الرسائل القصيرة لتسجيل الدخول."
+  "pinForgotScheduled": "تم. ابتداءً من {date} سيكفي رمز الرسائل القصيرة لتسجيل الدخول.",
+  "groupDelete": "حذف المجموعة",
+  "groupDeleteTitle": "حذف «{name}»؟",
+  "groupDeleteBody": "تختفي المجموعة لدى جميع أعضائها مع رسائلها. هذا الإجراء نهائي.",
+  "groupDeleteFailed": "تعذّر الحذف — حاول مرة أخرى."
 }

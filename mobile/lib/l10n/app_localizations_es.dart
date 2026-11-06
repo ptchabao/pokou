@@ -1745,7 +1745,7 @@ class LEs extends L {
   String get marketBoostFailed => 'No se puede impulsar ahora mismo.';
 
   @override
-  String get marketTitle => 'Marketplace';
+  String get marketTitle => 'Assimé';
 
   @override
   String get marketBecomeSeller => 'Hazte vendedor verificado';
@@ -6359,4 +6359,19 @@ class LEs extends L {
   String pinForgotScheduled(String date) {
     return 'Anotado. A partir del $date, bastará el código SMS para entrar.';
   }
+
+  @override
+  String get groupDelete => 'Eliminar el grupo';
+
+  @override
+  String groupDeleteTitle(String name) {
+    return '¿Eliminar «$name»?';
+  }
+
+  @override
+  String get groupDeleteBody =>
+      'El grupo desaparece para todos sus miembros, con sus mensajes. Es definitivo.';
+
+  @override
+  String get groupDeleteFailed => 'No se pudo eliminar — inténtalo de nuevo.';
 }

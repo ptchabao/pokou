@@ -517,7 +517,7 @@
   "marketBoostDone": "Pago realizado: anuncio patrocinado.",
   "marketBoostPending": "Pago del impulso pendiente.",
   "marketBoostFailed": "No se puede impulsar ahora mismo.",
-  "marketTitle": "Marketplace",
+  "marketTitle": "Assimé",
   "marketBecomeSeller": "Hazte vendedor verificado",
   "marketAddProduct": "Añadir un producto",
   "marketAroundYou": "A tu alrededor",
@@ -1832,5 +1832,9 @@
   "pinForgotWarning": "El plazo de 7 días impide que quien robe tu tarjeta SIM se quede con tu cuenta de inmediato.",
   "pinForgotMeanwhile": "Mientras esperas, tus contactos te siguen viendo y tus mensajes te esperan.",
   "pinForgotContinue": "Continuar",
-  "pinForgotScheduled": "Anotado. A partir del {date}, bastará el código SMS para entrar."
+  "pinForgotScheduled": "Anotado. A partir del {date}, bastará el código SMS para entrar.",
+  "groupDelete": "Eliminar el grupo",
+  "groupDeleteTitle": "¿Eliminar «{name}»?",
+  "groupDeleteBody": "El grupo desaparece para todos sus miembros, con sus mensajes. Es definitivo.",
+  "groupDeleteFailed": "No se pudo eliminar — inténtalo de nuevo."
 }

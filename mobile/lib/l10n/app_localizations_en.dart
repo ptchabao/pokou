@@ -1739,7 +1739,7 @@ class LEn extends L {
   String get marketBoostFailed => 'Can\'t boost right now.';
 
   @override
-  String get marketTitle => 'Marketplace';
+  String get marketTitle => 'Assimé';
 
   @override
   String get marketBecomeSeller => 'Become a verified seller';
@@ -6335,4 +6335,19 @@ class LEn extends L {
   String pinForgotScheduled(String date) {
     return 'Noted. From $date, the SMS code will be enough to sign in.';
   }
+
+  @override
+  String get groupDelete => 'Delete group';
+
+  @override
+  String groupDeleteTitle(String name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get groupDeleteBody =>
+      'The group disappears for all its members, with its messages. This cannot be undone.';
+
+  @override
+  String get groupDeleteFailed => 'Couldn\'t delete — try again.';
 }

@@ -517,7 +517,7 @@
   "marketBoostDone": "Payment done: listing sponsored.",
   "marketBoostPending": "Boost payment pending.",
   "marketBoostFailed": "Can't boost right now.",
-  "marketTitle": "Marketplace",
+  "marketTitle": "Assimé",
   "marketBecomeSeller": "Become a verified seller",
   "marketAddProduct": "Add a product",
   "marketAroundYou": "Around you",
@@ -1832,5 +1832,9 @@
   "pinForgotWarning": "The 7-day delay stops someone who stole your SIM card from taking your account right away.",
   "pinForgotMeanwhile": "While you wait, your contacts still see you and your messages wait for you.",
   "pinForgotContinue": "Continue",
-  "pinForgotScheduled": "Noted. From {date}, the SMS code will be enough to sign in."
+  "pinForgotScheduled": "Noted. From {date}, the SMS code will be enough to sign in.",
+  "groupDelete": "Delete group",
+  "groupDeleteTitle": "Delete “{name}”?",
+  "groupDeleteBody": "The group disappears for all its members, with its messages. This cannot be undone.",
+  "groupDeleteFailed": "Couldn't delete — try again."
 }

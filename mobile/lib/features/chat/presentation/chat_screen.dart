@@ -118,7 +118,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final style = AiStyle.of(context);
     // L'assistant est un service Mahizu : tant qu'aucun compte n'est
     // rattaché, l'écran propose de le faire au lieu d'échouer à chaque envoi.
-    if (!ref.watch(mahizuSessionProvider).isConnected) {
+    // Baba (kNoMonitor) répond via l'API Pokou ; seuls les moniteurs
+    // Mahizu demandent encore un compte Mahizu.
+    if (widget.monitorId != kNoMonitor &&
+        !ref.watch(mahizuSessionProvider).isConnected) {
       return Scaffold(
         backgroundColor: style.background,
         body: SafeArea(

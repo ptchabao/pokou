@@ -261,7 +261,8 @@ class MoreScreen extends ConsumerWidget {
               _Row(Icons.call_outlined, l.navCalls,
                   () => push(const CallLogScreen())),
               _Row(Icons.storefront_outlined, 'Assimé',
-                  () => push(const MarketplaceScreen())),
+                  () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const MarketplaceScreen()))),
               _Row(Icons.apps_rounded, l.navModules,
                   () => push(const ModulesScreen())),
               _Row(Icons.campaign_outlined, l.navBroadcasts,

@@ -1743,7 +1743,7 @@ class LRu extends L {
   String get marketBoostFailed => 'Сейчас продвинуть нельзя.';
 
   @override
-  String get marketTitle => 'Маркет';
+  String get marketTitle => 'Assimé';
 
   @override
   String get marketBecomeSeller => 'Стать проверенным продавцом';
@@ -6410,4 +6410,19 @@ class LRu extends L {
   String pinForgotScheduled(String date) {
     return 'Принято. С $date для входа хватит SMS-кода.';
   }
+
+  @override
+  String get groupDelete => 'Удалить группу';
+
+  @override
+  String groupDeleteTitle(String name) {
+    return 'Удалить «$name»?';
+  }
+
+  @override
+  String get groupDeleteBody =>
+      'Группа исчезнет у всех участников вместе с сообщениями. Это необратимо.';
+
+  @override
+  String get groupDeleteFailed => 'Не удалось удалить — попробуй ещё раз.';
 }

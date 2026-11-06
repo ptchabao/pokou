@@ -1747,7 +1747,7 @@ class LIt extends L {
   String get marketBoostFailed => 'Promozione non possibile al momento.';
 
   @override
-  String get marketTitle => 'Marketplace';
+  String get marketTitle => 'Assimé';
 
   @override
   String get marketBecomeSeller => 'Diventa venditore verificato';
@@ -6376,4 +6376,19 @@ class LIt extends L {
   String pinForgotScheduled(String date) {
     return 'Fatto. Dal $date, basterà il codice SMS per accedere.';
   }
+
+  @override
+  String get groupDelete => 'Elimina il gruppo';
+
+  @override
+  String groupDeleteTitle(String name) {
+    return 'Eliminare «$name»?';
+  }
+
+  @override
+  String get groupDeleteBody =>
+      'Il gruppo scompare per tutti i membri, con i suoi messaggi. È definitivo.';
+
+  @override
+  String get groupDeleteFailed => 'Eliminazione non riuscita — riprova.';
 }

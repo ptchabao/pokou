@@ -781,6 +781,21 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     }
   }
 
+  /// Message d'erreur du serveur s'il refuse (mode preuve, annonces),
+  /// sinon le message générique.
+  Future<bool> deleteGroup() async {
+    try {
+      await _repository.deleteGroup(groupId);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(error: _l.groupDeleteFailed);
+      return false;
+    }
+  }
+
   Future<bool> removeMember(int userId) async {
     try {
       await _repository.removeMember(groupId: groupId, userId: userId);

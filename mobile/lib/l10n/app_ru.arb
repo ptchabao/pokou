@@ -517,7 +517,7 @@
   "marketBoostDone": "Оплачено: объявление продвигается.",
   "marketBoostPending": "Оплата продвижения ожидается.",
   "marketBoostFailed": "Сейчас продвинуть нельзя.",
-  "marketTitle": "Маркет",
+  "marketTitle": "Assimé",
   "marketBecomeSeller": "Стать проверенным продавцом",
   "marketAddProduct": "Добавить товар",
   "marketAroundYou": "Рядом с вами",
@@ -1832,5 +1832,9 @@
   "pinForgotWarning": "7-дневная задержка не даёт укравшему SIM-карту сразу захватить аккаунт.",
   "pinForgotMeanwhile": "Пока ждёшь, контакты видят тебя, а сообщения ждут.",
   "pinForgotContinue": "Продолжить",
-  "pinForgotScheduled": "Принято. С {date} для входа хватит SMS-кода."
+  "pinForgotScheduled": "Принято. С {date} для входа хватит SMS-кода.",
+  "groupDelete": "Удалить группу",
+  "groupDeleteTitle": "Удалить «{name}»?",
+  "groupDeleteBody": "Группа исчезнет у всех участников вместе с сообщениями. Это необратимо.",
+  "groupDeleteFailed": "Не удалось удалить — попробуй ещё раз."
 }

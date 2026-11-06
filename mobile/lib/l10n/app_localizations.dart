@@ -3210,7 +3210,7 @@ abstract class L {
   /// No description provided for @marketTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Marketplace'**
+  /// **'Assimé'**
   String get marketTitle;
 
   /// No description provided for @marketBecomeSeller.
@@ -11102,6 +11102,30 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'C’est noté. À partir du {date}, le code SMS suffira pour te connecter.'**
   String pinForgotScheduled(String date);
+
+  /// No description provided for @groupDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le groupe'**
+  String get groupDelete;
+
+  /// No description provided for @groupDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer « {name} » ?'**
+  String groupDeleteTitle(String name);
+
+  /// No description provided for @groupDeleteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le groupe disparaît pour tous ses membres, avec ses messages. Cette action est définitive.'**
+  String get groupDeleteBody;
+
+  /// No description provided for @groupDeleteFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suppression impossible — réessaie.'**
+  String get groupDeleteFailed;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

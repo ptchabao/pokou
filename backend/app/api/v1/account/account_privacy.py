@@ -26,7 +26,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import CallLog, Community, CommunityMember, Contact, DeviceToken, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, MediaAsset, MessageReaction, PollVote, Status, StatusPrivacy, StatusPrivacyEntry, StatusView, Token, User
+from app.models import BabaMessage, CallLog, Community, CommunityMember, Contact, DeviceToken, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, MediaAsset, MessageReaction, PollVote, Status, StatusPrivacy, StatusPrivacyEntry, StatusView, Token, User
 from app.services.media import media_storage
 from app.services.privacy import privacy_service
 from app.core.security import get_current_user, hash_password, verify_password
@@ -473,6 +473,9 @@ async def delete_my_account(
             status_code=400,
             detail="Le numéro saisi ne correspond pas à celui du compte — la suppression est annulée",
         )
+
+    # Le fil avec Baba n'appartient qu'à moi.
+    db.query(BabaMessage).filter(BabaMessage.user_id == user.id).delete(synchronize_session=False)
 
     statuses = db.query(Status).filter(Status.user_id == user.id).all()
     status_ids = [status_row.id for status_row in statuses]

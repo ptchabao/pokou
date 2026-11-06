@@ -765,7 +765,7 @@
   "marketBoostDone": "Paiement effectué : annonce sponsorisée.",
   "marketBoostPending": "Paiement du boost en attente.",
   "marketBoostFailed": "Boost impossible pour le moment.",
-  "marketTitle": "Marketplace",
+  "marketTitle": "Assimé",
   "marketBecomeSeller": "Devenir vendeur vérifié",
   "marketAddProduct": "Ajouter un produit",
   "marketAroundYou": "Près de chez toi",
@@ -3020,6 +3020,17 @@
   "@pinForgotScheduled": {
     "placeholders": {
       "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupDelete": "Supprimer le groupe",
+  "groupDeleteTitle": "Supprimer « {name} » ?",
+  "groupDeleteBody": "Le groupe disparaît pour tous ses membres, avec ses messages. Cette action est définitive.",
+  "groupDeleteFailed": "Suppression impossible — réessaie.",
+  "@groupDeleteTitle": {
+    "placeholders": {
+      "name": {
         "type": "String"
       }
     }

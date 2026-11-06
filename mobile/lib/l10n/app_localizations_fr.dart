@@ -1747,7 +1747,7 @@ class LFr extends L {
   String get marketBoostFailed => 'Boost impossible pour le moment.';
 
   @override
-  String get marketTitle => 'Marketplace';
+  String get marketTitle => 'Assimé';
 
   @override
   String get marketBecomeSeller => 'Devenir vendeur vérifié';
@@ -6378,4 +6378,19 @@ class LFr extends L {
   String pinForgotScheduled(String date) {
     return 'C’est noté. À partir du $date, le code SMS suffira pour te connecter.';
   }
+
+  @override
+  String get groupDelete => 'Supprimer le groupe';
+
+  @override
+  String groupDeleteTitle(String name) {
+    return 'Supprimer « $name » ?';
+  }
+
+  @override
+  String get groupDeleteBody =>
+      'Le groupe disparaît pour tous ses membres, avec ses messages. Cette action est définitive.';
+
+  @override
+  String get groupDeleteFailed => 'Suppression impossible — réessaie.';
 }

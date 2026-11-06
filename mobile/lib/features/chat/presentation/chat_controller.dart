@@ -5,6 +5,7 @@ import '../../../core/l10n/l10n_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/mahizu/mahizu_session.dart';
+import '../../../core/providers.dart';
 import '../data/chat_local_store.dart';
 import '../data/chat_message_model.dart';
 import '../data/chat_repository.dart';
@@ -21,8 +22,10 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
   );
 });
 
+/// Baba est servi par l'API POKOU (`/baba/*`), avec les modèles de langage
+/// qu'elle a branchés — plus besoin d'un compte Mahizu pour lui parler.
 final minouRepositoryProvider = Provider<MinouRepository>((ref) {
-  return MinouRepository(apiClient: ref.watch(mahizuApiClientProvider));
+  return MinouRepository(apiClient: ref.watch(apiClientProvider));
 });
 
 /// Dans quel monde se trouve l'utilisateur — alertes de moniteur, ou

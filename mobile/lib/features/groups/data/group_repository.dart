@@ -355,6 +355,9 @@ class GroupRepository {
   Future<void> removeMember({required int groupId, required int userId}) =>
       _api.delete('/groups/$groupId/members/$userId');
 
+  /// Supprime le groupe pour tous — réservé au créateur côté serveur.
+  Future<void> deleteGroup(int groupId) => _api.delete('/groups/$groupId');
+
   /// Renommage et/ou photo. `clearAvatar` est distinct d'un
   /// `avatarMediaId` nul : « retirer la photo » et « ne pas y toucher » ne
   /// peuvent pas se dire avec la même valeur.

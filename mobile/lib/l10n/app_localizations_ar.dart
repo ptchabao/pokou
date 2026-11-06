@@ -1722,7 +1722,7 @@ class LAr extends L {
   String get marketBoostFailed => 'تعذّر التعزيز الآن.';
 
   @override
-  String get marketTitle => 'السوق';
+  String get marketTitle => 'Assimé';
 
   @override
   String get marketBecomeSeller => 'كن بائعًا موثّقًا';
@@ -6335,4 +6335,19 @@ class LAr extends L {
   String pinForgotScheduled(String date) {
     return 'تم. ابتداءً من $date سيكفي رمز الرسائل القصيرة لتسجيل الدخول.';
   }
+
+  @override
+  String get groupDelete => 'حذف المجموعة';
+
+  @override
+  String groupDeleteTitle(String name) {
+    return 'حذف «$name»؟';
+  }
+
+  @override
+  String get groupDeleteBody =>
+      'تختفي المجموعة لدى جميع أعضائها مع رسائلها. هذا الإجراء نهائي.';
+
+  @override
+  String get groupDeleteFailed => 'تعذّر الحذف — حاول مرة أخرى.';
 }

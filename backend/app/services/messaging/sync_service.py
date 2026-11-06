@@ -23,6 +23,7 @@ DURABLE_EVENT_TYPES = frozenset({
     "group:member:added",
     "group:member:removed",
     "group:member:role",
+    "group:deleted",
     "group:message:new",
     "group:message:edited",
     "group:message:reaction",

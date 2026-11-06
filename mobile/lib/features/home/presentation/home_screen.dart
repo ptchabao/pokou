@@ -17,6 +17,7 @@ import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
+import '../../marketplace/presentation/marketplace_screen.dart';
 import 'global_search_screen.dart';
 
 /// L'accueil après connexion (écran APP-1) : une carte par module ouvert
@@ -151,6 +152,10 @@ class _AssimeEntry extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: ModuleCard(
+        // APP-1 → APP-5 : l'entrée d'Assimé ouvre les petites annonces.
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
+        ),
         child: Row(
           children: [
             const Icon(Icons.shopping_bag_outlined),

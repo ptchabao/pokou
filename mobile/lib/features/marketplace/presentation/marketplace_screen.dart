@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/theme/app_radius.dart';
@@ -1257,6 +1258,11 @@ class _MarketAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PokouAppBar(title: L.of(context).marketTitle, actions: actions);
+    // Ouvert depuis l'Accueil ou Plus : un retour. En onglet : aucun.
+    return PokouAppBar(
+      title: L.of(context).marketTitle,
+      leading: Navigator.of(context).canPop() ? const PokouBackButton() : null,
+      actions: actions,
+    );
   }
 }

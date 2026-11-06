@@ -160,3 +160,6 @@ from app.models.honam import (  # noqa: F401
     PharmacyCourier,
     HonamWaitlistEntry,
 )
+from app.models.baba import (  # noqa: F401
+    BabaMessage,
+)

@@ -58,6 +58,7 @@ import '../../messaging/presentation/call_event_row.dart';
 import '../../messaging/presentation/pending_media_bubble.dart';
 import '../../messaging/presentation/proof_widgets.dart';
 import '../data/group_model.dart';
+import '../../contacts/presentation/discussions_controller.dart';
 import 'group_controller.dart';
 
 /// Conversation de groupe — pendant de ConversationScreen. Différences
@@ -1242,6 +1243,18 @@ class _GroupConversationScreenState
                 ),
                 onTap: () => Navigator.pop(sheetContext, 'leave'),
               ),
+              if (group.isOwnedBy(widget.myUserId))
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_forever_outlined,
+                    color: AppColors.semanticError,
+                  ),
+                  title: Text(
+                    _l.groupDelete,
+                    style: TextStyle(color: AppColors.semanticError),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, 'delete'),
+                ),
             ],
           ),
         ),
@@ -1257,6 +1270,8 @@ class _GroupConversationScreenState
       await _addMembers(group);
     } else if (action == 'leave') {
       await _leave();
+    } else if (action == 'delete') {
+      await _deleteGroup();
     } else if (action == 'rename') {
       await _renameGroup(group);
     } else if (action == 'photo') {
@@ -1632,6 +1647,37 @@ class _GroupConversationScreenState
         context,
       ).showSnackBar(SnackBar(content: Text(_l.groupAddFailed)));
     }
+  }
+
+  Future<void> _deleteGroup() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_l.groupDeleteTitle(widget.groupName)),
+        content: Text(_l.groupDeleteBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(_l.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              _l.groupDelete,
+              style: TextStyle(color: AppColors.semanticError),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final ok = await ref
+        .read(groupChatControllerProvider(widget.groupId).notifier)
+        .deleteGroup();
+    ref.invalidate(myGroupsProvider);
+    ref.invalidate(discussionsProvider);
+    if (!mounted || !ok) return;
+    Navigator.of(context).maybePop();
   }
 
   Future<void> _leave() async {

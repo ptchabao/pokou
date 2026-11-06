@@ -170,6 +170,7 @@ final discussionsRealtimeProvider = Provider<void>((ref) {
     'group:updated',
     'group:member:added',
     'group:member:removed',
+    'group:deleted',
   };
   listenDurableEventTypes(ref, (type) {
     if (relevantEvents.contains(type)) {
@@ -190,6 +191,7 @@ final discussionsRealtimeProvider = Provider<void>((ref) {
         type == 'community:member:removed' ||
         type == 'group:member:added' ||
         type == 'group:member:removed' ||
+        type == 'group:deleted' ||
         type == 'group:updated') {
       ref.invalidate(myCommunitiesProvider);
       ref.invalidate(myGroupsProvider);

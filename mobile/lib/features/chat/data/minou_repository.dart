@@ -156,12 +156,12 @@ class MinouRepository {
   final ApiClient _api;
 
   Future<MinouStatus> status() async {
-    final response = await _api.get('/minou/status');
+    final response = await _api.get('/baba/status');
     return MinouStatus.fromJson(response as Map<String, dynamic>);
   }
 
   Future<MinouThread> thread({int limit = 50}) async {
-    final response = await _api.get('/minou/thread?limit=$limit');
+    final response = await _api.get('/baba/thread?limit=$limit');
     return MinouThread.fromJson(response as Map<String, dynamic>);
   }
 
@@ -174,7 +174,7 @@ class MinouRepository {
   /// répond dans ce cas (lui seul porte le quota et le RBAC du moniteur).
   Future<List<MinouThreadItem>> send(String text) async {
     final response = await _api.post(
-      '/minou/messages',
+      '/baba/messages',
       body: {'text': text},
       // Minou lit le message avec un modèle de langage avant de répondre :
       // c'est long, et parfois plus long que les 20 s par défaut. Expirer
