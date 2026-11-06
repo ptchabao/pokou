@@ -212,13 +212,21 @@ async def verify_phone_otp(
     # code sur /auth/phone/two-step. Émettre la session puis exiger le code
     # ensuite laisserait une session valide à qui n'a que le SMS, ce qui
     # viderait la seconde étape de son sens.
+    if two_step_required(db, user.id) and _pin_reset_elapsed(user):
+        # REG-6 : le délai de 7 jours est passé sans qu'aucune connexion
+        # avec le code PIN ne l'annule — le code SMS suffit de nouveau.
+        user.two_step_pin_hash = None
+        user.two_step_reset_requested_at = None
+        db.commit()
     if two_step_required(db, user.id):
+        reset_at = _pin_reset_available_at(user)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={
                 "two_step_required": True,
                 "verification_token": _create_two_step_pending_token(user),
                 "expires_in": int(_TWO_STEP_PENDING_TTL.total_seconds()),
+                "pin_reset_available_at": reset_at.isoformat() if reset_at else None,
             },
         )
 
@@ -258,6 +266,50 @@ async def _announce_arrival(db: Session, user: User) -> None:
             await manager.send_to_user(owner_id, event)
     except Exception:  # noqa: BLE001 — voir docstring
         logger.warning("Pokou: annonce d'arrivée impossible pour %s", user.id, exc_info=True)
+
+
+PIN_RESET_DELAY = timedelta(days=7)
+
+
+def _pin_reset_available_at(user: User) -> Optional[datetime]:
+    if user.two_step_reset_requested_at is None:
+        return None
+    return user.two_step_reset_requested_at + PIN_RESET_DELAY
+
+
+def _pin_reset_elapsed(user: User) -> bool:
+    available = _pin_reset_available_at(user)
+    return available is not None and datetime.utcnow() >= available
+
+
+class PinForgotRequest(BaseModel):
+    verification_token: str
+
+
+@router.post("/phone/two-step/forgot")
+async def forgot_two_step_pin(payload: PinForgotRequest, db: Session = Depends(get_db)):
+    """REG-6 · Code PIN oublié : ouvre (ou rappelle) le délai de 7 jours.
+
+    Exige le laissez-passer de /phone/verify-otp — c'est-à-dire la preuve
+    que l'appelant reçoit les SMS de ce numéro. Le délai, lui, protège du
+    vol de carte SIM : un voleur a le SMS, pas le code PIN, et pendant ces
+    7 jours le titulaire qui se connecte avec son code annule la demande.
+    Redemander ne relance pas le délai : la première date reste."""
+    try:
+        claims = verify_token(payload.verification_token, token_type=_TWO_STEP_TOKEN_TYPE)
+    except HTTPException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vérification expirée — recommence la connexion.",
+        ) from exc
+    user = db.query(User).filter(User.id == claims.get("user_id")).first()
+    if not user or not user.is_active or not user.two_step_pin_hash:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte indisponible")
+    if user.two_step_reset_requested_at is None:
+        user.two_step_reset_requested_at = datetime.utcnow()
+        db.commit()
+        await AuditLogger.log(db, user.id, "two_step_reset_requested", "user", user.id)
+    return {"available_at": _pin_reset_available_at(user).isoformat()}
 
 
 class PhoneTwoStepVerify(BaseModel):
@@ -300,6 +352,11 @@ async def verify_phone_two_step(
 
     _reject_if_throttled(user.id)
     _check_pin(user, payload.pin)
+    if user.two_step_reset_requested_at is not None:
+        # Le titulaire connaît son code : une demande « PIN oublié » en
+        # cours ne vient peut-être pas de lui (vol de carte SIM). Annulée.
+        user.two_step_reset_requested_at = None
+        db.commit()
 
     access_token, refresh_token, _ = _issue_session(db, response, user)
     await _announce_arrival(db, user)

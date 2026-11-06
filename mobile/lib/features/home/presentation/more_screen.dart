@@ -19,6 +19,8 @@ import '../../modules/shared/module_ui.dart';
 import '../../profile/presentation/language_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import '../../profile/presentation/theme_screen.dart';
+import '../../settings/presentation/about_screen.dart';
+import '../../settings/presentation/help_screen.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
@@ -47,82 +49,13 @@ class MoreScreen extends ConsumerWidget {
       context,
     ).push(MaterialPageRoute(builder: (_) => _Pushed(child: screen)));
 
-    void showAbout() {
-      showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('À propos de Pokou'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Pokou v3.4 (Lot 1 & Services)'),
-              const SizedBox(height: 8),
-              Text(
-                'Deux rives réunies — Plus qu’une messagerie, une communauté.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Le sens de nos noms :',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              Text(
-                '• Pokou : reine de paix et d’unité\n• Kory : calebasse et tontines solidaires\n• Honam : santé et bien-être\n• Assimé : grand marché\n• Win Pokou : modèle équitable coursiers',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Fermer'),
-            ),
-          ],
-        ),
-      );
-    }
+    void showAbout() => Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => AboutScreen(lot1: lot1)),
+    );
 
-    void showHelp() {
-      showModalBottomSheet<void>(
-        context: context,
-        builder: (ctx) => Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Aide et support (REG-10)',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: const Icon(Icons.smart_toy_outlined, color: AppColors.accentPrimary),
-                title: const Text('Demander à Baba (IA)'),
-                subtitle: const Text('Réponses instantanées sur le fonctionnement de Pokou'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  // Baba est dans la liste des discussions
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.help_outline),
-                title: const Text('Questions fréquentes'),
-                subtitle: const Text('Sécurité, mode preuve, codes SMS, livraisons'),
-                onTap: () => Navigator.of(ctx).pop(),
-              ),
-              ListTile(
-                leading: const Icon(Icons.support_agent_outlined),
-                title: const Text('Écrire au support'),
-                subtitle: const Text('Réponse garantie directement dans l’application'),
-                onTap: () => Navigator.of(ctx).pop(),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    void showHelp() => Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const HelpScreen()),
+    );
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
@@ -197,7 +130,7 @@ class MoreScreen extends ConsumerWidget {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          lot1 ? 'Essai gratuit d’un mois offert · Badge et mode preuve' : l.certPitch,
+                          l.certPitch,
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,
@@ -263,7 +196,7 @@ class MoreScreen extends ConsumerWidget {
                                   : (courier.unlimited
                                       ? 'Pack Queen Pokou illimité'
                                       : '${courier.ridesLeft} courses restantes'))
-                              : 'Rejoignez la flotte Win Pokou dans votre ville',
+                              : '1 000 FCFA par course, près de chez toi',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,
@@ -291,14 +224,14 @@ class MoreScreen extends ConsumerWidget {
                       const Icon(Icons.auto_awesome, color: AppColors.brandOr, size: 20),
                       const SizedBox(width: 8),
                       const Text(
-                        'Bientôt disponibles',
+                        'Bientôt : Kory, Honam, Assimé',
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Kory (Cagnottes et tontines), Honam (Pharmacies & livraison) et Assimé (Petites annonces) arrivent bientôt dans votre ville.',
+                    'Cagnottes, pharmacie et petites annonces arrivent ville par ville.',
                     style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                   ),
                   const SizedBox(height: 12),
@@ -306,7 +239,7 @@ class MoreScreen extends ConsumerWidget {
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Votre intérêt est enregistré. Vous serez alerté dès l’ouverture !'),
+                          content: Text('C’est noté : tu seras prévenu dès l’ouverture dans ta ville.'),
                         ),
                       );
                     },
@@ -352,8 +285,8 @@ class MoreScreen extends ConsumerWidget {
                 () => push(const ThemeScreen())),
             _Row(Icons.language, l.profileLanguage,
                 () => push(const LanguageScreen())),
-            _Row(Icons.help_outline, 'Aide et support', showHelp),
-            _Row(Icons.info_outline, 'À propos de Pokou', showAbout),
+            _Row(Icons.help_outline, l.helpTitle, showHelp),
+            _Row(Icons.info_outline, l.aboutTitle, showAbout),
           ],
         ),
       ],

@@ -125,7 +125,7 @@ void main() {
     );
     _expectReadable(title.style!.color!, style.background, 'accueil');
     final subtitle = tester.widget<Text>(
-      find.text('Votre partenaire numérique'),
+      find.text('Ton partenaire numérique'),
     );
     _expectReadable(subtitle.style!.color!, style.background, 'sous-titre');
   });

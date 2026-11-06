@@ -26,6 +26,7 @@ import '../../chat/data/minou_repository.dart';
 import '../../chat/presentation/chat_controller.dart'
     show kNoMonitor, minouStatusProvider;
 import '../../settings/presentation/app_lock_screen.dart';
+import '../../settings/presentation/change_number_screen.dart';
 import '../../settings/presentation/delete_account_screen.dart';
 import '../../settings/presentation/devices_screen.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
@@ -664,6 +665,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             label: L.of(context).profileDevices,
                             onTap: () => _push(const DevicesScreen()),
                           ),
+                          // REG-4 : garder son compte avec une nouvelle puce.
+                          _SettingsRow(
+                            icon: Icons.phone_iphone,
+                            label: L.of(context).changeNumberTitle,
+                            onTap: () => _push(const ChangeNumberScreen()),
+                          ),
                           // REG-7 : la suppression du compte, depuis
                           // « Compte et sécurité » (AUTH-06).
                           _SettingsRow(
@@ -672,6 +679,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             onTap: () => _push(const DeleteAccountScreen()),
                           ),
                         ],
+                      ),
+                      // REG-3 : l'avertissement contre l'hameçonnage.
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.chatAiIconColor.withValues(
+                            alpha: 0.10,
+                          ),
+                          border: Border.all(
+                            color: AppColors.chatAiIconColor.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          L.of(context).securityPinWarning,
+                          style: TextStyle(color: AppColors.textPrimary),
+                        ),
                       ),
                       const SizedBox(height: 40),
                       Center(

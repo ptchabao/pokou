@@ -178,6 +178,10 @@ class User(Base):
     # ne protège que l'écran de cet appareil) : exigée en plus de l'OTP à la
     # reconnexion sur un nouvel appareil.
     two_step_pin_hash = Column(String(255), nullable=True)
+    #: « Code PIN oublié » (REG-6) : la demande ouvre un délai de 7 jours,
+    #: au terme duquel le code SMS seul suffit de nouveau. Une connexion
+    #: réussie AVEC le code PIN l'annule — c'est le cas du vol de carte SIM.
+    two_step_reset_requested_at = Column(DateTime, nullable=True)
     # ── Consentements (cahier des charges, section 8.1) ────────────────
     terms_accepted_at = Column(DateTime, nullable=True)
     terms_version = Column(String(16), nullable=True)

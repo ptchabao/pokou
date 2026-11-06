@@ -8,7 +8,7 @@ d'atterrissage des liens d'invitation, destinées à un navigateur.
 from fastapi import APIRouter
 
 from app.api.public import deeplinks, legal, officine, suppression, wellknown
-from app.api.v1.account import account_privacy, contacts, profile
+from app.api.v1.account import account_privacy, contacts, phone_change, profile
 from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
 from app.api.v1.calls import calls
@@ -48,6 +48,7 @@ for router in (
     bot_api.router,
     account_privacy.router,
     profile.router,
+    phone_change.router,
     media.router,
     link_preview.router,
     status.router,

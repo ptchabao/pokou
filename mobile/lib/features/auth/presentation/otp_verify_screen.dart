@@ -263,7 +263,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
         ),
         const SizedBox(height: 4),
         Text(
-          L.of(context).authVerifyTitle,
+          L.of(context).otpTitle,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,

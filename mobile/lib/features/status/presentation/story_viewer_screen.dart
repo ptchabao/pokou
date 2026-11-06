@@ -12,6 +12,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../data/status_model.dart';
 import 'status_controller.dart';
 import 'status_viewers_sheet.dart';
+import '../../messaging/presentation/messaging_controller.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/status_halo.dart';
 
@@ -41,6 +42,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   late final AnimationController _controller;
   int _index = 0;
   bool _deleting = false;
+  final _reply = TextEditingController();
+  final _replyFocus = FocusNode();
+  bool _sendingReply = false;
 
   @override
   void initState() {
@@ -55,7 +59,41 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   @override
   void dispose() {
     _controller.dispose();
+    _reply.dispose();
+    _replyFocus.dispose();
     super.dispose();
+  }
+
+  /// STA-2 / STA-7 (MSG-15) : la réponse part EN PRIVÉ, dans la discussion
+  /// à deux avec l'auteur — chiffrée comme tout message direct.
+  Future<void> _sendReply() async {
+    final text = _reply.text.trim();
+    if (text.isEmpty || _sendingReply) return;
+    final l = L.of(context);
+    setState(() => _sendingReply = true);
+    try {
+      await ref.read(messagingRepositoryProvider).send(
+        recipientId: widget.item.userId,
+        content: '${l.statusReplyQuote}\n$text',
+      );
+      if (!mounted) return;
+      _reply.clear();
+      _replyFocus.unfocus();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.statusReplySent)));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.convAttachmentFailed)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _sendingReply = false);
+        _controller.forward();
+      }
+    }
   }
 
   void _startCurrent() {
@@ -296,6 +334,62 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                     icon: const Icon(Icons.trending_up, size: 16),
                     label: Text(L.of(context).statusBoostAction),
                   ),
+                ),
+              ),
+            // STA-2 : répondre à quelqu'un d'autre — pause pendant la saisie.
+            if (widget.item.userId !=
+                ref.watch(authControllerProvider).user?.id)
+              Positioned(
+                bottom: 12,
+                left: 12,
+                right: 12,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _reply,
+                            focusNode: _replyFocus,
+                            onTap: _controller.stop,
+                            onSubmitted: (_) => _sendReply(),
+                            textInputAction: TextInputAction.send,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: L.of(context).statusReplyHint(
+                                widget.item.displayName,
+                              ),
+                              hintStyle: const TextStyle(color: Colors.white70),
+                              filled: true,
+                              fillColor: Colors.black54,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: L.of(context).actionSend,
+                          onPressed: _sendingReply ? null : _sendReply,
+                          icon: const Icon(Icons.send, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      L.of(context).statusReplyPrivate,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             Positioned(

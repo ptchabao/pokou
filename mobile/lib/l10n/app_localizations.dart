@@ -228,7 +228,7 @@ abstract class L {
   /// No description provided for @chatsEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vos conversations apparaîtront ici.'**
+  /// **'Tes discussions apparaîtront ici.'**
   String get chatsEmptyBody;
 
   /// No description provided for @chatsSearchHint.
@@ -252,7 +252,7 @@ abstract class L {
   /// No description provided for @chatsUnknownContact.
   ///
   /// In fr, this message translates to:
-  /// **'pas dans vos contacts'**
+  /// **'pas dans tes contacts'**
   String get chatsUnknownContact;
 
   /// No description provided for @chatsNoMessageYet.
@@ -264,7 +264,7 @@ abstract class L {
   /// No description provided for @chatsYouPrefix.
   ///
   /// In fr, this message translates to:
-  /// **'Vous : {message}'**
+  /// **'Toi : {message}'**
   String chatsYouPrefix(String message);
 
   /// No description provided for @chatsGroupCount.
@@ -324,7 +324,7 @@ abstract class L {
   /// No description provided for @newChatNoRegisteredContact.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun de vos contacts n\'utilise encore Pokou.'**
+  /// **'Aucun de tes contacts n\'utilise encore Pokou.'**
   String get newChatNoRegisteredContact;
 
   /// No description provided for @conversationSayHello.
@@ -402,7 +402,7 @@ abstract class L {
   /// No description provided for @offlineBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vous verrez ce qui est déjà sur cet appareil. Le reste arrivera au retour du réseau.'**
+  /// **'Tu verras ce qui est déjà sur ce téléphone. Le reste arrivera au retour du réseau.'**
   String get offlineBody;
 
   /// No description provided for @offlineNothingCached.
@@ -420,7 +420,7 @@ abstract class L {
   /// No description provided for @errorNetwork.
   ///
   /// In fr, this message translates to:
-  /// **'Connexion impossible. Vérifiez votre réseau.'**
+  /// **'Connexion impossible. Vérifie ton réseau.'**
   String get errorNetwork;
 
   /// No description provided for @twoStepTitle.
@@ -432,7 +432,7 @@ abstract class L {
   /// No description provided for @twoStepBody.
   ///
   /// In fr, this message translates to:
-  /// **'Ce compte est protégé par un code. Saisissez-le pour terminer la connexion.'**
+  /// **'Ton compte est protégé par la vérification en deux étapes. Saisis ton code PIN pour te reconnecter.'**
   String get twoStepBody;
 
   /// No description provided for @twoStepHint.
@@ -468,7 +468,7 @@ abstract class L {
   /// No description provided for @profileLanguageSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez la langue de l\'application'**
+  /// **'Choisis la langue de l\'application'**
   String get profileLanguageSubtitle;
 
   /// No description provided for @languageFrench.
@@ -552,7 +552,7 @@ abstract class L {
   /// No description provided for @sparkNoPhotoWarning.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez une photo — sans elle, presque personne ne like'**
+  /// **'Ajoute une photo — sans elle, presque personne ne like'**
   String get sparkNoPhotoWarning;
 
   /// No description provided for @sparkPhotoCount.
@@ -594,19 +594,19 @@ abstract class L {
   /// No description provided for @authSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Entrez votre numéro : nous vous envoyons un code. Nouveau sur Pokou ? Votre compte se crée à cette étape.'**
+  /// **'Nouveau ou déjà inscrit, c’est le même chemin : tu reçois un code par SMS.'**
   String get authSubtitle;
 
   /// No description provided for @authPhoneHint.
   ///
   /// In fr, this message translates to:
-  /// **'Votre numéro'**
+  /// **'Ton numéro de mobile'**
   String get authPhoneHint;
 
   /// No description provided for @authPrivacyNote.
   ///
   /// In fr, this message translates to:
-  /// **'Connexion sécurisée. Votre numéro sert uniquement à vérifier votre identité.'**
+  /// **'Connexion sécurisée. Ton numéro sert uniquement à vérifier ton identité.'**
   String get authPrivacyNote;
 
   /// No description provided for @authVerifyTitle.
@@ -618,7 +618,7 @@ abstract class L {
   /// No description provided for @authCodeSentTo.
   ///
   /// In fr, this message translates to:
-  /// **'Saisissez le code à 6 chiffres envoyé au {phone}'**
+  /// **'Envoyé par SMS au {phone}'**
   String authCodeSentTo(String phone);
 
   /// No description provided for @authChangeNumber.
@@ -720,7 +720,7 @@ abstract class L {
   /// No description provided for @chatsBlockBody.
   ///
   /// In fr, this message translates to:
-  /// **'Cette personne ne pourra plus vous écrire ni vous appeler. Elle ne sera pas prévenue.'**
+  /// **'Cette personne ne pourra plus t\'écrire ni t\'appeler. Elle ne sera pas prévenue.'**
   String get chatsBlockBody;
 
   /// No description provided for @chatsPinLimit.
@@ -786,7 +786,7 @@ abstract class L {
   /// No description provided for @navYou.
   ///
   /// In fr, this message translates to:
-  /// **'Vous'**
+  /// **'Toi'**
   String get navYou;
 
   /// No description provided for @convProductFallback.
@@ -846,7 +846,7 @@ abstract class L {
   /// No description provided for @convEditHint.
   ///
   /// In fr, this message translates to:
-  /// **'Votre message'**
+  /// **'Ton message'**
   String get convEditHint;
 
   /// No description provided for @convForwarded.
@@ -1038,7 +1038,7 @@ abstract class L {
   /// No description provided for @modulesCheckNetwork.
   ///
   /// In fr, this message translates to:
-  /// **'Vérifiez votre connexion et réessayez.'**
+  /// **'Vérifie ta connexion et réessaie.'**
   String get modulesCheckNetwork;
 
   /// No description provided for @modulesEmptyTitle.
@@ -1050,7 +1050,7 @@ abstract class L {
   /// No description provided for @modulesEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'De nouveaux modules arriveront ici. Vous n\'avez rien à faire en attendant.'**
+  /// **'De nouveaux modules arriveront ici. Tu n\'as rien à faire en attendant.'**
   String get modulesEmptyBody;
 
   /// No description provided for @modulesMine.
@@ -1104,7 +1104,7 @@ abstract class L {
   /// No description provided for @modulesComingSoon.
   ///
   /// In fr, this message translates to:
-  /// **'{name} arrive bientôt. Mettez l\'application à jour pour en profiter dès sa sortie.'**
+  /// **'{name} arrive bientôt. Mets l\'application à jour pour en profiter dès sa sortie.'**
   String modulesComingSoon(String name);
 
   /// No description provided for @modulesUserCount.
@@ -1116,13 +1116,13 @@ abstract class L {
   /// No description provided for @sparkEnableLocation.
   ///
   /// In fr, this message translates to:
-  /// **'Activez la localisation sur votre téléphone.'**
+  /// **'Active la localisation sur ton téléphone.'**
   String get sparkEnableLocation;
 
   /// No description provided for @sparkLocationNeeded.
   ///
   /// In fr, this message translates to:
-  /// **'Sans position, Spark ne peut pas savoir qui est autour de vous.'**
+  /// **'Sans position, Spark ne peut pas savoir qui est autour de toi.'**
   String get sparkLocationNeeded;
 
   /// No description provided for @sparkLocationFailed.
@@ -1140,19 +1140,19 @@ abstract class L {
   /// No description provided for @sparkPickIntentTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez votre carte du moment'**
+  /// **'Choisis ta carte du moment'**
   String get sparkPickIntentTitle;
 
   /// No description provided for @sparkPickIntentBody.
   ///
   /// In fr, this message translates to:
-  /// **'Dites ce que vous cherchez aujourd\'hui pour voir qui cherche la même chose.'**
+  /// **'Dis ce que tu cherches aujourd\'hui pour voir qui cherche la même chose.'**
   String get sparkPickIntentBody;
 
   /// No description provided for @sparkLocationStale.
   ///
   /// In fr, this message translates to:
-  /// **'Votre position n\'est pas à jour'**
+  /// **'Ta position n\'est pas à jour'**
   String get sparkLocationStale;
 
   /// No description provided for @sparkLocationStaleBody.
@@ -1170,13 +1170,13 @@ abstract class L {
   /// No description provided for @sparkQuotaTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Vous avez vu vos profils du jour'**
+  /// **'Tu as vu tes profils du jour'**
   String get sparkQuotaTitle;
 
   /// No description provided for @sparkQuotaBody.
   ///
   /// In fr, this message translates to:
-  /// **'Revenez demain, ou prenez Spark+ pour voir sans compter.'**
+  /// **'Reviens demain, ou prends Spark+ pour voir sans compter.'**
   String get sparkQuotaBody;
 
   /// No description provided for @sparkNobodyTitle.
@@ -1188,25 +1188,25 @@ abstract class L {
   /// No description provided for @sparkNobodyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Peu de monde cherche la même chose que vous, ici et maintenant. Réessayez plus tard — ou changez de carte.'**
+  /// **'Peu de monde cherche la même chose que toi, ici et maintenant. Réessaie plus tard — ou change de carte.'**
   String get sparkNobodyBody;
 
   /// No description provided for @sparkPickCard.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez votre carte'**
+  /// **'Choisis ta carte'**
   String get sparkPickCard;
 
   /// No description provided for @sparkTodayLooking.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous cherchez aujourd\'hui'**
+  /// **'Ce que tu cherches aujourd\'hui'**
   String get sparkTodayLooking;
 
   /// No description provided for @sparkCardExpired.
   ///
   /// In fr, this message translates to:
-  /// **'Votre carte a expiré'**
+  /// **'Ta carte a expiré'**
   String get sparkCardExpired;
 
   /// No description provided for @sparkHoursLeft.
@@ -1230,13 +1230,13 @@ abstract class L {
   /// No description provided for @sparkIntentSheetBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre carte expire dans 24 h. Vous ne verrez que des gens qui ont choisi la même chose.'**
+  /// **'Ta carte expire dans 24 h. Tu ne verras que des gens qui ont choisi la même chose.'**
   String get sparkIntentSheetBody;
 
   /// No description provided for @sparkLikesExhausted.
   ///
   /// In fr, this message translates to:
-  /// **'Vos likes du jour sont épuisés. Prenez un pack dans « Moi ».'**
+  /// **'Tes likes du jour sont épuisés. Prends un pack dans « Moi ».'**
   String get sparkLikesExhausted;
 
   /// No description provided for @sparkMatchesUnavailable.
@@ -1302,7 +1302,7 @@ abstract class L {
   /// No description provided for @sparkPlusActive.
   ///
   /// In fr, this message translates to:
-  /// **'Actif — prolonge votre abonnement'**
+  /// **'Actif — prolonge ton abonnement'**
   String get sparkPlusActive;
 
   /// No description provided for @sparkPlusPitch.
@@ -1350,7 +1350,7 @@ abstract class L {
   /// No description provided for @sparkWingmanPitch.
   ///
   /// In fr, this message translates to:
-  /// **'Les profils sur lesquels on vous demande un avis'**
+  /// **'Les profils sur lesquels on te demande un avis'**
   String get sparkWingmanPitch;
 
   /// No description provided for @sparkUploading.
@@ -1368,19 +1368,19 @@ abstract class L {
   /// No description provided for @sparkCanInvite.
   ///
   /// In fr, this message translates to:
-  /// **'Vous pouvez inviter'**
+  /// **'Tu peux inviter'**
   String get sparkCanInvite;
 
   /// No description provided for @sparkCannotInvite.
   ///
   /// In fr, this message translates to:
-  /// **'Trop bas pour inviter. Honorez vos rendez-vous.'**
+  /// **'Trop bas pour inviter. Honore tes rendez-vous.'**
   String get sparkCannotInvite;
 
   /// No description provided for @sparkLikersCount.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{Une personne vous a liké} other{{count} personnes vous ont liké}}'**
+  /// **'{count, plural, =1{Une personne t\'a liké} other{{count} personnes t\'ont liké}}'**
   String sparkLikersCount(int count);
 
   /// No description provided for @sparkSeeWho.
@@ -1392,7 +1392,7 @@ abstract class L {
   /// No description provided for @sparkFindInDiscover.
   ///
   /// In fr, this message translates to:
-  /// **'Retrouvez-les dans Découvrir.'**
+  /// **'Retrouve-les dans Découvrir.'**
   String get sparkFindInDiscover;
 
   /// No description provided for @sparkPaymentPendingLikers.
@@ -1404,7 +1404,7 @@ abstract class L {
   /// No description provided for @sparkPaymentPendingLikes.
   ///
   /// In fr, this message translates to:
-  /// **'Vos likes arriveront dès la confirmation du paiement.'**
+  /// **'Tes likes arriveront dès la confirmation du paiement.'**
   String get sparkPaymentPendingLikes;
 
   /// No description provided for @sparkPaymentPendingPlus.
@@ -1416,13 +1416,13 @@ abstract class L {
   /// No description provided for @sparkPaymentPendingBoost.
   ///
   /// In fr, this message translates to:
-  /// **'Votre profil remontera dès la confirmation du paiement.'**
+  /// **'Ton profil remontera dès la confirmation du paiement.'**
   String get sparkPaymentPendingBoost;
 
   /// No description provided for @sparkBirthDateLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Votre date de naissance'**
+  /// **'Ta date de naissance'**
   String get sparkBirthDateLabel;
 
   /// No description provided for @sparkNameAndBirthNeeded.
@@ -1440,19 +1440,19 @@ abstract class L {
   /// No description provided for @sparkCreateProfile.
   ///
   /// In fr, this message translates to:
-  /// **'Créez votre fiche'**
+  /// **'Crée ta fiche'**
   String get sparkCreateProfile;
 
   /// No description provided for @sparkStep1Title.
   ///
   /// In fr, this message translates to:
-  /// **'Vous dites ce que vous cherchez, aujourd\'hui'**
+  /// **'Tu dis ce que tu cherches, aujourd\'hui'**
   String get sparkStep1Title;
 
   /// No description provided for @sparkStep1Body.
   ///
   /// In fr, this message translates to:
-  /// **'Votre carte expire en 24 h. Vous ne voyez que des gens qui cherchent la même chose, à moins de 5 km.'**
+  /// **'Ta carte expire en 24 h. Tu ne vois que des gens qui cherchent la même chose, à moins de 5 km.'**
   String get sparkStep1Body;
 
   /// No description provided for @sparkStep2Title.
@@ -1470,25 +1470,25 @@ abstract class L {
   /// No description provided for @sparkStep3Title.
   ///
   /// In fr, this message translates to:
-  /// **'Vos proches savent où vous êtes'**
+  /// **'Tes proches savent où tu es'**
   String get sparkStep3Title;
 
   /// No description provided for @sparkStep3Body.
   ///
   /// In fr, this message translates to:
-  /// **'Un geste discret prévient votre cercle avec votre position. On vous demande aussi si tout va bien pendant le rendez-vous.'**
+  /// **'Un geste discret prévient ton cercle avec ta position. On te demande aussi si tout va bien pendant le rendez-vous.'**
   String get sparkStep3Body;
 
   /// No description provided for @sparkSeparateTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Votre fiche est séparée de Pokou'**
+  /// **'Ta fiche est séparée de Pokou'**
   String get sparkSeparateTitle;
 
   /// No description provided for @sparkSeparateBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre nom et votre numéro Pokou ne sont jamais montrés ici. Choisissez ce que vous voulez afficher.'**
+  /// **'Ton nom et ton numéro Pokou ne sont jamais montrés ici. Choisis ce que tu veux afficher.'**
   String get sparkSeparateBody;
 
   /// No description provided for @sparkDisplayName.
@@ -1524,7 +1524,7 @@ abstract class L {
   /// No description provided for @sparkYouAre.
   ///
   /// In fr, this message translates to:
-  /// **'Vous êtes'**
+  /// **'Tu es'**
   String get sparkYouAre;
 
   /// No description provided for @sparkWoman.
@@ -1548,13 +1548,13 @@ abstract class L {
   /// No description provided for @sparkBioLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Deux mots sur vous (facultatif)'**
+  /// **'Deux mots sur toi (facultatif)'**
   String get sparkBioLabel;
 
   /// No description provided for @sparkBioHint.
   ///
   /// In fr, this message translates to:
-  /// **'Ce qu\'il faut savoir avant de vous rencontrer'**
+  /// **'Ce qu\'il faut savoir avant de te rencontrer'**
   String get sparkBioHint;
 
   /// No description provided for @sparkCreateAction.
@@ -1602,13 +1602,13 @@ abstract class L {
   /// No description provided for @truthEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Quand quelqu\'un paiera pour vous poser une question, elle apparaîtra ici. Vous resterez libre de refuser.'**
+  /// **'Quand quelqu\'un paiera pour te poser une question, elle apparaîtra ici. Tu resteras libre de refuser.'**
   String get truthEmptyBody;
 
   /// No description provided for @truthYourAnswer.
   ///
   /// In fr, this message translates to:
-  /// **'Votre réponse'**
+  /// **'Ta réponse'**
   String get truthYourAnswer;
 
   /// No description provided for @truthAnswerPrivacy.
@@ -1620,7 +1620,7 @@ abstract class L {
   /// No description provided for @truthWhatToSay.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous voulez dire'**
+  /// **'Ce que tu veux dire'**
   String get truthWhatToSay;
 
   /// No description provided for @truthSendAnswer.
@@ -1650,7 +1650,7 @@ abstract class L {
   /// No description provided for @truthDeclineFree.
   ///
   /// In fr, this message translates to:
-  /// **'Refuser ne vous coûte rien. Vous n\'êtes payé qu\'en répondant.'**
+  /// **'Refuser ne te coûte rien. Tu n\'es payé qu\'en répondant.'**
   String get truthDeclineFree;
 
   /// No description provided for @truthHistoryUnavailable.
@@ -1662,13 +1662,13 @@ abstract class L {
   /// No description provided for @truthNothingAsked.
   ///
   /// In fr, this message translates to:
-  /// **'Vous n\'avez encore rien demandé'**
+  /// **'Tu n\'as encore rien demandé'**
   String get truthNothingAsked;
 
   /// No description provided for @truthNothingAskedBody.
   ///
   /// In fr, this message translates to:
-  /// **'Posez une question à quelqu\'un : il verra le montant et la question, jamais votre nom.'**
+  /// **'Pose une question à quelqu\'un : il verra le montant et la question, jamais ton nom.'**
   String get truthNothingAskedBody;
 
   /// No description provided for @truthAnswered.
@@ -1728,7 +1728,7 @@ abstract class L {
   /// No description provided for @truthAnonTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Votre nom n\'est pas montré'**
+  /// **'Ton nom n\'est pas montré'**
   String get truthAnonTitle;
 
   /// No description provided for @truthAnonBody.
@@ -1752,7 +1752,7 @@ abstract class L {
   /// No description provided for @truthPrivateTitle.
   ///
   /// In fr, this message translates to:
-  /// **'La réponse ne va qu\'à vous'**
+  /// **'La réponse ne va qu\'à toi'**
   String get truthPrivateTitle;
 
   /// No description provided for @truthPrivateBody.
@@ -1764,19 +1764,19 @@ abstract class L {
   /// No description provided for @truthYourQuestion.
   ///
   /// In fr, this message translates to:
-  /// **'Votre question'**
+  /// **'Ta question'**
   String get truthYourQuestion;
 
   /// No description provided for @truthQuestionHint.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous aimeriez vraiment savoir'**
+  /// **'Ce que tu aimerais vraiment savoir'**
   String get truthQuestionHint;
 
   /// No description provided for @truthHowMuch.
   ///
   /// In fr, this message translates to:
-  /// **'Combien vous proposez'**
+  /// **'Combien tu proposes'**
   String get truthHowMuch;
 
   /// No description provided for @truthAskForAmount.
@@ -1788,13 +1788,13 @@ abstract class L {
   /// No description provided for @truthWriteFirst.
   ///
   /// In fr, this message translates to:
-  /// **'Écrivez d\'abord votre question.'**
+  /// **'Écris d\'abord ta question.'**
   String get truthWriteFirst;
 
   /// No description provided for @truthPaymentPending.
   ///
   /// In fr, this message translates to:
-  /// **'Votre question partira dès la confirmation du paiement.'**
+  /// **'Ta question partira dès la confirmation du paiement.'**
   String get truthPaymentPending;
 
   /// No description provided for @hypeFinished.
@@ -1848,7 +1848,7 @@ abstract class L {
   /// No description provided for @hypeMineEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vos objectifs et ceux que vous avez soutenus apparaîtront ici.'**
+  /// **'Tes objectifs et ceux que tu as soutenus apparaîtront ici.'**
   String get hypeMineEmptyBody;
 
   /// No description provided for @hypeUnavailable.
@@ -1908,7 +1908,7 @@ abstract class L {
   /// No description provided for @hypeBeFirst.
   ///
   /// In fr, this message translates to:
-  /// **'Personne encore. Soyez le premier.'**
+  /// **'Personne encore. Sois le premier.'**
   String get hypeBeFirst;
 
   /// No description provided for @hypeContributor.
@@ -1920,7 +1920,7 @@ abstract class L {
   /// No description provided for @commonDueToYou.
   ///
   /// In fr, this message translates to:
-  /// **'Vous revient : {amount} FCFA'**
+  /// **'Te revient : {amount} FCFA'**
   String commonDueToYou(int amount);
 
   /// No description provided for @commonManualPayout.
@@ -1944,13 +1944,13 @@ abstract class L {
   /// No description provided for @hypeStepPromiseTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous promettez'**
+  /// **'Ce que tu promets'**
   String get hypeStepPromiseTitle;
 
   /// No description provided for @hypeStepPromiseBody.
   ///
   /// In fr, this message translates to:
-  /// **'Visible avant que quiconque ne paie. C\'est votre engagement si l\'objectif est atteint.'**
+  /// **'Visible avant que quiconque ne paie. C\'est ton engagement si l\'objectif est atteint.'**
   String get hypeStepPromiseBody;
 
   /// No description provided for @hypeStepOneTitle.
@@ -1962,7 +1962,7 @@ abstract class L {
   /// No description provided for @hypeStepOneBody.
   ///
   /// In fr, this message translates to:
-  /// **'Deux objectifs simultanés mettraient vos contributeurs en concurrence avec eux-mêmes.'**
+  /// **'Deux objectifs simultanés mettraient tes contributeurs en concurrence avec eux-mêmes.'**
   String get hypeStepOneBody;
 
   /// No description provided for @commonTitle.
@@ -1980,13 +1980,13 @@ abstract class L {
   /// No description provided for @hypePromiseLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous débloquez si l\'objectif tombe'**
+  /// **'Ce que tu débloques si l\'objectif tombe'**
   String get hypePromiseLabel;
 
   /// No description provided for @hypePromiseHint.
   ///
   /// In fr, this message translates to:
-  /// **'Soyez précis : c\'est ce que vos contributeurs achètent.'**
+  /// **'Sois précis : c\'est ce que tes contributeurs achètent.'**
   String get hypePromiseHint;
 
   /// No description provided for @hypeGoalAmount.
@@ -2016,13 +2016,13 @@ abstract class L {
   /// No description provided for @hypeAlreadyRunning.
   ///
   /// In fr, this message translates to:
-  /// **'Vous avez déjà un objectif en cours.'**
+  /// **'Tu as déjà un objectif en cours.'**
   String get hypeAlreadyRunning;
 
   /// No description provided for @hypeContributeNote.
   ///
   /// In fr, this message translates to:
-  /// **'Votre participation fait avancer la barre et débloque un contenu. Elle n\'est pas remboursable.'**
+  /// **'Ta participation fait avancer la barre et débloque un contenu. Elle n\'est pas remboursable.'**
   String get hypeContributeNote;
 
   /// No description provided for @commonAmount.
@@ -2100,7 +2100,7 @@ abstract class L {
   /// No description provided for @ceremonyNoneBody.
   ///
   /// In fr, this message translates to:
-  /// **'Mariage, baptême, deuil : créez la cagnotte, invitez, et chacun contribue comme il peut.'**
+  /// **'Mariage, baptême, deuil : crée la cagnotte, invite, et chacun contribue comme il peut.'**
   String get ceremonyNoneBody;
 
   /// No description provided for @ceremonyGoalHint.
@@ -2172,13 +2172,13 @@ abstract class L {
   /// No description provided for @ceremonyYouOrganize.
   ///
   /// In fr, this message translates to:
-  /// **'vous organisez'**
+  /// **'tu organises'**
   String get ceremonyYouOrganize;
 
   /// No description provided for @ceremonyNewSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Vous suivez les participations. Pokou n\'envoie aucune relance à ceux qui n\'ont pas donné.'**
+  /// **'Tu suis les participations. Pokou n\'envoie aucune relance à ceux qui n\'ont pas donné.'**
   String get ceremonyNewSubtitle;
 
   /// No description provided for @ceremonyOccasion.
@@ -2226,7 +2226,7 @@ abstract class L {
   /// No description provided for @ceremonyNeedTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez un titre à la cagnotte.'**
+  /// **'Donne un titre à la cagnotte.'**
   String get ceremonyNeedTitle;
 
   /// No description provided for @ceremonyJoinTo.
@@ -2250,7 +2250,7 @@ abstract class L {
   /// No description provided for @ceremonyWordHint.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous voulez leur dire'**
+  /// **'Ce que tu veux leur dire'**
   String get ceremonyWordHint;
 
   /// No description provided for @ceremonyAnonToggle.
@@ -2262,7 +2262,7 @@ abstract class L {
   /// No description provided for @ceremonyAnonNote.
   ///
   /// In fr, this message translates to:
-  /// **'Votre nom sera masqué. Le montant reste dans le total.'**
+  /// **'Ton nom sera masqué. Le montant reste dans le total.'**
   String get ceremonyAnonNote;
 
   /// No description provided for @ceremonyJoinAmount.
@@ -2280,13 +2280,13 @@ abstract class L {
   /// No description provided for @ceremonyPaymentPending.
   ///
   /// In fr, this message translates to:
-  /// **'Votre participation apparaîtra dès la confirmation du paiement.'**
+  /// **'Ta participation apparaîtra dès la confirmation du paiement.'**
   String get ceremonyPaymentPending;
 
   /// No description provided for @vipSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Vos abonnés, votre espace'**
+  /// **'Tes abonnés, ton espace'**
   String get vipSubtitle;
 
   /// No description provided for @vipDiscover.
@@ -2328,7 +2328,7 @@ abstract class L {
   /// No description provided for @vipNoSubBody.
   ///
   /// In fr, this message translates to:
-  /// **'Abonnez-vous à un salon pour retrouver ici tout ce que son créateur publie.'**
+  /// **'Abonne-toi à un salon pour retrouver ici tout ce que son créateur publie.'**
   String get vipNoSubBody;
 
   /// No description provided for @vipUnavailable.
@@ -2382,7 +2382,7 @@ abstract class L {
   /// No description provided for @vipStepAllBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vous voyez immédiatement les publications déjà en ligne, et celles qui suivront.'**
+  /// **'Tu vois immédiatement les publications déjà en ligne, et celles qui suivront.'**
   String get vipStepAllBody;
 
   /// No description provided for @vipStepDaysTitle.
@@ -2394,7 +2394,7 @@ abstract class L {
   /// No description provided for @vipStepDaysBody.
   ///
   /// In fr, this message translates to:
-  /// **'L\'accès s\'arrête tout seul au terme. Rien ne continue sans que vous le décidiez.'**
+  /// **'L\'accès s\'arrête tout seul au terme. Rien ne continue sans que tu le décides.'**
   String get vipStepDaysBody;
 
   /// No description provided for @vipStepNoRenewTitle.
@@ -2406,7 +2406,7 @@ abstract class L {
   /// No description provided for @vipStepNoRenewBody.
   ///
   /// In fr, this message translates to:
-  /// **'Pokou ne conserve pas votre moyen de paiement. Pour continuer, vous repayez, une fois.'**
+  /// **'Pokou ne conserve pas ton moyen de paiement. Pour continuer, tu repaies, une fois.'**
   String get vipStepNoRenewBody;
 
   /// No description provided for @vipSubscribeFor.
@@ -2454,13 +2454,13 @@ abstract class L {
   /// No description provided for @vipOpenYourRoom.
   ///
   /// In fr, this message translates to:
-  /// **'Ouvrez votre salon'**
+  /// **'Ouvre ton salon'**
   String get vipOpenYourRoom;
 
   /// No description provided for @vipOpenYourRoomBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vos abonnés paient une fois pour trente jours et voient tout ce que vous publiez ici. Vous fixez le prix.'**
+  /// **'Tes abonnés paient une fois pour trente jours et voient tout ce que tu publies ici. Tu fixes le prix.'**
   String get vipOpenYourRoomBody;
 
   /// No description provided for @vipOpenAction.
@@ -2496,7 +2496,7 @@ abstract class L {
   /// No description provided for @vipEarnings.
   ///
   /// In fr, this message translates to:
-  /// **'Vos revenus'**
+  /// **'Tes revenus'**
   String get vipEarnings;
 
   /// No description provided for @vipCollected.
@@ -2508,7 +2508,7 @@ abstract class L {
   /// No description provided for @vipDueNote.
   ///
   /// In fr, this message translates to:
-  /// **'Montant qui vous revient. Le versement se fait par l\'équipe Pokou, sur demande.'**
+  /// **'Montant qui te revient. Le versement se fait par l\'équipe Pokou, sur demande.'**
   String get vipDueNote;
 
   /// No description provided for @vipEditRoom.
@@ -2538,7 +2538,7 @@ abstract class L {
   /// No description provided for @vipPitchLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vos abonnés y trouveront'**
+  /// **'Ce que tes abonnés y trouveront'**
   String get vipPitchLabel;
 
   /// No description provided for @vipPitchNote.
@@ -2568,7 +2568,7 @@ abstract class L {
   /// No description provided for @vipAcceptNewNote.
   ///
   /// In fr, this message translates to:
-  /// **'Vos abonnés actuels gardent leur accès jusqu\'au terme.'**
+  /// **'Tes abonnés actuels gardent leur accès jusqu\'au terme.'**
   String get vipAcceptNewNote;
 
   /// No description provided for @vipFieldsNeeded.
@@ -2586,19 +2586,19 @@ abstract class L {
   /// No description provided for @vipPublishNote.
   ///
   /// In fr, this message translates to:
-  /// **'Visible uniquement par vos abonnés en cours.'**
+  /// **'Visible uniquement par tes abonnés en cours.'**
   String get vipPublishNote;
 
   /// No description provided for @vipYourMessage.
   ///
   /// In fr, this message translates to:
-  /// **'Votre message'**
+  /// **'Ton message'**
   String get vipYourMessage;
 
   /// No description provided for @vipShareHint.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous voulez partager'**
+  /// **'Ce que tu veux partager'**
   String get vipShareHint;
 
   /// No description provided for @vipEarningsSummary.
@@ -2622,7 +2622,7 @@ abstract class L {
   /// No description provided for @datesNoneBody.
   ///
   /// In fr, this message translates to:
-  /// **'Une fois la salle passée, proposez un endroit. Vous payez d\'avance, et l\'argent n\'est versé qu\'une fois que vous confirmez tous les deux.'**
+  /// **'Une fois la salle passée, propose un endroit. Tu paies d\'avance, et l\'argent n\'est versé qu\'une fois que vous confirmez tous les deux.'**
   String get datesNoneBody;
 
   /// No description provided for @datesNotNow.
@@ -2640,13 +2640,13 @@ abstract class L {
   /// No description provided for @datesCancelFree.
   ///
   /// In fr, this message translates to:
-  /// **'Vous êtes à plus de 24 h : vous serez intégralement remboursé.'**
+  /// **'Tu es à plus de 24 h : tu seras intégralement remboursé.'**
   String get datesCancelFree;
 
   /// No description provided for @datesCancelLate.
   ///
   /// In fr, this message translates to:
-  /// **'Il reste moins de 24 h. L\'établissement a déjà réservé, votre paiement lui reste acquis.'**
+  /// **'Il reste moins de 24 h. L\'établissement a déjà réservé, ton paiement lui reste acquis.'**
   String get datesCancelLate;
 
   /// No description provided for @datesKeep.
@@ -2712,7 +2712,7 @@ abstract class L {
   /// No description provided for @datesYourMatch.
   ///
   /// In fr, this message translates to:
-  /// **'votre match'**
+  /// **'ton match'**
   String get datesYourMatch;
 
   /// No description provided for @datesWentWell.
@@ -2724,7 +2724,7 @@ abstract class L {
   /// No description provided for @datesYouConfirmed.
   ///
   /// In fr, this message translates to:
-  /// **'Vous avez confirmé. On attend la confirmation de l\'autre.'**
+  /// **'Tu as confirmé. On attend la confirmation de l\'autre.'**
   String get datesYouConfirmed;
 
   /// No description provided for @datesNoShowAction.
@@ -2736,19 +2736,19 @@ abstract class L {
   /// No description provided for @datesVoucher.
   ///
   /// In fr, this message translates to:
-  /// **'Votre bon, à donner sur place'**
+  /// **'Ton bon, à donner sur place'**
   String get datesVoucher;
 
   /// No description provided for @datesPickBoth.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez une formule et un moment.'**
+  /// **'Choisis une formule et un moment.'**
   String get datesPickBoth;
 
   /// No description provided for @datesVoucherPending.
   ///
   /// In fr, this message translates to:
-  /// **'Votre bon sera émis dès la confirmation du paiement.'**
+  /// **'Ton bon sera émis dès la confirmation du paiement.'**
   String get datesVoucherPending;
 
   /// No description provided for @datesBookingFailed.
@@ -2766,7 +2766,7 @@ abstract class L {
   /// No description provided for @datesStepPayTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Vous payez d\'avance, rien n\'est versé'**
+  /// **'Tu paies d\'avance, rien n\'est versé'**
   String get datesStepPayTitle;
 
   /// No description provided for @datesStepPayBody.
@@ -2784,7 +2784,7 @@ abstract class L {
   /// No description provided for @datesStepCancelBody.
   ///
   /// In fr, this message translates to:
-  /// **'Remboursement intégral. En deçà, l\'établissement a déjà réservé et garde votre paiement.'**
+  /// **'Remboursement intégral. En deçà, l\'établissement a déjà réservé et garde ton paiement.'**
   String get datesStepCancelBody;
 
   /// No description provided for @datesStepNoShowTitle.
@@ -2796,7 +2796,7 @@ abstract class L {
   /// No description provided for @datesStepNoShowBody.
   ///
   /// In fr, this message translates to:
-  /// **'La moitié vous revient. L\'application ne prend rien sur un rendez-vous manqué.'**
+  /// **'La moitié te revient. L\'application ne prend rien sur un rendez-vous manqué.'**
   String get datesStepNoShowBody;
 
   /// No description provided for @datesThePackage.
@@ -2814,7 +2814,7 @@ abstract class L {
   /// No description provided for @datesNoPackNearby.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune formule n\'est proposée près de chez vous pour l\'instant.'**
+  /// **'Aucune formule n\'est proposée près de chez toi pour l\'instant.'**
   String get datesNoPackNearby;
 
   /// No description provided for @datesWhen.
@@ -2856,7 +2856,7 @@ abstract class L {
   /// No description provided for @roomBothYes.
   ///
   /// In fr, this message translates to:
-  /// **'C\'est parti. Vous pouvez maintenant proposer une sortie.'**
+  /// **'C\'est parti. Tu peux maintenant proposer une sortie.'**
   String get roomBothYes;
 
   /// No description provided for @roomWaitingOther.
@@ -2946,7 +2946,7 @@ abstract class L {
   /// No description provided for @roomSaved.
   ///
   /// In fr, this message translates to:
-  /// **'Le match est sauvé. Vous pouvez proposer une sortie.'**
+  /// **'Le match est sauvé. Tu peux proposer une sortie.'**
   String get roomSaved;
 
   /// No description provided for @roomClosedNoAnswer.
@@ -2970,7 +2970,7 @@ abstract class L {
   /// No description provided for @safetyCheckinBody.
   ///
   /// In fr, this message translates to:
-  /// **'Sans réponse de votre part dans les cinq minutes, votre cercle de sécurité sera prévenu avec votre position.'**
+  /// **'Sans réponse de ta part dans les cinq minutes, ton cercle de sécurité sera prévenu avec ta position.'**
   String get safetyCheckinBody;
 
   /// No description provided for @safetyAllGood.
@@ -2982,13 +2982,13 @@ abstract class L {
   /// No description provided for @safetyCircleAlerted.
   ///
   /// In fr, this message translates to:
-  /// **'Votre cercle a été prévenu.'**
+  /// **'Ton cercle a été prévenu.'**
   String get safetyCircleAlerted;
 
   /// No description provided for @safetyNoCircle.
   ///
   /// In fr, this message translates to:
-  /// **'Alerte enregistrée. Ajoutez des proches pour qu\'ils soient prévenus la prochaine fois.'**
+  /// **'Alerte enregistrée. Ajoute des proches pour qu\'ils soient prévenus la prochaine fois.'**
   String get safetyNoCircle;
 
   /// No description provided for @safetyWhoToAlert.
@@ -3000,7 +3000,7 @@ abstract class L {
   /// No description provided for @safetyWhoToAlertBody.
   ///
   /// In fr, this message translates to:
-  /// **'Ces personnes recevront votre position en direct si vous déclenchez une alerte.'**
+  /// **'Ces personnes recevront ta position en direct si tu déclenches une alerte.'**
   String get safetyWhoToAlertBody;
 
   /// No description provided for @safetyTitle.
@@ -3024,7 +3024,7 @@ abstract class L {
   /// No description provided for @safetyQuietAlertBody.
   ///
   /// In fr, this message translates to:
-  /// **'Prévient votre cercle avec votre position. Rien ne s\'affiche à l\'écran de votre téléphone.'**
+  /// **'Prévient ton cercle avec ta position. Rien ne s\'affiche à l\'écran de ton téléphone.'**
   String get safetyQuietAlertBody;
 
   /// No description provided for @safetyTrigger.
@@ -3066,7 +3066,7 @@ abstract class L {
   /// No description provided for @wingmanAnon.
   ///
   /// In fr, this message translates to:
-  /// **'Votre avis reste anonyme'**
+  /// **'Ton avis reste anonyme'**
   String get wingmanAnon;
 
   /// No description provided for @wingmanUnavailable.
@@ -3084,13 +3084,13 @@ abstract class L {
   /// No description provided for @wingmanNothingBody.
   ///
   /// In fr, this message translates to:
-  /// **'Quand un ami vous demandera ce que vous pensez d\'un profil, il apparaîtra ici.'**
+  /// **'Quand un ami te demandera ce que tu penses d\'un profil, il apparaîtra ici.'**
   String get wingmanNothingBody;
 
   /// No description provided for @wingmanAsksYou.
   ///
   /// In fr, this message translates to:
-  /// **'{name} demande votre avis'**
+  /// **'{name} demande ton avis'**
   String wingmanAsksYou(String name);
 
   /// No description provided for @wingmanMeh.
@@ -3108,7 +3108,7 @@ abstract class L {
   /// No description provided for @wingmanPrivacy.
   ///
   /// In fr, this message translates to:
-  /// **'Votre ami verra seulement si le groupe valide, jamais qui a répondu quoi.'**
+  /// **'Ton ami verra seulement si le groupe valide, jamais qui a répondu quoi.'**
   String get wingmanPrivacy;
 
   /// No description provided for @marketLocationOff.
@@ -3132,13 +3132,13 @@ abstract class L {
   /// No description provided for @marketGpsFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de récupérer votre position.'**
+  /// **'Impossible de récupérer ta position.'**
   String get marketGpsFailed;
 
   /// No description provided for @marketYourArea.
   ///
   /// In fr, this message translates to:
-  /// **'Votre zone'**
+  /// **'Ta zone'**
   String get marketYourArea;
 
   /// No description provided for @marketCityOrArea.
@@ -3228,7 +3228,7 @@ abstract class L {
   /// No description provided for @marketAroundYou.
   ///
   /// In fr, this message translates to:
-  /// **'Autour de vous'**
+  /// **'Près de chez toi'**
   String get marketAroundYou;
 
   /// No description provided for @marketMyGps.
@@ -3246,7 +3246,7 @@ abstract class L {
   /// No description provided for @marketNearYou.
   ///
   /// In fr, this message translates to:
-  /// **'Produits près de vous'**
+  /// **'Près de chez toi'**
   String get marketNearYou;
 
   /// No description provided for @marketUnavailable.
@@ -3282,19 +3282,19 @@ abstract class L {
   /// No description provided for @marketSwipeCatalogue.
   ///
   /// In fr, this message translates to:
-  /// **'Glissez pour voir tous vos produits'**
+  /// **'Glisse pour voir toutes tes annonces'**
   String get marketSwipeCatalogue;
 
   /// No description provided for @marketCatalogueEmpty.
   ///
   /// In fr, this message translates to:
-  /// **'Votre catalogue est vide'**
+  /// **'Tu n\'as pas encore d\'annonce'**
   String get marketCatalogueEmpty;
 
   /// No description provided for @marketCatalogueEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez votre premier produit pour commencer à vendre !'**
+  /// **'Publie ta première annonce pour commencer à vendre !'**
   String get marketCatalogueEmptyBody;
 
   /// No description provided for @marketBoosted.
@@ -3312,7 +3312,7 @@ abstract class L {
   /// No description provided for @vitrineHint.
   ///
   /// In fr, this message translates to:
-  /// **'Touchez l\'article pour l\'ouvrir'**
+  /// **'Touche l\'article pour l\'ouvrir'**
   String get vitrineHint;
 
   /// No description provided for @vitrineTitle.
@@ -3384,7 +3384,7 @@ abstract class L {
   /// No description provided for @versesOfflineHint.
   ///
   /// In fr, this message translates to:
-  /// **'Les versets arrivent même sans connexion : ils sont déjà sur votre téléphone.'**
+  /// **'Les versets arrivent même sans connexion : ils sont déjà sur ton téléphone.'**
   String get versesOfflineHint;
 
   /// No description provided for @marketBoosted48h.
@@ -3582,7 +3582,7 @@ abstract class L {
   /// No description provided for @groupAllContactsIn.
   ///
   /// In fr, this message translates to:
-  /// **'Tous vos contacts Pokou sont déjà dans ce groupe.'**
+  /// **'Tous tes contacts Pokou sont déjà dans ce groupe.'**
   String get groupAllContactsIn;
 
   /// No description provided for @groupAddToGroup.
@@ -3606,7 +3606,7 @@ abstract class L {
   /// No description provided for @groupLeaveBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vous ne recevrez plus les messages de « {name} ».'**
+  /// **'Tu ne recevras plus les messages de « {name} ». Tes messages restent chez les autres membres, et les administrateurs sont prévenus.'**
   String groupLeaveBody(String name);
 
   /// No description provided for @groupLeaveAction.
@@ -3618,13 +3618,13 @@ abstract class L {
   /// No description provided for @groupNoMessage.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun message. Lancez la discussion.'**
+  /// **'Aucun message. Lance la discussion.'**
   String get groupNoMessage;
 
   /// No description provided for @groupNotEncryptedNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écrivez en privé.'**
+  /// **'Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écris en privé.'**
   String get groupNotEncryptedNotice;
 
   /// No description provided for @botLabel.
@@ -3636,7 +3636,7 @@ abstract class L {
   /// No description provided for @botConversationNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Vous écrivez au bot d\'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l\'entreprise lit ce que vous lui envoyez.'**
+  /// **'Tu écris au bot d\'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l\'entreprise lit ce que tu lui envoies.'**
   String get botConversationNotice;
 
   /// No description provided for @groupAdminsOnly.
@@ -3732,7 +3732,7 @@ abstract class L {
   /// No description provided for @communityLeaveBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vous ne recevrez plus ses annonces. Les groupes que vous avez rejoints restent les vôtres.'**
+  /// **'Tu ne recevras plus ses annonces. Les groupes que tu as rejoints restent les tiens.'**
   String get communityLeaveBody;
 
   /// No description provided for @communityLeave.
@@ -3756,7 +3756,7 @@ abstract class L {
   /// No description provided for @communityUnavailable.
   ///
   /// In fr, this message translates to:
-  /// **'Communauté indisponible — vérifiez votre connexion.'**
+  /// **'Communauté indisponible — vérifie ta connexion.'**
   String get communityUnavailable;
 
   /// No description provided for @communityGroups.
@@ -3774,7 +3774,7 @@ abstract class L {
   /// No description provided for @communityOnlyAdminGroups.
   ///
   /// In fr, this message translates to:
-  /// **'Seuls les groupes que vous administrez peuvent rejoindre une communauté.'**
+  /// **'Seuls les groupes que tu administres peuvent rejoindre une communauté.'**
   String get communityOnlyAdminGroups;
 
   /// No description provided for @channelPostsUnavailable.
@@ -3882,7 +3882,7 @@ abstract class L {
   /// No description provided for @channelPostHint.
   ///
   /// In fr, this message translates to:
-  /// **'Votre annonce…'**
+  /// **'Ton annonce…'**
   String get channelPostHint;
 
   /// No description provided for @pollAnswerN.
@@ -3924,7 +3924,7 @@ abstract class L {
   /// No description provided for @pollQuestion.
   ///
   /// In fr, this message translates to:
-  /// **'Votre question'**
+  /// **'Ta question'**
   String get pollQuestion;
 
   /// No description provided for @commonSending.
@@ -3948,7 +3948,7 @@ abstract class L {
   /// No description provided for @lockCodeRule.
   ///
   /// In fr, this message translates to:
-  /// **'4 à 8 chiffres. Le code ne quitte jamais cet appareil et ne peut pas être retrouvé — en cas d\'oubli, le verrou se lève en vérifiant votre numéro de téléphone.'**
+  /// **'4 à 8 chiffres. Le code ne quitte jamais ce téléphone et ne peut pas être retrouvé — en cas d\'oubli, le verrou se lève en vérifiant ton numéro de téléphone.'**
   String get lockCodeRule;
 
   /// No description provided for @lockCode.
@@ -4080,7 +4080,7 @@ abstract class L {
   /// No description provided for @lockEnterToContinue.
   ///
   /// In fr, this message translates to:
-  /// **'Saisissez votre code pour continuer.'**
+  /// **'Saisis ton code pour continuer.'**
   String get lockEnterToContinue;
 
   /// No description provided for @lockUnlock.
@@ -4098,19 +4098,19 @@ abstract class L {
   /// No description provided for @lockSendFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Envoi impossible — vérifiez votre connexion.'**
+  /// **'Envoi impossible — vérifie ta connexion.'**
   String get lockSendFailed;
 
   /// No description provided for @lockRemovedToast.
   ///
   /// In fr, this message translates to:
-  /// **'Verrouillage retiré. Vous pouvez choisir un nouveau code dans Profil.'**
+  /// **'Verrouillage retiré. Tu peux choisir un nouveau code dans Profil.'**
   String get lockRemovedToast;
 
   /// No description provided for @lockVerifyFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Vérification impossible — vérifiez votre connexion.'**
+  /// **'Vérification impossible — vérifie ta connexion.'**
   String get lockVerifyFailed;
 
   /// No description provided for @lockLogoutQuestion.
@@ -4122,7 +4122,7 @@ abstract class L {
   /// No description provided for @lockLogoutBody.
   ///
   /// In fr, this message translates to:
-  /// **'À utiliser si vous n\'avez plus accès à ce numéro. Vos conversations restent sur le serveur, mais il faudra un numéro joignable pour vous reconnecter.'**
+  /// **'À utiliser si tu n\'as plus accès à ce numéro. Tes discussions restent sur le serveur, mais il faudra un numéro joignable pour te reconnecter.'**
   String get lockLogoutBody;
 
   /// No description provided for @lockLogout.
@@ -4140,19 +4140,19 @@ abstract class L {
   /// No description provided for @lockNoPhoneOnDevice.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de retrouver votre numéro sur cet appareil.'**
+  /// **'Impossible de retrouver ton numéro sur ce téléphone.'**
   String get lockNoPhoneOnDevice;
 
   /// No description provided for @lockEnterSentCode.
   ///
   /// In fr, this message translates to:
-  /// **'Saisissez le code envoyé au {phone} par SMS et WhatsApp.'**
+  /// **'Saisis le code envoyé au {phone} par SMS et WhatsApp.'**
   String lockEnterSentCode(String phone);
 
   /// No description provided for @lockForgotExplain.
   ///
   /// In fr, this message translates to:
-  /// **'Le code de verrouillage n\'est stocké que sur cet appareil et ne peut pas être retrouvé. Pour lever le verrou, vérifiez votre numéro {phone}.'**
+  /// **'Le code de verrouillage n\'est stocké que sur ce téléphone et ne peut pas être retrouvé. Pour lever le verrou, vérifie ton numéro {phone}.'**
   String lockForgotExplain(String phone);
 
   /// No description provided for @lockLift.
@@ -4248,7 +4248,7 @@ abstract class L {
   /// No description provided for @notifCallsFootnote.
   ///
   /// In fr, this message translates to:
-  /// **'Couper les appels ici ne supprime que la bannière affichée quand Pokou est ouvert : un appel entrant continue de sonner en plein écran, sinon vous manqueriez des appels sans le savoir.'**
+  /// **'Couper les appels ici ne supprime que la bannière affichée quand Pokou est ouvert : un appel entrant continue de sonner en plein écran, sinon tu manquerais des appels sans le savoir.'**
   String get notifCallsFootnote;
 
   /// No description provided for @notifSystem.
@@ -4278,7 +4278,7 @@ abstract class L {
   /// No description provided for @notifWebEnableFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible d\'activer les notifications. Vérifiez les réglages de ce site dans le navigateur.'**
+  /// **'Impossible d\'activer les notifications. Vérifie les réglages de ce site dans le navigateur.'**
   String get notifWebEnableFailed;
 
   /// No description provided for @notifAndroidSettings.
@@ -4308,7 +4308,7 @@ abstract class L {
   /// No description provided for @devicesRemoveCurrentBody.
   ///
   /// In fr, this message translates to:
-  /// **'Cet appareil ne recevra plus de notifications tant que vous n\'ouvrirez pas Pokou à nouveau.'**
+  /// **'Ce téléphone ne recevra plus de notifications tant que tu n\'ouvriras pas Pokou à nouveau.'**
   String get devicesRemoveCurrentBody;
 
   /// No description provided for @devicesRemoveOtherBody.
@@ -4338,7 +4338,7 @@ abstract class L {
   /// No description provided for @devicesUnavailable.
   ///
   /// In fr, this message translates to:
-  /// **'Liste indisponible — vérifiez votre connexion, puis tirez pour rafraîchir.'**
+  /// **'Liste indisponible — vérifie ta connexion, puis tire pour rafraîchir.'**
   String get devicesUnavailable;
 
   /// No description provided for @devicesEmpty.
@@ -4434,7 +4434,7 @@ abstract class L {
   /// No description provided for @storageClearFootnote.
   ///
   /// In fr, this message translates to:
-  /// **'Les fichiers vidés sont retéléchargés à la demande quand vous rouvrez la conversation : rien n\'est perdu, seulement libéré.'**
+  /// **'Les fichiers vidés sont retéléchargés à la demande quand tu rouvres la discussion : rien n\'est perdu, seulement libéré.'**
   String get storageClearFootnote;
 
   /// No description provided for @storageMobileData.
@@ -4458,7 +4458,7 @@ abstract class L {
   /// No description provided for @storageDataSaverFootnote.
   ///
   /// In fr, this message translates to:
-  /// **'Activée, les photos et vidéos reçues attendent que vous les touchiez pour se télécharger, et les photos que vous envoyez sont compressées davantage.'**
+  /// **'Activée, les photos et vidéos reçues attendent que tu les touches pour se télécharger, et les photos que tu envoies sont compressées davantage.'**
   String get storageDataSaverFootnote;
 
   /// No description provided for @profileAvatarFailed.
@@ -4494,7 +4494,7 @@ abstract class L {
   /// No description provided for @profileShieldModeBody.
   ///
   /// In fr, this message translates to:
-  /// **'Met en attente les appels et met en veilleuse les conversations non prioritaires pendant que vous êtes concentré. Vos contacts étiquetés Business, Client, Fournisseur ou Boss passent toujours.'**
+  /// **'Met en attente les appels et met en veilleuse les discussions non prioritaires pendant que tu es concentré. Tes contacts étiquetés Business, Client, Fournisseur ou Boss passent toujours.'**
   String get profileShieldModeBody;
 
   /// No description provided for @contactConnectFailed.
@@ -4518,7 +4518,7 @@ abstract class L {
   /// No description provided for @contactBlockBody.
   ///
   /// In fr, this message translates to:
-  /// **'Cette personne ne pourra plus vous écrire ni vous appeler. Elle n\'en sera pas informée.'**
+  /// **'Cette personne ne pourra plus t\'écrire ni t\'appeler. Elle n\'en sera pas informée.'**
   String get contactBlockBody;
 
   /// No description provided for @contactActionFailed.
@@ -4608,19 +4608,19 @@ abstract class L {
   /// No description provided for @contactUnblockHint.
   ///
   /// In fr, this message translates to:
-  /// **'Cette personne peut à nouveau vous écrire et vous appeler.'**
+  /// **'Cette personne peut à nouveau t\'écrire et t\'appeler.'**
   String get contactUnblockHint;
 
   /// No description provided for @contactBlockHint.
   ///
   /// In fr, this message translates to:
-  /// **'Elle ne pourra plus vous écrire ni vous appeler, sans en être informée.'**
+  /// **'Elle ne pourra plus t\'écrire ni t\'appeler, sans en être informée.'**
   String get contactBlockHint;
 
   /// No description provided for @adNeedTitleBody.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez un titre et un message à votre publicité.'**
+  /// **'Donne un titre et un message à ta publicité.'**
   String get adNeedTitleBody;
 
   /// No description provided for @adSendFailed.
@@ -4644,7 +4644,7 @@ abstract class L {
   /// No description provided for @adWhoSeesBody.
   ///
   /// In fr, this message translates to:
-  /// **'Tous les utilisateurs de Pokou Messenger dans l\'onglet Marché, ou entre deux statuts — à vous de choisir.'**
+  /// **'Tous les utilisateurs de Pokou dans Assimé, ou entre deux statuts — à toi de choisir.'**
   String get adWhoSeesBody;
 
   /// No description provided for @adReviewTitle.
@@ -4656,7 +4656,7 @@ abstract class L {
   /// No description provided for @adReviewBody.
   ///
   /// In fr, this message translates to:
-  /// **'Notre équipe lit chaque campagne avant qu\'elle ne parte. Comptez quelques heures.'**
+  /// **'Notre équipe lit chaque campagne avant qu\'elle ne parte. Compte quelques heures.'**
   String get adReviewBody;
 
   /// No description provided for @adCountdownTitle.
@@ -4668,19 +4668,19 @@ abstract class L {
   /// No description provided for @adCountdownBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vos jours de diffusion commencent une fois la campagne acceptée, pas au paiement.'**
+  /// **'Tes jours de diffusion commencent une fois la campagne acceptée, pas au paiement.'**
   String get adCountdownBody;
 
   /// No description provided for @adRefundTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Refusée ? Vous êtes remboursé'**
+  /// **'Refusée ? Tu es remboursé'**
   String get adRefundTitle;
 
   /// No description provided for @adRefundBody.
   ///
   /// In fr, this message translates to:
-  /// **'Si la campagne ne peut pas être diffusée, contactez-nous : la somme vous est rendue.'**
+  /// **'Si la campagne ne peut pas être diffusée, contacte-nous : la somme t\'est rendue.'**
   String get adRefundBody;
 
   /// No description provided for @adTitleHint.
@@ -4692,7 +4692,7 @@ abstract class L {
   /// No description provided for @adBodyHint.
   ///
   /// In fr, this message translates to:
-  /// **'Ce que vous proposez, et comment vous joindre.'**
+  /// **'Ce que tu proposes, et comment te joindre.'**
   String get adBodyHint;
 
   /// No description provided for @adMediaLabel.
@@ -4770,7 +4770,7 @@ abstract class L {
   /// No description provided for @productInterestedMessage.
   ///
   /// In fr, this message translates to:
-  /// **'Bonjour, je suis intéressé par votre {name} à {price} {currency}. Est-il disponible ?'**
+  /// **'Bonjour, je suis intéressé par ton annonce « {name} » à {price} {currency}. Est-elle toujours disponible ?'**
   String productInterestedMessage(String name, String price, String currency);
 
   /// No description provided for @productWriteFailed.
@@ -4782,7 +4782,7 @@ abstract class L {
   /// No description provided for @productCallFirstWrite.
   ///
   /// In fr, this message translates to:
-  /// **'Appel impossible — écrivez-lui d\'abord.'**
+  /// **'Appel impossible — écris-lui d\'abord.'**
   String get productCallFirstWrite;
 
   /// No description provided for @productRateSeller.
@@ -4806,7 +4806,7 @@ abstract class L {
   /// No description provided for @productReviewHint.
   ///
   /// In fr, this message translates to:
-  /// **'Votre commentaire (facultatif)'**
+  /// **'Ton commentaire (facultatif)'**
   String get productReviewHint;
 
   /// No description provided for @productDeleteReview.
@@ -4878,13 +4878,13 @@ abstract class L {
   /// No description provided for @productReviewMine.
   ///
   /// In fr, this message translates to:
-  /// **'Vous'**
+  /// **'Toi'**
   String get productReviewMine;
 
   /// No description provided for @verifNeedDocument.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez une photo de votre pièce d\'identité.'**
+  /// **'Ajoute une photo de ta pièce d\'identité.'**
   String get verifNeedDocument;
 
   /// No description provided for @verifTitle.
@@ -4896,13 +4896,13 @@ abstract class L {
   /// No description provided for @verifBadgeTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Un badge bleu sur vos annonces'**
+  /// **'Un badge bleu sur tes annonces'**
   String get verifBadgeTitle;
 
   /// No description provided for @verifBadgeBody.
   ///
   /// In fr, this message translates to:
-  /// **'Les acheteurs voient que votre identité a été vérifiée par notre équipe.'**
+  /// **'Les acheteurs voient que ton identité a été vérifiée par notre équipe.'**
   String get verifBadgeBody;
 
   /// No description provided for @verifWhyTitle.
@@ -4926,7 +4926,7 @@ abstract class L {
   /// No description provided for @verifNeedBody.
   ///
   /// In fr, this message translates to:
-  /// **'Une photo nette de votre carte d\'identité, passeport ou permis. Le nom doit être lisible.'**
+  /// **'Une photo nette de ta carte d\'identité, passeport ou permis. Le nom doit être lisible.'**
   String get verifNeedBody;
 
   /// No description provided for @verifUseTitle.
@@ -4938,7 +4938,7 @@ abstract class L {
   /// No description provided for @verifUseBody.
   ///
   /// In fr, this message translates to:
-  /// **'Elle est lue par notre équipe pour la seule vérification, n\'apparaît jamais sur votre profil, et n\'est montrée à aucun acheteur.'**
+  /// **'Elle est lue par notre équipe pour la seule vérification, n\'apparaît jamais sur ton profil, et n\'est montrée à aucun acheteur.'**
   String get verifUseBody;
 
   /// No description provided for @verifOneYearTitle.
@@ -4950,13 +4950,13 @@ abstract class L {
   /// No description provided for @verifOneYearBody.
   ///
   /// In fr, this message translates to:
-  /// **'Le badge dure douze mois. Comptez quelques jours pour l\'examen du dossier.'**
+  /// **'Le badge dure douze mois. Compte quelques jours pour l\'examen du dossier.'**
   String get verifOneYearBody;
 
   /// No description provided for @verifDocumentLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Votre pièce d\'identité'**
+  /// **'Ta pièce d\'identité'**
   String get verifDocumentLabel;
 
   /// No description provided for @verifPayCaption.
@@ -4980,7 +4980,7 @@ abstract class L {
   /// No description provided for @marketRemoveBody.
   ///
   /// In fr, this message translates to:
-  /// **'L\'annonce disparaît du marché. Vos conversations à son sujet restent lisibles, et les acheteurs qui l\'ont déjà reçue gardent leur historique.'**
+  /// **'L\'annonce disparaît d\'Assimé. Tes discussions à son sujet restent lisibles, et les acheteurs qui l\'ont déjà reçue gardent leur historique.'**
   String get marketRemoveBody;
 
   /// No description provided for @marketRemoveFailed.
@@ -4992,7 +4992,7 @@ abstract class L {
   /// No description provided for @marketImageFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Image non envoyée — réessayez.'**
+  /// **'Image non envoyée — réessaie.'**
   String get marketImageFailed;
 
   /// No description provided for @marketMainPhotoHint.
@@ -5142,13 +5142,13 @@ abstract class L {
   /// No description provided for @callLeaveConfirmBody.
   ///
   /// In fr, this message translates to:
-  /// **'Les autres participants peuvent encore parler. Pour revenir à l\'appel, vous pouvez fermer cet écran sans raccrocher.'**
+  /// **'Les autres participants peuvent encore parler. Pour revenir à l\'appel, tu peux fermer cet écran sans raccrocher.'**
   String get callLeaveConfirmBody;
 
   /// No description provided for @callYou.
   ///
   /// In fr, this message translates to:
-  /// **'Vous'**
+  /// **'Toi'**
   String get callYou;
 
   /// No description provided for @callContact.
@@ -5196,7 +5196,7 @@ abstract class L {
   /// No description provided for @callIncomingFrom.
   ///
   /// In fr, this message translates to:
-  /// **'{name} vous appelle'**
+  /// **'{name} t\'appelle'**
   String callIncomingFrom(String name);
 
   /// No description provided for @callIncomingGroup.
@@ -5220,7 +5220,7 @@ abstract class L {
   /// No description provided for @streakCheckConnection.
   ///
   /// In fr, this message translates to:
-  /// **'Vérifiez votre connexion et réessayez.'**
+  /// **'Vérifie ta connexion et réessaie.'**
   String get streakCheckConnection;
 
   /// No description provided for @streakEmptyTitle.
@@ -5232,7 +5232,7 @@ abstract class L {
   /// No description provided for @streakEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Échangez un message chaque jour avec la même personne : la chaîne démarre au premier aller-retour.'**
+  /// **'Échange un message chaque jour avec la même personne : la chaîne démarre au premier aller-retour.'**
   String get streakEmptyBody;
 
   /// No description provided for @streakToRescue.
@@ -5268,13 +5268,13 @@ abstract class L {
   /// No description provided for @streakLongest.
   ///
   /// In fr, this message translates to:
-  /// **'Votre plus longue chaîne'**
+  /// **'Ta plus longue chaîne'**
   String get streakLongest;
 
   /// No description provided for @streakRestorePending.
   ///
   /// In fr, this message translates to:
-  /// **'Votre chaîne repartira dès la confirmation du paiement.'**
+  /// **'Ta chaîne repartira dès la confirmation du paiement.'**
   String get streakRestorePending;
 
   /// No description provided for @streakDeadlinePassed.
@@ -5310,7 +5310,7 @@ abstract class L {
   /// No description provided for @leagueSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Votre ligue monte avec ce que vous recevez'**
+  /// **'Ta ligue monte avec ce que tu reçois'**
   String get leagueSubtitle;
 
   /// No description provided for @leagueUnavailable.
@@ -5328,7 +5328,7 @@ abstract class L {
   /// No description provided for @leagueProtectPending.
   ///
   /// In fr, this message translates to:
-  /// **'Votre protection sera active dès la confirmation du paiement.'**
+  /// **'Ta protection sera active dès la confirmation du paiement.'**
   String get leagueProtectPending;
 
   /// No description provided for @leaguePaymentFailed.
@@ -5340,7 +5340,7 @@ abstract class L {
   /// No description provided for @leagueAtTop.
   ///
   /// In fr, this message translates to:
-  /// **'Vous êtes au sommet du classement.'**
+  /// **'Tu es au sommet du classement.'**
   String get leagueAtTop;
 
   /// No description provided for @leaguePointsNeeded.
@@ -5352,19 +5352,19 @@ abstract class L {
   /// No description provided for @leagueProtected.
   ///
   /// In fr, this message translates to:
-  /// **'Vos points sont protégés. Rien ne baisse cette semaine.'**
+  /// **'Tes points sont protégés. Rien ne baisse cette semaine.'**
   String get leagueProtected;
 
   /// No description provided for @leagueDecayNow.
   ///
   /// In fr, this message translates to:
-  /// **'Vos points baissent au prochain passage.'**
+  /// **'Tes points baissent au prochain passage.'**
   String get leagueDecayNow;
 
   /// No description provided for @leagueDecayIn.
   ///
   /// In fr, this message translates to:
-  /// **'{days, plural, =1{Vos points baissent dans 1 jour sans activité.} other{Vos points baissent dans {days} jours sans activité.}}'**
+  /// **'{days, plural, =1{Tes points baissent dans 1 jour sans activité.} other{Tes points baissent dans {days} jours sans activité.}}'**
   String leagueDecayIn(int days);
 
   /// No description provided for @leagueProtectAction.
@@ -5376,13 +5376,13 @@ abstract class L {
   /// No description provided for @leagueNobodyRanked.
   ///
   /// In fr, this message translates to:
-  /// **'Personne n\'est encore classé. Soyez le premier.'**
+  /// **'Personne n\'est encore classé. Sois le premier.'**
   String get leagueNobodyRanked;
 
   /// No description provided for @leagueMyRank.
   ///
   /// In fr, this message translates to:
-  /// **'Vous êtes {rank}ᵉ avec {points} points.'**
+  /// **'Tu es {rank}ᵉ avec {points} points.'**
   String leagueMyRank(int rank, int points);
 
   /// No description provided for @reactWith.
@@ -5472,7 +5472,7 @@ abstract class L {
   /// No description provided for @contactsPreviewMine.
   ///
   /// In fr, this message translates to:
-  /// **'Vous : {preview}'**
+  /// **'Toi : {preview}'**
   String contactsPreviewMine(String preview);
 
   /// No description provided for @contactsPreviewSender.
@@ -5484,13 +5484,13 @@ abstract class L {
   /// No description provided for @contactsNotInContacts.
   ///
   /// In fr, this message translates to:
-  /// **'{preview} · pas dans vos contacts'**
+  /// **'{preview} · pas dans tes contacts'**
   String contactsNotInContacts(String preview);
 
   /// No description provided for @contactsAssistantSub.
   ///
   /// In fr, this message translates to:
-  /// **'Votre assistant IA'**
+  /// **'Pose-moi une question sur Pokou.'**
   String get contactsAssistantSub;
 
   /// No description provided for @addContactTitle.
@@ -5520,7 +5520,7 @@ abstract class L {
   /// No description provided for @joinLinkBody.
   ///
   /// In fr, this message translates to:
-  /// **'Collez le lien qu\'on vous a envoyé. Groupe ou communauté, on reconnaît lequel.'**
+  /// **'Colle le lien qu\'on t\'a envoyé. Groupe ou communauté, on reconnaît lequel.'**
   String get joinLinkBody;
 
   /// No description provided for @joinLinkContinue.
@@ -5538,7 +5538,7 @@ abstract class L {
   /// No description provided for @joinAlreadyMember.
   ///
   /// In fr, this message translates to:
-  /// **'Vous êtes déjà dans « {name} ».'**
+  /// **'Tu es déjà dans « {name} ».'**
   String joinAlreadyMember(String name);
 
   /// No description provided for @joinGroupQuestion.
@@ -5568,7 +5568,7 @@ abstract class L {
   /// No description provided for @joinCommunityBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vous recevrez ses annonces. Les autres groupes restent à rejoindre un par un.'**
+  /// **'Tu recevras ses annonces. Les autres groupes restent à rejoindre un par un.'**
   String get joinCommunityBody;
 
   /// No description provided for @joinCommunityFailed.
@@ -5580,7 +5580,7 @@ abstract class L {
   /// No description provided for @newChatOwnNumber.
   ///
   /// In fr, this message translates to:
-  /// **'C\'est votre propre numéro.'**
+  /// **'C\'est ton propre numéro.'**
   String get newChatOwnNumber;
 
   /// No description provided for @phoneLookupFailed.
@@ -5802,7 +5802,7 @@ abstract class L {
   /// No description provided for @convEditFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Modification impossible — vérifiez votre connexion.'**
+  /// **'Modification impossible — vérifie ta connexion.'**
   String get convEditFailed;
 
   /// No description provided for @convOrderUpdateFailed.
@@ -5832,7 +5832,7 @@ abstract class L {
   /// No description provided for @convAttachmentFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Pièce jointe non envoyée — réessayez.'**
+  /// **'Pièce jointe non envoyée — réessaie.'**
   String get convAttachmentFailed;
 
   /// No description provided for @groupOfflineNotCached.
@@ -5934,7 +5934,7 @@ abstract class L {
   /// No description provided for @orderBuyerWaiting.
   ///
   /// In fr, this message translates to:
-  /// **'Cet acheteur attend votre réponse.'**
+  /// **'Cet acheteur attend ta réponse.'**
   String get orderBuyerWaiting;
 
   /// No description provided for @orderNextStep.
@@ -5964,7 +5964,7 @@ abstract class L {
   /// No description provided for @convSearchPrompt.
   ///
   /// In fr, this message translates to:
-  /// **'Tapez un mot pour retrouver un message de cette conversation.'**
+  /// **'Tape un mot pour retrouver un message de cette discussion.'**
   String get convSearchPrompt;
 
   /// No description provided for @convSearchEmpty.
@@ -6000,7 +6000,7 @@ abstract class L {
   /// No description provided for @groupInviteLinkBody.
   ///
   /// In fr, this message translates to:
-  /// **'Toute personne qui ouvre ce lien rejoint le groupe directement, sans autre étape. Régénérez-le pour invalider celui déjà partagé.'**
+  /// **'Toute personne qui ouvre ce lien rejoint le groupe directement, sans autre étape. Régénère-le pour invalider celui déjà partagé.'**
   String get groupInviteLinkBody;
 
   /// No description provided for @groupNewLinkCreated.
@@ -6042,7 +6042,7 @@ abstract class L {
   /// No description provided for @groupPickParticipants.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez les participants'**
+  /// **'Choisis les participants'**
   String get groupPickParticipants;
 
   /// No description provided for @groupSelectedCount.
@@ -6174,7 +6174,7 @@ abstract class L {
   /// No description provided for @notifReplyHint.
   ///
   /// In fr, this message translates to:
-  /// **'Votre message'**
+  /// **'Ton message'**
   String get notifReplyHint;
 
   /// No description provided for @notifMarkRead.
@@ -6192,7 +6192,7 @@ abstract class L {
   /// No description provided for @notifReplyFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Réponse non envoyée — ouvrez Pokou pour réessayer'**
+  /// **'Réponse non envoyée — ouvre Pokou pour réessayer'**
   String get notifReplyFailed;
 
   /// Résumé du groupe de notifications de message.
@@ -6228,25 +6228,25 @@ abstract class L {
   /// No description provided for @audienceContactsDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes les personnes de votre carnet Pokou'**
+  /// **'Toutes les personnes de ton carnet Pokou'**
   String get audienceContactsDesc;
 
   /// No description provided for @audienceNobodyDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Vos statuts ne seront visibles que par vous'**
+  /// **'Tes statuts ne seront visibles que par toi'**
   String get audienceNobodyDesc;
 
   /// No description provided for @audienceExceptDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Vos contacts, à l\'exception de ceux que vous choisissez'**
+  /// **'Tes contacts, à l\'exception de ceux que tu choisis'**
   String get audienceExceptDesc;
 
   /// No description provided for @audienceOnlyDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Seules les personnes que vous choisissez'**
+  /// **'Seules les personnes que tu choisis'**
   String get audienceOnlyDesc;
 
   /// No description provided for @statusViewerFallback.
@@ -6264,13 +6264,13 @@ abstract class L {
   /// No description provided for @statusPrivacySaveFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistrement impossible — vérifiez votre connexion.'**
+  /// **'Enregistrement impossible — vérifie ta connexion.'**
   String get statusPrivacySaveFailed;
 
   /// No description provided for @statusPrivacyTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Visibilité des statuts'**
+  /// **'Qui voit mes statuts'**
   String get statusPrivacyTitle;
 
   /// No description provided for @statusExcludePeople.
@@ -6294,13 +6294,13 @@ abstract class L {
   /// No description provided for @statusExceptFootnote.
   ///
   /// In fr, this message translates to:
-  /// **'Ces personnes ne verront pas vos statuts, même si elles sont dans vos contacts.'**
+  /// **'Ces personnes ne verront pas tes statuts, même si elles sont dans tes contacts.'**
   String get statusExceptFootnote;
 
   /// No description provided for @statusOnlyFootnote.
   ///
   /// In fr, this message translates to:
-  /// **'Seules ces personnes verront vos statuts. Elles n\'ont pas besoin de vous avoir en contact.'**
+  /// **'Seules ces personnes verront tes statuts. Elles n\'ont pas besoin de t\'avoir en contact.'**
   String get statusOnlyFootnote;
 
   /// No description provided for @status24hFootnote.
@@ -6336,7 +6336,7 @@ abstract class L {
   /// No description provided for @statusTypeHint.
   ///
   /// In fr, this message translates to:
-  /// **'Tapez votre statut…'**
+  /// **'Tape ton statut…'**
   String get statusTypeHint;
 
   /// No description provided for @statusPublish.
@@ -6378,13 +6378,13 @@ abstract class L {
   /// No description provided for @bcastNeedName.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez un nom à cette liste.'**
+  /// **'Donne un nom à cette liste.'**
   String get bcastNeedName;
 
   /// No description provided for @bcastNeedRecipient.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez au moins un destinataire.'**
+  /// **'Choisis au moins un destinataire.'**
   String get bcastNeedRecipient;
 
   /// No description provided for @bcastSaveFailed.
@@ -6408,7 +6408,7 @@ abstract class L {
   /// No description provided for @bcastNameHint.
   ///
   /// In fr, this message translates to:
-  /// **'Nom de la liste (visible par vous seul)'**
+  /// **'Nom de la liste (visible par toi seul)'**
   String get bcastNameHint;
 
   /// No description provided for @bcastNoRecipient.
@@ -6432,7 +6432,7 @@ abstract class L {
   /// No description provided for @bcastNobodyOnPokou.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun de vos contacts n\'est encore sur Pokou Messenger.'**
+  /// **'Aucun de tes contacts n\'est encore sur Pokou.'**
   String get bcastNobodyOnPokou;
 
   /// No description provided for @bcastNewList.
@@ -6468,13 +6468,13 @@ abstract class L {
   /// No description provided for @bcastEmptyTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Annoncez une fois, à plusieurs'**
+  /// **'Annonce une fois, à plusieurs'**
   String get bcastEmptyTitle;
 
   /// No description provided for @bcastEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Chaque destinataire reçoit le message dans sa conversation privée. Il ne voit pas les autres, et vous répond à vous seul — contrairement à un groupe, où tout le monde se voit.'**
+  /// **'Chaque destinataire reçoit le message dans sa discussion privée. Il ne voit pas les autres, et ne répond qu\'à toi — contrairement à un groupe, où tout le monde se voit.'**
   String get bcastEmptyBody;
 
   /// No description provided for @bcastSentTo.
@@ -6486,7 +6486,7 @@ abstract class L {
   /// No description provided for @bcastSentPartly.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyé à {sent} sur {total} — {skipped} ne reçoit plus vos messages.'**
+  /// **'Envoyé à {sent} sur {total} — {skipped} ne reçoit plus tes messages.'**
   String bcastSentPartly(int sent, int total, int skipped);
 
   /// No description provided for @bcastSendFailed.
@@ -6522,7 +6522,7 @@ abstract class L {
   /// No description provided for @bcastPrivacyNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Chaque destinataire reçoit ce message en privé. Il ne voit pas les autres, et sa réponse vous arrive dans votre conversation avec lui.'**
+  /// **'Chaque destinataire reçoit ce message en privé. Il ne voit pas les autres, et sa réponse t\'arrive dans ta discussion avec lui.'**
   String get bcastPrivacyNotice;
 
   /// No description provided for @channelNameRequired.
@@ -6588,7 +6588,7 @@ abstract class L {
   /// No description provided for @channelDescriptionHint.
   ///
   /// In fr, this message translates to:
-  /// **'Présentez votre chaîne'**
+  /// **'Présente ta chaîne'**
   String get channelDescriptionHint;
 
   /// No description provided for @channelSaveChanges.
@@ -6630,7 +6630,7 @@ abstract class L {
   /// No description provided for @channelEmptyHint.
   ///
   /// In fr, this message translates to:
-  /// **'Créez une chaîne pour partager vos actualités.'**
+  /// **'Crée une chaîne pour partager tes actualités.'**
   String get channelEmptyHint;
 
   /// No description provided for @channelGenerateLink.
@@ -6654,7 +6654,7 @@ abstract class L {
   /// No description provided for @channelSearchPrompt.
   ///
   /// In fr, this message translates to:
-  /// **'Cherchez par nom ou par description. Les chaînes certifiées apparaissent en premier.'**
+  /// **'Cherche par nom ou par description. Les chaînes certifiées apparaissent en premier.'**
   String get channelSearchPrompt;
 
   /// No description provided for @channelSearchEmpty.
@@ -6666,7 +6666,7 @@ abstract class L {
   /// No description provided for @channelNothingPublishedAdmin.
   ///
   /// In fr, this message translates to:
-  /// **'Rien de publié pour l\'instant — touchez + pour votre première publication.'**
+  /// **'Rien de publié pour l\'instant — touche + pour ta première publication.'**
   String get channelNothingPublishedAdmin;
 
   /// No description provided for @channelNothingPublished.
@@ -6696,7 +6696,7 @@ abstract class L {
   /// No description provided for @communityNewBody.
   ///
   /// In fr, this message translates to:
-  /// **'Une communauté regroupe plusieurs groupes autour des mêmes personnes. Un groupe « Annonces » est créé avec elle : vous seul y écrivez, tous ses membres y lisent.'**
+  /// **'Une communauté regroupe plusieurs groupes autour des mêmes personnes. Un groupe « Annonces » est créé avec elle : toi seul y écris, tous ses membres y lisent.'**
   String get communityNewBody;
 
   /// No description provided for @communityNameHint.
@@ -6726,7 +6726,7 @@ abstract class L {
   /// No description provided for @communityNoGroupToAttach.
   ///
   /// In fr, this message translates to:
-  /// **'Vous n\'avez pas d\'autre groupe à rattacher. Seuls les groupes que vous administrez peuvent rejoindre une communauté.'**
+  /// **'Tu n\'as pas d\'autre groupe à rattacher. Seuls les groupes que tu administres peuvent rejoindre une communauté.'**
   String get communityNoGroupToAttach;
 
   /// No description provided for @communityAddGroupFailed.
@@ -6930,19 +6930,19 @@ abstract class L {
   /// No description provided for @aiHowCanIHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Comment puis-je vous aider ?'**
+  /// **'Comment puis-je t\'aider ?'**
   String get aiHowCanIHelp;
 
   /// No description provided for @aiAskAnything.
   ///
   /// In fr, this message translates to:
-  /// **'Posez-moi n\'importe quelle question.'**
+  /// **'Pose-moi n\'importe quelle question.'**
   String get aiAskAnything;
 
   /// No description provided for @aiAskAboutData.
   ///
   /// In fr, this message translates to:
-  /// **'Posez une question sur vos données connectées.'**
+  /// **'Pose une question sur tes données connectées.'**
   String get aiAskAboutData;
 
   /// No description provided for @aiThinking.
@@ -6960,7 +6960,7 @@ abstract class L {
   /// No description provided for @aiPartner.
   ///
   /// In fr, this message translates to:
-  /// **'Votre partenaire numérique'**
+  /// **'Ton partenaire numérique'**
   String get aiPartner;
 
   /// No description provided for @aiGreetMorning.
@@ -7008,7 +7008,7 @@ abstract class L {
   /// No description provided for @aiVoiceListening.
   ///
   /// In fr, this message translates to:
-  /// **'Je vous écoute…'**
+  /// **'Je t\'écoute…'**
   String get aiVoiceListening;
 
   /// No description provided for @aiVoiceTranscribing.
@@ -7020,7 +7020,7 @@ abstract class L {
   /// No description provided for @aiVoiceFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Je n\'ai pas pu vous entendre. Réessayez.'**
+  /// **'Je n\'ai pas pu t\'entendre. Réessaie.'**
   String get aiVoiceFailed;
 
   /// No description provided for @aiVoiceSpeak.
@@ -7050,7 +7050,7 @@ abstract class L {
   /// No description provided for @aiSendFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Message non envoyé — réessayez.'**
+  /// **'Message non envoyé — réessaie.'**
   String get aiSendFailed;
 
   /// No description provided for @digestTitle.
@@ -7086,7 +7086,7 @@ abstract class L {
   /// No description provided for @digestMonitorSignals.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 signal de vos moniteurs à consulter.} other{{count} signaux de vos moniteurs à consulter.}}'**
+  /// **'{count, plural, =1{1 signal de tes moniteurs à consulter.} other{{count} signaux de tes moniteurs à consulter.}}'**
   String digestMonitorSignals(int count);
 
   /// No description provided for @digestNothing.
@@ -7104,7 +7104,7 @@ abstract class L {
   /// No description provided for @shieldFlushSummary.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 message mis en attente pendant votre réunion.} other{{count} messages mis en attente pendant votre réunion.}}'**
+  /// **'{count, plural, =1{1 message mis en attente pendant ta réunion.} other{{count} messages mis en attente pendant ta réunion.}}'**
   String shieldFlushSummary(int count);
 
   /// No description provided for @shieldPendingMessages.
@@ -7170,13 +7170,13 @@ abstract class L {
   /// No description provided for @statusDeleteFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Suppression impossible — vérifiez votre connexion.'**
+  /// **'Suppression impossible — vérifie ta connexion.'**
   String get statusDeleteFailed;
 
   /// No description provided for @statusPublishFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Publication impossible — vérifiez votre connexion et réessayez.'**
+  /// **'Publication impossible — vérifie ta connexion et réessaie.'**
   String get statusPublishFailed;
 
   /// No description provided for @statusBoostAction.
@@ -7188,7 +7188,7 @@ abstract class L {
   /// No description provided for @modulesSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez ce qui vous sert, laissez le reste'**
+  /// **'Ajoute ce qui te sert, laisse le reste'**
   String get modulesSubtitle;
 
   /// No description provided for @modulePaymentFailed.
@@ -7218,7 +7218,7 @@ abstract class L {
   /// No description provided for @cropHint.
   ///
   /// In fr, this message translates to:
-  /// **'Pincez pour zoomer, glissez pour cadrer'**
+  /// **'Pince pour zoomer, glisse pour cadrer'**
   String get cropHint;
 
   /// No description provided for @cropConfirm.
@@ -7242,7 +7242,7 @@ abstract class L {
   /// No description provided for @otpNoCodeReceived.
   ///
   /// In fr, this message translates to:
-  /// **'Vous n\'avez pas reçu de code ?'**
+  /// **'Tu n\'as pas reçu de code ?'**
   String get otpNoCodeReceived;
 
   /// No description provided for @countryDialCode.
@@ -7296,7 +7296,7 @@ abstract class L {
   /// No description provided for @devicesNoPushHereBody.
   ///
   /// In fr, this message translates to:
-  /// **'Il n\'a pas pu s\'enregistrer auprès du service de notifications. Touchez pour réessayer.'**
+  /// **'Il n\'a pas pu s\'enregistrer auprès du service de notifications. Touche pour réessayer.'**
   String get devicesNoPushHereBody;
 
   /// No description provided for @devicesRetryDone.
@@ -7308,13 +7308,13 @@ abstract class L {
   /// No description provided for @devicesRetryFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Toujours pas d\'enregistrement possible — réessayez plus tard.'**
+  /// **'Toujours pas d\'enregistrement possible — réessaie plus tard.'**
   String get devicesRetryFailed;
 
   /// No description provided for @chatsProfileMissing.
   ///
   /// In fr, this message translates to:
-  /// **'Profil indisponible — vérifiez votre connexion, puis réessayez.'**
+  /// **'Profil indisponible — vérifie ta connexion, puis réessaie.'**
   String get chatsProfileMissing;
 
   /// No description provided for @recSlideToCancel.
@@ -7380,7 +7380,7 @@ abstract class L {
   /// No description provided for @channelSuggestedBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vous n\'en suivez aucune pour l\'instant. En voici quelques-unes.'**
+  /// **'Tu n\'en suis aucune pour l\'instant. En voici quelques-unes.'**
   String get channelSuggestedBody;
 
   /// No description provided for @channelSuggestedNone.
@@ -7398,7 +7398,7 @@ abstract class L {
   /// No description provided for @channelFollowFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Abonnement impossible — vérifiez votre connexion.'**
+  /// **'Abonnement impossible — vérifie ta connexion.'**
   String get channelFollowFailed;
 
   /// No description provided for @certifyTitle.
@@ -7416,7 +7416,7 @@ abstract class L {
   /// No description provided for @certifyWhyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Les chaînes certifiées apparaissent en premier à qui cherche quoi suivre, et le badge se voit sur chacune de vos publications.'**
+  /// **'Les chaînes certifiées apparaissent en premier à qui cherche quoi suivre, et le badge se voit sur chacune de tes publications.'**
   String get certifyWhyBody;
 
   /// No description provided for @certifyReviewTitle.
@@ -7428,19 +7428,19 @@ abstract class L {
   /// No description provided for @certifyReviewBody.
   ///
   /// In fr, this message translates to:
-  /// **'Notre équipe lit votre chaîne avant d\'accorder le badge. Un badge qui s\'achète sans regard ne vaudrait rien — c\'est ce qui fait sa valeur.'**
+  /// **'Notre équipe lit ta chaîne avant d\'accorder le badge. Un badge qui s\'achète sans regard ne vaudrait rien — c\'est ce qui fait sa valeur.'**
   String get certifyReviewBody;
 
   /// No description provided for @certifyRefundTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Refusée ? Vous êtes remboursé'**
+  /// **'Refusée ? Tu es remboursé'**
   String get certifyRefundTitle;
 
   /// No description provided for @certifyRefundBody.
   ///
   /// In fr, this message translates to:
-  /// **'Si le badge ne peut pas être accordé, contactez-nous : la somme vous est rendue.'**
+  /// **'Si le badge ne peut pas être accordé, contacte-nous : la somme t\'est rendue.'**
   String get certifyRefundBody;
 
   /// No description provided for @certifyRenewTitle.
@@ -7476,13 +7476,13 @@ abstract class L {
   /// No description provided for @certifyPending.
   ///
   /// In fr, this message translates to:
-  /// **'Votre demande part à l\'équipe dès la confirmation du paiement.'**
+  /// **'Ta demande part à l\'équipe dès la confirmation du paiement.'**
   String get certifyPending;
 
   /// No description provided for @certifyFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Demande impossible — réessayez.'**
+  /// **'Demande impossible — réessaie.'**
   String get certifyFailed;
 
   /// No description provided for @certifyAlready.
@@ -7500,13 +7500,13 @@ abstract class L {
   /// No description provided for @chatsStartTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Commencez une conversation'**
+  /// **'Commence une discussion'**
   String get chatsStartTitle;
 
   /// No description provided for @chatsStartBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vos contacts sont déjà sur Pokou. Touchez un nom pour lui écrire.'**
+  /// **'Tes contacts sont déjà sur Pokou. Touche un nom pour lui écrire.'**
   String get chatsStartBody;
 
   /// No description provided for @chatsSeeAllContacts.
@@ -7518,13 +7518,13 @@ abstract class L {
   /// No description provided for @chatsNoNetworkTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Votre réseau n\'est pas encore sur Pokou'**
+  /// **'Tes proches ne sont pas encore sur Pokou'**
   String get chatsNoNetworkTitle;
 
   /// No description provided for @chatsNoNetworkBody.
   ///
   /// In fr, this message translates to:
-  /// **'Invitez quelqu\'un, ou suivez une chaîne en attendant qu\'on vous réponde.'**
+  /// **'Invite quelqu\'un, ou suis une chaîne en attendant qu\'on te réponde.'**
   String get chatsNoNetworkBody;
 
   /// No description provided for @chatsInviteContacts.
@@ -7554,7 +7554,7 @@ abstract class L {
   /// No description provided for @e2eeNotEncryptedBody.
   ///
   /// In fr, this message translates to:
-  /// **'Cette personne n\'utilise pas encore une version de Pokou qui chiffre. Vos messages voyagent en clair.'**
+  /// **'Cette personne n\'utilise pas encore une version de Pokou qui chiffre. Tes messages voyagent en clair.'**
   String get e2eeNotEncryptedBody;
 
   /// No description provided for @e2eeIdentityChangedTitle.
@@ -7566,7 +7566,7 @@ abstract class L {
   /// No description provided for @e2eeIdentityChangedBody.
   ///
   /// In fr, this message translates to:
-  /// **'La clé de {name} n\'est plus la même. Cela arrive quand quelqu\'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu\'un s\'intercale. Vérifiez avec {name} par un autre moyen avant de continuer.'**
+  /// **'La clé de {name} n\'est plus la même. Cela arrive quand quelqu\'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu\'un s\'intercale. Vérifie avec {name} par un autre moyen avant de continuer.'**
   String e2eeIdentityChangedBody(String name);
 
   /// No description provided for @e2eeIdentityAccept.
@@ -7584,7 +7584,7 @@ abstract class L {
   /// No description provided for @e2eeBlockedLookup.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de récupérer la clé de chiffrement. Le message n\'a pas été envoyé — Pokou ne l\'enverra jamais en clair à votre insu.'**
+  /// **'Impossible de récupérer la clé de chiffrement. Le message n\'a pas été envoyé — Pokou ne l\'enverra jamais en clair à ton insu.'**
   String get e2eeBlockedLookup;
 
   /// No description provided for @e2eeBlockedInvalid.
@@ -7596,7 +7596,7 @@ abstract class L {
   /// No description provided for @e2eeBlockedIdentity.
   ///
   /// In fr, this message translates to:
-  /// **'La clé de ce contact a changé. Vérifiez son identité avant d\'envoyer.'**
+  /// **'La clé de ce contact a changé. Vérifie son identité avant d\'envoyer.'**
   String get e2eeBlockedIdentity;
 
   /// No description provided for @e2eeBlockedCrypto.
@@ -7704,7 +7704,7 @@ abstract class L {
   /// No description provided for @adYours.
   ///
   /// In fr, this message translates to:
-  /// **'Votre publicité'**
+  /// **'Ta publicité'**
   String get adYours;
 
   /// No description provided for @adContact.
@@ -7734,19 +7734,19 @@ abstract class L {
   /// No description provided for @mediaSaved.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistré dans votre galerie'**
+  /// **'Enregistré dans ta galerie'**
   String get mediaSaved;
 
   /// No description provided for @mediaExported.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez où l\'enregistrer'**
+  /// **'Choisis où l\'enregistrer'**
   String get mediaExported;
 
   /// No description provided for @mediaSavePermission.
   ///
   /// In fr, this message translates to:
-  /// **'Pokou a besoin d\'accéder à vos photos pour enregistrer ce fichier.'**
+  /// **'Pokou a besoin d\'accéder à tes photos pour enregistrer ce fichier.'**
   String get mediaSavePermission;
 
   /// No description provided for @mediaSaveNoSpace.
@@ -7878,19 +7878,19 @@ abstract class L {
   /// No description provided for @stickerCreated.
   ///
   /// In fr, this message translates to:
-  /// **'Sticker ajouté à vos stickers'**
+  /// **'Sticker ajouté à tes stickers'**
   String get stickerCreated;
 
   /// No description provided for @stickerLimitReached.
   ///
   /// In fr, this message translates to:
-  /// **'Votre pack personnel est plein'**
+  /// **'Ton pack personnel est plein'**
   String get stickerLimitReached;
 
   /// No description provided for @stickerSendFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Sticker non envoyé — réessayez'**
+  /// **'Sticker non envoyé — réessaie'**
   String get stickerSendFailed;
 
   /// No description provided for @stickerLabel.
@@ -7926,7 +7926,7 @@ abstract class L {
   /// No description provided for @stickerSaved.
   ///
   /// In fr, this message translates to:
-  /// **'Sticker ajouté à vos stickers'**
+  /// **'Sticker ajouté à tes stickers'**
   String get stickerSaved;
 
   /// No description provided for @navBaba.
@@ -8016,7 +8016,7 @@ abstract class L {
   /// No description provided for @statusMineBody.
   ///
   /// In fr, this message translates to:
-  /// **'Appuyez pour publier une actualité (24 h)'**
+  /// **'Touche pour ajouter un statut'**
   String get statusMineBody;
 
   /// No description provided for @statusMineVisibility.
@@ -8052,7 +8052,7 @@ abstract class L {
   /// No description provided for @callYouShort.
   ///
   /// In fr, this message translates to:
-  /// **'Vous'**
+  /// **'Toi'**
   String get callYouShort;
 
   /// No description provided for @callMutedShort.
@@ -8124,13 +8124,13 @@ abstract class L {
   /// No description provided for @e2eeReassurance.
   ///
   /// In fr, this message translates to:
-  /// **'Les messages de cette conversation sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.'**
+  /// **'Les messages de cette discussion sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.'**
   String get e2eeReassurance;
 
   /// No description provided for @chatsEncryptionFooter.
   ///
   /// In fr, this message translates to:
-  /// **'Vos conversations privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.'**
+  /// **'Tes discussions privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.'**
   String get chatsEncryptionFooter;
 
   /// No description provided for @callsRecentSection.
@@ -8214,7 +8214,7 @@ abstract class L {
   /// No description provided for @marketStatusModeratedBody.
   ///
   /// In fr, this message translates to:
-  /// **'Elle n\'est plus visible par les acheteurs. Écrivez au support si vous pensez que c\'est une erreur.'**
+  /// **'Elle n\'est plus visible par les acheteurs. Écris au support si tu penses que c\'est une erreur.'**
   String get marketStatusModeratedBody;
 
   /// No description provided for @callsFilterDirect.
@@ -8238,7 +8238,7 @@ abstract class L {
   /// No description provided for @profileVerifyAccountBody.
   ///
   /// In fr, this message translates to:
-  /// **'Obtenez le badge vendeur vérifié du Marché'**
+  /// **'Obtiens le badge vendeur vérifié d\'Assimé'**
   String get profileVerifyAccountBody;
 
   /// No description provided for @profileCertificationPending.
@@ -8250,7 +8250,7 @@ abstract class L {
   /// No description provided for @profileCertificationPendingBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre demande est en cours d\'examen.'**
+  /// **'Ta demande est en cours d\'examen.'**
   String get profileCertificationPendingBody;
 
   /// No description provided for @profileCertificationActive.
@@ -8280,7 +8280,7 @@ abstract class L {
   /// No description provided for @verifPlanLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez votre formule'**
+  /// **'Choisis ta formule'**
   String get verifPlanLabel;
 
   /// No description provided for @callEventAudio.
@@ -8322,7 +8322,7 @@ abstract class L {
   /// No description provided for @callEventYouDeclined.
   ///
   /// In fr, this message translates to:
-  /// **'Vous avez refusé'**
+  /// **'Tu as refusé'**
   String get callEventYouDeclined;
 
   /// No description provided for @callEventEnded.
@@ -8382,7 +8382,7 @@ abstract class L {
   /// No description provided for @privacyIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Ces réglages sont appliqués par le serveur : ce que vous masquez n\'est pas envoyé aux autres, pas seulement caché dans l\'application.'**
+  /// **'Ces réglages sont appliqués par le serveur : ce que tu masques n\'est pas envoyé aux autres, pas seulement caché dans l\'application.'**
   String get privacyIntro;
 
   /// No description provided for @privacySectionWhoSees.
@@ -8412,7 +8412,7 @@ abstract class L {
   /// No description provided for @privacyLastSeenBody.
   ///
   /// In fr, this message translates to:
-  /// **'À quelle heure vous étiez connecté pour la dernière fois.'**
+  /// **'À quelle heure tu étais connecté pour la dernière fois.'**
   String get privacyLastSeenBody;
 
   /// No description provided for @privacyOnline.
@@ -8424,7 +8424,7 @@ abstract class L {
   /// No description provided for @privacyOnlineBody.
   ///
   /// In fr, this message translates to:
-  /// **'Le point vert qui dit que vous êtes joignable maintenant. Indépendant de la dernière activité.'**
+  /// **'Le point vert qui dit que tu es joignable maintenant. Indépendant de la dernière activité.'**
   String get privacyOnlineBody;
 
   /// No description provided for @privacyProfilePhoto.
@@ -8436,7 +8436,7 @@ abstract class L {
   /// No description provided for @privacyProfilePhotoBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre photo, partout où elle apparaît.'**
+  /// **'Ta photo, partout où elle apparaît.'**
   String get privacyProfilePhotoBody;
 
   /// No description provided for @privacyProfileInfo.
@@ -8448,7 +8448,7 @@ abstract class L {
   /// No description provided for @privacyProfileInfoBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre description et ce que vous avez renseigné sur vous.'**
+  /// **'Ta description et ce que tu as renseigné sur toi.'**
   String get privacyProfileInfoBody;
 
   /// No description provided for @privacyReadReceipts.
@@ -8460,7 +8460,7 @@ abstract class L {
   /// No description provided for @privacyReadReceiptsBody.
   ///
   /// In fr, this message translates to:
-  /// **'Les désactiver vous prive aussi de celles des autres. Les accusés de réception (une coche) restent visibles.'**
+  /// **'Les désactiver te prive aussi de celles des autres. Les accusés de réception (une coche) restent visibles.'**
   String get privacyReadReceiptsBody;
 
   /// No description provided for @privacyGroupInvites.
@@ -8472,7 +8472,7 @@ abstract class L {
   /// No description provided for @privacyGroupInvitesBody.
   ///
   /// In fr, this message translates to:
-  /// **'Autoriser n\'est pas accepter : vous gardez le dernier mot sur chaque invitation.'**
+  /// **'Les autres t’envoient une invitation : tu gardes le dernier mot sur chacune.'**
   String get privacyGroupInvitesBody;
 
   /// No description provided for @privacyGroupMembership.
@@ -8484,7 +8484,7 @@ abstract class L {
   /// No description provided for @privacyGroupMembershipBody.
   ///
   /// In fr, this message translates to:
-  /// **'Qui peut voir dans quels groupes vous êtes. Les membres d\'un groupe continuent de se connaître entre eux.'**
+  /// **'Qui peut voir dans quels groupes tu es. Les membres d\'un groupe continuent de se connaître entre eux.'**
   String get privacyGroupMembershipBody;
 
   /// No description provided for @privacyEveryone.
@@ -8508,7 +8508,7 @@ abstract class L {
   /// No description provided for @privacySaveFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Réglage non enregistré — réessayez.'**
+  /// **'Réglage non enregistré — réessaie.'**
   String get privacySaveFailed;
 
   /// No description provided for @privacyUnavailable.
@@ -8520,7 +8520,7 @@ abstract class L {
   /// No description provided for @privacyStatusesNote.
   ///
   /// In fr, this message translates to:
-  /// **'La confidentialité des statuts se règle depuis l\'onglet Actus, où vous pouvez aussi exclure des personnes précises.'**
+  /// **'La confidentialité des statuts se règle depuis l\'onglet Statuts, où tu peux aussi exclure des personnes précises.'**
   String get privacyStatusesNote;
 
   /// No description provided for @groupInvitesSent.
@@ -8538,7 +8538,7 @@ abstract class L {
   /// No description provided for @groupInvitationFrom.
   ///
   /// In fr, this message translates to:
-  /// **'{name} vous invite'**
+  /// **'{name} t\'invite'**
   String groupInvitationFrom(Object name);
 
   /// No description provided for @groupInvitationMembers.
@@ -8628,7 +8628,7 @@ abstract class L {
   /// No description provided for @channelPrivateBody.
   ///
   /// In fr, this message translates to:
-  /// **'Introuvable par la recherche. Seules les personnes à qui vous donnez le lien peuvent la rejoindre et lire ses publications. Ce choix ne pourra pas être modifié ensuite.'**
+  /// **'Introuvable par la recherche. Seules les personnes à qui tu donnes le lien peuvent la rejoindre et lire ses publications. Ce choix ne pourra pas être modifié ensuite.'**
   String get channelPrivateBody;
 
   /// No description provided for @channelPrivateBadge.
@@ -8640,13 +8640,13 @@ abstract class L {
   /// No description provided for @mahizuConnectTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Connectez votre compte Mahizu'**
+  /// **'Connecte ton compte Mahizu'**
   String get mahizuConnectTitle;
 
   /// No description provided for @mahizuConnectBody.
   ///
   /// In fr, this message translates to:
-  /// **'L\'assistant est un service Mahizu, distinct de Pokou. Pour l\'utiliser, rattachez votre compte Mahizu : un code sera envoyé au {phone}.'**
+  /// **'L\'assistant est un service Mahizu, distinct de Pokou. Pour l\'utiliser, rattache ton compte Mahizu : un code sera envoyé au {phone}.'**
   String mahizuConnectBody(String phone);
 
   /// No description provided for @mahizuSendCode.
@@ -8664,7 +8664,7 @@ abstract class L {
   /// No description provided for @mahizuPinLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Code de votre compte Mahizu'**
+  /// **'Code de ton compte Mahizu'**
   String get mahizuPinLabel;
 
   /// No description provided for @mahizuConfirm.
@@ -8790,7 +8790,7 @@ abstract class L {
   /// No description provided for @koryNoMoney.
   ///
   /// In fr, this message translates to:
-  /// **'Pokou ne touche pas l\'argent : il va directement de votre wallet à celui du collecteur.'**
+  /// **'Pokou ne touche pas l\'argent : il va directement de ton wallet à celui du collecteur.'**
   String get koryNoMoney;
 
   /// No description provided for @koryCreate.
@@ -8838,7 +8838,7 @@ abstract class L {
   /// No description provided for @koryNoneBody.
   ///
   /// In fr, this message translates to:
-  /// **'Créez une cagnotte pour un mariage, un baptême ou une cotisation, ou rejoignez-en une avec son code.'**
+  /// **'Crée une cagnotte pour un mariage, un baptême ou une cotisation, ou rejoins-en une avec son code.'**
   String get koryNoneBody;
 
   /// No description provided for @koryUnavailable.
@@ -8910,7 +8910,7 @@ abstract class L {
   /// No description provided for @koryPayTo.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyez votre contribution depuis votre wallet au {phone}, puis déclarez-la ici.'**
+  /// **'Envoie ta contribution depuis ton wallet au {phone}, puis déclare-la ici.'**
   String koryPayTo(String phone);
 
   /// No description provided for @koryPerMember.
@@ -8946,7 +8946,7 @@ abstract class L {
   /// No description provided for @koryWalletRefHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Elle figure dans le SMS de votre opérateur. Seuls vous et le collecteur la voyez.'**
+  /// **'Elle figure dans le SMS de ton opérateur. Seuls toi et le collecteur la voyez.'**
   String get koryWalletRefHelp;
 
   /// No description provided for @koryNote.
@@ -9024,7 +9024,7 @@ abstract class L {
   /// No description provided for @koryShareText.
   ///
   /// In fr, this message translates to:
-  /// **'Rejoignez la cagnotte « {title} » sur Pokou avec le code {code}.'**
+  /// **'Rejoins la cagnotte « {title} » sur Pokou avec le code {code}.'**
   String koryShareText(String title, String code);
 
   /// No description provided for @koryCreateTitle.
@@ -9078,25 +9078,25 @@ abstract class L {
   /// No description provided for @koryNeedTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez un titre (3 caractères au moins).'**
+  /// **'Donne un titre (3 caractères au moins).'**
   String get koryNeedTitle;
 
   /// No description provided for @koryNeedAmount.
   ///
   /// In fr, this message translates to:
-  /// **'Indiquez un montant d\'au moins 100 FCFA.'**
+  /// **'Indique un montant d\'au moins 100 FCFA.'**
   String get koryNeedAmount;
 
   /// No description provided for @koryCollectorIsYou.
   ///
   /// In fr, this message translates to:
-  /// **'Vous êtes le collecteur : les contributions arrivent sur votre wallet, et c\'est vous qui les confirmez.'**
+  /// **'Tu es le collecteur : les contributions arrivent sur ton wallet, et c\'est toi qui les confirmes.'**
   String get koryCollectorIsYou;
 
   /// No description provided for @koryYou.
   ///
   /// In fr, this message translates to:
-  /// **'Vous'**
+  /// **'Toi'**
   String get koryYou;
 
   /// No description provided for @koryTontinePlus.
@@ -9126,7 +9126,7 @@ abstract class L {
   /// No description provided for @koryActionFailed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'opération n\'a pas abouti. Réessayez.'**
+  /// **'L\'opération n\'a pas abouti. Réessaie.'**
   String get koryActionFailed;
 
   /// No description provided for @welcomePromise.
@@ -9180,13 +9180,13 @@ abstract class L {
   /// No description provided for @onbProfileTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Votre profil'**
+  /// **'Ton profil'**
   String get onbProfileTitle;
 
   /// No description provided for @onbProfileBody.
   ///
   /// In fr, this message translates to:
-  /// **'C\'est le nom que verront vos contacts.'**
+  /// **'C\'est le nom que verront tes contacts.'**
   String get onbProfileBody;
 
   /// No description provided for @onbDisplayName.
@@ -9198,13 +9198,13 @@ abstract class L {
   /// No description provided for @onbNameRequired.
   ///
   /// In fr, this message translates to:
-  /// **'Indiquez un nom (2 caractères au moins).'**
+  /// **'Indique un nom (2 caractères au moins).'**
   String get onbNameRequired;
 
   /// No description provided for @onbPhotoLater.
   ///
   /// In fr, this message translates to:
-  /// **'Vous pourrez ajouter une photo plus tard, depuis votre profil.'**
+  /// **'Tu pourras ajouter une photo plus tard, depuis ton profil.'**
   String get onbPhotoLater;
 
   /// No description provided for @onbContinue.
@@ -9258,7 +9258,7 @@ abstract class L {
   /// No description provided for @onbFailed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'enregistrement n\'a pas abouti. Réessayez.'**
+  /// **'L\'enregistrement n\'a pas abouti. Réessaie.'**
   String get onbFailed;
 
   /// No description provided for @moreConsents.
@@ -9372,19 +9372,19 @@ abstract class L {
   /// No description provided for @honamNeedPhoto.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez la photo de l\'ordonnance.'**
+  /// **'Ajoute la photo de l\'ordonnance.'**
   String get honamNeedPhoto;
 
   /// No description provided for @honamNeedAddress.
   ///
   /// In fr, this message translates to:
-  /// **'Indiquez l\'adresse de livraison.'**
+  /// **'Indique l\'adresse de livraison.'**
   String get honamNeedAddress;
 
   /// No description provided for @honamFailed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'opération n\'a pas abouti. Réessayez.'**
+  /// **'L\'opération n\'a pas abouti. Réessaie.'**
   String get honamFailed;
 
   /// No description provided for @honamOrderTitle.
@@ -9492,7 +9492,7 @@ abstract class L {
   /// No description provided for @honamPayTo.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyez {amount} depuis votre wallet au {phone} (la pharmacie), puis confirmez.'**
+  /// **'Envoie {amount} depuis ton wallet au {phone} (la pharmacie), puis confirme.'**
   String honamPayTo(String amount, String phone);
 
   /// No description provided for @honamDeclarePaid.
@@ -9510,7 +9510,7 @@ abstract class L {
   /// No description provided for @honamPaymentNotReceived.
   ///
   /// In fr, this message translates to:
-  /// **'La pharmacie n\'a pas reçu votre paiement. Vérifiez le numéro et le montant.'**
+  /// **'La pharmacie n\'a pas reçu ton paiement. Vérifie le numéro et le montant.'**
   String get honamPaymentNotReceived;
 
   /// No description provided for @honamCode.
@@ -9522,7 +9522,7 @@ abstract class L {
   /// No description provided for @honamCodeHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez ce code au coursier, seulement quand vous avez le colis en main.'**
+  /// **'Donne ce code au coursier, seulement quand tu as le colis en main.'**
   String get honamCodeHelp;
 
   /// No description provided for @honamOriginal.
@@ -9534,7 +9534,7 @@ abstract class L {
   /// No description provided for @honamRefundDue.
   ///
   /// In fr, this message translates to:
-  /// **'La pharmacie vous doit {amount} : {reason}'**
+  /// **'La pharmacie te doit {amount} : {reason}'**
   String honamRefundDue(String amount, String reason);
 
   /// No description provided for @honamRefundReceived.
@@ -9684,13 +9684,13 @@ abstract class L {
   /// No description provided for @honamPaymentLinkOpened.
   ///
   /// In fr, this message translates to:
-  /// **'Terminez le paiement dans la page qui s\'ouvre.'**
+  /// **'Termine le paiement dans la page qui s\'ouvre.'**
   String get honamPaymentLinkOpened;
 
   /// No description provided for @honamCourierSuspended.
   ///
   /// In fr, this message translates to:
-  /// **'Compte coursier suspendu après 3 défauts de livraison. Contactez le support pour un recours.'**
+  /// **'Compte coursier suspendu après 3 défauts de livraison. Contacte le support pour un recours.'**
   String get honamCourierSuspended;
 
   /// No description provided for @honamPriceNote.
@@ -9708,13 +9708,13 @@ abstract class L {
   /// No description provided for @certPitch.
   ///
   /// In fr, this message translates to:
-  /// **'Le badge prouve que votre nom est bien le vôtre. Le mode preuve garde visibles, barrés, les messages supprimés d\'un groupe.'**
+  /// **'Nom vérifié et mode preuve · essai d’un mois'**
   String get certPitch;
 
   /// No description provided for @certHowItWorks.
   ///
   /// In fr, this message translates to:
-  /// **'Votre identité est vérifiée par le nom du titulaire du wallet qui paie.'**
+  /// **'Ton identité est vérifiée par le nom du titulaire du wallet qui paie.'**
   String get certHowItWorks;
 
   /// No description provided for @certStartTrial.
@@ -9774,7 +9774,7 @@ abstract class L {
   /// No description provided for @certMismatchBody.
   ///
   /// In fr, this message translates to:
-  /// **'Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrigez-le tel qu\'il figure sur sa pièce d\'identité.'**
+  /// **'Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrige-le tel qu\'il figure sur sa pièce d\'identité.'**
   String get certMismatchBody;
 
   /// No description provided for @proofModeTitle.
@@ -9888,7 +9888,7 @@ abstract class L {
   /// No description provided for @marketUseHonam.
   ///
   /// In fr, this message translates to:
-  /// **'Les médicaments ne se vendent pas sur Assimé : passez par Honam.'**
+  /// **'Les médicaments ne se vendent pas sur Assimé : passe par Honam.'**
   String get marketUseHonam;
 
   /// No description provided for @honamMissingTitle.
@@ -9900,7 +9900,7 @@ abstract class L {
   /// No description provided for @honamMissingBody.
   ///
   /// In fr, this message translates to:
-  /// **'{amount} manquent : {reason}. Que préférez-vous ?'**
+  /// **'{amount} manquent : {reason}. Que préfères-tu ?'**
   String honamMissingBody(String amount, String reason);
 
   /// No description provided for @honamKeepRest.
@@ -9918,7 +9918,7 @@ abstract class L {
   /// No description provided for @honamRefundDelay.
   ///
   /// In fr, this message translates to:
-  /// **'La pharmacie vous rembourse sous 2 h, sur le numéro qui a payé.'**
+  /// **'La pharmacie te rembourse sous 2 h, sur le numéro qui a payé.'**
   String get honamRefundDelay;
 
   /// No description provided for @honamZones.
@@ -9954,7 +9954,7 @@ abstract class L {
   /// No description provided for @honamLaunch.
   ///
   /// In fr, this message translates to:
-  /// **'Période de lancement : vous livrez sans adhésion ni pack.'**
+  /// **'Période de lancement : tu livres sans adhésion ni pack.'**
   String get honamLaunch;
 
   /// No description provided for @honamQueenLocked.
@@ -10652,6 +10652,456 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'La suppression a échoué. Réessaie.'**
   String get deleteAccountFailed;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide et support'**
+  String get helpTitle;
+
+  /// No description provided for @helpSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher dans l’aide'**
+  String get helpSearchHint;
+
+  /// No description provided for @helpAskBaba.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander à Baba'**
+  String get helpAskBaba;
+
+  /// No description provided for @helpAskBabaSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’assistant IA répond tout de suite'**
+  String get helpAskBabaSub;
+
+  /// No description provided for @helpFaqTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Questions fréquentes'**
+  String get helpFaqTitle;
+
+  /// No description provided for @helpQMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou touche-t-il mon argent ?'**
+  String get helpQMoney;
+
+  /// No description provided for @helpAMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non. Cagnottes, pharmacies et coursiers se paient de wallet à wallet. Pokou ne garde jamais ton argent.'**
+  String get helpAMoney;
+
+  /// No description provided for @helpQProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment marche le mode preuve ?'**
+  String get helpQProof;
+
+  /// No description provided for @helpAProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activé par un titulaire de Pokou certifié, il garde visibles, barrés, les messages supprimés ou modifiés. C’est toujours affiché en tête de la discussion.'**
+  String get helpAProof;
+
+  /// No description provided for @helpQSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne reçois pas le code SMS'**
+  String get helpQSms;
+
+  /// No description provided for @helpASms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie le numéro et le réseau, puis attends la fin du compte à rebours pour redemander un code. Pokou ne te demandera jamais ce code, ni par message ni par appel.'**
+  String get helpASms;
+
+  /// No description provided for @helpQCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment devenir coursier Honam ?'**
+  String get helpQCourier;
+
+  /// No description provided for @helpACourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans Plus, touche « Devenir coursier Honam » : identité, zones, wallet et règles d’or. Honam ouvre ville par ville.'**
+  String get helpACourier;
+
+  /// No description provided for @helpQScam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment repérer une arnaque ?'**
+  String get helpQScam;
+
+  /// No description provided for @helpAScam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Méfie-toi de qui demande un code reçu par SMS, ton code PIN ou un paiement urgent. Pokou ne le fait jamais. Bloque et signale le contact.'**
+  String get helpAScam;
+
+  /// No description provided for @helpSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire au support'**
+  String get helpSupport;
+
+  /// No description provided for @helpSupportSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse dans l’application'**
+  String get helpSupportSub;
+
+  /// No description provided for @helpReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un problème'**
+  String get helpReport;
+
+  /// No description provided for @helpNoResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune question ne correspond. Demande à Baba.'**
+  String get helpNoResult;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos de Pokou'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version}'**
+  String aboutVersion(String version);
+
+  /// No description provided for @aboutNamesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le sens de nos noms'**
+  String get aboutNamesTitle;
+
+  /// No description provided for @aboutPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'un nom baoulé'**
+  String get aboutPokou;
+
+  /// No description provided for @aboutKory.
+  ///
+  /// In fr, this message translates to:
+  /// **'le cauris'**
+  String get aboutKory;
+
+  /// No description provided for @aboutHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'« aide-moi », en éwé'**
+  String get aboutHonam;
+
+  /// No description provided for @aboutAssime.
+  ///
+  /// In fr, this message translates to:
+  /// **'« au marché », en éwé'**
+  String get aboutAssime;
+
+  /// No description provided for @aboutWetri.
+  ///
+  /// In fr, this message translates to:
+  /// **'« mois », en éwé'**
+  String get aboutWetri;
+
+  /// No description provided for @aboutEpe.
+  ///
+  /// In fr, this message translates to:
+  /// **'« année », en éwé'**
+  String get aboutEpe;
+
+  /// No description provided for @aboutNextNames.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nos prochains services porteront eux aussi des noms venus de langues africaines.'**
+  String get aboutNextNames;
+
+  /// No description provided for @aboutLicenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licences des logiciels libres'**
+  String get aboutLicenses;
+
+  /// No description provided for @legalEssentials.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’essentiel'**
+  String get legalEssentials;
+
+  /// No description provided for @legalFullText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Texte complet'**
+  String get legalFullText;
+
+  /// No description provided for @termsE1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne touche jamais l’argent : cagnottes, pharmacies et coursiers se paient de wallet à wallet.'**
+  String get termsE1;
+
+  /// No description provided for @termsE2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve garde la trace des messages supprimés, et c’est toujours affiché.'**
+  String get termsE2;
+
+  /// No description provided for @termsE3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam n’est pas un service d’urgence.'**
+  String get termsE3;
+
+  /// No description provided for @termsE4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les badges payants se résilient à tout moment.'**
+  String get termsE4;
+
+  /// No description provided for @privacyE1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton numéro n’est jamais montré à un vendeur ni à un coursier.'**
+  String get privacyE1;
+
+  /// No description provided for @privacyE2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne lit pas tes messages. Un signalement n’envoie que les 5 derniers au support.'**
+  String get privacyE2;
+
+  /// No description provided for @privacyE3.
+  ///
+  /// In fr, this message translates to:
+  /// **'La position du coursier n’est pas conservée après la livraison.'**
+  String get privacyE3;
+
+  /// No description provided for @privacyE4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les annonces sponsorisées sont ciblées par ville, jamais à partir de tes messages.'**
+  String get privacyE4;
+
+  /// No description provided for @languageNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'La langue de l’application ne change pas celle de tes messages. Les noms Pokou, Kory, Honam et Assimé restent les mêmes dans toutes les langues.'**
+  String get languageNote;
+
+  /// No description provided for @securityPinWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne te demandera jamais ton code PIN ni le code reçu par SMS, ni par message ni par appel.'**
+  String get securityPinWarning;
+
+  /// No description provided for @statusReplyPrivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta réponse arrive en privé, dans votre discussion à deux.'**
+  String get statusReplyPrivate;
+
+  /// No description provided for @statusViewersNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toi seul vois cette liste. Les réponses arrivent en privé, dans vos discussions.'**
+  String get statusViewersNote;
+
+  /// No description provided for @statusWhoSees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui voit mes statuts'**
+  String get statusWhoSees;
+
+  /// No description provided for @attachCompressNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos et vidéos sont compressées avant l’envoi pour économiser tes données.'**
+  String get attachCompressNote;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisis le code'**
+  String get otpTitle;
+
+  /// No description provided for @pinForgot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN oublié ?'**
+  String get pinForgot;
+
+  /// No description provided for @pinTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code PIN'**
+  String get pinTitle;
+
+  /// No description provided for @statusReplyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répondre à {name}…'**
+  String statusReplyHint(String name);
+
+  /// No description provided for @statusReplyQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'↩ En réponse à ton statut'**
+  String get statusReplyQuote;
+
+  /// No description provided for @statusReplySent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse envoyée en privé.'**
+  String get statusReplySent;
+
+  /// No description provided for @changeNumberTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de numéro'**
+  String get changeNumberTitle;
+
+  /// No description provided for @changeNumberOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancien numéro'**
+  String get changeNumberOld;
+
+  /// No description provided for @changeNumberNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau numéro'**
+  String get changeNumberNew;
+
+  /// No description provided for @changeNumberNotify.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévenir mes contacts'**
+  String get changeNumberNotify;
+
+  /// No description provided for @changeNumberNotifyAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous mes contacts'**
+  String get changeNumberNotifyAll;
+
+  /// No description provided for @changeNumberNotifyChatted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ceux avec qui j’ai discuté'**
+  String get changeNumberNotifyChatted;
+
+  /// No description provided for @changeNumberNotifyNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne'**
+  String get changeNumberNotifyNone;
+
+  /// No description provided for @changeNumberNotifyNoneSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes groupes sont toujours prévenus'**
+  String get changeNumberNotifyNoneSub;
+
+  /// No description provided for @changeNumberInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton compte, tes discussions, ton badge Pokou certifié et tes cagnottes Kory te suivent. Un code est envoyé au nouveau numéro.'**
+  String get changeNumberInfo;
+
+  /// No description provided for @changeNumberKoryWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si tu es collecteur d’une cagnotte, ton numéro de collecte ne change pas tout seul : modifie-le dans Kory, les membres en seront prévenus.'**
+  String get changeNumberKoryWarning;
+
+  /// No description provided for @changeNumberSendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le code'**
+  String get changeNumberSendCode;
+
+  /// No description provided for @changeNumberCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code reçu par SMS'**
+  String get changeNumberCodeLabel;
+
+  /// No description provided for @changeNumberConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le changement'**
+  String get changeNumberConfirm;
+
+  /// No description provided for @changeNumberDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton numéro est changé.'**
+  String get changeNumberDone;
+
+  /// No description provided for @pinForgotIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deux façons de retrouver ton compte :'**
+  String get pinForgotIntro;
+
+  /// No description provided for @pinForgotEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par e-mail'**
+  String get pinForgotEmail;
+
+  /// No description provided for @pinForgotEmailSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si tu as ajouté une adresse : un lien de réinitialisation t’est envoyé'**
+  String get pinForgotEmailSub;
+
+  /// No description provided for @pinForgotWait.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendre 7 jours'**
+  String get pinForgotWait;
+
+  /// No description provided for @pinForgotWaitSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ensuite, tu te connectes sans code PIN avec le code SMS, à condition de garder ton numéro'**
+  String get pinForgotWaitSub;
+
+  /// No description provided for @pinForgotWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le délai de 7 jours empêche quelqu’un qui aurait volé ta carte SIM de prendre ton compte tout de suite.'**
+  String get pinForgotWarning;
+
+  /// No description provided for @pinForgotMeanwhile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pendant l’attente, tes contacts continuent de te voir et tes messages t’attendent.'**
+  String get pinForgotMeanwhile;
+
+  /// No description provided for @pinForgotContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get pinForgotContinue;
+
+  /// No description provided for @pinForgotScheduled.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est noté. À partir du {date}, le code SMS suffira pour te connecter.'**
+  String pinForgotScheduled(String date);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

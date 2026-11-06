@@ -9,6 +9,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../../../l10n/app_localizations.dart';
 import 'auth_controller.dart';
+import 'forgot_pin_screen.dart';
 import 'onboarding_screen.dart';
 
 /// Seconde étape de la connexion : le code du compte, après le SMS.
@@ -103,7 +104,7 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  l.twoStepTitle,
+                  l.pinTitle,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -154,6 +155,19 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(l.actionContinue),
+                ),
+                // CNX-1 → REG-6.
+                TextButton(
+                  onPressed: _submitting
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ForgotPinScreen(
+                              verificationToken: widget.verificationToken,
+                            ),
+                          ),
+                        ),
+                  child: Text(l.pinForgot),
                 ),
               ],
             ),

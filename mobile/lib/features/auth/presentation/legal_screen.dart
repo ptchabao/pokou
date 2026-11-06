@@ -41,6 +41,19 @@ class LegalScreen extends ConsumerWidget {
         data: (doc) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
           children: [
+            // REG-12 / REG-13 : « L’essentiel » d'abord, en quatre phrases,
+            // puis le texte complet servi par l'API.
+            _Essentials(
+              lines: name == 'conditions'
+                  ? [l.termsE1, l.termsE2, l.termsE3, l.termsE4]
+                  : [l.privacyE1, l.privacyE2, l.privacyE3, l.privacyE4],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l.legalFullText,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
             for (final line in doc.body.split('\n').skip(1))
               _MarkdownLine(line),
           ],
@@ -85,5 +98,58 @@ class _MarkdownLine extends StatelessWidget {
       );
     }
     return Text(text, style: const TextStyle(fontSize: 15, height: 1.45));
+  }
+}
+
+class _Essentials extends StatelessWidget {
+  const _Essentials({required this.lines});
+
+  final List<String> lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          L.of(context).legalEssentials,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final line in lines)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2),
+                        child: Icon(
+                          Icons.check_circle_outline,
+                          size: 18,
+                          color: AppColors.accentPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(line)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

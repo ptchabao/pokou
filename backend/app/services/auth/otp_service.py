@@ -270,8 +270,14 @@ def get_or_create_user_by_phone(db: Session, phone: str) -> User:
 
 
 def verify_otp(db: Session, raw_phone: str, code: str) -> User:
-    """Verifies the most recent unconsumed code for this phone, then
-    creates the User row on first success. Raises OTPInvalidError on any
+    return get_or_create_user_by_phone(db, consume_otp(db, raw_phone, code))
+
+
+def consume_otp(db: Session, raw_phone: str, code: str) -> str:
+    """Verifies (and consumes) the most recent unconsumed code for this
+    phone, and returns the normalized number — WITHOUT creating any account:
+    a number change proves possession of a number that must not become a
+    second account. Raises OTPInvalidError on any
     failure (wrong code, expired, too many attempts) — deliberately the
     same error/message for all of these so a caller can't distinguish
     "expired" from "wrong code" to narrow down a brute-force guess."""
@@ -305,4 +311,4 @@ def verify_otp(db: Session, raw_phone: str, code: str) -> User:
     otp.consumed_at = datetime.utcnow()
     db.commit()
 
-    return get_or_create_user_by_phone(db, phone)
+    return phone

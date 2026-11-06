@@ -6104,4 +6104,259 @@ class LEs extends L {
 
   @override
   String get deleteAccountFailed => 'La eliminación falló. Inténtalo de nuevo.';
+
+  @override
+  String get helpTitle => 'Ayuda y soporte';
+
+  @override
+  String get helpSearchHint => 'Buscar en la ayuda';
+
+  @override
+  String get helpAskBaba => 'Preguntar a Baba';
+
+  @override
+  String get helpAskBabaSub => 'El asistente de IA responde al instante';
+
+  @override
+  String get helpFaqTitle => 'Preguntas frecuentes';
+
+  @override
+  String get helpQMoney => '¿Pokou toca mi dinero?';
+
+  @override
+  String get helpAMoney =>
+      'No. Colectas, farmacias y repartidores se pagan de monedero a monedero. Pokou nunca guarda tu dinero.';
+
+  @override
+  String get helpQProof => '¿Cómo funciona el modo prueba?';
+
+  @override
+  String get helpAProof =>
+      'Activado por un titular de Pokou certificado, mantiene visibles, tachados, los mensajes borrados o editados. Siempre se indica al inicio del chat.';
+
+  @override
+  String get helpQSms => 'No recibo el código SMS';
+
+  @override
+  String get helpASms =>
+      'Comprueba el número y la red, y espera a que termine la cuenta atrás para pedir otro código. Pokou nunca te pedirá este código, ni por mensaje ni por llamada.';
+
+  @override
+  String get helpQCourier => '¿Cómo ser repartidor de Honam?';
+
+  @override
+  String get helpACourier =>
+      'En Más, toca «Ser repartidor de Honam»: identidad, zonas, monedero y reglas de oro. Honam abre ciudad por ciudad.';
+
+  @override
+  String get helpQScam => '¿Cómo detectar una estafa?';
+
+  @override
+  String get helpAScam =>
+      'Desconfía de quien pida un código SMS, tu PIN o un pago urgente. Pokou nunca lo hace. Bloquea y denuncia al contacto.';
+
+  @override
+  String get helpSupport => 'Escribir al soporte';
+
+  @override
+  String get helpSupportSub => 'Respuesta en la aplicación';
+
+  @override
+  String get helpReport => 'Informar de un problema';
+
+  @override
+  String get helpNoResult => 'Ninguna pregunta coincide. Pregunta a Baba.';
+
+  @override
+  String get aboutTitle => 'Acerca de Pokou';
+
+  @override
+  String aboutVersion(String version) {
+    return 'Versión $version';
+  }
+
+  @override
+  String get aboutNamesTitle => 'El sentido de nuestros nombres';
+
+  @override
+  String get aboutPokou => 'un nombre baulé';
+
+  @override
+  String get aboutKory => 'el cauri';
+
+  @override
+  String get aboutHonam => '«ayúdame», en ewe';
+
+  @override
+  String get aboutAssime => '«en el mercado», en ewe';
+
+  @override
+  String get aboutWetri => '«mes», en ewe';
+
+  @override
+  String get aboutEpe => '«año», en ewe';
+
+  @override
+  String get aboutNextNames =>
+      'Nuestros próximos servicios también llevarán nombres de lenguas africanas.';
+
+  @override
+  String get aboutLicenses => 'Licencias de software libre';
+
+  @override
+  String get legalEssentials => 'Lo esencial';
+
+  @override
+  String get legalFullText => 'Texto completo';
+
+  @override
+  String get termsE1 =>
+      'Pokou nunca toca el dinero: colectas, farmacias y repartidores se pagan de monedero a monedero.';
+
+  @override
+  String get termsE2 =>
+      'El modo prueba conserva el rastro de los mensajes borrados, y siempre se indica.';
+
+  @override
+  String get termsE3 => 'Honam no es un servicio de urgencias.';
+
+  @override
+  String get termsE4 =>
+      'Las insignias de pago se cancelan en cualquier momento.';
+
+  @override
+  String get privacyE1 =>
+      'Tu número nunca se muestra a un vendedor ni a un repartidor.';
+
+  @override
+  String get privacyE2 =>
+      'Pokou no lee tus mensajes. Una denuncia solo envía los 5 últimos al soporte.';
+
+  @override
+  String get privacyE3 =>
+      'La ubicación del repartidor no se conserva tras la entrega.';
+
+  @override
+  String get privacyE4 =>
+      'Los anuncios patrocinados se dirigen por ciudad, nunca a partir de tus mensajes.';
+
+  @override
+  String get languageNote =>
+      'El idioma de la aplicación no cambia el de tus mensajes. Los nombres Pokou, Kory, Honam y Assimé no cambian en ningún idioma.';
+
+  @override
+  String get securityPinWarning =>
+      'Pokou nunca te pedirá tu PIN ni el código SMS, ni por mensaje ni por llamada.';
+
+  @override
+  String get statusReplyPrivate =>
+      'Tu respuesta llega en privado, en vuestro chat a dos.';
+
+  @override
+  String get statusViewersNote =>
+      'Solo tú ves esta lista. Las respuestas llegan en privado, en tus chats.';
+
+  @override
+  String get statusWhoSees => 'Quién ve mis estados';
+
+  @override
+  String get attachCompressNote =>
+      'Las fotos y vídeos se comprimen antes de enviarse para ahorrar datos.';
+
+  @override
+  String get otpTitle => 'Introduce el código';
+
+  @override
+  String get pinForgot => '¿Olvidaste tu PIN?';
+
+  @override
+  String get pinTitle => 'Tu PIN';
+
+  @override
+  String statusReplyHint(String name) {
+    return 'Responder a $name…';
+  }
+
+  @override
+  String get statusReplyQuote => '↩ En respuesta a tu estado';
+
+  @override
+  String get statusReplySent => 'Respuesta enviada en privado.';
+
+  @override
+  String get changeNumberTitle => 'Cambiar de número';
+
+  @override
+  String get changeNumberOld => 'Número anterior';
+
+  @override
+  String get changeNumberNew => 'Número nuevo';
+
+  @override
+  String get changeNumberNotify => 'Avisar a mis contactos';
+
+  @override
+  String get changeNumberNotifyAll => 'Todos mis contactos';
+
+  @override
+  String get changeNumberNotifyChatted => 'Con quienes he chateado';
+
+  @override
+  String get changeNumberNotifyNone => 'Nadie';
+
+  @override
+  String get changeNumberNotifyNoneSub => 'Tus grupos siempre son avisados';
+
+  @override
+  String get changeNumberInfo =>
+      'Tu cuenta, tus chats, tu insignia Pokou certificado y tus colectas Kory te siguen. Se envía un código al número nuevo.';
+
+  @override
+  String get changeNumberKoryWarning =>
+      'Si recaudas una colecta, tu número de cobro no cambia solo: cámbialo en Kory, los miembros serán avisados.';
+
+  @override
+  String get changeNumberSendCode => 'Enviar el código';
+
+  @override
+  String get changeNumberCodeLabel => 'Código recibido por SMS';
+
+  @override
+  String get changeNumberConfirm => 'Confirmar el cambio';
+
+  @override
+  String get changeNumberDone => 'Tu número ha cambiado.';
+
+  @override
+  String get pinForgotIntro => 'Dos formas de recuperar tu cuenta:';
+
+  @override
+  String get pinForgotEmail => 'Por correo';
+
+  @override
+  String get pinForgotEmailSub =>
+      'Si añadiste una dirección: se te envía un enlace de restablecimiento';
+
+  @override
+  String get pinForgotWait => 'Esperar 7 días';
+
+  @override
+  String get pinForgotWaitSub =>
+      'Después entras sin PIN con el código SMS, siempre que conserves tu número';
+
+  @override
+  String get pinForgotWarning =>
+      'El plazo de 7 días impide que quien robe tu tarjeta SIM se quede con tu cuenta de inmediato.';
+
+  @override
+  String get pinForgotMeanwhile =>
+      'Mientras esperas, tus contactos te siguen viendo y tus mensajes te esperan.';
+
+  @override
+  String get pinForgotContinue => 'Continuar';
+
+  @override
+  String pinForgotScheduled(String date) {
+    return 'Anotado. A partir del $date, bastará el código SMS para entrar.';
+  }
 }

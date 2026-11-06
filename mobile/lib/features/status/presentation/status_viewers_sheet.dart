@@ -99,6 +99,12 @@ class _StatusViewersSheetState extends ConsumerState<StatusViewersSheet> {
                 ),
               ],
             ),
+            const SizedBox(height: 6),
+            // STA-6 : la liste est privée, les réponses aussi.
+            Text(
+              L.of(context).statusViewersNote,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
             const SizedBox(height: 12),
             if (_error != null)
               Text(

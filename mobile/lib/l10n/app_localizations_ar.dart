@@ -6084,4 +6084,255 @@ class LAr extends L {
 
   @override
   String get deleteAccountFailed => 'فشل الحذف. حاول مرة أخرى.';
+
+  @override
+  String get helpTitle => 'المساعدة والدعم';
+
+  @override
+  String get helpSearchHint => 'ابحث في المساعدة';
+
+  @override
+  String get helpAskBaba => 'اسأل بابا';
+
+  @override
+  String get helpAskBabaSub => 'يجيب المساعد الذكي فورًا';
+
+  @override
+  String get helpFaqTitle => 'الأسئلة الشائعة';
+
+  @override
+  String get helpQMoney => 'هل يتعامل Pokou مع أموالي؟';
+
+  @override
+  String get helpAMoney =>
+      'لا. تُدفع الصناديق والصيدليات والمندوبون من محفظة إلى محفظة. لا يحتفظ Pokou بأموالك أبدًا.';
+
+  @override
+  String get helpQProof => 'كيف يعمل وضع الإثبات؟';
+
+  @override
+  String get helpAProof =>
+      'يفعّله حامل شارة Pokou الموثّق، فتبقى الرسائل المحذوفة أو المعدّلة ظاهرة مشطوبة. ويُعرض ذلك دائمًا أعلى المحادثة.';
+
+  @override
+  String get helpQSms => 'لا يصلني رمز الرسائل القصيرة';
+
+  @override
+  String get helpASms =>
+      'تحقق من الرقم والشبكة، ثم انتظر انتهاء العد التنازلي لطلب رمز جديد. لن يطلب منك Pokou هذا الرمز أبدًا، لا برسالة ولا بمكالمة.';
+
+  @override
+  String get helpQCourier => 'كيف أصبح مندوب توصيل في Honam؟';
+
+  @override
+  String get helpACourier =>
+      'في «المزيد»، اضغط «كن مندوب Honam»: الهوية والمناطق والمحفظة والقواعد الذهبية. يفتح Honam مدينةً تلو الأخرى.';
+
+  @override
+  String get helpQScam => 'كيف أكتشف عملية احتيال؟';
+
+  @override
+  String get helpAScam =>
+      'احذر ممن يطلب رمز رسالة قصيرة أو رمزك السري أو دفعًا عاجلًا. Pokou لا يفعل ذلك أبدًا. احظر جهة الاتصال وأبلغ عنها.';
+
+  @override
+  String get helpSupport => 'راسل الدعم';
+
+  @override
+  String get helpSupportSub => 'الرد داخل التطبيق';
+
+  @override
+  String get helpReport => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get helpNoResult => 'لا يوجد سؤال مطابق. اسأل بابا.';
+
+  @override
+  String get aboutTitle => 'حول Pokou';
+
+  @override
+  String aboutVersion(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get aboutNamesTitle => 'معنى أسمائنا';
+
+  @override
+  String get aboutPokou => 'اسم من لغة الباولي';
+
+  @override
+  String get aboutKory => 'صدفة الودع';
+
+  @override
+  String get aboutHonam => '«ساعدني» بلغة الإيوي';
+
+  @override
+  String get aboutAssime => '«في السوق» بلغة الإيوي';
+
+  @override
+  String get aboutWetri => '«شهر» بلغة الإيوي';
+
+  @override
+  String get aboutEpe => '«سنة» بلغة الإيوي';
+
+  @override
+  String get aboutNextNames =>
+      'ستحمل خدماتنا القادمة أيضًا أسماءً من لغات أفريقية.';
+
+  @override
+  String get aboutLicenses => 'تراخيص البرمجيات الحرة';
+
+  @override
+  String get legalEssentials => 'الأساسيات';
+
+  @override
+  String get legalFullText => 'النص الكامل';
+
+  @override
+  String get termsE1 =>
+      'لا يتعامل Pokou مع الأموال أبدًا: تُدفع الصناديق والصيدليات والمندوبون من محفظة إلى محفظة.';
+
+  @override
+  String get termsE2 =>
+      'يحتفظ وضع الإثبات بأثر الرسائل المحذوفة، ويُعرض ذلك دائمًا.';
+
+  @override
+  String get termsE3 => 'Honam ليس خدمة طوارئ.';
+
+  @override
+  String get termsE4 => 'يمكن إلغاء الشارات المدفوعة في أي وقت.';
+
+  @override
+  String get privacyE1 => 'لا يُعرض رقمك أبدًا على بائع أو مندوب.';
+
+  @override
+  String get privacyE2 =>
+      'لا يقرأ Pokou رسائلك. البلاغ يرسل آخر 5 رسائل فقط إلى الدعم.';
+
+  @override
+  String get privacyE3 => 'لا يُحتفظ بموقع المندوب بعد التسليم.';
+
+  @override
+  String get privacyE4 =>
+      'تُستهدف الإعلانات الممولة حسب المدينة، وليس أبدًا من رسائلك.';
+
+  @override
+  String get languageNote =>
+      'لغة التطبيق لا تغيّر لغة رسائلك. تبقى أسماء Pokou وKory وHonam وAssimé كما هي في كل اللغات.';
+
+  @override
+  String get securityPinWarning =>
+      'لن يطلب منك Pokou أبدًا رمزك السري ولا رمز الرسائل القصيرة، لا برسالة ولا بمكالمة.';
+
+  @override
+  String get statusReplyPrivate => 'يصل ردك بشكل خاص، في محادثتكما الثنائية.';
+
+  @override
+  String get statusViewersNote =>
+      'أنت وحدك ترى هذه القائمة. تصل الردود بشكل خاص في محادثاتك.';
+
+  @override
+  String get statusWhoSees => 'من يرى حالاتي';
+
+  @override
+  String get attachCompressNote =>
+      'تُضغط الصور ومقاطع الفيديو قبل الإرسال لتوفير بياناتك.';
+
+  @override
+  String get otpTitle => 'أدخل الرمز';
+
+  @override
+  String get pinForgot => 'نسيت الرمز السري؟';
+
+  @override
+  String get pinTitle => 'رمزك السري';
+
+  @override
+  String statusReplyHint(String name) {
+    return 'الرد على $name…';
+  }
+
+  @override
+  String get statusReplyQuote => '↩ ردًا على حالتك';
+
+  @override
+  String get statusReplySent => 'تم إرسال الرد بشكل خاص.';
+
+  @override
+  String get changeNumberTitle => 'تغيير الرقم';
+
+  @override
+  String get changeNumberOld => 'الرقم القديم';
+
+  @override
+  String get changeNumberNew => 'الرقم الجديد';
+
+  @override
+  String get changeNumberNotify => 'إبلاغ جهات اتصالي';
+
+  @override
+  String get changeNumberNotifyAll => 'كل جهات اتصالي';
+
+  @override
+  String get changeNumberNotifyChatted => 'من تحدثت معهم';
+
+  @override
+  String get changeNumberNotifyNone => 'لا أحد';
+
+  @override
+  String get changeNumberNotifyNoneSub => 'تُبلَّغ مجموعاتك دائمًا';
+
+  @override
+  String get changeNumberInfo =>
+      'يتبعك حسابك ومحادثاتك وشارة Pokou الموثّقة وصناديق Kory. يُرسل رمز إلى الرقم الجديد.';
+
+  @override
+  String get changeNumberKoryWarning =>
+      'إذا كنت جامع صندوق، فلن يتغير رقم الجمع تلقائيًا: عدّله في Kory وسيُبلَّغ الأعضاء.';
+
+  @override
+  String get changeNumberSendCode => 'إرسال الرمز';
+
+  @override
+  String get changeNumberCodeLabel => 'الرمز المستلم بالرسائل القصيرة';
+
+  @override
+  String get changeNumberConfirm => 'تأكيد التغيير';
+
+  @override
+  String get changeNumberDone => 'تم تغيير رقمك.';
+
+  @override
+  String get pinForgotIntro => 'طريقتان لاستعادة حسابك:';
+
+  @override
+  String get pinForgotEmail => 'عبر البريد الإلكتروني';
+
+  @override
+  String get pinForgotEmailSub =>
+      'إذا أضفت عنوانًا: يُرسل إليك رابط إعادة تعيين';
+
+  @override
+  String get pinForgotWait => 'الانتظار 7 أيام';
+
+  @override
+  String get pinForgotWaitSub =>
+      'بعدها تسجّل الدخول دون رمز سري برمز الرسائل القصيرة، شرط الاحتفاظ برقمك';
+
+  @override
+  String get pinForgotWarning =>
+      'تمنع مهلة 7 أيام من سرق شريحتك من الاستيلاء على حسابك فورًا.';
+
+  @override
+  String get pinForgotMeanwhile =>
+      'أثناء الانتظار، تظل جهات اتصالك تراك ورسائلك بانتظارك.';
+
+  @override
+  String get pinForgotContinue => 'متابعة';
+
+  @override
+  String pinForgotScheduled(String date) {
+    return 'تم. ابتداءً من $date سيكفي رمز الرسائل القصيرة لتسجيل الدخول.';
+  }
 }

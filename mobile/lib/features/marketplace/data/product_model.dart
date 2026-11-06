@@ -106,7 +106,7 @@ class MarketplaceConfig {
       VerificationPlan(
         code: 'ANNUAL',
         label: 'Vendeur vérifié',
-        description: 'Badge vérifié sur toutes vos annonces.',
+        description: 'Badge vérifié sur toutes tes annonces.',
         amount: 5000,
         isDefault: true,
       ),

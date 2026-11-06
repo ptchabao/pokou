@@ -50,6 +50,14 @@ class LanguageScreen extends ConsumerWidget {
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
             ),
+            // REG-9 : la langue de l'interface ne traduit pas les messages.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: Text(
+                l.languageNote,
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              ),
+            ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 32),

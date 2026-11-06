@@ -169,7 +169,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                     child: Padding(
                       padding: EdgeInsets.all(32),
                       child: Text(
-                        "Aucun de vos contacts n'est encore sur Pokou.\nInvitez-les pour créer un groupe.",
+                        "Aucun de tes contacts n'est encore sur Pokou.\nInvite-les pour créer un groupe.",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: AppColors.textSecondary),
                       ),

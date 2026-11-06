@@ -1018,6 +1018,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               title: Text(_l.convAttachCamera),
               onTap: () => Navigator.pop(sheetContext, 'camera'),
             ),
+            // DIS-2 : dire pourquoi la photo arrive plus légère.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Text(
+                _l.attachCompressNote,
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              ),
+            ),
           ],
         ),
       ),

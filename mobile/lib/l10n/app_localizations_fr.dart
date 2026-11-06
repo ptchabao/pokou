@@ -69,7 +69,7 @@ class LFr extends L {
   String get chatsEmptyTitle => 'Aucune discussion';
 
   @override
-  String get chatsEmptyBody => 'Vos conversations apparaîtront ici.';
+  String get chatsEmptyBody => 'Tes discussions apparaîtront ici.';
 
   @override
   String get chatsSearchHint => 'Rechercher';
@@ -83,14 +83,14 @@ class LFr extends L {
   }
 
   @override
-  String get chatsUnknownContact => 'pas dans vos contacts';
+  String get chatsUnknownContact => 'pas dans tes contacts';
 
   @override
   String get chatsNoMessageYet => 'Aucun message pour l\'instant';
 
   @override
   String chatsYouPrefix(String message) {
-    return 'Vous : $message';
+    return 'Toi : $message';
   }
 
   @override
@@ -131,7 +131,7 @@ class LFr extends L {
 
   @override
   String get newChatNoRegisteredContact =>
-      'Aucun de vos contacts n\'utilise encore Pokou.';
+      'Aucun de tes contacts n\'utilise encore Pokou.';
 
   @override
   String conversationSayHello(String name) {
@@ -174,7 +174,7 @@ class LFr extends L {
 
   @override
   String get offlineBody =>
-      'Vous verrez ce qui est déjà sur cet appareil. Le reste arrivera au retour du réseau.';
+      'Tu verras ce qui est déjà sur ce téléphone. Le reste arrivera au retour du réseau.';
 
   @override
   String get offlineNothingCached =>
@@ -184,14 +184,14 @@ class LFr extends L {
   String get offlineSending => 'En attente d\'envoi';
 
   @override
-  String get errorNetwork => 'Connexion impossible. Vérifiez votre réseau.';
+  String get errorNetwork => 'Connexion impossible. Vérifie ton réseau.';
 
   @override
   String get twoStepTitle => 'Vérification en deux étapes';
 
   @override
   String get twoStepBody =>
-      'Ce compte est protégé par un code. Saisissez-le pour terminer la connexion.';
+      'Ton compte est protégé par la vérification en deux étapes. Saisis ton code PIN pour te reconnecter.';
 
   @override
   String get twoStepHint => 'Code du compte';
@@ -209,8 +209,7 @@ class LFr extends L {
   String get profileLanguageSystem => 'Langue du téléphone';
 
   @override
-  String get profileLanguageSubtitle =>
-      'Choisissez la langue de l\'application';
+  String get profileLanguageSubtitle => 'Choisis la langue de l\'application';
 
   @override
   String get languageFrench => 'Français';
@@ -253,7 +252,7 @@ class LFr extends L {
 
   @override
   String get sparkNoPhotoWarning =>
-      'Ajoutez une photo — sans elle, presque personne ne like';
+      'Ajoute une photo — sans elle, presque personne ne like';
 
   @override
   String sparkPhotoCount(int count) {
@@ -283,21 +282,21 @@ class LFr extends L {
 
   @override
   String get authSubtitle =>
-      'Entrez votre numéro : nous vous envoyons un code. Nouveau sur Pokou ? Votre compte se crée à cette étape.';
+      'Nouveau ou déjà inscrit, c’est le même chemin : tu reçois un code par SMS.';
 
   @override
-  String get authPhoneHint => 'Votre numéro';
+  String get authPhoneHint => 'Ton numéro de mobile';
 
   @override
   String get authPrivacyNote =>
-      'Connexion sécurisée. Votre numéro sert uniquement à vérifier votre identité.';
+      'Connexion sécurisée. Ton numéro sert uniquement à vérifier ton identité.';
 
   @override
   String get authVerifyTitle => 'Vérification';
 
   @override
   String authCodeSentTo(String phone) {
-    return 'Saisissez le code à 6 chiffres envoyé au $phone';
+    return 'Envoyé par SMS au $phone';
   }
 
   @override
@@ -356,7 +355,7 @@ class LFr extends L {
 
   @override
   String get chatsBlockBody =>
-      'Cette personne ne pourra plus vous écrire ni vous appeler. Elle ne sera pas prévenue.';
+      'Cette personne ne pourra plus t\'écrire ni t\'appeler. Elle ne sera pas prévenue.';
 
   @override
   String get chatsPinLimit => 'Trois discussions déjà épinglées au maximum.';
@@ -389,7 +388,7 @@ class LFr extends L {
   String get navBroadcasts => 'Listes de diffusion';
 
   @override
-  String get navYou => 'Vous';
+  String get navYou => 'Toi';
 
   @override
   String get convProductFallback => 'Produit';
@@ -419,7 +418,7 @@ class LFr extends L {
   String get convEditTitle => 'Modifier le message';
 
   @override
-  String get convEditHint => 'Votre message';
+  String get convEditHint => 'Ton message';
 
   @override
   String convForwarded(String name) {
@@ -519,14 +518,14 @@ class LFr extends L {
   String get modulesUnavailable => 'Modules indisponibles';
 
   @override
-  String get modulesCheckNetwork => 'Vérifiez votre connexion et réessayez.';
+  String get modulesCheckNetwork => 'Vérifie ta connexion et réessaie.';
 
   @override
   String get modulesEmptyTitle => 'Rien à ajouter pour l\'instant';
 
   @override
   String get modulesEmptyBody =>
-      'De nouveaux modules arriveront ici. Vous n\'avez rien à faire en attendant.';
+      'De nouveaux modules arriveront ici. Tu n\'as rien à faire en attendant.';
 
   @override
   String get modulesMine => 'Mes apps';
@@ -554,7 +553,7 @@ class LFr extends L {
 
   @override
   String modulesComingSoon(String name) {
-    return '$name arrive bientôt. Mettez l\'application à jour pour en profiter dès sa sortie.';
+    return '$name arrive bientôt. Mets l\'application à jour pour en profiter dès sa sortie.';
   }
 
   @override
@@ -569,12 +568,11 @@ class LFr extends L {
   }
 
   @override
-  String get sparkEnableLocation =>
-      'Activez la localisation sur votre téléphone.';
+  String get sparkEnableLocation => 'Active la localisation sur ton téléphone.';
 
   @override
   String get sparkLocationNeeded =>
-      'Sans position, Spark ne peut pas savoir qui est autour de vous.';
+      'Sans position, Spark ne peut pas savoir qui est autour de toi.';
 
   @override
   String get sparkLocationFailed => 'La position n\'a pas pu être relevée.';
@@ -583,14 +581,14 @@ class LFr extends L {
   String get sparkFeedUnavailable => 'Flux indisponible';
 
   @override
-  String get sparkPickIntentTitle => 'Choisissez votre carte du moment';
+  String get sparkPickIntentTitle => 'Choisis ta carte du moment';
 
   @override
   String get sparkPickIntentBody =>
-      'Dites ce que vous cherchez aujourd\'hui pour voir qui cherche la même chose.';
+      'Dis ce que tu cherches aujourd\'hui pour voir qui cherche la même chose.';
 
   @override
-  String get sparkLocationStale => 'Votre position n\'est pas à jour';
+  String get sparkLocationStale => 'Ta position n\'est pas à jour';
 
   @override
   String get sparkLocationStaleBody =>
@@ -600,27 +598,27 @@ class LFr extends L {
   String get sparkShareLocation => 'Partager ma position';
 
   @override
-  String get sparkQuotaTitle => 'Vous avez vu vos profils du jour';
+  String get sparkQuotaTitle => 'Tu as vu tes profils du jour';
 
   @override
   String get sparkQuotaBody =>
-      'Revenez demain, ou prenez Spark+ pour voir sans compter.';
+      'Reviens demain, ou prends Spark+ pour voir sans compter.';
 
   @override
   String get sparkNobodyTitle => 'Personne pour l\'instant';
 
   @override
   String get sparkNobodyBody =>
-      'Peu de monde cherche la même chose que vous, ici et maintenant. Réessayez plus tard — ou changez de carte.';
+      'Peu de monde cherche la même chose que toi, ici et maintenant. Réessaie plus tard — ou change de carte.';
 
   @override
-  String get sparkPickCard => 'Choisissez votre carte';
+  String get sparkPickCard => 'Choisis ta carte';
 
   @override
-  String get sparkTodayLooking => 'Ce que vous cherchez aujourd\'hui';
+  String get sparkTodayLooking => 'Ce que tu cherches aujourd\'hui';
 
   @override
-  String get sparkCardExpired => 'Votre carte a expiré';
+  String get sparkCardExpired => 'Ta carte a expiré';
 
   @override
   String sparkHoursLeft(int hours) {
@@ -637,11 +635,11 @@ class LFr extends L {
 
   @override
   String get sparkIntentSheetBody =>
-      'Votre carte expire dans 24 h. Vous ne verrez que des gens qui ont choisi la même chose.';
+      'Ta carte expire dans 24 h. Tu ne verras que des gens qui ont choisi la même chose.';
 
   @override
   String get sparkLikesExhausted =>
-      'Vos likes du jour sont épuisés. Prenez un pack dans « Moi ».';
+      'Tes likes du jour sont épuisés. Prends un pack dans « Moi ».';
 
   @override
   String get sparkMatchesUnavailable => 'Matchs indisponibles';
@@ -675,7 +673,7 @@ class LFr extends L {
   String get sparkNoExpiry => 'Sans expiration';
 
   @override
-  String get sparkPlusActive => 'Actif — prolonge votre abonnement';
+  String get sparkPlusActive => 'Actif — prolonge ton abonnement';
 
   @override
   String get sparkPlusPitch => 'Profils illimités, un mois';
@@ -700,7 +698,7 @@ class LFr extends L {
 
   @override
   String get sparkWingmanPitch =>
-      'Les profils sur lesquels on vous demande un avis';
+      'Les profils sur lesquels on te demande un avis';
 
   @override
   String get sparkUploading => 'Envoi…';
@@ -709,19 +707,19 @@ class LFr extends L {
   String get sparkKarma => 'Street Cred';
 
   @override
-  String get sparkCanInvite => 'Vous pouvez inviter';
+  String get sparkCanInvite => 'Tu peux inviter';
 
   @override
   String get sparkCannotInvite =>
-      'Trop bas pour inviter. Honorez vos rendez-vous.';
+      'Trop bas pour inviter. Honore tes rendez-vous.';
 
   @override
   String sparkLikersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count personnes vous ont liké',
-      one: 'Une personne vous a liké',
+      other: '$count personnes t\'ont liké',
+      one: 'Une personne t\'a liké',
     );
     return '$_temp0';
   }
@@ -730,7 +728,7 @@ class LFr extends L {
   String get sparkSeeWho => 'Voir qui';
 
   @override
-  String get sparkFindInDiscover => 'Retrouvez-les dans Découvrir.';
+  String get sparkFindInDiscover => 'Retrouve-les dans Découvrir.';
 
   @override
   String get sparkPaymentPendingLikers =>
@@ -738,7 +736,7 @@ class LFr extends L {
 
   @override
   String get sparkPaymentPendingLikes =>
-      'Vos likes arriveront dès la confirmation du paiement.';
+      'Tes likes arriveront dès la confirmation du paiement.';
 
   @override
   String get sparkPaymentPendingPlus =>
@@ -746,10 +744,10 @@ class LFr extends L {
 
   @override
   String get sparkPaymentPendingBoost =>
-      'Votre profil remontera dès la confirmation du paiement.';
+      'Ton profil remontera dès la confirmation du paiement.';
 
   @override
-  String get sparkBirthDateLabel => 'Votre date de naissance';
+  String get sparkBirthDateLabel => 'Ta date de naissance';
 
   @override
   String get sparkNameAndBirthNeeded =>
@@ -759,14 +757,14 @@ class LFr extends L {
   String get sparkProfileFailed => 'La fiche n\'a pas pu être créée.';
 
   @override
-  String get sparkCreateProfile => 'Créez votre fiche';
+  String get sparkCreateProfile => 'Crée ta fiche';
 
   @override
-  String get sparkStep1Title => 'Vous dites ce que vous cherchez, aujourd\'hui';
+  String get sparkStep1Title => 'Tu dis ce que tu cherches, aujourd\'hui';
 
   @override
   String get sparkStep1Body =>
-      'Votre carte expire en 24 h. Vous ne voyez que des gens qui cherchent la même chose, à moins de 5 km.';
+      'Ta carte expire en 24 h. Tu ne vois que des gens qui cherchent la même chose, à moins de 5 km.';
 
   @override
   String get sparkStep2Title => 'Dix minutes de vocal avant d\'écrire';
@@ -776,18 +774,18 @@ class LFr extends L {
       'Après un match, une salle s\'ouvre : vocaux et stickers seulement. Les faux profils ne passent pas cette étape.';
 
   @override
-  String get sparkStep3Title => 'Vos proches savent où vous êtes';
+  String get sparkStep3Title => 'Tes proches savent où tu es';
 
   @override
   String get sparkStep3Body =>
-      'Un geste discret prévient votre cercle avec votre position. On vous demande aussi si tout va bien pendant le rendez-vous.';
+      'Un geste discret prévient ton cercle avec ta position. On te demande aussi si tout va bien pendant le rendez-vous.';
 
   @override
-  String get sparkSeparateTitle => 'Votre fiche est séparée de Pokou';
+  String get sparkSeparateTitle => 'Ta fiche est séparée de Pokou';
 
   @override
   String get sparkSeparateBody =>
-      'Votre nom et votre numéro Pokou ne sont jamais montrés ici. Choisissez ce que vous voulez afficher.';
+      'Ton nom et ton numéro Pokou ne sont jamais montrés ici. Choisis ce que tu veux afficher.';
 
   @override
   String get sparkDisplayName => 'Prénom affiché';
@@ -806,7 +804,7 @@ class LFr extends L {
   String get sparkChoose => 'Choisir';
 
   @override
-  String get sparkYouAre => 'Vous êtes';
+  String get sparkYouAre => 'Tu es';
 
   @override
   String get sparkWoman => 'Une femme';
@@ -818,10 +816,10 @@ class LFr extends L {
   String get sparkOther => 'Autre';
 
   @override
-  String get sparkBioLabel => 'Deux mots sur vous (facultatif)';
+  String get sparkBioLabel => 'Deux mots sur toi (facultatif)';
 
   @override
-  String get sparkBioHint => 'Ce qu\'il faut savoir avant de vous rencontrer';
+  String get sparkBioHint => 'Ce qu\'il faut savoir avant de te rencontrer';
 
   @override
   String get sparkCreateAction => 'Créer ma fiche';
@@ -846,17 +844,17 @@ class LFr extends L {
 
   @override
   String get truthEmptyBody =>
-      'Quand quelqu\'un paiera pour vous poser une question, elle apparaîtra ici. Vous resterez libre de refuser.';
+      'Quand quelqu\'un paiera pour te poser une question, elle apparaîtra ici. Tu resteras libre de refuser.';
 
   @override
-  String get truthYourAnswer => 'Votre réponse';
+  String get truthYourAnswer => 'Ta réponse';
 
   @override
   String get truthAnswerPrivacy =>
       'Elle ne va qu\'à la personne qui a payé. Pokou ne la republie nulle part.';
 
   @override
-  String get truthWhatToSay => 'Ce que vous voulez dire';
+  String get truthWhatToSay => 'Ce que tu veux dire';
 
   @override
   String get truthSendAnswer => 'Envoyer ma réponse';
@@ -872,17 +870,17 @@ class LFr extends L {
 
   @override
   String get truthDeclineFree =>
-      'Refuser ne vous coûte rien. Vous n\'êtes payé qu\'en répondant.';
+      'Refuser ne te coûte rien. Tu n\'es payé qu\'en répondant.';
 
   @override
   String get truthHistoryUnavailable => 'Historique indisponible';
 
   @override
-  String get truthNothingAsked => 'Vous n\'avez encore rien demandé';
+  String get truthNothingAsked => 'Tu n\'as encore rien demandé';
 
   @override
   String get truthNothingAskedBody =>
-      'Posez une question à quelqu\'un : il verra le montant et la question, jamais votre nom.';
+      'Pose une question à quelqu\'un : il verra le montant et la question, jamais ton nom.';
 
   @override
   String get truthAnswered => 'Répondu';
@@ -916,7 +914,7 @@ class LFr extends L {
   }
 
   @override
-  String get truthAnonTitle => 'Votre nom n\'est pas montré';
+  String get truthAnonTitle => 'Ton nom n\'est pas montré';
 
   @override
   String get truthAnonBody =>
@@ -930,20 +928,20 @@ class LFr extends L {
       'Refuser ne lui rapporte rien : elle n\'est payée qu\'en répondant.';
 
   @override
-  String get truthPrivateTitle => 'La réponse ne va qu\'à vous';
+  String get truthPrivateTitle => 'La réponse ne va qu\'à toi';
 
   @override
   String get truthPrivateBody =>
       'Pokou ne la republie nulle part, et elle expire au bout de sept jours sans réponse.';
 
   @override
-  String get truthYourQuestion => 'Votre question';
+  String get truthYourQuestion => 'Ta question';
 
   @override
-  String get truthQuestionHint => 'Ce que vous aimeriez vraiment savoir';
+  String get truthQuestionHint => 'Ce que tu aimerais vraiment savoir';
 
   @override
-  String get truthHowMuch => 'Combien vous proposez';
+  String get truthHowMuch => 'Combien tu proposes';
 
   @override
   String truthAskForAmount(int amount) {
@@ -951,11 +949,11 @@ class LFr extends L {
   }
 
   @override
-  String get truthWriteFirst => 'Écrivez d\'abord votre question.';
+  String get truthWriteFirst => 'Écris d\'abord ta question.';
 
   @override
   String get truthPaymentPending =>
-      'Votre question partira dès la confirmation du paiement.';
+      'Ta question partira dès la confirmation du paiement.';
 
   @override
   String get hypeFinished => 'Terminé';
@@ -984,7 +982,7 @@ class LFr extends L {
 
   @override
   String get hypeMineEmptyBody =>
-      'Vos objectifs et ceux que vous avez soutenus apparaîtront ici.';
+      'Tes objectifs et ceux que tu as soutenus apparaîtront ici.';
 
   @override
   String get hypeUnavailable => 'Objectifs indisponibles';
@@ -1014,14 +1012,14 @@ class LFr extends L {
   String get hypePushers => 'Ceux qui poussent';
 
   @override
-  String get hypeBeFirst => 'Personne encore. Soyez le premier.';
+  String get hypeBeFirst => 'Personne encore. Sois le premier.';
 
   @override
   String get hypeContributor => 'Contributeur';
 
   @override
   String commonDueToYou(int amount) {
-    return 'Vous revient : $amount FCFA';
+    return 'Te revient : $amount FCFA';
   }
 
   @override
@@ -1036,18 +1034,18 @@ class LFr extends L {
       'Chaque participation fait monter la barre, et tout le monde voit le palier tomber en même temps.';
 
   @override
-  String get hypeStepPromiseTitle => 'Ce que vous promettez';
+  String get hypeStepPromiseTitle => 'Ce que tu promets';
 
   @override
   String get hypeStepPromiseBody =>
-      'Visible avant que quiconque ne paie. C\'est votre engagement si l\'objectif est atteint.';
+      'Visible avant que quiconque ne paie. C\'est ton engagement si l\'objectif est atteint.';
 
   @override
   String get hypeStepOneTitle => 'Un seul objectif à la fois';
 
   @override
   String get hypeStepOneBody =>
-      'Deux objectifs simultanés mettraient vos contributeurs en concurrence avec eux-mêmes.';
+      'Deux objectifs simultanés mettraient tes contributeurs en concurrence avec eux-mêmes.';
 
   @override
   String get commonTitle => 'Titre';
@@ -1056,11 +1054,11 @@ class LFr extends L {
   String get hypeTitleExample => 'Ex : 100 000 et je chante';
 
   @override
-  String get hypePromiseLabel => 'Ce que vous débloquez si l\'objectif tombe';
+  String get hypePromiseLabel => 'Ce que tu débloques si l\'objectif tombe';
 
   @override
   String get hypePromiseHint =>
-      'Soyez précis : c\'est ce que vos contributeurs achètent.';
+      'Sois précis : c\'est ce que tes contributeurs achètent.';
 
   @override
   String get hypeGoalAmount => 'Objectif en FCFA';
@@ -1076,11 +1074,11 @@ class LFr extends L {
       'Titre, promesse et objectif sont nécessaires.';
 
   @override
-  String get hypeAlreadyRunning => 'Vous avez déjà un objectif en cours.';
+  String get hypeAlreadyRunning => 'Tu as déjà un objectif en cours.';
 
   @override
   String get hypeContributeNote =>
-      'Votre participation fait avancer la barre et débloque un contenu. Elle n\'est pas remboursable.';
+      'Ta participation fait avancer la barre et débloque un contenu. Elle n\'est pas remboursable.';
 
   @override
   String get commonAmount => 'Montant';
@@ -1123,7 +1121,7 @@ class LFr extends L {
 
   @override
   String get ceremonyNoneBody =>
-      'Mariage, baptême, deuil : créez la cagnotte, invitez, et chacun contribue comme il peut.';
+      'Mariage, baptême, deuil : crée la cagnotte, invite, et chacun contribue comme il peut.';
 
   @override
   String ceremonyGoalHint(int amount) {
@@ -1161,11 +1159,11 @@ class LFr extends L {
   String get ceremonyCollected => 'collectés';
 
   @override
-  String get ceremonyYouOrganize => 'vous organisez';
+  String get ceremonyYouOrganize => 'tu organises';
 
   @override
   String get ceremonyNewSubtitle =>
-      'Vous suivez les participations. Pokou n\'envoie aucune relance à ceux qui n\'ont pas donné.';
+      'Tu suis les participations. Pokou n\'envoie aucune relance à ceux qui n\'ont pas donné.';
 
   @override
   String get ceremonyOccasion => 'Occasion';
@@ -1191,7 +1189,7 @@ class LFr extends L {
   String get ceremonyCreate => 'Créer la cagnotte';
 
   @override
-  String get ceremonyNeedTitle => 'Donnez un titre à la cagnotte.';
+  String get ceremonyNeedTitle => 'Donne un titre à la cagnotte.';
 
   @override
   String ceremonyJoinTo(String title) {
@@ -1205,14 +1203,14 @@ class LFr extends L {
   String get ceremonyWordOptional => 'Un mot (facultatif)';
 
   @override
-  String get ceremonyWordHint => 'Ce que vous voulez leur dire';
+  String get ceremonyWordHint => 'Ce que tu veux leur dire';
 
   @override
   String get ceremonyAnonToggle => 'Participer anonymement';
 
   @override
   String get ceremonyAnonNote =>
-      'Votre nom sera masqué. Le montant reste dans le total.';
+      'Ton nom sera masqué. Le montant reste dans le total.';
 
   @override
   String ceremonyJoinAmount(int amount) {
@@ -1224,10 +1222,10 @@ class LFr extends L {
 
   @override
   String get ceremonyPaymentPending =>
-      'Votre participation apparaîtra dès la confirmation du paiement.';
+      'Ta participation apparaîtra dès la confirmation du paiement.';
 
   @override
-  String get vipSubtitle => 'Vos abonnés, votre espace';
+  String get vipSubtitle => 'Tes abonnés, ton espace';
 
   @override
   String get vipDiscover => 'Découvrir';
@@ -1250,7 +1248,7 @@ class LFr extends L {
 
   @override
   String get vipNoSubBody =>
-      'Abonnez-vous à un salon pour retrouver ici tout ce que son créateur publie.';
+      'Abonne-toi à un salon pour retrouver ici tout ce que son créateur publie.';
 
   @override
   String get vipUnavailable => 'Salons indisponibles';
@@ -1281,21 +1279,21 @@ class LFr extends L {
 
   @override
   String get vipStepAllBody =>
-      'Vous voyez immédiatement les publications déjà en ligne, et celles qui suivront.';
+      'Tu vois immédiatement les publications déjà en ligne, et celles qui suivront.';
 
   @override
   String get vipStepDaysTitle => 'Trente jours';
 
   @override
   String get vipStepDaysBody =>
-      'L\'accès s\'arrête tout seul au terme. Rien ne continue sans que vous le décidiez.';
+      'L\'accès s\'arrête tout seul au terme. Rien ne continue sans que tu le décides.';
 
   @override
   String get vipStepNoRenewTitle => 'Aucune reconduction automatique';
 
   @override
   String get vipStepNoRenewBody =>
-      'Pokou ne conserve pas votre moyen de paiement. Pour continuer, vous repayez, une fois.';
+      'Pokou ne conserve pas ton moyen de paiement. Pour continuer, tu repaies, une fois.';
 
   @override
   String vipSubscribeFor(int amount) {
@@ -1322,11 +1320,11 @@ class LFr extends L {
   String get vipRoomUnavailable => 'Salon indisponible';
 
   @override
-  String get vipOpenYourRoom => 'Ouvrez votre salon';
+  String get vipOpenYourRoom => 'Ouvre ton salon';
 
   @override
   String get vipOpenYourRoomBody =>
-      'Vos abonnés paient une fois pour trente jours et voient tout ce que vous publiez ici. Vous fixez le prix.';
+      'Tes abonnés paient une fois pour trente jours et voient tout ce que tu publies ici. Tu fixes le prix.';
 
   @override
   String get vipOpenAction => 'Ouvrir mon salon';
@@ -1344,7 +1342,7 @@ class LFr extends L {
   String get vipClosed => 'Fermé';
 
   @override
-  String get vipEarnings => 'Vos revenus';
+  String get vipEarnings => 'Tes revenus';
 
   @override
   String vipCollected(int amount) {
@@ -1353,7 +1351,7 @@ class LFr extends L {
 
   @override
   String get vipDueNote =>
-      'Montant qui vous revient. Le versement se fait par l\'équipe Pokou, sur demande.';
+      'Montant qui te revient. Le versement se fait par l\'équipe Pokou, sur demande.';
 
   @override
   String get vipEditRoom => 'Modifier mon salon';
@@ -1369,7 +1367,7 @@ class LFr extends L {
   String get vipRoomNameHint => 'Ex : Les coulisses';
 
   @override
-  String get vipPitchLabel => 'Ce que vos abonnés y trouveront';
+  String get vipPitchLabel => 'Ce que tes abonnés y trouveront';
 
   @override
   String get vipPitchNote =>
@@ -1386,7 +1384,7 @@ class LFr extends L {
 
   @override
   String get vipAcceptNewNote =>
-      'Vos abonnés actuels gardent leur accès jusqu\'au terme.';
+      'Tes abonnés actuels gardent leur accès jusqu\'au terme.';
 
   @override
   String get vipFieldsNeeded => 'Nom, description et prix sont nécessaires.';
@@ -1395,13 +1393,13 @@ class LFr extends L {
   String get vipPublishTitle => 'Publier dans mon salon';
 
   @override
-  String get vipPublishNote => 'Visible uniquement par vos abonnés en cours.';
+  String get vipPublishNote => 'Visible uniquement par tes abonnés en cours.';
 
   @override
-  String get vipYourMessage => 'Votre message';
+  String get vipYourMessage => 'Ton message';
 
   @override
-  String get vipShareHint => 'Ce que vous voulez partager';
+  String get vipShareHint => 'Ce que tu veux partager';
 
   @override
   String vipEarningsSummary(int count, int amount) {
@@ -1422,7 +1420,7 @@ class LFr extends L {
 
   @override
   String get datesNoneBody =>
-      'Une fois la salle passée, proposez un endroit. Vous payez d\'avance, et l\'argent n\'est versé qu\'une fois que vous confirmez tous les deux.';
+      'Une fois la salle passée, propose un endroit. Tu paies d\'avance, et l\'argent n\'est versé qu\'une fois que vous confirmez tous les deux.';
 
   @override
   String get datesNotNow => 'Ce n\'est pas le moment pour ce geste.';
@@ -1432,11 +1430,11 @@ class LFr extends L {
 
   @override
   String get datesCancelFree =>
-      'Vous êtes à plus de 24 h : vous serez intégralement remboursé.';
+      'Tu es à plus de 24 h : tu seras intégralement remboursé.';
 
   @override
   String get datesCancelLate =>
-      'Il reste moins de 24 h. L\'établissement a déjà réservé, votre paiement lui reste acquis.';
+      'Il reste moins de 24 h. L\'établissement a déjà réservé, ton paiement lui reste acquis.';
 
   @override
   String get datesKeep => 'Garder';
@@ -1471,27 +1469,27 @@ class LFr extends L {
   }
 
   @override
-  String get datesYourMatch => 'votre match';
+  String get datesYourMatch => 'ton match';
 
   @override
   String get datesWentWell => 'Ça s\'est bien passé';
 
   @override
   String get datesYouConfirmed =>
-      'Vous avez confirmé. On attend la confirmation de l\'autre.';
+      'Tu as confirmé. On attend la confirmation de l\'autre.';
 
   @override
   String get datesNoShowAction => 'Il n\'est pas venu';
 
   @override
-  String get datesVoucher => 'Votre bon, à donner sur place';
+  String get datesVoucher => 'Ton bon, à donner sur place';
 
   @override
-  String get datesPickBoth => 'Choisissez une formule et un moment.';
+  String get datesPickBoth => 'Choisis une formule et un moment.';
 
   @override
   String get datesVoucherPending =>
-      'Votre bon sera émis dès la confirmation du paiement.';
+      'Ton bon sera émis dès la confirmation du paiement.';
 
   @override
   String get datesBookingFailed => 'La réservation n\'a pas abouti.';
@@ -1500,7 +1498,7 @@ class LFr extends L {
   String get datesWhereTo => 'Où allez-vous ?';
 
   @override
-  String get datesStepPayTitle => 'Vous payez d\'avance, rien n\'est versé';
+  String get datesStepPayTitle => 'Tu paies d\'avance, rien n\'est versé';
 
   @override
   String get datesStepPayBody =>
@@ -1511,14 +1509,14 @@ class LFr extends L {
 
   @override
   String get datesStepCancelBody =>
-      'Remboursement intégral. En deçà, l\'établissement a déjà réservé et garde votre paiement.';
+      'Remboursement intégral. En deçà, l\'établissement a déjà réservé et garde ton paiement.';
 
   @override
   String get datesStepNoShowTitle => 'Si l\'autre ne vient pas';
 
   @override
   String get datesStepNoShowBody =>
-      'La moitié vous revient. L\'application ne prend rien sur un rendez-vous manqué.';
+      'La moitié te revient. L\'application ne prend rien sur un rendez-vous manqué.';
 
   @override
   String get datesThePackage => 'La formule';
@@ -1529,7 +1527,7 @@ class LFr extends L {
 
   @override
   String get datesNoPackNearby =>
-      'Aucune formule n\'est proposée près de chez vous pour l\'instant.';
+      'Aucune formule n\'est proposée près de chez toi pour l\'instant.';
 
   @override
   String get datesWhen => 'Quand ?';
@@ -1554,7 +1552,7 @@ class LFr extends L {
 
   @override
   String get roomBothYes =>
-      'C\'est parti. Vous pouvez maintenant proposer une sortie.';
+      'C\'est parti. Tu peux maintenant proposer une sortie.';
 
   @override
   String get roomWaitingOther =>
@@ -1606,8 +1604,7 @@ class LFr extends L {
   String get roomBothSaidYes => 'Vous avez tous les deux dit oui.';
 
   @override
-  String get roomSaved =>
-      'Le match est sauvé. Vous pouvez proposer une sortie.';
+  String get roomSaved => 'Le match est sauvé. Tu peux proposer une sortie.';
 
   @override
   String get roomClosedNoAnswer => 'La salle s\'est refermée sans réponse.';
@@ -1620,24 +1617,24 @@ class LFr extends L {
 
   @override
   String get safetyCheckinBody =>
-      'Sans réponse de votre part dans les cinq minutes, votre cercle de sécurité sera prévenu avec votre position.';
+      'Sans réponse de ta part dans les cinq minutes, ton cercle de sécurité sera prévenu avec ta position.';
 
   @override
   String get safetyAllGood => 'Oui, tout va bien';
 
   @override
-  String get safetyCircleAlerted => 'Votre cercle a été prévenu.';
+  String get safetyCircleAlerted => 'Ton cercle a été prévenu.';
 
   @override
   String get safetyNoCircle =>
-      'Alerte enregistrée. Ajoutez des proches pour qu\'ils soient prévenus la prochaine fois.';
+      'Alerte enregistrée. Ajoute des proches pour qu\'ils soient prévenus la prochaine fois.';
 
   @override
   String get safetyWhoToAlert => 'Qui prévenir ?';
 
   @override
   String get safetyWhoToAlertBody =>
-      'Ces personnes recevront votre position en direct si vous déclenchez une alerte.';
+      'Ces personnes recevront ta position en direct si tu déclenches une alerte.';
 
   @override
   String get safetyTitle => 'Sécurité';
@@ -1650,7 +1647,7 @@ class LFr extends L {
 
   @override
   String get safetyQuietAlertBody =>
-      'Prévient votre cercle avec votre position. Rien ne s\'affiche à l\'écran de votre téléphone.';
+      'Prévient ton cercle avec ta position. Rien ne s\'affiche à l\'écran de ton téléphone.';
 
   @override
   String get safetyTrigger => 'Déclencher une alerte';
@@ -1672,7 +1669,7 @@ class LFr extends L {
   String get wingmanTitle => 'Avis de potes';
 
   @override
-  String get wingmanAnon => 'Votre avis reste anonyme';
+  String get wingmanAnon => 'Ton avis reste anonyme';
 
   @override
   String get wingmanUnavailable => 'Demandes indisponibles';
@@ -1682,11 +1679,11 @@ class LFr extends L {
 
   @override
   String get wingmanNothingBody =>
-      'Quand un ami vous demandera ce que vous pensez d\'un profil, il apparaîtra ici.';
+      'Quand un ami te demandera ce que tu penses d\'un profil, il apparaîtra ici.';
 
   @override
   String wingmanAsksYou(String name) {
-    return '$name demande votre avis';
+    return '$name demande ton avis';
   }
 
   @override
@@ -1697,7 +1694,7 @@ class LFr extends L {
 
   @override
   String get wingmanPrivacy =>
-      'Votre ami verra seulement si le groupe valide, jamais qui a répondu quoi.';
+      'Ton ami verra seulement si le groupe valide, jamais qui a répondu quoi.';
 
   @override
   String get marketLocationOff => 'Service de localisation désactivé.';
@@ -1709,10 +1706,10 @@ class LFr extends L {
   String get marketGpsApplied => 'Localisation GPS appliquée.';
 
   @override
-  String get marketGpsFailed => 'Impossible de récupérer votre position.';
+  String get marketGpsFailed => 'Impossible de récupérer ta position.';
 
   @override
-  String get marketYourArea => 'Votre zone';
+  String get marketYourArea => 'Ta zone';
 
   @override
   String get marketCityOrArea => 'Ville ou quartier';
@@ -1759,7 +1756,7 @@ class LFr extends L {
   String get marketAddProduct => 'Ajouter un produit';
 
   @override
-  String get marketAroundYou => 'Autour de vous';
+  String get marketAroundYou => 'Près de chez toi';
 
   @override
   String get marketMyGps => 'Ma position GPS';
@@ -1768,7 +1765,7 @@ class LFr extends L {
   String get marketPickArea => 'Choisir une zone';
 
   @override
-  String get marketNearYou => 'Produits près de vous';
+  String get marketNearYou => 'Près de chez toi';
 
   @override
   String get marketUnavailable => 'Marketplace indisponible.';
@@ -1786,14 +1783,14 @@ class LFr extends L {
   String get marketMyCatalogue => 'Mon catalogue';
 
   @override
-  String get marketSwipeCatalogue => 'Glissez pour voir tous vos produits';
+  String get marketSwipeCatalogue => 'Glisse pour voir toutes tes annonces';
 
   @override
-  String get marketCatalogueEmpty => 'Votre catalogue est vide';
+  String get marketCatalogueEmpty => 'Tu n\'as pas encore d\'annonce';
 
   @override
   String get marketCatalogueEmptyBody =>
-      'Ajoutez votre premier produit pour commencer à vendre !';
+      'Publie ta première annonce pour commencer à vendre !';
 
   @override
   String get marketBoosted => 'Sponsorisé';
@@ -1802,7 +1799,7 @@ class LFr extends L {
   String get vitrineSeeProduct => 'Voir l\'article';
 
   @override
-  String get vitrineHint => 'Touchez l\'article pour l\'ouvrir';
+  String get vitrineHint => 'Touche l\'article pour l\'ouvrir';
 
   @override
   String get vitrineTitle => 'Vitrine du Marché';
@@ -1839,7 +1836,7 @@ class LFr extends L {
 
   @override
   String get versesOfflineHint =>
-      'Les versets arrivent même sans connexion : ils sont déjà sur votre téléphone.';
+      'Les versets arrivent même sans connexion : ils sont déjà sur ton téléphone.';
 
   @override
   String get marketBoosted48h => 'Sponsorisé';
@@ -1941,7 +1938,7 @@ class LFr extends L {
 
   @override
   String get groupAllContactsIn =>
-      'Tous vos contacts Pokou sont déjà dans ce groupe.';
+      'Tous tes contacts Pokou sont déjà dans ce groupe.';
 
   @override
   String get groupAddToGroup => 'Ajouter au groupe';
@@ -1962,25 +1959,25 @@ class LFr extends L {
 
   @override
   String groupLeaveBody(String name) {
-    return 'Vous ne recevrez plus les messages de « $name ».';
+    return 'Tu ne recevras plus les messages de « $name ». Tes messages restent chez les autres membres, et les administrateurs sont prévenus.';
   }
 
   @override
   String get groupLeaveAction => 'Quitter';
 
   @override
-  String get groupNoMessage => 'Aucun message. Lancez la discussion.';
+  String get groupNoMessage => 'Aucun message. Lance la discussion.';
 
   @override
   String get groupNotEncryptedNotice =>
-      'Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écrivez en privé.';
+      'Les messages de ce groupe ne sont pas chiffrés de bout en bout : ils sont protégés pendant leur transport, mais le serveur Pokou peut les lire. Pour un échange confidentiel, écris en privé.';
 
   @override
   String get botLabel => 'Bot';
 
   @override
   String get botConversationNotice =>
-      'Vous écrivez au bot d\'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l\'entreprise lit ce que vous lui envoyez.';
+      'Tu écris au bot d\'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l\'entreprise lit ce que tu lui envoies.';
 
   @override
   String get groupAdminsOnly =>
@@ -2034,7 +2031,7 @@ class LFr extends L {
 
   @override
   String get communityLeaveBody =>
-      'Vous ne recevrez plus ses annonces. Les groupes que vous avez rejoints restent les vôtres.';
+      'Tu ne recevras plus ses annonces. Les groupes que tu as rejoints restent les tiens.';
 
   @override
   String get communityLeave => 'Quitter la communauté';
@@ -2047,7 +2044,7 @@ class LFr extends L {
 
   @override
   String get communityUnavailable =>
-      'Communauté indisponible — vérifiez votre connexion.';
+      'Communauté indisponible — vérifie ta connexion.';
 
   @override
   String get communityGroups => 'GROUPES';
@@ -2057,7 +2054,7 @@ class LFr extends L {
 
   @override
   String get communityOnlyAdminGroups =>
-      'Seuls les groupes que vous administrez peuvent rejoindre une communauté.';
+      'Seuls les groupes que tu administres peuvent rejoindre une communauté.';
 
   @override
   String get channelPostsUnavailable => 'Publications indisponibles.';
@@ -2120,7 +2117,7 @@ class LFr extends L {
   String get channelNewPost => 'Nouvelle publication';
 
   @override
-  String get channelPostHint => 'Votre annonce…';
+  String get channelPostHint => 'Ton annonce…';
 
   @override
   String pollAnswerN(int index) {
@@ -2143,7 +2140,7 @@ class LFr extends L {
   String get pollOne => 'Sondage';
 
   @override
-  String get pollQuestion => 'Votre question';
+  String get pollQuestion => 'Ta question';
 
   @override
   String get commonSending => 'Envoi…';
@@ -2164,7 +2161,7 @@ class LFr extends L {
 
   @override
   String get lockCodeRule =>
-      '4 à 8 chiffres. Le code ne quitte jamais cet appareil et ne peut pas être retrouvé — en cas d\'oubli, le verrou se lève en vérifiant votre numéro de téléphone.';
+      '4 à 8 chiffres. Le code ne quitte jamais ce téléphone et ne peut pas être retrouvé — en cas d\'oubli, le verrou se lève en vérifiant ton numéro de téléphone.';
 
   @override
   String get lockCode => 'Code';
@@ -2232,7 +2229,7 @@ class LFr extends L {
   String get lockScreenTitle => 'Pokou est verrouillé';
 
   @override
-  String get lockEnterToContinue => 'Saisissez votre code pour continuer.';
+  String get lockEnterToContinue => 'Saisis ton code pour continuer.';
 
   @override
   String get lockUnlock => 'Déverrouiller';
@@ -2241,22 +2238,22 @@ class LFr extends L {
   String get lockForgotQuestion => 'Code oublié ?';
 
   @override
-  String get lockSendFailed => 'Envoi impossible — vérifiez votre connexion.';
+  String get lockSendFailed => 'Envoi impossible — vérifie ta connexion.';
 
   @override
   String get lockRemovedToast =>
-      'Verrouillage retiré. Vous pouvez choisir un nouveau code dans Profil.';
+      'Verrouillage retiré. Tu peux choisir un nouveau code dans Profil.';
 
   @override
   String get lockVerifyFailed =>
-      'Vérification impossible — vérifiez votre connexion.';
+      'Vérification impossible — vérifie ta connexion.';
 
   @override
   String get lockLogoutQuestion => 'Se déconnecter ?';
 
   @override
   String get lockLogoutBody =>
-      'À utiliser si vous n\'avez plus accès à ce numéro. Vos conversations restent sur le serveur, mais il faudra un numéro joignable pour vous reconnecter.';
+      'À utiliser si tu n\'as plus accès à ce numéro. Tes discussions restent sur le serveur, mais il faudra un numéro joignable pour te reconnecter.';
 
   @override
   String get lockLogout => 'Se déconnecter';
@@ -2266,16 +2263,16 @@ class LFr extends L {
 
   @override
   String get lockNoPhoneOnDevice =>
-      'Impossible de retrouver votre numéro sur cet appareil.';
+      'Impossible de retrouver ton numéro sur ce téléphone.';
 
   @override
   String lockEnterSentCode(String phone) {
-    return 'Saisissez le code envoyé au $phone par SMS et WhatsApp.';
+    return 'Saisis le code envoyé au $phone par SMS et WhatsApp.';
   }
 
   @override
   String lockForgotExplain(String phone) {
-    return 'Le code de verrouillage n\'est stocké que sur cet appareil et ne peut pas être retrouvé. Pour lever le verrou, vérifiez votre numéro $phone.';
+    return 'Le code de verrouillage n\'est stocké que sur ce téléphone et ne peut pas être retrouvé. Pour lever le verrou, vérifie ton numéro $phone.';
   }
 
   @override
@@ -2325,7 +2322,7 @@ class LFr extends L {
 
   @override
   String get notifCallsFootnote =>
-      'Couper les appels ici ne supprime que la bannière affichée quand Pokou est ouvert : un appel entrant continue de sonner en plein écran, sinon vous manqueriez des appels sans le savoir.';
+      'Couper les appels ici ne supprime que la bannière affichée quand Pokou est ouvert : un appel entrant continue de sonner en plein écran, sinon tu manquerais des appels sans le savoir.';
 
   @override
   String get notifSystem => 'Système';
@@ -2342,7 +2339,7 @@ class LFr extends L {
 
   @override
   String get notifWebEnableFailed =>
-      'Impossible d\'activer les notifications. Vérifiez les réglages de ce site dans le navigateur.';
+      'Impossible d\'activer les notifications. Vérifie les réglages de ce site dans le navigateur.';
 
   @override
   String get notifAndroidSettings => 'Réglages Android';
@@ -2359,7 +2356,7 @@ class LFr extends L {
 
   @override
   String get devicesRemoveCurrentBody =>
-      'Cet appareil ne recevra plus de notifications tant que vous n\'ouvrirez pas Pokou à nouveau.';
+      'Ce téléphone ne recevra plus de notifications tant que tu n\'ouvriras pas Pokou à nouveau.';
 
   @override
   String get devicesRemoveOtherBody =>
@@ -2376,7 +2373,7 @@ class LFr extends L {
 
   @override
   String get devicesUnavailable =>
-      'Liste indisponible — vérifiez votre connexion, puis tirez pour rafraîchir.';
+      'Liste indisponible — vérifie ta connexion, puis tire pour rafraîchir.';
 
   @override
   String get devicesEmpty =>
@@ -2447,7 +2444,7 @@ class LFr extends L {
 
   @override
   String get storageClearFootnote =>
-      'Les fichiers vidés sont retéléchargés à la demande quand vous rouvrez la conversation : rien n\'est perdu, seulement libéré.';
+      'Les fichiers vidés sont retéléchargés à la demande quand tu rouvres la discussion : rien n\'est perdu, seulement libéré.';
 
   @override
   String get storageMobileData => 'Données mobiles';
@@ -2461,7 +2458,7 @@ class LFr extends L {
 
   @override
   String get storageDataSaverFootnote =>
-      'Activée, les photos et vidéos reçues attendent que vous les touchiez pour se télécharger, et les photos que vous envoyez sont compressées davantage.';
+      'Activée, les photos et vidéos reçues attendent que tu les touches pour se télécharger, et les photos que tu envoies sont compressées davantage.';
 
   @override
   String get profileAvatarFailed =>
@@ -2489,7 +2486,7 @@ class LFr extends L {
 
   @override
   String get profileShieldModeBody =>
-      'Met en attente les appels et met en veilleuse les conversations non prioritaires pendant que vous êtes concentré. Vos contacts étiquetés Business, Client, Fournisseur ou Boss passent toujours.';
+      'Met en attente les appels et met en veilleuse les discussions non prioritaires pendant que tu es concentré. Tes contacts étiquetés Business, Client, Fournisseur ou Boss passent toujours.';
 
   @override
   String get contactConnectFailed => 'Connexion impossible.';
@@ -2504,7 +2501,7 @@ class LFr extends L {
 
   @override
   String get contactBlockBody =>
-      'Cette personne ne pourra plus vous écrire ni vous appeler. Elle n\'en sera pas informée.';
+      'Cette personne ne pourra plus t\'écrire ni t\'appeler. Elle n\'en sera pas informée.';
 
   @override
   String get contactActionFailed => 'Action impossible pour le moment.';
@@ -2558,15 +2555,14 @@ class LFr extends L {
 
   @override
   String get contactUnblockHint =>
-      'Cette personne peut à nouveau vous écrire et vous appeler.';
+      'Cette personne peut à nouveau t\'écrire et t\'appeler.';
 
   @override
   String get contactBlockHint =>
-      'Elle ne pourra plus vous écrire ni vous appeler, sans en être informée.';
+      'Elle ne pourra plus t\'écrire ni t\'appeler, sans en être informée.';
 
   @override
-  String get adNeedTitleBody =>
-      'Donnez un titre et un message à votre publicité.';
+  String get adNeedTitleBody => 'Donne un titre et un message à ta publicité.';
 
   @override
   String get adSendFailed => 'La demande n\'a pas pu être envoyée.';
@@ -2579,34 +2575,34 @@ class LFr extends L {
 
   @override
   String get adWhoSeesBody =>
-      'Tous les utilisateurs de Pokou Messenger dans l\'onglet Marché, ou entre deux statuts — à vous de choisir.';
+      'Tous les utilisateurs de Pokou dans Assimé, ou entre deux statuts — à toi de choisir.';
 
   @override
   String get adReviewTitle => 'Une relecture avant diffusion';
 
   @override
   String get adReviewBody =>
-      'Notre équipe lit chaque campagne avant qu\'elle ne parte. Comptez quelques heures.';
+      'Notre équipe lit chaque campagne avant qu\'elle ne parte. Compte quelques heures.';
 
   @override
   String get adCountdownTitle => 'Le décompte part de la validation';
 
   @override
   String get adCountdownBody =>
-      'Vos jours de diffusion commencent une fois la campagne acceptée, pas au paiement.';
+      'Tes jours de diffusion commencent une fois la campagne acceptée, pas au paiement.';
 
   @override
-  String get adRefundTitle => 'Refusée ? Vous êtes remboursé';
+  String get adRefundTitle => 'Refusée ? Tu es remboursé';
 
   @override
   String get adRefundBody =>
-      'Si la campagne ne peut pas être diffusée, contactez-nous : la somme vous est rendue.';
+      'Si la campagne ne peut pas être diffusée, contacte-nous : la somme t\'est rendue.';
 
   @override
   String get adTitleHint => 'Ex : Ciment CIMTOGO en promotion';
 
   @override
-  String get adBodyHint => 'Ce que vous proposez, et comment vous joindre.';
+  String get adBodyHint => 'Ce que tu proposes, et comment te joindre.';
 
   @override
   String get adMediaLabel => 'Photo ou vidéo (facultatif)';
@@ -2647,7 +2643,7 @@ class LFr extends L {
 
   @override
   String productInterestedMessage(String name, String price, String currency) {
-    return 'Bonjour, je suis intéressé par votre $name à $price $currency. Est-il disponible ?';
+    return 'Bonjour, je suis intéressé par ton annonce « $name » à $price $currency. Est-elle toujours disponible ?';
   }
 
   @override
@@ -2655,8 +2651,7 @@ class LFr extends L {
       'Impossible d\'écrire au vendeur pour l\'instant.';
 
   @override
-  String get productCallFirstWrite =>
-      'Appel impossible — écrivez-lui d\'abord.';
+  String get productCallFirstWrite => 'Appel impossible — écris-lui d\'abord.';
 
   @override
   String get productRateSeller => 'Noter ce vendeur';
@@ -2669,7 +2664,7 @@ class LFr extends L {
       'L\'avis porte sur le VENDEUR, pas sur un produit : c\'est la confiance dans la personne qui compte, et elle reste même si l\'article quitte le catalogue.';
 
   @override
-  String get productReviewHint => 'Votre commentaire (facultatif)';
+  String get productReviewHint => 'Ton commentaire (facultatif)';
 
   @override
   String get productDeleteReview => 'Supprimer mon avis';
@@ -2721,21 +2716,20 @@ class LFr extends L {
   String get productCertified => 'Compte vérifié par l\'équipe Pokou.';
 
   @override
-  String get productReviewMine => 'Vous';
+  String get productReviewMine => 'Toi';
 
   @override
-  String get verifNeedDocument =>
-      'Ajoutez une photo de votre pièce d\'identité.';
+  String get verifNeedDocument => 'Ajoute une photo de ta pièce d\'identité.';
 
   @override
   String get verifTitle => 'Devenir vendeur vérifié';
 
   @override
-  String get verifBadgeTitle => 'Un badge bleu sur vos annonces';
+  String get verifBadgeTitle => 'Un badge bleu sur tes annonces';
 
   @override
   String get verifBadgeBody =>
-      'Les acheteurs voient que votre identité a été vérifiée par notre équipe.';
+      'Les acheteurs voient que ton identité a été vérifiée par notre équipe.';
 
   @override
   String get verifWhyTitle => 'Pourquoi ça change tout';
@@ -2749,24 +2743,24 @@ class LFr extends L {
 
   @override
   String get verifNeedBody =>
-      'Une photo nette de votre carte d\'identité, passeport ou permis. Le nom doit être lisible.';
+      'Une photo nette de ta carte d\'identité, passeport ou permis. Le nom doit être lisible.';
 
   @override
   String get verifUseTitle => 'Ce que nous en faisons';
 
   @override
   String get verifUseBody =>
-      'Elle est lue par notre équipe pour la seule vérification, n\'apparaît jamais sur votre profil, et n\'est montrée à aucun acheteur.';
+      'Elle est lue par notre équipe pour la seule vérification, n\'apparaît jamais sur ton profil, et n\'est montrée à aucun acheteur.';
 
   @override
   String get verifOneYearTitle => 'Valable un an';
 
   @override
   String get verifOneYearBody =>
-      'Le badge dure douze mois. Comptez quelques jours pour l\'examen du dossier.';
+      'Le badge dure douze mois. Compte quelques jours pour l\'examen du dossier.';
 
   @override
-  String get verifDocumentLabel => 'Votre pièce d\'identité';
+  String get verifDocumentLabel => 'Ta pièce d\'identité';
 
   @override
   String get verifPayCaption => 'Paiement Mobile Money · 1 an';
@@ -2779,13 +2773,13 @@ class LFr extends L {
 
   @override
   String get marketRemoveBody =>
-      'L\'annonce disparaît du marché. Vos conversations à son sujet restent lisibles, et les acheteurs qui l\'ont déjà reçue gardent leur historique.';
+      'L\'annonce disparaît d\'Assimé. Tes discussions à son sujet restent lisibles, et les acheteurs qui l\'ont déjà reçue gardent leur historique.';
 
   @override
   String get marketRemoveFailed => 'L\'annonce n\'a pas pu être retirée.';
 
   @override
-  String get marketImageFailed => 'Image non envoyée — réessayez.';
+  String get marketImageFailed => 'Image non envoyée — réessaie.';
 
   @override
   String get marketMainPhotoHint =>
@@ -2864,10 +2858,10 @@ class LFr extends L {
 
   @override
   String get callLeaveConfirmBody =>
-      'Les autres participants peuvent encore parler. Pour revenir à l\'appel, vous pouvez fermer cet écran sans raccrocher.';
+      'Les autres participants peuvent encore parler. Pour revenir à l\'appel, tu peux fermer cet écran sans raccrocher.';
 
   @override
-  String get callYou => 'Vous';
+  String get callYou => 'Toi';
 
   @override
   String get callContact => 'Contact';
@@ -2893,7 +2887,7 @@ class LFr extends L {
 
   @override
   String callIncomingFrom(String name) {
-    return '$name vous appelle';
+    return '$name t\'appelle';
   }
 
   @override
@@ -2907,14 +2901,14 @@ class LFr extends L {
   String get streakUnavailable => 'Chaînes indisponibles';
 
   @override
-  String get streakCheckConnection => 'Vérifiez votre connexion et réessayez.';
+  String get streakCheckConnection => 'Vérifie ta connexion et réessaie.';
 
   @override
   String get streakEmptyTitle => 'Aucune chaîne pour le moment';
 
   @override
   String get streakEmptyBody =>
-      'Échangez un message chaque jour avec la même personne : la chaîne démarre au premier aller-retour.';
+      'Échange un message chaque jour avec la même personne : la chaîne démarre au premier aller-retour.';
 
   @override
   String get streakToRescue => 'À sauver maintenant';
@@ -2940,11 +2934,11 @@ class LFr extends L {
   }
 
   @override
-  String get streakLongest => 'Votre plus longue chaîne';
+  String get streakLongest => 'Ta plus longue chaîne';
 
   @override
   String get streakRestorePending =>
-      'Votre chaîne repartira dès la confirmation du paiement.';
+      'Ta chaîne repartira dès la confirmation du paiement.';
 
   @override
   String get streakDeadlinePassed => 'Le délai est peut-être passé.';
@@ -2974,7 +2968,7 @@ class LFr extends L {
   }
 
   @override
-  String get leagueSubtitle => 'Votre ligue monte avec ce que vous recevez';
+  String get leagueSubtitle => 'Ta ligue monte avec ce que tu reçois';
 
   @override
   String get leagueUnavailable => 'Classement indisponible';
@@ -2984,13 +2978,13 @@ class LFr extends L {
 
   @override
   String get leagueProtectPending =>
-      'Votre protection sera active dès la confirmation du paiement.';
+      'Ta protection sera active dès la confirmation du paiement.';
 
   @override
   String get leaguePaymentFailed => 'Le paiement n\'a pas pu être lancé.';
 
   @override
-  String get leagueAtTop => 'Vous êtes au sommet du classement.';
+  String get leagueAtTop => 'Tu es au sommet du classement.';
 
   @override
   String leaguePointsNeeded(int points, String label) {
@@ -2999,18 +2993,18 @@ class LFr extends L {
 
   @override
   String get leagueProtected =>
-      'Vos points sont protégés. Rien ne baisse cette semaine.';
+      'Tes points sont protégés. Rien ne baisse cette semaine.';
 
   @override
-  String get leagueDecayNow => 'Vos points baissent au prochain passage.';
+  String get leagueDecayNow => 'Tes points baissent au prochain passage.';
 
   @override
   String leagueDecayIn(int days) {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'Vos points baissent dans $days jours sans activité.',
-      one: 'Vos points baissent dans 1 jour sans activité.',
+      other: 'Tes points baissent dans $days jours sans activité.',
+      one: 'Tes points baissent dans 1 jour sans activité.',
     );
     return '$_temp0';
   }
@@ -3020,11 +3014,11 @@ class LFr extends L {
 
   @override
   String get leagueNobodyRanked =>
-      'Personne n\'est encore classé. Soyez le premier.';
+      'Personne n\'est encore classé. Sois le premier.';
 
   @override
   String leagueMyRank(int rank, int points) {
-    return 'Vous êtes $rankᵉ avec $points points.';
+    return 'Tu es $rankᵉ avec $points points.';
   }
 
   @override
@@ -3073,7 +3067,7 @@ class LFr extends L {
 
   @override
   String contactsPreviewMine(String preview) {
-    return 'Vous : $preview';
+    return 'Toi : $preview';
   }
 
   @override
@@ -3083,11 +3077,11 @@ class LFr extends L {
 
   @override
   String contactsNotInContacts(String preview) {
-    return '$preview · pas dans vos contacts';
+    return '$preview · pas dans tes contacts';
   }
 
   @override
-  String get contactsAssistantSub => 'Votre assistant IA';
+  String get contactsAssistantSub => 'Pose-moi une question sur Pokou.';
 
   @override
   String get addContactTitle => 'Ajouter un contact';
@@ -3103,7 +3097,7 @@ class LFr extends L {
 
   @override
   String get joinLinkBody =>
-      'Collez le lien qu\'on vous a envoyé. Groupe ou communauté, on reconnaît lequel.';
+      'Colle le lien qu\'on t\'a envoyé. Groupe ou communauté, on reconnaît lequel.';
 
   @override
   String get joinLinkContinue => 'Continuer';
@@ -3113,7 +3107,7 @@ class LFr extends L {
 
   @override
   String joinAlreadyMember(String name) {
-    return 'Vous êtes déjà dans « $name ».';
+    return 'Tu es déjà dans « $name ».';
   }
 
   @override
@@ -3152,13 +3146,13 @@ class LFr extends L {
 
   @override
   String get joinCommunityBody =>
-      'Vous recevrez ses annonces. Les autres groupes restent à rejoindre un par un.';
+      'Tu recevras ses annonces. Les autres groupes restent à rejoindre un par un.';
 
   @override
   String get joinCommunityFailed => 'Impossible de rejoindre cette communauté.';
 
   @override
-  String get newChatOwnNumber => 'C\'est votre propre numéro.';
+  String get newChatOwnNumber => 'C\'est ton propre numéro.';
 
   @override
   String get phoneLookupFailed => 'Numéro invalide ou vérification impossible.';
@@ -3294,7 +3288,7 @@ class LFr extends L {
 
   @override
   String get convEditFailed =>
-      'Modification impossible — vérifiez votre connexion.';
+      'Modification impossible — vérifie ta connexion.';
 
   @override
   String get convOrderUpdateFailed =>
@@ -3311,7 +3305,7 @@ class LFr extends L {
       'Hors ligne — les pièces jointes exigent une connexion.';
 
   @override
-  String get convAttachmentFailed => 'Pièce jointe non envoyée — réessayez.';
+  String get convAttachmentFailed => 'Pièce jointe non envoyée — réessaie.';
 
   @override
   String get groupOfflineNotCached =>
@@ -3366,7 +3360,7 @@ class LFr extends L {
   String get orderMarkDelivered => 'Marquer comme livré';
 
   @override
-  String get orderBuyerWaiting => 'Cet acheteur attend votre réponse.';
+  String get orderBuyerWaiting => 'Cet acheteur attend ta réponse.';
 
   @override
   String get orderNextStep => 'Étape suivante de la commande.';
@@ -3384,7 +3378,7 @@ class LFr extends L {
 
   @override
   String get convSearchPrompt =>
-      'Tapez un mot pour retrouver un message de cette conversation.';
+      'Tape un mot pour retrouver un message de cette discussion.';
 
   @override
   String get convSearchEmpty => 'Aucun message trouvé.';
@@ -3403,7 +3397,7 @@ class LFr extends L {
 
   @override
   String get groupInviteLinkBody =>
-      'Toute personne qui ouvre ce lien rejoint le groupe directement, sans autre étape. Régénérez-le pour invalider celui déjà partagé.';
+      'Toute personne qui ouvre ce lien rejoint le groupe directement, sans autre étape. Régénère-le pour invalider celui déjà partagé.';
 
   @override
   String get groupNewLinkCreated =>
@@ -3425,7 +3419,7 @@ class LFr extends L {
   String get groupNameHint => 'Nom du groupe';
 
   @override
-  String get groupPickParticipants => 'Choisissez les participants';
+  String get groupPickParticipants => 'Choisis les participants';
 
   @override
   String groupSelectedCount(int count) {
@@ -3501,7 +3495,7 @@ class LFr extends L {
   String get notifReply => 'Répondre';
 
   @override
-  String get notifReplyHint => 'Votre message';
+  String get notifReplyHint => 'Ton message';
 
   @override
   String get notifMarkRead => 'Marquer comme lu';
@@ -3511,7 +3505,7 @@ class LFr extends L {
 
   @override
   String get notifReplyFailed =>
-      'Réponse non envoyée — ouvrez Pokou pour réessayer';
+      'Réponse non envoyée — ouvre Pokou pour réessayer';
 
   @override
   String notifSummary(int count, int conversations) {
@@ -3543,19 +3537,17 @@ class LFr extends L {
   String get audienceOnly => 'Uniquement…';
 
   @override
-  String get audienceContactsDesc =>
-      'Toutes les personnes de votre carnet Pokou';
+  String get audienceContactsDesc => 'Toutes les personnes de ton carnet Pokou';
 
   @override
-  String get audienceNobodyDesc =>
-      'Vos statuts ne seront visibles que par vous';
+  String get audienceNobodyDesc => 'Tes statuts ne seront visibles que par toi';
 
   @override
   String get audienceExceptDesc =>
-      'Vos contacts, à l\'exception de ceux que vous choisissez';
+      'Tes contacts, à l\'exception de ceux que tu choisis';
 
   @override
-  String get audienceOnlyDesc => 'Seules les personnes que vous choisissez';
+  String get audienceOnlyDesc => 'Seules les personnes que tu choisis';
 
   @override
   String get statusViewerFallback => 'Utilisateur';
@@ -3565,10 +3557,10 @@ class LFr extends L {
 
   @override
   String get statusPrivacySaveFailed =>
-      'Enregistrement impossible — vérifiez votre connexion.';
+      'Enregistrement impossible — vérifie ta connexion.';
 
   @override
-  String get statusPrivacyTitle => 'Visibilité des statuts';
+  String get statusPrivacyTitle => 'Qui voit mes statuts';
 
   @override
   String get statusExcludePeople => 'Personnes à exclure';
@@ -3582,11 +3574,11 @@ class LFr extends L {
 
   @override
   String get statusExceptFootnote =>
-      'Ces personnes ne verront pas vos statuts, même si elles sont dans vos contacts.';
+      'Ces personnes ne verront pas tes statuts, même si elles sont dans tes contacts.';
 
   @override
   String get statusOnlyFootnote =>
-      'Seules ces personnes verront vos statuts. Elles n\'ont pas besoin de vous avoir en contact.';
+      'Seules ces personnes verront tes statuts. Elles n\'ont pas besoin de t\'avoir en contact.';
 
   @override
   String get status24hFootnote =>
@@ -3605,7 +3597,7 @@ class LFr extends L {
   String get statusText => 'Texte';
 
   @override
-  String get statusTypeHint => 'Tapez votre statut…';
+  String get statusTypeHint => 'Tape ton statut…';
 
   @override
   String get statusPublish => 'Publier';
@@ -3626,10 +3618,10 @@ class LFr extends L {
   String get channelsSection => 'Chaînes';
 
   @override
-  String get bcastNeedName => 'Donnez un nom à cette liste.';
+  String get bcastNeedName => 'Donne un nom à cette liste.';
 
   @override
-  String get bcastNeedRecipient => 'Choisissez au moins un destinataire.';
+  String get bcastNeedRecipient => 'Choisis au moins un destinataire.';
 
   @override
   String get bcastSaveFailed => 'Enregistrement impossible.';
@@ -3641,7 +3633,7 @@ class LFr extends L {
   String get bcastEditTitle => 'Modifier la liste';
 
   @override
-  String get bcastNameHint => 'Nom de la liste (visible par vous seul)';
+  String get bcastNameHint => 'Nom de la liste (visible par toi seul)';
 
   @override
   String get bcastNoRecipient => 'Aucun destinataire';
@@ -3662,7 +3654,7 @@ class LFr extends L {
 
   @override
   String get bcastNobodyOnPokou =>
-      'Aucun de vos contacts n\'est encore sur Pokou Messenger.';
+      'Aucun de tes contacts n\'est encore sur Pokou.';
 
   @override
   String get bcastNewList => 'Nouvelle liste';
@@ -3683,11 +3675,11 @@ class LFr extends L {
       'Les messages déjà envoyés restent chez leurs destinataires. Seule la liste disparaît.';
 
   @override
-  String get bcastEmptyTitle => 'Annoncez une fois, à plusieurs';
+  String get bcastEmptyTitle => 'Annonce une fois, à plusieurs';
 
   @override
   String get bcastEmptyBody =>
-      'Chaque destinataire reçoit le message dans sa conversation privée. Il ne voit pas les autres, et vous répond à vous seul — contrairement à un groupe, où tout le monde se voit.';
+      'Chaque destinataire reçoit le message dans sa discussion privée. Il ne voit pas les autres, et ne répond qu\'à toi — contrairement à un groupe, où tout le monde se voit.';
 
   @override
   String bcastSentTo(int count) {
@@ -3702,7 +3694,7 @@ class LFr extends L {
 
   @override
   String bcastSentPartly(int sent, int total, int skipped) {
-    return 'Envoyé à $sent sur $total — $skipped ne reçoit plus vos messages.';
+    return 'Envoyé à $sent sur $total — $skipped ne reçoit plus tes messages.';
   }
 
   @override
@@ -3722,7 +3714,7 @@ class LFr extends L {
 
   @override
   String get bcastPrivacyNotice =>
-      'Chaque destinataire reçoit ce message en privé. Il ne voit pas les autres, et sa réponse vous arrive dans votre conversation avec lui.';
+      'Chaque destinataire reçoit ce message en privé. Il ne voit pas les autres, et sa réponse t\'arrive dans ta discussion avec lui.';
 
   @override
   String get channelNameRequired => 'Le nom de la chaîne est obligatoire.';
@@ -3755,7 +3747,7 @@ class LFr extends L {
   String get channelDescriptionLabel => 'Description';
 
   @override
-  String get channelDescriptionHint => 'Présentez votre chaîne';
+  String get channelDescriptionHint => 'Présente ta chaîne';
 
   @override
   String get channelSaveChanges => 'Enregistrer les modifications';
@@ -3777,7 +3769,7 @@ class LFr extends L {
 
   @override
   String get channelEmptyHint =>
-      'Créez une chaîne pour partager vos actualités.';
+      'Crée une chaîne pour partager tes actualités.';
 
   @override
   String get channelGenerateLink => 'Générer un lien';
@@ -3790,14 +3782,14 @@ class LFr extends L {
 
   @override
   String get channelSearchPrompt =>
-      'Cherchez par nom ou par description. Les chaînes certifiées apparaissent en premier.';
+      'Cherche par nom ou par description. Les chaînes certifiées apparaissent en premier.';
 
   @override
   String get channelSearchEmpty => 'Aucune chaîne trouvée.';
 
   @override
   String get channelNothingPublishedAdmin =>
-      'Rien de publié pour l\'instant — touchez + pour votre première publication.';
+      'Rien de publié pour l\'instant — touche + pour ta première publication.';
 
   @override
   String get channelNothingPublished => 'Cette chaîne n\'a encore rien publié.';
@@ -3813,7 +3805,7 @@ class LFr extends L {
 
   @override
   String get communityNewBody =>
-      'Une communauté regroupe plusieurs groupes autour des mêmes personnes. Un groupe « Annonces » est créé avec elle : vous seul y écrivez, tous ses membres y lisent.';
+      'Une communauté regroupe plusieurs groupes autour des mêmes personnes. Un groupe « Annonces » est créé avec elle : toi seul y écris, tous ses membres y lisent.';
 
   @override
   String get communityNameHint => 'Nom de la communauté';
@@ -3829,7 +3821,7 @@ class LFr extends L {
 
   @override
   String get communityNoGroupToAttach =>
-      'Vous n\'avez pas d\'autre groupe à rattacher. Seuls les groupes que vous administrez peuvent rejoindre une communauté.';
+      'Tu n\'as pas d\'autre groupe à rattacher. Seuls les groupes que tu administres peuvent rejoindre une communauté.';
 
   @override
   String get communityAddGroupFailed => 'Impossible d\'ajouter ce groupe.';
@@ -3939,13 +3931,13 @@ class LFr extends L {
   String get aiMessageHint => 'Message…';
 
   @override
-  String get aiHowCanIHelp => 'Comment puis-je vous aider ?';
+  String get aiHowCanIHelp => 'Comment puis-je t\'aider ?';
 
   @override
-  String get aiAskAnything => 'Posez-moi n\'importe quelle question.';
+  String get aiAskAnything => 'Pose-moi n\'importe quelle question.';
 
   @override
-  String get aiAskAboutData => 'Posez une question sur vos données connectées.';
+  String get aiAskAboutData => 'Pose une question sur tes données connectées.';
 
   @override
   String get aiThinking => 'Baba réfléchit';
@@ -3956,7 +3948,7 @@ class LFr extends L {
   }
 
   @override
-  String get aiPartner => 'Votre partenaire numérique';
+  String get aiPartner => 'Ton partenaire numérique';
 
   @override
   String get aiGreetMorning => 'Bonjour';
@@ -3980,13 +3972,13 @@ class LFr extends L {
   String get aiGenerated => 'Généré par l\'IA';
 
   @override
-  String get aiVoiceListening => 'Je vous écoute…';
+  String get aiVoiceListening => 'Je t\'écoute…';
 
   @override
   String get aiVoiceTranscribing => 'Transcription…';
 
   @override
-  String get aiVoiceFailed => 'Je n\'ai pas pu vous entendre. Réessayez.';
+  String get aiVoiceFailed => 'Je n\'ai pas pu t\'entendre. Réessaie.';
 
   @override
   String get aiVoiceSpeak => 'Parler à l\'assistant';
@@ -4001,7 +3993,7 @@ class LFr extends L {
   String get aiVoiceStop => 'Terminer';
 
   @override
-  String get aiSendFailed => 'Message non envoyé — réessayez.';
+  String get aiSendFailed => 'Message non envoyé — réessaie.';
 
   @override
   String get digestTitle => 'Récap du jour';
@@ -4031,8 +4023,8 @@ class LFr extends L {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count signaux de vos moniteurs à consulter.',
-      one: '1 signal de vos moniteurs à consulter.',
+      other: '$count signaux de tes moniteurs à consulter.',
+      one: '1 signal de tes moniteurs à consulter.',
     );
     return '$_temp0';
   }
@@ -4048,8 +4040,8 @@ class LFr extends L {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count messages mis en attente pendant votre réunion.',
-      one: '1 message mis en attente pendant votre réunion.',
+      other: '$count messages mis en attente pendant ta réunion.',
+      one: '1 message mis en attente pendant ta réunion.',
     );
     return '$_temp0';
   }
@@ -4101,17 +4093,17 @@ class LFr extends L {
 
   @override
   String get statusDeleteFailed =>
-      'Suppression impossible — vérifiez votre connexion.';
+      'Suppression impossible — vérifie ta connexion.';
 
   @override
   String get statusPublishFailed =>
-      'Publication impossible — vérifiez votre connexion et réessayez.';
+      'Publication impossible — vérifie ta connexion et réessaie.';
 
   @override
   String get statusBoostAction => 'Booster ce statut · 1 000 FCFA';
 
   @override
-  String get modulesSubtitle => 'Ajoutez ce qui vous sert, laissez le reste';
+  String get modulesSubtitle => 'Ajoute ce qui te sert, laisse le reste';
 
   @override
   String get modulePaymentFailed => 'Le paiement n\'a pas pu être lancé.';
@@ -4129,7 +4121,7 @@ class LFr extends L {
   String get cropTitle => 'Recadrer';
 
   @override
-  String get cropHint => 'Pincez pour zoomer, glissez pour cadrer';
+  String get cropHint => 'Pince pour zoomer, glisse pour cadrer';
 
   @override
   String get cropConfirm => 'Valider';
@@ -4143,7 +4135,7 @@ class LFr extends L {
   }
 
   @override
-  String get otpNoCodeReceived => 'Vous n\'avez pas reçu de code ?';
+  String get otpNoCodeReceived => 'Tu n\'as pas reçu de code ?';
 
   @override
   String get countryDialCode => 'Indicatif du pays';
@@ -4178,7 +4170,7 @@ class LFr extends L {
 
   @override
   String get devicesNoPushHereBody =>
-      'Il n\'a pas pu s\'enregistrer auprès du service de notifications. Touchez pour réessayer.';
+      'Il n\'a pas pu s\'enregistrer auprès du service de notifications. Touche pour réessayer.';
 
   @override
   String get devicesRetryDone =>
@@ -4186,11 +4178,11 @@ class LFr extends L {
 
   @override
   String get devicesRetryFailed =>
-      'Toujours pas d\'enregistrement possible — réessayez plus tard.';
+      'Toujours pas d\'enregistrement possible — réessaie plus tard.';
 
   @override
   String get chatsProfileMissing =>
-      'Profil indisponible — vérifiez votre connexion, puis réessayez.';
+      'Profil indisponible — vérifie ta connexion, puis réessaie.';
 
   @override
   String get recSlideToCancel => 'Glisser pour annuler';
@@ -4225,7 +4217,7 @@ class LFr extends L {
 
   @override
   String get channelSuggestedBody =>
-      'Vous n\'en suivez aucune pour l\'instant. En voici quelques-unes.';
+      'Tu n\'en suis aucune pour l\'instant. En voici quelques-unes.';
 
   @override
   String get channelSuggestedNone => 'Aucune chaîne à proposer pour le moment.';
@@ -4237,7 +4229,7 @@ class LFr extends L {
 
   @override
   String get channelFollowFailed =>
-      'Abonnement impossible — vérifiez votre connexion.';
+      'Abonnement impossible — vérifie ta connexion.';
 
   @override
   String get certifyTitle => 'Chaîne certifiée';
@@ -4247,21 +4239,21 @@ class LFr extends L {
 
   @override
   String get certifyWhyBody =>
-      'Les chaînes certifiées apparaissent en premier à qui cherche quoi suivre, et le badge se voit sur chacune de vos publications.';
+      'Les chaînes certifiées apparaissent en premier à qui cherche quoi suivre, et le badge se voit sur chacune de tes publications.';
 
   @override
   String get certifyReviewTitle => 'Un examen, pas un achat';
 
   @override
   String get certifyReviewBody =>
-      'Notre équipe lit votre chaîne avant d\'accorder le badge. Un badge qui s\'achète sans regard ne vaudrait rien — c\'est ce qui fait sa valeur.';
+      'Notre équipe lit ta chaîne avant d\'accorder le badge. Un badge qui s\'achète sans regard ne vaudrait rien — c\'est ce qui fait sa valeur.';
 
   @override
-  String get certifyRefundTitle => 'Refusée ? Vous êtes remboursé';
+  String get certifyRefundTitle => 'Refusée ? Tu es remboursé';
 
   @override
   String get certifyRefundBody =>
-      'Si le badge ne peut pas être accordé, contactez-nous : la somme vous est rendue.';
+      'Si le badge ne peut pas être accordé, contacte-nous : la somme t\'est rendue.';
 
   @override
   String get certifyRenewTitle => 'Un abonnement, pas un acquis';
@@ -4281,10 +4273,10 @@ class LFr extends L {
 
   @override
   String get certifyPending =>
-      'Votre demande part à l\'équipe dès la confirmation du paiement.';
+      'Ta demande part à l\'équipe dès la confirmation du paiement.';
 
   @override
-  String get certifyFailed => 'Demande impossible — réessayez.';
+  String get certifyFailed => 'Demande impossible — réessaie.';
 
   @override
   String get certifyAlready => 'Cette chaîne est certifiée';
@@ -4293,21 +4285,21 @@ class LFr extends L {
   String get certifyTooltip => 'Faire certifier cette chaîne';
 
   @override
-  String get chatsStartTitle => 'Commencez une conversation';
+  String get chatsStartTitle => 'Commence une discussion';
 
   @override
   String get chatsStartBody =>
-      'Vos contacts sont déjà sur Pokou. Touchez un nom pour lui écrire.';
+      'Tes contacts sont déjà sur Pokou. Touche un nom pour lui écrire.';
 
   @override
   String get chatsSeeAllContacts => 'Voir tous mes contacts';
 
   @override
-  String get chatsNoNetworkTitle => 'Votre réseau n\'est pas encore sur Pokou';
+  String get chatsNoNetworkTitle => 'Tes proches ne sont pas encore sur Pokou';
 
   @override
   String get chatsNoNetworkBody =>
-      'Invitez quelqu\'un, ou suivez une chaîne en attendant qu\'on vous réponde.';
+      'Invite quelqu\'un, ou suis une chaîne en attendant qu\'on te réponde.';
 
   @override
   String get chatsInviteContacts => 'Inviter des contacts';
@@ -4323,7 +4315,7 @@ class LFr extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'Cette personne n\'utilise pas encore une version de Pokou qui chiffre. Vos messages voyagent en clair.';
+      'Cette personne n\'utilise pas encore une version de Pokou qui chiffre. Tes messages voyagent en clair.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4331,7 +4323,7 @@ class LFr extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return 'La clé de $name n\'est plus la même. Cela arrive quand quelqu\'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu\'un s\'intercale. Vérifiez avec $name par un autre moyen avant de continuer.';
+    return 'La clé de $name n\'est plus la même. Cela arrive quand quelqu\'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu\'un s\'intercale. Vérifie avec $name par un autre moyen avant de continuer.';
   }
 
   @override
@@ -4342,7 +4334,7 @@ class LFr extends L {
 
   @override
   String get e2eeBlockedLookup =>
-      'Impossible de récupérer la clé de chiffrement. Le message n\'a pas été envoyé — Pokou ne l\'enverra jamais en clair à votre insu.';
+      'Impossible de récupérer la clé de chiffrement. Le message n\'a pas été envoyé — Pokou ne l\'enverra jamais en clair à ton insu.';
 
   @override
   String get e2eeBlockedInvalid =>
@@ -4350,7 +4342,7 @@ class LFr extends L {
 
   @override
   String get e2eeBlockedIdentity =>
-      'La clé de ce contact a changé. Vérifiez son identité avant d\'envoyer.';
+      'La clé de ce contact a changé. Vérifie son identité avant d\'envoyer.';
 
   @override
   String get e2eeBlockedCrypto =>
@@ -4406,7 +4398,7 @@ class LFr extends L {
   String get adSponsored => 'Sponsorisé';
 
   @override
-  String get adYours => 'Votre publicité';
+  String get adYours => 'Ta publicité';
 
   @override
   String get adContact => 'Contacter';
@@ -4422,14 +4414,14 @@ class LFr extends L {
       'Pièce jointe chiffrée illisible sur ce téléphone.';
 
   @override
-  String get mediaSaved => 'Enregistré dans votre galerie';
+  String get mediaSaved => 'Enregistré dans ta galerie';
 
   @override
-  String get mediaExported => 'Choisissez où l\'enregistrer';
+  String get mediaExported => 'Choisis où l\'enregistrer';
 
   @override
   String get mediaSavePermission =>
-      'Pokou a besoin d\'accéder à vos photos pour enregistrer ce fichier.';
+      'Pokou a besoin d\'accéder à tes photos pour enregistrer ce fichier.';
 
   @override
   String get mediaSaveNoSpace => 'Pas assez d\'espace sur le téléphone.';
@@ -4496,13 +4488,13 @@ class LFr extends L {
   String get stickerCreateFromPhoto => 'Créer depuis une photo';
 
   @override
-  String get stickerCreated => 'Sticker ajouté à vos stickers';
+  String get stickerCreated => 'Sticker ajouté à tes stickers';
 
   @override
-  String get stickerLimitReached => 'Votre pack personnel est plein';
+  String get stickerLimitReached => 'Ton pack personnel est plein';
 
   @override
-  String get stickerSendFailed => 'Sticker non envoyé — réessayez';
+  String get stickerSendFailed => 'Sticker non envoyé — réessaie';
 
   @override
   String get stickerLabel => 'Sticker';
@@ -4520,7 +4512,7 @@ class LFr extends L {
   String get stickerSaveToMine => 'Ajouter à mes stickers';
 
   @override
-  String get stickerSaved => 'Sticker ajouté à vos stickers';
+  String get stickerSaved => 'Sticker ajouté à tes stickers';
 
   @override
   String get navBaba => 'Baba';
@@ -4565,7 +4557,7 @@ class LFr extends L {
   String get statusMineTitle => 'Mon Actu';
 
   @override
-  String get statusMineBody => 'Appuyez pour publier une actualité (24 h)';
+  String get statusMineBody => 'Touche pour ajouter un statut';
 
   @override
   String get statusMineVisibility => 'Visible par mes contacts';
@@ -4583,7 +4575,7 @@ class LFr extends L {
   String get callQualityPoor => 'Faible';
 
   @override
-  String get callYouShort => 'Vous';
+  String get callYouShort => 'Toi';
 
   @override
   String get callMutedShort => 'Coupé';
@@ -4623,11 +4615,11 @@ class LFr extends L {
 
   @override
   String get e2eeReassurance =>
-      'Les messages de cette conversation sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.';
+      'Les messages de cette discussion sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.';
 
   @override
   String get chatsEncryptionFooter =>
-      'Vos conversations privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.';
+      'Tes discussions privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.';
 
   @override
   String get callsRecentSection => 'RÉCENTS';
@@ -4671,7 +4663,7 @@ class LFr extends L {
 
   @override
   String get marketStatusModeratedBody =>
-      'Elle n\'est plus visible par les acheteurs. Écrivez au support si vous pensez que c\'est une erreur.';
+      'Elle n\'est plus visible par les acheteurs. Écris au support si tu penses que c\'est une erreur.';
 
   @override
   String get callsFilterDirect => 'En tête-à-tête';
@@ -4684,14 +4676,14 @@ class LFr extends L {
 
   @override
   String get profileVerifyAccountBody =>
-      'Obtenez le badge vendeur vérifié du Marché';
+      'Obtiens le badge vendeur vérifié d\'Assimé';
 
   @override
   String get profileCertificationPending => 'Certification en cours';
 
   @override
   String get profileCertificationPendingBody =>
-      'Votre demande est en cours d\'examen.';
+      'Ta demande est en cours d\'examen.';
 
   @override
   String get profileCertificationActive => 'Compte certifié';
@@ -4709,7 +4701,7 @@ class LFr extends L {
   }
 
   @override
-  String get verifPlanLabel => 'Choisissez votre formule';
+  String get verifPlanLabel => 'Choisis ta formule';
 
   @override
   String get callEventAudio => 'Appel audio';
@@ -4730,7 +4722,7 @@ class LFr extends L {
   String get callEventDeclined => 'Refusé';
 
   @override
-  String get callEventYouDeclined => 'Vous avez refusé';
+  String get callEventYouDeclined => 'Tu as refusé';
 
   @override
   String get callEventEnded => 'Terminé';
@@ -4787,7 +4779,7 @@ class LFr extends L {
 
   @override
   String get privacyIntro =>
-      'Ces réglages sont appliqués par le serveur : ce que vous masquez n\'est pas envoyé aux autres, pas seulement caché dans l\'application.';
+      'Ces réglages sont appliqués par le serveur : ce que tu masques n\'est pas envoyé aux autres, pas seulement caché dans l\'application.';
 
   @override
   String get privacySectionWhoSees => 'Qui peut voir mes informations';
@@ -4803,42 +4795,41 @@ class LFr extends L {
 
   @override
   String get privacyLastSeenBody =>
-      'À quelle heure vous étiez connecté pour la dernière fois.';
+      'À quelle heure tu étais connecté pour la dernière fois.';
 
   @override
   String get privacyOnline => 'Présence en ligne';
 
   @override
   String get privacyOnlineBody =>
-      'Le point vert qui dit que vous êtes joignable maintenant. Indépendant de la dernière activité.';
+      'Le point vert qui dit que tu es joignable maintenant. Indépendant de la dernière activité.';
 
   @override
   String get privacyProfilePhoto => 'Photo de profil';
 
   @override
-  String get privacyProfilePhotoBody =>
-      'Votre photo, partout où elle apparaît.';
+  String get privacyProfilePhotoBody => 'Ta photo, partout où elle apparaît.';
 
   @override
   String get privacyProfileInfo => 'Informations du profil';
 
   @override
   String get privacyProfileInfoBody =>
-      'Votre description et ce que vous avez renseigné sur vous.';
+      'Ta description et ce que tu as renseigné sur toi.';
 
   @override
   String get privacyReadReceipts => 'Confirmations de lecture';
 
   @override
   String get privacyReadReceiptsBody =>
-      'Les désactiver vous prive aussi de celles des autres. Les accusés de réception (une coche) restent visibles.';
+      'Les désactiver te prive aussi de celles des autres. Les accusés de réception (une coche) restent visibles.';
 
   @override
   String get privacyGroupInvites => 'Qui peut m\'inviter dans un groupe';
 
   @override
   String get privacyGroupInvitesBody =>
-      'Autoriser n\'est pas accepter : vous gardez le dernier mot sur chaque invitation.';
+      'Les autres t’envoient une invitation : tu gardes le dernier mot sur chacune.';
 
   @override
   String get privacyGroupMembership =>
@@ -4846,7 +4837,7 @@ class LFr extends L {
 
   @override
   String get privacyGroupMembershipBody =>
-      'Qui peut voir dans quels groupes vous êtes. Les membres d\'un groupe continuent de se connaître entre eux.';
+      'Qui peut voir dans quels groupes tu es. Les membres d\'un groupe continuent de se connaître entre eux.';
 
   @override
   String get privacyEveryone => 'Tout le monde';
@@ -4858,14 +4849,14 @@ class LFr extends L {
   String get privacyNobody => 'Personne';
 
   @override
-  String get privacySaveFailed => 'Réglage non enregistré — réessayez.';
+  String get privacySaveFailed => 'Réglage non enregistré — réessaie.';
 
   @override
   String get privacyUnavailable => 'Réglages de confidentialité indisponibles.';
 
   @override
   String get privacyStatusesNote =>
-      'La confidentialité des statuts se règle depuis l\'onglet Actus, où vous pouvez aussi exclure des personnes précises.';
+      'La confidentialité des statuts se règle depuis l\'onglet Statuts, où tu peux aussi exclure des personnes précises.';
 
   @override
   String groupInvitesSent(num count) {
@@ -4884,7 +4875,7 @@ class LFr extends L {
 
   @override
   String groupInvitationFrom(Object name) {
-    return '$name vous invite';
+    return '$name t\'invite';
   }
 
   @override
@@ -4952,17 +4943,17 @@ class LFr extends L {
 
   @override
   String get channelPrivateBody =>
-      'Introuvable par la recherche. Seules les personnes à qui vous donnez le lien peuvent la rejoindre et lire ses publications. Ce choix ne pourra pas être modifié ensuite.';
+      'Introuvable par la recherche. Seules les personnes à qui tu donnes le lien peuvent la rejoindre et lire ses publications. Ce choix ne pourra pas être modifié ensuite.';
 
   @override
   String get channelPrivateBadge => 'Privée';
 
   @override
-  String get mahizuConnectTitle => 'Connectez votre compte Mahizu';
+  String get mahizuConnectTitle => 'Connecte ton compte Mahizu';
 
   @override
   String mahizuConnectBody(String phone) {
-    return 'L\'assistant est un service Mahizu, distinct de Pokou. Pour l\'utiliser, rattachez votre compte Mahizu : un code sera envoyé au $phone.';
+    return 'L\'assistant est un service Mahizu, distinct de Pokou. Pour l\'utiliser, rattache ton compte Mahizu : un code sera envoyé au $phone.';
   }
 
   @override
@@ -4972,7 +4963,7 @@ class LFr extends L {
   String get mahizuCodeLabel => 'Code reçu';
 
   @override
-  String get mahizuPinLabel => 'Code de votre compte Mahizu';
+  String get mahizuPinLabel => 'Code de ton compte Mahizu';
 
   @override
   String get mahizuConfirm => 'Connecter';
@@ -5039,7 +5030,7 @@ class LFr extends L {
 
   @override
   String get koryNoMoney =>
-      'Pokou ne touche pas l\'argent : il va directement de votre wallet à celui du collecteur.';
+      'Pokou ne touche pas l\'argent : il va directement de ton wallet à celui du collecteur.';
 
   @override
   String get koryCreate => 'Créer une cagnotte';
@@ -5064,7 +5055,7 @@ class LFr extends L {
 
   @override
   String get koryNoneBody =>
-      'Créez une cagnotte pour un mariage, un baptême ou une cotisation, ou rejoignez-en une avec son code.';
+      'Crée une cagnotte pour un mariage, un baptême ou une cotisation, ou rejoins-en une avec son code.';
 
   @override
   String get koryUnavailable => 'Kory est indisponible';
@@ -5111,7 +5102,7 @@ class LFr extends L {
 
   @override
   String koryPayTo(String phone) {
-    return 'Envoyez votre contribution depuis votre wallet au $phone, puis déclarez-la ici.';
+    return 'Envoie ta contribution depuis ton wallet au $phone, puis déclare-la ici.';
   }
 
   @override
@@ -5133,7 +5124,7 @@ class LFr extends L {
 
   @override
   String get koryWalletRefHelp =>
-      'Elle figure dans le SMS de votre opérateur. Seuls vous et le collecteur la voyez.';
+      'Elle figure dans le SMS de ton opérateur. Seuls toi et le collecteur la voyez.';
 
   @override
   String get koryNote => 'Message (facultatif)';
@@ -5177,7 +5168,7 @@ class LFr extends L {
 
   @override
   String koryShareText(String title, String code) {
-    return 'Rejoignez la cagnotte « $title » sur Pokou avec le code $code.';
+    return 'Rejoins la cagnotte « $title » sur Pokou avec le code $code.';
   }
 
   @override
@@ -5205,17 +5196,17 @@ class LFr extends L {
   String get koryFieldDue => 'Échéance (facultatif)';
 
   @override
-  String get koryNeedTitle => 'Donnez un titre (3 caractères au moins).';
+  String get koryNeedTitle => 'Donne un titre (3 caractères au moins).';
 
   @override
-  String get koryNeedAmount => 'Indiquez un montant d\'au moins 100 FCFA.';
+  String get koryNeedAmount => 'Indique un montant d\'au moins 100 FCFA.';
 
   @override
   String get koryCollectorIsYou =>
-      'Vous êtes le collecteur : les contributions arrivent sur votre wallet, et c\'est vous qui les confirmez.';
+      'Tu es le collecteur : les contributions arrivent sur ton wallet, et c\'est toi qui les confirmes.';
 
   @override
-  String get koryYou => 'Vous';
+  String get koryYou => 'Toi';
 
   @override
   String get koryTontinePlus => 'Tontine en rotation : bientôt avec Kory Plus';
@@ -5231,7 +5222,7 @@ class LFr extends L {
   String get koryCopied => 'Copié';
 
   @override
-  String get koryActionFailed => 'L\'opération n\'a pas abouti. Réessayez.';
+  String get koryActionFailed => 'L\'opération n\'a pas abouti. Réessaie.';
 
   @override
   String get welcomePromise => 'Plus qu\'une messagerie, une communauté.';
@@ -5260,20 +5251,20 @@ class LFr extends L {
   }
 
   @override
-  String get onbProfileTitle => 'Votre profil';
+  String get onbProfileTitle => 'Ton profil';
 
   @override
-  String get onbProfileBody => 'C\'est le nom que verront vos contacts.';
+  String get onbProfileBody => 'C\'est le nom que verront tes contacts.';
 
   @override
   String get onbDisplayName => 'Nom affiché';
 
   @override
-  String get onbNameRequired => 'Indiquez un nom (2 caractères au moins).';
+  String get onbNameRequired => 'Indique un nom (2 caractères au moins).';
 
   @override
   String get onbPhotoLater =>
-      'Vous pourrez ajouter une photo plus tard, depuis votre profil.';
+      'Tu pourras ajouter une photo plus tard, depuis ton profil.';
 
   @override
   String get onbContinue => 'Continuer';
@@ -5303,7 +5294,7 @@ class LFr extends L {
   String get onbFinish => 'Terminer';
 
   @override
-  String get onbFailed => 'L\'enregistrement n\'a pas abouti. Réessayez.';
+  String get onbFailed => 'L\'enregistrement n\'a pas abouti. Réessaie.';
 
   @override
   String get moreConsents => 'Statistiques et communications';
@@ -5361,13 +5352,13 @@ class LFr extends L {
   String get honamSubmit => 'Envoyer à la pharmacie';
 
   @override
-  String get honamNeedPhoto => 'Ajoutez la photo de l\'ordonnance.';
+  String get honamNeedPhoto => 'Ajoute la photo de l\'ordonnance.';
 
   @override
-  String get honamNeedAddress => 'Indiquez l\'adresse de livraison.';
+  String get honamNeedAddress => 'Indique l\'adresse de livraison.';
 
   @override
-  String get honamFailed => 'L\'opération n\'a pas abouti. Réessayez.';
+  String get honamFailed => 'L\'opération n\'a pas abouti. Réessaie.';
 
   @override
   String honamOrderTitle(String id) {
@@ -5424,7 +5415,7 @@ class LFr extends L {
 
   @override
   String honamPayTo(String amount, String phone) {
-    return 'Envoyez $amount depuis votre wallet au $phone (la pharmacie), puis confirmez.';
+    return 'Envoie $amount depuis ton wallet au $phone (la pharmacie), puis confirme.';
   }
 
   @override
@@ -5436,21 +5427,21 @@ class LFr extends L {
 
   @override
   String get honamPaymentNotReceived =>
-      'La pharmacie n\'a pas reçu votre paiement. Vérifiez le numéro et le montant.';
+      'La pharmacie n\'a pas reçu ton paiement. Vérifie le numéro et le montant.';
 
   @override
   String get honamCode => 'Code de remise';
 
   @override
   String get honamCodeHelp =>
-      'Donnez ce code au coursier, seulement quand vous avez le colis en main.';
+      'Donne ce code au coursier, seulement quand tu as le colis en main.';
 
   @override
   String get honamOriginal => 'Le coursier récupérera l\'ordonnance originale.';
 
   @override
   String honamRefundDue(String amount, String reason) {
-    return 'La pharmacie vous doit $amount : $reason';
+    return 'La pharmacie te doit $amount : $reason';
   }
 
   @override
@@ -5536,11 +5527,11 @@ class LFr extends L {
 
   @override
   String get honamPaymentLinkOpened =>
-      'Terminez le paiement dans la page qui s\'ouvre.';
+      'Termine le paiement dans la page qui s\'ouvre.';
 
   @override
   String get honamCourierSuspended =>
-      'Compte coursier suspendu après 3 défauts de livraison. Contactez le support pour un recours.';
+      'Compte coursier suspendu après 3 défauts de livraison. Contacte le support pour un recours.';
 
   @override
   String get honamPriceNote => 'Prix hors taxes, TVA du pays en sus.';
@@ -5549,12 +5540,11 @@ class LFr extends L {
   String get certTitle => 'Pokou certifié';
 
   @override
-  String get certPitch =>
-      'Le badge prouve que votre nom est bien le vôtre. Le mode preuve garde visibles, barrés, les messages supprimés d\'un groupe.';
+  String get certPitch => 'Nom vérifié et mode preuve · essai d’un mois';
 
   @override
   String get certHowItWorks =>
-      'Votre identité est vérifiée par le nom du titulaire du wallet qui paie.';
+      'Ton identité est vérifiée par le nom du titulaire du wallet qui paie.';
 
   @override
   String certStartTrial(String days) {
@@ -5594,7 +5584,7 @@ class LFr extends L {
 
   @override
   String get certMismatchBody =>
-      'Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrigez-le tel qu\'il figure sur sa pièce d\'identité.';
+      'Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrige-le tel qu\'il figure sur sa pièce d\'identité.';
 
   @override
   String get proofModeTitle => 'Mode preuve';
@@ -5662,14 +5652,14 @@ class LFr extends L {
 
   @override
   String get marketUseHonam =>
-      'Les médicaments ne se vendent pas sur Assimé : passez par Honam.';
+      'Les médicaments ne se vendent pas sur Assimé : passe par Honam.';
 
   @override
   String get honamMissingTitle => 'Un produit manque';
 
   @override
   String honamMissingBody(String amount, String reason) {
-    return '$amount manquent : $reason. Que préférez-vous ?';
+    return '$amount manquent : $reason. Que préfères-tu ?';
   }
 
   @override
@@ -5680,7 +5670,7 @@ class LFr extends L {
 
   @override
   String get honamRefundDelay =>
-      'La pharmacie vous rembourse sous 2 h, sur le numéro qui a payé.';
+      'La pharmacie te rembourse sous 2 h, sur le numéro qui a payé.';
 
   @override
   String get honamZones => 'Zones et créneaux (ex. Bè, Tokoin — soirs)';
@@ -5701,7 +5691,7 @@ class LFr extends L {
 
   @override
   String get honamLaunch =>
-      'Période de lancement : vous livrez sans adhésion ni pack.';
+      'Période de lancement : tu livres sans adhésion ni pack.';
 
   @override
   String get honamQueenLocked =>
@@ -6134,4 +6124,258 @@ class LFr extends L {
 
   @override
   String get deleteAccountFailed => 'La suppression a échoué. Réessaie.';
+
+  @override
+  String get helpTitle => 'Aide et support';
+
+  @override
+  String get helpSearchHint => 'Rechercher dans l’aide';
+
+  @override
+  String get helpAskBaba => 'Demander à Baba';
+
+  @override
+  String get helpAskBabaSub => 'L’assistant IA répond tout de suite';
+
+  @override
+  String get helpFaqTitle => 'Questions fréquentes';
+
+  @override
+  String get helpQMoney => 'Pokou touche-t-il mon argent ?';
+
+  @override
+  String get helpAMoney =>
+      'Non. Cagnottes, pharmacies et coursiers se paient de wallet à wallet. Pokou ne garde jamais ton argent.';
+
+  @override
+  String get helpQProof => 'Comment marche le mode preuve ?';
+
+  @override
+  String get helpAProof =>
+      'Activé par un titulaire de Pokou certifié, il garde visibles, barrés, les messages supprimés ou modifiés. C’est toujours affiché en tête de la discussion.';
+
+  @override
+  String get helpQSms => 'Je ne reçois pas le code SMS';
+
+  @override
+  String get helpASms =>
+      'Vérifie le numéro et le réseau, puis attends la fin du compte à rebours pour redemander un code. Pokou ne te demandera jamais ce code, ni par message ni par appel.';
+
+  @override
+  String get helpQCourier => 'Comment devenir coursier Honam ?';
+
+  @override
+  String get helpACourier =>
+      'Dans Plus, touche « Devenir coursier Honam » : identité, zones, wallet et règles d’or. Honam ouvre ville par ville.';
+
+  @override
+  String get helpQScam => 'Comment repérer une arnaque ?';
+
+  @override
+  String get helpAScam =>
+      'Méfie-toi de qui demande un code reçu par SMS, ton code PIN ou un paiement urgent. Pokou ne le fait jamais. Bloque et signale le contact.';
+
+  @override
+  String get helpSupport => 'Écrire au support';
+
+  @override
+  String get helpSupportSub => 'Réponse dans l’application';
+
+  @override
+  String get helpReport => 'Signaler un problème';
+
+  @override
+  String get helpNoResult => 'Aucune question ne correspond. Demande à Baba.';
+
+  @override
+  String get aboutTitle => 'À propos de Pokou';
+
+  @override
+  String aboutVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get aboutNamesTitle => 'Le sens de nos noms';
+
+  @override
+  String get aboutPokou => 'un nom baoulé';
+
+  @override
+  String get aboutKory => 'le cauris';
+
+  @override
+  String get aboutHonam => '« aide-moi », en éwé';
+
+  @override
+  String get aboutAssime => '« au marché », en éwé';
+
+  @override
+  String get aboutWetri => '« mois », en éwé';
+
+  @override
+  String get aboutEpe => '« année », en éwé';
+
+  @override
+  String get aboutNextNames =>
+      'Nos prochains services porteront eux aussi des noms venus de langues africaines.';
+
+  @override
+  String get aboutLicenses => 'Licences des logiciels libres';
+
+  @override
+  String get legalEssentials => 'L’essentiel';
+
+  @override
+  String get legalFullText => 'Texte complet';
+
+  @override
+  String get termsE1 =>
+      'Pokou ne touche jamais l’argent : cagnottes, pharmacies et coursiers se paient de wallet à wallet.';
+
+  @override
+  String get termsE2 =>
+      'Le mode preuve garde la trace des messages supprimés, et c’est toujours affiché.';
+
+  @override
+  String get termsE3 => 'Honam n’est pas un service d’urgence.';
+
+  @override
+  String get termsE4 => 'Les badges payants se résilient à tout moment.';
+
+  @override
+  String get privacyE1 =>
+      'Ton numéro n’est jamais montré à un vendeur ni à un coursier.';
+
+  @override
+  String get privacyE2 =>
+      'Pokou ne lit pas tes messages. Un signalement n’envoie que les 5 derniers au support.';
+
+  @override
+  String get privacyE3 =>
+      'La position du coursier n’est pas conservée après la livraison.';
+
+  @override
+  String get privacyE4 =>
+      'Les annonces sponsorisées sont ciblées par ville, jamais à partir de tes messages.';
+
+  @override
+  String get languageNote =>
+      'La langue de l’application ne change pas celle de tes messages. Les noms Pokou, Kory, Honam et Assimé restent les mêmes dans toutes les langues.';
+
+  @override
+  String get securityPinWarning =>
+      'Pokou ne te demandera jamais ton code PIN ni le code reçu par SMS, ni par message ni par appel.';
+
+  @override
+  String get statusReplyPrivate =>
+      'Ta réponse arrive en privé, dans votre discussion à deux.';
+
+  @override
+  String get statusViewersNote =>
+      'Toi seul vois cette liste. Les réponses arrivent en privé, dans vos discussions.';
+
+  @override
+  String get statusWhoSees => 'Qui voit mes statuts';
+
+  @override
+  String get attachCompressNote =>
+      'Photos et vidéos sont compressées avant l’envoi pour économiser tes données.';
+
+  @override
+  String get otpTitle => 'Saisis le code';
+
+  @override
+  String get pinForgot => 'Code PIN oublié ?';
+
+  @override
+  String get pinTitle => 'Ton code PIN';
+
+  @override
+  String statusReplyHint(String name) {
+    return 'Répondre à $name…';
+  }
+
+  @override
+  String get statusReplyQuote => '↩ En réponse à ton statut';
+
+  @override
+  String get statusReplySent => 'Réponse envoyée en privé.';
+
+  @override
+  String get changeNumberTitle => 'Changer de numéro';
+
+  @override
+  String get changeNumberOld => 'Ancien numéro';
+
+  @override
+  String get changeNumberNew => 'Nouveau numéro';
+
+  @override
+  String get changeNumberNotify => 'Prévenir mes contacts';
+
+  @override
+  String get changeNumberNotifyAll => 'Tous mes contacts';
+
+  @override
+  String get changeNumberNotifyChatted => 'Ceux avec qui j’ai discuté';
+
+  @override
+  String get changeNumberNotifyNone => 'Personne';
+
+  @override
+  String get changeNumberNotifyNoneSub => 'Tes groupes sont toujours prévenus';
+
+  @override
+  String get changeNumberInfo =>
+      'Ton compte, tes discussions, ton badge Pokou certifié et tes cagnottes Kory te suivent. Un code est envoyé au nouveau numéro.';
+
+  @override
+  String get changeNumberKoryWarning =>
+      'Si tu es collecteur d’une cagnotte, ton numéro de collecte ne change pas tout seul : modifie-le dans Kory, les membres en seront prévenus.';
+
+  @override
+  String get changeNumberSendCode => 'Envoyer le code';
+
+  @override
+  String get changeNumberCodeLabel => 'Code reçu par SMS';
+
+  @override
+  String get changeNumberConfirm => 'Confirmer le changement';
+
+  @override
+  String get changeNumberDone => 'Ton numéro est changé.';
+
+  @override
+  String get pinForgotIntro => 'Deux façons de retrouver ton compte :';
+
+  @override
+  String get pinForgotEmail => 'Par e-mail';
+
+  @override
+  String get pinForgotEmailSub =>
+      'Si tu as ajouté une adresse : un lien de réinitialisation t’est envoyé';
+
+  @override
+  String get pinForgotWait => 'Attendre 7 jours';
+
+  @override
+  String get pinForgotWaitSub =>
+      'Ensuite, tu te connectes sans code PIN avec le code SMS, à condition de garder ton numéro';
+
+  @override
+  String get pinForgotWarning =>
+      'Le délai de 7 jours empêche quelqu’un qui aurait volé ta carte SIM de prendre ton compte tout de suite.';
+
+  @override
+  String get pinForgotMeanwhile =>
+      'Pendant l’attente, tes contacts continuent de te voir et tes messages t’attendent.';
+
+  @override
+  String get pinForgotContinue => 'Continuer';
+
+  @override
+  String pinForgotScheduled(String date) {
+    return 'C’est noté. À partir du $date, le code SMS suffira pour te connecter.';
+  }
 }
