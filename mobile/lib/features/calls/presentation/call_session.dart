@@ -224,7 +224,21 @@ class CallSession extends ChangeNotifier {
       CameraCaptureOptions(cameraPosition: cameraPosition);
 
   void _changed() {
+    _syncPip();
     if (!ended) notifyListeners();
+  }
+
+  bool _pipEligible = false;
+
+  /// Picture-in-Picture système : seulement pour un appel VIDÉO établi,
+  /// affiché en plein écran. Un état d'INTERFACE, pas de session : il ne
+  /// change rien à l'appel lui-même.
+  void _syncPip() {
+    final eligible =
+        !ended && cameraEnabled && someoneJoined && attachedScreens > 0;
+    if (eligible == _pipEligible) return;
+    _pipEligible = eligible;
+    unawaited(_nativeBridge?.setPipEligible(eligible));
   }
 
   void _markJoined() {
@@ -536,6 +550,7 @@ class CallSession extends ChangeNotifier {
     } catch (_) {}
     ended = true;
     unawaited(_nativeBridge?.stopOngoingCall());
+    _syncPip();
     CallKeys.forget(roomName);
     // Les écrans encore ouverts se ferment sur ce signal (voir CallScreen).
     notifyListeners();

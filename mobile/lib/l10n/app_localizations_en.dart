@@ -1972,7 +1972,7 @@ class LEn extends L {
       'You are writing to a business\'s bot. These messages are not end-to-end encrypted: the business reads what you send.';
 
   @override
-  String get groupAdminsOnly => 'Only admins can post in announcements.';
+  String get groupAdminsOnly => 'Admins only';
 
   @override
   String get groupCallOngoing => 'Call in progress';
@@ -6350,4 +6350,78 @@ class LEn extends L {
 
   @override
   String get groupDeleteFailed => 'Couldn\'t delete — try again.';
+
+  @override
+  String get groupManageTitle => 'Manage group';
+
+  @override
+  String get groupManageSubtitle =>
+      'Permissions, new members, disappearing messages';
+
+  @override
+  String get groupPermissions => 'Permissions';
+
+  @override
+  String get groupEditInfoSetting => 'Edit name and photo';
+
+  @override
+  String get groupSendSetting => 'Send messages';
+
+  @override
+  String get groupApproveSetting => 'Approve new members';
+
+  @override
+  String get groupApproveSettingSub => 'An admin approves each join by link';
+
+  @override
+  String get groupAllMembers => 'All members';
+
+  @override
+  String get groupDisappearing => 'Disappearing messages';
+
+  @override
+  String get groupDisappearingOff => 'Off';
+
+  @override
+  String get groupDisappearing24h => '24 hours';
+
+  @override
+  String get groupDisappearing7d => '7 days';
+
+  @override
+  String get groupDisappearing90d => '90 days';
+
+  @override
+  String get groupJoinRequests => 'Join requests';
+
+  @override
+  String get groupNoJoinRequest => 'No pending requests.';
+
+  @override
+  String get groupApprove => 'Approve';
+
+  @override
+  String get groupReject => 'Decline';
+
+  @override
+  String get groupJoinPending =>
+      'Request sent: an admin must approve your entry.';
+
+  @override
+  String get groupSettingsSaveFailed => 'Setting not saved — try again.';
+
+  @override
+  String get groupLeaveKoryNote =>
+      'Leaving the group doesn\'t delete the ongoing pot: your contributions stay in the Kory log.';
+
+  @override
+  String get messageWaiting =>
+      'Waiting for this message. It will appear as soon as the sender\'s phone resends it.';
+
+  @override
+  String get callWaitingNotice =>
+      'You\'re already on a call. Decline to keep it; accept to end it.';
+
+  @override
+  String get callEndAndAccept => 'End and accept';
 }

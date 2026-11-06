@@ -261,6 +261,34 @@ class E2EEService {
       }
     }
 
+    return _sealWithNewSession(identity, peerUserId, plaintext);
+  }
+
+  /// Re-livraison d'un message que le correspondant n'a pas pu ouvrir
+  /// (reçu de nouvel essai, voir e2ee_retry_service.dart).
+  ///
+  /// Toujours par une NOUVELLE session, ouverte sur le trousseau qu'il
+  /// publie aujourd'hui : s'il a perdu l'ancienne (réinstallation, cache
+  /// effacé), la continuer échouerait encore. La nouvelle session devient la
+  /// courante pour les messages suivants.
+  Future<SealOutcome> sealFresh({
+    required int peerUserId,
+    required String plaintext,
+  }) => _exclusive(peerUserId, () async {
+    final E2EEIdentity identity;
+    try {
+      identity = await _store.loadOrCreateIdentity();
+    } catch (_) {
+      return const SealRefused(SealFailure.cryptoFailure);
+    }
+    return _sealWithNewSession(identity, peerUserId, plaintext);
+  });
+
+  Future<SealOutcome> _sealWithNewSession(
+    E2EEIdentity identity,
+    int peerUserId,
+    String plaintext,
+  ) async {
     final Map<String, dynamic> bundleJson;
     try {
       bundleJson =

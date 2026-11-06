@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../features/groups/data/group_repository.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 
@@ -174,7 +175,9 @@ class DeepLinkService {
       final serverMessage = exc is ApiException ? exc.message : null;
       final context = rootNavigatorKey.currentContext;
       if (context != null && context.mounted) {
-        final message = serverMessage ?? L.of(context).deeplinkOpenFailed;
+        final message = exc is GroupJoinPending
+            ? L.of(context).groupJoinPending
+            : serverMessage ?? L.of(context).deeplinkOpenFailed;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(message)));

@@ -174,6 +174,11 @@ class NativeCallBridge {
   /// disparaissent.
   Future<void> stopOngoingCall() => _invoke('stopOngoingCall');
 
+  /// Un appel vidéo est à l'écran : quitter l'application le réduit en
+  /// fenêtre flottante (Picture-in-Picture) au lieu de le cacher.
+  Future<void> setPipEligible(bool eligible) =>
+      _invoke('setPipEligible', eligible);
+
   /// Récupère les réponses rapides écrites depuis une notification, et VIDE
   /// la file native.
   ///

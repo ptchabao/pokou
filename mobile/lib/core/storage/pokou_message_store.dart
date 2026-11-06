@@ -822,6 +822,46 @@ class PokouMessageStore {
   /// chaque chargement, et ce second déchiffrement échoue — sa clé a été
   /// consommée par le cliquet. Ici, une ligne compte comme ouverte dès
   /// qu'elle porte un texte OU une clé de pièce jointe.
+  /// Un message direct du cache, tel quel (chiffré ou ouvert).
+  Future<DirectMessage?> directById(String id) async {
+    final db = await _database;
+    final rows = await db.query(
+      'direct_messages',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return rows.isEmpty
+        ? null
+        : DirectMessage.fromJson(_payloadOf(rows.single), fromCache: true);
+  }
+
+  /// Un message de groupe du cache, tel quel (chiffré ou ouvert).
+  Future<GroupMessage?> groupById(String id) async {
+    final db = await _database;
+    final rows = await db.query(
+      'group_messages',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : GroupMessage.fromJson(_payloadOf(rows.single));
+  }
+
+  /// Un message vient d'être RÉCUPÉRÉ par re-livraison (reçu de nouvel
+  /// essai) et rangé ouvert : les conversations ouvertes le relisent par le
+  /// même chemin qu'un message reçu.
+  void announceRecovered({
+    required bool group,
+    required Map<String, dynamic> message,
+  }) => _syncUpdates.add(
+    SyncInboxEvent(
+      id: 'retry-${message['id']}',
+      type: group ? 'group:message:new' : 'message:new',
+      payload: {'message': message},
+    ),
+  );
+
   Future<Map<String, DirectMessage>> decryptedFor(
     Iterable<String> messageIds,
   ) async {

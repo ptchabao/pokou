@@ -1957,7 +1957,7 @@ class LAr extends L {
       'أنت تراسل بوت إحدى الشركات. هذه الرسائل غير مشفّرة تشفيرًا تامًّا بين الطرفين: الشركة تقرأ ما ترسله.';
 
   @override
-  String get groupAdminsOnly => 'يمكن للمشرفين فقط النشر في الإعلانات.';
+  String get groupAdminsOnly => 'المشرفون فقط';
 
   @override
   String get groupCallOngoing => 'مكالمة جارية';
@@ -6350,4 +6350,77 @@ class LAr extends L {
 
   @override
   String get groupDeleteFailed => 'تعذّر الحذف — حاول مرة أخرى.';
+
+  @override
+  String get groupManageTitle => 'إدارة المجموعة';
+
+  @override
+  String get groupManageSubtitle => 'الأذونات، الأعضاء الجدد، الرسائل المؤقتة';
+
+  @override
+  String get groupPermissions => 'الأذونات';
+
+  @override
+  String get groupEditInfoSetting => 'تعديل الاسم والصورة';
+
+  @override
+  String get groupSendSetting => 'إرسال الرسائل';
+
+  @override
+  String get groupApproveSetting => 'الموافقة على الأعضاء الجدد';
+
+  @override
+  String get groupApproveSettingSub => 'يوافق مشرف على كل انضمام عبر الرابط';
+
+  @override
+  String get groupAllMembers => 'جميع الأعضاء';
+
+  @override
+  String get groupDisappearing => 'الرسائل المؤقتة';
+
+  @override
+  String get groupDisappearingOff => 'معطّلة';
+
+  @override
+  String get groupDisappearing24h => '24 ساعة';
+
+  @override
+  String get groupDisappearing7d => '7 أيام';
+
+  @override
+  String get groupDisappearing90d => '90 يومًا';
+
+  @override
+  String get groupJoinRequests => 'طلبات الانضمام';
+
+  @override
+  String get groupNoJoinRequest => 'لا توجد طلبات معلّقة.';
+
+  @override
+  String get groupApprove => 'قبول';
+
+  @override
+  String get groupReject => 'رفض';
+
+  @override
+  String get groupJoinPending =>
+      'تم إرسال الطلب: يجب أن يوافق مشرف على انضمامك.';
+
+  @override
+  String get groupSettingsSaveFailed => 'لم يُحفظ الإعداد — حاول مجددًا.';
+
+  @override
+  String get groupLeaveKoryNote =>
+      'مغادرة المجموعة لا تحذف الصندوق الجاري: تبقى مساهماتك في سجل Kory.';
+
+  @override
+  String get messageWaiting =>
+      'بانتظار هذه الرسالة. ستظهر فور إعادة إرسالها من هاتف المرسل.';
+
+  @override
+  String get callWaitingNotice =>
+      'أنت في مكالمة بالفعل. الرفض يبقيها؛ القبول ينهيها.';
+
+  @override
+  String get callEndAndAccept => 'إنهاء وقبول';
 }

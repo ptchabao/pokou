@@ -1,3 +1,2 @@
 secrets.env
-app.json
-livekit.json
+firebase-service-account.json

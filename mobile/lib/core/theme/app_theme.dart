@@ -32,11 +32,23 @@ class AppTheme {
       'Noto Sans',
     ];
 
-    final corps = base.textTheme.apply(
+    final applied = base.textTheme.apply(
       bodyColor: AppColors.textPrimary,
       displayColor: AppColors.textPrimary,
       fontFamily: 'Inter',
       fontFamilyFallback: fallback,
+    );
+    // Jetons « display » des maquettes : demi-gras, interlettrage -0,2.
+    TextStyle? titre(TextStyle? s) =>
+        s?.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2);
+    final corps = applied.copyWith(
+      displayLarge: titre(applied.displayLarge),
+      displayMedium: titre(applied.displayMedium),
+      displaySmall: titre(applied.displaySmall),
+      headlineLarge: titre(applied.headlineLarge),
+      headlineMedium: titre(applied.headlineMedium),
+      headlineSmall: titre(applied.headlineSmall),
+      titleLarge: titre(applied.titleLarge),
     );
 
     return base.copyWith(
@@ -56,6 +68,14 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: false,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontFamilyFallback: fallback,
+          fontWeight: FontWeight.w600,
+          fontSize: 22,
+          letterSpacing: -0.2,
+          color: AppColors.textPrimary,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -88,6 +108,125 @@ class AppTheme {
             borderRadius: BorderRadius.circular(AppRadius.sheet),
           ),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+      ),
+      // ── Maquettes Stitch « Terre de Confiance » ───────────────────────
+      // Cartes blanches arrondies sur fond crème, actions en pastille,
+      // filtres en pastille beige, titres Inter demi-gras.
+      cardTheme: CardThemeData(
+        color: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.tile),
+          side: BorderSide(color: AppColors.border),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.actionButtonBackground,
+          foregroundColor: AppColors.actionButtonForeground,
+          minimumSize: const Size(64, 52),
+          shape: const StadiumBorder(),
+          textStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.accentPrimaryDark,
+          backgroundColor: AppColors.neutralBeige.withValues(alpha: 0.6),
+          minimumSize: const Size(64, 52),
+          side: BorderSide.none,
+          shape: const StadiumBorder(),
+          textStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.accentPrimaryDark,
+          textStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      chipTheme: base.chipTheme.copyWith(
+        backgroundColor: AppColors.neutralBeige,
+        selectedColor: AppColors.accentPrimaryLight,
+        side: BorderSide.none,
+        shape: const StadiumBorder(),
+        labelStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.accentPrimary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: const CircleBorder(),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: AppColors.accentPrimaryDark,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          color: AppColors.textPrimary,
+        ),
+        subtitleTextStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 14,
+          color: AppColors.textSecondary,
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.white
+              : AppColors.textMuted,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.accentPrimary
+              : AppColors.neutralSable,
+        ),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.tile),
+        ),
+        titleTextStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
       ),
       dividerTheme: DividerThemeData(color: AppColors.border, space: 1),

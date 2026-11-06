@@ -452,6 +452,8 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     );
   }
 
+  Future<void> refreshGroup() => _refreshGroup();
+
   Future<void> _refreshGroup() async {
     try {
       final group = await _repository.getGroup(groupId);

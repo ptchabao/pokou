@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/crypto/e2ee_retry_service.dart';
 import 'core/crypto/e2ee_service.dart';
 import 'core/deeplink/deep_link_service.dart';
 import 'core/media/media_repository.dart';
@@ -90,6 +91,9 @@ class PokouApp extends ConsumerWidget {
     // d'accueil et perdait l'appel : le pont existait, rien ne l'appelait.
     ref.watch(nativeCallGateProvider);
     ref.watch(communityMembershipSyncProvider);
+    // Reçus de nouvel essai : aucun message ne reste illisible — voir
+    // e2ee_retry_service.dart.
+    ref.watch(e2eeRetryServiceProvider);
     // Notifications push (FCM) — voir push_service.dart.
     ref.watch(pushServiceProvider);
     // Les versets de 6 h et 18 h : réserve rechargée à chaque ouverture,

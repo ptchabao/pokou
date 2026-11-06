@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../groups/data/group_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,6 +149,8 @@ Future<void> _joinGroup(
         ),
       ),
     );
+  } on GroupJoinPending {
+    if (context.mounted) _say(context, L.of(context).groupJoinPending);
   } catch (_) {
     _say(context, L.of(context).joinGroupFailed);
   }

@@ -3,7 +3,10 @@ package com.pokou.pokou
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.app.PictureInPictureParams
+import android.os.Build
 import android.os.Bundle
+import android.util.Rational
 import android.telephony.TelephonyManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -160,9 +163,46 @@ class MainActivity : FlutterActivity() {
                         RingVibration.stop()
                         result.success(null)
                     }
+                    // Picture-in-Picture : Flutter dit quand un appel VIDÉO
+                    // est affiché. Quitter l'application le réduit alors en
+                    // fenêtre flottante au lieu de le cacher.
+                    "setPipEligible" -> {
+                        pipEligible = call.arguments == true
+                        updateAutoPip()
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    private var pipEligible = false
+
+    private fun pipParams(): PictureInPictureParams? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        val builder = PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setAutoEnterEnabled(pipEligible)
+        }
+        return builder.build()
+    }
+
+    /** Android 12+ : l'entrée en PiP est confiée au système (geste Accueil). */
+    private fun updateAutoPip() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pipParams()?.let { setPictureInPictureParams(it) }
+        }
+    }
+
+    /** Android 8 à 11 : on entre en PiP quand l'utilisateur quitte l'appli. */
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (pipEligible &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+        ) {
+            pipParams()?.let { runCatching { enterPictureInPictureMode(it) } }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

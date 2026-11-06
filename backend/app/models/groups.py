@@ -43,6 +43,12 @@ class Group(Base):
     disappearing_seconds = Column(Integer, nullable=True)
     # Réservé aux admins pour écrire (hors annonces, qui l'imposent déjà).
     admins_only_messages = Column(Boolean, default=False, nullable=False)
+    # DIS-26 « Modifier le nom et la photo » : réservé aux administrateurs
+    # par défaut ; ouvert à tous les membres si l'admin le décide.
+    members_can_edit_info = Column(Boolean, default=False, nullable=False)
+    # DIS-26 « Approuver les nouveaux membres » : une entrée par lien
+    # devient une demande qu'un administrateur valide.
+    join_approval = Column(Boolean, default=False, nullable=False)
     # Mode preuve (Pokou certifié) : un message supprimé reste visible,
     # barré, pour TOUS les membres, et plus rien ne se modifie. Activé par un
     # administrateur certifié ou en essai.
@@ -340,3 +346,21 @@ class GroupSenderKeyDistribution(Base):
     __table_args__ = (
         UniqueConstraint("group_id", "epoch", "sender_id", "recipient_id", name="uq_group_sender_key_recipient"),
     )
+
+
+class GroupJoinRequest(Base):
+    """Demande d'entrée par lien, quand le groupe exige une approbation."""
+
+    __tablename__ = "group_join_requests"
+    __table_args__ = (UniqueConstraint("group_id", "user_id", name="uq_group_join_request"),)
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    #: PENDING, APPROVED ou REJECTED.
+    status = Column(String(12), nullable=False, default="PENDING")
+    decided_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    decided_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User", foreign_keys=[user_id])

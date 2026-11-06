@@ -3642,7 +3642,7 @@ abstract class L {
   /// No description provided for @groupAdminsOnly.
   ///
   /// In fr, this message translates to:
-  /// **'Seuls les administrateurs peuvent publier dans les annonces.'**
+  /// **'Réservé aux administrateurs'**
   String get groupAdminsOnly;
 
   /// No description provided for @groupCallOngoing.
@@ -11126,6 +11126,144 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Suppression impossible — réessaie.'**
   String get groupDeleteFailed;
+
+  /// No description provided for @groupManageTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer le groupe'**
+  String get groupManageTitle;
+
+  /// No description provided for @groupManageSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisations, nouveaux membres, messages éphémères'**
+  String get groupManageSubtitle;
+
+  /// No description provided for @groupPermissions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisations'**
+  String get groupPermissions;
+
+  /// No description provided for @groupEditInfoSetting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le nom et la photo'**
+  String get groupEditInfoSetting;
+
+  /// No description provided for @groupSendSetting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer des messages'**
+  String get groupSendSetting;
+
+  /// No description provided for @groupApproveSetting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Approuver les nouveaux membres'**
+  String get groupApproveSetting;
+
+  /// No description provided for @groupApproveSettingSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un administrateur valide chaque entrée par lien'**
+  String get groupApproveSettingSub;
+
+  /// No description provided for @groupAllMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les membres'**
+  String get groupAllMembers;
+
+  /// No description provided for @groupDisappearing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages éphémères'**
+  String get groupDisappearing;
+
+  /// No description provided for @groupDisappearingOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivés'**
+  String get groupDisappearingOff;
+
+  /// No description provided for @groupDisappearing24h.
+  ///
+  /// In fr, this message translates to:
+  /// **'24 heures'**
+  String get groupDisappearing24h;
+
+  /// No description provided for @groupDisappearing7d.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours'**
+  String get groupDisappearing7d;
+
+  /// No description provided for @groupDisappearing90d.
+  ///
+  /// In fr, this message translates to:
+  /// **'90 jours'**
+  String get groupDisappearing90d;
+
+  /// No description provided for @groupJoinRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes d’entrée'**
+  String get groupJoinRequests;
+
+  /// No description provided for @groupNoJoinRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande en attente.'**
+  String get groupNoJoinRequest;
+
+  /// No description provided for @groupApprove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get groupApprove;
+
+  /// No description provided for @groupReject.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get groupReject;
+
+  /// No description provided for @groupJoinPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée : un administrateur doit valider ton entrée.'**
+  String get groupJoinPending;
+
+  /// No description provided for @groupSettingsSaveFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglage non enregistré — réessaie.'**
+  String get groupSettingsSaveFailed;
+
+  /// No description provided for @groupLeaveKoryNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quitter le groupe ne supprime pas la cagnotte en cours : tes contributions restent dans le journal Kory.'**
+  String get groupLeaveKoryNote;
+
+  /// No description provided for @messageWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de ce message. Il s’affichera dès que le téléphone de l’expéditeur l’aura renvoyé.'**
+  String get messageWaiting;
+
+  /// No description provided for @callWaitingNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu es déjà en appel. Refuser le garde ; accepter le termine.'**
+  String get callWaitingNotice;
+
+  /// No description provided for @callEndAndAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminer et accepter'**
+  String get callEndAndAccept;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

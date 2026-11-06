@@ -1,3 +1,5 @@
+import 'dart:convert';
+import '../../../core/crypto/undecryptable.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/crypto/e2ee_outcome.dart';
 import '../../../core/crypto/e2ee_service.dart';
@@ -122,6 +124,39 @@ class MessagingRepository {
   /// capable de le lire pourra encore essayer. Écraser le chiffré par le
   /// texte d'erreur rendrait l'échec définitif — y compris s'il n'était dû
   /// qu'à un aléa.
+  /// Le clair d'un message direct — un texte, ou la clé d'une pièce jointe
+  /// — appliqué à [message]. Sert au déchiffrement normal ET à la
+  /// re-livraison. Renvoie [message] inchangé si la clé ne correspond pas.
+  DirectMessage resolveDirectPlaintext(DirectMessage message, String plaintext) {
+    // Une pièce jointe chiffrée transporte sa CLÉ, pas un texte : la
+    // légende, le nom et le type du fichier voyagent avec elle.
+    final mediaKey = message.mediaAssetId != null
+        ? MediaKey.tryParse(plaintext)
+        : null;
+    if (mediaKey != null) {
+      // Une clé n'est acceptée que pour le fichier qu'elle annonce, et
+      // seulement pour un type qui voyage chiffré : un autocollant public,
+      // par exemple, ne l'est jamais.
+      if (mediaKey.assetId != message.mediaAssetId ||
+          !_encryptedMediaTypes.contains(message.messageType)) {
+        return message;
+      }
+      return message.copyWith(
+        content: mediaKey.caption,
+        mediaKey: mediaKey,
+        media: mediaKey.toMeta(message.mediaAssetId!),
+        clearCiphertext: true,
+      );
+    }
+    return message.copyWith(content: plaintext, clearCiphertext: true);
+  }
+
+  /// Le clair d'un message que J'AI envoyé, pour le re-livrer.
+  static String directPlaintextOf(DirectMessage message) =>
+      message.mediaKey != null && message.mediaAssetId != null
+      ? jsonEncode(message.mediaKey!.withAssetId(message.mediaAssetId!).toJson())
+      : (message.content ?? '');
+
   Future<DirectMessage> _openOnce(DirectMessage message, int peerUserId) async {
     try {
       final plaintext = await _e2ee!.open(
@@ -129,28 +164,13 @@ class MessagingRepository {
         envelope: message.envelope!,
         ciphertext: message.ciphertext!,
       );
-      // Une pièce jointe chiffrée transporte sa CLÉ, pas un texte : la
-      // légende, le nom et le type du fichier voyagent avec elle.
-      final mediaKey = message.mediaAssetId != null
-          ? MediaKey.tryParse(plaintext)
-          : null;
-      if (mediaKey != null) {
-        // Une clé n'est acceptée que pour le fichier qu'elle annonce, et
-        // seulement pour un type qui voyage chiffré : un autocollant public,
-        // par exemple, ne l'est jamais.
-        if (mediaKey.assetId != message.mediaAssetId ||
-            !_encryptedMediaTypes.contains(message.messageType)) {
-          return message;
-        }
-        return message.copyWith(
-          content: mediaKey.caption,
-          mediaKey: mediaKey,
-          media: mediaKey.toMeta(message.mediaAssetId!),
-          clearCiphertext: true,
-        );
-      }
-      return message.copyWith(content: plaintext, clearCiphertext: true);
+      return resolveDirectPlaintext(message, plaintext);
     } catch (_) {
+      // Reçu de nouvel essai : seulement pour un message REÇU — le mien,
+      // c'est moi qui en ai le clair.
+      if (message.senderId == peerUserId) {
+        reportUndecryptable('direct', message.id);
+      }
       // Un message qui ne s'ouvre pas n'est pas masqué : une bulle manquante
       // sans explication est bien plus déroutante qu'une bulle qui dit
       // pourquoi — et c'est le seul signe qu'un utilisateur puisse avoir que

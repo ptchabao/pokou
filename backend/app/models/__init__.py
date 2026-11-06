@@ -43,6 +43,7 @@ from app.models.groups import (  # noqa: F401
     Group,
     GroupInvitationStatus,
     GroupInvitation,
+    GroupJoinRequest,
     GroupMember,
     Poll,
     PollOption,
@@ -162,4 +163,7 @@ from app.models.honam import (  # noqa: F401
 )
 from app.models.baba import (  # noqa: F401
     BabaMessage,
+)
+from app.models.e2ee_retry import (  # noqa: F401
+    E2EERetry,
 )

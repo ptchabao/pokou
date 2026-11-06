@@ -1977,8 +1977,7 @@ class LRu extends L {
       'Вы пишете боту компании. Эти сообщения не защищены сквозным шифрованием: компания читает то, что вы отправляете.';
 
   @override
-  String get groupAdminsOnly =>
-      'Публиковать в объявлениях могут только администраторы.';
+  String get groupAdminsOnly => 'Только администраторы';
 
   @override
   String get groupCallOngoing => 'Идёт звонок';
@@ -6425,4 +6424,80 @@ class LRu extends L {
 
   @override
   String get groupDeleteFailed => 'Не удалось удалить — попробуй ещё раз.';
+
+  @override
+  String get groupManageTitle => 'Управление группой';
+
+  @override
+  String get groupManageSubtitle =>
+      'Права, новые участники, исчезающие сообщения';
+
+  @override
+  String get groupPermissions => 'Права';
+
+  @override
+  String get groupEditInfoSetting => 'Изменять название и фото';
+
+  @override
+  String get groupSendSetting => 'Отправлять сообщения';
+
+  @override
+  String get groupApproveSetting => 'Одобрять новых участников';
+
+  @override
+  String get groupApproveSettingSub =>
+      'Администратор одобряет каждый вход по ссылке';
+
+  @override
+  String get groupAllMembers => 'Все участники';
+
+  @override
+  String get groupDisappearing => 'Исчезающие сообщения';
+
+  @override
+  String get groupDisappearingOff => 'Выключены';
+
+  @override
+  String get groupDisappearing24h => '24 часа';
+
+  @override
+  String get groupDisappearing7d => '7 дней';
+
+  @override
+  String get groupDisappearing90d => '90 дней';
+
+  @override
+  String get groupJoinRequests => 'Заявки на вступление';
+
+  @override
+  String get groupNoJoinRequest => 'Нет ожидающих заявок.';
+
+  @override
+  String get groupApprove => 'Принять';
+
+  @override
+  String get groupReject => 'Отклонить';
+
+  @override
+  String get groupJoinPending =>
+      'Заявка отправлена: администратор должен одобрить вход.';
+
+  @override
+  String get groupSettingsSaveFailed =>
+      'Настройка не сохранена — попробуй снова.';
+
+  @override
+  String get groupLeaveKoryNote =>
+      'Выход из группы не удаляет текущую копилку: твои взносы остаются в журнале Kory.';
+
+  @override
+  String get messageWaiting =>
+      'Ожидание сообщения. Оно появится, как только телефон отправителя отправит его снова.';
+
+  @override
+  String get callWaitingNotice =>
+      'Ты уже в звонке. Отклони, чтобы продолжить; прими, чтобы завершить его.';
+
+  @override
+  String get callEndAndAccept => 'Завершить и принять';
 }

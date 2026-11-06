@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../../core/crypto/undecryptable.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/crypto/e2ee_outcome.dart';
 import '../../../core/crypto/e2ee_service.dart';
@@ -244,29 +245,12 @@ class GroupRepository {
         senderId: message.senderId,
         ciphertext: message.ciphertext!,
       );
-      final decoded = jsonDecode(clear);
-      if (decoded is! Map<String, dynamic>) {
-        throw const FormatException('Invalid encrypted group payload');
-      }
-      mediaKey = MediaKey.tryFromJson(decoded['media_key']);
-      if (mediaKey != null) {
-        if (message.mediaAssetId == null ||
-            mediaKey.assetId != message.mediaAssetId ||
-            !_encryptedMediaTypes.contains(message.messageType)) {
-          throw const FormatException('Group media key context mismatch');
-        }
-      }
-      final replyJson = decoded['reply_to'] as Map<String, dynamic>?;
-      resolved = message.resolvedWith(
-        content: decoded['content'] as String? ?? mediaKey?.caption ?? '',
-        payload: decoded['payload'] as Map<String, dynamic>?,
-        replyTo: replyJson == null
-            ? null
-            : MessageReplyPreview.fromJson(replyJson),
-        media: mediaKey?.toMeta(message.mediaAssetId!),
-        mediaKey: mediaKey,
-      );
+      resolved = resolveGroupBody(message, clear);
+      mediaKey = resolved.mediaKey;
     } catch (_) {
+      // Illisible ici : on demande à l'expéditeur de le re-livrer (voir
+      // e2ee_retry_service.dart) plutôt que de laisser une bulle vide.
+      reportUndecryptable('group', message.id);
       return message;
     }
     // The Signal receive chain has advanced. Persist cleartext into SQLCipher
@@ -277,6 +261,43 @@ class GroupRepository {
     }
     return resolved;
   }
+
+  /// Le corps en clair d'un message de groupe — `{content, payload,
+  /// reply_to, media_key}` — appliqué à [message]. Sert au déchiffrement
+  /// normal ET à la re-livraison par l'expéditeur. Lève si le corps est
+  /// invalide ou ne correspond pas au message.
+  GroupMessage resolveGroupBody(GroupMessage message, String clear) {
+    final decoded = jsonDecode(clear);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Invalid encrypted group payload');
+    }
+    final mediaKey = MediaKey.tryFromJson(decoded['media_key']);
+    if (mediaKey != null) {
+      if (message.mediaAssetId == null ||
+          mediaKey.assetId != message.mediaAssetId ||
+          !_encryptedMediaTypes.contains(message.messageType)) {
+        throw const FormatException('Group media key context mismatch');
+      }
+    }
+    final replyJson = decoded['reply_to'] as Map<String, dynamic>?;
+    return message.resolvedWith(
+      content: decoded['content'] as String? ?? mediaKey?.caption ?? '',
+      payload: decoded['payload'] as Map<String, dynamic>?,
+      replyTo: replyJson == null ? null : MessageReplyPreview.fromJson(replyJson),
+      media: mediaKey?.toMeta(message.mediaAssetId!),
+      mediaKey: mediaKey,
+    );
+  }
+
+  /// Le corps en clair d'un message de groupe que J'AI envoyé, pour le
+  /// re-livrer à un membre qui n'a pas pu l'ouvrir.
+  static String groupBodyOf(GroupMessage message) => jsonEncode({
+    'content': message.content,
+    'payload': ?message.payload,
+    if (message.replyTo != null) 'reply_to': message.replyTo!.toJson(),
+    if (message.mediaKey != null && message.mediaAssetId != null)
+      'media_key': message.mediaKey!.withAssetId(message.mediaAssetId!).toJson(),
+  });
 
   /// Supprimer pour tous. Renvoie le message conservé en mode preuve, ou
   /// `null` quand il a été effacé.
@@ -378,6 +399,42 @@ class GroupRepository {
     return Group.fromJson(response as Map<String, dynamic>);
   }
 
+  /// DIS-26 : les réglages du groupe (administrateurs).
+  Future<Group> updateSettings({
+    required int groupId,
+    bool? adminsOnlyMessages,
+    bool? membersCanEditInfo,
+    bool? joinApproval,
+    bool setDisappearing = false,
+    int? disappearingSeconds,
+  }) async {
+    final response = await _api.patch(
+      '/groups/$groupId',
+      body: {
+        'admins_only_messages': ?adminsOnlyMessages,
+        'members_can_edit_info': ?membersCanEditInfo,
+        'join_approval': ?joinApproval,
+        if (setDisappearing) 'disappearing_seconds': disappearingSeconds,
+      },
+    );
+    return Group.fromJson(response as Map<String, dynamic>);
+  }
+
+  Future<List<Map<String, dynamic>>> joinRequests(int groupId) async {
+    final response = await _api.get('/groups/$groupId/join-requests');
+    return ((response['items'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>();
+  }
+
+  Future<void> decideJoinRequest({
+    required int groupId,
+    required String requestId,
+    required bool approve,
+  }) => _api.post(
+    '/groups/$groupId/join-requests/$requestId',
+    body: {'approve': approve},
+  );
+
   Future<GroupMember> setMemberRole({
     required int groupId,
     required int userId,
@@ -408,12 +465,17 @@ class GroupRepository {
     return GroupInvitePreview.fromJson(response as Map<String, dynamic>);
   }
 
+  /// Lève [GroupJoinPending] quand le groupe exige l'approbation d'un
+  /// administrateur (DIS-26) : la demande est déposée, l'entrée viendra.
   Future<Group> joinByInvite(String code) async {
     final response = await _api.post(
       '/groups/invite/$code/join',
       body: const {},
-    );
-    return Group.fromJson(response as Map<String, dynamic>);
+    ) as Map<String, dynamic>;
+    if (response['pending_approval'] == true) {
+      throw GroupJoinPending(response['name'] as String? ?? '');
+    }
+    return Group.fromJson(response);
   }
 
   Future<List<GroupMessage>> getMessages(int groupId) async =>
@@ -571,4 +633,11 @@ class GroupRepository {
     );
     return PollData.fromJson(response as Map<String, dynamic>);
   }
+}
+
+/// L'entrée par lien attend la validation d'un administrateur.
+class GroupJoinPending implements Exception {
+  const GroupJoinPending(this.groupName);
+
+  final String groupName;
 }

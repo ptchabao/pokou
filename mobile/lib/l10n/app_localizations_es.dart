@@ -1978,8 +1978,7 @@ class LEs extends L {
       'Estás escribiendo al bot de una empresa. Estos mensajes no están cifrados de extremo a extremo: la empresa lee lo que le envías.';
 
   @override
-  String get groupAdminsOnly =>
-      'Solo los administradores pueden publicar en anuncios.';
+  String get groupAdminsOnly => 'Solo administradores';
 
   @override
   String get groupCallOngoing => 'Llamada en curso';
@@ -6374,4 +6373,80 @@ class LEs extends L {
 
   @override
   String get groupDeleteFailed => 'No se pudo eliminar — inténtalo de nuevo.';
+
+  @override
+  String get groupManageTitle => 'Gestionar el grupo';
+
+  @override
+  String get groupManageSubtitle =>
+      'Permisos, nuevos miembros, mensajes temporales';
+
+  @override
+  String get groupPermissions => 'Permisos';
+
+  @override
+  String get groupEditInfoSetting => 'Editar nombre y foto';
+
+  @override
+  String get groupSendSetting => 'Enviar mensajes';
+
+  @override
+  String get groupApproveSetting => 'Aprobar nuevos miembros';
+
+  @override
+  String get groupApproveSettingSub =>
+      'Un administrador valida cada entrada por enlace';
+
+  @override
+  String get groupAllMembers => 'Todos los miembros';
+
+  @override
+  String get groupDisappearing => 'Mensajes temporales';
+
+  @override
+  String get groupDisappearingOff => 'Desactivados';
+
+  @override
+  String get groupDisappearing24h => '24 horas';
+
+  @override
+  String get groupDisappearing7d => '7 días';
+
+  @override
+  String get groupDisappearing90d => '90 días';
+
+  @override
+  String get groupJoinRequests => 'Solicitudes de entrada';
+
+  @override
+  String get groupNoJoinRequest => 'No hay solicitudes pendientes.';
+
+  @override
+  String get groupApprove => 'Aceptar';
+
+  @override
+  String get groupReject => 'Rechazar';
+
+  @override
+  String get groupJoinPending =>
+      'Solicitud enviada: un administrador debe aprobar tu entrada.';
+
+  @override
+  String get groupSettingsSaveFailed =>
+      'Ajuste no guardado — inténtalo de nuevo.';
+
+  @override
+  String get groupLeaveKoryNote =>
+      'Salir del grupo no elimina la colecta en curso: tus aportes quedan en el registro Kory.';
+
+  @override
+  String get messageWaiting =>
+      'Esperando este mensaje. Aparecerá en cuanto el teléfono del remitente lo reenvíe.';
+
+  @override
+  String get callWaitingNotice =>
+      'Ya estás en una llamada. Rechazar la mantiene; aceptar la termina.';
+
+  @override
+  String get callEndAndAccept => 'Terminar y aceptar';
 }

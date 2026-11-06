@@ -2688,6 +2688,24 @@ class _BubbleState extends State<_Bubble> {
       return PendingMediaBubble(message: message, onRetry: widget.onRetry);
     }
 
+    // Pas encore ouvert : une re-livraison a été demandée à l'expéditeur
+    // (voir e2ee_retry_service.dart). Le dire, plutôt qu'une bulle vide.
+    if (message.isEncrypted && message.mediaAssetId == null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.hourglass_empty, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              L.of(context).messageWaiting,
+              style: textStyle.copyWith(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ],
+      );
+    }
+
     final media = message.media;
     if (media == null) {
       // Un numéro plausible dans un message ordinaire est tappable comme sur

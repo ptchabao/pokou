@@ -60,6 +60,7 @@ import '../../messaging/presentation/proof_widgets.dart';
 import '../data/group_model.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'group_controller.dart';
+import 'group_settings_screen.dart';
 
 /// Conversation de groupe — pendant de ConversationScreen. Différences
 /// assumées : pas de Mode Bouclier (il note une conversation par contact),
@@ -1163,7 +1164,9 @@ class _GroupConversationScreenState
                   title: Text(_l.proofExport),
                   onTap: () => Navigator.pop(sheetContext, 'proof:export'),
                 ),
-              if (group.canManage) ...[
+              // Nom et photo : administrateurs, ou tous les membres si le
+              // groupe l'autorise (DIS-26).
+              if (group.canEditInfo) ...[
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(
@@ -1194,6 +1197,20 @@ class _GroupConversationScreenState
                     title: Text(_l.groupRemovePhoto),
                     onTap: () => Navigator.pop(sheetContext, 'photo:clear'),
                   ),
+              ],
+              if (group.canManage) ...[
+                ListTile(
+                  leading: Icon(
+                    Icons.tune,
+                    color: AppColors.accentPrimaryDark,
+                  ),
+                  title: Text(_l.groupManageTitle),
+                  subtitle: Text(
+                    _l.groupManageSubtitle,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, 'manage'),
+                ),
                 ListTile(
                   leading: Icon(Icons.link, color: AppColors.accentPrimaryDark),
                   title: Text(_l.groupInviteLink),
@@ -1272,6 +1289,17 @@ class _GroupConversationScreenState
       await _leave();
     } else if (action == 'delete') {
       await _deleteGroup();
+    } else if (action == 'manage') {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => GroupSettingsScreen(groupId: widget.groupId),
+        ),
+      );
+      if (mounted) {
+        await ref
+            .read(groupChatControllerProvider(widget.groupId).notifier)
+            .refreshGroup();
+      }
     } else if (action == 'rename') {
       await _renameGroup(group);
     } else if (action == 'photo') {
@@ -2481,6 +2509,25 @@ class _GroupBubbleState extends State<_GroupBubble> {
 
     final richContent = _richContentWidget(L.of(context), textStyle);
     if (richContent != null) return richContent;
+
+    // Pas encore ouvert : une re-livraison a été demandée à l'expéditeur
+    // (voir e2ee_retry_service.dart). Le dire, plutôt qu'une bulle vide.
+    if (message.isEncrypted && message.mediaAssetId == null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.hourglass_empty, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              L.of(context).messageWaiting,
+              style: textStyle.copyWith(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ],
+      );
+    }
+
 
     // Pièce jointe pas encore partie : même bulle qu'en tête-à-tête, même
     // aperçu local, mêmes états. Les deux conversations ne doivent pas se

@@ -29,7 +29,6 @@ app_env = {
     "KAFKA_BOOTSTRAP_SERVERS": "pokou-kafka:9092",
     "KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
     "KAFKA_TOPIC_PREFIX": "pokou",
-    "FCM_ENABLED": "false",
     "SECRET_KEY": env["SECRET_KEY"],
     "WEBHOOK_HMAC_SECRET": env["WEBHOOK_HMAC_SECRET"],
     "DATABASE_URL": env["DATABASE_URL"],
@@ -50,6 +49,27 @@ else:
 for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_SMS_FROM", "TWILIO_MESSAGING_SERVICE_SID"):
     if env.get(k):
         app_env[k] = env[k]
+
+# Notifications push (FCM) : allumées dès qu'une clé de compte de service
+# Firebase est fournie — soit en JSON sur une ligne dans secrets.env
+# (FIREBASE_CREDENTIALS_JSON=…), soit par un fichier firebase-service-account.json
+# posé à côté de ce script (gitignoré). Sans clé, aucune notification ni
+# sonnerie n'arrive quand l'application est fermée.
+import os
+_fb = env.get("FIREBASE_CREDENTIALS_JSON", "").strip()
+if not _fb and os.path.exists("firebase-service-account.json"):
+    _fb = json.dumps(json.load(open("firebase-service-account.json", encoding="utf-8")))
+if _fb:
+    app_env["FCM_ENABLED"] = "true"
+    app_env["FIREBASE_CREDENTIALS_JSON"] = _fb
+else:
+    app_env["FCM_ENABLED"] = "false"
+# Baba : un ou plusieurs modèles de langage, essayés dans l'ordre
+# (voir app/services/baba). Sans clé, Baba répond par la FAQ.
+for k in ("GEMINI_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY", "GROK_API_KEY"):
+    if env.get(k):
+        app_env[k] = env[k]
+        app_env[k.replace("_API_KEY", "_ENABLED")] = "true"
 
 resources = {"requests": {"cpu": "250m", "memory": "384Mi"}, "limits": {"memory": "768Mi"}}
 

@@ -12,12 +12,13 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, Group, GroupInvitation, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
+from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
 from app.utils.editing import MESSAGE_EDIT_WINDOW_MINUTES
 from app.utils.identity import est_certifie, nom_certifie
 from app.services.messaging import group_invitation_service
@@ -69,6 +70,8 @@ class GroupUpdate(BaseModel):
     clear_avatar: bool = False
     admins_only_messages: Optional[bool] = None
     disappearing_seconds: Optional[int] = None
+    members_can_edit_info: Optional[bool] = None
+    join_approval: Optional[bool] = None
 
 
 class GroupMemberRole(BaseModel):
@@ -161,6 +164,8 @@ def _serialize_group(group: Group, *, with_members: bool = False) -> dict:
         # Même raison pour `admins_only_messages` : la zone de saisie se
         # verrouille d'elle-même au lieu d'attendre un 403 à l'envoi.
         "admins_only_messages": bool(group.admins_only_messages),
+        "members_can_edit_info": bool(group.members_can_edit_info),
+        "join_approval": bool(group.join_approval),
         # Le réglage courant, pas l'échéance d'un message : chaque message
         # emporte la sienne, figée à l'envoi (voir send_group_message).
         "disappearing_seconds": group.disappearing_seconds,
@@ -181,6 +186,9 @@ def _serialize_group_for(group: Group, viewer_id: int, *, with_members: bool = F
     role = next((m.role for m in group.members if m.user_id == viewer_id), None)
     payload["my_role"] = role
     payload["can_manage"] = role in _MANAGER_ROLES
+    payload["can_edit_info"] = role in _MANAGER_ROLES or (
+        role is not None and bool(group.members_can_edit_info)
+    )
     payload["invite_code"] = group.invite_code if role in _MANAGER_ROLES else None
     return payload
 
@@ -694,11 +702,17 @@ async def update_group(
     l'archivage ou la sourdine : ils valent pour le groupe entier, pas pour
     la vue personnelle qu'on en a."""
     user_id = current_user["user_id"]
-    _require_manager(db, group_id, user_id)
-
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Groupe introuvable")
+    # Nom et photo : tout membre si le groupe l'autorise (DIS-26). Les
+    # réglages du groupe, eux, restent aux administrateurs.
+    settings_fields = {"admins_only_messages", "disappearing_seconds", "members_can_edit_info", "join_approval"}
+    touches_settings = bool(settings_fields & payload.model_fields_set)
+    if touches_settings or not group.members_can_edit_info:
+        _require_manager(db, group_id, user_id)
+    else:
+        _require_membership(db, group_id, user_id)
 
     if payload.name is not None:
         name = payload.name.strip()
@@ -720,6 +734,10 @@ async def update_group(
 
     if payload.admins_only_messages is not None:
         group.admins_only_messages = payload.admins_only_messages
+    if payload.members_can_edit_info is not None:
+        group.members_can_edit_info = payload.members_can_edit_info
+    if payload.join_approval is not None:
+        group.join_approval = payload.join_approval
 
     if "disappearing_seconds" in payload.model_fields_set:
         seconds = payload.disappearing_seconds
@@ -942,6 +960,31 @@ async def join_by_invite(
         # Idempotent : toucher deux fois le lien ne doit pas être une erreur.
         return _serialize_group_for(group, user_id, with_members=True)
 
+    if group.join_approval:
+        # DIS-26 « Approuver les nouveaux membres » : le lien dépose une
+        # demande ; un administrateur la valide.
+        request = db.query(GroupJoinRequest).filter(
+            GroupJoinRequest.group_id == group.id, GroupJoinRequest.user_id == user_id
+        ).first()
+        if request is None:
+            request = GroupJoinRequest(group_id=group.id, user_id=user_id)
+            db.add(request)
+        request.status = "PENDING"
+        request.decided_by = None
+        request.decided_at = None
+        db.commit()
+        admins = [
+            uid for (uid,) in db.query(GroupMember.user_id).filter(
+                GroupMember.group_id == group.id, GroupMember.role.in_(_MANAGER_ROLES)
+            )
+        ]
+        for admin_id in admins:
+            await manager.send_to_user(admin_id, {"type": "group:join_request", "group_id": group.id})
+        return JSONResponse(
+            status_code=202,
+            content={"pending_approval": True, "group_id": group.id, "name": group.name},
+        )
+
     group.crypto_epoch += 1
     db.add(GroupMember(group_id=group.id, user_id=user_id, role="MEMBER"))
     db.commit()
@@ -960,6 +1003,79 @@ async def join_by_invite(
         exclude_user_id=user_id,
     )
     return _serialize_group_for(group, user_id, with_members=True)
+
+
+@router.get("/{group_id}/join-requests")
+async def list_join_requests(
+    group_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_manager(db, group_id, current_user["user_id"])
+    rows = (
+        db.query(GroupJoinRequest)
+        .filter(GroupJoinRequest.group_id == group_id, GroupJoinRequest.status == "PENDING")
+        .order_by(GroupJoinRequest.created_at)
+        .all()
+    )
+    return {
+        "items": [
+            {
+                "id": r.id,
+                "user_id": r.user_id,
+                "display_name": _display_name(r.user),
+                "created_at": r.created_at.isoformat(),
+            }
+            for r in rows
+        ]
+    }
+
+
+class JoinDecision(BaseModel):
+    approve: bool
+
+
+@router.post("/{group_id}/join-requests/{request_id}")
+async def decide_join_request(
+    group_id: int,
+    request_id: str,
+    payload: JoinDecision,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    admin_id = current_user["user_id"]
+    _require_manager(db, group_id, admin_id)
+    request = db.query(GroupJoinRequest).filter(
+        GroupJoinRequest.id == request_id, GroupJoinRequest.group_id == group_id
+    ).first()
+    if request is None or request.status != "PENDING":
+        raise HTTPException(status_code=404, detail="Demande introuvable")
+    request.status = "APPROVED" if payload.approve else "REJECTED"
+    request.decided_by = admin_id
+    request.decided_at = datetime.utcnow()
+    group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
+    joined = False
+    if payload.approve and not db.query(GroupMember).filter(
+        GroupMember.group_id == group_id, GroupMember.user_id == request.user_id
+    ).first():
+        group.crypto_epoch += 1
+        db.add(GroupMember(group_id=group_id, user_id=request.user_id, role="MEMBER"))
+        joined = True
+    db.commit()
+    db.refresh(group)
+    if joined:
+        joiner = db.query(User).filter(User.id == request.user_id).first()
+        await _broadcast(
+            db,
+            group_id,
+            {
+                "type": "group:member:added",
+                "group_id": group_id,
+                "group": _serialize_group(group),
+                "member": {"user_id": request.user_id, "display_name": _display_name(joiner), "role": "MEMBER"},
+            },
+        )
+    return {"status": request.status}
 
 
 @router.delete("/{group_id}")

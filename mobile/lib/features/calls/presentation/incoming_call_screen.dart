@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/crypto/call_keys.dart';
 import '../../../l10n/app_localizations.dart';
@@ -13,6 +14,7 @@ import '../../contacts/data/contact_model.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import 'call_controller.dart';
 import 'call_screen.dart';
+import 'call_session.dart';
 import 'ringtone_player.dart';
 import '../../../core/widgets/verified_badge.dart';
 
@@ -67,6 +69,15 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
   /// l'écran sonnait alors sans fin. Plus long que le délai de l'appelant
   /// (kNoAnswerTimeout) pour ne jamais couper un appel encore vivant.
   Timer? _giveUpTimer;
+  Timer? _waitingVibration;
+
+  /// Déjà en appel dans un AUTRE salon : c'est un double appel. Accepter
+  /// terminera l'appel en cours (jamais deux communications à la fois) ;
+  /// refuser le laisse intact.
+  bool get _busy {
+    final current = activeCall.value;
+    return current != null && !current.ended && current.roomName != widget.room;
+  }
   late final RingtonePlayer _ringtonePlayer =
       widget.ringtonePlayer ?? RingtonePlayer();
 
@@ -82,7 +93,18 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     // Sonnerie d'appel entrant, tant que rien n'a encore été décidé — arrêtée
     // dans dispose() et dès la réponse (voir _accept/_decline), avant même
     // la navigation qui en découle.
-    unawaited(_ringtonePlayer.playRingtone());
+    //
+    // Double appel : déjà en communication, la sonnerie couvrirait la voix
+    // de l'autre. Vibration seule — l'écran dit le reste.
+    if (_busy) {
+      _waitingVibration = Timer.periodic(
+        const Duration(seconds: 2),
+        (_) => HapticFeedback.heavyImpact(),
+      );
+      HapticFeedback.heavyImpact();
+    } else {
+      unawaited(_ringtonePlayer.playRingtone());
+    }
   }
 
   /// L'appelant a renoncé avant qu'on décroche : le serveur pousse
@@ -99,6 +121,7 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
   @override
   void dispose() {
     _giveUpTimer?.cancel();
+    _waitingVibration?.cancel();
     _signalSubscription?.cancel();
     unawaited(_ringtonePlayer.stop());
     // Ne libère le lecteur natif que s'il a été créé ici — une instance
@@ -111,6 +134,7 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     // Arrêt immédiat, avant même l'appel réseau : dès que l'utilisateur a
     // répondu, plus une seconde de sonnerie.
     unawaited(_ringtonePlayer.stop());
+    _waitingVibration?.cancel();
     setState(() => _responding = true);
     try {
       await ref
@@ -129,6 +153,7 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     // Idem : coupée avant même de savoir si la connexion à l'appel va
     // réussir — une fois qu'on a décroché, on ne veut plus l'entendre.
     unawaited(_ringtonePlayer.stop());
+    _waitingVibration?.cancel();
     setState(() => _responding = true);
     try {
       final calls = ref.read(callRepositoryProvider);
@@ -278,6 +303,22 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
                   : L.of(context).callIncoming,
               style: const TextStyle(color: Colors.white70),
             ),
+            if (_busy) ...[
+              const SizedBox(height: 16),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white12,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  L.of(context).callWaitingNotice,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
             const Spacer(),
             if (_responding)
               const Padding(
@@ -298,10 +339,25 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
                       color: Colors.black,
                       onTap: _decline,
                     ),
-                    _ResponseButton(
-                      icon: Icons.call,
-                      color: AppColors.accentPrimary,
-                      onTap: _accept,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ResponseButton(
+                          icon: _busy ? Icons.phone_forwarded : Icons.call,
+                          color: AppColors.accentPrimary,
+                          onTap: _accept,
+                        ),
+                        if (_busy) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            L.of(context).callEndAndAccept,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),

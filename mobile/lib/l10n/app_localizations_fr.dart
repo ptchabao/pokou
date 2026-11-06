@@ -1980,8 +1980,7 @@ class LFr extends L {
       'Tu écris au bot d\'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l\'entreprise lit ce que tu lui envoies.';
 
   @override
-  String get groupAdminsOnly =>
-      'Seuls les administrateurs peuvent publier dans les annonces.';
+  String get groupAdminsOnly => 'Réservé aux administrateurs';
 
   @override
   String get groupCallOngoing => 'Appel en cours';
@@ -6393,4 +6392,79 @@ class LFr extends L {
 
   @override
   String get groupDeleteFailed => 'Suppression impossible — réessaie.';
+
+  @override
+  String get groupManageTitle => 'Gérer le groupe';
+
+  @override
+  String get groupManageSubtitle =>
+      'Autorisations, nouveaux membres, messages éphémères';
+
+  @override
+  String get groupPermissions => 'Autorisations';
+
+  @override
+  String get groupEditInfoSetting => 'Modifier le nom et la photo';
+
+  @override
+  String get groupSendSetting => 'Envoyer des messages';
+
+  @override
+  String get groupApproveSetting => 'Approuver les nouveaux membres';
+
+  @override
+  String get groupApproveSettingSub =>
+      'Un administrateur valide chaque entrée par lien';
+
+  @override
+  String get groupAllMembers => 'Tous les membres';
+
+  @override
+  String get groupDisappearing => 'Messages éphémères';
+
+  @override
+  String get groupDisappearingOff => 'Désactivés';
+
+  @override
+  String get groupDisappearing24h => '24 heures';
+
+  @override
+  String get groupDisappearing7d => '7 jours';
+
+  @override
+  String get groupDisappearing90d => '90 jours';
+
+  @override
+  String get groupJoinRequests => 'Demandes d’entrée';
+
+  @override
+  String get groupNoJoinRequest => 'Aucune demande en attente.';
+
+  @override
+  String get groupApprove => 'Accepter';
+
+  @override
+  String get groupReject => 'Refuser';
+
+  @override
+  String get groupJoinPending =>
+      'Demande envoyée : un administrateur doit valider ton entrée.';
+
+  @override
+  String get groupSettingsSaveFailed => 'Réglage non enregistré — réessaie.';
+
+  @override
+  String get groupLeaveKoryNote =>
+      'Quitter le groupe ne supprime pas la cagnotte en cours : tes contributions restent dans le journal Kory.';
+
+  @override
+  String get messageWaiting =>
+      'En attente de ce message. Il s’affichera dès que le téléphone de l’expéditeur l’aura renvoyé.';
+
+  @override
+  String get callWaitingNotice =>
+      'Tu es déjà en appel. Refuser le garde ; accepter le termine.';
+
+  @override
+  String get callEndAndAccept => 'Terminer et accepter';
 }

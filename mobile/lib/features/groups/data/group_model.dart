@@ -71,7 +71,27 @@ class Group {
     this.isAnnouncement = false,
     this.proofMode = false,
     this.cryptoEpoch = 1,
+    this.adminsOnlyMessages = false,
+    this.disappearingSeconds,
+    this.membersCanEditInfo = false,
+    this.joinApproval = false,
+    this.canEditInfo = false,
   });
+
+  /// DIS-26 « Envoyer des messages » : réservé aux administrateurs.
+  final bool adminsOnlyMessages;
+
+  /// Messages éphémères du groupe (24 h, 7 j, 90 j) ou `null`.
+  final int? disappearingSeconds;
+
+  /// DIS-26 « Modifier le nom et la photo » ouvert à tous les membres.
+  final bool membersCanEditInfo;
+
+  /// DIS-26 « Approuver les nouveaux membres ».
+  final bool joinApproval;
+
+  /// Puis-je modifier le nom et la photo ? Calculé par le serveur.
+  final bool canEditInfo;
 
   final int id;
   final String name;
@@ -114,7 +134,7 @@ class Group {
   /// Puis-je écrire ici ? Faux uniquement dans les annonces quand je ne suis
   /// pas administrateur — l'app affiche alors une saisie désactivée plutôt
   /// que de laisser écrire un message qui serait refusé.
-  bool get canPost => !isAnnouncement || canManage;
+  bool get canPost => !(isAnnouncement || adminsOnlyMessages) || canManage;
 
   /// Vide sur la liste des groupes (`GET /groups`, charge utile allégée),
   /// peuplé sur le détail (`GET /groups/{id}`).
@@ -152,6 +172,12 @@ class Group {
       isAnnouncement: json['is_announcement'] as bool? ?? false,
       proofMode: json['proof_mode'] as bool? ?? false,
       cryptoEpoch: json['crypto_epoch'] as int? ?? 1,
+      adminsOnlyMessages: json['admins_only_messages'] as bool? ?? false,
+      disappearingSeconds: json['disappearing_seconds'] as int?,
+      membersCanEditInfo: json['members_can_edit_info'] as bool? ?? false,
+      joinApproval: json['join_approval'] as bool? ?? false,
+      canEditInfo:
+          json['can_edit_info'] as bool? ?? (json['can_manage'] as bool? ?? false),
       members: membersJson == null
           ? const []
           : membersJson

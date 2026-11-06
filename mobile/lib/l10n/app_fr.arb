@@ -861,7 +861,7 @@
   "groupNotEncryptedNotice": "Les messages de ce groupe sont chiffrés de bout en bout : seuls ses membres peuvent les lire, pas même Pokou. Chaque arrivée ou départ change les clés.",
   "botLabel": "Bot",
   "botConversationNotice": "Tu écris au bot d'une entreprise. Ces messages ne sont pas chiffrés de bout en bout : l'entreprise lit ce que tu lui envoies.",
-  "groupAdminsOnly": "Seuls les administrateurs peuvent publier dans les annonces.",
+  "groupAdminsOnly": "Réservé aux administrateurs",
   "groupCallOngoing": "Appel en cours",
   "communityEdit": "Modifier la communauté",
   "commonName": "Nom",
@@ -3034,5 +3034,28 @@
         "type": "String"
       }
     }
-  }
+  },
+  "groupManageTitle": "Gérer le groupe",
+  "groupManageSubtitle": "Autorisations, nouveaux membres, messages éphémères",
+  "groupPermissions": "Autorisations",
+  "groupEditInfoSetting": "Modifier le nom et la photo",
+  "groupSendSetting": "Envoyer des messages",
+  "groupApproveSetting": "Approuver les nouveaux membres",
+  "groupApproveSettingSub": "Un administrateur valide chaque entrée par lien",
+  "groupAllMembers": "Tous les membres",
+  "groupDisappearing": "Messages éphémères",
+  "groupDisappearingOff": "Désactivés",
+  "groupDisappearing24h": "24 heures",
+  "groupDisappearing7d": "7 jours",
+  "groupDisappearing90d": "90 jours",
+  "groupJoinRequests": "Demandes d’entrée",
+  "groupNoJoinRequest": "Aucune demande en attente.",
+  "groupApprove": "Accepter",
+  "groupReject": "Refuser",
+  "groupJoinPending": "Demande envoyée : un administrateur doit valider ton entrée.",
+  "groupSettingsSaveFailed": "Réglage non enregistré — réessaie.",
+  "groupLeaveKoryNote": "Quitter le groupe ne supprime pas la cagnotte en cours : tes contributions restent dans le journal Kory.",
+  "messageWaiting": "En attente de ce message. Il s’affichera dès que le téléphone de l’expéditeur l’aura renvoyé.",
+  "callWaitingNotice": "Tu es déjà en appel. Refuser le garde ; accepter le termine.",
+  "callEndAndAccept": "Terminer et accepter"
 }
