@@ -11,6 +11,8 @@ import '../data/product_model.dart';
 import 'marketplace_actions.dart';
 import 'marketplace_controller.dart';
 import 'product_detail_screen.dart';
+import '../../modules/shared/module_ui.dart';
+import 'assime_sale_screens.dart';
 
 /// Le filtre du catalogue.
 ///
@@ -463,6 +465,45 @@ class _LigneProduit extends ConsumerWidget {
               ),
             ),
           Divider(height: 1, thickness: 1, color: AppColors.border),
+          // ANN-18 : clore la vente — l'annonce quitte le marché et
+          // l'acheteur pourra la noter.
+          if (produit.soldAt == null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: ModuleQuietButton(
+                label: l.annSoldTitle,
+                icon: Icons.sell_outlined,
+                onPressed: () async {
+                  final done = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => AssimeMarkSoldScreen(product: produit),
+                    ),
+                  );
+                  if (done == true) ref.invalidate(myProductsProvider);
+                },
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    size: 18,
+                    color: AppColors.feedbackSuccess,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    l.annSoldBadge,
+                    style: TextStyle(
+                      color: AppColors.feedbackSuccess,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
             child: Row(

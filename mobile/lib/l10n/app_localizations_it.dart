@@ -6878,4 +6878,103 @@ class LIt extends L {
 
   @override
   String get certChangePlan => 'Cambia formula';
+
+  @override
+  String get annSoldTitle => 'Segna come venduto';
+
+  @override
+  String get annSoldWho =>
+      'A chi l’hai venduto? Questa persona potrà valutare la transazione.';
+
+  @override
+  String annSoldDiscussionOf(Object date) {
+    return 'Chat del $date';
+  }
+
+  @override
+  String get annSoldOutside => 'Qualcuno fuori da Pokou';
+
+  @override
+  String get annSoldOutsideSub =>
+      'Nessuna valutazione possibile per questa vendita';
+
+  @override
+  String get annSoldFinalPrice => 'Prezzo finale';
+
+  @override
+  String get annSoldPriceHelp => 'Visibile solo a te e all’acquirente';
+
+  @override
+  String get annSoldConfirm => 'Conferma la vendita';
+
+  @override
+  String get annSoldBadge => 'Venduto';
+
+  @override
+  String get annSoldDone => 'Vendita registrata.';
+
+  @override
+  String get annRateTitle => 'Valuta la transazione';
+
+  @override
+  String get annRateHow => 'Com’è andata la tua transazione?';
+
+  @override
+  String get annRate1 => 'Deludente';
+
+  @override
+  String get annRate2 => 'Così così';
+
+  @override
+  String get annRate3 => 'Corretto';
+
+  @override
+  String get annRate4 => 'Molto bene';
+
+  @override
+  String get annRate5 => 'Eccellente';
+
+  @override
+  String annRateStars(Object count) {
+    return '$count stelle su 5';
+  }
+
+  @override
+  String get annRateWentWell => 'Cosa è andato bene';
+
+  @override
+  String get annTagAsDescribed => 'Conforme all’annuncio';
+
+  @override
+  String get annTagPunctual => 'Puntuale';
+
+  @override
+  String get annTagFairPrice => 'Prezzo rispettato';
+
+  @override
+  String get annTagFriendly => 'Gentile';
+
+  @override
+  String get annTagCommunication => 'Buona comunicazione';
+
+  @override
+  String get annRateComment => 'La tua opinione (facoltativa)';
+
+  @override
+  String get annRateNotice =>
+      'La tua opinione mostra il tuo nome e l’iniziale del cognome. Solo una vendita confermata dal venditore può essere valutata, una sola volta.';
+
+  @override
+  String get annRatePublish => 'Pubblica la mia opinione';
+
+  @override
+  String get annRatePublished => 'Grazie, la tua opinione è pubblicata.';
+
+  @override
+  String get annRateAlready => 'Hai già valutato questa vendita.';
+
+  @override
+  String annRateSubtitle(Object product, Object seller) {
+    return '$seller · $product';
+  }
 }

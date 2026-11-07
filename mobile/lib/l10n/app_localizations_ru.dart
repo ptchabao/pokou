@@ -6913,4 +6913,102 @@ class LRu extends L {
 
   @override
   String get certChangePlan => 'Сменить тариф';
+
+  @override
+  String get annSoldTitle => 'Отметить как проданное';
+
+  @override
+  String get annSoldWho =>
+      'Кому ты продал? Этот человек сможет оценить сделку.';
+
+  @override
+  String annSoldDiscussionOf(Object date) {
+    return 'Переписка от $date';
+  }
+
+  @override
+  String get annSoldOutside => 'Кто-то вне Pokou';
+
+  @override
+  String get annSoldOutsideSub => 'Эту продажу нельзя будет оценить';
+
+  @override
+  String get annSoldFinalPrice => 'Итоговая цена';
+
+  @override
+  String get annSoldPriceHelp => 'Видно только тебе и покупателю';
+
+  @override
+  String get annSoldConfirm => 'Подтвердить продажу';
+
+  @override
+  String get annSoldBadge => 'Продано';
+
+  @override
+  String get annSoldDone => 'Продажа сохранена.';
+
+  @override
+  String get annRateTitle => 'Оценить сделку';
+
+  @override
+  String get annRateHow => 'Как прошла сделка?';
+
+  @override
+  String get annRate1 => 'Разочарован';
+
+  @override
+  String get annRate2 => 'Так себе';
+
+  @override
+  String get annRate3 => 'Нормально';
+
+  @override
+  String get annRate4 => 'Очень хорошо';
+
+  @override
+  String get annRate5 => 'Отлично';
+
+  @override
+  String annRateStars(Object count) {
+    return '$count из 5 звёзд';
+  }
+
+  @override
+  String get annRateWentWell => 'Что понравилось';
+
+  @override
+  String get annTagAsDescribed => 'Соответствует объявлению';
+
+  @override
+  String get annTagPunctual => 'Пунктуальность';
+
+  @override
+  String get annTagFairPrice => 'Цена соблюдена';
+
+  @override
+  String get annTagFriendly => 'Вежливость';
+
+  @override
+  String get annTagCommunication => 'Хорошая связь';
+
+  @override
+  String get annRateComment => 'Твой отзыв (необязательно)';
+
+  @override
+  String get annRateNotice =>
+      'Отзыв показывается с твоим именем и первой буквой фамилии. Оценить можно только продажу, подтверждённую продавцом, и только один раз.';
+
+  @override
+  String get annRatePublish => 'Опубликовать отзыв';
+
+  @override
+  String get annRatePublished => 'Спасибо, отзыв опубликован.';
+
+  @override
+  String get annRateAlready => 'Ты уже оценил эту продажу.';
+
+  @override
+  String annRateSubtitle(Object product, Object seller) {
+    return '$seller · $product';
+  }
 }

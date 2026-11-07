@@ -21,7 +21,9 @@ final _alertsProvider = FutureProvider.autoDispose<List<AssimeAlert>>(
 );
 
 /// La place sponsorisée de la bande des statuts (Assimé 14), ou rien.
-final sponsoredStatusProvider = FutureProvider.autoDispose<SponsoredStatus?>((ref) async {
+final sponsoredStatusProvider = FutureProvider.autoDispose<SponsoredStatus?>((
+  ref,
+) async {
   try {
     return await ref
         .watch(marketplaceRepositoryProvider)
@@ -44,8 +46,15 @@ class FavoritesAlertsScreen extends ConsumerWidget {
         title: l.assimeFavoritesAlerts,
         child: Column(
           children: [
-            TabBar(tabs: [Tab(text: l.assimeFavorites), Tab(text: l.assimeAlerts)]),
-            const Expanded(child: TabBarView(children: [_Favorites(), _Alerts()])),
+            TabBar(
+              tabs: [
+                Tab(text: l.assimeFavorites),
+                Tab(text: l.assimeAlerts),
+              ],
+            ),
+            const Expanded(
+              child: TabBarView(children: [_Favorites(), _Alerts()]),
+            ),
           ],
         ),
       ),
@@ -59,32 +68,49 @@ class _Favorites extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    return ref.watch(favoritesProvider).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => ModuleEmptyState(icon: Icons.cloud_off, title: l.honamFailed, message: l.modulesCheckNetwork),
-      data: (items) => items.isEmpty
-          ? ModuleEmptyState(icon: Icons.favorite_border, title: l.assimeNoFavorites, message: l.assimeFavoritesHint)
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                for (final item in items)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: _Thumb(mediaId: item.imageMediaId),
-                    title: Text(item.name),
-                    subtitle: Text('${item.price} ${item.currency}${item.location != null ? ' · ${item.location}' : ''}'),
-                    trailing: IconButton(
-                      tooltip: l.assimeRemoveFavorite,
-                      icon: const Icon(Icons.favorite, color: AppColors.feedbackDanger),
-                      onPressed: () async {
-                        await ref.read(marketplaceRepositoryProvider).setFavorite(item.id, false);
-                        ref.invalidate(favoritesProvider);
-                      },
-                    ),
-                  ),
-              ],
-            ),
-    );
+    return ref
+        .watch(favoritesProvider)
+        .when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => ModuleEmptyState(
+            icon: Icons.cloud_off,
+            title: l.honamFailed,
+            message: l.modulesCheckNetwork,
+          ),
+          data: (items) => items.isEmpty
+              ? ModuleEmptyState(
+                  icon: Icons.favorite_border,
+                  title: l.assimeNoFavorites,
+                  message: l.assimeFavoritesHint,
+                )
+              : ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    for (final item in items)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: _Thumb(mediaId: item.imageMediaId),
+                        title: Text(item.name),
+                        subtitle: Text(
+                          '${item.price} ${item.currency}${item.location != null ? ' · ${item.location}' : ''}',
+                        ),
+                        trailing: IconButton(
+                          tooltip: l.assimeRemoveFavorite,
+                          icon: const Icon(
+                            Icons.favorite,
+                            color: AppColors.feedbackDanger,
+                          ),
+                          onPressed: () async {
+                            await ref
+                                .read(marketplaceRepositoryProvider)
+                                .setFavorite(item.id, false);
+                            ref.invalidate(favoritesProvider);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+        );
   }
 }
 
@@ -102,19 +128,32 @@ class _Alerts extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: query, autofocus: true, decoration: InputDecoration(labelText: l.assimeAlertQuery)),
+            TextField(
+              controller: query,
+              autofocus: true,
+              decoration: InputDecoration(labelText: l.assimeAlertQuery),
+            ),
             TextField(
               controller: maxPrice,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: l.assimeAlertMaxPrice),
             ),
             const SizedBox(height: 8),
-            Text(l.assimeAlertNote, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(
+              l.assimeAlertNote,
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(l.actionCancel)),
-          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: Text(l.actionSave)),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l.actionSave),
+          ),
         ],
       ),
     );
@@ -124,11 +163,15 @@ class _Alerts extends ConsumerWidget {
     maxPrice.dispose();
     if (ok != true || text.trim().isEmpty) return;
     try {
-      await ref.read(marketplaceRepositoryProvider).createAlert(query: text, maxPrice: price);
+      await ref
+          .read(marketplaceRepositoryProvider)
+          .createAlert(query: text, maxPrice: price);
       ref.invalidate(_alertsProvider);
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
       }
     }
   }
@@ -136,40 +179,55 @@ class _Alerts extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    return ref.watch(_alertsProvider).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => ModuleEmptyState(icon: Icons.cloud_off, title: l.honamFailed, message: l.modulesCheckNetwork),
-      data: (alerts) => ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          ModuleActionButton(
-            label: l.assimeNewAlert,
-            icon: Icons.notifications_active_outlined,
-            onPressed: () => _create(context, ref),
+    return ref
+        .watch(_alertsProvider)
+        .when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => ModuleEmptyState(
+            icon: Icons.cloud_off,
+            title: l.honamFailed,
+            message: l.modulesCheckNetwork,
           ),
-          const SizedBox(height: 12),
-          if (alerts.isEmpty) Text(l.assimeNoAlerts, style: TextStyle(color: AppColors.textSecondary)),
-          for (final alert in alerts)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.notifications_outlined),
-              title: Text(alert.query ?? alert.category ?? ''),
-              subtitle: Text([
-                if (alert.maxPrice != null) l.assimeAlertUpTo('${alert.maxPrice}'),
-                l.assimeAlertMatches('${alert.matchesCount}'),
-              ].join(' · ')),
-              trailing: IconButton(
-                tooltip: l.actionDelete,
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () async {
-                  await ref.read(marketplaceRepositoryProvider).deleteAlert(alert.id);
-                  ref.invalidate(_alertsProvider);
-                },
+          data: (alerts) => ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              ModuleActionButton(
+                label: l.assimeNewAlert,
+                icon: Icons.notifications_active_outlined,
+                onPressed: () => _create(context, ref),
               ),
-            ),
-        ],
-      ),
-    );
+              const SizedBox(height: 12),
+              if (alerts.isEmpty)
+                Text(
+                  l.assimeNoAlerts,
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              for (final alert in alerts)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.notifications_outlined),
+                  title: Text(alert.query ?? alert.category ?? ''),
+                  subtitle: Text(
+                    [
+                      if (alert.maxPrice != null)
+                        l.assimeAlertUpTo('${alert.maxPrice}'),
+                      l.assimeAlertMatches('${alert.matchesCount}'),
+                    ].join(' · '),
+                  ),
+                  trailing: IconButton(
+                    tooltip: l.actionDelete,
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () async {
+                      await ref
+                          .read(marketplaceRepositoryProvider)
+                          .deleteAlert(alert.id);
+                      ref.invalidate(_alertsProvider);
+                    },
+                  ),
+                ),
+            ],
+          ),
+        );
   }
 }
 
@@ -187,7 +245,10 @@ class _Thumb extends StatelessWidget {
         width: size,
         height: size,
         child: mediaId == null
-            ? Container(color: AppColors.surface, child: const Icon(Icons.image_outlined))
+            ? Container(
+                color: AppColors.surface,
+                child: const Icon(Icons.image_outlined),
+              )
             : MediaImage(mediaId: mediaId!, fit: BoxFit.cover),
       ),
     );
@@ -195,11 +256,17 @@ class _Thumb extends StatelessWidget {
 }
 
 /// « Pourquoi je vois ça » (Assimé 16).
-Future<void> showWhySponsored(BuildContext context, WidgetRef ref, int productId) async {
+Future<void> showWhySponsored(
+  BuildContext context,
+  WidgetRef ref,
+  int productId,
+) async {
   final l = L.of(context);
   String? text;
   try {
-    text = await ref.read(marketplaceRepositoryProvider).whySponsored(productId);
+    text = await ref
+        .read(marketplaceRepositoryProvider)
+        .whySponsored(productId);
   } catch (_) {
     text = null;
   }
@@ -214,7 +281,10 @@ Future<void> showWhySponsored(BuildContext context, WidgetRef ref, int productId
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l.assimeWhyTitle, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            Text(
+              l.assimeWhyTitle,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             Text(text ?? l.assimeWhyNotSponsored),
           ],
@@ -224,13 +294,19 @@ Future<void> showWhySponsored(BuildContext context, WidgetRef ref, int productId
   );
 }
 
-final _boostReportProvider = FutureProvider.autoDispose.family<List<BoostReport>, int>(
-  (ref, productId) => ref.watch(marketplaceRepositoryProvider).boostReport(productId),
-);
+final _boostReportProvider = FutureProvider.autoDispose
+    .family<List<BoostReport>, int>(
+      (ref, productId) =>
+          ref.watch(marketplaceRepositoryProvider).boostReport(productId),
+    );
 
 /// Le bilan de la mise en avant (Assimé 17), pour le seul vendeur.
 class BoostReportScreen extends ConsumerWidget {
-  const BoostReportScreen({super.key, required this.productId, required this.productName});
+  const BoostReportScreen({
+    super.key,
+    required this.productId,
+    required this.productName,
+  });
 
   final int productId;
   final String productName;
@@ -245,9 +321,17 @@ class BoostReportScreen extends ConsumerWidget {
       subtitle: productName,
       child: report.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => ModuleEmptyState(icon: Icons.cloud_off, title: l.honamFailed, message: l.modulesCheckNetwork),
+        error: (_, _) => ModuleEmptyState(
+          icon: Icons.cloud_off,
+          title: l.honamFailed,
+          message: l.modulesCheckNetwork,
+        ),
         data: (items) => items.isEmpty
-            ? ModuleEmptyState(icon: Icons.campaign_outlined, title: l.assimeReportEmpty, message: '')
+            ? ModuleEmptyState(
+                icon: Icons.campaign_outlined,
+                title: l.assimeReportEmpty,
+                message: '',
+              )
             : ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -261,19 +345,38 @@ class BoostReportScreen extends ConsumerWidget {
                             Text(
                               l.assimeReportPeriod(
                                 '${b.days ?? '?'}',
-                                DateFormat.MMMd(locale).format(b.startsAt.toLocal()),
-                                DateFormat.MMMd(locale).format(b.expiresAt.toLocal()),
+                                DateFormat.MMMd(
+                                  locale,
+                                ).format(b.startsAt.toLocal()),
+                                DateFormat.MMMd(
+                                  locale,
+                                ).format(b.expiresAt.toLocal()),
                               ),
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(l.assimeReportImpressions('${b.impressions}')),
-                            if (b.days == 7) Text(l.assimeReportStatusViews('${b.statusViews}')),
+                            if (b.days == 7)
+                              Text(
+                                l.assimeReportStatusViews('${b.statusViews}'),
+                              ),
                             Text(l.assimeReportContacts('${b.contacts}')),
                             if (b.statusModeration == 'PENDING')
-                              Text(l.assimeStatusPending, style: const TextStyle(color: AppColors.feedbackWarning)),
+                              Text(
+                                l.assimeStatusPending,
+                                style: const TextStyle(
+                                  color: AppColors.feedbackWarning,
+                                ),
+                              ),
                             if (b.statusModeration == 'REJECTED')
-                              Text(l.assimeStatusRejected, style: const TextStyle(color: AppColors.feedbackDanger)),
+                              Text(
+                                l.assimeStatusRejected,
+                                style: const TextStyle(
+                                  color: AppColors.feedbackDanger,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -313,10 +416,25 @@ class SponsoredStatusTile extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l.assimeSponsored, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        Text(product.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                        Text(
+                          l.assimeSponsored,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         Text('${product.price} ${product.currency}'),
-                        Text(product.sellerName, style: TextStyle(color: AppColors.textSecondary)),
+                        Text(
+                          product.sellerName,
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
                       ],
                     ),
                   ),
@@ -338,13 +456,15 @@ class SponsoredStatusTile extends ConsumerWidget {
                     // joignable même si la fiche n'a pas pu être épinglée.
                   }
                   if (!context.mounted || myUserId == null) return;
-                  await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => ConversationScreen(
-                      myUserId: myUserId,
-                      contactUserId: product.sellerId,
-                      contactName: product.sellerName,
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ConversationScreen(
+                        myUserId: myUserId,
+                        contactUserId: product.sellerId,
+                        contactName: product.sellerName,
+                      ),
                     ),
-                  ));
+                  );
                 },
               ),
               TextButton(
@@ -358,7 +478,13 @@ class SponsoredStatusTile extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l.assimeWhyTitle, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                          Text(
+                            l.assimeWhyTitle,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           Text(sponsored.why),
                         ],
@@ -398,8 +524,14 @@ class SponsoredStatusTile extends ConsumerWidget {
                     width: 52,
                     height: 52,
                     child: sponsored.product.imageMediaId == null
-                        ? Container(color: AppColors.surface, child: const Icon(Icons.storefront_outlined))
-                        : MediaImage(mediaId: sponsored.product.imageMediaId!, fit: BoxFit.cover),
+                        ? Container(
+                            color: AppColors.surface,
+                            child: const Icon(Icons.storefront_outlined),
+                          )
+                        : MediaImage(
+                            mediaId: sponsored.product.imageMediaId!,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
               ),

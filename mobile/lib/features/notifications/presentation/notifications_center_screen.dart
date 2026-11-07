@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../honam/presentation/honam_order_screen.dart';
 import '../../kory/presentation/kory_pot_screen.dart';
+import '../../marketplace/presentation/assime_sale_screens.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../data/service_notification.dart';
 
@@ -32,6 +33,11 @@ void openServiceRoute(NavigatorState navigator, String? route) {
   if (parts.length == 2 && parts[0] == 'kory') {
     final id = int.tryParse(parts[1]);
     if (id != null) screen = KoryPotScreen(potId: id);
+  } else if (parts.length == 3 &&
+      parts[0] == 'assime' &&
+      parts[1] == 'review') {
+    final id = int.tryParse(parts[2]);
+    if (id != null) screen = AssimeRateSaleScreen(productId: id);
   } else if (parts.length == 3 && parts[0] == 'honam' && parts[1] == 'order') {
     final id = int.tryParse(parts[2]);
     if (id != null) screen = HonamOrderScreen(orderId: id);

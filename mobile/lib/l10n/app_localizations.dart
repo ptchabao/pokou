@@ -11900,6 +11900,186 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Changer de formule'**
   String get certChangePlan;
+
+  /// No description provided for @annSoldTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme vendue'**
+  String get annSoldTitle;
+
+  /// No description provided for @annSoldWho.
+  ///
+  /// In fr, this message translates to:
+  /// **'À qui l’as-tu vendue ? Cette personne pourra noter la transaction.'**
+  String get annSoldWho;
+
+  /// No description provided for @annSoldDiscussionOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion du {date}'**
+  String annSoldDiscussionOf(Object date);
+
+  /// No description provided for @annSoldOutside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelqu’un hors de Pokou'**
+  String get annSoldOutside;
+
+  /// No description provided for @annSoldOutsideSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de note possible pour cette vente'**
+  String get annSoldOutsideSub;
+
+  /// No description provided for @annSoldFinalPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix final'**
+  String get annSoldFinalPrice;
+
+  /// No description provided for @annSoldPriceHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible seulement de toi et de l’acheteur'**
+  String get annSoldPriceHelp;
+
+  /// No description provided for @annSoldConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la vente'**
+  String get annSoldConfirm;
+
+  /// No description provided for @annSoldBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendue'**
+  String get annSoldBadge;
+
+  /// No description provided for @annSoldDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente enregistrée.'**
+  String get annSoldDone;
+
+  /// No description provided for @annRateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Noter la transaction'**
+  String get annRateTitle;
+
+  /// No description provided for @annRateHow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment s’est passée ta transaction ?'**
+  String get annRateHow;
+
+  /// No description provided for @annRate1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décevant'**
+  String get annRate1;
+
+  /// No description provided for @annRate2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen'**
+  String get annRate2;
+
+  /// No description provided for @annRate3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Correct'**
+  String get annRate3;
+
+  /// No description provided for @annRate4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Très bien'**
+  String get annRate4;
+
+  /// No description provided for @annRate5.
+  ///
+  /// In fr, this message translates to:
+  /// **'Excellent'**
+  String get annRate5;
+
+  /// No description provided for @annRateStars.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} étoiles sur 5'**
+  String annRateStars(Object count);
+
+  /// No description provided for @annRateWentWell.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui s’est bien passé'**
+  String get annRateWentWell;
+
+  /// No description provided for @annTagAsDescribed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conforme à l’annonce'**
+  String get annTagAsDescribed;
+
+  /// No description provided for @annTagPunctual.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ponctuel·le'**
+  String get annTagPunctual;
+
+  /// No description provided for @annTagFairPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix respecté'**
+  String get annTagFairPrice;
+
+  /// No description provided for @annTagFriendly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aimable'**
+  String get annTagFriendly;
+
+  /// No description provided for @annTagCommunication.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonne communication'**
+  String get annTagCommunication;
+
+  /// No description provided for @annRateComment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton avis (facultatif)'**
+  String get annRateComment;
+
+  /// No description provided for @annRateNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton avis s’affiche avec ton prénom et l’initiale de ton nom. Seule une vente confirmée par le vendeur peut être notée, une seule fois.'**
+  String get annRateNotice;
+
+  /// No description provided for @annRatePublish.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier mon avis'**
+  String get annRatePublish;
+
+  /// No description provided for @annRatePublished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci, ton avis est publié.'**
+  String get annRatePublished;
+
+  /// No description provided for @annRateAlready.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as déjà noté cette vente.'**
+  String get annRateAlready;
+
+  /// No description provided for @annRateSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seller} · {product}'**
+  String annRateSubtitle(Object product, Object seller);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

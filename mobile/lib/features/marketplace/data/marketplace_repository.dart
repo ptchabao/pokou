@@ -191,7 +191,10 @@ class MarketplaceRepository {
 
   /// Mise en avant de 3 ou 7 jours (600 ou 1 300 FCFA TTC).
   Future<Map<String, dynamic>> boostProduct(int id, {int days = 7}) async {
-    final response = await _api.post('/marketplace/$id/boost', body: {'days': days});
+    final response = await _api.post(
+      '/marketplace/$id/boost',
+      body: {'days': days},
+    );
     return (response as Map).cast<String, dynamic>();
   }
 
@@ -284,17 +287,39 @@ class MarketplaceRepository {
     required int sellerId,
     required int rating,
     String? comment,
+    List<String>? tags,
   }) async {
     final response = await _api.put(
       '/marketplace/sellers/$sellerId/review',
       body: {
         'rating': rating,
+        if (tags != null && tags.isNotEmpty) 'tags': tags,
         if (comment != null && comment.trim().isNotEmpty)
           'comment': comment.trim(),
       },
     );
     return SellerReview.fromJson(response as Map<String, dynamic>);
   }
+
+  /// ANN-18 : les personnes avec qui j'ai échangé depuis la publication.
+  Future<List<Map<String, dynamic>>> buyerCandidates(int productId) async {
+    final response =
+        await _api.get('/marketplace/$productId/buyer-candidates')
+            as Map<String, dynamic>;
+    return (response['items'] as List? ?? const [])
+        .cast<Map<String, dynamic>>();
+  }
+
+  /// ANN-18 : clore la vente. [buyerId] `null` : vendue hors de Pokou.
+  Future<void> markSold(int productId, {int? buyerId, int? finalPrice}) =>
+      _api.post(
+        '/marketplace/$productId/sold',
+        body: {'buyer_id': buyerId, 'final_price': ?finalPrice},
+      );
+
+  /// ANN-19 : la vente que l'acheteur va noter.
+  Future<Map<String, dynamic>> sale(int productId) async =>
+      await _api.get('/marketplace/$productId/sale') as Map<String, dynamic>;
 
   Future<void> deleteMyReview(int sellerId) =>
       _api.delete('/marketplace/sellers/$sellerId/review');
@@ -323,7 +348,8 @@ class MarketplaceRepository {
   // ── Assimé : favoris, alertes, statut sponsorisé, bilan ─────────────────
 
   Future<List<AssimeSnapshot>> favorites() async {
-    final json = await _api.get('/marketplace/favorites') as Map<String, dynamic>;
+    final json =
+        await _api.get('/marketplace/favorites') as Map<String, dynamic>;
     return [
       for (final item in (json['items'] as List? ?? const []))
         AssimeSnapshot.fromJson(item as Map<String, dynamic>),
@@ -343,32 +369,45 @@ class MarketplaceRepository {
   }
 
   Future<void> createAlert({String? query, String? category, int? maxPrice}) =>
-      _api.post('/marketplace/alerts', body: {
-        if (query != null && query.trim().isNotEmpty) 'query': query.trim(),
-        'category': ?category,
-        'max_price': ?maxPrice,
-      });
+      _api.post(
+        '/marketplace/alerts',
+        body: {
+          if (query != null && query.trim().isNotEmpty) 'query': query.trim(),
+          'category': ?category,
+          'max_price': ?maxPrice,
+        },
+      );
 
   Future<void> deleteAlert(int id) => _api.delete('/marketplace/alerts/$id');
 
   /// La seule place sponsorisée de la bande des statuts, ou `null`.
   Future<SponsoredStatus?> sponsoredStatus({String? city}) async {
-    final query = city != null && city.trim().isNotEmpty ? '?city=${Uri.encodeQueryComponent(city.trim())}' : '';
-    final json = await _api.get('/marketplace/sponsored-status$query') as Map<String, dynamic>;
+    final query = city != null && city.trim().isNotEmpty
+        ? '?city=${Uri.encodeQueryComponent(city.trim())}'
+        : '';
+    final json =
+        await _api.get('/marketplace/sponsored-status$query')
+            as Map<String, dynamic>;
     final item = json['item'] as Map<String, dynamic>?;
-    return item == null ? null : SponsoredStatus.fromJson(item, every: json['every'] as int? ?? 5);
+    return item == null
+        ? null
+        : SponsoredStatus.fromJson(item, every: json['every'] as int? ?? 5);
   }
 
-  Future<void> countSponsoredContact(int boostId) => _api.post('/marketplace/boosts/$boostId/contact');
+  Future<void> countSponsoredContact(int boostId) =>
+      _api.post('/marketplace/boosts/$boostId/contact');
 
   /// « Pourquoi je vois ça » : `null` si l'annonce n'est plus sponsorisée.
   Future<String?> whySponsored(int productId) async {
-    final json = await _api.get('/marketplace/$productId/why') as Map<String, dynamic>;
+    final json =
+        await _api.get('/marketplace/$productId/why') as Map<String, dynamic>;
     return json['sponsored'] == true ? json['text'] as String? : null;
   }
 
   Future<List<BoostReport>> boostReport(int productId) async {
-    final json = await _api.get('/marketplace/$productId/boost/report') as Map<String, dynamic>;
+    final json =
+        await _api.get('/marketplace/$productId/boost/report')
+            as Map<String, dynamic>;
     return [
       for (final item in (json['items'] as List? ?? const []))
         BoostReport.fromJson(item as Map<String, dynamic>),
@@ -412,7 +451,13 @@ class AssimeSnapshot {
 }
 
 class AssimeAlert {
-  const AssimeAlert({required this.id, this.query, this.category, this.maxPrice, this.matchesCount = 0});
+  const AssimeAlert({
+    required this.id,
+    this.query,
+    this.category,
+    this.maxPrice,
+    this.matchesCount = 0,
+  });
 
   final int id;
   final String? query;
@@ -430,7 +475,12 @@ class AssimeAlert {
 }
 
 class SponsoredStatus {
-  const SponsoredStatus({required this.boostId, required this.product, required this.why, this.every = 5});
+  const SponsoredStatus({
+    required this.boostId,
+    required this.product,
+    required this.why,
+    this.every = 5,
+  });
 
   final int boostId;
   final AssimeSnapshot product;
@@ -439,7 +489,10 @@ class SponsoredStatus {
   /// Au plus un statut sponsorisé tous les [every] statuts.
   final int every;
 
-  factory SponsoredStatus.fromJson(Map<String, dynamic> json, {int every = 5}) => SponsoredStatus(
+  factory SponsoredStatus.fromJson(
+    Map<String, dynamic> json, {
+    int every = 5,
+  }) => SponsoredStatus(
     boostId: json['boost_id'] as int,
     product: AssimeSnapshot.fromJson(json['product'] as Map<String, dynamic>),
     why: (json['why'] as Map?)?['text'] as String? ?? '',

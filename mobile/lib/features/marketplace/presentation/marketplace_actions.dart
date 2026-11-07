@@ -141,7 +141,12 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(title: Text(l.marketBoost, style: const TextStyle(fontWeight: FontWeight.w600))),
+            ListTile(
+              title: Text(
+                l.marketBoost,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.trending_up),
               title: Text(l.marketBoost3),

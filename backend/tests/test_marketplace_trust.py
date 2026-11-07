@@ -78,6 +78,18 @@ def _create_product(client, headers, **overrides):
     return client.post("/api/v1/marketplace", json=payload, headers=headers)
 
 
+def _sold_to(client, headers_seller, buyer_id, price=11500):
+    """ASM-16 : une note suppose une vente confirmée par le vendeur (ANN-18)."""
+    product = _create_product(client, headers_seller, name="Pagne wax").json()
+    response = client.post(
+        f"/api/v1/marketplace/{product['id']}/sold",
+        json={"buyer_id": buyer_id, "final_price": price},
+        headers=headers_seller,
+    )
+    assert response.status_code == 200, response.text
+    return product
+
+
 # ─── Images produit ───────────────────────────────────────────────────────────
 
 def test_product_carries_a_main_image_and_an_ordered_gallery(client):
@@ -178,8 +190,9 @@ def test_gallery_is_capped(client):
 
 def test_a_review_sets_the_sellers_rating(client):
     headers_seller, seller_id = _signup(client, "+22897200010")
-    headers_buyer, _ = _signup(client, "+22897200011")
+    headers_buyer, buyer_id = _signup(client, "+22897200011")
     _create_product(client, headers_seller)
+    _sold_to(client, headers_seller, buyer_id)
 
     posted = client.put(
         f"/api/v1/marketplace/sellers/{seller_id}/review",
@@ -222,7 +235,8 @@ def test_paid_pro_status_is_exposed_separately_from_seller_certification(client)
 def test_a_second_review_by_the_same_person_replaces_the_first(client):
     """Un avis par personne : sinon la note se gonfle depuis un seul compte."""
     headers_seller, seller_id = _signup(client, "+22897200012")
-    headers_buyer, _ = _signup(client, "+22897200013")
+    headers_buyer, buyer_id = _signup(client, "+22897200013")
+    _sold_to(client, headers_seller, buyer_id)
 
     for rating in (5, 5, 5):
         client.put(
@@ -247,8 +261,10 @@ def test_a_second_review_by_the_same_person_replaces_the_first(client):
 
 def test_the_rating_is_the_average_of_every_review(client):
     headers_seller, seller_id = _signup(client, "+22897200014")
-    headers_b, _ = _signup(client, "+22897200015")
-    headers_c, _ = _signup(client, "+22897200016")
+    headers_b, b_id = _signup(client, "+22897200015")
+    headers_c, c_id = _signup(client, "+22897200016")
+    _sold_to(client, headers_seller, b_id)
+    _sold_to(client, headers_seller, c_id)
 
     client.put(f"/api/v1/marketplace/sellers/{seller_id}/review", json={"rating": 5}, headers=headers_b)
     client.put(f"/api/v1/marketplace/sellers/{seller_id}/review", json={"rating": 2}, headers=headers_c)
@@ -280,7 +296,8 @@ def test_a_rating_outside_one_to_five_is_refused(client):
 
 def test_deleting_my_review_removes_it_from_the_average(client):
     headers_seller, seller_id = _signup(client, "+22897200020")
-    headers_buyer, _ = _signup(client, "+22897200021")
+    headers_buyer, buyer_id = _signup(client, "+22897200021")
+    _sold_to(client, headers_seller, buyer_id)
     client.put(
         f"/api/v1/marketplace/sellers/{seller_id}/review", json={"rating": 1}, headers=headers_buyer
     )
@@ -351,7 +368,8 @@ def test_certification_is_independent_of_the_rating(client):
     « ce compte est vérifié », pas « ce vendeur est bon »."""
     headers_seller, seller_id = _signup(client, "+22897200033")
     headers_admin, admin_id = _signup(client, "+22897200034")
-    headers_buyer, _ = _signup(client, "+22897200035")
+    headers_buyer, buyer_id = _signup(client, "+22897200035")
+    _sold_to(client, headers_seller, buyer_id)
     _promote_to_admin(admin_id)
 
     client.put(
@@ -753,3 +771,29 @@ def test_on_peut_toujours_RETIRER_la_photo_principale(client):
 
     assert modifie.status_code == 200, modifie.text
     assert modifie.json()["image"] is None
+
+
+def test_only_the_buyer_of_a_confirmed_sale_can_review(client):
+    headers_seller, seller_id = _signup(client, "+22897200040")
+    headers_buyer, buyer_id = _signup(client, "+22897200041")
+    headers_other, _ = _signup(client, "+22897200042")
+    refused = client.put(
+        f"/api/v1/marketplace/sellers/{seller_id}/review", json={"rating": 5}, headers=headers_other
+    )
+    assert refused.status_code == 403
+    product = _sold_to(client, headers_seller, buyer_id)
+    # Vendue : l'annonce quitte le marché.
+    listed = client.get("/api/v1/marketplace", headers=headers_other).json()["items"]
+    assert all(item["id"] != product["id"] for item in listed)
+    # L'acheteur est invité à noter (centre de notifications).
+    inbox = client.get("/api/v1/notifications", headers=headers_buyer).json()["items"]
+    assert inbox[0]["route"] == f"assime/review/{product['id']}"
+    assert "a indiqué que tu as acheté cet article pour 11 500 FCFA." in inbox[0]["body"]
+    sale = client.get(f"/api/v1/marketplace/{product['id']}/sale", headers=headers_buyer).json()
+    assert sale["seller_id"] == seller_id and sale["reviewed"] is False
+    ok = client.put(
+        f"/api/v1/marketplace/sellers/{seller_id}/review",
+        json={"rating": 4, "comment": "Tissu de belle qualité", "tags": ["as_described", "punctual", "bogus"]},
+        headers=headers_buyer,
+    )
+    assert ok.status_code == 200 and ok.json()["tags"] == ["as_described", "punctual"]

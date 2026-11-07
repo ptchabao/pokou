@@ -90,9 +90,9 @@ class _SellerVerificationScreenState
       if (url != null && url.isNotEmpty) {
         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       }
-      ref.read(authControllerProvider.notifier).setCertificationStatus(
-            isCertificationPending: true,
-          );
+      ref
+          .read(authControllerProvider.notifier)
+          .setCertificationStatus(isCertificationPending: true);
       ref.invalidate(mySellerCertificationProvider);
       if (mounted) Navigator.of(context).pop(true);
     } catch (_) {

@@ -25,6 +25,14 @@ def upgrade() -> None:
         t.add_column(sa.Column("proof_media_id", sa.Integer(), nullable=True))
     with op.batch_alter_table("kory_pots") as t:
         t.add_column(sa.Column("extended_at", sa.DateTime(), nullable=True))
+    # Assimé : vente (ANN-18) et note de la vente (ANN-19).
+    with op.batch_alter_table("marketplace_products") as t:
+        t.add_column(sa.Column("sold_at", sa.DateTime(), nullable=True))
+        t.add_column(sa.Column("buyer_id", sa.Integer(), nullable=True))
+        t.add_column(sa.Column("final_price", sa.Integer(), nullable=True))
+    with op.batch_alter_table("seller_reviews") as t:
+        t.add_column(sa.Column("product_id", sa.Integer(), nullable=True))
+        t.add_column(sa.Column("tags", sa.JSON(), nullable=True))
     # Centre de notifications (NOT-1).
     op.create_table(
         "service_notifications",
@@ -43,6 +51,13 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("service_notifications")
+    with op.batch_alter_table("seller_reviews") as t:
+        t.drop_column("tags")
+        t.drop_column("product_id")
+    with op.batch_alter_table("marketplace_products") as t:
+        t.drop_column("final_price")
+        t.drop_column("buyer_id")
+        t.drop_column("sold_at")
     with op.batch_alter_table("kory_pots") as t:
         t.drop_column("extended_at")
     with op.batch_alter_table("kory_entries") as t:

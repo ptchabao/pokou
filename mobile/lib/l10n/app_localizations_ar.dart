@@ -6828,4 +6828,101 @@ class LAr extends L {
 
   @override
   String get certChangePlan => 'تغيير الباقة';
+
+  @override
+  String get annSoldTitle => 'وضع علامة كمباع';
+
+  @override
+  String get annSoldWho => 'لمن بعتَه؟ سيتمكّن هذا الشخص من تقييم المعاملة.';
+
+  @override
+  String annSoldDiscussionOf(Object date) {
+    return 'محادثة $date';
+  }
+
+  @override
+  String get annSoldOutside => 'شخص خارج Pokou';
+
+  @override
+  String get annSoldOutsideSub => 'لا يمكن تقييم هذا البيع';
+
+  @override
+  String get annSoldFinalPrice => 'السعر النهائي';
+
+  @override
+  String get annSoldPriceHelp => 'مرئي لك وللمشتري فقط';
+
+  @override
+  String get annSoldConfirm => 'تأكيد البيع';
+
+  @override
+  String get annSoldBadge => 'مباع';
+
+  @override
+  String get annSoldDone => 'تم تسجيل البيع.';
+
+  @override
+  String get annRateTitle => 'قيّم المعاملة';
+
+  @override
+  String get annRateHow => 'كيف كانت معاملتك؟';
+
+  @override
+  String get annRate1 => 'مخيّب';
+
+  @override
+  String get annRate2 => 'متوسط';
+
+  @override
+  String get annRate3 => 'جيد';
+
+  @override
+  String get annRate4 => 'جيد جدًا';
+
+  @override
+  String get annRate5 => 'ممتاز';
+
+  @override
+  String annRateStars(Object count) {
+    return '$count نجوم من 5';
+  }
+
+  @override
+  String get annRateWentWell => 'ما سار على ما يرام';
+
+  @override
+  String get annTagAsDescribed => 'مطابق للإعلان';
+
+  @override
+  String get annTagPunctual => 'في الموعد';
+
+  @override
+  String get annTagFairPrice => 'السعر محترم';
+
+  @override
+  String get annTagFriendly => 'لطيف';
+
+  @override
+  String get annTagCommunication => 'تواصل جيد';
+
+  @override
+  String get annRateComment => 'رأيك (اختياري)';
+
+  @override
+  String get annRateNotice =>
+      'يظهر رأيك باسمك الأول والحرف الأول من اسم عائلتك. لا يمكن تقييم إلا بيع أكّده البائع، ومرة واحدة فقط.';
+
+  @override
+  String get annRatePublish => 'نشر رأيي';
+
+  @override
+  String get annRatePublished => 'شكرًا، تم نشر رأيك.';
+
+  @override
+  String get annRateAlready => 'لقد قيّمتَ هذا البيع بالفعل.';
+
+  @override
+  String annRateSubtitle(Object product, Object seller) {
+    return '$seller · $product';
+  }
 }

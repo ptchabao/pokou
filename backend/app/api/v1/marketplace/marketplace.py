@@ -101,6 +101,18 @@ def _exiger_devise_connue(db: Session, code: str) -> None:
 class ReviewPayload(BaseModel):
     rating: int = Field(..., ge=_MIN_RATING, le=_MAX_RATING)
     comment: Optional[str] = Field(None, max_length=1000)
+    #: ANN-19 : « Conforme à l'annonce », « Ponctuelle »…
+    tags: Optional[List[str]] = Field(None, max_length=8)
+
+
+#: ANN-19 : ce qui s'est bien passé — des clés stables, traduites par l'app.
+REVIEW_TAGS = {"as_described", "punctual", "fair_price", "friendly", "good_communication"}
+
+
+class SoldPayload(BaseModel):
+    #: L'acheteur sur Pokou, ou `None` pour une vente hors de Pokou.
+    buyer_id: Optional[int] = None
+    final_price: Optional[int] = Field(None, ge=0, le=100_000_000)
 
 
 class SellerCertification(BaseModel):
@@ -199,7 +211,17 @@ def _serialize(
         "image": _media(product.image_media),
         "gallery": [_media(image.media) for image in product.images if image.media is not None],
         "is_active": product.is_active,
+        "sold_at": product.sold_at.isoformat() if product.sold_at else None,
     }
+
+
+def _short_name(full_name: Optional[str]) -> str:
+    """ANN-19 : un avis s'affiche avec le prénom et l'initiale du nom —
+    jamais le nom complet, jamais le numéro."""
+    parts = (full_name or "").split()
+    if not parts:
+        return "Utilisateur"
+    return parts[0] if len(parts) == 1 else f"{parts[0]} {parts[-1][0].upper()}."
 
 
 def _serialize_review(review: SellerReview, viewer_id: int) -> dict:
@@ -208,9 +230,10 @@ def _serialize_review(review: SellerReview, viewer_id: int) -> dict:
         "id": review.id,
         "seller_id": review.seller_id,
         "author_id": review.author_id,
-        "author_name": (author.full_name or author.phone or "Utilisateur") if author else "Utilisateur",
+        "author_name": _short_name(author.full_name if author else None),
         "rating": review.rating,
         "comment": review.comment,
+        "tags": review.tags or [],
         "created_at": review.created_at.isoformat(),
         "is_mine": review.author_id == viewer_id,
     }
@@ -282,6 +305,8 @@ async def list_marketplace(
     query = db.query(MarketplaceProduct).options(*_load_options()).filter(
         MarketplaceProduct.is_active.is_(True),
         MarketplaceProduct.deleted_at.is_(None),
+        # Une annonce vendue quitte le marché (ANN-18).
+        MarketplaceProduct.sold_at.is_(None),
     )
     if seller_id is not None:
         query = query.filter(MarketplaceProduct.seller_id == seller_id)
@@ -876,6 +901,20 @@ async def upsert_seller_review(
         raise HTTPException(status_code=403, detail="Vous ne pouvez pas vous noter vous-même")
     if not db.query(User).filter(User.id == seller_id).first():
         raise HTTPException(status_code=404, detail="Vendeur introuvable")
+    # ASM-16 : seule une vente CONFIRMÉE par le vendeur peut être notée,
+    # par son acheteur. Sans cette règle, n'importe qui notait n'importe qui.
+    sale = (
+        db.query(MarketplaceProduct)
+        .filter(
+            MarketplaceProduct.seller_id == seller_id,
+            MarketplaceProduct.buyer_id == author_id,
+            MarketplaceProduct.sold_at.isnot(None),
+        )
+        .order_by(MarketplaceProduct.sold_at.desc())
+        .first()
+    )
+    if sale is None:
+        raise HTTPException(status_code=403, detail="Seule une vente confirmée par le vendeur peut être notée")
 
     review = db.query(SellerReview).filter(
         SellerReview.seller_id == seller_id, SellerReview.author_id == author_id
@@ -885,6 +924,8 @@ async def upsert_seller_review(
         db.add(review)
     review.rating = payload.rating
     review.comment = payload.comment
+    review.product_id = sale.id
+    review.tags = sorted({t for t in (payload.tags or []) if t in REVIEW_TAGS}) or None
     db.commit()
     db.refresh(review)
     return _serialize_review(review, author_id)
@@ -1017,3 +1058,115 @@ def _require_contact_for_share(db: Session, owner_id: int, contact_user_id: int)
         Contact.owner_user_id == owner_id, Contact.contact_user_id == contact_user_id
     ).first():
         raise HTTPException(status_code=403, detail="Ce contact n'est pas dans votre carnet d'adresses")
+
+
+@router.get("/{product_id}/buyer-candidates")
+async def buyer_candidates(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """ANN-18 : à qui l'as-tu vendue ? Les personnes avec qui le vendeur a
+    échangé depuis la publication — le serveur ne lit pas les messages
+    (chiffrés) : il ne propose que des noms et des dates."""
+    me = current_user["user_id"]
+    product = db.query(MarketplaceProduct).filter(
+        MarketplaceProduct.id == product_id, MarketplaceProduct.seller_id == me,
+        MarketplaceProduct.deleted_at.is_(None),
+    ).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Annonce introuvable")
+    from sqlalchemy import case
+    from app.models import DirectMessage
+
+    other = case((DirectMessage.sender_id == me, DirectMessage.recipient_id), else_=DirectMessage.sender_id)
+    rows = (
+        db.query(other.label("user_id"), func.max(DirectMessage.created_at).label("last_at"))
+        .filter(
+            (DirectMessage.sender_id == me) | (DirectMessage.recipient_id == me),
+            DirectMessage.created_at >= product.created_at,
+        )
+        .group_by(other)
+        .order_by(func.max(DirectMessage.created_at).desc())
+        .limit(10)
+        .all()
+    )
+    items = []
+    for user_id, last_at in rows:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user is None or user.id == me:
+            continue
+        items.append({"user_id": user.id, "name": user.full_name or "Pokou", "last_message_at": last_at.isoformat()})
+    return {"items": items}
+
+
+@router.post("/{product_id}/sold")
+async def mark_sold(
+    product_id: int,
+    payload: SoldPayload,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """ANN-18 : clore une vente et désigner l'acheteur, qui pourra la noter
+    (ANN-24 → ANN-19). L'annonce quitte le marché."""
+    me = current_user["user_id"]
+    product = db.query(MarketplaceProduct).filter(
+        MarketplaceProduct.id == product_id, MarketplaceProduct.seller_id == me,
+        MarketplaceProduct.deleted_at.is_(None),
+    ).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Annonce introuvable")
+    if product.sold_at is not None:
+        raise HTTPException(status_code=409, detail="Cette annonce est déjà vendue")
+    if payload.buyer_id is not None:
+        if payload.buyer_id == me or db.query(User).filter(User.id == payload.buyer_id).first() is None:
+            raise HTTPException(status_code=422, detail="Acheteur introuvable")
+    product.sold_at = datetime.utcnow()
+    product.buyer_id = payload.buyer_id
+    product.final_price = payload.final_price
+    if payload.buyer_id is not None:
+        from app.services.notifications.inbox import notify
+
+        seller = db.query(User).filter(User.id == me).first()
+        price = payload.final_price if payload.final_price is not None else int(product.price or 0)
+        notify(
+            db, [payload.buyer_id], service="assime", title=product.name,
+            body=(
+                f"{(seller.full_name if seller else None) or 'Le vendeur'} a indiqué que tu as acheté "
+                f"cet article pour {price:,} FCFA.".replace(",", " ")
+            ),
+            route=f"assime/review/{product.id}",
+        )
+    db.commit()
+    return {"id": product.id, "sold_at": product.sold_at.isoformat(), "buyer_id": product.buyer_id,
+            "final_price": product.final_price}
+
+
+@router.get("/{product_id}/sale")
+async def sale_for_buyer(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """ANN-19 : ce que l'acheteur doit savoir pour noter — le vendeur,
+    l'article, le prix final, et s'il a déjà noté."""
+    me = current_user["user_id"]
+    product = db.query(MarketplaceProduct).filter(
+        MarketplaceProduct.id == product_id, MarketplaceProduct.buyer_id == me,
+        MarketplaceProduct.sold_at.isnot(None),
+    ).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Vente introuvable")
+    seller = db.query(User).filter(User.id == product.seller_id).first()
+    already = db.query(SellerReview).filter(
+        SellerReview.seller_id == product.seller_id, SellerReview.author_id == me
+    ).first()
+    return {
+        "product_id": product.id,
+        "product_name": product.name,
+        "seller_id": product.seller_id,
+        "seller_name": (seller.full_name if seller else None) or "Vendeur",
+        "final_price": product.final_price,
+        "sold_at": product.sold_at.isoformat(),
+        "reviewed": already is not None,
+    }

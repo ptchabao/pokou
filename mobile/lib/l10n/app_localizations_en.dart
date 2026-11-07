@@ -6834,4 +6834,102 @@ class LEn extends L {
 
   @override
   String get certChangePlan => 'Change plan';
+
+  @override
+  String get annSoldTitle => 'Mark as sold';
+
+  @override
+  String get annSoldWho =>
+      'Who did you sell it to? This person will be able to rate the transaction.';
+
+  @override
+  String annSoldDiscussionOf(Object date) {
+    return 'Chat of $date';
+  }
+
+  @override
+  String get annSoldOutside => 'Someone outside Pokou';
+
+  @override
+  String get annSoldOutsideSub => 'No rating possible for this sale';
+
+  @override
+  String get annSoldFinalPrice => 'Final price';
+
+  @override
+  String get annSoldPriceHelp => 'Visible only to you and the buyer';
+
+  @override
+  String get annSoldConfirm => 'Confirm the sale';
+
+  @override
+  String get annSoldBadge => 'Sold';
+
+  @override
+  String get annSoldDone => 'Sale recorded.';
+
+  @override
+  String get annRateTitle => 'Rate the transaction';
+
+  @override
+  String get annRateHow => 'How did your transaction go?';
+
+  @override
+  String get annRate1 => 'Disappointing';
+
+  @override
+  String get annRate2 => 'Fair';
+
+  @override
+  String get annRate3 => 'Good';
+
+  @override
+  String get annRate4 => 'Very good';
+
+  @override
+  String get annRate5 => 'Excellent';
+
+  @override
+  String annRateStars(Object count) {
+    return '$count stars out of 5';
+  }
+
+  @override
+  String get annRateWentWell => 'What went well';
+
+  @override
+  String get annTagAsDescribed => 'As described';
+
+  @override
+  String get annTagPunctual => 'On time';
+
+  @override
+  String get annTagFairPrice => 'Price respected';
+
+  @override
+  String get annTagFriendly => 'Friendly';
+
+  @override
+  String get annTagCommunication => 'Good communication';
+
+  @override
+  String get annRateComment => 'Your review (optional)';
+
+  @override
+  String get annRateNotice =>
+      'Your review shows your first name and the initial of your last name. Only a sale confirmed by the seller can be rated, once.';
+
+  @override
+  String get annRatePublish => 'Publish my review';
+
+  @override
+  String get annRatePublished => 'Thanks, your review is published.';
+
+  @override
+  String get annRateAlready => 'You’ve already rated this sale.';
+
+  @override
+  String annRateSubtitle(Object product, Object seller) {
+    return '$seller · $product';
+  }
 }

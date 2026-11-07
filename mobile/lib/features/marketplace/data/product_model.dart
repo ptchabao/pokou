@@ -190,7 +190,11 @@ class MarketplaceProduct {
     this.sellerReviewCount = 0,
     this.isActive = true,
     this.isBoosted = false,
+    this.soldAt,
   });
+
+  /// ANN-18 : vendue — l'annonce a quitté le marché.
+  final DateTime? soldAt;
 
   final int id;
   final int sellerId;
@@ -264,6 +268,7 @@ class MarketplaceProduct {
       sellerRating: rating == null ? null : (rating as num).toDouble(),
       sellerReviewCount: json['seller_review_count'] as int? ?? 0,
       isActive: json['is_active'] as bool? ?? true,
+      soldAt: DateTime.tryParse(json['sold_at'] as String? ?? ''),
       isBoosted: json['is_boosted'] as bool? ?? false,
     );
   }

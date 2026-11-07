@@ -39,6 +39,12 @@ class MarketplaceProduct(Base):
     #: détruirait la trace d'une somme encaissée et laisserait des
     #: conversations pointant dans le vide.
     deleted_at = Column(DateTime, nullable=True, index=True)
+    #: ANN-18 : vendue. `buyer_id` désigne l'acheteur sur Pokou (lui seul
+    #: pourra noter la vente) ; vide pour une vente hors de Pokou. Le prix
+    #: final n'est visible que du vendeur et de l'acheteur.
+    sold_at = Column(DateTime, nullable=True, index=True)
+    buyer_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    final_price = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -89,6 +95,9 @@ class SellerReview(Base):
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     rating = Column(Integer, nullable=False)  # 1..5, borné par la route
     comment = Column(String(1000), nullable=True)
+    #: ANN-19 : la vente notée, et « ce qui s'est bien passé ».
+    product_id = Column(Integer, ForeignKey("marketplace_products.id", ondelete="SET NULL"), nullable=True)
+    tags = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
