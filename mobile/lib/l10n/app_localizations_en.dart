@@ -6795,4 +6795,43 @@ class LEn extends L {
 
   @override
   String get notifSettings => 'Notification settings';
+
+  @override
+  String get certPausedTitle => 'Badge paused';
+
+  @override
+  String certPausedBody(Object days, Object due, Object since) {
+    return 'The payment of $due didn’t go through. Your badge has been hidden since $since, after $days days of grace.';
+  }
+
+  @override
+  String get certWhatRemains => 'What stays';
+
+  @override
+  String get certRemainsChats => 'Your chats and contacts';
+
+  @override
+  String get certRemainsTraces => 'The records already kept by proof mode';
+
+  @override
+  String get certWhatPaused => 'What is paused';
+
+  @override
+  String get certPausedBadge => 'The badge and the verified name';
+
+  @override
+  String get certPausedProof =>
+      'Proof mode for new messages and the dated export';
+
+  @override
+  String get certPausedWallet =>
+      'Payment is made from your wallet. If your balance was too low, top it up and try again.';
+
+  @override
+  String certPausedPay(Object amount) {
+    return 'Pay $amount and show my badge again';
+  }
+
+  @override
+  String get certChangePlan => 'Change plan';
 }

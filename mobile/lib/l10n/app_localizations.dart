@@ -11834,6 +11834,72 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Réglages des notifications'**
   String get notifSettings;
+
+  /// No description provided for @certPausedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Badge en pause'**
+  String get certPausedTitle;
+
+  /// No description provided for @certPausedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le paiement du {due} n’a pas abouti. Ton badge est masqué depuis le {since}, après {days} jours de grâce.'**
+  String certPausedBody(Object days, Object due, Object since);
+
+  /// No description provided for @certWhatRemains.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui reste'**
+  String get certWhatRemains;
+
+  /// No description provided for @certRemainsChats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes discussions et tes contacts'**
+  String get certRemainsChats;
+
+  /// No description provided for @certRemainsTraces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les traces déjà enregistrées par le mode preuve'**
+  String get certRemainsTraces;
+
+  /// No description provided for @certWhatPaused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui est en pause'**
+  String get certWhatPaused;
+
+  /// No description provided for @certPausedBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le badge et le nom vérifié'**
+  String get certPausedBadge;
+
+  /// No description provided for @certPausedProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve des nouveaux messages et l’export daté'**
+  String get certPausedProof;
+
+  /// No description provided for @certPausedWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le paiement se fait par ton wallet. Si ton solde était insuffisant, recharge-le puis réessaie.'**
+  String get certPausedWallet;
+
+  /// No description provided for @certPausedPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} et réafficher mon badge'**
+  String certPausedPay(Object amount);
+
+  /// No description provided for @certChangePlan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de formule'**
+  String get certChangePlan;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -6822,4 +6822,43 @@ class LEs extends L {
 
   @override
   String get notifSettings => 'Ajustes de notificaciones';
+
+  @override
+  String get certPausedTitle => 'Insignia en pausa';
+
+  @override
+  String certPausedBody(Object days, Object due, Object since) {
+    return 'El pago del $due no se completó. Tu insignia está oculta desde el $since, tras $days días de gracia.';
+  }
+
+  @override
+  String get certWhatRemains => 'Lo que se mantiene';
+
+  @override
+  String get certRemainsChats => 'Tus conversaciones y contactos';
+
+  @override
+  String get certRemainsTraces => 'Los rastros ya guardados por el modo prueba';
+
+  @override
+  String get certWhatPaused => 'Lo que está en pausa';
+
+  @override
+  String get certPausedBadge => 'La insignia y el nombre verificado';
+
+  @override
+  String get certPausedProof =>
+      'El modo prueba de los nuevos mensajes y la exportación fechada';
+
+  @override
+  String get certPausedWallet =>
+      'El pago se hace con tu billetera. Si tu saldo era insuficiente, recárgala y vuelve a intentarlo.';
+
+  @override
+  String certPausedPay(Object amount) {
+    return 'Pagar $amount y volver a mostrar mi insignia';
+  }
+
+  @override
+  String get certChangePlan => 'Cambiar de plan';
 }

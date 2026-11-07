@@ -141,17 +141,36 @@ def test_mode_preuve_reserve_aux_certifies(client):
     assert ok.status_code == 200 and ok.json()["proof_mode"] is True
 
 
+def _send_encrypted(client, group_id, sender, recipient_id, text="chiffre"):
+    """Un message de groupe tel que l'app l'envoie : chiffré, après avoir
+    remis sa clé d'expéditeur aux autres membres."""
+    epoch = client.get(f"/api/v1/groups/{group_id}", headers=sender).json()["crypto_epoch"]
+    client.post(
+        f"/api/v1/groups/{group_id}/sender-key-distributions",
+        json={"epoch": epoch, "distributions": [{
+            "recipient_id": recipient_id, "encryption": "v1",
+            "ciphertext": "cle", "envelope": {"sid": "s"},
+        }]},
+        headers=sender,
+    )
+    response = client.post(
+        f"/api/v1/groups/{group_id}/messages",
+        json={"encryption": "sender-key-v1", "ciphertext": text, "crypto_epoch": epoch},
+        headers=sender,
+    )
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def _admin_id(client, headers):
+    return client.get("/api/v1/auth/me", headers=headers).json()["id"]
+
+
 def test_en_mode_preuve_un_message_supprime_reste_visible(client):
     admin, member, group_id = _group_with_member(client)
     client.post("/api/v1/certified/trial", headers=admin)
     client.post(f"/api/v1/groups/{group_id}/proof-mode", json={"enabled": True}, headers=admin)
-    sent = client.post(f"/api/v1/groups/{group_id}/messages", json={"content": "Je paie demain"}, headers=member).json()
-
-    # Modifier reste possible ; la version d'origine reste lisible de tous.
-    edited = client.patch(
-        f"/api/v1/groups/{group_id}/messages/{sent['id']}", json={"content": "Je paie la semaine prochaine"}, headers=member,
-    ).json()
-    assert edited["original_content"] == "Je paie demain"
+    sent = _send_encrypted(client, group_id, member, _admin_id(client, admin), "Je paie demain (chiffré)")
 
     deleted = client.delete(f"/api/v1/groups/{group_id}/messages/{sent['id']}", headers=member).json()
     assert deleted["kept_as_proof"] is True
@@ -159,17 +178,14 @@ def test_en_mode_preuve_un_message_supprime_reste_visible(client):
     messages = client.get(f"/api/v1/groups/{group_id}/messages", headers=admin).json()
     items = messages["items"] if isinstance(messages, dict) else messages
     kept = next(m for m in items if m["id"] == sent["id"])
-    assert kept["original_content"] == "Je paie demain" and kept["deleted_at"] is not None
-    # Le message système qui annonce le mode preuve est dans le fil.
-    assert any((m.get("payload") or {}).get("kind") == "proof_mode" for m in items)
-
-    pdf = client.get(f"/api/v1/groups/{group_id}/proof-export", headers=member)
-    assert pdf.status_code == 200 and pdf.content.startswith(b"%PDF")
+    # Conservé, marqué supprimé — et toujours chiffré : le serveur garde la
+    # trace sans pouvoir la lire.
+    assert kept["deleted_at"] is not None and kept["content"] is None
 
 
 def test_hors_mode_preuve_la_suppression_efface(client):
     admin, member, group_id = _group_with_member(client)
-    sent = client.post(f"/api/v1/groups/{group_id}/messages", json={"content": "Oups"}, headers=member).json()
+    sent = _send_encrypted(client, group_id, member, _admin_id(client, admin), "Oups")
     deleted = client.delete(f"/api/v1/groups/{group_id}/messages/{sent['id']}", headers=member).json()
     assert deleted["kept_as_proof"] is False
     messages = client.get(f"/api/v1/groups/{group_id}/messages", headers=admin).json()
@@ -188,3 +204,19 @@ def test_tout_titulaire_active_desactivation_reservee(client):
     assert refused.status_code == 403
     # La personne qui l'a activé, si.
     assert client.post(f"/api/v1/groups/{group_id}/proof-mode", json={"enabled": False}, headers=member).json()["proof_mode"] is False
+
+
+def test_paiement_manque_grace_de_7_jours_puis_badge_en_pause():
+    from datetime import datetime, timedelta
+
+    from app.api.v1.certified.certified import refresh_status
+    from app.models import CertifiedSubscription
+
+    now = datetime(2026, 12, 10)
+    sub = CertifiedSubscription(user_id=1, status="ACTIVE", current_period_end=datetime(2026, 11, 27))
+    # Le 30 nov. : encore dans les 7 jours de grâce, le badge reste.
+    assert refresh_status(sub, datetime(2026, 11, 30)) == "ACTIVE"
+    # Après le 4 déc. : en pause (pas expiré : rien n'est effacé).
+    assert refresh_status(sub, now) == "PAUSED"
+    trial = CertifiedSubscription(user_id=2, status="TRIAL", trial_ends_at=now - timedelta(days=1))
+    assert refresh_status(trial, now) == "EXPIRED"

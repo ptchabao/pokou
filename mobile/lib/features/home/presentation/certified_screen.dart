@@ -141,6 +141,26 @@ class CertifiedScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+                // CRT-5 · Badge en pause : expliquer sans inquiéter, et
+                // réafficher le badge en un paiement.
+                if (state == 'PAUSED') ...[
+                  const SizedBox(height: 12),
+                  _BadgePaused(
+                    status: status,
+                    plans: plans,
+                    date: date,
+                    onPay: (code) => openPayment(
+                      context,
+                      api
+                          .post('/certified/subscribe', body: {'plan': code})
+                          .then(
+                            (json) =>
+                                (json as Map<String, dynamic>)['payment_url']
+                                    as String?,
+                          ),
+                    ),
+                  ),
+                ],
                 if (state == 'NAME_MISMATCH') ...[
                   const SizedBox(height: 12),
                   _NameMismatch(
@@ -322,6 +342,85 @@ class _NameMismatchState extends ConsumerState<_NameMismatch> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BadgePaused extends StatelessWidget {
+  const _BadgePaused({
+    required this.status,
+    required this.plans,
+    required this.date,
+    required this.onPay,
+  });
+
+  final Map<String, dynamic> status;
+  final List<Map<String, dynamic>> plans;
+  final String Function(String?) date;
+  final void Function(String planCode) onPay;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final code = status['plan'] as String?;
+    final plan =
+        plans.where((p) => p['code'] == code).firstOrNull ?? plans.firstOrNull;
+    Widget list(String title, List<String> items) => ModuleCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.circle, size: 6, color: AppColors.textMuted),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(item)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l.certPausedTitle,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l.certPausedBody(
+            date(status['current_period_end'] as String?),
+            date(status['paused_since'] as String?),
+            '${status['grace_days'] ?? 7}',
+          ),
+        ),
+        const SizedBox(height: 12),
+        list(l.certWhatRemains, [l.certRemainsChats, l.certRemainsTraces]),
+        const SizedBox(height: 8),
+        list(l.certWhatPaused, [l.certPausedBadge, l.certPausedProof]),
+        const SizedBox(height: 8),
+        ModuleCallout(tone: CalloutTone.beige, text: l.certPausedWallet),
+        if (plan != null) ...[
+          const SizedBox(height: 12),
+          ModuleActionButton(
+            label: l.certPausedPay(formatFcfa(plan['price_ttc'] as int)),
+            onPressed: () => onPay(plan['code'] as String),
+          ),
+          Center(
+            child: Text(
+              l.certChangePlan,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

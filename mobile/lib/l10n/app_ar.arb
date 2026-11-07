@@ -1954,5 +1954,16 @@
   "notifMessagesElsewhere": "لا تظهر الرسائل هنا: تبقى في المحادثات.",
   "notifEmpty": "لا توجد إشعارات بعد.",
   "notifServiceCertified": "Pokou المعتمد",
-  "notifSettings": "إعدادات الإشعارات"
+  "notifSettings": "إعدادات الإشعارات",
+  "certPausedTitle": "الشارة متوقفة مؤقتًا",
+  "certPausedBody": "لم يكتمل دفع {due}. شارتك مخفية منذ {since}، بعد {days} أيام من المهلة.",
+  "certWhatRemains": "ما يبقى",
+  "certRemainsChats": "محادثاتك وجهات اتصالك",
+  "certRemainsTraces": "الآثار التي سجّلها وضع الإثبات",
+  "certWhatPaused": "ما هو متوقف",
+  "certPausedBadge": "الشارة والاسم الموثَّق",
+  "certPausedProof": "وضع الإثبات للرسائل الجديدة والتصدير المؤرَّخ",
+  "certPausedWallet": "يتم الدفع من محفظتك. إذا كان رصيدك غير كافٍ، اشحنها ثم أعد المحاولة.",
+  "certPausedPay": "ادفع {amount} وأعد إظهار شارتي",
+  "certChangePlan": "تغيير الباقة"
 }

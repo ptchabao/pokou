@@ -6873,4 +6873,44 @@ class LRu extends L {
 
   @override
   String get notifSettings => 'Настройки уведомлений';
+
+  @override
+  String get certPausedTitle => 'Значок приостановлен';
+
+  @override
+  String certPausedBody(Object days, Object due, Object since) {
+    return 'Платёж от $due не прошёл. Значок скрыт с $since, после $days дней отсрочки.';
+  }
+
+  @override
+  String get certWhatRemains => 'Что остаётся';
+
+  @override
+  String get certRemainsChats => 'Твои чаты и контакты';
+
+  @override
+  String get certRemainsTraces =>
+      'Записи, уже сохранённые режимом доказательств';
+
+  @override
+  String get certWhatPaused => 'Что приостановлено';
+
+  @override
+  String get certPausedBadge => 'Значок и проверенное имя';
+
+  @override
+  String get certPausedProof =>
+      'Режим доказательств для новых сообщений и экспорт с датой';
+
+  @override
+  String get certPausedWallet =>
+      'Оплата идёт с твоего кошелька. Если не хватило средств, пополни его и попробуй снова.';
+
+  @override
+  String certPausedPay(Object amount) {
+    return 'Оплатить $amount и вернуть значок';
+  }
+
+  @override
+  String get certChangePlan => 'Сменить тариф';
 }

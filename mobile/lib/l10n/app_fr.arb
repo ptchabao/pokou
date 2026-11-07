@@ -3159,5 +3159,16 @@
   "notifMessagesElsewhere": "Les messages n’apparaissent pas ici : ils restent dans Discussions.",
   "notifEmpty": "Aucune notification pour l’instant.",
   "notifServiceCertified": "Pokou certifié",
-  "notifSettings": "Réglages des notifications"
+  "notifSettings": "Réglages des notifications",
+  "certPausedTitle": "Badge en pause",
+  "certPausedBody": "Le paiement du {due} n’a pas abouti. Ton badge est masqué depuis le {since}, après {days} jours de grâce.",
+  "certWhatRemains": "Ce qui reste",
+  "certRemainsChats": "Tes discussions et tes contacts",
+  "certRemainsTraces": "Les traces déjà enregistrées par le mode preuve",
+  "certWhatPaused": "Ce qui est en pause",
+  "certPausedBadge": "Le badge et le nom vérifié",
+  "certPausedProof": "Le mode preuve des nouveaux messages et l’export daté",
+  "certPausedWallet": "Le paiement se fait par ton wallet. Si ton solde était insuffisant, recharge-le puis réessaie.",
+  "certPausedPay": "Payer {amount} et réafficher mon badge",
+  "certChangePlan": "Changer de formule"
 }

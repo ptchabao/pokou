@@ -6841,4 +6841,44 @@ class LFr extends L {
 
   @override
   String get notifSettings => 'Réglages des notifications';
+
+  @override
+  String get certPausedTitle => 'Badge en pause';
+
+  @override
+  String certPausedBody(Object days, Object due, Object since) {
+    return 'Le paiement du $due n’a pas abouti. Ton badge est masqué depuis le $since, après $days jours de grâce.';
+  }
+
+  @override
+  String get certWhatRemains => 'Ce qui reste';
+
+  @override
+  String get certRemainsChats => 'Tes discussions et tes contacts';
+
+  @override
+  String get certRemainsTraces =>
+      'Les traces déjà enregistrées par le mode preuve';
+
+  @override
+  String get certWhatPaused => 'Ce qui est en pause';
+
+  @override
+  String get certPausedBadge => 'Le badge et le nom vérifié';
+
+  @override
+  String get certPausedProof =>
+      'Le mode preuve des nouveaux messages et l’export daté';
+
+  @override
+  String get certPausedWallet =>
+      'Le paiement se fait par ton wallet. Si ton solde était insuffisant, recharge-le puis réessaie.';
+
+  @override
+  String certPausedPay(Object amount) {
+    return 'Payer $amount et réafficher mon badge';
+  }
+
+  @override
+  String get certChangePlan => 'Changer de formule';
 }

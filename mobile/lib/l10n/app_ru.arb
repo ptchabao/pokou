@@ -1954,5 +1954,16 @@
   "notifMessagesElsewhere": "Сообщения здесь не появляются: они остаются в разделе «Чаты».",
   "notifEmpty": "Пока нет уведомлений.",
   "notifServiceCertified": "Pokou certifié",
-  "notifSettings": "Настройки уведомлений"
+  "notifSettings": "Настройки уведомлений",
+  "certPausedTitle": "Значок приостановлен",
+  "certPausedBody": "Платёж от {due} не прошёл. Значок скрыт с {since}, после {days} дней отсрочки.",
+  "certWhatRemains": "Что остаётся",
+  "certRemainsChats": "Твои чаты и контакты",
+  "certRemainsTraces": "Записи, уже сохранённые режимом доказательств",
+  "certWhatPaused": "Что приостановлено",
+  "certPausedBadge": "Значок и проверенное имя",
+  "certPausedProof": "Режим доказательств для новых сообщений и экспорт с датой",
+  "certPausedWallet": "Оплата идёт с твоего кошелька. Если не хватило средств, пополни его и попробуй снова.",
+  "certPausedPay": "Оплатить {amount} и вернуть значок",
+  "certChangePlan": "Сменить тариф"
 }

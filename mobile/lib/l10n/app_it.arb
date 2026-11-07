@@ -1954,5 +1954,16 @@
   "notifMessagesElsewhere": "I messaggi non compaiono qui: restano in Chat.",
   "notifEmpty": "Ancora nessuna notifica.",
   "notifServiceCertified": "Pokou certificato",
-  "notifSettings": "Impostazioni notifiche"
+  "notifSettings": "Impostazioni notifiche",
+  "certPausedTitle": "Badge in pausa",
+  "certPausedBody": "Il pagamento del {due} non è andato a buon fine. Il tuo badge è nascosto dal {since}, dopo {days} giorni di tolleranza.",
+  "certWhatRemains": "Cosa resta",
+  "certRemainsChats": "Le tue chat e i tuoi contatti",
+  "certRemainsTraces": "Le tracce già registrate dalla modalità prova",
+  "certWhatPaused": "Cosa è in pausa",
+  "certPausedBadge": "Il badge e il nome verificato",
+  "certPausedProof": "La modalità prova dei nuovi messaggi e l’esportazione datata",
+  "certPausedWallet": "Il pagamento avviene dal tuo wallet. Se il saldo era insufficiente, ricaricalo e riprova.",
+  "certPausedPay": "Paga {amount} e mostra di nuovo il mio badge",
+  "certChangePlan": "Cambia formula"
 }

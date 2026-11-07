@@ -6790,4 +6790,42 @@ class LAr extends L {
 
   @override
   String get notifSettings => 'إعدادات الإشعارات';
+
+  @override
+  String get certPausedTitle => 'الشارة متوقفة مؤقتًا';
+
+  @override
+  String certPausedBody(Object days, Object due, Object since) {
+    return 'لم يكتمل دفع $due. شارتك مخفية منذ $since، بعد $days أيام من المهلة.';
+  }
+
+  @override
+  String get certWhatRemains => 'ما يبقى';
+
+  @override
+  String get certRemainsChats => 'محادثاتك وجهات اتصالك';
+
+  @override
+  String get certRemainsTraces => 'الآثار التي سجّلها وضع الإثبات';
+
+  @override
+  String get certWhatPaused => 'ما هو متوقف';
+
+  @override
+  String get certPausedBadge => 'الشارة والاسم الموثَّق';
+
+  @override
+  String get certPausedProof => 'وضع الإثبات للرسائل الجديدة والتصدير المؤرَّخ';
+
+  @override
+  String get certPausedWallet =>
+      'يتم الدفع من محفظتك. إذا كان رصيدك غير كافٍ، اشحنها ثم أعد المحاولة.';
+
+  @override
+  String certPausedPay(Object amount) {
+    return 'ادفع $amount وأعد إظهار شارتي';
+  }
+
+  @override
+  String get certChangePlan => 'تغيير الباقة';
 }

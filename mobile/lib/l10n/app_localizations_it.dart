@@ -6838,4 +6838,44 @@ class LIt extends L {
 
   @override
   String get notifSettings => 'Impostazioni notifiche';
+
+  @override
+  String get certPausedTitle => 'Badge in pausa';
+
+  @override
+  String certPausedBody(Object days, Object due, Object since) {
+    return 'Il pagamento del $due non è andato a buon fine. Il tuo badge è nascosto dal $since, dopo $days giorni di tolleranza.';
+  }
+
+  @override
+  String get certWhatRemains => 'Cosa resta';
+
+  @override
+  String get certRemainsChats => 'Le tue chat e i tuoi contatti';
+
+  @override
+  String get certRemainsTraces =>
+      'Le tracce già registrate dalla modalità prova';
+
+  @override
+  String get certWhatPaused => 'Cosa è in pausa';
+
+  @override
+  String get certPausedBadge => 'Il badge e il nome verificato';
+
+  @override
+  String get certPausedProof =>
+      'La modalità prova dei nuovi messaggi e l’esportazione datata';
+
+  @override
+  String get certPausedWallet =>
+      'Il pagamento avviene dal tuo wallet. Se il saldo era insufficiente, ricaricalo e riprova.';
+
+  @override
+  String certPausedPay(Object amount) {
+    return 'Paga $amount e mostra di nuovo il mio badge';
+  }
+
+  @override
+  String get certChangePlan => 'Cambia formula';
 }

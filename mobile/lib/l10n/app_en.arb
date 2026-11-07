@@ -1954,5 +1954,16 @@
   "notifMessagesElsewhere": "Messages don’t appear here: they stay in Chats.",
   "notifEmpty": "No notifications yet.",
   "notifServiceCertified": "Pokou certified",
-  "notifSettings": "Notification settings"
+  "notifSettings": "Notification settings",
+  "certPausedTitle": "Badge paused",
+  "certPausedBody": "The payment of {due} didn’t go through. Your badge has been hidden since {since}, after {days} days of grace.",
+  "certWhatRemains": "What stays",
+  "certRemainsChats": "Your chats and contacts",
+  "certRemainsTraces": "The records already kept by proof mode",
+  "certWhatPaused": "What is paused",
+  "certPausedBadge": "The badge and the verified name",
+  "certPausedProof": "Proof mode for new messages and the dated export",
+  "certPausedWallet": "Payment is made from your wallet. If your balance was too low, top it up and try again.",
+  "certPausedPay": "Pay {amount} and show my badge again",
+  "certChangePlan": "Change plan"
 }

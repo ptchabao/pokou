@@ -1954,5 +1954,16 @@
   "notifMessagesElsewhere": "Los mensajes no aparecen aquí: se quedan en Conversaciones.",
   "notifEmpty": "Aún no hay notificaciones.",
   "notifServiceCertified": "Pokou certificado",
-  "notifSettings": "Ajustes de notificaciones"
+  "notifSettings": "Ajustes de notificaciones",
+  "certPausedTitle": "Insignia en pausa",
+  "certPausedBody": "El pago del {due} no se completó. Tu insignia está oculta desde el {since}, tras {days} días de gracia.",
+  "certWhatRemains": "Lo que se mantiene",
+  "certRemainsChats": "Tus conversaciones y contactos",
+  "certRemainsTraces": "Los rastros ya guardados por el modo prueba",
+  "certWhatPaused": "Lo que está en pausa",
+  "certPausedBadge": "La insignia y el nombre verificado",
+  "certPausedProof": "El modo prueba de los nuevos mensajes y la exportación fechada",
+  "certPausedWallet": "El pago se hace con tu billetera. Si tu saldo era insuficiente, recárgala y vuelve a intentarlo.",
+  "certPausedPay": "Pagar {amount} y volver a mostrar mi insignia",
+  "certChangePlan": "Cambiar de plan"
 }

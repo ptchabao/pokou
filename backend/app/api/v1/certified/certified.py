@@ -102,13 +102,24 @@ def _subscription(db: Session, user_id: int) -> Optional[CertifiedSubscription]:
     return db.query(CertifiedSubscription).filter(CertifiedSubscription.user_id == user_id).first()
 
 
+#: CRT-5 : après un paiement manqué, le badge reste visible 7 jours de grâce,
+#: puis il est mis EN PAUSE — masqué, sans rien effacer.
+GRACE_DAYS = 7
+
+
 def refresh_status(sub: CertifiedSubscription, now: Optional[datetime] = None) -> str:
     """Fait expirer ce qui doit l'être, à la lecture."""
     now = now or datetime.utcnow()
     if sub.status == "TRIAL" and sub.trial_ends_at and sub.trial_ends_at < now:
         sub.status = "EXPIRED"
-    elif sub.status in ("ACTIVE", "NAME_MISMATCH") and sub.current_period_end and sub.current_period_end < now:
-        sub.status = "EXPIRED"
+    elif (
+        sub.status in ("ACTIVE", "NAME_MISMATCH")
+        and sub.current_period_end
+        and sub.current_period_end + timedelta(days=GRACE_DAYS) < now
+    ):
+        # Un abonnement PAYÉ ne s'éteint pas : il se met en pause, et se
+        # réactive au paiement suivant. Les traces du mode preuve restent.
+        sub.status = "PAUSED"
     return sub.status
 
 
@@ -142,6 +153,12 @@ def _status_json(db: Session, user: User, sub: Optional[CertifiedSubscription]) 
         "plan": sub.plan if sub else None,
         "trial_ends_at": sub.trial_ends_at.isoformat() if sub and sub.trial_ends_at else None,
         "current_period_end": sub.current_period_end.isoformat() if sub and sub.current_period_end else None,
+        # CRT-5 : la date du paiement manqué, et celle où le badge a été masqué.
+        "paused_since": (
+            (sub.current_period_end + timedelta(days=GRACE_DAYS)).isoformat()
+            if sub and sub.status == "PAUSED" and sub.current_period_end else None
+        ),
+        "grace_days": GRACE_DAYS,
         "badge_visible": bool(user.is_verified),
         "proof_mode_allowed": bool(sub and sub.status in ("TRIAL", "ACTIVE", "NAME_MISMATCH")),
         "profile_name": user.full_name,
