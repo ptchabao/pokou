@@ -7206,4 +7206,7 @@ class LRu extends L {
 
   @override
   String get storageOtherDiscussion => 'Другие файлы';
+
+  @override
+  String get callReconnecting => 'Переподключение…';
 }

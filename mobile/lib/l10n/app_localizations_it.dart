@@ -7174,4 +7174,7 @@ class LIt extends L {
 
   @override
   String get storageOtherDiscussion => 'Altri file';
+
+  @override
+  String get callReconnecting => 'Riconnessione…';
 }

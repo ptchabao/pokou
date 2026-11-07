@@ -7176,4 +7176,7 @@ class LFr extends L {
 
   @override
   String get storageOtherDiscussion => 'Autres fichiers';
+
+  @override
+  String get callReconnecting => 'Reconnexion…';
 }

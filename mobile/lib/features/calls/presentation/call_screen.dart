@@ -718,6 +718,44 @@ class _CallScreenState extends ConsumerState<CallScreen> {
                 ),
               ),
             ),
+          // Reconnexion en cours (la nôtre ou celle de l'autre) : l'appel
+          // n'est pas coupé, il revient.
+          if (_s.waitingForReturn)
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 8,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        L.of(context).callReconnecting,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -7154,4 +7154,7 @@ class LEs extends L {
 
   @override
   String get storageOtherDiscussion => 'Otros archivos';
+
+  @override
+  String get callReconnecting => 'Reconectando…';
 }

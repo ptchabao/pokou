@@ -7119,4 +7119,7 @@ class LAr extends L {
 
   @override
   String get storageOtherDiscussion => 'ملفات أخرى';
+
+  @override
+  String get callReconnecting => 'جارٍ إعادة الاتصال…';
 }

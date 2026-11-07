@@ -12404,6 +12404,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Autres fichiers'**
   String get storageOtherDiscussion;
+
+  /// No description provided for @callReconnecting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reconnexion…'**
+  String get callReconnecting;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

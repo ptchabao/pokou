@@ -2049,5 +2049,6 @@
   "storageCallSaver": "Risparmia dati durante le chiamate",
   "storageCallSaverSub": "Qualità ridotta, chiamata più stabile",
   "storagePokouUses": "Pokou · {size}",
-  "storageOtherDiscussion": "Altri file"
+  "storageOtherDiscussion": "Altri file",
+  "callReconnecting": "Riconnessione…"
 }

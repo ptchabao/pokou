@@ -198,6 +198,20 @@ class CallSession extends ChangeNotifier {
   // correspondant ait pu décrocher.
   bool someoneJoined = false;
 
+  /// Le salon se reconnecte (changement de réseau, coupure brève) : LiveKit
+  /// fait alors « partir » puis revenir les autres participants. Rien ne
+  /// doit raccrocher pendant ce temps.
+  bool reconnecting = false;
+
+  /// Les autres ont disparu du salon : on attend un peu avant de conclure
+  /// que l'appel est fini — c'est peut-être EUX qui se reconnectent.
+  Timer? _emptyRoomTimer;
+  static const _emptyRoomGrace = Duration(seconds: 25);
+
+  /// Vrai quand quelqu'un est attendu de retour : l'écran l'affiche
+  /// (« Reconnexion… ») au lieu de laisser croire à un appel coupé.
+  bool get waitingForReturn => reconnecting || _emptyRoomTimer != null;
+
   /// Le début de la conversation (quelqu'un a décroché) — pour la durée
   /// affichée dans le bandeau.
   DateTime? connectedAt;
@@ -317,8 +331,23 @@ class CallSession extends ChangeNotifier {
       ..on<RoomDisconnectedEvent>((_) => unawaited(_end()))
       ..on<ParticipantConnectedEvent>((_) {
         // Quelqu'un vient de rejoindre le salon : le correspondant a
-        // décroché — le ringback n'a plus lieu d'être.
+        // décroché — le ringback n'a plus lieu d'être. Ou il revient
+        // d'une reconnexion : l'attente s'arrête.
+        _emptyRoomTimer?.cancel();
+        _emptyRoomTimer = null;
         _markJoined();
+        _changed();
+      })
+      ..on<RoomReconnectingEvent>((_) {
+        reconnecting = true;
+        _changed();
+      })
+      ..on<RoomReconnectedEvent>((_) {
+        reconnecting = false;
+        if (lkRoom.remoteParticipants.isNotEmpty) {
+          _emptyRoomTimer?.cancel();
+          _emptyRoomTimer = null;
+        }
         _changed();
       })
       ..on<ParticipantDisconnectedEvent>((event) {
@@ -327,9 +356,20 @@ class CallSession extends ChangeNotifier {
         if (userId != null) _gone.add(userId);
         // Filet de sécurité si le signal `end` n'arrive pas : un salon vidé
         // de tous ses pairs après en avoir eu au moins un, c'est un appel
-        // terminé.
-        if (someoneJoined && lkRoom.remoteParticipants.isEmpty) {
-          unawaited(hangUp());
+        // terminé — mais seulement s'il le RESTE. Une reconnexion (la nôtre
+        // ou la leur) vide le salon quelques secondes : raccrocher tout de
+        // suite coupait l'appel à chaque changement de réseau.
+        if (someoneJoined &&
+            lkRoom.remoteParticipants.isEmpty &&
+            _emptyRoomTimer == null) {
+          _emptyRoomTimer = Timer(_emptyRoomGrace, () {
+            _emptyRoomTimer = null;
+            if (!ended && !reconnecting && lkRoom.remoteParticipants.isEmpty) {
+              unawaited(hangUp());
+            } else {
+              _changed();
+            }
+          });
         }
       })
       ..on<TrackSubscribedEvent>((event) {
@@ -591,6 +631,8 @@ class CallSession extends ChangeNotifier {
   Future<void> _end() async {
     if (ended) return;
     _leaving = true;
+    _emptyRoomTimer?.cancel();
+    _emptyRoomTimer = null;
     _noAnswerTimer?.cancel();
     await _signalSubscription?.cancel();
     unawaited(_ringtonePlayer.stop());

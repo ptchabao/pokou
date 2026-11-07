@@ -9,6 +9,7 @@ import '../../../core/providers.dart';
 import '../../../core/sync/offline_list.dart';
 import '../../../core/router/app_router.dart';
 import '../data/call_repository.dart';
+import 'call_session.dart';
 import 'incoming_call_screen.dart';
 
 final callRepositoryProvider = Provider<CallRepository>((ref) {
@@ -47,6 +48,11 @@ final callSignalingProvider = Provider<void>((ref) {
     final room = event['room'] as String?;
     final fromUserId = event['from_user_id'] as int?;
     if (room == null || fromUserId == null) return;
+    // Une invitation pour l'appel DÉJÀ en cours (renvoyée au retour du
+    // réseau, ou arrivée en double) ne doit pas refaire sonner : c'était
+    // « l'appel qui se relance ».
+    final current = activeCall.value;
+    if (current != null && !current.ended && current.roomName == room) return;
     final callType = event['call_type'] as String? ?? '1:1';
     final isVideo = event['is_video'] as bool? ?? true;
     final groupId = event['group_id'] as int?;

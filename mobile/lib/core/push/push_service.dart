@@ -15,6 +15,7 @@ import 'web_notifications_stub.dart'
     if (dart.library.js_interop) 'web_notifications_web.dart'
     as web_notifications;
 
+import '../../features/calls/presentation/call_session.dart';
 import '../../features/notifications/presentation/notifications_center_screen.dart';
 import '../../features/calls/presentation/call_controller.dart';
 import '../../features/calls/presentation/call_screen.dart';
@@ -514,12 +515,22 @@ class PushService {
     web_notifications.showNotification(title, body);
   }
 
+  bool _isCurrentCall(Object? room) {
+    final current = activeCall.value;
+    return room != null && current != null && !current.ended && current.roomName == room;
+  }
+
   bool _isVideo(Map<String, dynamic> data) {
     final value = data['is_video'];
     return value == true || value == '1' || value == 'true';
   }
 
   void _showForegroundNotification(RemoteMessage message) {
+    // L'appel que cette notification annonce est DÉJÀ en cours ici (push
+    // arrivé en retard, ou en double avec le WebSocket) : rien à sonner.
+    if (message.data['type'] == 'call' && _isCurrentCall(message.data['room'])) {
+      return;
+    }
     if (MessagePush.tryParse(message.data) != null) {
       unawaited(_showMessage(message.data));
       return;
@@ -888,6 +899,7 @@ class PushService {
     final fromUserId = int.tryParse(data['from_user_id'] as String? ?? '');
     final isVideo = _isVideo(data);
     if (room == null || fromUserId == null) return;
+    if (_isCurrentCall(room)) return;
 
     if (actionId == 'decline') {
       unawaited(
