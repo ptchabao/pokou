@@ -30,6 +30,10 @@ class AppTheme {
       'Roboto',
       'Noto Sans Arabic',
       'Noto Sans',
+      // Les EMOJI (et les drapeaux) : sans eux dans la chaîne, iOS affichait
+      // des carrés « ? » à la place.
+      'Apple Color Emoji',
+      'Noto Color Emoji',
     ];
 
     final applied = base.textTheme.apply(

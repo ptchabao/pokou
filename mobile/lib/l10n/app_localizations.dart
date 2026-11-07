@@ -3624,7 +3624,7 @@ abstract class L {
   /// No description provided for @groupNotEncryptedNotice.
   ///
   /// In fr, this message translates to:
-  /// **'🔒 Chiffré de bout en bout : seuls les membres peuvent lire ces messages.'**
+  /// **'Chiffré de bout en bout : seuls les membres peuvent lire ces messages.'**
   String get groupNotEncryptedNotice;
 
   /// No description provided for @botLabel.
@@ -8124,13 +8124,13 @@ abstract class L {
   /// No description provided for @e2eeReassurance.
   ///
   /// In fr, this message translates to:
-  /// **'🔒 Chiffré de bout en bout : personne d’autre, pas même Pokou, ne peut lire ces messages.'**
+  /// **'Chiffré de bout en bout : personne d’autre, pas même Pokou, ne peut lire ces messages.'**
   String get e2eeReassurance;
 
   /// No description provided for @chatsEncryptionFooter.
   ///
   /// In fr, this message translates to:
-  /// **'🔒 Tes discussions sont chiffrées de bout en bout.'**
+  /// **'Tes discussions sont chiffrées de bout en bout.'**
   String get chatsEncryptionFooter;
 
   /// No description provided for @callsRecentSection.

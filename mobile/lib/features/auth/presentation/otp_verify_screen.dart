@@ -334,17 +334,23 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (var i = 0; i < _codeLength; i++) ...[
-                if (i > 0) const SizedBox(width: 16),
-                _OtpBox(
-                  digit: i < code.length ? code[i] : null,
-                  active: hasFocus && i == code.length,
-                ),
+          // FittedBox : sur un écran étroit, les 6 cases rétrécissent au lieu
+          // de déborder.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var i = 0; i < _codeLength; i++) ...[
+                  if (i > 0) const SizedBox(width: 16),
+                  _OtpBox(
+                    digit: i < code.length ? code[i] : null,
+                    active: hasFocus && i == code.length,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
           // Champ réel invisible qui capte la saisie/le collage (long
           // appui) — les 6 cases ne sont qu'un rendu de son contenu.

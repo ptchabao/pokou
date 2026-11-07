@@ -128,5 +128,65 @@ void main() {
         );
       },
     );
+
+    test(
+      'un expéditeur sur deux appareils reste lisible (clé neuve installée)',
+      () async {
+        final phone = GroupSenderKeys(store: InMemorySenderKeyStore());
+        final simulator = GroupSenderKeys(store: InMemorySenderKeyStore());
+        final bob = GroupSenderKeys(store: InMemorySenderKeyStore());
+        Future<void> give(GroupSenderKeys from, String id) async =>
+            bob.acceptDistribution(
+              groupId: 6,
+              epoch: 4,
+              senderId: 1,
+              envelopeId: id,
+              distribution: await from.createDistribution(
+                groupId: 6,
+                epoch: 4,
+                senderId: 1,
+              ),
+            );
+        Future<String> roundTrip(GroupSenderKeys from, String text) async =>
+            bob.decrypt(
+              groupId: 6,
+              epoch: 4,
+              senderId: 1,
+              ciphertext: await from.encrypt(
+                groupId: 6,
+                epoch: 4,
+                senderId: 1,
+                plaintext: text,
+              ),
+            );
+
+        await give(phone, 'a');
+        expect(
+          await roundTrip(phone, 'depuis le téléphone'),
+          'depuis le téléphone',
+        );
+        await give(simulator, 'b');
+        expect(
+          await bob.hasOpened(
+            groupId: 6,
+            epoch: 4,
+            senderId: 1,
+            envelopeId: 'b',
+          ),
+          isTrue,
+        );
+        expect(
+          await roundTrip(simulator, 'depuis le simulateur'),
+          'depuis le simulateur',
+        );
+        // L'ancienne clé reste valable, et la même clé reçue deux fois ne
+        // fait pas repartir la chaîne de zéro.
+        await give(phone, 'c');
+        expect(
+          await roundTrip(phone, 'encore le téléphone'),
+          'encore le téléphone',
+        );
+      },
+    );
   });
 }

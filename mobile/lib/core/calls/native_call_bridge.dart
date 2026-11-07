@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,14 +22,14 @@ enum NativeCallState {
   /// absent — devient `ended` plutôt que de lever. Un écran d'appel bloqué
   /// sur un état illisible serait pire que la fin de l'appel.
   static NativeCallState parse(String? raw) => switch (raw) {
-        'RINGING' => NativeCallState.ringing,
-        'ANSWERING' => NativeCallState.answering,
-        'CONNECTING' => NativeCallState.connecting,
-        'CONNECTED' => NativeCallState.connected,
-        'MISSED' => NativeCallState.missed,
-        'FAILED' => NativeCallState.failed,
-        _ => NativeCallState.ended,
-      };
+    'RINGING' => NativeCallState.ringing,
+    'ANSWERING' => NativeCallState.answering,
+    'CONNECTING' => NativeCallState.connecting,
+    'CONNECTED' => NativeCallState.connected,
+    'MISSED' => NativeCallState.missed,
+    'FAILED' => NativeCallState.failed,
+    _ => NativeCallState.ended,
+  };
 
   bool get isActive =>
       this == NativeCallState.ringing ||
@@ -58,14 +59,14 @@ class NativeCall {
   final String? groupName;
 
   static NativeCall fromMap(Map<dynamic, dynamic> map) => NativeCall(
-        state: NativeCallState.parse(map['state'] as String?),
-        room: map['room'] as String?,
-        fromUserId: int.tryParse('${map['from_user_id']}'),
-        callerName: map['caller_name'] as String?,
-        isVideo: map['is_video'] == true,
-        groupId: int.tryParse('${map['group_id']}'),
-        groupName: map['group_name'] as String?,
-      );
+    state: NativeCallState.parse(map['state'] as String?),
+    room: map['room'] as String?,
+    fromUserId: int.tryParse('${map['from_user_id']}'),
+    callerName: map['caller_name'] as String?,
+    isVideo: map['is_video'] == true,
+    groupId: int.tryParse('${map['group_id']}'),
+    groupName: map['group_name'] as String?,
+  );
 }
 
 /// Une réponse rapide écrite depuis une notification, en attente de
@@ -119,8 +120,15 @@ class PendingNativeReply {
 /// docs/native-call-layer.md §7 pour son critère de suppression.
 class NativeCallBridge {
   NativeCallBridge({EventChannel? events, MethodChannel? methods})
-      : _events = events ?? const EventChannel('com.pokou.pokou/call_events'),
-        _methods = methods ?? const MethodChannel('com.pokou.pokou/call');
+    : _events = events ?? const EventChannel('com.pokou.pokou/call_events'),
+      _methods = methods ?? const MethodChannel('com.pokou.pokou/call'),
+      // La couche d'appel native n'existe que sur Android. Écouter son
+      // canal ailleurs (iOS) levait une MissingPluginException à chaque
+      // lancement. Un canal injecté (tests) est toujours écouté.
+      _hasNativeLayer =
+          events != null || defaultTargetPlatform == TargetPlatform.android;
+
+  final bool _hasNativeLayer;
 
   final EventChannel _events;
   final MethodChannel _methods;
@@ -131,14 +139,16 @@ class NativeCallBridge {
   ///
   /// Diffusé et mis en cache : plusieurs écrans peuvent l'observer, et
   /// ouvrir deux abonnements au canal en poserait deux au `CallManager`.
-  Stream<NativeCall> get calls => _stream ??= _events
-      .receiveBroadcastStream()
-      .map((event) => NativeCall.fromMap(event as Map<dynamic, dynamic>))
-      .handleError((Object _) {
-        // Canal absent : on n'en fait pas une erreur que chaque écran
-        // devrait traiter pour ne rien en faire.
-      })
-      .asBroadcastStream();
+  Stream<NativeCall> get calls => _stream ??= !_hasNativeLayer
+      ? const Stream<NativeCall>.empty()
+      : _events
+            .receiveBroadcastStream()
+            .map((event) => NativeCall.fromMap(event as Map<dynamic, dynamic>))
+            .handleError((Object _) {
+              // Canal absent : on n'en fait pas une erreur que chaque écran
+              // devrait traiter pour ne rien en faire.
+            })
+            .asBroadcastStream();
 
   /// L'appel en cours au moment où Flutter démarre.
   ///
@@ -147,8 +157,9 @@ class NativeCallBridge {
   /// jamais qu'un appel est en cours.
   Future<NativeCall?> currentCall() async {
     try {
-      final result =
-          await _methods.invokeMethod<Map<dynamic, dynamic>>('getCurrentCall');
+      final result = await _methods.invokeMethod<Map<dynamic, dynamic>>(
+        'getCurrentCall',
+      );
       if (result == null) return null;
       final call = NativeCall.fromMap(result);
       return call.state.isActive ? call : null;

@@ -1970,7 +1970,7 @@ class LIt extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      '🔒 Crittografia end-to-end: solo i membri possono leggerli.';
+      'Crittografia end-to-end: solo i membri possono leggerli.';
 
   @override
   String get botLabel => 'Bot';
@@ -4613,11 +4613,11 @@ class LIt extends L {
 
   @override
   String get e2eeReassurance =>
-      '🔒 Crittografia end-to-end: nessun altro, nemmeno Pokou, può leggere questi messaggi.';
+      'Crittografia end-to-end: nessun altro, nemmeno Pokou, può leggere questi messaggi.';
 
   @override
   String get chatsEncryptionFooter =>
-      '🔒 Le tue chat sono crittografate end-to-end.';
+      'Le tue chat sono crittografate end-to-end.';
 
   @override
   String get callsRecentSection => 'RECENTI';

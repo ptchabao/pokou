@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import '../../../core/crypto/undecryptable.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/crypto/e2ee_outcome.dart';
@@ -73,13 +75,18 @@ class GroupRepository {
         continue; // hors contexte : ignorée, sans bloquer les autres
       }
       final senderId = item['sender_id'] as int;
-      // Déjà installée : ne JAMAIS rouvrir l'enveloppe (elle ne s'ouvre
-      // qu'une fois). C'était la cause des bulles vides / « en attente »
-      // sur tous les messages de groupe.
-      if (await _senderKeys.hasDistribution(
+      final envelopeId = sha256
+          .convert(utf8.encode(item['ciphertext'] as String))
+          .toString()
+          .substring(0, 32);
+      // Cette enveloppe-ci déjà ouverte : ne JAMAIS la rouvrir (elle ne
+      // s'ouvre qu'une fois). Une enveloppe NOUVELLE du même expéditeur
+      // (autre appareil, réinstallation) est, elle, ouverte et installée.
+      if (await _senderKeys.hasOpened(
         groupId: group.id,
         epoch: requestedEpoch,
         senderId: senderId,
+        envelopeId: envelopeId,
       )) {
         continue;
       }
@@ -94,6 +101,7 @@ class GroupRepository {
           epoch: requestedEpoch,
           senderId: senderId,
           distribution: distribution,
+          envelopeId: envelopeId,
         );
       } catch (_) {
         // Une clé illisible ne bloque plus celles des autres membres : les
@@ -115,12 +123,23 @@ class GroupRepository {
   /// Après une réinstallation (identité changée), une session neuve est
   /// ouverte vers sa nouvelle identité, comme le fait WhatsApp.
   Future<void> _ensureSenderKeyDistributed(Group group, int senderId) async {
+    // La clé de suivi inclut l'identité PUBLIÉE du membre : s'il se
+    // reconnecte sur un autre appareil, il redevient « à servir » et reçoit
+    // ma clé scellée pour sa nouvelle identité.
+    final identities = <int, String?>{};
     String key(int recipient) =>
-        '${group.id}:${group.cryptoEpoch}:$senderId:$recipient';
+        '${group.id}:${group.cryptoEpoch}:$senderId:$recipient:${identities[recipient]}';
     final recipients = group.members
         .map((member) => member.userId)
         .where((id) => id != senderId)
         .toSet();
+    for (final id in recipients) {
+      try {
+        identities[id] = (await _e2ee.peerCrypto(id)).identityKey;
+      } catch (_) {
+        identities[id] = null;
+      }
+    }
     final pending = recipients.where((id) => !_publishedTo.contains(key(id)));
     if (pending.isEmpty) return;
     final distribution = await _senderKeys.createDistribution(
@@ -145,7 +164,10 @@ class GroupRepository {
                 peerUserId: recipientId,
                 plaintext: distribution,
               )
-            : await _e2ee.seal(peerUserId: recipientId, plaintext: distribution);
+            : await _e2ee.seal(
+                peerUserId: recipientId,
+                plaintext: distribution,
+              );
         if (envelope is! SealEncrypted) continue;
         sealed.add({
           'recipient_id': recipientId,
@@ -325,7 +347,9 @@ class GroupRepository {
     return message.resolvedWith(
       content: decoded['content'] as String? ?? mediaKey?.caption ?? '',
       payload: decoded['payload'] as Map<String, dynamic>?,
-      replyTo: replyJson == null ? null : MessageReplyPreview.fromJson(replyJson),
+      replyTo: replyJson == null
+          ? null
+          : MessageReplyPreview.fromJson(replyJson),
       media: mediaKey?.toMeta(message.mediaAssetId!),
       mediaKey: mediaKey,
     );
@@ -338,7 +362,9 @@ class GroupRepository {
     'payload': ?message.payload,
     if (message.replyTo != null) 'reply_to': message.replyTo!.toJson(),
     if (message.mediaKey != null && message.mediaAssetId != null)
-      'media_key': message.mediaKey!.withAssetId(message.mediaAssetId!).toJson(),
+      'media_key': message.mediaKey!
+          .withAssetId(message.mediaAssetId!)
+          .toJson(),
   });
 
   /// Supprimer pour tous. Renvoie le message conservé en mode preuve, ou
@@ -510,10 +536,9 @@ class GroupRepository {
   /// Lève [GroupJoinPending] quand le groupe exige l'approbation d'un
   /// administrateur (DIS-26) : la demande est déposée, l'entrée viendra.
   Future<Group> joinByInvite(String code) async {
-    final response = await _api.post(
-      '/groups/invite/$code/join',
-      body: const {},
-    ) as Map<String, dynamic>;
+    final response =
+        await _api.post('/groups/invite/$code/join', body: const {})
+            as Map<String, dynamic>;
     if (response['pending_approval'] == true) {
       throw GroupJoinPending(response['name'] as String? ?? '');
     }

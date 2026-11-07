@@ -1947,7 +1947,7 @@ class LAr extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      '🔒 مشفّرة من طرف إلى طرف: الأعضاء فقط يمكنهم قراءتها.';
+      'مشفّرة من طرف إلى طرف: الأعضاء فقط يمكنهم قراءتها.';
 
   @override
   String get botLabel => 'بوت';
@@ -4610,10 +4610,10 @@ class LAr extends L {
 
   @override
   String get e2eeReassurance =>
-      '🔒 مشفّرة من طرف إلى طرف: لا يمكن لأحد غيركما، ولا حتى Pokou، قراءتها.';
+      'مشفّرة من طرف إلى طرف: لا يمكن لأحد غيركما، ولا حتى Pokou، قراءتها.';
 
   @override
-  String get chatsEncryptionFooter => '🔒 محادثاتك مشفّرة من طرف إلى طرف.';
+  String get chatsEncryptionFooter => 'محادثاتك مشفّرة من طرف إلى طرف.';
 
   @override
   String get callsRecentSection => 'الأخيرة';

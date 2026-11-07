@@ -1970,7 +1970,7 @@ class LFr extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      '🔒 Chiffré de bout en bout : seuls les membres peuvent lire ces messages.';
+      'Chiffré de bout en bout : seuls les membres peuvent lire ces messages.';
 
   @override
   String get botLabel => 'Bot';
@@ -4614,11 +4614,11 @@ class LFr extends L {
 
   @override
   String get e2eeReassurance =>
-      '🔒 Chiffré de bout en bout : personne d’autre, pas même Pokou, ne peut lire ces messages.';
+      'Chiffré de bout en bout : personne d’autre, pas même Pokou, ne peut lire ces messages.';
 
   @override
   String get chatsEncryptionFooter =>
-      '🔒 Tes discussions sont chiffrées de bout en bout.';
+      'Tes discussions sont chiffrées de bout en bout.';
 
   @override
   String get callsRecentSection => 'RÉCENTS';

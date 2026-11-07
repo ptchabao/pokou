@@ -1962,7 +1962,7 @@ class LEn extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      '🔒 End-to-end encrypted: only members can read these messages.';
+      'End-to-end encrypted: only members can read these messages.';
 
   @override
   String get botLabel => 'Bot';
@@ -4585,10 +4585,10 @@ class LEn extends L {
 
   @override
   String get e2eeReassurance =>
-      '🔒 End-to-end encrypted: no one else, not even Pokou, can read these messages.';
+      'End-to-end encrypted: no one else, not even Pokou, can read these messages.';
 
   @override
-  String get chatsEncryptionFooter => '🔒 Your chats are end-to-end encrypted.';
+  String get chatsEncryptionFooter => 'Your chats are end-to-end encrypted.';
 
   @override
   String get callsRecentSection => 'RECENT';

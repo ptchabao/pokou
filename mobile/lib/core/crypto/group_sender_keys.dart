@@ -92,19 +92,24 @@ class GroupSenderKeys {
     }
   }
 
-  /// La clé de cet expéditeur pour ce groupe et cette époque est-elle déjà
-  /// installée ? Son enveloppe à deux ne s'ouvre qu'UNE fois : la rouvrir à
-  /// chaque chargement échouait (« message déjà reçu ») et bloquait le
-  /// déchiffrement de tout le groupe.
-  Future<bool> hasDistribution({
+  String _openedKey(int groupId, int epoch, int senderId, String envelopeId) =>
+      'signal_group_distribution_opened_v2_${groupId}_${epoch}_${senderId}_$envelopeId';
+
+  /// CETTE enveloppe de clé ([envelopeId] : empreinte de son chiffré) a-t-elle
+  /// déjà été ouverte ? Une enveloppe à deux ne s'ouvre qu'UNE fois : la
+  /// rouvrir échouait (« message déjà reçu »).
+  ///
+  /// On suit chaque enveloppe, et non plus « une clé par expéditeur » : un
+  /// expéditeur qui écrit depuis un nouvel appareil (réinstallation,
+  /// simulateur…) publie une NOUVELLE clé, qu'il faut installer à côté de
+  /// l'ancienne — sinon tous ses messages restaient « en attente ».
+  Future<bool> hasOpened({
     required int groupId,
     required int epoch,
     required int senderId,
+    required String envelopeId,
   }) async =>
-      await _read(
-        'signal_group_distribution_accepted_v1_${groupId}_${epoch}_$senderId',
-      ) ==
-      '1';
+      await _read(_openedKey(groupId, epoch, senderId, envelopeId)) == '1';
 
   /// The distribution must be sealed to each member with a pairwise E2EE
   /// session before being sent to the server.
@@ -113,12 +118,10 @@ class GroupSenderKeys {
     required int epoch,
     required int senderId,
     required String distribution,
+    String? envelopeId,
   }) {
     final name = _name(groupId: groupId, epoch: epoch, senderId: senderId);
     return _exclusive(name, () async {
-      final acceptedKey =
-          'signal_group_distribution_accepted_v1_${groupId}_${epoch}_$senderId';
-      if (await _read(acceptedKey) == '1') return;
       final payload = jsonDecode(distribution);
       if (payload is! Map<String, dynamic> ||
           payload['format'] != 'pokou-group-sender-key-v1' ||
@@ -131,8 +134,19 @@ class GroupSenderKeys {
       final decoded = SenderKeyDistributionMessageWrapper.fromSerialized(
         base64.decode(payload['distribution'] as String),
       );
-      await GroupSessionBuilder(_store).process(name, decoded);
-      await _write(acceptedKey, '1');
+      // Plusieurs clés par expéditeur (une par appareil) cohabitent ; la
+      // même clé reçue deux fois n'est pas réinstallée (elle repartirait de
+      // zéro).
+      final record = await _store.loadSenderKey(name);
+      var known = false;
+      try {
+        record.getSenderKeyStateById(decoded.id);
+        known = true;
+      } catch (_) {}
+      if (!known) await GroupSessionBuilder(_store).process(name, decoded);
+      if (envelopeId != null) {
+        await _write(_openedKey(groupId, epoch, senderId, envelopeId), '1');
+      }
     });
   }
 

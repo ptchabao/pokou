@@ -1967,7 +1967,7 @@ class LRu extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      '🔒 Сквозное шифрование: читать могут только участники.';
+      'Сквозное шифрование: читать могут только участники.';
 
   @override
   String get botLabel => 'Бот';
@@ -4656,11 +4656,11 @@ class LRu extends L {
 
   @override
   String get e2eeReassurance =>
-      '🔒 Сквозное шифрование: никто, даже Pokou, не может читать эти сообщения.';
+      'Сквозное шифрование: никто, даже Pokou, не может читать эти сообщения.';
 
   @override
   String get chatsEncryptionFooter =>
-      '🔒 Твои чаты защищены сквозным шифрованием.';
+      'Твои чаты защищены сквозным шифрованием.';
 
   @override
   String get callsRecentSection => 'НЕДАВНИЕ';

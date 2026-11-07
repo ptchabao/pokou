@@ -1968,7 +1968,7 @@ class LEs extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      '🔒 Cifrado de extremo a extremo: solo los miembros pueden leerlos.';
+      'Cifrado de extremo a extremo: solo los miembros pueden leerlos.';
 
   @override
   String get botLabel => 'Bot';
@@ -4600,11 +4600,11 @@ class LEs extends L {
 
   @override
   String get e2eeReassurance =>
-      '🔒 Cifrado de extremo a extremo: nadie más, ni siquiera Pokou, puede leer estos mensajes.';
+      'Cifrado de extremo a extremo: nadie más, ni siquiera Pokou, puede leer estos mensajes.';
 
   @override
   String get chatsEncryptionFooter =>
-      '🔒 Tus chats están cifrados de extremo a extremo.';
+      'Tus chats están cifrados de extremo a extremo.';
 
   @override
   String get callsRecentSection => 'RECIENTES';
