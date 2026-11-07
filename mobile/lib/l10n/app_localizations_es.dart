@@ -6459,4 +6459,11 @@ class LEs extends L {
   String koryActiveCount(String count) {
     return '$count activas';
   }
+
+  @override
+  String get searchIntro =>
+      'Busca en tus mensajes, canales y anuncios de Assimé.';
+
+  @override
+  String get searchRecent => 'Búsquedas recientes';
 }

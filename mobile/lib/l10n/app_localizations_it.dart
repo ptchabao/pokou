@@ -6475,4 +6475,11 @@ class LIt extends L {
   String koryActiveCount(String count) {
     return '$count attive';
   }
+
+  @override
+  String get searchIntro =>
+      'Cerca nei tuoi messaggi, canali e annunci di Assimé.';
+
+  @override
+  String get searchRecent => 'Ricerche recenti';
 }

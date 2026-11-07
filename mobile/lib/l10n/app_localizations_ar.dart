@@ -6432,4 +6432,10 @@ class LAr extends L {
   String koryActiveCount(String count) {
     return '$count نشطة';
   }
+
+  @override
+  String get searchIntro => 'ابحث في رسائلك والقنوات وإعلانات Assimé.';
+
+  @override
+  String get searchRecent => 'عمليات البحث الأخيرة';
 }

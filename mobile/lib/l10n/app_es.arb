@@ -1862,5 +1862,7 @@
   "callEndAndAccept": "Terminar y aceptar",
   "homeHelloOverline": "Hola",
   "koryOverline": "Ahorro solidario",
-  "koryActiveCount": "{count} activas"
+  "koryActiveCount": "{count} activas",
+  "searchIntro": "Busca en tus mensajes, canales y anuncios de Assimé.",
+  "searchRecent": "Búsquedas recientes"
 }

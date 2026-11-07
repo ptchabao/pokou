@@ -6510,4 +6510,10 @@ class LRu extends L {
   String koryActiveCount(String count) {
     return 'активных: $count';
   }
+
+  @override
+  String get searchIntro => 'Ищи в сообщениях, каналах и объявлениях Assimé.';
+
+  @override
+  String get searchRecent => 'Недавние запросы';
 }

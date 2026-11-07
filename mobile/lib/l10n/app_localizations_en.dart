@@ -6433,4 +6433,11 @@ class LEn extends L {
   String koryActiveCount(String count) {
     return '$count active';
   }
+
+  @override
+  String get searchIntro =>
+      'Search your messages, channels and Assimé listings.';
+
+  @override
+  String get searchRecent => 'Recent searches';
 }

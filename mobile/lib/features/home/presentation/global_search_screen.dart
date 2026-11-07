@@ -21,6 +21,10 @@ class GlobalSearchScreen extends ConsumerStatefulWidget {
 }
 
 class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
+  /// Recherches récentes de la session : un écran de recherche ne doit
+  /// jamais s'ouvrir vide.
+  static final List<String> _recent = [];
+
   late final TextEditingController _controller;
   Map<String, List<Map<String, dynamic>>> _results = const {};
   bool _searching = false;
@@ -44,6 +48,10 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   Future<void> _search() async {
     final query = _controller.text.trim();
     if (query.isEmpty || _searching) return;
+    _recent
+      ..remove(query)
+      ..insert(0, query);
+    if (_recent.length > 8) _recent.removeLast();
     setState(() {
       _searching = true;
       _error = null;
@@ -184,6 +192,43 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                       },
                     ),
                 ],
+                // Avant toute recherche : quoi chercher, et les récentes.
+                if (_results.isEmpty && !_searching && _error == null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.searchIntro,
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                        if (_recent.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            l.searchRecent,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final q in _recent)
+                                ActionChip(
+                                  avatar: const Icon(Icons.history, size: 16),
+                                  label: Text(q),
+                                  onPressed: () {
+                                    _controller.text = q;
+                                    _search();
+                                  },
+                                ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 if (!_searching &&
                     _error == null &&
                     _results.isNotEmpty &&

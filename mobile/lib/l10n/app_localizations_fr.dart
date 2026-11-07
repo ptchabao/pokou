@@ -6477,4 +6477,11 @@ class LFr extends L {
   String koryActiveCount(String count) {
     return '$count actives';
   }
+
+  @override
+  String get searchIntro =>
+      'Cherche dans tes messages, les chaînes et les annonces d’Assimé.';
+
+  @override
+  String get searchRecent => 'Recherches récentes';
 }

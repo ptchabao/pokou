@@ -11,6 +11,7 @@ import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../contacts/presentation/discussions_controller.dart';
+import '../../contacts/presentation/open_discussion.dart';
 import '../../honam/presentation/honam_controller.dart';
 import '../../honam/presentation/honam_screen.dart';
 import '../../honam/presentation/honam_send_screen.dart';
@@ -20,6 +21,7 @@ import '../../kory/presentation/kory_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
+import '../../profile/presentation/profile_screen.dart';
 import 'global_search_screen.dart';
 
 /// L'accueil après connexion (écran APP-1) : une carte par module ouvert
@@ -60,11 +62,30 @@ class HomeScreen extends ConsumerWidget {
                 semanticLabel: 'Pokou',
               ),
               actions: [
+                // La photo mène au PROFIL (cible de 44 pt).
                 if (user != null)
-                  ContactAvatar(
-                    avatar: user.avatar,
-                    displayName: user.fullName ?? '',
-                    size: 32,
+                  Semantics(
+                    button: true,
+                    label: l.navProfile,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileScreen(),
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Center(
+                          child: ContactAvatar(
+                            avatar: user.avatar,
+                            displayName: user.fullName ?? '',
+                            size: 32,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -432,7 +453,8 @@ class _DiscussionsCard extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 6),
                     child: _InnerTile(
                       onDark: true,
-                      onTap: onSeeAll,
+                      // Toucher une bulle ouvre LA discussion, directement.
+                      onTap: () => openDiscussion(context, ref, d),
                       child: Row(
                         children: [
                           ContactAvatar(

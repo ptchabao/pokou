@@ -11282,6 +11282,18 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{count} actives'**
   String koryActiveCount(String count);
+
+  /// No description provided for @searchIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cherche dans tes messages, les chaînes et les annonces d’Assimé.'**
+  String get searchIntro;
+
+  /// No description provided for @searchRecent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherches récentes'**
+  String get searchRecent;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

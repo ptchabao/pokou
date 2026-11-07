@@ -1862,5 +1862,7 @@
   "callEndAndAccept": "Завершить и принять",
   "homeHelloOverline": "Здравствуй",
   "koryOverline": "Солидарные сбережения",
-  "koryActiveCount": "активных: {count}"
+  "koryActiveCount": "активных: {count}",
+  "searchIntro": "Ищи в сообщениях, каналах и объявлениях Assimé.",
+  "searchRecent": "Недавние запросы"
 }

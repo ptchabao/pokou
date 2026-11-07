@@ -203,6 +203,13 @@ class KoryScreen extends ConsumerWidget {
                           icon: Icons.savings_outlined,
                           title: l.koryNone,
                           message: l.koryNoneBody,
+                          // Un état vide qui GUIDE : l'action est là.
+                          action: ModuleActionButton(
+                            label: l.koryCreate,
+                            icon: Icons.add,
+                            expanded: false,
+                            onPressed: () => openKoryCreate(context, ref),
+                          ),
                         ),
                       ),
                     ]

@@ -1862,5 +1862,7 @@
   "callEndAndAccept": "إنهاء وقبول",
   "homeHelloOverline": "مرحبًا",
   "koryOverline": "ادخار تضامني",
-  "koryActiveCount": "{count} نشطة"
+  "koryActiveCount": "{count} نشطة",
+  "searchIntro": "ابحث في رسائلك والقنوات وإعلانات Assimé.",
+  "searchRecent": "عمليات البحث الأخيرة"
 }

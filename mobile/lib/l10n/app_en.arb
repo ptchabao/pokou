@@ -1862,5 +1862,7 @@
   "callEndAndAccept": "End and accept",
   "homeHelloOverline": "Hello",
   "koryOverline": "Solidarity savings",
-  "koryActiveCount": "{count} active"
+  "koryActiveCount": "{count} active",
+  "searchIntro": "Search your messages, channels and Assimé listings.",
+  "searchRecent": "Recent searches"
 }
