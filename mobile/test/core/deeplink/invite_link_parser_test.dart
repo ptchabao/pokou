@@ -228,4 +228,14 @@ void main() {
     expect(invite?.kind, DeepLinkInviteKind.koryJoin);
     expect(invite?.code, 'KX7P2Q');
   });
+
+  test('les liens courts /k/ et /g/ sont reconnus', () {
+    expect(
+      parseInviteLink(Uri.parse('$pokouLinkBaseUrl/k/KX7P2Q'))?.kind,
+      DeepLinkInviteKind.koryJoin,
+    );
+    final g = parseInviteLink(Uri.parse('$pokouLinkBaseUrl/g/AB12CD'));
+    expect(g?.kind, DeepLinkInviteKind.group);
+    expect(g?.code, 'AB12CD');
+  });
 }

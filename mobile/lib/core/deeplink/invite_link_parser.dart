@@ -60,6 +60,17 @@ PendingInvite? parseInviteLink(Uri uri) {
       .toList();
   if (segments.isEmpty) return null;
 
+  // Liens COURTS : /k/{code} (cagnotte à rejoindre), /g/{code} (groupe).
+  if (segments.length == 2 && (segments[0] == 'k' || segments[0] == 'g')) {
+    final code = segments[1].trim();
+    if (code.isEmpty) return null;
+    return PendingInvite(
+      kind: segments[0] == 'k'
+          ? DeepLinkInviteKind.koryJoin
+          : DeepLinkInviteKind.group,
+      code: code,
+    );
+  }
   // Lien de partage d'une cagnotte : /kory/join/{code}.
   if (segments.length == 3 && segments[0] == 'kory' && segments[1] == 'join') {
     final code = segments[2].trim();

@@ -188,7 +188,9 @@ class Group {
 }
 
 /// Forme canonique d'un lien d'invitation de groupe (Android App Links / iOS Universal Links).
-String inviteLinkFor(String code) => '$pokouLinkBaseUrl/invite/group/$code';
+/// Lien COURT d'invitation : /g/{code}. Les anciens liens /invite/group/
+/// restent reconnus.
+String inviteLinkFor(String code) => '$pokouLinkBaseUrl/g/$code';
 
 /// Extrait le code d'un lien collé (format canonique `/invite/group/CODE` ou
 /// historique `/invite/CODE`), ou rend l'entrée telle quelle si c'est déjà un code.

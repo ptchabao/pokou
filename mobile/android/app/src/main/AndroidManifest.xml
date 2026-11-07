@@ -116,6 +116,8 @@
                 <!-- Préfixes des liens Pokou gérés par invite_link_parser.dart. -->
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/invite"/>
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/c/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/k/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/g/"/>
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/channel/"/>
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/bot/"/>
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/kory/pots/"/>

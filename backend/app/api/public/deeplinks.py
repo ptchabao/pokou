@@ -178,6 +178,18 @@ def _page(
     return HTMLResponse(content=html, headers={"Cache-Control": "no-store"})
 
 
+@router.get("/k/{code}", response_class=HTMLResponse)
+async def kory_short_link(code: str):
+    """Lien COURT de partage d'une cagnotte (même effet que /kory/join/)."""
+    return _page(f"/k/{code}", "kory")
+
+
+@router.get("/g/{code}", response_class=HTMLResponse)
+async def group_short_link(code: str):
+    """Lien COURT d'invitation à un groupe (même effet que /invite/group/)."""
+    return _page(f"/g/{code}", "group")
+
+
 @router.get("/kory/join/{code}", response_class=HTMLResponse)
 async def kory_join_link(code: str):
     """Lien de partage d'une cagnotte : ouvre Pokou, qui rejoint la cagnotte

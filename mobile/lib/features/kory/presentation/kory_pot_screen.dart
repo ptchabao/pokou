@@ -47,7 +47,7 @@ class KoryPotScreen extends ConsumerWidget {
                 // de l'installer.
                 Share.share(
                   '${l.koryShareText(pot.title, pot.joinCode)}\n'
-                  '$pokouLinkBaseUrl/kory/join/${Uri.encodeComponent(pot.joinCode)}',
+                  '$pokouLinkBaseUrl/k/${Uri.encodeComponent(pot.joinCode)}',
                 ),
           ),
         if (pot != null && pot.isTontine && pot.isOrganizer && pot.isOpen)
