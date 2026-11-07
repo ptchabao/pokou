@@ -1805,10 +1805,10 @@ class LFr extends L {
   String get vitrineTitle => 'Vitrine du Marché';
 
   @override
-  String get versesMorning => '☀️ Verset du matin';
+  String get versesMorning => 'Verset du matin';
 
   @override
-  String get versesEvening => '🌙 Verset du soir';
+  String get versesEvening => 'Verset du soir';
 
   @override
   String get versesChannel => 'Versets du jour';
@@ -4765,7 +4765,7 @@ class LFr extends L {
   }
 
   @override
-  String get mediaCall => '📞 Appel';
+  String get mediaCall => 'Appel';
 
   @override
   String get mediaSticker => 'Sticker';

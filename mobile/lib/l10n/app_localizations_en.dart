@@ -1797,10 +1797,10 @@ class LEn extends L {
   String get vitrineTitle => 'Marketplace showcase';
 
   @override
-  String get versesMorning => '☀️ Morning verse';
+  String get versesMorning => 'Morning verse';
 
   @override
-  String get versesEvening => '🌙 Evening verse';
+  String get versesEvening => 'Evening verse';
 
   @override
   String get versesChannel => 'Daily verses';
@@ -4735,7 +4735,7 @@ class LEn extends L {
   }
 
   @override
-  String get mediaCall => '📞 Call';
+  String get mediaCall => 'Call';
 
   @override
   String get mediaSticker => 'Sticker';

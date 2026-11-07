@@ -3324,13 +3324,13 @@ abstract class L {
   /// No description provided for @versesMorning.
   ///
   /// In fr, this message translates to:
-  /// **'☀️ Verset du matin'**
+  /// **'Verset du matin'**
   String get versesMorning;
 
   /// No description provided for @versesEvening.
   ///
   /// In fr, this message translates to:
-  /// **'🌙 Verset du soir'**
+  /// **'Verset du soir'**
   String get versesEvening;
 
   /// No description provided for @versesChannel.
@@ -8358,7 +8358,7 @@ abstract class L {
   /// No description provided for @mediaCall.
   ///
   /// In fr, this message translates to:
-  /// **'📞 Appel'**
+  /// **'Appel'**
   String get mediaCall;
 
   /// No description provided for @mediaSticker.

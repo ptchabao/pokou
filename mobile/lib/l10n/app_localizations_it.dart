@@ -1805,10 +1805,10 @@ class LIt extends L {
   String get vitrineTitle => 'Vetrina del Mercato';
 
   @override
-  String get versesMorning => '☀️ Versetto del mattino';
+  String get versesMorning => 'Versetto del mattino';
 
   @override
-  String get versesEvening => '🌙 Versetto della sera';
+  String get versesEvening => 'Versetto della sera';
 
   @override
   String get versesChannel => 'Versetti del giorno';
@@ -4764,7 +4764,7 @@ class LIt extends L {
   }
 
   @override
-  String get mediaCall => '📞 Chiamata';
+  String get mediaCall => 'Chiamata';
 
   @override
   String get mediaSticker => 'Sticker';

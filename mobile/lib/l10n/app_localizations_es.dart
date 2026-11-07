@@ -1803,10 +1803,10 @@ class LEs extends L {
   String get vitrineTitle => 'Escaparate del Mercado';
 
   @override
-  String get versesMorning => '☀️ Versículo de la mañana';
+  String get versesMorning => 'Versículo de la mañana';
 
   @override
-  String get versesEvening => '🌙 Versículo de la tarde';
+  String get versesEvening => 'Versículo de la tarde';
 
   @override
   String get versesChannel => 'Versículos del día';
@@ -4752,7 +4752,7 @@ class LEs extends L {
   }
 
   @override
-  String get mediaCall => '📞 Llamada';
+  String get mediaCall => 'Llamada';
 
   @override
   String get mediaSticker => 'Sticker';

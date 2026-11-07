@@ -1779,10 +1779,10 @@ class LAr extends L {
   String get vitrineTitle => 'واجهة السوق';
 
   @override
-  String get versesMorning => '☀️ آية الصباح';
+  String get versesMorning => 'آية الصباح';
 
   @override
-  String get versesEvening => '🌙 آية المساء';
+  String get versesEvening => 'آية المساء';
 
   @override
   String get versesChannel => 'آيات اليوم';
@@ -4755,7 +4755,7 @@ class LAr extends L {
   }
 
   @override
-  String get mediaCall => '📞 مكالمة';
+  String get mediaCall => 'مكالمة';
 
   @override
   String get mediaSticker => 'ملصق';

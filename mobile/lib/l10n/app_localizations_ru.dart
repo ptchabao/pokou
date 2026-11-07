@@ -1801,10 +1801,10 @@ class LRu extends L {
   String get vitrineTitle => 'Витрина Маркета';
 
   @override
-  String get versesMorning => '☀️ Утренний стих';
+  String get versesMorning => 'Утренний стих';
 
   @override
-  String get versesEvening => '🌙 Вечерний стих';
+  String get versesEvening => 'Вечерний стих';
 
   @override
   String get versesChannel => 'Стихи дня';
@@ -4808,7 +4808,7 @@ class LRu extends L {
   }
 
   @override
-  String get mediaCall => '📞 Звонок';
+  String get mediaCall => 'Звонок';
 
   @override
   String get mediaSticker => 'Стикер';
