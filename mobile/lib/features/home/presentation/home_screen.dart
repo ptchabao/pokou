@@ -192,10 +192,11 @@ class _GreetingCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const Spacer(),
-                    Flexible(
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Text(
                         today.toUpperCase(),
+                        textAlign: TextAlign.end,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
