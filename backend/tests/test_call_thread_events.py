@@ -360,7 +360,20 @@ def test_un_appel_de_groupe_se_depose_dans_le_groupe(client):
     with patch_service, patch_route:
         demarre = client.post(
             "/api/v1/calls/token",
-            json={"group_id": group_id, "is_video": False},
+            json={
+                "group_id": group_id,
+                "is_video": False,
+                # Appel de groupe chiffré : la clé du salon scellée pour
+                # chaque invité (opaque pour le serveur).
+                "sealed_keys": {
+                    str(uid): {
+                        "encryption": "v1",
+                        "ciphertext": f"cle-{uid}",
+                        "envelope": {"sid": "s"},
+                    }
+                    for uid in (user_id_b, user_id_c)
+                },
+            },
             headers=headers_a,
         )
     assert demarre.status_code == 200, demarre.text

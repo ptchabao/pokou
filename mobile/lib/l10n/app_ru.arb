@@ -1865,5 +1865,13 @@
   "koryActiveCount": "активных: {count}",
   "searchIntro": "Ищи в сообщениях, каналах и объявлениях Assimé.",
   "searchRecent": "Недавние запросы",
-  "homeTagline": "Всё важное — в одном месте."
+  "homeTagline": "Всё важное — в одном месте.",
+  "homeWhatToDo": "Что ты хочешь сделать?",
+  "homeInProgress": "В процессе",
+  "homeKoryPitch": "Собирайте деньги вместе на проект, событие или тонтину.",
+  "homeHonamPitch": "Отправь рецепт и получи предложения ближайших аптек.",
+  "homeAssimeTitle": "Assimé",
+  "homeAssimeSubtitle": "Объявления",
+  "homeAssimePitch": "Покупай и продавай рядом с домом — с доверием.",
+  "homeAssimeCta": "Смотреть объявления"
 }

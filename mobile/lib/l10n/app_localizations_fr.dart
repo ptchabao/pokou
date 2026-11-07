@@ -6487,4 +6487,31 @@ class LFr extends L {
 
   @override
   String get homeTagline => 'Tout ce qui compte, au même endroit.';
+
+  @override
+  String get homeWhatToDo => 'Que veux-tu faire ?';
+
+  @override
+  String get homeInProgress => 'En cours';
+
+  @override
+  String get homeKoryPitch =>
+      'Collectez à plusieurs pour un projet, un événement ou une tontine.';
+
+  @override
+  String get homeHonamPitch =>
+      'Envoie ton ordonnance et reçois les devis des pharmacies proches.';
+
+  @override
+  String get homeAssimeTitle => 'Assimé';
+
+  @override
+  String get homeAssimeSubtitle => 'Petites annonces';
+
+  @override
+  String get homeAssimePitch =>
+      'Achète et vends près de chez toi, en toute confiance.';
+
+  @override
+  String get homeAssimeCta => 'Voir les annonces';
 }

@@ -6469,4 +6469,30 @@ class LEs extends L {
 
   @override
   String get homeTagline => 'Todo lo que importa, en un solo lugar.';
+
+  @override
+  String get homeWhatToDo => '¿Qué quieres hacer?';
+
+  @override
+  String get homeInProgress => 'En curso';
+
+  @override
+  String get homeKoryPitch =>
+      'Reúnan dinero para un proyecto, un evento o una tontina.';
+
+  @override
+  String get homeHonamPitch =>
+      'Envía tu receta y recibe presupuestos de farmacias cercanas.';
+
+  @override
+  String get homeAssimeTitle => 'Assimé';
+
+  @override
+  String get homeAssimeSubtitle => 'Anuncios';
+
+  @override
+  String get homeAssimePitch => 'Compra y vende cerca de ti, con confianza.';
+
+  @override
+  String get homeAssimeCta => 'Ver anuncios';
 }

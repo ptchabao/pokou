@@ -11300,6 +11300,54 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Tout ce qui compte, au même endroit.'**
   String get homeTagline;
+
+  /// No description provided for @homeWhatToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que veux-tu faire ?'**
+  String get homeWhatToDo;
+
+  /// No description provided for @homeInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get homeInProgress;
+
+  /// No description provided for @homeKoryPitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collectez à plusieurs pour un projet, un événement ou une tontine.'**
+  String get homeKoryPitch;
+
+  /// No description provided for @homeHonamPitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoie ton ordonnance et reçois les devis des pharmacies proches.'**
+  String get homeHonamPitch;
+
+  /// No description provided for @homeAssimeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assimé'**
+  String get homeAssimeTitle;
+
+  /// No description provided for @homeAssimeSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petites annonces'**
+  String get homeAssimeSubtitle;
+
+  /// No description provided for @homeAssimePitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achète et vends près de chez toi, en toute confiance.'**
+  String get homeAssimePitch;
+
+  /// No description provided for @homeAssimeCta.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les annonces'**
+  String get homeAssimeCta;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

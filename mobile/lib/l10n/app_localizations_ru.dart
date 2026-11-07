@@ -6519,4 +6519,31 @@ class LRu extends L {
 
   @override
   String get homeTagline => 'Всё важное — в одном месте.';
+
+  @override
+  String get homeWhatToDo => 'Что ты хочешь сделать?';
+
+  @override
+  String get homeInProgress => 'В процессе';
+
+  @override
+  String get homeKoryPitch =>
+      'Собирайте деньги вместе на проект, событие или тонтину.';
+
+  @override
+  String get homeHonamPitch =>
+      'Отправь рецепт и получи предложения ближайших аптек.';
+
+  @override
+  String get homeAssimeTitle => 'Assimé';
+
+  @override
+  String get homeAssimeSubtitle => 'Объявления';
+
+  @override
+  String get homeAssimePitch =>
+      'Покупай и продавай рядом с домом — с доверием.';
+
+  @override
+  String get homeAssimeCta => 'Смотреть объявления';
 }

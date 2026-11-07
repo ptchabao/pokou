@@ -1865,5 +1865,13 @@
   "koryActiveCount": "{count} active",
   "searchIntro": "Search your messages, channels and Assimé listings.",
   "searchRecent": "Recent searches",
-  "homeTagline": "Everything that matters, in one place."
+  "homeTagline": "Everything that matters, in one place.",
+  "homeWhatToDo": "What would you like to do?",
+  "homeInProgress": "In progress",
+  "homeKoryPitch": "Pool money together for a project, an event or a savings circle.",
+  "homeHonamPitch": "Send your prescription and get quotes from nearby pharmacies.",
+  "homeAssimeTitle": "Assimé",
+  "homeAssimeSubtitle": "Classifieds",
+  "homeAssimePitch": "Buy and sell near you, with confidence.",
+  "homeAssimeCta": "Browse listings"
 }

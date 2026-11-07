@@ -1865,5 +1865,13 @@
   "koryActiveCount": "{count} نشطة",
   "searchIntro": "ابحث في رسائلك والقنوات وإعلانات Assimé.",
   "searchRecent": "عمليات البحث الأخيرة",
-  "homeTagline": "كل ما يهمّ، في مكان واحد."
+  "homeTagline": "كل ما يهمّ، في مكان واحد.",
+  "homeWhatToDo": "ماذا تريد أن تفعل؟",
+  "homeInProgress": "قيد التنفيذ",
+  "homeKoryPitch": "اجمعوا المال معًا لمشروع أو مناسبة أو جمعية ادخار.",
+  "homeHonamPitch": "أرسل وصفتك واحصل على عروض الصيدليات القريبة.",
+  "homeAssimeTitle": "Assimé",
+  "homeAssimeSubtitle": "إعلانات مبوبة",
+  "homeAssimePitch": "اشترِ وبِع بالقرب منك بكل ثقة.",
+  "homeAssimeCta": "تصفح الإعلانات"
 }

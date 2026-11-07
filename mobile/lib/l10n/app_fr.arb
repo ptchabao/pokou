@@ -3070,5 +3070,13 @@
   },
   "searchIntro": "Cherche dans tes messages, les chaînes et les annonces d’Assimé.",
   "searchRecent": "Recherches récentes",
-  "homeTagline": "Tout ce qui compte, au même endroit."
+  "homeTagline": "Tout ce qui compte, au même endroit.",
+  "homeWhatToDo": "Que veux-tu faire ?",
+  "homeInProgress": "En cours",
+  "homeKoryPitch": "Collectez à plusieurs pour un projet, un événement ou une tontine.",
+  "homeHonamPitch": "Envoie ton ordonnance et reçois les devis des pharmacies proches.",
+  "homeAssimeTitle": "Assimé",
+  "homeAssimeSubtitle": "Petites annonces",
+  "homeAssimePitch": "Achète et vends près de chez toi, en toute confiance.",
+  "homeAssimeCta": "Voir les annonces"
 }

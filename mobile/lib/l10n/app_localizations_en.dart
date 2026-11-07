@@ -6443,4 +6443,30 @@ class LEn extends L {
 
   @override
   String get homeTagline => 'Everything that matters, in one place.';
+
+  @override
+  String get homeWhatToDo => 'What would you like to do?';
+
+  @override
+  String get homeInProgress => 'In progress';
+
+  @override
+  String get homeKoryPitch =>
+      'Pool money together for a project, an event or a savings circle.';
+
+  @override
+  String get homeHonamPitch =>
+      'Send your prescription and get quotes from nearby pharmacies.';
+
+  @override
+  String get homeAssimeTitle => 'Assimé';
+
+  @override
+  String get homeAssimeSubtitle => 'Classifieds';
+
+  @override
+  String get homeAssimePitch => 'Buy and sell near you, with confidence.';
+
+  @override
+  String get homeAssimeCta => 'Browse listings';
 }

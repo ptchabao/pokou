@@ -1865,5 +1865,13 @@
   "koryActiveCount": "{count} attive",
   "searchIntro": "Cerca nei tuoi messaggi, canali e annunci di Assimé.",
   "searchRecent": "Ricerche recenti",
-  "homeTagline": "Tutto ciò che conta, in un unico posto."
+  "homeTagline": "Tutto ciò che conta, in un unico posto.",
+  "homeWhatToDo": "Cosa vuoi fare?",
+  "homeInProgress": "In corso",
+  "homeKoryPitch": "Raccogliete insieme per un progetto, un evento o una tontina.",
+  "homeHonamPitch": "Invia la ricetta e ricevi i preventivi delle farmacie vicine.",
+  "homeAssimeTitle": "Assimé",
+  "homeAssimeSubtitle": "Annunci",
+  "homeAssimePitch": "Compra e vendi vicino a te, in tutta fiducia.",
+  "homeAssimeCta": "Vedi annunci"
 }

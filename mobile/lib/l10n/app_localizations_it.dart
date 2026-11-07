@@ -6485,4 +6485,30 @@ class LIt extends L {
 
   @override
   String get homeTagline => 'Tutto ciò che conta, in un unico posto.';
+
+  @override
+  String get homeWhatToDo => 'Cosa vuoi fare?';
+
+  @override
+  String get homeInProgress => 'In corso';
+
+  @override
+  String get homeKoryPitch =>
+      'Raccogliete insieme per un progetto, un evento o una tontina.';
+
+  @override
+  String get homeHonamPitch =>
+      'Invia la ricetta e ricevi i preventivi delle farmacie vicine.';
+
+  @override
+  String get homeAssimeTitle => 'Assimé';
+
+  @override
+  String get homeAssimeSubtitle => 'Annunci';
+
+  @override
+  String get homeAssimePitch => 'Compra e vendi vicino a te, in tutta fiducia.';
+
+  @override
+  String get homeAssimeCta => 'Vedi annunci';
 }

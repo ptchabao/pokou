@@ -6441,4 +6441,29 @@ class LAr extends L {
 
   @override
   String get homeTagline => 'كل ما يهمّ، في مكان واحد.';
+
+  @override
+  String get homeWhatToDo => 'ماذا تريد أن تفعل؟';
+
+  @override
+  String get homeInProgress => 'قيد التنفيذ';
+
+  @override
+  String get homeKoryPitch =>
+      'اجمعوا المال معًا لمشروع أو مناسبة أو جمعية ادخار.';
+
+  @override
+  String get homeHonamPitch => 'أرسل وصفتك واحصل على عروض الصيدليات القريبة.';
+
+  @override
+  String get homeAssimeTitle => 'Assimé';
+
+  @override
+  String get homeAssimeSubtitle => 'إعلانات مبوبة';
+
+  @override
+  String get homeAssimePitch => 'اشترِ وبِع بالقرب منك بكل ثقة.';
+
+  @override
+  String get homeAssimeCta => 'تصفح الإعلانات';
 }

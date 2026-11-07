@@ -136,11 +136,19 @@ def test_un_message_de_groupe_se_relit_par_son_identifiant(client):
     headers_a, _ = _signup(client, "+22890200007")
     headers_c, _ = _signup(client, "+22890200008")
     groupe = client.post("/api/v1/groups", json={"name": "Équipe", "member_user_ids": []}, headers=headers_a).json()
+    # Les messages de groupe sont chiffrés : le serveur ne relit que le chiffré.
     message = client.post(
-        f"/api/v1/groups/{groupe['id']}/messages", json={"content": "Réunion à 10 h"}, headers=headers_a
+        f"/api/v1/groups/{groupe['id']}/messages",
+        json={
+            "encryption": "sender-key-v1",
+            "ciphertext": "chiffre-opaque",
+            "crypto_epoch": groupe["crypto_epoch"],
+        },
+        headers=headers_a,
     ).json()
 
     lu = client.get(f"/api/v1/groups/{groupe['id']}/messages/{message['id']}", headers=headers_a)
     assert lu.status_code == 200
-    assert lu.json()["content"] == "Réunion à 10 h"
+    assert lu.json()["ciphertext"] == "chiffre-opaque"
+    assert lu.json()["content"] is None
     assert client.get(f"/api/v1/groups/{groupe['id']}/messages/{message['id']}", headers=headers_c).status_code == 403

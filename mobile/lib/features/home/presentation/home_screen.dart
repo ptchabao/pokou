@@ -107,11 +107,60 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
+            // Ce qui est EN COURS (une cagnotte ouverte, une commande) —
+            // n'apparaît que s'il y a quelque chose à suivre.
+            _InProgress(
+              kory: config.has('kory'),
+              honam: config.has('honam'),
+              onOpenKory: () => onOpenTab(PokouTab.kory),
+              onOpenHonam: () => onOpenTab(PokouTab.honam),
+            ),
+            // Puis les services, en grandes cartes (inspiration « gobox » :
+            // icône teintée, titre, promesse, action directe).
+            _SectionTitle(l.homeWhatToDo),
             if (config.has('kory'))
-              _KoryCard(onSeeAll: () => onOpenTab(PokouTab.kory)),
+              _ServiceCard(
+                icon: Icons.savings_outlined,
+                tint: AppColors.terracottaTint,
+                ink: AppColors.accentPrimaryDark,
+                title: l.navKory,
+                subtitle: l.korySubtitle,
+                pitch: l.homeKoryPitch,
+                ctaIcon: Icons.add_circle_outline,
+                ctaLabel: l.koryCreate,
+                onTap: () => onOpenTab(PokouTab.kory),
+                onCta: () => openKoryCreate(context, ref),
+              ),
             if (config.has('honam'))
-              _HonamCard(onSeeAll: () => onOpenTab(PokouTab.honam)),
-            if (config.has('assime')) const _AssimeEntry(),
+              _ServiceCard(
+                icon: Icons.local_pharmacy_outlined,
+                tint: const Color(0xFFF5E5BD),
+                ink: AppColors.warning,
+                title: l.navHonam,
+                subtitle: l.honamSubtitle,
+                pitch: l.homeHonamPitch,
+                ctaIcon: Icons.document_scanner_outlined,
+                ctaLabel: l.honamSend,
+                onTap: () => onOpenTab(PokouTab.honam),
+                onCta: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HonamSendScreen()),
+                ),
+              ),
+            if (config.has('assime'))
+              _ServiceCard(
+                icon: Icons.storefront_outlined,
+                tint: const Color(0xFFDCE9F0),
+                ink: const Color(0xFF245C9E),
+                title: l.homeAssimeTitle,
+                subtitle: l.homeAssimeSubtitle,
+                pitch: l.homeAssimePitch,
+                ctaIcon: Icons.arrow_forward,
+                ctaLabel: l.homeAssimeCta,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
+                ),
+              ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -466,84 +515,193 @@ class _InnerTile extends StatelessWidget {
   }
 }
 
-class _AssimeEntry extends StatelessWidget {
-  const _AssimeEntry();
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: 20,
+        height: 1.2,
+        letterSpacing: -0.3,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
+    ),
+  );
+}
+
+/// Carte de service de l'Accueil — inspirée des cartes « gobox » : une
+/// grande icône teintée, le nom et sa promesse, une action directe en pied
+/// de carte, un chevron qui dit « on peut entrer ».
+class _ServiceCard extends StatelessWidget {
+  const _ServiceCard({
+    required this.icon,
+    required this.tint,
+    required this.ink,
+    required this.title,
+    required this.subtitle,
+    required this.pitch,
+    required this.ctaIcon,
+    required this.ctaLabel,
+    required this.onTap,
+    this.onCta,
+  });
+
+  final IconData icon;
+  final Color tint;
+  final Color ink;
+  final String title;
+  final String subtitle;
+  final String pitch;
+  final IconData ctaIcon;
+  final String ctaLabel;
+  final VoidCallback onTap;
+  final VoidCallback? onCta;
 
   @override
   Widget build(BuildContext context) {
+    final tileTint = AppColors.isDark ? ink.withValues(alpha: 0.18) : tint;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: ModuleCard(
-        // APP-1 → APP-5 : l'entrée d'Assimé ouvre les petites annonces.
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen())),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.feedbackInfo.withValues(alpha: 0.10),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.storefront_outlined,
-                color: AppColors.feedbackInfo,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppRadius.card,
+          boxShadow: AppElevation.card,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: AppRadius.card,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 12, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Assimé',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: tileTint,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        TextSpan(
-                          text: ' · Petites annonces',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
+                        child: Icon(icon, size: 28, color: ink),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: title,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: -0.2,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '  ·  $subtitle',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              pitch,
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.35,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right, color: AppColors.textMuted),
+                    ],
                   ),
-                  Text(
-                    'Achète et vends près de chez toi',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
+                  const SizedBox(height: 12),
+                  Divider(height: 1, color: AppColors.border),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.accentPrimaryDark,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      onPressed: onCta ?? onTap,
+                      icon: Icon(ctaIcon, size: 18),
+                      label: Text(ctaLabel),
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.terracottaTint,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_forward,
-                size: 18,
-                color: AppColors.accentPrimary,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// « En cours » : la cagnotte ouverte et la commande Honam qui avance.
+/// Rien quand il n'y a rien à suivre — l'Accueil ne montre pas de vide.
+class _InProgress extends ConsumerWidget {
+  const _InProgress({
+    required this.kory,
+    required this.honam,
+    required this.onOpenKory,
+    required this.onOpenHonam,
+  });
+
+  final bool kory;
+  final bool honam;
+  final VoidCallback onOpenKory;
+  final VoidCallback onOpenHonam;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pots = kory
+        ? (ref.watch(koryPotsProvider).valueOrNull ?? const [])
+        : const [];
+    final orders = honam
+        ? (ref.watch(honamOrdersProvider).valueOrNull ?? const [])
+        : const [];
+    final hasPot = pots.any((p) => p.isOpen);
+    final hasOrder = orders.any((o) => !o.isFinished);
+    if (!hasPot && !hasOrder) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle(L.of(context).homeInProgress),
+        if (hasPot) _KoryCard(onSeeAll: onOpenKory),
+        if (hasOrder) _HonamCard(onSeeAll: onOpenHonam),
+      ],
     );
   }
 }
