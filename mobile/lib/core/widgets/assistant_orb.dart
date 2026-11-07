@@ -31,7 +31,7 @@ class AssistantOrb extends StatefulWidget {
 /// Le vert de l'application, de la lumière à l'ombre.
 const _light = Color(0xFFE39A6B);
 const _mid = Color(0xFF93491F);
-const _brand = Color(0xFFA65527);
+const _brand = Color(0xFFA4512A);
 const _deep = Color(0xFF7A3A18);
 
 class _AssistantOrbState extends State<AssistantOrb>

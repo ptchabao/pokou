@@ -6516,4 +6516,7 @@ class LRu extends L {
 
   @override
   String get searchRecent => 'Недавние запросы';
+
+  @override
+  String get homeTagline => 'Всё важное — в одном месте.';
 }

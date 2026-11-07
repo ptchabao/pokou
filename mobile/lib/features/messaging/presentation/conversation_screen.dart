@@ -2963,25 +2963,23 @@ class _BubbleState extends State<_Bubble> {
                 ),
                 constraints: BoxConstraints(maxWidth: maxWidth),
                 decoration: BoxDecoration(
-                  // Aplat : ce système est plat, sans dégradé sur le chrome.
+                  // Maquette Figma : bulle envoyée en dégradé pêche, bulle
+                  // reçue blanche cerclée ; ombre très douce sur les deux.
                   color: isMine
                       ? AppColors.chatBubbleSent
                       : AppColors.chatBubbleReceived,
+                  gradient: isMine ? AppGradients.sentBubble : null,
                   borderRadius: radius,
-                  // Une BORDURE, et plus une ombre.
-                  //
-                  // L'ombre décollait la bulle du papier peint crème. Ce
-                  // papier peint a disparu : le canevas est presque blanc,
-                  // et une bulle blanche sans contour y flotterait sans
-                  // limite. C'est désormais le trait d'un point qui la
-                  // délimite — et le système supprime de toute façon les
-                  // ombres diffuses, pour tenir la fréquence d'images sur
-                  // les appareils d'entrée de gamme.
-                  border: Border.all(
-                    color: isMine
-                        ? AppColors.chatBubbleSentBorder
-                        : AppColors.chatBubbleReceivedBorder,
-                  ),
+                  border: isMine
+                      ? null
+                      : Border.all(color: AppColors.chatBubbleReceivedBorder),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.chatBubbleShadow,
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -11,6 +11,7 @@ import '../../../core/api/api_exceptions.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/pokou_fab.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
@@ -482,14 +483,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               kBottomNavigationBarHeight +
               8,
         ),
-        child: FloatingActionButton(
+        child: PokouFab(
           onPressed: () => Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (_) => const NewChatScreen())),
-          backgroundColor: AppColors.accentPrimary,
-          foregroundColor: Colors.white,
           tooltip: L.of(context).newChatTitle,
-          child: const Icon(Icons.add_comment_outlined),
+          icon: Icons.add_comment_outlined,
         ),
       ),
       body: RefreshIndicator(
@@ -1623,21 +1622,28 @@ class _FilterChip extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
+            // Maquette Figma : le filtre actif est plein, terre cuite.
             color: selected
-                ? AppColors.terracottaTint
+                ? AppColors.accentPrimary
                 : AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(999),
-            boxShadow: selected ? AppElevation.subtle : null,
+            boxShadow: selected
+                ? const [
+                    BoxShadow(
+                      color: Color(0x29A4512A),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               letterSpacing: 0.2,
-              fontWeight: FontWeight.w500,
-              color: selected
-                  ? AppColors.onTerracottaTint
-                  : AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : AppColors.textSecondary,
             ),
           ),
         ),

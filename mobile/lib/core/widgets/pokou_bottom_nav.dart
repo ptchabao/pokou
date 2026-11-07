@@ -145,7 +145,8 @@ class PokouBottomNav extends StatelessWidget {
           selectedItemColor: AppColors.accentPrimaryDark,
           unselectedItemColor: AppColors.navIconInactive,
           selectedFontSize: 11,
-          unselectedFontSize: 10,
+          unselectedFontSize: 11,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
           // AUCUNE élévation : le système de design supprime les ombres
           // diffuses pour tenir la fréquence d'images sur les appareils
           // d'entrée de gamme. La barre se détache par un trait d'un point,
@@ -189,15 +190,29 @@ class _Glyph extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          width: 22,
+          width: 32,
           height: 2,
           margin: const EdgeInsets.only(bottom: 4),
           decoration: BoxDecoration(
             color: active ? AppColors.accentPrimary : Colors.transparent,
-            borderRadius: BorderRadius.circular(1),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(3),
+            ),
           ),
         ),
-        Icon(icon),
+        // Maquette Figma : une pastille terre cuite claire sous l'icône
+        // active (38 × 28).
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          width: 44,
+          height: 28,
+          decoration: BoxDecoration(
+            color: active ? AppColors.terracottaTint : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon),
+        ),
       ],
     );
   }

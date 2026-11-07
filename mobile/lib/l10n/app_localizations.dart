@@ -11294,6 +11294,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Recherches récentes'**
   String get searchRecent;
+
+  /// No description provided for @homeTagline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout ce qui compte, au même endroit.'**
+  String get homeTagline;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

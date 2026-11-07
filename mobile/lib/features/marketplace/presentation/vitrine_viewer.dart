@@ -337,7 +337,7 @@ class _VitrineViewerState extends ConsumerState<VitrineViewer>
                                 ),
                                 _Stamp(
                                   icon: Icons.favorite_rounded,
-                                  color: const Color(0xFFA65527),
+                                  color: const Color(0xFFA4512A),
                                   opacity: lean.clamp(0.0, 1.0),
                                   alignment: Alignment.topLeft,
                                   label: l.vitrineSeeProduct,

@@ -6482,4 +6482,7 @@ class LIt extends L {
 
   @override
   String get searchRecent => 'Ricerche recenti';
+
+  @override
+  String get homeTagline => 'Tutto ciò che conta, in un unico posto.';
 }

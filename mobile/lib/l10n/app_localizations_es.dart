@@ -6466,4 +6466,7 @@ class LEs extends L {
 
   @override
   String get searchRecent => 'Búsquedas recientes';
+
+  @override
+  String get homeTagline => 'Todo lo que importa, en un solo lugar.';
 }

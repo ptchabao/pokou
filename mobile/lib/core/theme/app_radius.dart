@@ -9,9 +9,10 @@ class AppRadius {
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
-  // Maquettes Stitch « Terre de Confiance » : cartes `rounded-xl` = 12,
-  // tuiles internes `rounded-lg` = 8, actions et filtres en pastille.
-  static const double tile = 12; // dominant card/list-tile radius
+  // Maquette Figma « Design professionnel complet » : cartes 18, tuiles
+  // internes 13, actions et filtres en pastille.
+  static const double tile = 18; // dominant card/list-tile radius
+  static const double inner = 13; // tuile dans une carte (mini-fil, devis)
   static const double sheet = 24; // bottom sheets, buttons, inputs
 
   static const chip = BorderRadius.all(Radius.circular(sm));

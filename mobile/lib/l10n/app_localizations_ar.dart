@@ -6438,4 +6438,7 @@ class LAr extends L {
 
   @override
   String get searchRecent => 'عمليات البحث الأخيرة';
+
+  @override
+  String get homeTagline => 'كل ما يهمّ، في مكان واحد.';
 }

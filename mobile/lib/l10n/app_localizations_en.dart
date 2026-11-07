@@ -6440,4 +6440,7 @@ class LEn extends L {
 
   @override
   String get searchRecent => 'Recent searches';
+
+  @override
+  String get homeTagline => 'Everything that matters, in one place.';
 }

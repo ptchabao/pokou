@@ -1202,10 +1202,7 @@ class _GroupConversationScreenState
               ],
               if (group.canManage) ...[
                 ListTile(
-                  leading: Icon(
-                    Icons.tune,
-                    color: AppColors.accentPrimaryDark,
-                  ),
+                  leading: Icon(Icons.tune, color: AppColors.accentPrimaryDark),
                   title: Text(_l.groupManageTitle),
                   subtitle: Text(
                     _l.groupManageSubtitle,
@@ -1244,7 +1241,8 @@ class _GroupConversationScreenState
                   // Toucher un membre ouvre une discussion à deux avec lui.
                   onTap: member.userId == widget.myUserId
                       ? null
-                      : () => Navigator.pop(sheetContext, 'dm:${member.userId}'),
+                      : () =>
+                            Navigator.pop(sheetContext, 'dm:${member.userId}'),
                 ),
               const Divider(height: 1),
               ListTile(
@@ -1297,9 +1295,7 @@ class _GroupConversationScreenState
       await _deleteGroup();
     } else if (action.startsWith('dm:')) {
       final userId = int.tryParse(action.substring(3));
-      final member = group.members
-          .where((m) => m.userId == userId)
-          .firstOrNull;
+      final member = group.members.where((m) => m.userId == userId).firstOrNull;
       if (userId != null && member != null && mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
@@ -2554,7 +2550,6 @@ class _GroupBubbleState extends State<_GroupBubble> {
       );
     }
 
-
     // Pièce jointe pas encore partie : même bulle qu'en tête-à-tête, même
     // aperçu local, mêmes états. Les deux conversations ne doivent pas se
     // comporter différemment pour une photo.
@@ -2760,25 +2755,23 @@ class _GroupBubbleState extends State<_GroupBubble> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             constraints: BoxConstraints(maxWidth: maxWidth),
             decoration: BoxDecoration(
-              // Même bulle claire qu'en 1:1 (voir AppColors.chatBubbleSent) :
-              // une conversation de groupe et une conversation directe ne
-              // doivent pas se teinter différemment.
+              // Maquette Figma : bulle envoyée en dégradé pêche, bulle
+              // reçue blanche cerclée ; ombre très douce sur les deux.
               color: isMine
                   ? AppColors.chatBubbleSent
                   : AppColors.chatBubbleReceived,
-              border: Border(
-                top: BorderSide(
-                  color: isMine
-                      ? AppColors.chatBubbleSentBorder
-                      : AppColors.chatBubbleReceivedBorder,
-                ),
-                left: BorderSide(
-                  color: isMine
-                      ? AppColors.chatBubbleSentBorder
-                      : AppColors.chatBubbleReceivedBorder,
-                ),
-              ),
+              gradient: isMine ? AppGradients.sentBubble : null,
               borderRadius: radius,
+              border: isMine
+                  ? null
+                  : Border.all(color: AppColors.chatBubbleReceivedBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.chatBubbleShadow,
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

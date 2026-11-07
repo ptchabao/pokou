@@ -90,9 +90,9 @@ IconData moduleIcon(String? name) {
 
 /// Couleur d'accent `#RRGGBB`, avec repli sur le teal de marque.
 Color moduleColor(String? hex) {
-  if (hex == null || hex.length < 7) return const Color(0xFF8A4520);
+  if (hex == null || hex.length < 7) return const Color(0xFF7F3D1E);
   final value = int.tryParse(hex.substring(1), radix: 16);
-  return value == null ? const Color(0xFF8A4520) : Color(0xFF000000 | value);
+  return value == null ? const Color(0xFF7F3D1E) : Color(0xFF000000 | value);
 }
 
 /// Le catalogue en trois rayons, tel que le serveur les compose.

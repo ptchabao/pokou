@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
@@ -89,74 +90,20 @@ class HomeScreen extends ConsumerWidget {
                   ),
               ],
             ),
-            // Maquette APP-1 : « BONJOUR • » en surtitre, le prénom en
-            // grand, recherche et notifications en ronds beiges.
+            // Maquette Figma : la salutation est une carte au dégradé
+            // pêche, un anneau discret en coin, la date en pastille.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              l.homeHelloOverline.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 11,
-                                height: 16 / 11,
-                                letterSpacing: 0.6,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                color: AppColors.accentPrimary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          firstName.isEmpty ? l.navHome : firstName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 28,
-                            height: 36 / 28,
-                            letterSpacing: -0.2,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: _GreetingCard(
+                firstName: firstName.isEmpty ? l.navHome : firstName,
+                onSearch: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+                ),
+                onNotifications: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsSettingsScreen(),
                   ),
-                  _RoundAction(
-                    icon: Icons.search,
-                    tooltip: l.homeSearchHint,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const GlobalSearchScreen(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _RoundAction(
-                    icon: Icons.notifications_none_outlined,
-                    tooltip: l.profileNotifications,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationsSettingsScreen(),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
@@ -167,6 +114,149 @@ class HomeScreen extends ConsumerWidget {
             if (config.has('assime')) const _AssimeEntry(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Carte de salutation (maquette Figma `.greeting`).
+class _GreetingCard extends StatelessWidget {
+  const _GreetingCard({
+    required this.firstName,
+    required this.onSearch,
+    required this.onNotifications,
+  });
+
+  final String firstName;
+  final VoidCallback onSearch;
+  final VoidCallback onNotifications;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    String today;
+    try {
+      today = DateFormat('EEE d MMM', locale).format(DateTime.now());
+    } catch (_) {
+      today = DateFormat('d/M').format(DateTime.now());
+    }
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: AppGradients.greeting,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Stack(
+        children: [
+          // L'anneau décoratif en bas à droite.
+          Positioned(
+            right: -34,
+            bottom: -48,
+            child: IgnorePointer(
+              child: Container(
+                width: 130,
+                height: 130,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    width: 24,
+                    color: AppColors.accentPrimary.withValues(alpha: 0.06),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      l.homeHelloOverline.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 1.3,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.accentPrimary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const Spacer(),
+                    Flexible(
+                      child: Text(
+                        today.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          letterSpacing: 0.4,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accentPrimaryDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            firstName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 32,
+                              height: 1.1,
+                              letterSpacing: -0.7,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l.homeTagline,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _RoundAction(
+                      icon: Icons.search,
+                      tooltip: l.homeSearchHint,
+                      onTap: onSearch,
+                    ),
+                    const SizedBox(width: 8),
+                    _RoundAction(
+                      icon: Icons.notifications_none_outlined,
+                      tooltip: l.profileNotifications,
+                      onTap: onNotifications,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,83 +288,115 @@ class _HomeSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 16),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: accent ? AppColors.accentPrimary : AppColors.surface,
+          color: accent ? null : AppColors.surface,
+          gradient: accent ? AppGradients.brand : null,
           borderRadius: AppRadius.card,
-          boxShadow: AppElevation.subtle,
+          boxShadow: accent ? AppElevation.brand : AppElevation.card,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: accent
-                        ? Colors.white.withValues(alpha: 0.16)
-                        : AppColors.terracottaTint,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: accent ? Colors.white : AppColors.accentPrimary,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: title,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: ink,
-                          ),
-                        ),
-                        if (subtitle != null)
-                          TextSpan(
-                            text: ' · $subtitle',
-                            style: TextStyle(
-                              fontSize: 12,
-                              letterSpacing: 0.2,
-                              color: accent
-                                  ? AppColors.neutralCreme.withValues(
-                                      alpha: 0.8,
-                                    )
-                                  : AppColors.textSecondary,
-                            ),
-                          ),
-                      ],
+            if (accent)
+              // Anneau clair en haut à droite (maquette `.discussion-card`).
+              Positioned(
+                top: -90,
+                right: -90,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        width: 30,
+                        color: Colors.white.withValues(alpha: 0.06),
+                      ),
                     ),
-                    maxLines: 2,
                   ),
                 ),
-                const SizedBox(width: 4),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: accent
-                        ? AppColors.neutralCreme
-                        : AppColors.accentPrimary,
-                  ),
-                  onPressed: onSeeAll,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 8, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(L.of(context).homeSeeAll),
-                      const Icon(Icons.chevron_right, size: 18),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: accent
+                              ? Colors.white.withValues(alpha: 0.16)
+                              : AppColors.terracottaTint,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 18,
+                          color: accent
+                              ? Colors.white
+                              : AppColors.accentPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: title,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  color: ink,
+                                ),
+                              ),
+                              if (subtitle != null)
+                                TextSpan(
+                                  text: ' · $subtitle',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    letterSpacing: 0.2,
+                                    color: accent
+                                        ? AppColors.neutralCreme.withValues(
+                                            alpha: 0.8,
+                                          )
+                                        : AppColors.textSecondary,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          maxLines: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: accent
+                              ? AppColors.neutralCreme
+                              : AppColors.accentPrimary,
+                        ),
+                        onPressed: onSeeAll,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(L.of(context).homeSeeAll),
+                            const Icon(Icons.chevron_right, size: 18),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: child,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            Padding(padding: const EdgeInsets.only(right: 8), child: child),
           ],
         ),
       ),
@@ -299,7 +421,9 @@ class _RoundAction extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: AppColors.surfaceElevated,
+        color: AppColors.isDark
+            ? AppColors.surfaceElevated
+            : Colors.white.withValues(alpha: 0.82),
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
@@ -327,11 +451,13 @@ class _InnerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: onDark
-          ? Colors.black.withValues(alpha: 0.10)
+          ? const Color(
+              0x33301508,
+            ) // rgba(48,21,10,.2) — maquette `.mini-thread`
           : AppColors.surfaceElevated,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
+      borderRadius: BorderRadius.circular(AppRadius.inner),
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: BorderRadius.circular(AppRadius.inner),
         onTap: onTap,
         child: Padding(padding: const EdgeInsets.all(12), child: child),
       ),

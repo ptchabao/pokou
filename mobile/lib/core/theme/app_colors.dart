@@ -60,7 +60,7 @@ class AppColors {
   /// Fond d'application : listes, réglages, profils.
   /// v3.4 Section 7.2 neutral.creme-50 #FFF7EC / Section 7.8 mode sombre #1A1615 (brand.ebene-900).
   static Color get background =>
-      _pick(const Color(0xFFFFF7EC), const Color(0xFF1A1615));
+      _pick(const Color(0xFFFBF7F2), const Color(0xFF1A1615));
 
   /// Surface : cartes, feuilles modales, dialogue.
   /// v3.4 Section 7.8 mode sombre #2A2320 (surface sombre chaude).
@@ -69,11 +69,11 @@ class AppColors {
 
   /// Surface groupée (sections de réglages, barre de recherche).
   static Color get surfaceElevated =>
-      _pick(const Color(0xFFF2E5D5), const Color(0xFF352C28));
+      _pick(const Color(0xFFF3EAE1), const Color(0xFF352C28));
 
   /// Filet entre deux lignes de liste — un cheveu, pas un trait.
   static Color get border =>
-      _pick(const Color(0xFFE4D3BF), const Color(0xFF3D332E));
+      _pick(const Color(0xFFEADED2), const Color(0xFF3D332E));
 
   /// Remplissage des formes d'attente (voir core/widgets/skeleton.dart).
   static Color get skeletonFill =>
@@ -83,7 +83,7 @@ class AppColors {
   /// Texte des bulles, noms de contacts, titres.
   /// v3.4 Section 7.2 brand.ebene-900 #1A1615 / Section 7.8 mode sombre #FFF7EC (14,54:1 sur surface).
   static Color get textPrimary =>
-      _pick(const Color(0xFF1A1615), const Color(0xFFFFF7EC));
+      _pick(const Color(0xFF1A1615), const Color(0xFFFBF7F2));
 
   /// Aperçu de message, horodatage, sous-titres.
   /// v3.4 Section 7.2 neutral.taupe-600 #6B5E57 / Section 7.8 mode sombre #B8AAA0 (6,84:1 sur surface).
@@ -97,13 +97,13 @@ class AppColors {
 
   // ── Marque & Jetons de charte v3.4 (Section 7.2 & 7.8) ─────────────────
   /// LA couleur d'action, terre cuite terracotta-500 (#A65527).
-  static const accentPrimary = Color(0xFFA65527);
+  static const accentPrimary = Color(0xFFA4512A);
 
   /// État pressé de la couleur d'action terracotta-700 (#8A4520).
-  static const accentPressed = Color(0xFF8A4520);
+  static const accentPressed = Color(0xFF7F3D1E);
 
   /// Puce sélectionnée terracotta-100 (#F5DCCB).
-  static const brandTerracotta100 = Color(0xFFF5DCCB);
+  static const brandTerracotta100 = Color(0xFFF7E2D4);
 
   /// Cuivre brand.cuivre-500 (#B86D3B).
   static const brandCuivre = Color(0xFFB86D3B);
@@ -115,35 +115,35 @@ class AppColors {
   static const brandEbene = Color(0xFF1A1615);
 
   /// Crème neutral.creme-50 (#FFF7EC).
-  static const neutralCreme = Color(0xFFFFF7EC);
+  static const neutralCreme = Color(0xFFFBF7F2);
 
   /// Beige neutral.beige-100 (#F2E5D5).
-  static const neutralBeige = Color(0xFFF2E5D5);
+  static const neutralBeige = Color(0xFFF3EAE1);
 
   /// Sable neutral.sable-200 (#E4D3BF).
-  static const neutralSable = Color(0xFFE4D3BF);
+  static const neutralSable = Color(0xFFEADED2);
 
   /// Verbe / Action selon thème :
   /// v3.4 Section 7.8 : action #E8A57C avec libellé ébène #1A1615 (8,64:1).
   static Color get actionButtonBackground =>
-      _pick(const Color(0xFFA65527), const Color(0xFFE8A57C));
+      _pick(const Color(0xFFA4512A), const Color(0xFFE8A57C));
   static Color get actionButtonForeground =>
       _pick(Colors.white, const Color(0xFF1A1615));
 
   /// Teal / Terre cuite secondaire — icônes et libellés teintés.
   static Color get accentPrimaryLight =>
-      _pick(const Color(0xFFA65527), const Color(0xFFE8A57C));
+      _pick(const Color(0xFFA4512A), const Color(0xFFE8A57C));
 
   /// L'encre teintée de marque : liens, libellés d'action textuels, icônes.
   static Color get accentPrimaryDark =>
-      _pick(const Color(0xFFA65527), const Color(0xFFE8A57C));
+      _pick(const Color(0xFFA4512A), const Color(0xFFE8A57C));
 
   /// Anneau de focus des champs de formulaire.
-  static const focusRing = Color(0xFFA65527);
+  static const focusRing = Color(0xFFA4512A);
 
   static Color get securityCritical =>
       _pick(const Color(0xFFB3261E), const Color(0xFFEF5350));
-  static const securityVerified = Color(0xFFA65527);
+  static const securityVerified = Color(0xFFA4512A);
   static const certifiedBadgeBlue = Color(0xFF1688C7);
   static Color get securityWarning =>
       _pick(const Color(0xFF8A5A00), const Color(0xFFFBBF24));
@@ -158,14 +158,14 @@ class AppColors {
 
   /// brand.terracotta-100 des maquettes : pastille active, avatar, badge.
   static Color get terracottaTint =>
-      _pick(const Color(0xFFF5DCCB), const Color(0xFF4A2E20));
+      _pick(const Color(0xFFF7E2D4), const Color(0xFF4A2E20));
 
   /// brand.terracotta-700 : texte posé sur [terracottaTint].
   static Color get onTerracottaTint =>
-      _pick(const Color(0xFF8A4520), const Color(0xFFF5DCCB));
+      _pick(const Color(0xFF7F3D1E), const Color(0xFFF7E2D4));
 
   /// Accents de badge — déclinaisons de la marque.
-  static const badgeGreen = Color(0xFFA65527);
+  static const badgeGreen = Color(0xFFA4512A);
   static Color get badgeCyan =>
       _pick(const Color(0xFF93491F), const Color(0xFFE39A6B));
   static Color get badgePink =>
@@ -175,7 +175,7 @@ class AppColors {
   // Fond blanc translucide en clair, surface sombre #2A2320 en sombre.
   static Color get navBackground =>
       _pick(const Color(0xFFFFFFFF), const Color(0xFF2A2320));
-  static const navPillBackground = Color(0x14A65527);
+  static const navPillBackground = Color(0x14A4512A);
   static const navPillForeground = accentPrimary;
   static Color get navIconInactive =>
       _pick(const Color(0xFF8C7D73), const Color(0xFFB8AAA0));
@@ -183,15 +183,15 @@ class AppColors {
   // ── Écran de discussion ────────────────────────────────────────────────
   /// Papier peint de conversation — crème / ébène.
   static Color get chatBackground =>
-      _pick(const Color(0xFFFFF7EC), const Color(0xFF1A1615));
+      _pick(const Color(0xFFF8F3ED), const Color(0xFF1A1615));
   static Color get chatGlowCenter =>
-      _pick(const Color(0xFFFFF7EC), const Color(0xFF1A1615));
+      _pick(const Color(0xFFFBF7F2), const Color(0xFF1A1615));
 
   /// Bulle REÇUE — blanc pur sur fond clair, surface chaude #2A2320 en sombre.
   static Color get chatBubbleReceived =>
       _pick(const Color(0xFFFFFFFF), const Color(0xFF2A2320));
   static Color get chatBubbleReceivedBorder =>
-      _pick(const Color(0xFFE4D3BF), const Color(0xFF3D332E));
+      _pick(const Color(0xFFEADED2), const Color(0xFF3D332E));
 
   /// La couleur du NOM d'un auteur dans un groupe, stable par personne.
   static Color authorName(int userId) {
@@ -220,32 +220,34 @@ class AppColors {
   }
 
   static Color get chatTextReceived =>
-      _pick(const Color(0xFF1A1615), const Color(0xFFFFF7EC));
+      _pick(const Color(0xFF1A1615), const Color(0xFFFBF7F2));
 
   /// Bulle ENVOYÉE — un sable très clair en clair, terracotta profond en sombre.
   static Color get chatBubbleSent =>
-      _pick(const Color(0xFFFBEDE4), const Color(0xFF5C2E14));
+      _pick(const Color(0xFFF3CFB8), const Color(0xFF5C2E14));
   static Color get chatBubbleSentBorder =>
-      _pick(const Color(0xFFF3D3BE), const Color(0xFF7A3A18));
+      _pick(const Color(0xFFF1C8AD), const Color(0xFF7A3A18));
 
-  static Color get chatBubbleShadow => const Color(0x00000000);
+  /// Ombre des bulles : 0 3px 10px rgba(44,31,24,.055) (maquette Figma).
+  static Color get chatBubbleShadow =>
+      _pick(const Color(0x0E2C1F18), const Color(0x00000000));
 
   /// Couleur d'action dans la conversation.
-  static const chatActionGreen = Color(0xFFA65527);
-  static const chatActionGreenDeep = Color(0xFF8A4520);
+  static const chatActionGreen = Color(0xFFA4512A);
+  static const chatActionGreenDeep = Color(0xFF7F3D1E);
 
   static Color get chatTimestamp =>
       _pick(const Color(0xFF6B3415), const Color(0xFFF6E3D6));
   static Color get chatComposerBg =>
       _pick(const Color(0xFFFFFFFF), const Color(0xFF2A2320));
   static Color get chatComposerBorder =>
-      _pick(const Color(0xFFE4D3BF), const Color(0xFF3D332E));
+      _pick(const Color(0xFFEADED2), const Color(0xFF3D332E));
 
   /// Icônes au repos de la barre de saisie (neutral.taupe-500).
   static const chatIconMuted = Color(0xFF8C7D73);
 
   /// Anneau autour d'un avatar portant des statuts.
-  static const chatAvatarRingStart = Color(0xFFA65527);
+  static const chatAvatarRingStart = Color(0xFFA4512A);
   static const chatAvatarRingEnd = Color(0xFF93491F);
   static Color get statusRingViewed =>
       _pick(const Color(0xFF94A3B8), const Color(0xFF6B5E57));
@@ -289,7 +291,7 @@ class AppColors {
   static Color get chatMediaFrame =>
       _pick(const Color(0xFFFFFFFF), const Color(0xFF2A2320));
   static Color get chatMediaFrameBorder =>
-      _pick(const Color(0xFFE4D3BF), const Color(0xFF3D332E));
+      _pick(const Color(0xFFEADED2), const Color(0xFF3D332E));
   static Color get chatAiCardBg =>
       _pick(const Color(0xFFFEF3C7), const Color(0xFF352C28));
   static Color get chatAiIconColor =>
@@ -322,5 +324,63 @@ class AppColors {
   static const semanticError = Color(0xFFBA1A1A);
 
   /// Conservé pour les états confirmés non liés à la lecture.
-  static const semanticSuccess = Color(0xFFA65527);
+  static const semanticSuccess = Color(0xFFA4512A);
+}
+
+/// Dégradés de la maquette Figma « Design professionnel complet ».
+class AppGradients {
+  AppGradients._();
+
+  /// Carte Discussions, carte ordonnance : #AD5A31 → #8B4221 (140°).
+  static const brand = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFAD5A31), Color(0xFF8B4221)],
+  );
+
+  /// Bouton principal, FAB, logo : #B86538 → #7F3D1E (145°).
+  static const action = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFB86538), Color(0xFF7F3D1E)],
+  );
+
+  /// Carte d'accueil : #F8E8DD → #F3E9DF.
+  static LinearGradient get greeting => AppColors.isDark
+      ? const LinearGradient(colors: [Color(0xFF352C28), Color(0xFF2A2320)])
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF8E8DD), Color(0xFFF3E9DF)],
+        );
+
+  /// Solde Kory : #F3E7DC → #EEE2D7.
+  static LinearGradient get balance => AppColors.isDark
+      ? const LinearGradient(colors: [Color(0xFF352C28), Color(0xFF2A2320)])
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF3E7DC), Color(0xFFEEE2D7)],
+        );
+
+  /// Carte « certifié » : #3D3025 → #211B17.
+  static const certified = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF3D3025), Color(0xFF211B17)],
+  );
+
+  /// Bulle envoyée : #F5D8C5 → #F1C8AD.
+  static LinearGradient? get sentBubble => AppColors.isDark
+      ? null
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF5D8C5), Color(0xFFF1C8AD)],
+        );
+
+  /// Barre de progression : #B9683D → terre cuite.
+  static const progress = LinearGradient(
+    colors: [Color(0xFFB9683D), Color(0xFFA4512A)],
+  );
 }

@@ -110,36 +110,75 @@ class MoreScreen extends ConsumerWidget {
         if (lot1 || config.has('certified'))
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: ModuleCard(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CertifiedScreen()),
-              ),
-              child: Row(
-                children: [
-                  const ModuleBadge(
-                    icon: Icons.verified_outlined,
-                    color: AppColors.accentPrimary,
+            // Maquette Figma `.certified-card` : carte ébène en dégradé,
+            // rond or, texte crème.
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppGradients.certified,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x241E1814),
+                    blurRadius: 22,
+                    offset: Offset(0, 9),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CertifiedScreen()),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
                       children: [
-                        Text(
-                          l.moreCertifiedTitle,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          l.certPitch,
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            color: AppColors.brandOr,
+                            shape: BoxShape.circle,
                           ),
+                          child: const Icon(
+                            Icons.verified_outlined,
+                            color: Color(0xFF352A20),
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.moreCertifiedTitle,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFFFF9E5),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                l.certPitch,
+                                style: const TextStyle(
+                                  color: Color(0xFFE6D9BD),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.brandOr,
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),

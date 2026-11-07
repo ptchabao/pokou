@@ -6484,4 +6484,7 @@ class LFr extends L {
 
   @override
   String get searchRecent => 'Recherches récentes';
+
+  @override
+  String get homeTagline => 'Tout ce qui compte, au même endroit.';
 }
