@@ -867,6 +867,46 @@ class PokouMessageStore {
     return (direct: direct, group: group);
   }
 
+  /// REG-2 · « Gérer le stockage » : à quelle discussion appartient chaque
+  /// pièce jointe. Clé : `contact:<id de l'autre>` ou `group:<id>`.
+  Future<Map<int, String>> mediaOwners(int myUserId) async {
+    final db = await _database;
+    final owners = <int, String>{};
+    for (final row in await db.query(
+      'direct_messages',
+      columns: ['sender_id', 'recipient_id', 'payload'],
+      where: 'payload LIKE ?',
+      whereArgs: ['%"media_asset_id":%'],
+    )) {
+      final media = _mediaIdOf(row['payload'] as String);
+      if (media == null) continue;
+      final other = row['sender_id'] == myUserId
+          ? row['recipient_id']
+          : row['sender_id'];
+      owners[media] = 'contact:$other';
+    }
+    for (final row in await db.query(
+      'group_messages',
+      columns: ['group_id', 'payload'],
+      where: 'payload LIKE ?',
+      whereArgs: ['%"media_asset_id":%'],
+    )) {
+      final media = _mediaIdOf(row['payload'] as String);
+      if (media != null) owners[media] = 'group:${row['group_id']}';
+    }
+    return owners;
+  }
+
+  static int? _mediaIdOf(String payload) {
+    try {
+      final value =
+          (jsonDecode(payload) as Map<String, dynamic>)['media_asset_id'];
+      return value is int ? value : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Combien de messages la base garde déjà : une restauration ne se
   /// propose que sur un téléphone vide.
   Future<int> messageCount() async {

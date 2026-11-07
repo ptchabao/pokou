@@ -2036,6 +2036,18 @@
   "koryCollectorChip": "Сборщик",
   "koryRemoveParticipant": "Убрать {name}",
   "koryInviteNote": "Без Pokou человек получит SMS-приглашение. Он остаётся «Приглашённым» до регистрации, а затем вносит обязательство, как все.",
-  "koryContinueWith": "{count, plural, =0{Продолжить} =1{Продолжить с 1 участником} other{Продолжить с участниками: {count}}}",
-  "koryInvalidPhone": "Неверный номер."
+  "koryContinueWith": "{count, plural, =0{Продолжить без участников} =1{Продолжить с 1 участником} other{Продолжить с участниками: {count}}}",
+  "koryInvalidPhone": "Неверный номер.",
+  "storageManage": "Управление хранилищем",
+  "storageBigFiles": "Файлы больше 5 МБ",
+  "storageAutoDownload": "Автозагрузка",
+  "storageOnWifi": "По Wi-Fi",
+  "autoDownloadNone": "Ничего",
+  "autoDownloadPhotos": "Фото",
+  "autoDownloadPhotosVideos": "Фото и видео",
+  "autoDownloadAll": "Всё",
+  "storageCallSaver": "Экономить трафик во время звонков",
+  "storageCallSaverSub": "Ниже качество, стабильнее связь",
+  "storagePokouUses": "Pokou · {size}",
+  "storageOtherDiscussion": "Другие файлы"
 }

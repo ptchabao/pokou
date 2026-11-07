@@ -7129,11 +7129,49 @@ class LIt extends L {
       locale: localeName,
       other: 'Continua con $count partecipanti',
       one: 'Continua con 1 partecipante',
-      zero: 'Continua',
+      zero: 'Continua senza partecipanti',
     );
     return '$_temp0';
   }
 
   @override
   String get koryInvalidPhone => 'Questo numero non è valido.';
+
+  @override
+  String get storageManage => 'Gestisci lo spazio';
+
+  @override
+  String get storageBigFiles => 'File oltre 5 MB';
+
+  @override
+  String get storageAutoDownload => 'Download automatico';
+
+  @override
+  String get storageOnWifi => 'In Wi-Fi';
+
+  @override
+  String get autoDownloadNone => 'Niente';
+
+  @override
+  String get autoDownloadPhotos => 'Foto';
+
+  @override
+  String get autoDownloadPhotosVideos => 'Foto e video';
+
+  @override
+  String get autoDownloadAll => 'Tutto';
+
+  @override
+  String get storageCallSaver => 'Risparmia dati durante le chiamate';
+
+  @override
+  String get storageCallSaverSub => 'Qualità ridotta, chiamata più stabile';
+
+  @override
+  String storagePokouUses(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String get storageOtherDiscussion => 'Altri file';
 }

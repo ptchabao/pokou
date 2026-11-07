@@ -47,6 +47,9 @@ dependencies:
   go_router: ^14.6.2
   # HTTP client for the MAHIZU API
   http: ^1.2.2
+  # REG-2 : téléchargement automatique selon le réseau (Wi-Fi ou données
+  # mobiles).
+  connectivity_plus: ^7.0.0
   # MediaType pour les uploads multipart (pièces jointes Pokou) — dépendance
   # transitive de `http`, déclarée explicitement car importée directement.
   http_parser: ^4.1.2

@@ -7109,11 +7109,49 @@ class LEs extends L {
       locale: localeName,
       other: 'Continuar con $count participantes',
       one: 'Continuar con 1 participante',
-      zero: 'Continuar',
+      zero: 'Continuar sin participantes',
     );
     return '$_temp0';
   }
 
   @override
   String get koryInvalidPhone => 'Este número no es válido.';
+
+  @override
+  String get storageManage => 'Gestionar el almacenamiento';
+
+  @override
+  String get storageBigFiles => 'Archivos de más de 5 MB';
+
+  @override
+  String get storageAutoDownload => 'Descarga automática';
+
+  @override
+  String get storageOnWifi => 'Con Wi-Fi';
+
+  @override
+  String get autoDownloadNone => 'Nada';
+
+  @override
+  String get autoDownloadPhotos => 'Fotos';
+
+  @override
+  String get autoDownloadPhotosVideos => 'Fotos y vídeos';
+
+  @override
+  String get autoDownloadAll => 'Todo';
+
+  @override
+  String get storageCallSaver => 'Ahorrar datos durante las llamadas';
+
+  @override
+  String get storageCallSaverSub => 'Menor calidad, llamada más estable';
+
+  @override
+  String storagePokouUses(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String get storageOtherDiscussion => 'Otros archivos';
 }

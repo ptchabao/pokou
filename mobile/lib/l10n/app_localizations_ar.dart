@@ -7074,11 +7074,49 @@ class LAr extends L {
       locale: localeName,
       other: 'متابعة مع $count مشاركين',
       one: 'متابعة مع مشارك واحد',
-      zero: 'متابعة',
+      zero: 'المتابعة دون مشاركين',
     );
     return '$_temp0';
   }
 
   @override
   String get koryInvalidPhone => 'هذا الرقم غير صالح.';
+
+  @override
+  String get storageManage => 'إدارة التخزين';
+
+  @override
+  String get storageBigFiles => 'ملفات أكبر من 5 ميغابايت';
+
+  @override
+  String get storageAutoDownload => 'التنزيل التلقائي';
+
+  @override
+  String get storageOnWifi => 'عبر Wi-Fi';
+
+  @override
+  String get autoDownloadNone => 'لا شيء';
+
+  @override
+  String get autoDownloadPhotos => 'الصور';
+
+  @override
+  String get autoDownloadPhotosVideos => 'الصور ومقاطع الفيديو';
+
+  @override
+  String get autoDownloadAll => 'الكل';
+
+  @override
+  String get storageCallSaver => 'توفير البيانات أثناء المكالمات';
+
+  @override
+  String get storageCallSaverSub => 'جودة أقل ومكالمة أكثر استقرارًا';
+
+  @override
+  String storagePokouUses(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String get storageOtherDiscussion => 'ملفات أخرى';
 }

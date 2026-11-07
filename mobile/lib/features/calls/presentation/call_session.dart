@@ -228,8 +228,15 @@ class CallSession extends ChangeNotifier {
 
   bool get canSwitchSpeaker => AudioManager.instance.canSwitchSpeakerphone;
 
-  CameraCaptureOptions get _cameraOptions =>
-      CameraCaptureOptions(cameraPosition: cameraPosition);
+  /// REG-2 · « Économiser les données pendant les appels » : vidéo en 360p.
+  bool callDataSaver = true;
+
+  CameraCaptureOptions get _cameraOptions => CameraCaptureOptions(
+    cameraPosition: cameraPosition,
+    params: callDataSaver
+        ? VideoParametersPresets.h360_169
+        : VideoParametersPresets.h720_169,
+  );
 
   void _changed() {
     _syncPip();

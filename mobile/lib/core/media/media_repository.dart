@@ -321,7 +321,10 @@ class MediaRepository {
           if (bytes != null) {
             await destination.writeAsBytes(bytes, flush: true);
           } else {
-            await destination.writeAsBytes(await source.readAsBytes(), flush: true);
+            await destination.writeAsBytes(
+              await source.readAsBytes(),
+              flush: true,
+            );
           }
         }
       } else if (bytes != null) {
@@ -361,7 +364,9 @@ class MediaRepository {
     // photo illisible chez son propre expéditeur. L'appelant y range
     // lui-même le clair (voir MediaSender).
     if (memoriser) {
-      final ext = filename.contains('.') ? filename.split('.').last : mimeType.split('/').last;
+      final ext = filename.contains('.')
+          ? filename.split('.').last
+          : mimeType.split('/').last;
       await memoriserDansCache(result.id, bytes: bytes, extension: ext);
     }
     return result;
@@ -419,7 +424,11 @@ class MediaRepository {
   }) {
     mediaKey ??= MediaKeyRing.of(mediaAssetId);
     if (mediaKey != null) largeur = null;
-    final deja = fichierEnCache(mediaAssetId, extension: extension, largeur: largeur);
+    final deja = fichierEnCache(
+      mediaAssetId,
+      extension: extension,
+      largeur: largeur,
+    );
     // `SynchronousFuture` et non `Future.value` : il se complète dans la
     // même image de rendu, donc un `FutureBuilder` déjà en place ne repasse
     // pas par son état de chargement.
@@ -460,6 +469,23 @@ class MediaRepository {
 
   /// Réglages > Stockage et données — ce que le cache média occupe
   /// réellement, pour ne pas proposer de « vider » à l'aveugle.
+  /// REG-2 : la taille en cache de chaque pièce jointe (vignettes
+  /// comprises), par identifiant.
+  Future<Map<int, int>> cacheSizesByMedia() async {
+    final dir = await _repertoire();
+    final sizes = <int, int>{};
+    if (!await dir.exists()) return sizes;
+    final pattern = RegExp('^${_cachePrefix}(?:w\\d+_)?(\\d+)');
+    await for (final entity in dir.list()) {
+      if (entity is! File) continue;
+      final match = pattern.firstMatch(entity.uri.pathSegments.last);
+      if (match == null) continue;
+      final id = int.parse(match.group(1)!);
+      sizes[id] = (sizes[id] ?? 0) + await entity.length();
+    }
+    return sizes;
+  }
+
   Future<MediaCacheStats> cacheStats() async {
     final dir = await _repertoire();
     if (!await dir.exists())

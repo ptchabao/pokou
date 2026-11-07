@@ -12324,7 +12324,7 @@ abstract class L {
   /// No description provided for @koryContinueWith.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Continuer} =1{Continuer avec 1 participant} other{Continuer avec {count} participants}}'**
+  /// **'{count, plural, =0{Continuer sans participant} =1{Continuer avec 1 participant} other{Continuer avec {count} participants}}'**
   String koryContinueWith(num count);
 
   /// No description provided for @koryInvalidPhone.
@@ -12332,6 +12332,78 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Ce numéro n’est pas valide.'**
   String get koryInvalidPhone;
+
+  /// No description provided for @storageManage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer le stockage'**
+  String get storageManage;
+
+  /// No description provided for @storageBigFiles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichiers de plus de 5 Mo'**
+  String get storageBigFiles;
+
+  /// No description provided for @storageAutoDownload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement automatique'**
+  String get storageAutoDownload;
+
+  /// No description provided for @storageOnWifi.
+  ///
+  /// In fr, this message translates to:
+  /// **'En Wi-Fi'**
+  String get storageOnWifi;
+
+  /// No description provided for @autoDownloadNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien'**
+  String get autoDownloadNone;
+
+  /// No description provided for @autoDownloadPhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos'**
+  String get autoDownloadPhotos;
+
+  /// No description provided for @autoDownloadPhotosVideos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos et vidéos'**
+  String get autoDownloadPhotosVideos;
+
+  /// No description provided for @autoDownloadAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get autoDownloadAll;
+
+  /// No description provided for @storageCallSaver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Économiser les données pendant les appels'**
+  String get storageCallSaver;
+
+  /// No description provided for @storageCallSaverSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qualité réduite, appel plus stable'**
+  String get storageCallSaverSub;
+
+  /// No description provided for @storagePokouUses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou · {size}'**
+  String storagePokouUses(Object size);
+
+  /// No description provided for @storageOtherDiscussion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres fichiers'**
+  String get storageOtherDiscussion;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

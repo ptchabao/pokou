@@ -7161,11 +7161,49 @@ class LRu extends L {
       locale: localeName,
       other: 'Продолжить с участниками: $count',
       one: 'Продолжить с 1 участником',
-      zero: 'Продолжить',
+      zero: 'Продолжить без участников',
     );
     return '$_temp0';
   }
 
   @override
   String get koryInvalidPhone => 'Неверный номер.';
+
+  @override
+  String get storageManage => 'Управление хранилищем';
+
+  @override
+  String get storageBigFiles => 'Файлы больше 5 МБ';
+
+  @override
+  String get storageAutoDownload => 'Автозагрузка';
+
+  @override
+  String get storageOnWifi => 'По Wi-Fi';
+
+  @override
+  String get autoDownloadNone => 'Ничего';
+
+  @override
+  String get autoDownloadPhotos => 'Фото';
+
+  @override
+  String get autoDownloadPhotosVideos => 'Фото и видео';
+
+  @override
+  String get autoDownloadAll => 'Всё';
+
+  @override
+  String get storageCallSaver => 'Экономить трафик во время звонков';
+
+  @override
+  String get storageCallSaverSub => 'Ниже качество, стабильнее связь';
+
+  @override
+  String storagePokouUses(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String get storageOtherDiscussion => 'Другие файлы';
 }

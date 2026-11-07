@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+import '../../../core/settings/app_settings.dart';
 import '../../../core/calls/native_call_bridge.dart';
 import '../../../core/providers.dart';
 import '../../../core/media/media_repository.dart';
@@ -145,6 +146,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
         ringtonePlayer: widget.ringtonePlayer,
         nativeBridge: ref.read(nativeCallBridgeProvider),
       );
+      _s.callDataSaver = ref.read(appSettingsProvider).callDataSaver;
       activeCall.value = _s;
       _s.start();
     }

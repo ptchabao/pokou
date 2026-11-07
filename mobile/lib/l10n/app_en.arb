@@ -2036,6 +2036,18 @@
   "koryCollectorChip": "Collector",
   "koryRemoveParticipant": "Remove {name}",
   "koryInviteNote": "Without Pokou, the person gets an invitation SMS. They stay “Invited” until they sign up, then pledge like everyone else.",
-  "koryContinueWith": "{count, plural, =0{Continue} =1{Continue with 1 participant} other{Continue with {count} participants}}",
-  "koryInvalidPhone": "This number isn’t valid."
+  "koryContinueWith": "{count, plural, =0{Continue without participants} =1{Continue with 1 participant} other{Continue with {count} participants}}",
+  "koryInvalidPhone": "This number isn’t valid.",
+  "storageManage": "Manage storage",
+  "storageBigFiles": "Files over 5 MB",
+  "storageAutoDownload": "Automatic download",
+  "storageOnWifi": "On Wi-Fi",
+  "autoDownloadNone": "Nothing",
+  "autoDownloadPhotos": "Photos",
+  "autoDownloadPhotosVideos": "Photos and videos",
+  "autoDownloadAll": "Everything",
+  "storageCallSaver": "Save data during calls",
+  "storageCallSaverSub": "Lower quality, more stable call",
+  "storagePokouUses": "Pokou · {size}",
+  "storageOtherDiscussion": "Other files"
 }

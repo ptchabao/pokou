@@ -7080,11 +7080,49 @@ class LEn extends L {
       locale: localeName,
       other: 'Continue with $count participants',
       one: 'Continue with 1 participant',
-      zero: 'Continue',
+      zero: 'Continue without participants',
     );
     return '$_temp0';
   }
 
   @override
   String get koryInvalidPhone => 'This number isn’t valid.';
+
+  @override
+  String get storageManage => 'Manage storage';
+
+  @override
+  String get storageBigFiles => 'Files over 5 MB';
+
+  @override
+  String get storageAutoDownload => 'Automatic download';
+
+  @override
+  String get storageOnWifi => 'On Wi-Fi';
+
+  @override
+  String get autoDownloadNone => 'Nothing';
+
+  @override
+  String get autoDownloadPhotos => 'Photos';
+
+  @override
+  String get autoDownloadPhotosVideos => 'Photos and videos';
+
+  @override
+  String get autoDownloadAll => 'Everything';
+
+  @override
+  String get storageCallSaver => 'Save data during calls';
+
+  @override
+  String get storageCallSaverSub => 'Lower quality, more stable call';
+
+  @override
+  String storagePokouUses(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String get storageOtherDiscussion => 'Other files';
 }

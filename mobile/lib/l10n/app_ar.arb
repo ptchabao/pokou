@@ -2036,6 +2036,18 @@
   "koryCollectorChip": "الجامع",
   "koryRemoveParticipant": "إزالة {name}",
   "koryInviteNote": "من دون Pokou، يتلقّى الشخص رسالة دعوة قصيرة. يبقى «مدعوًا» حتى يسجّل، ثم يتعهّد مثل الآخرين.",
-  "koryContinueWith": "{count, plural, =0{متابعة} =1{متابعة مع مشارك واحد} other{متابعة مع {count} مشاركين}}",
-  "koryInvalidPhone": "هذا الرقم غير صالح."
+  "koryContinueWith": "{count, plural, =0{المتابعة دون مشاركين} =1{متابعة مع مشارك واحد} other{متابعة مع {count} مشاركين}}",
+  "koryInvalidPhone": "هذا الرقم غير صالح.",
+  "storageManage": "إدارة التخزين",
+  "storageBigFiles": "ملفات أكبر من 5 ميغابايت",
+  "storageAutoDownload": "التنزيل التلقائي",
+  "storageOnWifi": "عبر Wi-Fi",
+  "autoDownloadNone": "لا شيء",
+  "autoDownloadPhotos": "الصور",
+  "autoDownloadPhotosVideos": "الصور ومقاطع الفيديو",
+  "autoDownloadAll": "الكل",
+  "storageCallSaver": "توفير البيانات أثناء المكالمات",
+  "storageCallSaverSub": "جودة أقل ومكالمة أكثر استقرارًا",
+  "storagePokouUses": "Pokou · {size}",
+  "storageOtherDiscussion": "ملفات أخرى"
 }

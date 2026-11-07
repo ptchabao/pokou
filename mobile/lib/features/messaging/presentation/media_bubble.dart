@@ -434,7 +434,11 @@ class _ImageMessageBubbleState extends ConsumerState<ImageMessageBubble> {
       return;
     }
 
-    if (!ref.read(appSettingsProvider).dataSaver) {
+    // REG-2 : selon le réseau et le type de média.
+    final onWifi = ref.read(onWifiProvider).valueOrNull ?? false;
+    if (ref
+        .read(appSettingsProvider)
+        .autoDownloads(mimeType: widget.media.mimeType, onWifi: onWifi)) {
       final fut = _resolve();
       fut.then((f) {
         if (mounted) setState(() => _cachedFile = f);

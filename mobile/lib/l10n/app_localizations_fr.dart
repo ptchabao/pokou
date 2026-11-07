@@ -7131,11 +7131,49 @@ class LFr extends L {
       locale: localeName,
       other: 'Continuer avec $count participants',
       one: 'Continuer avec 1 participant',
-      zero: 'Continuer',
+      zero: 'Continuer sans participant',
     );
     return '$_temp0';
   }
 
   @override
   String get koryInvalidPhone => 'Ce numéro n’est pas valide.';
+
+  @override
+  String get storageManage => 'Gérer le stockage';
+
+  @override
+  String get storageBigFiles => 'Fichiers de plus de 5 Mo';
+
+  @override
+  String get storageAutoDownload => 'Téléchargement automatique';
+
+  @override
+  String get storageOnWifi => 'En Wi-Fi';
+
+  @override
+  String get autoDownloadNone => 'Rien';
+
+  @override
+  String get autoDownloadPhotos => 'Photos';
+
+  @override
+  String get autoDownloadPhotosVideos => 'Photos et vidéos';
+
+  @override
+  String get autoDownloadAll => 'Tout';
+
+  @override
+  String get storageCallSaver => 'Économiser les données pendant les appels';
+
+  @override
+  String get storageCallSaverSub => 'Qualité réduite, appel plus stable';
+
+  @override
+  String storagePokouUses(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String get storageOtherDiscussion => 'Autres fichiers';
 }
