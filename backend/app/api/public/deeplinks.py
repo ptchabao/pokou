@@ -178,6 +178,14 @@ def _page(
     return HTMLResponse(content=html, headers={"Cache-Control": "no-store"})
 
 
+@router.get("/kory/join/{code}", response_class=HTMLResponse)
+async def kory_join_link(code: str):
+    """Lien de partage d'une cagnotte : ouvre Pokou, qui rejoint la cagnotte
+    avec ce code puis l'affiche. Sans l'application, la page propose de
+    l'installer. Aucune donnée de la cagnotte n'est exposée."""
+    return _page(f"/kory/join/{code}", "kory")
+
+
 @router.get("/kory/{pot_id}", response_class=HTMLResponse)
 async def kory_pot_link(pot_id: int):
     """Public landing page for a Kory pot deep link; no pot data is exposed."""

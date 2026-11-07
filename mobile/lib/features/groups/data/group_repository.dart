@@ -71,19 +71,35 @@ class GroupRepository {
       if (item['recipient_id'] != myUserId ||
           item['encryption'] != 'v1' ||
           item['epoch'] != null && item['epoch'] != requestedEpoch) {
-        throw const FormatException('Invalid sender-key envelope context');
+        continue; // hors contexte : ignorée, sans bloquer les autres
       }
-      final distribution = await _e2ee.open(
-        peerUserId: item['sender_id'] as int,
-        envelope: item['envelope'] as Map<String, dynamic>,
-        ciphertext: item['ciphertext'] as String,
-      );
-      await _senderKeys.acceptDistribution(
+      final senderId = item['sender_id'] as int;
+      // Déjà installée : ne JAMAIS rouvrir l'enveloppe (elle ne s'ouvre
+      // qu'une fois). C'était la cause des bulles vides / « en attente »
+      // sur tous les messages de groupe.
+      if (await _senderKeys.hasDistribution(
         groupId: group.id,
         epoch: requestedEpoch,
-        senderId: item['sender_id'] as int,
-        distribution: distribution,
-      );
+        senderId: senderId,
+      )) {
+        continue;
+      }
+      try {
+        final distribution = await _e2ee.open(
+          peerUserId: senderId,
+          envelope: item['envelope'] as Map<String, dynamic>,
+          ciphertext: item['ciphertext'] as String,
+        );
+        await _senderKeys.acceptDistribution(
+          groupId: group.id,
+          epoch: requestedEpoch,
+          senderId: senderId,
+          distribution: distribution,
+        );
+      } catch (_) {
+        // Une clé illisible ne bloque plus celles des autres membres : les
+        // messages de CET expéditeur passeront par la re-livraison.
+      }
     }
   }
 
@@ -205,7 +221,11 @@ class GroupRepository {
         .map((message) => message.cryptoEpoch!)
         .toSet();
     for (final epoch in epochs) {
-      await prepareReceiverKeys(group, myUserId, epoch: epoch);
+      try {
+        await prepareReceiverKeys(group, myUserId, epoch: epoch);
+      } catch (_) {
+        // Réseau ou époque périmée : on tente quand même chaque message.
+      }
     }
     for (final message in messages) {
       if (!message.isEncrypted ||

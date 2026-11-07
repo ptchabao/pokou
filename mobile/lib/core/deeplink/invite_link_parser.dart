@@ -2,7 +2,15 @@
 /// `bot` n'est pas une invitation à rejoindre : c'est l'ouverture d'une
 /// conversation avec le bot d'une entreprise (`/bot/<handle>`), qui passe
 /// par le même chemin — y compris l'attente de la connexion.
-enum DeepLinkInviteKind { group, community, channel, bot, koryPot, honamOrder }
+enum DeepLinkInviteKind {
+  group,
+  community,
+  channel,
+  bot,
+  koryPot,
+  koryJoin,
+  honamOrder,
+}
 
 const pokouLinkHost = 'apipokou.cabinet-p-et-associes.com';
 const pokouLinkBaseUrl = 'https://$pokouLinkHost';
@@ -52,6 +60,12 @@ PendingInvite? parseInviteLink(Uri uri) {
       .toList();
   if (segments.isEmpty) return null;
 
+  // Lien de partage d'une cagnotte : /kory/join/{code}.
+  if (segments.length == 3 && segments[0] == 'kory' && segments[1] == 'join') {
+    final code = segments[2].trim();
+    if (code.isEmpty) return null;
+    return PendingInvite(kind: DeepLinkInviteKind.koryJoin, code: code);
+  }
   final isKoryPot =
       (segments.length == 2 && segments[0] == 'kory') ||
       (segments.length == 3 && segments[0] == 'kory' && segments[1] == 'pots');

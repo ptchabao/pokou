@@ -431,7 +431,10 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : Text(L.of(context).authAcceptAndContinue),
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(L.of(context).authAcceptAndContinue),
+                            ),
                     ),
                     const SizedBox(height: 24),
                     // Formulation honnête : Pokou ne fait PAS de chiffrement de

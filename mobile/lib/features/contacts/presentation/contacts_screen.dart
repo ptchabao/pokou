@@ -475,6 +475,23 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       // zone sûre vaut 0 sur un appareil à bouton physique et une trentaine
       // de points sur un écran à encoche, et une constante serait juste sur
       // l'un des deux.
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(
+          bottom:
+              MediaQuery.paddingOf(context).bottom +
+              kBottomNavigationBarHeight +
+              8,
+        ),
+        child: FloatingActionButton(
+          onPressed: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const NewChatScreen())),
+          backgroundColor: AppColors.accentPrimary,
+          foregroundColor: Colors.white,
+          tooltip: L.of(context).newChatTitle,
+          child: const Icon(Icons.add_comment_outlined),
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await forceContactSync(ref);
@@ -581,29 +598,6 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                             vertical: 12,
                           ),
                           isDense: true,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Tooltip(
-                    message: L.of(context).newChatTitle,
-                    child: Material(
-                      color: AppColors.accentPrimary,
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      shadowColor: const Color(0x1A1A1615),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const NewChatScreen(),
-                          ),
-                        ),
-                        child: const SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: Icon(Icons.add, color: Colors.white, size: 22),
                         ),
                       ),
                     ),
@@ -1222,15 +1216,17 @@ class _DiscussionTile extends ConsumerWidget {
 
     // Maquette Stitch « Discussions » : chaque fil est une carte blanche
     // (rounded-xl, p-3.5, ombre d'un point) posée sur le fond crème.
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+    // Liste continue, sans espace entre deux discussions : un filet d'un
+    // point les sépare.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+        ),
+      ),
       child: Material(
         color: AppColors.surface,
-        borderRadius: AppRadius.card,
-        shadowColor: AppColors.shadowTint,
-        elevation: 0.6,
         child: InkWell(
-          borderRadius: AppRadius.card,
           onTap: () => _open(context, ref),
           onLongPress: onLongPress,
           child: Container(

@@ -1947,7 +1947,7 @@ class LAr extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'رسائل هذه المجموعة مشفّرة من طرف إلى طرف: لا يقرؤها إلا أعضاؤها، ولا حتى Pokou. تتغير المفاتيح عند كل انضمام أو مغادرة.';
+      '🔒 مشفّرة من طرف إلى طرف: الأعضاء فقط يمكنهم قراءتها.';
 
   @override
   String get botLabel => 'بوت';
@@ -4313,7 +4313,7 @@ class LAr extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'هذا الشخص لا يستخدم بعد إصدارًا من Pokou يدعم التشفير. رسائلك تنتقل دون تشفير.';
+      'يجب على هذا الشخص تحديث Pokou لتفعيل التشفير.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4321,7 +4321,7 @@ class LAr extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return 'لم يعد مفتاح $name كما كان. يحدث هذا عند إعادة تثبيت Pokou أو تغيير الهاتف، وأيضًا إذا تدخّل أحد بينكما. تحقّق من $name بوسيلة أخرى قبل المتابعة.';
+    return 'تغيّر مفتاح أمان $name (هاتف جديد أو إعادة تثبيت). إن شككت، تحقّق مع $name.';
   }
 
   @override
@@ -4610,11 +4610,10 @@ class LAr extends L {
 
   @override
   String get e2eeReassurance =>
-      'الرسائل في هذه المحادثة مشفّرة من طرف إلى طرف: لا أحد، ولا حتى Pokou، يمكنه قراءتها. وكذلك الصور والملفات والمكالمات عندما يكون لديكما معًا إصدار محدَّث من Pokou وسبق أن تراسلتما.';
+      '🔒 مشفّرة من طرف إلى طرف: لا يمكن لأحد غيركما، ولا حتى Pokou، قراءتها.';
 
   @override
-  String get chatsEncryptionFooter =>
-      'محادثاتك الخاصة مشفّرة من طرف إلى طرف: الرسائل، ومع إصدار محدَّث من Pokou لدى الطرفين، الصور والملفات والمكالمات بعد أن تتراسلا.';
+  String get chatsEncryptionFooter => '🔒 محادثاتك مشفّرة من طرف إلى طرف.';
 
   @override
   String get callsRecentSection => 'الأخيرة';
@@ -6414,8 +6413,7 @@ class LAr extends L {
       'مغادرة المجموعة لا تحذف الصندوق الجاري: تبقى مساهماتك في سجل Kory.';
 
   @override
-  String get messageWaiting =>
-      'بانتظار هذه الرسالة. ستظهر فور إعادة إرسالها من هاتف المرسل.';
+  String get messageWaiting => 'بانتظار هذه الرسالة…';
 
   @override
   String get callWaitingNotice =>

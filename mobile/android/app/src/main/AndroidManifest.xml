@@ -221,6 +221,17 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
+        <!-- Intégration Telecom (self-managed) : un appel Pokou actif fait
+             mettre en attente l'appel téléphonique / WhatsApp en cours.
+             Voir call/PokouTelecom.kt. -->
+        <service
+            android:name=".call.PokouConnectionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService"/>
+            </intent-filter>
+        </service>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

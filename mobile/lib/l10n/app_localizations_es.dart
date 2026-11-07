@@ -1968,7 +1968,7 @@ class LEs extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'Los mensajes de este grupo están cifrados de extremo a extremo: solo sus miembros pueden leerlos, ni siquiera Pokou. Las claves cambian cada vez que alguien entra o sale.';
+      '🔒 Cifrado de extremo a extremo: solo los miembros pueden leerlos.';
 
   @override
   String get botLabel => 'Bot';
@@ -4303,7 +4303,7 @@ class LEs extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'Esta persona aún no usa una versión de Pokou que cifre. Tus mensajes viajan sin cifrar.';
+      'Esta persona debe actualizar Pokou para el cifrado.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4311,7 +4311,7 @@ class LEs extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return 'La clave de $name ya no es la misma. Ocurre cuando alguien reinstala Pokou o cambia de teléfono, pero también si alguien se interpone. Comprueba con $name por otro medio antes de continuar.';
+    return 'La clave de seguridad de $name cambió (teléfono nuevo o reinstalación). Si dudas, compruébalo con $name.';
   }
 
   @override
@@ -4600,11 +4600,11 @@ class LEs extends L {
 
   @override
   String get e2eeReassurance =>
-      'Los mensajes de esta conversación están cifrados de extremo a extremo: nadie, ni siquiera Pokou, puede leerlos. Las fotos, archivos y llamadas también, cuando ambos tienen una versión actualizada de Pokou y ya se han escrito.';
+      '🔒 Cifrado de extremo a extremo: nadie más, ni siquiera Pokou, puede leer estos mensajes.';
 
   @override
   String get chatsEncryptionFooter =>
-      'Tus conversaciones privadas están cifradas de extremo a extremo: los mensajes y, con Pokou actualizado en ambos lados, las fotos, archivos y llamadas una vez que se han escrito.';
+      '🔒 Tus chats están cifrados de extremo a extremo.';
 
   @override
   String get callsRecentSection => 'RECIENTES';
@@ -6440,8 +6440,7 @@ class LEs extends L {
       'Salir del grupo no elimina la colecta en curso: tus aportes quedan en el registro Kory.';
 
   @override
-  String get messageWaiting =>
-      'Esperando este mensaje. Aparecerá en cuanto el teléfono del remitente lo reenvíe.';
+  String get messageWaiting => 'Esperando este mensaje…';
 
   @override
   String get callWaitingNotice =>

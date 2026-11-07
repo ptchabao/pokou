@@ -155,6 +155,11 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     unawaited(_ringtonePlayer.stop());
     _waitingVibration?.cancel();
     setState(() => _responding = true);
+    // Double appel : l'appel en cours sera terminé, PROPREMENT et AVANT
+    // d'entrer dans le nouveau — jamais deux salons ouverts à la fois.
+    final previous = activeCall.value;
+    final switching =
+        previous != null && !previous.ended && previous.roomName != widget.room;
     try {
       final calls = ref.read(callRepositoryProvider);
       final token = await calls.joinCall(
@@ -162,7 +167,20 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
         inviter: widget.fromUserId,
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
+      final navigator = Navigator.of(context);
+      if (switching) {
+        // 1. Retirer l'écran de l'ancien appel (il ne doit plus réagir).
+        for (final route in CallScreen.openRoutes.toList()) {
+          if (route.isActive) navigator.removeRoute(route);
+        }
+        // 2. Terminer l'ancien appel et attendre sa libération (micro,
+        //    caméra, salon) avant d'ouvrir le nouveau.
+        try {
+          await previous.hangUp();
+        } catch (_) {}
+        if (!mounted) return;
+      }
+      navigator.pushReplacement(
         MaterialPageRoute(
           builder: (_) => CallScreen(
             livekitUrl: token.livekitUrl,

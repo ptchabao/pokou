@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/deeplink/invite_link_parser.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../l10n/app_localizations.dart';
@@ -41,7 +42,13 @@ class KoryPotScreen extends ConsumerWidget {
             tooltip: l.koryShareCode(pot.joinCode),
             icon: const Icon(Icons.share_outlined),
             onPressed: () =>
-                Share.share(l.koryShareText(pot.title, pot.joinCode)),
+                // Le texte ET un lien direct : touché, il ouvre Pokou sur la
+                // cagnotte (et la rejoint) ; sans l'application, il propose
+                // de l'installer.
+                Share.share(
+                  '${l.koryShareText(pot.title, pot.joinCode)}\n'
+                  '$pokouLinkBaseUrl/kory/join/${Uri.encodeComponent(pot.joinCode)}',
+                ),
           ),
         if (pot != null && pot.isTontine && pot.isOrganizer && pot.isOpen)
           IconButton(
@@ -58,12 +65,13 @@ class KoryPotScreen extends ConsumerWidget {
       ],
       // Dans une tontine, le bénéficiaire du tour reçoit : il ne mise pas.
       floatingActionButton: pot != null && pot.isOpen && !(pot.isTontine && pot.isCollector)
-          ? FloatingActionButton.extended(
+          // Une icône, pas un libellé : le texte débordait du bouton.
+          ? FloatingActionButton(
               backgroundColor: AppColors.accentPrimary,
               foregroundColor: Colors.white,
+              tooltip: l.koryDeclareTitle,
               onPressed: () => _declare(context, ref, pot),
-              icon: const Icon(Icons.check_circle_outline),
-              label: Text(l.koryDeclare),
+              child: const Icon(Icons.add_task),
             )
           : null,
       child: async.when(

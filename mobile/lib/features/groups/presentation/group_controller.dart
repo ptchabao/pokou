@@ -192,9 +192,17 @@ class GroupChatController extends StateNotifier<GroupChatState> {
 
     try {
       final group = await _repository.getGroup(groupId);
+      // Le détail (rôle, droits, membres) s'affiche AVANT la préparation des
+      // clés : une clé illisible ne doit jamais faire perdre les droits
+      // d'administration ni la liste des membres.
+      if (mounted) state = state.copyWith(group: group);
       final myUserId = _myUserId;
       if (myUserId != null) {
-        await _repository.prepareReceiverKeys(group, myUserId);
+        try {
+          await _repository.prepareReceiverKeys(group, myUserId);
+        } catch (_) {
+          // Les messages concernés passeront par la re-livraison.
+        }
       }
       final page = await _repository.getMessagesPage(groupId);
       final messages = await _decryptPage(group, page.items);
@@ -457,11 +465,13 @@ class GroupChatController extends StateNotifier<GroupChatState> {
   Future<void> _refreshGroup() async {
     try {
       final group = await _repository.getGroup(groupId);
+      if (mounted) state = state.copyWith(group: group);
       final myUserId = _myUserId;
       if (myUserId != null) {
-        await _repository.prepareReceiverKeys(group, myUserId);
+        try {
+          await _repository.prepareReceiverKeys(group, myUserId);
+        } catch (_) {}
       }
-      state = state.copyWith(group: group);
     } catch (_) {
       // Retiré du groupe entre-temps : l'écran se ferme via l'événement WS
       // côté UI, inutile de polluer l'état avec une erreur ici.

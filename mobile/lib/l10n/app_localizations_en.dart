@@ -1962,7 +1962,7 @@ class LEn extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'Messages in this group are end-to-end encrypted: only its members can read them, not even Pokou. Keys change whenever someone joins or leaves.';
+      '🔒 End-to-end encrypted: only members can read these messages.';
 
   @override
   String get botLabel => 'Bot';
@@ -4286,7 +4286,7 @@ class LEn extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'This person isn\'t using a version of Pokou that encrypts yet. Your messages travel unencrypted.';
+      'This person needs to update Pokou for encryption.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4294,7 +4294,7 @@ class LEn extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return '$name\'s key is no longer the same. This happens when someone reinstalls Pokou or changes phone — but also if someone steps in between. Check with $name by another means before continuing.';
+    return '$name\'s security key changed (new phone or reinstall). If in doubt, check with $name.';
   }
 
   @override
@@ -4585,11 +4585,10 @@ class LEn extends L {
 
   @override
   String get e2eeReassurance =>
-      'Messages in this chat are end-to-end encrypted: no one, not even Pokou, can read them. Photos, files and calls are too when you both have an up-to-date version of Pokou and have already messaged each other.';
+      '🔒 End-to-end encrypted: no one else, not even Pokou, can read these messages.';
 
   @override
-  String get chatsEncryptionFooter =>
-      'Your private chats are end-to-end encrypted: messages, and — with an up-to-date Pokou on both sides — photos, files and calls once you have messaged each other.';
+  String get chatsEncryptionFooter => '🔒 Your chats are end-to-end encrypted.';
 
   @override
   String get callsRecentSection => 'RECENT';
@@ -6415,8 +6414,7 @@ class LEn extends L {
       'Leaving the group doesn\'t delete the ongoing pot: your contributions stay in the Kory log.';
 
   @override
-  String get messageWaiting =>
-      'Waiting for this message. It will appear as soon as the sender\'s phone resends it.';
+  String get messageWaiting => 'Waiting for this message…';
 
   @override
   String get callWaitingNotice =>

@@ -36,6 +36,10 @@ import '../../contacts/presentation/discussions_controller.dart';
 /// le carnet d'adresses (même règle que côté API, voir calls.py::invite).
 
 class CallScreen extends ConsumerStatefulWidget {
+  /// Les écrans d'appel ouverts — pour les retirer proprement quand un
+  /// nouvel appel remplace l'appel en cours (double appel).
+  static final Set<Route<dynamic>> openRoutes = {};
+
   const CallScreen({
     super.key,
     required this.livekitUrl,
@@ -85,6 +89,21 @@ class CallScreen extends ConsumerStatefulWidget {
 class _CallScreenState extends ConsumerState<CallScreen> {
   /// La session de cet appel — qui survit à cet écran (voir CallSession).
   late final CallSession _s;
+
+  /// La route de CET écran. Fermer à la fin de l'appel retire celle-ci, et
+  /// non « celle du dessus » : pendant un basculement d'appel, le dessus
+  /// est l'écran du NOUVEL appel, et le fermer figeait l'application.
+  Route<dynamic>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null && _route == null) {
+      _route = route;
+      CallScreen.openRoutes.add(route);
+    }
+  }
   StreamSubscription<CallNotice>? _noticeSubscription;
   StreamSubscription<CallReaction>? _reactionSubscription;
   Timer? _reactionTimer;
@@ -133,7 +152,10 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     if (_s.ended) {
       if (!_closing) {
         _closing = true;
-        Navigator.of(context).maybePop();
+        final route = _route;
+        if (route != null && route.isActive) {
+          Navigator.of(context).removeRoute(route);
+        }
       }
       return;
     }
@@ -304,6 +326,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
 
   @override
   void dispose() {
+    if (_route != null) CallScreen.openRoutes.remove(_route);
     // Fermer l'écran ne coupe PLUS l'appel : on le quitte pour lire un
     // message, le bandeau « Appel en cours » ramène ici. Seul le raccroché
     // (ou celui de l'autre) termine la session.

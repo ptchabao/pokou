@@ -16,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:flutter/gestures.dart';
 
+import '../../../core/text/emoji_only.dart';
 import '../../../core/media/image_cropper.dart';
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../core/crypto/call_keys.dart' show CallEncryptionException;
@@ -40,6 +41,7 @@ import '../../messaging/presentation/bubble_widgets.dart';
 import '../../messaging/presentation/contact_card_bubble.dart'
     show ContactCardBubble, findPhoneMatches, handlePhoneTap;
 import '../../messaging/presentation/location_bubble.dart';
+import '../../messaging/presentation/conversation_screen.dart';
 import '../../messaging/presentation/day_separator.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../home/presentation/certified_screen.dart';
@@ -1239,6 +1241,10 @@ class _GroupConversationScreenState
                       ? Text(member.isOwner ? _l.groupCreator : _l.groupAdmin)
                       : null,
                   trailing: _memberActions(group, member, sheetContext),
+                  // Toucher un membre ouvre une discussion à deux avec lui.
+                  onTap: member.userId == widget.myUserId
+                      ? null
+                      : () => Navigator.pop(sheetContext, 'dm:${member.userId}'),
                 ),
               const Divider(height: 1),
               ListTile(
@@ -1289,6 +1295,22 @@ class _GroupConversationScreenState
       await _leave();
     } else if (action == 'delete') {
       await _deleteGroup();
+    } else if (action.startsWith('dm:')) {
+      final userId = int.tryParse(action.substring(3));
+      final member = group.members
+          .where((m) => m.userId == userId)
+          .firstOrNull;
+      if (userId != null && member != null && mounted) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ConversationScreen(
+              myUserId: widget.myUserId,
+              contactUserId: userId,
+              contactName: member.displayName,
+            ),
+          ),
+        );
+      }
     } else if (action == 'manage') {
       await Navigator.of(context).push(
         MaterialPageRoute(
@@ -2474,7 +2496,11 @@ class _GroupBubbleState extends State<_GroupBubble> {
 
   Widget _mediaWidget(MediaMeta media) => switch (message.messageType) {
     'STICKER' => StickerImage(mediaId: media.id, size: _stickerSize),
-    'AUDIO' => AudioMessageBubble(media: media, isMine: isMine),
+    'AUDIO' => AudioMessageBubble(
+      media: media,
+      isMine: isMine,
+      mediaKey: message.mediaKey,
+    ),
     'IMAGE' => ImageMessageBubble(media: media),
     'VIDEO' => VideoMessageBubble(media: media),
     _ => DocumentMessageBubble(media: media, isMine: isMine),
@@ -2541,6 +2567,13 @@ class _GroupBubbleState extends State<_GroupBubble> {
 
     final media = message.media;
     if (media == null) {
+      final emojis = emojiOnlyCount(message.content);
+      if (emojis != null) {
+        return Text(
+          message.content!.trim(),
+          style: emojiOnlyStyle(textStyle, emojis),
+        );
+      }
       // Mentions ET numéros de téléphone se combinent sur le même texte,
       // d'où ce widget dédié plutôt que réutiliser LinkifiedText tel quel
       // (voir _GroupMessageText).

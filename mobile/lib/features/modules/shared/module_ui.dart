@@ -210,7 +210,7 @@ class ModuleActionButton extends StatelessWidget {
               color: AppColors.actionButtonForeground,
             ),
           )
-        : Text(label);
+        : Text(label, textAlign: TextAlign.center, maxLines: 2, softWrap: true);
 
     final button = icon == null || busy
         ? FilledButton(
@@ -222,7 +222,7 @@ class ModuleActionButton extends StatelessWidget {
             onPressed: onPressed,
             style: style,
             icon: Icon(icon, size: 18),
-            label: Text(label),
+            label: Text(label, textAlign: TextAlign.center, maxLines: 2, softWrap: true),
           );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }
@@ -266,7 +266,7 @@ class ModuleQuietButton extends StatelessWidget {
             onPressed: onPressed,
             style: style,
             icon: Icon(icon, size: 20),
-            label: Text(label),
+            label: Text(label, textAlign: TextAlign.center, maxLines: 2, softWrap: true),
           );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }

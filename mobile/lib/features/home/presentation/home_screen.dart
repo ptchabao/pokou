@@ -204,7 +204,7 @@ class _HomeSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Flexible(
+                Expanded(
                   child: Text.rich(
                     TextSpan(
                       children: [
@@ -231,11 +231,10 @@ class _HomeSection extends StatelessWidget {
                           ),
                       ],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 4),
                 TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: accent

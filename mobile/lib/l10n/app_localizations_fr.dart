@@ -1970,7 +1970,7 @@ class LFr extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'Les messages de ce groupe sont chiffrés de bout en bout : seuls ses membres peuvent les lire, pas même Pokou. Chaque arrivée ou départ change les clés.';
+      '🔒 Chiffré de bout en bout : seuls les membres peuvent lire ces messages.';
 
   @override
   String get botLabel => 'Bot';
@@ -4314,7 +4314,7 @@ class LFr extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'Cette personne n\'utilise pas encore une version de Pokou qui chiffre. Tes messages voyagent en clair.';
+      'Cette personne doit mettre Pokou à jour pour le chiffrement.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4322,7 +4322,7 @@ class LFr extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return 'La clé de $name n\'est plus la même. Cela arrive quand quelqu\'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu\'un s\'intercale. Vérifie avec $name par un autre moyen avant de continuer.';
+    return 'La clé de sécurité de $name a changé (nouveau téléphone ou réinstallation). En cas de doute, vérifie avec $name.';
   }
 
   @override
@@ -4614,11 +4614,11 @@ class LFr extends L {
 
   @override
   String get e2eeReassurance =>
-      'Les messages de cette discussion sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.';
+      '🔒 Chiffré de bout en bout : personne d’autre, pas même Pokou, ne peut lire ces messages.';
 
   @override
   String get chatsEncryptionFooter =>
-      'Tes discussions privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.';
+      '🔒 Tes discussions sont chiffrées de bout en bout.';
 
   @override
   String get callsRecentSection => 'RÉCENTS';
@@ -6458,8 +6458,7 @@ class LFr extends L {
       'Quitter le groupe ne supprime pas la cagnotte en cours : tes contributions restent dans le journal Kory.';
 
   @override
-  String get messageWaiting =>
-      'En attente de ce message. Il s’affichera dès que le téléphone de l’expéditeur l’aura renvoyé.';
+  String get messageWaiting => 'En attente de ce message…';
 
   @override
   String get callWaitingNotice =>

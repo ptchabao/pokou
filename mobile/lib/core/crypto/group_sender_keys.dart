@@ -92,6 +92,20 @@ class GroupSenderKeys {
     }
   }
 
+  /// La clé de cet expéditeur pour ce groupe et cette époque est-elle déjà
+  /// installée ? Son enveloppe à deux ne s'ouvre qu'UNE fois : la rouvrir à
+  /// chaque chargement échouait (« message déjà reçu ») et bloquait le
+  /// déchiffrement de tout le groupe.
+  Future<bool> hasDistribution({
+    required int groupId,
+    required int epoch,
+    required int senderId,
+  }) async =>
+      await _read(
+        'signal_group_distribution_accepted_v1_${groupId}_${epoch}_$senderId',
+      ) ==
+      '1';
+
   /// The distribution must be sealed to each member with a pairwise E2EE
   /// session before being sent to the server.
   Future<void> acceptDistribution({

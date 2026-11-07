@@ -1967,7 +1967,7 @@ class LRu extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'Сообщения этой группы защищены сквозным шифрованием: читать их могут только участники, даже Pokou не может. Ключи меняются при каждом входе или выходе.';
+      '🔒 Сквозное шифрование: читать могут только участники.';
 
   @override
   String get botLabel => 'Бот';
@@ -4356,7 +4356,7 @@ class LRu extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'Этот человек пока не использует версию Pokou с шифрованием. Ваши сообщения передаются открыто.';
+      'Этому человеку нужно обновить Pokou для шифрования.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4364,7 +4364,7 @@ class LRu extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return 'Ключ $name больше не тот же. Так бывает при переустановке Pokou или смене телефона — но и в случае, если кто-то вклинился между вами. Свяжитесь с $name другим способом, прежде чем продолжить.';
+    return 'Ключ безопасности $name изменился (новый телефон или переустановка). Если сомневаешься, уточни у $name.';
   }
 
   @override
@@ -4656,11 +4656,11 @@ class LRu extends L {
 
   @override
   String get e2eeReassurance =>
-      'Сообщения в этом чате защищены сквозным шифрованием: никто, даже Pokou, не может их прочитать. Фото, файлы и звонки — тоже, если у вас обоих обновлённый Pokou и вы уже переписывались.';
+      '🔒 Сквозное шифрование: никто, даже Pokou, не может читать эти сообщения.';
 
   @override
   String get chatsEncryptionFooter =>
-      'Ваши личные чаты защищены сквозным шифрованием: сообщения, а при обновлённом Pokou у обоих — фото, файлы и звонки, как только вы обменялись сообщениями.';
+      '🔒 Твои чаты защищены сквозным шифрованием.';
 
   @override
   String get callsRecentSection => 'НЕДАВНИЕ';
@@ -6491,8 +6491,7 @@ class LRu extends L {
       'Выход из группы не удаляет текущую копилку: твои взносы остаются в журнале Kory.';
 
   @override
-  String get messageWaiting =>
-      'Ожидание сообщения. Оно появится, как только телефон отправителя отправит его снова.';
+  String get messageWaiting => 'Ожидание сообщения…';
 
   @override
   String get callWaitingNotice =>

@@ -16,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel
 import com.pokou.pokou.call.CallManager
 import com.pokou.pokou.call.CallNotification
 import com.pokou.pokou.call.OngoingCallService
+import com.pokou.pokou.call.PokouTelecom
 import com.pokou.pokou.call.CallState
 import com.pokou.pokou.call.IncomingCall
 import com.pokou.pokou.call.RingVibration
@@ -128,9 +129,13 @@ class MainActivity : FlutterActivity() {
                     }
                     "startOngoingCall" -> {
                         OngoingCallService.start(applicationContext, call.arguments == true)
+                        // Déclare l'appel au système : un appel téléphonique
+                        // ou WhatsApp en cours est mis EN ATTENTE.
+                        PokouTelecom.activate(applicationContext)
                         result.success(null)
                     }
                     "stopOngoingCall" -> {
+                        PokouTelecom.end()
                         OngoingCallService.stop(applicationContext)
                         result.success(null)
                     }

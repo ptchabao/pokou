@@ -10,6 +10,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../core/crypto/media_cipher.dart';
 import '../../../core/media/media_repository.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
@@ -140,10 +141,15 @@ class AudioMessageBubble extends ConsumerStatefulWidget {
     super.key,
     required this.media,
     required this.isMine,
+    this.mediaKey,
   });
 
   final MediaMeta media;
   final bool isMine;
+
+  /// La clé de la note chiffrée, portée par le message. Sans elle, c'est le
+  /// CHIFFRÉ qui partait au lecteur : la note tournait dans le vide.
+  final MediaKey? mediaKey;
 
   @override
   ConsumerState<AudioMessageBubble> createState() => _AudioMessageBubbleState();
@@ -162,6 +168,30 @@ class _AudioMessageBubbleState extends ConsumerState<AudioMessageBubble> {
   late final List<double> _silhouette = silhouetteFor(
     'audio-${widget.media.id}',
   );
+
+  /// Le téléchargement de la note — lancé DÈS l'affichage, comme WhatsApp,
+  /// pour que la lecture parte aussitôt qu'on touche « lecture ».
+  Future<File>? _download;
+
+  Future<File> _fetch() => _download ??= ref
+      .read(mediaRepositoryProvider)
+      .resolveLocalFile(
+        widget.media.id,
+        extension: mediaExtension(widget.media),
+        mediaKey: widget.mediaKey,
+      )
+      .timeout(const Duration(seconds: 45))
+      .catchError((Object e) {
+        _download = null; // un nouvel appui relance
+        throw e;
+      });
+
+  @override
+  void initState() {
+    super.initState();
+    // Préchargement silencieux : une note vocale pèse peu.
+    unawaited(_fetch().then((_) {}, onError: (_) {}));
+  }
 
   @override
   void dispose() {
@@ -201,16 +231,13 @@ class _AudioMessageBubbleState extends ConsumerState<AudioMessageBubble> {
       _error = null;
     });
     try {
-      final file = await ref
-          .read(mediaRepositoryProvider)
-          .resolveLocalFile(
-            widget.media.id,
-            extension: mediaExtension(widget.media),
-          );
-      await _player.setFilePath(file.path);
+      final file = await _fetch();
+      await _player
+          .setFilePath(file.path)
+          .timeout(const Duration(seconds: 15));
       _startPlayback();
     } catch (_) {
-      setState(() => _error = L.of(context).audioPlayFailed);
+      if (mounted) setState(() => _error = L.of(context).audioPlayFailed);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

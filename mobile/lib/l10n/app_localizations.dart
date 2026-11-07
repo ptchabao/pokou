@@ -3624,7 +3624,7 @@ abstract class L {
   /// No description provided for @groupNotEncryptedNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Les messages de ce groupe sont chiffrés de bout en bout : seuls ses membres peuvent les lire, pas même Pokou. Chaque arrivée ou départ change les clés.'**
+  /// **'🔒 Chiffré de bout en bout : seuls les membres peuvent lire ces messages.'**
   String get groupNotEncryptedNotice;
 
   /// No description provided for @botLabel.
@@ -7554,7 +7554,7 @@ abstract class L {
   /// No description provided for @e2eeNotEncryptedBody.
   ///
   /// In fr, this message translates to:
-  /// **'Cette personne n\'utilise pas encore une version de Pokou qui chiffre. Tes messages voyagent en clair.'**
+  /// **'Cette personne doit mettre Pokou à jour pour le chiffrement.'**
   String get e2eeNotEncryptedBody;
 
   /// No description provided for @e2eeIdentityChangedTitle.
@@ -7566,7 +7566,7 @@ abstract class L {
   /// No description provided for @e2eeIdentityChangedBody.
   ///
   /// In fr, this message translates to:
-  /// **'La clé de {name} n\'est plus la même. Cela arrive quand quelqu\'un réinstalle Pokou ou change de téléphone — mais aussi si quelqu\'un s\'intercale. Vérifie avec {name} par un autre moyen avant de continuer.'**
+  /// **'La clé de sécurité de {name} a changé (nouveau téléphone ou réinstallation). En cas de doute, vérifie avec {name}.'**
   String e2eeIdentityChangedBody(String name);
 
   /// No description provided for @e2eeIdentityAccept.
@@ -8124,13 +8124,13 @@ abstract class L {
   /// No description provided for @e2eeReassurance.
   ///
   /// In fr, this message translates to:
-  /// **'Les messages de cette discussion sont chiffrés de bout en bout : personne, pas même Pokou, ne peut les lire. Les photos, fichiers et appels le sont aussi quand vous avez tous les deux une version à jour de Pokou et que vous vous êtes déjà écrit.'**
+  /// **'🔒 Chiffré de bout en bout : personne d’autre, pas même Pokou, ne peut lire ces messages.'**
   String get e2eeReassurance;
 
   /// No description provided for @chatsEncryptionFooter.
   ///
   /// In fr, this message translates to:
-  /// **'Tes discussions privées sont chiffrées de bout en bout : les messages, et — avec une version à jour de Pokou des deux côtés — les photos, les fichiers et les appels dès que vous vous êtes écrit.'**
+  /// **'🔒 Tes discussions sont chiffrées de bout en bout.'**
   String get chatsEncryptionFooter;
 
   /// No description provided for @callsRecentSection.
@@ -11250,7 +11250,7 @@ abstract class L {
   /// No description provided for @messageWaiting.
   ///
   /// In fr, this message translates to:
-  /// **'En attente de ce message. Il s’affichera dès que le téléphone de l’expéditeur l’aura renvoyé.'**
+  /// **'En attente de ce message…'**
   String get messageWaiting;
 
   /// No description provided for @callWaitingNotice.

@@ -15,6 +15,7 @@ import '../../features/communities/presentation/community_detail_screen.dart';
 import '../../features/groups/presentation/group_controller.dart';
 import '../../features/groups/presentation/group_conversation_screen.dart';
 import '../../features/honam/presentation/honam_order_screen.dart';
+import '../../features/kory/presentation/kory_controller.dart';
 import '../../features/kory/presentation/kory_pot_screen.dart';
 import '../../features/messaging/presentation/conversation_screen.dart';
 import '../api/api_exceptions.dart';
@@ -99,6 +100,14 @@ class DeepLinkService {
     if (myUserId == null) return;
 
     try {
+      if (invite.kind == DeepLinkInviteKind.koryJoin) {
+        // Rejoindre avec le code du lien, puis ouvrir la cagnotte.
+        final pot = await _ref.read(koryRepositoryProvider).join(invite.code);
+        rootNavigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
+        );
+        return;
+      }
       if (invite.kind == DeepLinkInviteKind.koryPot) {
         final potId = invite.resourceId;
         if (potId == null) return;

@@ -1970,7 +1970,7 @@ class LIt extends L {
 
   @override
   String get groupNotEncryptedNotice =>
-      'I messaggi di questo gruppo sono crittografati end-to-end: solo i membri possono leggerli, nemmeno Pokou. Le chiavi cambiano a ogni ingresso o uscita.';
+      '🔒 Crittografia end-to-end: solo i membri possono leggerli.';
 
   @override
   String get botLabel => 'Bot';
@@ -4313,7 +4313,7 @@ class LIt extends L {
 
   @override
   String get e2eeNotEncryptedBody =>
-      'Questa persona non usa ancora una versione di Pokou che crittografa. I tuoi messaggi viaggiano in chiaro.';
+      'Questa persona deve aggiornare Pokou per la crittografia.';
 
   @override
   String get e2eeIdentityChangedTitle =>
@@ -4321,7 +4321,7 @@ class LIt extends L {
 
   @override
   String e2eeIdentityChangedBody(String name) {
-    return 'La chiave di $name non è più la stessa. Succede quando qualcuno reinstalla Pokou o cambia telefono, ma anche se qualcuno si intromette. Verifica con $name in altro modo prima di continuare.';
+    return 'La chiave di sicurezza di $name è cambiata (nuovo telefono o reinstallazione). Nel dubbio, verifica con $name.';
   }
 
   @override
@@ -4613,11 +4613,11 @@ class LIt extends L {
 
   @override
   String get e2eeReassurance =>
-      'I messaggi di questa chat sono cifrati end-to-end: nessuno, nemmeno Pokou, può leggerli. Anche foto, file e chiamate, quando entrambi avete una versione aggiornata di Pokou e vi siete già scritti.';
+      '🔒 Crittografia end-to-end: nessun altro, nemmeno Pokou, può leggere questi messaggi.';
 
   @override
   String get chatsEncryptionFooter =>
-      'Le tue chat private sono cifrate end-to-end: i messaggi e, con Pokou aggiornato da entrambe le parti, foto, file e chiamate dopo che vi siete scritti.';
+      '🔒 Le tue chat sono crittografate end-to-end.';
 
   @override
   String get callsRecentSection => 'RECENTI';
@@ -6456,8 +6456,7 @@ class LIt extends L {
       'Lasciare il gruppo non elimina la colletta in corso: i tuoi contributi restano nel registro Kory.';
 
   @override
-  String get messageWaiting =>
-      'In attesa di questo messaggio. Apparirà non appena il telefono del mittente lo reinvierà.';
+  String get messageWaiting => 'In attesa di questo messaggio…';
 
   @override
   String get callWaitingNotice =>

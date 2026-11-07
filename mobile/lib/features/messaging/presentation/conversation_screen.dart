@@ -14,6 +14,7 @@ import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/text/emoji_only.dart';
 import '../../../core/media/media_repository.dart'
     show MediaMeta, mediaExtension;
 import '../../../core/providers.dart';
@@ -2629,7 +2630,11 @@ class _BubbleState extends State<_Bubble> {
   Widget _mediaWidget(MediaMeta media) {
     final base = switch (message.messageType) {
       'STICKER' => StickerImage(mediaId: media.id, size: _stickerSize),
-      'AUDIO' => AudioMessageBubble(media: media, isMine: isMine),
+      'AUDIO' => AudioMessageBubble(
+        media: media,
+        isMine: isMine,
+        mediaKey: message.mediaKey,
+      ),
       'IMAGE' => ImageMessageBubble(media: media),
       'VIDEO' => VideoMessageBubble(media: media),
       _ => DocumentMessageBubble(media: media, isMine: isMine),
@@ -2712,6 +2717,11 @@ class _BubbleState extends State<_Bubble> {
       // la carte de visite — même geste, même fonction (voir
       // contact_card_bubble.dart::handlePhoneTap).
       final content = message.content ?? '';
+      // Un message fait seulement d'emoji s'affiche en grand (WhatsApp).
+      final emojis = emojiOnlyCount(content);
+      if (emojis != null) {
+        return Text(content.trim(), style: emojiOnlyStyle(textStyle, emojis));
+      }
       final firstUrl = extractFirstUrl(content);
       if (firstUrl == null)
         return LinkifiedText(text: content, style: textStyle);

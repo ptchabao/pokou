@@ -81,6 +81,11 @@ _BUILT_IN_SHA256_FINGERPRINTS = [
     # risque : cette clé ne signe rien qui soit distribué, et elle n'autorise
     # que l'ouverture de liens, pas l'accès à des données.
     "C6:2E:93:50:78:7A:FF:46:51:DC:6B:48:58:52:D7:33:86:0F:D2:15:A5:FC:E6:84:00:34:3B:70:04:DE:4B:7B",
+    # Clé qui signe les APK de release distribués EN CE MOMENT (construits
+    # sur le Mac de build sans android/key.properties : repli sur sa clé de
+    # debug). Sans elle, ces APK n'ouvrent pas les liens Pokou — groupes,
+    # communautés, chaînes, cagnottes — et c'est le navigateur qui s'ouvre.
+    "49:93:4D:1E:9B:53:00:6D:58:1C:2E:54:35:08:A4:5E:38:53:CF:49:93:37:3B:95:CF:A4:D4:BF:55:0C:73:0F",
     # La clé de signature GÉRÉE PAR GOOGLE (Play App Signing) n'est PAS ici :
     # elle est propre à chaque fiche Play et n'existe qu'une fois
     # l'application créée dans la console. Elle se déclare par

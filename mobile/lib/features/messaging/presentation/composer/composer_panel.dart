@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -183,10 +185,20 @@ class _KeyboardHandoffState extends State<_KeyboardHandoff>
     duration: const Duration(milliseconds: 180),
   )..forward();
 
+  /// Passé le temps de l'animation du clavier, le panneau prend TOUTE sa
+  /// hauteur : certains téléphones continuent de signaler un encart de
+  /// clavier après sa fermeture, et le panneau restait caché derrière la
+  /// barre de saisie.
+  bool _settled = false;
+  Timer? _settleTimer;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _settleTimer = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) setState(() => _settled = true);
+    });
   }
 
   @override
@@ -197,6 +209,7 @@ class _KeyboardHandoffState extends State<_KeyboardHandoff>
 
   @override
   void dispose() {
+    _settleTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _appear.dispose();
     super.dispose();
@@ -209,7 +222,9 @@ class _KeyboardHandoffState extends State<_KeyboardHandoff>
     return AnimatedBuilder(
       animation: _appear,
       builder: (context, child) {
-        final freed = (widget.height - keyboard).clamp(0.0, widget.height);
+        final freed = _settled
+            ? widget.height
+            : (widget.height - keyboard).clamp(0.0, widget.height);
         final rising =
             widget.height * Curves.easeOutCubic.transform(_appear.value);
         final visible = freed < rising ? freed : rising;

@@ -220,4 +220,12 @@ void main() {
       }
     });
   });
+
+  test('un lien de partage de cagnotte porte le code pour la rejoindre', () {
+    final invite = parseInviteLink(
+      Uri.parse('$pokouLinkBaseUrl/kory/join/KX7P2Q'),
+    );
+    expect(invite?.kind, DeepLinkInviteKind.koryJoin);
+    expect(invite?.code, 'KX7P2Q');
+  });
 }
