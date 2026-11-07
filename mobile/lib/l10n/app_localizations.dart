@@ -726,7 +726,7 @@ abstract class L {
   /// No description provided for @chatsPinLimit.
   ///
   /// In fr, this message translates to:
-  /// **'Trois discussions déjà épinglées au maximum.'**
+  /// **'Trois discussions épinglées au maximum.'**
   String get chatsPinLimit;
 
   /// No description provided for @chatsMute8h.
@@ -3144,7 +3144,7 @@ abstract class L {
   /// No description provided for @marketCityOrArea.
   ///
   /// In fr, this message translates to:
-  /// **'Ville ou quartier'**
+  /// **'Ville et quartier'**
   String get marketCityOrArea;
 
   /// No description provided for @marketLocationCleared.
@@ -4440,7 +4440,7 @@ abstract class L {
   /// No description provided for @storageMobileData.
   ///
   /// In fr, this message translates to:
-  /// **'Données mobiles'**
+  /// **'En données mobiles'**
   String get storageMobileData;
 
   /// No description provided for @storageDataSaver.
@@ -7320,7 +7320,7 @@ abstract class L {
   /// No description provided for @recSlideToCancel.
   ///
   /// In fr, this message translates to:
-  /// **'Glisser pour annuler'**
+  /// **'Glisse pour annuler'**
   String get recSlideToCancel;
 
   /// No description provided for @recReleaseToCancel.
@@ -8022,7 +8022,7 @@ abstract class L {
   /// No description provided for @statusMineVisibility.
   ///
   /// In fr, this message translates to:
-  /// **'Visible par mes contacts'**
+  /// **'Visible par : Mes contacts'**
   String get statusMineVisibility;
 
   /// No description provided for @callLeaveConference.
@@ -8928,7 +8928,7 @@ abstract class L {
   /// No description provided for @koryDeclareTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Déclarer une contribution'**
+  /// **'Déclarer ma contribution'**
   String get koryDeclareTitle;
 
   /// No description provided for @koryAmount.
@@ -9030,7 +9030,7 @@ abstract class L {
   /// No description provided for @koryCreateTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Nouvelle cagnotte'**
+  /// **'Nouvelle collecte'**
   String get koryCreateTitle;
 
   /// No description provided for @koryFieldTitle.
@@ -9516,7 +9516,7 @@ abstract class L {
   /// No description provided for @honamCode.
   ///
   /// In fr, this message translates to:
-  /// **'Code de remise'**
+  /// **'Ton code de remise'**
   String get honamCode;
 
   /// No description provided for @honamCodeHelp.
@@ -9816,7 +9816,7 @@ abstract class L {
   /// No description provided for @deleteProofWarning.
   ///
   /// In fr, this message translates to:
-  /// **'Le mode preuve est actif : le message restera visible, barré, pour tous les membres.'**
+  /// **'Le mode preuve est actif. Ton message restera visible, barré, pour tous les participants, avec l’heure de la suppression.'**
   String get deleteProofWarning;
 
   /// No description provided for @deletedKept.
@@ -9846,7 +9846,7 @@ abstract class L {
   /// No description provided for @proofExport.
   ///
   /// In fr, this message translates to:
-  /// **'Exporter la discussion (PDF)'**
+  /// **'Exporter la discussion en PDF'**
   String get proofExport;
 
   /// No description provided for @proofModeOn.
@@ -10224,7 +10224,7 @@ abstract class L {
   /// No description provided for @honamReferralTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Parraine un coursier'**
+  /// **'Invite un coursier'**
   String get honamReferralTitle;
 
   /// No description provided for @honamReferralBody.
@@ -10320,7 +10320,7 @@ abstract class L {
   /// No description provided for @honamTrackingShowMap.
   ///
   /// In fr, this message translates to:
-  /// **'Voir sur la carte'**
+  /// **'Afficher la carte'**
   String get honamTrackingShowMap;
 
   /// No description provided for @honamTrackingMapDataSaver.
@@ -10422,7 +10422,7 @@ abstract class L {
   /// No description provided for @assimeWhyTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Pourquoi je vois ça'**
+  /// **'Pourquoi je vois cette annonce ?'**
   String get assimeWhyTitle;
 
   /// No description provided for @assimeWhyNotSponsored.

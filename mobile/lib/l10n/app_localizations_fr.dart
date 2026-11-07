@@ -358,7 +358,7 @@ class LFr extends L {
       'Cette personne ne pourra plus t\'écrire ni t\'appeler. Elle ne sera pas prévenue.';
 
   @override
-  String get chatsPinLimit => 'Trois discussions déjà épinglées au maximum.';
+  String get chatsPinLimit => 'Trois discussions épinglées au maximum.';
 
   @override
   String get chatsMute8h => '8 heures';
@@ -1712,7 +1712,7 @@ class LFr extends L {
   String get marketYourArea => 'Ta zone';
 
   @override
-  String get marketCityOrArea => 'Ville ou quartier';
+  String get marketCityOrArea => 'Ville et quartier';
 
   @override
   String get marketLocationCleared => 'Localisation désactivée.';
@@ -2446,7 +2446,7 @@ class LFr extends L {
       'Les fichiers vidés sont retéléchargés à la demande quand tu rouvres la discussion : rien n\'est perdu, seulement libéré.';
 
   @override
-  String get storageMobileData => 'Données mobiles';
+  String get storageMobileData => 'En données mobiles';
 
   @override
   String get storageDataSaver => 'Économie de données';
@@ -4184,7 +4184,7 @@ class LFr extends L {
       'Profil indisponible — vérifie ta connexion, puis réessaie.';
 
   @override
-  String get recSlideToCancel => 'Glisser pour annuler';
+  String get recSlideToCancel => 'Glisse pour annuler';
 
   @override
   String get recReleaseToCancel => 'Relâcher pour annuler';
@@ -4559,7 +4559,7 @@ class LFr extends L {
   String get statusMineBody => 'Touche pour ajouter un statut';
 
   @override
-  String get statusMineVisibility => 'Visible par mes contacts';
+  String get statusMineVisibility => 'Visible par : Mes contacts';
 
   @override
   String get callLeaveConference => 'Quitter la conférence';
@@ -5113,7 +5113,7 @@ class LFr extends L {
   String get koryDeclare => 'J\'ai contribué';
 
   @override
-  String get koryDeclareTitle => 'Déclarer une contribution';
+  String get koryDeclareTitle => 'Déclarer ma contribution';
 
   @override
   String get koryAmount => 'Montant (FCFA)';
@@ -5171,7 +5171,7 @@ class LFr extends L {
   }
 
   @override
-  String get koryCreateTitle => 'Nouvelle cagnotte';
+  String get koryCreateTitle => 'Nouvelle collecte';
 
   @override
   String get koryFieldTitle => 'Titre';
@@ -5429,7 +5429,7 @@ class LFr extends L {
       'La pharmacie n\'a pas reçu ton paiement. Vérifie le numéro et le montant.';
 
   @override
-  String get honamCode => 'Code de remise';
+  String get honamCode => 'Ton code de remise';
 
   @override
   String get honamCodeHelp =>
@@ -5607,7 +5607,7 @@ class LFr extends L {
 
   @override
   String get deleteProofWarning =>
-      'Le mode preuve est actif : le message restera visible, barré, pour tous les membres.';
+      'Le mode preuve est actif. Ton message restera visible, barré, pour tous les participants, avec l’heure de la suppression.';
 
   @override
   String get deletedKept => 'Message supprimé, conservé par le mode preuve';
@@ -5622,7 +5622,7 @@ class LFr extends L {
   String get certStillMismatch => 'Ce nom ne correspond toujours pas.';
 
   @override
-  String get proofExport => 'Exporter la discussion (PDF)';
+  String get proofExport => 'Exporter la discussion en PDF';
 
   @override
   String proofModeOn(String name) {
@@ -5858,7 +5858,7 @@ class LFr extends L {
   String get honamReferralCodeField => 'Code de parrainage (facultatif)';
 
   @override
-  String get honamReferralTitle => 'Parraine un coursier';
+  String get honamReferralTitle => 'Invite un coursier';
 
   @override
   String honamReferralBody(String rides) {
@@ -5922,7 +5922,7 @@ class LFr extends L {
   String get honamTrackingStale => 'Position non à jour';
 
   @override
-  String get honamTrackingShowMap => 'Voir sur la carte';
+  String get honamTrackingShowMap => 'Afficher la carte';
 
   @override
   String get honamTrackingMapDataSaver =>
@@ -5980,7 +5980,7 @@ class LFr extends L {
   String get assimeSponsored => 'Sponsorisé';
 
   @override
-  String get assimeWhyTitle => 'Pourquoi je vois ça';
+  String get assimeWhyTitle => 'Pourquoi je vois cette annonce ?';
 
   @override
   String get assimeWhyNotSponsored =>

@@ -357,8 +357,7 @@ class LEn extends L {
       'This person won\'t be able to message or call you. They won\'t be told.';
 
   @override
-  String get chatsPinLimit =>
-      'Three chats are already pinned — that\'s the maximum.';
+  String get chatsPinLimit => 'Three pinned chats at most.';
 
   @override
   String get chatsMute8h => '8 hours';
@@ -1704,7 +1703,7 @@ class LEn extends L {
   String get marketYourArea => 'Your area';
 
   @override
-  String get marketCityOrArea => 'City or neighbourhood';
+  String get marketCityOrArea => 'City and area';
 
   @override
   String get marketLocationCleared => 'Location cleared.';
@@ -2437,7 +2436,7 @@ class LEn extends L {
       'Cleared files are downloaded again on demand when you reopen the chat: nothing is lost, only freed.';
 
   @override
-  String get storageMobileData => 'Mobile data';
+  String get storageMobileData => 'On mobile data';
 
   @override
   String get storageDataSaver => 'Data saver';
@@ -4531,7 +4530,7 @@ class LEn extends L {
   String get statusMineBody => 'Tap to post an update (24 h)';
 
   @override
-  String get statusMineVisibility => 'Visible to my contacts';
+  String get statusMineVisibility => 'Visible to: My contacts';
 
   @override
   String get callLeaveConference => 'Leave the call';
@@ -5081,7 +5080,7 @@ class LEn extends L {
   String get koryDeclare => 'I contributed';
 
   @override
-  String get koryDeclareTitle => 'Declare a contribution';
+  String get koryDeclareTitle => 'Declare my contribution';
 
   @override
   String get koryAmount => 'Amount (FCFA)';
@@ -5138,7 +5137,7 @@ class LEn extends L {
   }
 
   @override
-  String get koryCreateTitle => 'New pot';
+  String get koryCreateTitle => 'New collection';
 
   @override
   String get koryFieldTitle => 'Title';
@@ -5394,7 +5393,7 @@ class LEn extends L {
       'The pharmacy hasn\'t received your payment. Check the number and amount.';
 
   @override
-  String get honamCode => 'Handover code';
+  String get honamCode => 'Your handover code';
 
   @override
   String get honamCodeHelp =>
@@ -5574,7 +5573,7 @@ class LEn extends L {
 
   @override
   String get deleteProofWarning =>
-      'Proof mode is on: the message will stay visible, struck through, for all members.';
+      'Proof mode is on. Your message will stay visible, struck through, for all participants, with the time it was deleted.';
 
   @override
   String get deletedKept => 'Deleted message, kept by proof mode';
@@ -5589,7 +5588,7 @@ class LEn extends L {
   String get certStillMismatch => 'This name still doesn\'t match.';
 
   @override
-  String get proofExport => 'Export the chat (PDF)';
+  String get proofExport => 'Export the chat as PDF';
 
   @override
   String proofModeOn(String name) {
@@ -5823,7 +5822,7 @@ class LEn extends L {
   String get honamReferralCodeField => 'Referral code (optional)';
 
   @override
-  String get honamReferralTitle => 'Refer a courier';
+  String get honamReferralTitle => 'Invite a courier';
 
   @override
   String honamReferralBody(String rides) {
@@ -5887,7 +5886,7 @@ class LEn extends L {
   String get honamTrackingStale => 'Location not up to date';
 
   @override
-  String get honamTrackingShowMap => 'Show on the map';
+  String get honamTrackingShowMap => 'Show the map';
 
   @override
   String get honamTrackingMapDataSaver => 'Show on the map (uses data)';
@@ -5944,7 +5943,7 @@ class LEn extends L {
   String get assimeSponsored => 'Sponsored';
 
   @override
-  String get assimeWhyTitle => 'Why am I seeing this';
+  String get assimeWhyTitle => 'Why am I seeing this ad?';
 
   @override
   String get assimeWhyNotSponsored => 'This listing is no longer promoted.';

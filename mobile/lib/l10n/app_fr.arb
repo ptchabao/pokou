@@ -170,7 +170,7 @@
     }
   },
   "chatsBlockBody": "Cette personne ne pourra plus t'écrire ni t'appeler. Elle ne sera pas prévenue.",
-  "chatsPinLimit": "Trois discussions déjà épinglées au maximum.",
+  "chatsPinLimit": "Trois discussions épinglées au maximum.",
   "chatsMute8h": "8 heures",
   "chatsMute1w": "1 semaine",
   "chatsMuteAlways": "Toujours",
@@ -747,7 +747,7 @@
   "marketGpsApplied": "Localisation GPS appliquée.",
   "marketGpsFailed": "Impossible de récupérer ta position.",
   "marketYourArea": "Ta zone",
-  "marketCityOrArea": "Ville ou quartier",
+  "marketCityOrArea": "Ville et quartier",
   "marketLocationCleared": "Localisation désactivée.",
   "marketUseGps": "Utiliser ma position GPS",
   "marketApply": "Appliquer",
@@ -1070,7 +1070,7 @@
   },
   "storageClearCache": "Vider le cache",
   "storageClearFootnote": "Les fichiers vidés sont retéléchargés à la demande quand tu rouvres la discussion : rien n'est perdu, seulement libéré.",
-  "storageMobileData": "Données mobiles",
+  "storageMobileData": "En données mobiles",
   "storageDataSaver": "Économie de données",
   "storageDataSaverSub": "Ne pas télécharger les médias automatiquement",
   "storageDataSaverFootnote": "Activée, les photos et vidéos reçues attendent que tu les touches pour se télécharger, et les photos que tu envoies sont compressées davantage.",
@@ -1937,7 +1937,7 @@
   "devicesRetryDone": "Cet appareil reçoit désormais les notifications.",
   "devicesRetryFailed": "Toujours pas d'enregistrement possible — réessaie plus tard.",
   "chatsProfileMissing": "Profil indisponible — vérifie ta connexion, puis réessaie.",
-  "recSlideToCancel": "Glisser pour annuler",
+  "recSlideToCancel": "Glisse pour annuler",
   "recReleaseToCancel": "Relâcher pour annuler",
   "recLocked": "Verrouillé",
   "recSlideUpToLock": "Glisser vers le haut pour verrouiller",
@@ -2068,7 +2068,7 @@
   "chatsArchivedSection": "Discussions archivées",
   "statusMineTitle": "Mon Actu",
   "statusMineBody": "Touche pour ajouter un statut",
-  "statusMineVisibility": "Visible par mes contacts",
+  "statusMineVisibility": "Visible par : Mes contacts",
   "callLeaveConference": "Quitter la conférence",
   "callQualityExcellent": "Excellent",
   "callQualityGood": "Correct",
@@ -2299,7 +2299,7 @@
     }
   },
   "koryDeclare": "J'ai contribué",
-  "koryDeclareTitle": "Déclarer une contribution",
+  "koryDeclareTitle": "Déclarer ma contribution",
   "koryAmount": "Montant (FCFA)",
   "koryWalletRef": "Référence de la transaction (facultatif)",
   "koryWalletRefHelp": "Elle figure dans le SMS de ton opérateur. Seuls toi et le collecteur la voyez.",
@@ -2333,7 +2333,7 @@
       }
     }
   },
-  "koryCreateTitle": "Nouvelle cagnotte",
+  "koryCreateTitle": "Nouvelle collecte",
   "koryFieldTitle": "Titre",
   "koryFieldDescription": "Description (facultatif)",
   "koryFieldGoal": "Objectif en FCFA (facultatif)",
@@ -2438,7 +2438,7 @@
   "honamDeclarePaid": "J'ai payé la pharmacie",
   "honamPaidDeclared": "Paiement signalé : la pharmacie va le confirmer.",
   "honamPaymentNotReceived": "La pharmacie n'a pas reçu ton paiement. Vérifie le numéro et le montant.",
-  "honamCode": "Code de remise",
+  "honamCode": "Ton code de remise",
   "honamCodeHelp": "Donne ce code au coursier, seulement quand tu as le colis en main.",
   "honamOriginal": "Le coursier récupérera l'ordonnance originale.",
   "honamRefundDue": "La pharmacie te doit {amount} : {reason}",
@@ -2557,12 +2557,12 @@
   "proofModeDisable": "Désactiver le mode preuve",
   "proofModeNeedsCert": "Le mode preuve demande Pokou certifié (essai gratuit disponible).",
   "deleteForAll": "Supprimer pour tous",
-  "deleteProofWarning": "Le mode preuve est actif : le message restera visible, barré, pour tous les membres.",
+  "deleteProofWarning": "Le mode preuve est actif. Ton message restera visible, barré, pour tous les participants, avec l’heure de la suppression.",
   "deletedKept": "Message supprimé, conservé par le mode preuve",
   "certCorrectName": "Nom complet du titulaire",
   "certRetryName": "Vérifier ce nom",
   "certStillMismatch": "Ce nom ne correspond toujours pas.",
-  "proofExport": "Exporter la discussion (PDF)",
+  "proofExport": "Exporter la discussion en PDF",
   "proofModeOn": "{name} a activé le mode preuve",
   "@proofModeOn": {
     "placeholders": {
@@ -2742,7 +2742,7 @@
   },
   "honamWaitlistBody": "On te prévient dès que Honam livre dans ta ville. Rien d'autre.",
   "honamReferralCodeField": "Code de parrainage (facultatif)",
-  "honamReferralTitle": "Parraine un coursier",
+  "honamReferralTitle": "Invite un coursier",
   "honamReferralBody": "{rides} courses offertes à la première livraison de ton filleul.",
   "@honamReferralBody": {
     "placeholders": {
@@ -2807,7 +2807,7 @@
     }
   },
   "honamTrackingStale": "Position non à jour",
-  "honamTrackingShowMap": "Voir sur la carte",
+  "honamTrackingShowMap": "Afficher la carte",
   "honamTrackingMapDataSaver": "Voir sur la carte (consomme des données)",
   "assimeFavoritesAlerts": "Favoris et alertes",
   "assimeFavorites": "Favoris",
@@ -2838,7 +2838,7 @@
     }
   },
   "assimeSponsored": "Sponsorisé",
-  "assimeWhyTitle": "Pourquoi je vois ça",
+  "assimeWhyTitle": "Pourquoi je vois cette annonce ?",
   "assimeWhyNotSponsored": "Cette annonce n'est plus mise en avant.",
   "assimeReportTitle": "Bilan de la mise en avant",
   "assimeReportEmpty": "Pas encore de mise en avant pour cette annonce.",
