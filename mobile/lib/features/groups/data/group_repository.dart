@@ -30,7 +30,6 @@ class GroupRepository {
   final E2EEService _e2ee;
   final GroupSenderKeys _senderKeys;
   final PokouMessageStore _store;
-  static final Set<String> _publishedEpochs = {};
   static final Map<String, Future<GroupMessage>> _incomingDecryptions = {};
 
   /// Voir contacts_repository.dart::listRaw — même raison : c'est ce JSON
@@ -103,51 +102,74 @@ class GroupRepository {
     }
   }
 
+  /// Les membres qui ont DÉJÀ reçu ma clé pour (groupe, époque) — par
+  /// membre, pour ne resceller qu'aux autres.
+  static final Set<String> _publishedTo = {};
+
+  /// Donne ma clé d'expéditeur aux membres qui ne l'ont pas encore.
+  ///
+  /// Un membre qui ne peut pas la recevoir (application trop ancienne,
+  /// clés non publiées, réseau) est SAUTÉ au lieu de bloquer l'envoi de
+  /// tout le groupe — c'est ce qui laissait les messages « en attente
+  /// d'envoi ». Il la recevra à un envoi suivant, dès qu'il le pourra.
+  /// Après une réinstallation (identité changée), une session neuve est
+  /// ouverte vers sa nouvelle identité, comme le fait WhatsApp.
   Future<void> _ensureSenderKeyDistributed(Group group, int senderId) async {
-    final cacheKey = '${group.id}:${group.cryptoEpoch}:$senderId';
-    if (_publishedEpochs.contains(cacheKey)) return;
+    String key(int recipient) =>
+        '${group.id}:${group.cryptoEpoch}:$senderId:$recipient';
     final recipients = group.members
         .map((member) => member.userId)
         .where((id) => id != senderId)
         .toSet();
+    final pending = recipients.where((id) => !_publishedTo.contains(key(id)));
+    if (pending.isEmpty) return;
     final distribution = await _senderKeys.createDistribution(
       groupId: group.id,
       epoch: group.cryptoEpoch,
       senderId: senderId,
     );
     final sealed = <Map<String, dynamic>>[];
-    for (final recipientId in recipients) {
-      final peer = await _e2ee.peerCrypto(recipientId);
-      if (!peer.capabilities.contains(E2EEService.groupCapability)) {
-        throw StateError('A current group member cannot receive Sender Keys');
+    for (final recipientId in pending.toList()) {
+      try {
+        final peer = await _e2ee.peerCrypto(recipientId);
+        if (!peer.capabilities.contains(E2EEService.groupCapability)) continue;
+        final changed =
+            peer.identityKey != null &&
+            await _e2ee.sessionState(
+                  recipientId,
+                  publishedIdentityKey: peer.identityKey,
+                ) ==
+                PeerSessionState.changed;
+        final envelope = changed
+            ? await _e2ee.sealFresh(
+                peerUserId: recipientId,
+                plaintext: distribution,
+              )
+            : await _e2ee.seal(peerUserId: recipientId, plaintext: distribution);
+        if (envelope is! SealEncrypted) continue;
+        sealed.add({
+          'recipient_id': recipientId,
+          'encryption': envelope.encryption,
+          'ciphertext': envelope.ciphertext,
+          'envelope': envelope.envelope,
+        });
+      } catch (_) {
+        continue;
       }
-      if (peer.identityKey != null &&
-          await _e2ee.sessionState(
-                recipientId,
-                publishedIdentityKey: peer.identityKey,
-              ) ==
-              PeerSessionState.changed) {
-        throw StateError('Group member identity changed');
-      }
-      final envelope = await _e2ee.seal(
-        peerUserId: recipientId,
-        plaintext: distribution,
-      );
-      if (envelope is! SealEncrypted) {
-        throw StateError('Unable to pairwise-encrypt sender-key distribution');
-      }
-      sealed.add({
-        'recipient_id': recipientId,
-        'encryption': envelope.encryption,
-        'ciphertext': envelope.ciphertext,
-        'envelope': envelope.envelope,
-      });
+    }
+    if (sealed.isEmpty) {
+      // Personne n'a pu la recevoir : l'envoi n'aurait aucun lecteur.
+      // Sauf si quelqu'un l'a déjà (envoi précédent) — on peut alors écrire.
+      if (recipients.any((id) => _publishedTo.contains(key(id)))) return;
+      throw StateError('No group member can receive the sender key yet');
     }
     await _api.post(
       '/groups/${group.id}/sender-key-distributions',
       body: {'epoch': group.cryptoEpoch, 'distributions': sealed},
     );
-    _publishedEpochs.add(cacheKey);
+    for (final item in sealed) {
+      _publishedTo.add(key(item['recipient_id'] as int));
+    }
   }
 
   Future<GroupMessage> _sendEncrypted({

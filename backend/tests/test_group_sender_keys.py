@@ -166,3 +166,37 @@ def test_group_poll_fails_closed(client):
         headers=headers,
     )
     assert response.status_code == 409
+
+
+def test_un_membre_sans_cle_ne_bloque_pas_les_messages_du_groupe(client):
+    """Avant : un seul membre sans clé (application ancienne) empêchait tout
+    envoi — les messages restaient « en attente d'envoi »."""
+    headers_a, _ = _signup(client, "+22893000101")
+    headers_b, user_b = _signup(client, "+22893000102")
+    headers_c, user_c = _signup(client, "+22893000103")
+    for phone, name in (("+22893000102", "B"), ("+22893000103", "C")):
+        client.post("/api/v1/contacts", json={"phone": phone, "display_name": name}, headers=headers_a)
+    group = client.post(
+        "/api/v1/groups", json={"name": "trois", "member_user_ids": [user_b, user_c]}, headers=headers_a
+    ).json()
+    for headers in (headers_b, headers_c):
+        for inv in client.get("/api/v1/groups/invitations", headers=headers).json()["items"]:
+            client.post(f"/api/v1/groups/invitations/{inv['id']}/accept", headers=headers)
+    epoch = client.get(f"/api/v1/groups/{group['id']}", headers=headers_a).json()["crypto_epoch"]
+
+    # Clé envoyée à B seulement (C ne peut pas encore la recevoir).
+    endpoint = f"/api/v1/groups/{group['id']}/sender-key-distributions"
+    one = {"recipient_id": user_b, "encryption": "v1", "ciphertext": "x", "envelope": {"sid": "s"}}
+    assert client.post(endpoint, json={"epoch": epoch, "distributions": [one]}, headers=headers_a).status_code == 200
+    sent = client.post(
+        f"/api/v1/groups/{group['id']}/messages",
+        json={"encryption": "sender-key-v1", "ciphertext": "c", "crypto_epoch": epoch},
+        headers=headers_a,
+    )
+    assert sent.status_code == 200, sent.text
+
+    # Une enveloppe renvoyée remplace l'ancienne (B a réinstallé).
+    again = {**one, "ciphertext": "y"}
+    client.post(endpoint, json={"epoch": epoch, "distributions": [again]}, headers=headers_a)
+    item = client.get(endpoint, headers=headers_b).json()["items"][0]
+    assert item["ciphertext"] == "y"

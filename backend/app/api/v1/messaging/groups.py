@@ -1279,19 +1279,33 @@ async def publish_sender_key_distributions(
         member.user_id for member in group.members if member.user_id != sender_id
     }
     submitted = [item.recipient_id for item in payload.distributions]
-    if len(set(submitted)) != len(submitted) or set(submitted) != expected:
+    # Un SOUS-ENSEMBLE des membres est accepté : un membre qui ne peut pas
+    # encore recevoir la clé (application trop ancienne, clés non publiées)
+    # ne bloque plus l'envoi de tout le groupe — il la recevra à un envoi
+    # suivant. Chaque destinataire doit en revanche être un membre actuel.
+    if (
+        not submitted
+        or len(set(submitted)) != len(submitted)
+        or not set(submitted) <= expected
+    ):
         raise HTTPException(
             status_code=400,
-            detail="Une enveloppe pairwise est requise pour chaque membre actuel",
+            detail="Enveloppes pairwise invalides pour ce groupe",
         )
     for item in payload.distributions:
-        existing = db.query(GroupSenderKeyDistribution.id).filter_by(
+        existing = db.query(GroupSenderKeyDistribution).filter_by(
             group_id=group_id,
             epoch=group.crypto_epoch,
             sender_id=sender_id,
             recipient_id=item.recipient_id,
         ).first()
-        if existing is None:
+        if existing is not None:
+            # Renvoyée (le destinataire a réinstallé, changé de clé) : la
+            # nouvelle enveloppe remplace celle qu'il ne peut plus ouvrir.
+            existing.encryption = item.encryption
+            existing.ciphertext = item.ciphertext
+            existing.envelope = item.envelope
+        else:
             db.add(
                 GroupSenderKeyDistribution(
                     group_id=group_id,
@@ -1434,7 +1448,9 @@ async def send_group_message(
             group_id=group_id, epoch=group.crypto_epoch, sender_id=sender_id
         ).all()
     }
-    if expected_recipients and delivered_recipients != expected_recipients:
+    # Au moins UN membre doit avoir reçu la clé de l'expéditeur ; ceux qui
+    # ne l'ont pas encore la recevront plus tard (ou par re-livraison).
+    if expected_recipients and not (delivered_recipients & expected_recipients):
         raise HTTPException(status_code=409, detail="Distribution de clé incomplète")
 
     # Mentions are currently carried only inside the ciphertext; the server
@@ -1575,7 +1591,9 @@ async def edit_group_message(
             group_id=group_id, epoch=group.crypto_epoch, sender_id=user_id
         ).all()
     }
-    if expected_recipients and delivered_recipients != expected_recipients:
+    # Au moins UN membre doit avoir reçu la clé de l'expéditeur ; ceux qui
+    # ne l'ont pas encore la recevront plus tard (ou par re-livraison).
+    if expected_recipients and not (delivered_recipients & expected_recipients):
         raise HTTPException(status_code=409, detail="Distribution de clé incomplète")
 
     if message.sender_id != user_id:
