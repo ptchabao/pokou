@@ -82,9 +82,10 @@ class E2EEService {
   /// jamais devenir « il ne sait pas », sans quoi une panne de quelques
   /// secondes ferait partir des photos en clair vers quelqu'un qui aurait pu
   /// les recevoir chiffrées. Une erreur n'est jamais mise en cache.
-  Future<PeerCrypto> peerCrypto(int peerUserId) async {
+  Future<PeerCrypto> peerCrypto(int peerUserId, {bool fresh = false}) async {
     final cached = _peerCrypto[peerUserId];
-    if (cached != null &&
+    if (!fresh &&
+        cached != null &&
         DateTime.now().difference(cached.at) < _peerCryptoTtl) {
       return cached.value;
     }

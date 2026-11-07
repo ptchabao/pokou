@@ -79,12 +79,13 @@ class _E2EE extends E2EEService {
   final List<({int peerId, String plaintext})> sealed = [];
 
   @override
-  Future<PeerCrypto> peerCrypto(int peerUserId) async => PeerCrypto(
-    capabilities: unavailable.contains(peerUserId)
-        ? const {}
-        : {E2EEService.callCapability},
-    identityKey: 'identity-$peerUserId',
-  );
+  Future<PeerCrypto> peerCrypto(int peerUserId, {bool fresh = false}) async =>
+      PeerCrypto(
+        capabilities: unavailable.contains(peerUserId)
+            ? const {}
+            : {E2EEService.callCapability},
+        identityKey: 'identity-$peerUserId',
+      );
 
   @override
   Future<PeerSessionState> sessionState(

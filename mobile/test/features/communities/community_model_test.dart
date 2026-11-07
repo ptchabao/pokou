@@ -78,7 +78,7 @@ void main() {
       // /c/ et /invite/ : un lien de communauté ne doit pas être pris pour un
       // lien de groupe, les deux endpoints étant différents.
       expect(communityInviteLinkFor('X').contains('/c/'), isTrue);
-      expect(inviteLinkFor('X').contains('/invite/'), isTrue);
+      expect(inviteLinkFor('X').contains('/g/'), isTrue);
     });
   });
 

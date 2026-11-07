@@ -11,7 +11,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import or_
@@ -324,6 +324,29 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
 
 
 # ─── Autorisation ─────────────────────────────────────────────────────────────
+
+# Version du protocole de groupe que l'application annonce (en-tête
+# X-Pokou-Crypto). Les versions d'avant 2 ne renvoyaient pas leur clé de groupe
+# à un membre qui avait changé d'appareil : leurs messages restaient
+# illisibles (« En attente de ce message… »). Elles doivent se mettre à jour.
+GROUP_CRYPTO_MIN = 2
+
+
+def _require_current_client(user_agent: Optional[str], crypto: Optional[str]) -> None:
+    # Seule l'application mobile (client Dart) est concernée.
+    if not (user_agent or "").startswith("Dart/"):
+        return
+    try:
+        version = int(crypto or 0)
+    except ValueError:
+        version = 0
+    if version < GROUP_CRYPTO_MIN:
+        raise HTTPException(
+            status_code=426,
+            detail="Mets à jour Pokou pour écrire dans les groupes : "
+            "tes messages ne pourraient pas être lus par tous les membres.",
+        )
+
 
 def _require_membership(db: Session, group_id: int, user_id: int) -> GroupMember:
     """Lire ou écrire dans un groupe exige d'en être membre. Contrairement au
@@ -1263,13 +1286,45 @@ async def list_sender_key_distributions(
     }
 
 
+@router.get("/{group_id}/sender-key-distributions/status")
+async def sender_key_distribution_status(
+    group_id: int,
+    epoch: Optional[int] = Query(None, ge=1),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Les membres qui n'ont PAS (ou plus) ma clé de groupe pour l'époque.
+
+    La source de vérité est ici, et non la mémoire du téléphone : un membre
+    qui change d'appareil voit ses clés effacées (auth/e2ee.py) et réapparaît
+    dans cette liste ; l'expéditeur la lui renvoie à son prochain envoi.
+    """
+    me = current_user["user_id"]
+    _require_membership(db, group_id, me)
+    group = db.query(Group).filter(Group.id == group_id).first()
+    requested = group.crypto_epoch if epoch is None else epoch
+    have = {
+        row[0]
+        for row in db.query(GroupSenderKeyDistribution.recipient_id).filter(
+            GroupSenderKeyDistribution.group_id == group_id,
+            GroupSenderKeyDistribution.epoch == requested,
+            GroupSenderKeyDistribution.sender_id == me,
+        ).all()
+    }
+    members = {m.user_id for m in group.members if m.user_id != me}
+    return {"epoch": requested, "missing": sorted(members - have)}
+
+
 @router.post("/{group_id}/sender-key-distributions")
 async def publish_sender_key_distributions(
     group_id: int,
     payload: SenderKeyDistributionCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
+    user_agent: Optional[str] = Header(None),
+    x_pokou_crypto: Optional[str] = Header(None),
 ):
+    _require_current_client(user_agent, x_pokou_crypto)
     sender_id = current_user["user_id"]
     _require_membership(db, group_id, sender_id)
     group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
@@ -1381,7 +1436,10 @@ async def send_group_message(
     payload: GroupMessageCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
+    user_agent: Optional[str] = Header(None),
+    x_pokou_crypto: Optional[str] = Header(None),
 ):
+    _require_current_client(user_agent, x_pokou_crypto)
     sender_id = current_user["user_id"]
     _require_membership(db, group_id, sender_id)
 

@@ -233,7 +233,7 @@ void main() {
     });
 
     test('le lien partageable se construit depuis le code', () {
-      expect(inviteLinkFor('AbC123'), '$pokouLinkBaseUrl/invite/group/AbC123');
+      expect(inviteLinkFor('AbC123'), '$pokouLinkBaseUrl/g/AbC123');
       expect(inviteCodeFrom(inviteLinkFor('AbC123')), 'AbC123');
     });
   });

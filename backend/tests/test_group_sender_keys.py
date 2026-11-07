@@ -200,3 +200,85 @@ def test_un_membre_sans_cle_ne_bloque_pas_les_messages_du_groupe(client):
     client.post(endpoint, json={"epoch": epoch, "distributions": [again]}, headers=headers_a)
     item = client.get(endpoint, headers=headers_b).json()["items"][0]
     assert item["ciphertext"] == "y"
+
+
+def _bundle():
+    import base64
+    import os
+
+    def key(size=32):
+        return base64.b64encode(os.urandom(size)).decode()
+
+    return {
+        "device_id": "device-x",
+        "identity_key": key(),
+        "signing_key": key(),
+        "signed_prekey": key(),
+        "signed_prekey_signature": key(64),
+        "one_time_prekeys": [],
+    }
+
+
+def test_nouvel_appareil_la_cle_de_groupe_lui_est_redemandee(client):
+    """Un membre qui change d'appareil ne peut plus ouvrir les clés scellées
+    pour l'ancien : le serveur les efface, et l'expéditeur le voit manquant."""
+    headers_a, _ = _signup(client, "+22893000011")
+    headers_b, user_b = _signup(client, "+22893000012")
+    client.post(
+        "/api/v1/contacts",
+        json={"phone": "+22893000012", "display_name": "B"},
+        headers=headers_a,
+    )
+    group = client.post(
+        "/api/v1/groups",
+        json={"name": "appareils", "member_user_ids": [user_b]},
+        headers=headers_a,
+    ).json()
+    invitation = client.get("/api/v1/groups/invitations", headers=headers_b).json()["items"][0]
+    client.post(f"/api/v1/groups/invitations/{invitation['id']}/accept", headers=headers_b)
+    assert client.put("/api/v1/e2ee/bundle", json=_bundle(), headers=headers_b).status_code == 200
+    epoch = client.get(f"/api/v1/groups/{group['id']}", headers=headers_a).json()["crypto_epoch"]
+    status = f"/api/v1/groups/{group['id']}/sender-key-distributions/status?epoch={epoch}"
+
+    assert client.get(status, headers=headers_a).json()["missing"] == [user_b]
+    client.post(
+        f"/api/v1/groups/{group['id']}/sender-key-distributions",
+        json={
+            "epoch": epoch,
+            "distributions": [
+                {
+                    "recipient_id": user_b,
+                    "encryption": "v1",
+                    "ciphertext": "pour-l-ancien-appareil",
+                    "envelope": {"sid": "s"},
+                }
+            ],
+        },
+        headers=headers_a,
+    )
+    assert client.get(status, headers=headers_a).json()["missing"] == []
+
+    # B se reconnecte sur un autre téléphone : nouvelle identité.
+    assert client.put("/api/v1/e2ee/bundle", json=_bundle(), headers=headers_b).json()[
+        "identity_changed"
+    ]
+    assert client.get(status, headers=headers_a).json()["missing"] == [user_b]
+
+
+def test_une_ancienne_application_ne_peut_plus_ecrire_dans_un_groupe(client):
+    headers, _ = _signup(client, "+22893000013")
+    group = _create_group(client, headers)
+    body = {
+        "encryption": "sender-key-v1",
+        "ciphertext": "opaque",
+        "crypto_epoch": group["crypto_epoch"],
+    }
+    url = f"/api/v1/groups/{group['id']}/messages"
+    old = client.post(url, json=body, headers={**headers, "User-Agent": "Dart/3.5 (dart:io)"})
+    assert old.status_code == 426
+    current = client.post(
+        url,
+        json=body,
+        headers={**headers, "User-Agent": "Dart/3.9 (dart:io)", "X-Pokou-Crypto": "2"},
+    )
+    assert current.status_code == 200, current.text

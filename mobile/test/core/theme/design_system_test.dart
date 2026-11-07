@@ -26,17 +26,32 @@ void main() {
   group('Lisibilité', () {
     test("l'encre tient le contraste sur la surface qui la porte", () {
       // 4,5:1 est le seuil WCAG AA pour du texte courant.
-      expect(_contrast(AppColors.textPrimary, AppColors.surface), greaterThan(4.5));
-      expect(_contrast(AppColors.textSecondary, AppColors.surface), greaterThan(4.5));
+      expect(
+        _contrast(AppColors.textPrimary, AppColors.surface),
+        greaterThan(4.5),
+      );
+      expect(
+        _contrast(AppColors.textSecondary, AppColors.surface),
+        greaterThan(4.5),
+      );
 
       // Le texte d'une bulle, sur CHACUNE des deux bulles. C'est ce qui rend
       // les longs messages lisibles et ce qui autorise une bulle teintée si
       // claire.
-      expect(_contrast(AppColors.chatTextReceived, AppColors.chatBubbleSent), greaterThan(4.5));
-      expect(_contrast(AppColors.chatTextReceived, AppColors.chatBubbleReceived), greaterThan(4.5));
+      expect(
+        _contrast(AppColors.chatTextReceived, AppColors.chatBubbleSent),
+        greaterThan(4.5),
+      );
+      expect(
+        _contrast(AppColors.chatTextReceived, AppColors.chatBubbleReceived),
+        greaterThan(4.5),
+      );
 
       // L'horodatage dans la bulle : plus petit, donc au moins le même seuil.
-      expect(_contrast(AppColors.chatTimestamp, AppColors.chatBubbleSent), greaterThan(4.5));
+      expect(
+        _contrast(AppColors.chatTimestamp, AppColors.chatBubbleSent),
+        greaterThan(4.5),
+      );
     });
 
     test("la couleur d'action porte du texte, dans les deux sens", () {
@@ -48,14 +63,22 @@ void main() {
       //
       // Seuils gardés pour qu'un retour vers une couleur plus claire
       // redevienne un choix explicite, et pas une dérive.
-      expect(_contrast(AppColors.accentPrimary, AppColors.surface),
-          greaterThan(4.5));
-      expect(_contrast(AppColors.accentPrimaryDark, AppColors.surface),
-          greaterThan(4.5));
-      expect(_contrast(Colors.white, AppColors.accentPrimary),
-          greaterThan(4.5));
-      expect(_contrast(Colors.white, AppColors.accentPrimaryDark),
-          greaterThan(4.5));
+      expect(
+        _contrast(AppColors.accentPrimary, AppColors.surface),
+        greaterThan(4.5),
+      );
+      expect(
+        _contrast(AppColors.accentPrimaryDark, AppColors.surface),
+        greaterThan(4.5),
+      );
+      expect(
+        _contrast(Colors.white, AppColors.accentPrimary),
+        greaterThan(4.5),
+      );
+      expect(
+        _contrast(Colors.white, AppColors.accentPrimaryDark),
+        greaterThan(4.5),
+      );
     });
 
     test("l'ambre de Baba ne porte du texte qu'en version FONCÉE", () {
@@ -67,10 +90,14 @@ void main() {
       // son glyphe, `chatAiLinkColor` (#B45309) porte tout ce qui est écrit.
       // Confondre les deux mettrait un libellé sous le seuil sur la seule
       // surface que le système veut voir de loin.
-      expect(_contrast(Colors.white, AppColors.chatAiIconColor),
-          greaterThan(3.0));
-      expect(_contrast(Colors.white, AppColors.chatAiLinkColor),
-          greaterThan(4.5));
+      expect(
+        _contrast(Colors.white, AppColors.chatAiIconColor),
+        greaterThan(3.0),
+      );
+      expect(
+        _contrast(Colors.white, AppColors.chatAiLinkColor),
+        greaterThan(4.5),
+      );
 
       // Et le VIOLET est proscrit. Le système l'écrit noir sur blanc :
       // « purple is strictly banned across all tokens and components ».
@@ -111,7 +138,7 @@ void main() {
       // lien. Un aplat saturé imposerait du blanc, donc de faire descendre
       // `isMine` dans chacun d'eux. Si cette assertion tombe, ce n'est pas
       // le jeton qu'il faut corriger : c'est tout le rendu des bulles.
-      expect(AppColors.chatBubbleSent, const Color(0xFFFBEDE4));
+      expect(AppColors.chatBubbleSent, const Color(0xFFF3CFB8));
       expect(AppColors.chatBubbleReceived, const Color(0xFFFFFFFF));
       expect(AppColors.chatBubbleSent, isNot(AppColors.chatBubbleReceived));
       expect(
@@ -133,18 +160,16 @@ void main() {
       // d'entrée de gamme. La retirer rendrait un message reçu flottant,
       // sans contour, indiscernable du canevas.
       // Crème du cahier v3.4 (7.2, neutral.creme-50) : le fond principal.
-      expect(AppColors.chatBackground, const Color(0xFFFFF7EC));
+      expect(AppColors.chatBackground, const Color(0xFFF8F3ED));
       expect(AppColors.chatBubbleReceived, const Color(0xFFFFFFFF));
       expect(
         AppColors.chatBubbleReceivedBorder.a,
         greaterThan(0.0),
         reason: 'sur un canevas presque blanc, seule la bordure délimite',
       );
-      expect(
-        AppColors.chatBubbleShadow.a,
-        0.0,
-        reason: 'le système supprime les ombres : la profondeur est un trait',
-      );
+      // La maquette Figma ajoute une ombre TRÈS douce (≈ 5 %), en plus du
+      // trait : la bordure reste ce qui délimite la bulle.
+      expect(AppColors.chatBubbleShadow.a, lessThan(0.08));
     });
   });
 
@@ -177,7 +202,11 @@ void main() {
     });
 
     test('les graisses restent dans la plage 400-700', () {
-      for (final style in [AppTextStyles.body, AppTextStyles.subtitle, AppTextStyles.display]) {
+      for (final style in [
+        AppTextStyles.body,
+        AppTextStyles.subtitle,
+        AppTextStyles.display,
+      ]) {
         final weight = style.fontWeight ?? FontWeight.w400;
         expect(weight.value, greaterThanOrEqualTo(400));
         expect(weight.value, lessThanOrEqualTo(700));
@@ -231,7 +260,10 @@ void main() {
       // qu'un `textScaler` fixe apparaisse un jour pour « protéger » une
       // mise en page.
       for (final theme in [AppTheme.light, AppTheme.dark]) {
-        expect(theme.textTheme.bodyLarge?.height, anyOf(isNull, greaterThan(1.0)));
+        expect(
+          theme.textTheme.bodyLarge?.height,
+          anyOf(isNull, greaterThan(1.0)),
+        );
       }
     });
   });

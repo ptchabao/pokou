@@ -29,8 +29,8 @@ void main() {
   });
 
   test('la palette claire suit les jetons fournis', () {
-    expect(AppColors.background, const Color(0xFFFFF7EC));
-    expect(AppColors.surfaceElevated, const Color(0xFFF2E5D5));
-    expect(AppColors.actionButtonBackground, const Color(0xFFA65527));
+    expect(AppColors.background, const Color(0xFFFBF7F2));
+    expect(AppColors.surfaceElevated, const Color(0xFFF3EAE1));
+    expect(AppColors.actionButtonBackground, const Color(0xFFA4512A));
   });
 }

@@ -49,7 +49,7 @@ void main() {
       // Sans repli, une couleur illisible donnerait du NOIR — une carte noire
       // au milieu de la galerie, sans que rien n'indique pourquoi.
       for (final invalide in [null, '', '#ZZZZZZ', 'rouge']) {
-        expect(moduleColor(invalide).toARGB32(), 0xFF8A4520);
+        expect(moduleColor(invalide).toARGB32(), 0xFF7F3D1E);
       }
     });
   });

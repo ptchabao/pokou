@@ -31,7 +31,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
-from app.models import DeviceKeyBundle, OneTimePrekey, User
+from app.models import (
+    DeviceKeyBundle,
+    GroupMember,
+    GroupSenderKeyDistribution,
+    OneTimePrekey,
+    User,
+)
 from app.core.security import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -123,8 +129,28 @@ async def publish_bundle(
     bundle.updated_at = datetime.utcnow()
     db.flush()
 
+    co_members: set[int] = set()
     if identity_changed:
         db.query(OneTimePrekey).filter(OneTimePrekey.bundle_id == bundle.id).delete()
+        # Les clés de groupe qu'on lui avait remises étaient scellées pour
+        # l'ANCIENNE identité : il ne pourra plus jamais les ouvrir. On les
+        # efface, pour que chaque expéditeur voie qu'il lui manque sa clé et
+        # la lui renvoie, scellée pour la nouvelle (voir
+        # groups.py::sender_key_distribution_status).
+        db.query(GroupSenderKeyDistribution).filter(
+            GroupSenderKeyDistribution.recipient_id == user_id
+        ).delete(synchronize_session=False)
+        my_groups = [
+            row[0]
+            for row in db.query(GroupMember.group_id).filter(GroupMember.user_id == user_id).all()
+        ]
+        if my_groups:
+            co_members = {
+                row[0]
+                for row in db.query(GroupMember.user_id)
+                .filter(GroupMember.group_id.in_(my_groups), GroupMember.user_id != user_id)
+                .all()
+            }
 
     existing_ids = {
         row[0]
@@ -142,6 +168,17 @@ async def publish_bundle(
         added += 1
 
     db.commit()
+    if co_members:
+        # Prévenir tout de suite les autres membres : leur téléphone renvoie
+        # sa clé de groupe sans attendre leur prochain message.
+        from app.api.v1.messaging.ws import manager
+
+        event = {"type": "e2ee:identity_changed", "user_id": user_id}
+        for member_id in co_members:
+            try:
+                await manager.send_to_user(member_id, event)
+            except Exception:  # hors ligne : rattrapé au prochain envoi
+                logger.debug("identity_changed non livré à %s", member_id)
     return {"published": True, "prekeys_added": added, "identity_changed": identity_changed}
 
 

@@ -110,56 +110,45 @@ class GroupRepository {
     }
   }
 
-  /// Les membres qui ont DÉJÀ reçu ma clé pour (groupe, époque) — par
-  /// membre, pour ne resceller qu'aux autres.
-  static final Set<String> _publishedTo = {};
-
-  /// Donne ma clé d'expéditeur aux membres qui ne l'ont pas encore.
+  /// Donne ma clé d'expéditeur aux membres qui ne l'ont pas (ou plus).
   ///
-  /// Un membre qui ne peut pas la recevoir (application trop ancienne,
-  /// clés non publiées, réseau) est SAUTÉ au lieu de bloquer l'envoi de
-  /// tout le groupe — c'est ce qui laissait les messages « en attente
-  /// d'envoi ». Il la recevra à un envoi suivant, dès qu'il le pourra.
-  /// Après une réinstallation (identité changée), une session neuve est
-  /// ouverte vers sa nouvelle identité, comme le fait WhatsApp.
+  /// La liste vient du SERVEUR (`/sender-key-distributions/status`), pas de
+  /// la mémoire du téléphone : quand un membre change d'appareil, le serveur
+  /// efface les clés scellées pour l'ancien, et il réapparaît ici. Avant,
+  /// un téléphone resté ouvert croyait l'avoir déjà servi, et tous ses
+  /// messages restaient « En attente de ce message… » chez ce membre.
+  ///
+  /// Un membre qui ne peut pas la recevoir (application trop ancienne, clés
+  /// non publiées, réseau) est sauté au lieu de bloquer l'envoi : il la
+  /// recevra au prochain envoi.
   Future<void> _ensureSenderKeyDistributed(Group group, int senderId) async {
-    // La clé de suivi inclut l'identité PUBLIÉE du membre : s'il se
-    // reconnecte sur un autre appareil, il redevient « à servir » et reçoit
-    // ma clé scellée pour sa nouvelle identité.
-    final identities = <int, String?>{};
-    String key(int recipient) =>
-        '${group.id}:${group.cryptoEpoch}:$senderId:$recipient:${identities[recipient]}';
-    final recipients = group.members
-        .map((member) => member.userId)
-        .where((id) => id != senderId)
-        .toSet();
-    for (final id in recipients) {
-      try {
-        identities[id] = (await _e2ee.peerCrypto(id)).identityKey;
-      } catch (_) {
-        identities[id] = null;
-      }
-    }
-    final pending = recipients.where((id) => !_publishedTo.contains(key(id)));
-    if (pending.isEmpty) return;
+    final status =
+        await _api.get(
+              '/groups/${group.id}/sender-key-distributions/status'
+              '?epoch=${group.cryptoEpoch}',
+            )
+            as Map<String, dynamic>;
+    final missing = [
+      for (final id in (status['missing'] as List? ?? const []))
+        if (id is int && id != senderId) id,
+    ];
+    if (missing.isEmpty) return;
     final distribution = await _senderKeys.createDistribution(
       groupId: group.id,
       epoch: group.cryptoEpoch,
       senderId: senderId,
     );
     final sealed = <Map<String, dynamic>>[];
-    for (final recipientId in pending.toList()) {
+    for (final recipientId in missing) {
       try {
-        final peer = await _e2ee.peerCrypto(recipientId);
+        // Identité RELUE : celle en cache peut être l'ancien appareil.
+        final peer = await _e2ee.peerCrypto(recipientId, fresh: true);
         if (!peer.capabilities.contains(E2EEService.groupCapability)) continue;
-        final changed =
-            peer.identityKey != null &&
-            await _e2ee.sessionState(
-                  recipientId,
-                  publishedIdentityKey: peer.identityKey,
-                ) ==
-                PeerSessionState.changed;
-        final envelope = changed
+        final state = await _e2ee.sessionState(
+          recipientId,
+          publishedIdentityKey: peer.identityKey,
+        );
+        final envelope = state == PeerSessionState.changed
             ? await _e2ee.sealFresh(
                 peerUserId: recipientId,
                 plaintext: distribution,
@@ -180,18 +169,18 @@ class GroupRepository {
       }
     }
     if (sealed.isEmpty) {
-      // Personne n'a pu la recevoir : l'envoi n'aurait aucun lecteur.
-      // Sauf si quelqu'un l'a déjà (envoi précédent) — on peut alors écrire.
-      if (recipients.any((id) => _publishedTo.contains(key(id)))) return;
-      throw StateError('No group member can receive the sender key yet');
+      // Personne de ceux qui manquent n'a pu la recevoir. Si TOUS les
+      // membres manquent, l'envoi n'aurait aucun lecteur : on le refuse.
+      final others = group.members.where((m) => m.userId != senderId).length;
+      if (missing.length >= others) {
+        throw StateError('No group member can receive the sender key yet');
+      }
+      return;
     }
     await _api.post(
       '/groups/${group.id}/sender-key-distributions',
       body: {'epoch': group.cryptoEpoch, 'distributions': sealed},
     );
-    for (final item in sealed) {
-      _publishedTo.add(key(item['recipient_id'] as int));
-    }
   }
 
   Future<GroupMessage> _sendEncrypted({

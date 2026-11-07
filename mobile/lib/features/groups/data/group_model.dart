@@ -219,10 +219,17 @@ String inviteCodeFrom(String input) {
         .split(RegExp(r'[/?#]'))
         .first;
   }
-  final marker = '/invite/';
-  final index = trimmed.indexOf(marker);
-  if (index == -1) return trimmed;
-  return trimmed.substring(index + marker.length).split(RegExp(r'[/?#]')).first;
+  // Lien court actuel `/g/CODE` (voir inviteLinkFor), puis l'ancien
+  // `/invite/CODE` des liens déjà partagés.
+  for (final marker in const ['/g/', '/invite/']) {
+    final index = trimmed.indexOf(marker);
+    if (index == -1) continue;
+    return trimmed
+        .substring(index + marker.length)
+        .split(RegExp(r'[/?#]'))
+        .first;
+  }
+  return trimmed;
 }
 
 /// Ce qu'on voit AVANT d'accepter une invitation par lien. Sans la liste des

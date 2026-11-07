@@ -90,7 +90,13 @@ class ApiClient {
   static const _refreshBackoffMax = Duration(seconds: 60);
 
   Future<Map<String, String>> _headers({bool authenticated = true}) async {
-    final headers = {'Content-Type': 'application/json'};
+    final headers = {
+      'Content-Type': 'application/json',
+      // Version du protocole de groupe (voir backend groups.py
+      // GROUP_CRYPTO_MIN) : le serveur refuse les messages de groupe des
+      // versions qui ne savaient pas renvoyer leur clé à un nouvel appareil.
+      'X-Pokou-Crypto': '2',
+    };
     if (authenticated) {
       final token = await _tokenStorage.readAccessToken();
       if (token != null) headers['Authorization'] = 'Bearer $token';
@@ -134,7 +140,9 @@ class ApiClient {
     Future<http.Response> Function() send, {
     required bool authenticated,
   }) async {
-    final tokenBefore = authenticated ? await _tokenStorage.readAccessToken() : null;
+    final tokenBefore = authenticated
+        ? await _tokenStorage.readAccessToken()
+        : null;
     var response = await send();
     if (response.statusCode != 401 || !authenticated) return response;
 
@@ -176,10 +184,11 @@ class ApiClient {
       return Future.value(RefreshOutcome.unreachable);
     }
     final enCours = shared.inFlight;
-    if (enCours != null) return enCours.then((outcome) => outcome as RefreshOutcome);
-    final lance = _performRefresh(triggerToken: failedToken).whenComplete(
-      () => shared.inFlight = null,
-    );
+    if (enCours != null)
+      return enCours.then((outcome) => outcome as RefreshOutcome);
+    final lance = _performRefresh(
+      triggerToken: failedToken,
+    ).whenComplete(() => shared.inFlight = null);
     shared.inFlight = lance;
     return lance;
   }
@@ -203,7 +212,9 @@ class ApiClient {
     // Si pendant la planification de ce rafraîchissement, un jeton plus
     // récent a déjà été enregistré par un appel concurrent :
     final currentAccess = await _tokenStorage.readAccessToken();
-    if (triggerToken != null && currentAccess != null && currentAccess != triggerToken) {
+    if (triggerToken != null &&
+        currentAccess != null &&
+        currentAccess != triggerToken) {
       _log('refresh: déjà rafraîchi par un autre appel concurrent');
       return _settle(RefreshOutcome.refreshed);
     }
