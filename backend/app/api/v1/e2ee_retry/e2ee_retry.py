@@ -68,10 +68,12 @@ async def request_retry(
         msg = db.query(GroupMessage).filter(GroupMessage.id == payload.message_id).first()
         if msg is None:
             raise HTTPException(status_code=404, detail="Message introuvable")
-        member = db.query(GroupMember.id).filter(
+        member = db.query(GroupMember.joined_at).filter(
             GroupMember.group_id == msg.group_id, GroupMember.user_id == me
         ).first()
-        if member is None or msg.sender_id == me:
+        # Un membre arrivé APRÈS le message ne peut pas se le faire livrer :
+        # l'historique d'avant son entrée lui reste fermé.
+        if member is None or msg.sender_id == me or member.joined_at > msg.created_at:
             raise HTTPException(status_code=404, detail="Message introuvable")
         sender_id = msg.sender_id
         group_id = msg.group_id

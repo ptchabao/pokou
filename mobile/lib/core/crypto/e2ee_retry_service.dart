@@ -55,10 +55,9 @@ class E2EERetryService {
   Future<void> _request(String kind, String messageId) async {
     if (_me == null || !_asked.add('$kind:$messageId')) return;
     try {
-      await _ref.read(apiClientProvider).post(
-        '/e2ee/retries',
-        body: {'kind': kind, 'message_id': messageId},
-      );
+      await _ref
+          .read(apiClientProvider)
+          .post('/e2ee/retries', body: {'kind': kind, 'message_id': messageId});
     } catch (_) {
       // Hors ligne : on redemandera à la prochaine lecture du message.
       _asked.remove('$kind:$messageId');
@@ -106,16 +105,25 @@ class E2EERetryService {
     final kind = item['kind'] as String;
     final messageId = item['message_id'] as String;
     final retryId = item['id'] as String;
+    final requesterId = item['requester_id'] as int;
 
     String? body;
     if (kind == 'direct') {
       final m = await store.directById(messageId);
-      if (m != null && !m.isEncrypted && m.senderId == me) {
+      // Le téléphone ne croit pas le serveur sur parole : il ne re-livre
+      // qu'au DESTINATAIRE de ce message.
+      if (m != null &&
+          !m.isEncrypted &&
+          m.senderId == me &&
+          m.recipientId == requesterId) {
         body = MessagingRepository.directPlaintextOf(m);
       }
     } else {
       final m = await store.groupById(messageId);
-      if (m != null && !m.isEncrypted && m.senderId == me) {
+      if (m != null &&
+          !m.isEncrypted &&
+          m.senderId == me &&
+          await _wasMemberWhenSent(m.groupId, requesterId, m.createdAt)) {
         body = GroupRepository.groupBodyOf(m);
       }
     }
@@ -129,7 +137,7 @@ class E2EERetryService {
     final sealed = await _ref
         .read(e2eeServiceProvider)
         .sealFresh(
-          peerUserId: item['requester_id'] as int,
+          peerUserId: requesterId,
           plaintext: jsonEncode({
             'v': 1,
             'kind': kind,
@@ -146,6 +154,23 @@ class E2EERetryService {
         'envelope': sealed.envelope,
       },
     );
+  }
+
+  /// [userId] est-il ENCORE membre du groupe, et l'était-il déjà quand le
+  /// message a été écrit ? Un membre arrivé après coup ne doit pas lire
+  /// l'historique, même si le serveur le demande.
+  Future<bool> _wasMemberWhenSent(
+    int groupId,
+    int userId,
+    DateTime sentAt,
+  ) async {
+    final group = await _ref.read(groupRepositoryProvider).getGroup(groupId);
+    for (final member in group.members) {
+      if (member.userId != userId) continue;
+      final joinedAt = member.joinedAt;
+      return joinedAt != null && !joinedAt.isAfter(sentAt);
+    }
+    return false;
   }
 
   Future<void> _open(Map<String, dynamic> item) async {

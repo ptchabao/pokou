@@ -35,11 +35,16 @@ class GroupMember {
     required this.userId,
     required this.role,
     required this.displayName,
+    this.joinedAt,
   });
 
   final int userId;
   final String role;
   final String displayName;
+
+  /// Entrée dans le groupe : un membre ne peut se faire re-livrer que ce
+  /// qui a été écrit APRÈS (voir e2ee_retry_service.dart).
+  final DateTime? joinedAt;
 
   bool get isOwner => role == 'OWNER';
   bool get isAdmin => role == 'ADMIN';
@@ -51,7 +56,16 @@ class GroupMember {
     userId: json['user_id'] as int,
     role: json['role'] as String? ?? 'MEMBER',
     displayName: json['display_name'] as String? ?? 'Inconnu',
+    joinedAt: _parseJoinedAt(json['joined_at']),
   );
+
+  static DateTime? _parseJoinedAt(Object? raw) {
+    if (raw is! String) return null;
+    // Le serveur écrit l'UTC sans suffixe.
+    return DateTime.tryParse(
+      raw.endsWith('Z') || raw.contains('+') ? raw : '${raw}Z',
+    );
+  }
 }
 
 class Group {
@@ -177,7 +191,8 @@ class Group {
       membersCanEditInfo: json['members_can_edit_info'] as bool? ?? false,
       joinApproval: json['join_approval'] as bool? ?? false,
       canEditInfo:
-          json['can_edit_info'] as bool? ?? (json['can_manage'] as bool? ?? false),
+          json['can_edit_info'] as bool? ??
+          (json['can_manage'] as bool? ?? false),
       members: membersJson == null
           ? const []
           : membersJson
