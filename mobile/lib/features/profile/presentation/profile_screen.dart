@@ -25,6 +25,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../chat/data/minou_repository.dart';
 import '../../chat/presentation/chat_controller.dart'
     show kNoMonitor, minouStatusProvider;
+import '../../settings/presentation/backup_screens.dart';
 import '../../settings/presentation/app_lock_screen.dart';
 import '../../settings/presentation/change_number_screen.dart';
 import '../../settings/presentation/delete_account_screen.dart';
@@ -468,8 +469,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               return L.of(context).profileMonitorAlerts(count);
                             },
                             loading: () => L.of(context).commonLoading,
-                            error: (_, _) =>
-                                L.of(context).profileBabaAssistant,
+                            error: (_, _) => L.of(context).profileBabaAssistant,
                           ),
                           onTap: _openMahizu,
                         ),
@@ -644,6 +644,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             icon: Icons.devices_outlined,
                             label: L.of(context).profileDevices,
                             onTap: () => _push(const DevicesScreen()),
+                          ),
+                          // MSG-12 : la sauvegarde chiffrée des discussions.
+                          _SettingsRow(
+                            icon: Icons.backup_outlined,
+                            label: L.of(context).backupTitle,
+                            onTap: () => _push(const BackupSettingsScreen()),
                           ),
                           // REG-4 : garder son compte avec une nouvelle puce.
                           _SettingsRow(

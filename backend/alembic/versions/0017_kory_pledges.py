@@ -33,6 +33,18 @@ def upgrade() -> None:
     with op.batch_alter_table("seller_reviews") as t:
         t.add_column(sa.Column("product_id", sa.Integer(), nullable=True))
         t.add_column(sa.Column("tags", sa.JSON(), nullable=True))
+    # Sauvegarde chiffrée (MSG-12).
+    op.create_table(
+        "user_backups",
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+        sa.Column("media_asset_id", sa.Integer(), sa.ForeignKey("media_assets.id", ondelete="SET NULL"), nullable=True),
+        sa.Column("salt", sa.String(length=64), nullable=False),
+        sa.Column("iterations", sa.Integer(), nullable=False),
+        sa.Column("discussions", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("messages", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("size_bytes", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+    )
     # Centre de notifications (NOT-1).
     op.create_table(
         "service_notifications",
@@ -51,6 +63,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("service_notifications")
+    op.drop_table("user_backups")
     with op.batch_alter_table("seller_reviews") as t:
         t.drop_column("tags")
         t.drop_column("product_id")

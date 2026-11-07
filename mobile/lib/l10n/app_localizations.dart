@@ -12080,6 +12080,168 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{seller} · {product}'**
   String annRateSubtitle(Object product, Object seller);
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde'**
+  String get backupTitle;
+
+  /// No description provided for @backupWhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou, chiffrée sur ton téléphone'**
+  String get backupWhere;
+
+  /// No description provided for @backupLast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière sauvegarde'**
+  String get backupLast;
+
+  /// No description provided for @backupContent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu'**
+  String get backupContent;
+
+  /// No description provided for @backupContentValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 discussion} other{{count} discussions}} · {size}'**
+  String backupContentValue(num count, Object size);
+
+  /// No description provided for @backupNever.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais'**
+  String get backupNever;
+
+  /// No description provided for @backupExplain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes discussions sont chiffrées sur ce téléphone avec ton mot de passe avant d’être envoyées. Sans lui, personne ne peut les lire, pas même Pokou : garde-le précieusement.'**
+  String get backupExplain;
+
+  /// No description provided for @backupSetPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un mot de passe'**
+  String get backupSetPassword;
+
+  /// No description provided for @backupChangePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le mot de passe'**
+  String get backupChangePassword;
+
+  /// No description provided for @backupPasswordLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe de sauvegarde'**
+  String get backupPasswordLabel;
+
+  /// No description provided for @backupPasswordConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirme le mot de passe'**
+  String get backupPasswordConfirm;
+
+  /// No description provided for @backupPasswordTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'8 caractères au moins.'**
+  String get backupPasswordTooShort;
+
+  /// No description provided for @backupPasswordMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux mots de passe ne correspondent pas.'**
+  String get backupPasswordMismatch;
+
+  /// No description provided for @backupNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarder maintenant'**
+  String get backupNow;
+
+  /// No description provided for @backupDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde terminée.'**
+  String get backupDone;
+
+  /// No description provided for @backupDaily.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une sauvegarde est faite chaque jour, à l’ouverture de Pokou.'**
+  String get backupDaily;
+
+  /// No description provided for @backupDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la sauvegarde'**
+  String get backupDelete;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La sauvegarde n’a pas abouti. Réessaie.'**
+  String get backupFailed;
+
+  /// No description provided for @welcomeBackBaba.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon retour, {name} ! J’ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes cagnottes Kory et ton badge te suivent.'**
+  String welcomeBackBaba(Object name);
+
+  /// No description provided for @welcomeBackOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussions et état du mode preuve d’abord ; photos et vidéos ensuite, à l’ouverture de chaque discussion.'**
+  String get welcomeBackOrder;
+
+  /// No description provided for @welcomeBackOldPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton ancien téléphone sera déconnecté.'**
+  String get welcomeBackOldPhone;
+
+  /// No description provided for @welcomeBackRestore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer'**
+  String get welcomeBackRestore;
+
+  /// No description provided for @welcomeBackSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer sans restaurer'**
+  String get welcomeBackSkip;
+
+  /// No description provided for @restoreWrongPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mot de passe ne correspond pas à la sauvegarde.'**
+  String get restoreWrongPassword;
+
+  /// No description provided for @restoreCardTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restauration de tes discussions'**
+  String get restoreCardTitle;
+
+  /// No description provided for @restoreCardBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} discussions sur {total}. Photos et vidéos ensuite, à l’ouverture.'**
+  String restoreCardBody(Object done, Object total);
+
+  /// No description provided for @restoreDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes discussions sont de retour.'**
+  String get restoreDone;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

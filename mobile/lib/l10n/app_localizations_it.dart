@@ -6977,4 +6977,102 @@ class LIt extends L {
   String annRateSubtitle(Object product, Object seller) {
     return '$seller · $product';
   }
+
+  @override
+  String get backupTitle => 'Backup';
+
+  @override
+  String get backupWhere => 'Pokou, cifrato sul tuo telefono';
+
+  @override
+  String get backupLast => 'Ultimo backup';
+
+  @override
+  String get backupContent => 'Contenuto';
+
+  @override
+  String backupContentValue(num count, Object size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chat',
+      one: '1 chat',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
+  String get backupNever => 'Mai';
+
+  @override
+  String get backupExplain =>
+      'Le tue chat sono cifrate su questo telefono con la tua password prima di essere inviate. Senza di essa nessuno può leggerle, nemmeno Pokou: conservala con cura.';
+
+  @override
+  String get backupSetPassword => 'Scegli una password';
+
+  @override
+  String get backupChangePassword => 'Cambia la password';
+
+  @override
+  String get backupPasswordLabel => 'Password del backup';
+
+  @override
+  String get backupPasswordConfirm => 'Conferma la password';
+
+  @override
+  String get backupPasswordTooShort => 'Almeno 8 caratteri.';
+
+  @override
+  String get backupPasswordMismatch => 'Le due password non corrispondono.';
+
+  @override
+  String get backupNow => 'Esegui backup ora';
+
+  @override
+  String get backupDone => 'Backup completato.';
+
+  @override
+  String get backupDaily =>
+      'Un backup viene fatto ogni giorno all’apertura di Pokou.';
+
+  @override
+  String get backupDelete => 'Elimina il backup';
+
+  @override
+  String get backupFailed => 'Il backup non è riuscito. Riprova.';
+
+  @override
+  String welcomeBackBaba(Object name) {
+    return 'Bentornato, $name! Ho ritrovato il tuo account e il tuo backup. I tuoi gruppi, le raccolte Kory e il badge ti seguono.';
+  }
+
+  @override
+  String get welcomeBackOrder =>
+      'Prima le chat e lo stato della modalità prova; foto e video dopo, all’apertura di ogni chat.';
+
+  @override
+  String get welcomeBackOldPhone =>
+      'Il tuo vecchio telefono verrà disconnesso.';
+
+  @override
+  String get welcomeBackRestore => 'Ripristina';
+
+  @override
+  String get welcomeBackSkip => 'Continua senza ripristinare';
+
+  @override
+  String get restoreWrongPassword =>
+      'Questa password non corrisponde al backup.';
+
+  @override
+  String get restoreCardTitle => 'Ripristino delle tue chat';
+
+  @override
+  String restoreCardBody(Object done, Object total) {
+    return '$done chat su $total. Foto e video dopo, all’apertura.';
+  }
+
+  @override
+  String get restoreDone => 'Le tue chat sono tornate.';
 }

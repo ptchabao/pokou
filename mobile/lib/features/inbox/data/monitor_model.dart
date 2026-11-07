@@ -1,4 +1,5 @@
 import '../../../core/time/server_time.dart';
+
 /// A "Smart Contact" in Pokou's inbox — maps 1:1 to a backend `Monitor`
 /// (an intention bound to a connected data source, e.g. "Mon Stock Excel").
 class SmartContact {

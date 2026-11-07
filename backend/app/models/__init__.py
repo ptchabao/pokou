@@ -170,3 +170,6 @@ from app.models.e2ee_retry import (  # noqa: F401
 from app.models.service_notifications import (  # noqa: F401
     ServiceNotification,
 )
+from app.models.backups import (  # noqa: F401
+    UserBackup,
+)

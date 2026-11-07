@@ -6932,4 +6932,99 @@ class LEn extends L {
   String annRateSubtitle(Object product, Object seller) {
     return '$seller · $product';
   }
+
+  @override
+  String get backupTitle => 'Backup';
+
+  @override
+  String get backupWhere => 'Pokou, encrypted on your phone';
+
+  @override
+  String get backupLast => 'Last backup';
+
+  @override
+  String get backupContent => 'Content';
+
+  @override
+  String backupContentValue(num count, Object size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chats',
+      one: '1 chat',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
+  String get backupNever => 'Never';
+
+  @override
+  String get backupExplain =>
+      'Your chats are encrypted on this phone with your password before being sent. Without it, nobody can read them, not even Pokou: keep it safe.';
+
+  @override
+  String get backupSetPassword => 'Choose a password';
+
+  @override
+  String get backupChangePassword => 'Change the password';
+
+  @override
+  String get backupPasswordLabel => 'Backup password';
+
+  @override
+  String get backupPasswordConfirm => 'Confirm the password';
+
+  @override
+  String get backupPasswordTooShort => 'At least 8 characters.';
+
+  @override
+  String get backupPasswordMismatch => 'The two passwords don’t match.';
+
+  @override
+  String get backupNow => 'Back up now';
+
+  @override
+  String get backupDone => 'Backup complete.';
+
+  @override
+  String get backupDaily => 'A backup is made every day when Pokou opens.';
+
+  @override
+  String get backupDelete => 'Delete the backup';
+
+  @override
+  String get backupFailed => 'The backup didn’t complete. Try again.';
+
+  @override
+  String welcomeBackBaba(Object name) {
+    return 'Welcome back, $name! I found your account and your backup. Your groups, Kory pots and badge come with you.';
+  }
+
+  @override
+  String get welcomeBackOrder =>
+      'Chats and proof-mode state first; photos and videos afterwards, when you open each chat.';
+
+  @override
+  String get welcomeBackOldPhone => 'Your old phone will be signed out.';
+
+  @override
+  String get welcomeBackRestore => 'Restore';
+
+  @override
+  String get welcomeBackSkip => 'Continue without restoring';
+
+  @override
+  String get restoreWrongPassword => 'This password doesn’t match the backup.';
+
+  @override
+  String get restoreCardTitle => 'Restoring your chats';
+
+  @override
+  String restoreCardBody(Object done, Object total) {
+    return '$done of $total chats. Photos and videos afterwards, when opened.';
+  }
+
+  @override
+  String get restoreDone => 'Your chats are back.';
 }

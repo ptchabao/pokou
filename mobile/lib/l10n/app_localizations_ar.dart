@@ -6925,4 +6925,99 @@ class LAr extends L {
   String annRateSubtitle(Object product, Object seller) {
     return '$seller · $product';
   }
+
+  @override
+  String get backupTitle => 'النسخ الاحتياطي';
+
+  @override
+  String get backupWhere => 'Pokou، مشفّرة على هاتفك';
+
+  @override
+  String get backupLast => 'آخر نسخة';
+
+  @override
+  String get backupContent => 'المحتوى';
+
+  @override
+  String backupContentValue(num count, Object size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count محادثات',
+      one: 'محادثة واحدة',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
+  String get backupNever => 'أبدًا';
+
+  @override
+  String get backupExplain =>
+      'تُشفَّر محادثاتك على هذا الهاتف بكلمة مرورك قبل إرسالها. بدونها لا يستطيع أحد قراءتها، ولا حتى Pokou: احتفظ بها جيدًا.';
+
+  @override
+  String get backupSetPassword => 'اختر كلمة مرور';
+
+  @override
+  String get backupChangePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get backupPasswordLabel => 'كلمة مرور النسخة';
+
+  @override
+  String get backupPasswordConfirm => 'أكّد كلمة المرور';
+
+  @override
+  String get backupPasswordTooShort => '8 أحرف على الأقل.';
+
+  @override
+  String get backupPasswordMismatch => 'كلمتا المرور غير متطابقتين.';
+
+  @override
+  String get backupNow => 'انسخ الآن';
+
+  @override
+  String get backupDone => 'اكتمل النسخ.';
+
+  @override
+  String get backupDaily => 'تُنشأ نسخة كل يوم عند فتح Pokou.';
+
+  @override
+  String get backupDelete => 'حذف النسخة';
+
+  @override
+  String get backupFailed => 'لم يكتمل النسخ. أعد المحاولة.';
+
+  @override
+  String welcomeBackBaba(Object name) {
+    return 'مرحبًا بعودتك يا $name! وجدتُ حسابك ونسختك الاحتياطية. مجموعاتك وصناديق Kory وشارتك تتبعك.';
+  }
+
+  @override
+  String get welcomeBackOrder =>
+      'المحادثات وحالة وضع الإثبات أولًا؛ ثم الصور ومقاطع الفيديو عند فتح كل محادثة.';
+
+  @override
+  String get welcomeBackOldPhone => 'سيتم فصل هاتفك القديم.';
+
+  @override
+  String get welcomeBackRestore => 'استعادة';
+
+  @override
+  String get welcomeBackSkip => 'المتابعة دون استعادة';
+
+  @override
+  String get restoreWrongPassword => 'كلمة المرور هذه لا تطابق النسخة.';
+
+  @override
+  String get restoreCardTitle => 'استعادة محادثاتك';
+
+  @override
+  String restoreCardBody(Object done, Object total) {
+    return '$done من $total محادثة. الصور ومقاطع الفيديو لاحقًا عند الفتح.';
+  }
+
+  @override
+  String get restoreDone => 'عادت محادثاتك.';
 }

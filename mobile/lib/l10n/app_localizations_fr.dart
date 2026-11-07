@@ -6979,4 +6979,102 @@ class LFr extends L {
   String annRateSubtitle(Object product, Object seller) {
     return '$seller · $product';
   }
+
+  @override
+  String get backupTitle => 'Sauvegarde';
+
+  @override
+  String get backupWhere => 'Pokou, chiffrée sur ton téléphone';
+
+  @override
+  String get backupLast => 'Dernière sauvegarde';
+
+  @override
+  String get backupContent => 'Contenu';
+
+  @override
+  String backupContentValue(num count, Object size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count discussions',
+      one: '1 discussion',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
+  String get backupNever => 'Jamais';
+
+  @override
+  String get backupExplain =>
+      'Tes discussions sont chiffrées sur ce téléphone avec ton mot de passe avant d’être envoyées. Sans lui, personne ne peut les lire, pas même Pokou : garde-le précieusement.';
+
+  @override
+  String get backupSetPassword => 'Choisir un mot de passe';
+
+  @override
+  String get backupChangePassword => 'Changer le mot de passe';
+
+  @override
+  String get backupPasswordLabel => 'Mot de passe de sauvegarde';
+
+  @override
+  String get backupPasswordConfirm => 'Confirme le mot de passe';
+
+  @override
+  String get backupPasswordTooShort => '8 caractères au moins.';
+
+  @override
+  String get backupPasswordMismatch =>
+      'Les deux mots de passe ne correspondent pas.';
+
+  @override
+  String get backupNow => 'Sauvegarder maintenant';
+
+  @override
+  String get backupDone => 'Sauvegarde terminée.';
+
+  @override
+  String get backupDaily =>
+      'Une sauvegarde est faite chaque jour, à l’ouverture de Pokou.';
+
+  @override
+  String get backupDelete => 'Supprimer la sauvegarde';
+
+  @override
+  String get backupFailed => 'La sauvegarde n’a pas abouti. Réessaie.';
+
+  @override
+  String welcomeBackBaba(Object name) {
+    return 'Bon retour, $name ! J’ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes cagnottes Kory et ton badge te suivent.';
+  }
+
+  @override
+  String get welcomeBackOrder =>
+      'Discussions et état du mode preuve d’abord ; photos et vidéos ensuite, à l’ouverture de chaque discussion.';
+
+  @override
+  String get welcomeBackOldPhone => 'Ton ancien téléphone sera déconnecté.';
+
+  @override
+  String get welcomeBackRestore => 'Restaurer';
+
+  @override
+  String get welcomeBackSkip => 'Continuer sans restaurer';
+
+  @override
+  String get restoreWrongPassword =>
+      'Ce mot de passe ne correspond pas à la sauvegarde.';
+
+  @override
+  String get restoreCardTitle => 'Restauration de tes discussions';
+
+  @override
+  String restoreCardBody(Object done, Object total) {
+    return '$done discussions sur $total. Photos et vidéos ensuite, à l’ouverture.';
+  }
+
+  @override
+  String get restoreDone => 'Tes discussions sont de retour.';
 }

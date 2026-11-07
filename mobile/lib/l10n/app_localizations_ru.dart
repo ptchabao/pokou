@@ -7011,4 +7011,100 @@ class LRu extends L {
   String annRateSubtitle(Object product, Object seller) {
     return '$seller · $product';
   }
+
+  @override
+  String get backupTitle => 'Резервная копия';
+
+  @override
+  String get backupWhere => 'Pokou, зашифровано на твоём телефоне';
+
+  @override
+  String get backupLast => 'Последняя копия';
+
+  @override
+  String get backupContent => 'Содержимое';
+
+  @override
+  String backupContentValue(num count, Object size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count чатов',
+      few: '$count чата',
+      one: '1 чат',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
+  String get backupNever => 'Никогда';
+
+  @override
+  String get backupExplain =>
+      'Чаты шифруются на этом телефоне твоим паролем перед отправкой. Без него их никто не прочитает, даже Pokou: храни его надёжно.';
+
+  @override
+  String get backupSetPassword => 'Выбрать пароль';
+
+  @override
+  String get backupChangePassword => 'Сменить пароль';
+
+  @override
+  String get backupPasswordLabel => 'Пароль резервной копии';
+
+  @override
+  String get backupPasswordConfirm => 'Подтверди пароль';
+
+  @override
+  String get backupPasswordTooShort => 'Не менее 8 символов.';
+
+  @override
+  String get backupPasswordMismatch => 'Пароли не совпадают.';
+
+  @override
+  String get backupNow => 'Сохранить сейчас';
+
+  @override
+  String get backupDone => 'Копирование завершено.';
+
+  @override
+  String get backupDaily => 'Копия создаётся каждый день при запуске Pokou.';
+
+  @override
+  String get backupDelete => 'Удалить копию';
+
+  @override
+  String get backupFailed => 'Не удалось сохранить. Попробуй снова.';
+
+  @override
+  String welcomeBackBaba(Object name) {
+    return 'С возвращением, $name! Я нашёл твой аккаунт и резервную копию. Группы, сборы Kory и значок остаются с тобой.';
+  }
+
+  @override
+  String get welcomeBackOrder =>
+      'Сначала чаты и режим доказательств; фото и видео — потом, при открытии каждого чата.';
+
+  @override
+  String get welcomeBackOldPhone => 'Старый телефон будет отключён.';
+
+  @override
+  String get welcomeBackRestore => 'Восстановить';
+
+  @override
+  String get welcomeBackSkip => 'Продолжить без восстановления';
+
+  @override
+  String get restoreWrongPassword => 'Этот пароль не подходит к копии.';
+
+  @override
+  String get restoreCardTitle => 'Восстановление чатов';
+
+  @override
+  String restoreCardBody(Object done, Object total) {
+    return '$done из $total чатов. Фото и видео — потом, при открытии.';
+  }
+
+  @override
+  String get restoreDone => 'Твои чаты вернулись.';
 }

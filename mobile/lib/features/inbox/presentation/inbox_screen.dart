@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/backup/backup_service.dart';
 import '../../../core/country/country_config.dart';
+import '../../../core/providers.dart';
+import '../../settings/presentation/backup_screens.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../calls/presentation/call_log_screen.dart';
@@ -37,6 +40,39 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
   /// position de défilement de chaque onglet est conservée (NAV-02), sans
   /// faire démarrer tous les écrans — et toutes leurs requêtes — d'un coup.
   final Set<PokouTab> _visited = {PokouTab.home};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _offerRestoreOrBackup(),
+    );
+  }
+
+  /// CNX-2 : sur un téléphone VIDE, avec une sauvegarde au compte, la
+  /// restauration est proposée une fois. Sinon, la sauvegarde quotidienne
+  /// part en silence (MSG-12).
+  Future<void> _offerRestoreOrBackup() async {
+    final service = ref.read(backupServiceProvider);
+    try {
+      final empty =
+          await ref.read(pokouMessageStoreProvider).messageCount() == 0;
+      if (empty && !await service.hasPassword()) {
+        final backup = await service.info();
+        if (backup != null && mounted) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => WelcomeBackScreen(backup: backup),
+            ),
+          );
+          return;
+        }
+      }
+      await service.backupIfDue();
+    } catch (_) {
+      // Hors ligne : rien à proposer maintenant.
+    }
+  }
 
   void _open(PokouTab tab) => setState(() {
     _current = tab;

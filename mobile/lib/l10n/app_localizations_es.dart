@@ -6959,4 +6959,100 @@ class LEs extends L {
   String annRateSubtitle(Object product, Object seller) {
     return '$seller · $product';
   }
+
+  @override
+  String get backupTitle => 'Copia de seguridad';
+
+  @override
+  String get backupWhere => 'Pokou, cifrada en tu teléfono';
+
+  @override
+  String get backupLast => 'Última copia';
+
+  @override
+  String get backupContent => 'Contenido';
+
+  @override
+  String backupContentValue(num count, Object size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count conversaciones',
+      one: '1 conversación',
+    );
+    return '$_temp0 · $size';
+  }
+
+  @override
+  String get backupNever => 'Nunca';
+
+  @override
+  String get backupExplain =>
+      'Tus conversaciones se cifran en este teléfono con tu contraseña antes de enviarse. Sin ella, nadie puede leerlas, ni siquiera Pokou: guárdala bien.';
+
+  @override
+  String get backupSetPassword => 'Elegir una contraseña';
+
+  @override
+  String get backupChangePassword => 'Cambiar la contraseña';
+
+  @override
+  String get backupPasswordLabel => 'Contraseña de la copia';
+
+  @override
+  String get backupPasswordConfirm => 'Confirma la contraseña';
+
+  @override
+  String get backupPasswordTooShort => 'Al menos 8 caracteres.';
+
+  @override
+  String get backupPasswordMismatch => 'Las dos contraseñas no coinciden.';
+
+  @override
+  String get backupNow => 'Hacer copia ahora';
+
+  @override
+  String get backupDone => 'Copia completada.';
+
+  @override
+  String get backupDaily => 'Se hace una copia cada día al abrir Pokou.';
+
+  @override
+  String get backupDelete => 'Eliminar la copia';
+
+  @override
+  String get backupFailed => 'La copia no se completó. Inténtalo de nuevo.';
+
+  @override
+  String welcomeBackBaba(Object name) {
+    return '¡Bienvenido de nuevo, $name! Encontré tu cuenta y tu copia. Tus grupos, tus botes Kory y tu insignia te acompañan.';
+  }
+
+  @override
+  String get welcomeBackOrder =>
+      'Primero las conversaciones y el estado del modo prueba; fotos y vídeos después, al abrir cada conversación.';
+
+  @override
+  String get welcomeBackOldPhone => 'Tu teléfono anterior se desconectará.';
+
+  @override
+  String get welcomeBackRestore => 'Restaurar';
+
+  @override
+  String get welcomeBackSkip => 'Continuar sin restaurar';
+
+  @override
+  String get restoreWrongPassword =>
+      'Esta contraseña no corresponde a la copia.';
+
+  @override
+  String get restoreCardTitle => 'Restaurando tus conversaciones';
+
+  @override
+  String restoreCardBody(Object done, Object total) {
+    return '$done de $total conversaciones. Fotos y vídeos después, al abrirlas.';
+  }
+
+  @override
+  String get restoreDone => 'Tus conversaciones han vuelto.';
 }

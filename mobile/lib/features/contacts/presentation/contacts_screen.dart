@@ -12,6 +12,7 @@ import '../../../core/providers.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_fab.dart';
+import '../../settings/presentation/backup_screens.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
@@ -618,6 +619,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                   MediaQuery.paddingOf(context).bottom + 96,
                 ),
                 children: [
+                  // CNX-3 : la restauration en cours, sans bloquer l'écran.
+                  const RestoreProgressCard(),
                   const _PinnedMahizuTile(),
                   const SizedBox(height: 12),
                   // Plus de sections « Communautés » et « Groupes » au-dessus

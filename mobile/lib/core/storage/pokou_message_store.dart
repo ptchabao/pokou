@@ -637,7 +637,8 @@ class PokouMessageStore {
     );
     incoming = _keepProofTrace(existing, incoming);
     if (!incoming.isEncrypted) return incoming;
-    final opened = !existing.isEncrypted &&
+    final opened =
+        !existing.isEncrypted &&
         (existing.mediaKey != null ||
             (existing.content?.trim().isNotEmpty ?? false));
     if (!opened || existing.editedAt != incoming.editedAt) return incoming;
@@ -651,13 +652,17 @@ class PokouMessageStore {
   /// message envoyé en mode preuve, c'est donc ici que l'ancien texte est
   /// mis de côté, avant que le nouveau chiffré ne le recouvre. Une trace
   /// déjà posée n'est jamais effacée par une version plus récente.
-  DirectMessage _keepProofTrace(DirectMessage existing, DirectMessage incoming) {
+  DirectMessage _keepProofTrace(
+    DirectMessage existing,
+    DirectMessage incoming,
+  ) {
     var kept = incoming;
     if (kept.deletedAt == null && existing.deletedAt != null) {
       kept = kept.copyWith(deletedAt: existing.deletedAt);
     }
     if (kept.originalContent == null) {
-      final original = existing.originalContent ??
+      final original =
+          existing.originalContent ??
           (incoming.proofMode &&
                   existing.editedAt != incoming.editedAt &&
                   !existing.isEncrypted
@@ -710,7 +715,8 @@ class PokouMessageStore {
     );
     return CachedConversation(
       messages: [
-        for (final row in rows) DirectMessage.fromJson(_payloadOf(row), fromCache: true),
+        for (final row in rows)
+          DirectMessage.fromJson(_payloadOf(row), fromCache: true),
       ],
       pendingIds: {
         for (final row in rows)
@@ -836,6 +842,80 @@ class PokouMessageStore {
         : DirectMessage.fromJson(_payloadOf(rows.single), fromCache: true);
   }
 
+  // ── Sauvegarde chiffrée (MSG-12, CNX-2 / CNX-3) ───────────────────────
+
+  /// Les messages déjà DÉCHIFFRÉS, tels que la base les garde, pour la
+  /// sauvegarde. Les messages en attente d'envoi n'y entrent pas : ils
+  /// partiront d'abord.
+  Future<
+    ({List<Map<String, Object?>> direct, List<Map<String, Object?>> group})
+  >
+  exportForBackup() async {
+    final db = await _database;
+    final direct = await db.query(
+      'direct_messages',
+      columns: ['id', 'sender_id', 'recipient_id', 'created_at', 'payload'],
+      where: 'pending = ? AND failed = ?',
+      whereArgs: [_pendingFalse, _pendingFalse],
+    );
+    final group = await db.query(
+      'group_messages',
+      columns: ['id', 'group_id', 'created_at', 'payload'],
+      where: 'pending = ? AND failed = ?',
+      whereArgs: [_pendingFalse, _pendingFalse],
+    );
+    return (direct: direct, group: group);
+  }
+
+  /// Combien de messages la base garde déjà : une restauration ne se
+  /// propose que sur un téléphone vide.
+  Future<int> messageCount() async {
+    final db = await _database;
+    final a =
+        Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM direct_messages'),
+        ) ??
+        0;
+    final b =
+        Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM group_messages'),
+        ) ??
+        0;
+    return a + b;
+  }
+
+  /// Réinjecte des lignes sauvegardées. `ignore` : ce que ce téléphone a
+  /// déjà (reçu depuis) n'est jamais écrasé par une copie plus ancienne.
+  Future<void> importFromBackup({
+    List<Map<String, dynamic>> direct = const [],
+    List<Map<String, dynamic>> group = const [],
+  }) async {
+    final db = await _database;
+    final batch = db.batch();
+    for (final row in direct) {
+      batch.insert('direct_messages', {
+        'id': row['id'],
+        'sender_id': row['sender_id'],
+        'recipient_id': row['recipient_id'],
+        'created_at': row['created_at'],
+        'pending': _pendingFalse,
+        'failed': _pendingFalse,
+        'payload': row['payload'],
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    for (final row in group) {
+      batch.insert('group_messages', {
+        'id': row['id'],
+        'group_id': row['group_id'],
+        'created_at': row['created_at'],
+        'pending': _pendingFalse,
+        'failed': _pendingFalse,
+        'payload': row['payload'],
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    await batch.commit(noResult: true);
+  }
+
   /// Un message de groupe du cache, tel quel (chiffré ou ouvert).
   Future<GroupMessage?> groupById(String id) async {
     final db = await _database;
@@ -901,7 +981,10 @@ class PokouMessageStore {
       whereArgs: [_pendingTrue],
       orderBy: 'created_at ASC',
     );
-    return [for (final row in rows) DirectMessage.fromJson(_payloadOf(row), fromCache: true)];
+    return [
+      for (final row in rows)
+        DirectMessage.fromJson(_payloadOf(row), fromCache: true),
+    ];
   }
 
   /// Aligne le cache sur l'historique renvoyé par le serveur : un message
