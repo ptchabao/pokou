@@ -2050,5 +2050,19 @@
   "storageCallSaverSub": "Lower quality, more stable call",
   "storagePokouUses": "Pokou · {size}",
   "storageOtherDiscussion": "Other files",
-  "callReconnecting": "Reconnecting…"
+  "callReconnecting": "Reconnecting…",
+  "homeSearchEverything": "Search a contact, a service, an ad",
+  "homeBabaTitle": "Need a hand?",
+  "homeBabaSub": "Ask Baba, he takes care of the rest.",
+  "homeAlertsActive": "{count, plural, =1{1 active alert} other{{count} active alerts}}",
+  "homeSeeAllUnread": "See all ({count} unread)",
+  "homeServicesSub": "Simple services, designed for your everyday life.",
+  "homeKoryOverline": "POTS & SAVINGS CIRCLES",
+  "homeHonamOverline": "“HELP ME”",
+  "homeAssimeOverline": "“AT THE MARKET”",
+  "homeTrustOverline": "COMPLETE TRUST",
+  "homeTrustBody": "Your data and conversations are end-to-end encrypted.",
+  "homeKoryInProgress": "KORY • POT",
+  "homeHonamInProgress": "HONAM • HEALTH",
+  "homeKoryNoMoney": "Pokou never touches the money"
 }

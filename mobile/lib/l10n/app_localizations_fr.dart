@@ -7179,4 +7179,59 @@ class LFr extends L {
 
   @override
   String get callReconnecting => 'Reconnexion…';
+
+  @override
+  String get homeSearchEverything =>
+      'Rechercher un contact, un service, une annonce';
+
+  @override
+  String get homeBabaTitle => 'Besoin d’un coup de main ?';
+
+  @override
+  String get homeBabaSub => 'Pose ta question à Baba, il s’occupe du reste.';
+
+  @override
+  String homeAlertsActive(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alertes actives',
+      one: '1 alerte active',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeSeeAllUnread(Object count) {
+    return 'Tout voir ($count non lus)';
+  }
+
+  @override
+  String get homeServicesSub =>
+      'Des services simples, pensés pour ton quotidien.';
+
+  @override
+  String get homeKoryOverline => 'CAGNOTTES & TONTINES';
+
+  @override
+  String get homeHonamOverline => '« AIDE-MOI »';
+
+  @override
+  String get homeAssimeOverline => '« AU MARCHÉ »';
+
+  @override
+  String get homeTrustOverline => 'CONFIANCE ABSOLUE';
+
+  @override
+  String get homeTrustBody =>
+      'Tes données et échanges sont chiffrés de bout en bout.';
+
+  @override
+  String get homeKoryInProgress => 'KORY • CAGNOTTE';
+
+  @override
+  String get homeHonamInProgress => 'HONAM • SANTÉ';
+
+  @override
+  String get homeKoryNoMoney => 'Pokou ne touche pas l’argent';
 }

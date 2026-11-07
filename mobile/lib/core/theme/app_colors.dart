@@ -224,7 +224,7 @@ class AppColors {
 
   /// Bulle ENVOYÉE — un sable très clair en clair, terracotta profond en sombre.
   static Color get chatBubbleSent =>
-      _pick(const Color(0xFFF3CFB8), const Color(0xFF5C2E14));
+      _pick(const Color(0xFFF7E2D4), const Color(0xFF5C2E14));
   static Color get chatBubbleSentBorder =>
       _pick(const Color(0xFFF1C8AD), const Color(0xFF7A3A18));
 
@@ -376,7 +376,7 @@ class AppGradients {
       : const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF5D8C5), Color(0xFFF1C8AD)],
+          colors: [Color(0xFFF7E2D4), Color(0xFFFFFBF8)],
         );
 
   /// Barre de progression : #B9683D → terre cuite.

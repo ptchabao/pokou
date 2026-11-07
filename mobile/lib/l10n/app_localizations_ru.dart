@@ -7209,4 +7209,58 @@ class LRu extends L {
 
   @override
   String get callReconnecting => 'Переподключение…';
+
+  @override
+  String get homeSearchEverything => 'Найти контакт, услугу, объявление';
+
+  @override
+  String get homeBabaTitle => 'Нужна помощь?';
+
+  @override
+  String get homeBabaSub => 'Спроси Baba — он позаботится об остальном.';
+
+  @override
+  String homeAlertsActive(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count активных',
+      few: '$count активных',
+      one: '1 активное',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeSeeAllUnread(Object count) {
+    return 'Все ($count непрочит.)';
+  }
+
+  @override
+  String get homeServicesSub => 'Простые сервисы для твоей повседневной жизни.';
+
+  @override
+  String get homeKoryOverline => 'СБОРЫ И ТОНТИНЫ';
+
+  @override
+  String get homeHonamOverline => '«ПОМОГИ МНЕ»';
+
+  @override
+  String get homeAssimeOverline => '«НА РЫНКЕ»';
+
+  @override
+  String get homeTrustOverline => 'ПОЛНОЕ ДОВЕРИЕ';
+
+  @override
+  String get homeTrustBody =>
+      'Твои данные и переписка защищены сквозным шифрованием.';
+
+  @override
+  String get homeKoryInProgress => 'KORY • СБОР';
+
+  @override
+  String get homeHonamInProgress => 'HONAM • ЗДОРОВЬЕ';
+
+  @override
+  String get homeKoryNoMoney => 'Pokou не касается денег';
 }

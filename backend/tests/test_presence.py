@@ -360,9 +360,23 @@ def test_group_typing_reaches_other_members_but_not_its_author(client):
         # L'auteur ne doit rien avoir reçu. Une lecture bloquerait, donc on
         # provoque un événement POSTÉRIEUR : s'il arrive en premier chez A,
         # c'est que l'événement `typing` ne lui a jamais été adressé.
+        # Message de groupe tel que l'app l'envoie : chiffré, après avoir
+        # remis sa clé d'expéditeur aux autres membres.
+        epoch = client.get(f"/api/v1/groups/{group['id']}", headers=headers_c).json()["crypto_epoch"]
         client.post(
-            f"/api/v1/groups/{group['id']}/messages", json={"content": "on y va"}, headers=headers_c
+            f"/api/v1/groups/{group['id']}/sender-key-distributions",
+            json={"epoch": epoch, "distributions": [
+                {"recipient_id": uid, "encryption": "v1", "ciphertext": "cle", "envelope": {"sid": "s"}}
+                for uid in (user_id_a, user_id_b)
+            ]},
+            headers=headers_c,
         )
+        posted = client.post(
+            f"/api/v1/groups/{group['id']}/messages",
+            json={"encryption": "sender-key-v1", "ciphertext": "on y va", "crypto_epoch": epoch},
+            headers=headers_c,
+        )
+        assert posted.status_code == 200, posted.text
         assert ws_a.receive_json()["type"] == "group:message:new"
 
 

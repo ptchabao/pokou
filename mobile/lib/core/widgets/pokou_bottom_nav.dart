@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/contacts/presentation/discussions_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 
@@ -76,8 +78,8 @@ List<PokouNavDestination> pokouNavDestinationsOf(
           label: l.navHome,
         ),
         PokouTab.discussions => PokouNavDestination(
-          icon: Icons.forum_outlined,
-          activeIcon: Icons.forum,
+          icon: Icons.chat_bubble_outline,
+          activeIcon: Icons.chat_bubble,
           label: l.navChats,
         ),
         PokouTab.kory => PokouNavDestination(
@@ -86,13 +88,13 @@ List<PokouNavDestination> pokouNavDestinationsOf(
           label: l.navKory,
         ),
         PokouTab.honam => PokouNavDestination(
-          icon: Icons.local_pharmacy_outlined,
-          activeIcon: Icons.local_pharmacy,
+          icon: Icons.health_and_safety_outlined,
+          activeIcon: Icons.health_and_safety,
           label: l.navHonam,
         ),
         PokouTab.more => PokouNavDestination(
-          icon: Icons.menu,
-          activeIcon: Icons.menu_open,
+          icon: Icons.grid_view_outlined,
+          activeIcon: Icons.grid_view_rounded,
           label: l.navMore,
         ),
         PokouTab.statuses => PokouNavDestination(
@@ -115,7 +117,7 @@ List<PokouNavDestination> pokouNavDestinationsOf(
 }
 
 /// Navigation basse simple, pleine largeur et sans conteneur arrondi.
-class PokouBottomNav extends StatelessWidget {
+class PokouBottomNav extends ConsumerWidget {
   const PokouBottomNav({
     super.key,
     required this.currentIndex,
@@ -128,7 +130,15 @@ class PokouBottomNav extends StatelessWidget {
   final List<PokouTab> tabs;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Pastille des non-lus sur Discussions (maquette Terre de Confiance).
+    final unread = ref.watch(
+      discussionsProvider.select(
+        (async) => (async.valueOrNull ?? const [])
+            .where((d) => !d.isArchived)
+            .fold<int>(0, (sum, d) => sum + d.unreadCount),
+      ),
+    );
     return SafeArea(
       top: false,
       child: DecoratedBox(
@@ -144,8 +154,8 @@ class PokouBottomNav extends StatelessWidget {
           backgroundColor: AppColors.navBackground,
           selectedItemColor: AppColors.accentPrimaryDark,
           unselectedItemColor: AppColors.navIconInactive,
-          selectedFontSize: 11,
-          unselectedFontSize: 11,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
           // AUCUNE élévation : le système de design supprime les ombres
           // diffuses pour tenir la fréquence d'images sur les appareils
@@ -153,10 +163,21 @@ class PokouBottomNav extends StatelessWidget {
           // posé par le `Container` ci-dessus.
           elevation: 0,
           items: [
-            for (final destination in pokouNavDestinationsOf(context, tabs))
+            for (final (i, destination) in pokouNavDestinationsOf(
+              context,
+              tabs,
+            ).indexed)
               BottomNavigationBarItem(
-                icon: _Glyph(icon: destination.icon, active: false),
-                activeIcon: _Glyph(icon: destination.activeIcon, active: true),
+                icon: _Glyph(
+                  icon: destination.icon,
+                  active: false,
+                  badge: tabs[i] == PokouTab.discussions ? unread : 0,
+                ),
+                activeIcon: _Glyph(
+                  icon: destination.activeIcon,
+                  active: true,
+                  badge: tabs[i] == PokouTab.discussions ? unread : 0,
+                ),
                 label: destination.label,
               ),
           ],
@@ -177,10 +198,11 @@ class PokouBottomNav extends StatelessWidget {
 /// inactif. Sans cela, chaque changement d'onglet décalerait les glyphes de
 /// deux points vers le bas — un tressautement visible à chaque navigation.
 class _Glyph extends StatelessWidget {
-  const _Glyph({required this.icon, required this.active});
+  const _Glyph({required this.icon, required this.active, this.badge = 0});
 
   final IconData icon;
   final bool active;
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +233,12 @@ class _Glyph extends StatelessWidget {
             color: active ? AppColors.terracottaTint : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon),
+          child: Badge(
+            isLabelVisible: badge > 0,
+            backgroundColor: AppColors.accentPrimary,
+            label: Text(badge > 99 ? '99+' : '$badge'),
+            child: Icon(icon),
+          ),
         ),
       ],
     );

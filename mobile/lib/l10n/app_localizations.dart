@@ -12410,6 +12410,90 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Reconnexion…'**
   String get callReconnecting;
+
+  /// No description provided for @homeSearchEverything.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un contact, un service, une annonce'**
+  String get homeSearchEverything;
+
+  /// No description provided for @homeBabaTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Besoin d’un coup de main ?'**
+  String get homeBabaTitle;
+
+  /// No description provided for @homeBabaSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pose ta question à Baba, il s’occupe du reste.'**
+  String get homeBabaSub;
+
+  /// No description provided for @homeAlertsActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 alerte active} other{{count} alertes actives}}'**
+  String homeAlertsActive(num count);
+
+  /// No description provided for @homeSeeAllUnread.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout voir ({count} non lus)'**
+  String homeSeeAllUnread(Object count);
+
+  /// No description provided for @homeServicesSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des services simples, pensés pour ton quotidien.'**
+  String get homeServicesSub;
+
+  /// No description provided for @homeKoryOverline.
+  ///
+  /// In fr, this message translates to:
+  /// **'CAGNOTTES & TONTINES'**
+  String get homeKoryOverline;
+
+  /// No description provided for @homeHonamOverline.
+  ///
+  /// In fr, this message translates to:
+  /// **'« AIDE-MOI »'**
+  String get homeHonamOverline;
+
+  /// No description provided for @homeAssimeOverline.
+  ///
+  /// In fr, this message translates to:
+  /// **'« AU MARCHÉ »'**
+  String get homeAssimeOverline;
+
+  /// No description provided for @homeTrustOverline.
+  ///
+  /// In fr, this message translates to:
+  /// **'CONFIANCE ABSOLUE'**
+  String get homeTrustOverline;
+
+  /// No description provided for @homeTrustBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes données et échanges sont chiffrés de bout en bout.'**
+  String get homeTrustBody;
+
+  /// No description provided for @homeKoryInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'KORY • CAGNOTTE'**
+  String get homeKoryInProgress;
+
+  /// No description provided for @homeHonamInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'HONAM • SANTÉ'**
+  String get homeHonamInProgress;
+
+  /// No description provided for @homeKoryNoMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne touche pas l’argent'**
+  String get homeKoryNoMoney;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

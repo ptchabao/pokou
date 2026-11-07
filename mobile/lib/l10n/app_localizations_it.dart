@@ -7177,4 +7177,58 @@ class LIt extends L {
 
   @override
   String get callReconnecting => 'Riconnessione…';
+
+  @override
+  String get homeSearchEverything =>
+      'Cerca un contatto, un servizio, un annuncio';
+
+  @override
+  String get homeBabaTitle => 'Ti serve una mano?';
+
+  @override
+  String get homeBabaSub => 'Chiedi a Baba, al resto pensa lui.';
+
+  @override
+  String homeAlertsActive(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count avvisi attivi',
+      one: '1 avviso attivo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeSeeAllUnread(Object count) {
+    return 'Vedi tutto ($count non letti)';
+  }
+
+  @override
+  String get homeServicesSub =>
+      'Servizi semplici, pensati per la tua quotidianità.';
+
+  @override
+  String get homeKoryOverline => 'RACCOLTE E TONTINE';
+
+  @override
+  String get homeHonamOverline => '«AIUTAMI»';
+
+  @override
+  String get homeAssimeOverline => '«AL MERCATO»';
+
+  @override
+  String get homeTrustOverline => 'FIDUCIA TOTALE';
+
+  @override
+  String get homeTrustBody => 'I tuoi dati e scambi sono cifrati end-to-end.';
+
+  @override
+  String get homeKoryInProgress => 'KORY • RACCOLTA';
+
+  @override
+  String get homeHonamInProgress => 'HONAM • SALUTE';
+
+  @override
+  String get homeKoryNoMoney => 'Pokou non tocca il denaro';
 }

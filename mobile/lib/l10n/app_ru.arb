@@ -2050,5 +2050,19 @@
   "storageCallSaverSub": "Ниже качество, стабильнее связь",
   "storagePokouUses": "Pokou · {size}",
   "storageOtherDiscussion": "Другие файлы",
-  "callReconnecting": "Переподключение…"
+  "callReconnecting": "Переподключение…",
+  "homeSearchEverything": "Найти контакт, услугу, объявление",
+  "homeBabaTitle": "Нужна помощь?",
+  "homeBabaSub": "Спроси Baba — он позаботится об остальном.",
+  "homeAlertsActive": "{count, plural, =1{1 активное} few{{count} активных} other{{count} активных}}",
+  "homeSeeAllUnread": "Все ({count} непрочит.)",
+  "homeServicesSub": "Простые сервисы для твоей повседневной жизни.",
+  "homeKoryOverline": "СБОРЫ И ТОНТИНЫ",
+  "homeHonamOverline": "«ПОМОГИ МНЕ»",
+  "homeAssimeOverline": "«НА РЫНКЕ»",
+  "homeTrustOverline": "ПОЛНОЕ ДОВЕРИЕ",
+  "homeTrustBody": "Твои данные и переписка защищены сквозным шифрованием.",
+  "homeKoryInProgress": "KORY • СБОР",
+  "homeHonamInProgress": "HONAM • ЗДОРОВЬЕ",
+  "homeKoryNoMoney": "Pokou не касается денег"
 }

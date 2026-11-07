@@ -138,7 +138,7 @@ void main() {
       // lien. Un aplat saturé imposerait du blanc, donc de faire descendre
       // `isMine` dans chacun d'eux. Si cette assertion tombe, ce n'est pas
       // le jeton qu'il faut corriger : c'est tout le rendu des bulles.
-      expect(AppColors.chatBubbleSent, const Color(0xFFF3CFB8));
+      expect(AppColors.chatBubbleSent, const Color(0xFFF7E2D4));
       expect(AppColors.chatBubbleReceived, const Color(0xFFFFFFFF));
       expect(AppColors.chatBubbleSent, isNot(AppColors.chatBubbleReceived));
       expect(

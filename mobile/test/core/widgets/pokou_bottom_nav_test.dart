@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokou/features/contacts/presentation/discussions_controller.dart';
 import 'package:pokou/core/theme/app_colors.dart';
 import 'package:pokou/core/widgets/pokou_bottom_nav.dart';
 import 'package:pokou/l10n/app_localizations.dart';
@@ -17,14 +19,20 @@ void main() {
 
   Future<void> pump(WidgetTester tester, {int index = 0, Locale? locale}) {
     return tester.pumpWidget(
-      MaterialApp(
-        locale: locale,
-        supportedLocales: L.supportedLocales,
-        localizationsDelegates: L.localizationsDelegates,
-        home: Scaffold(
-          bottomNavigationBar: PokouBottomNav(
-            currentIndex: index,
-            onTap: (_) {},
+      ProviderScope(
+        overrides: [
+          // Pas de réseau ni de base dans ce test : aucune discussion.
+          discussionsProvider.overrideWith((ref) => Stream.value(const [])),
+        ],
+        child: MaterialApp(
+          locale: locale,
+          supportedLocales: L.supportedLocales,
+          localizationsDelegates: L.localizationsDelegates,
+          home: Scaffold(
+            bottomNavigationBar: PokouBottomNav(
+              currentIndex: index,
+              onTap: (_) {},
+            ),
           ),
         ),
       ),

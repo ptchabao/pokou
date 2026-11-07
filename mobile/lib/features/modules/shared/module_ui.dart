@@ -111,8 +111,10 @@ class ModuleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.surface,
         borderRadius: AppRadius.card,
-        // Maquettes : pas de filet, une ombre d'un point.
-        boxShadow: AppElevation.subtle,
+        // Terre de Confiance : un filet d'un point (lisible en plein soleil)
+        // et une ombre double très douce.
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppElevation.card,
       ),
       child: child,
     );
@@ -253,17 +255,16 @@ class ModuleQuietButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Maquettes : pastille blanche, sans filet, ombre d'un point.
+    // Terre de Confiance : pastille beige, texte encre, sans ombre.
     final style = OutlinedButton.styleFrom(
-      foregroundColor: AppColors.accentPrimaryDark,
-      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.textPrimary,
+      backgroundColor: AppColors.surfaceElevated,
       side: BorderSide.none,
-      minimumSize: const Size(64, 52),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      minimumSize: const Size(64, 48),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       shape: const StadiumBorder(),
-      elevation: 0.6,
-      shadowColor: AppColors.shadowTint,
-      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+      elevation: 0,
+      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
     );
     final button = icon == null
         ? OutlinedButton(onPressed: onPressed, style: style, child: Text(label))
@@ -590,25 +591,47 @@ class ModuleCallout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (Color ink, IconData icon) = switch (tone) {
-      CalloutTone.amber => (AppColors.feedbackWarning, Icons.info_outline),
-      CalloutTone.red => (AppColors.feedbackDanger, Icons.error_outline),
+    // Terre de Confiance : fond teinté, filet de la même famille, icône.
+    final (Color ink, IconData icon, Color bg, Color line) = switch (tone) {
+      CalloutTone.amber => (
+        AppColors.feedbackWarning,
+        Icons.info_outline,
+        const Color(0xFFFEF3C7),
+        const Color(0xFFFDE68A),
+      ),
+      CalloutTone.red => (
+        AppColors.feedbackDanger,
+        Icons.error_outline,
+        const Color(0xFFFEE2E2),
+        const Color(0xFFFECACA),
+      ),
       CalloutTone.green => (
         AppColors.feedbackSuccess,
         Icons.check_circle_outline,
+        const Color(0xFFDCFCE7),
+        const Color(0xFFBBF7D0),
       ),
-      CalloutTone.blue => (AppColors.feedbackInfo, Icons.info_outline),
-      CalloutTone.beige => (AppColors.textSecondary, Icons.info_outline),
+      CalloutTone.blue => (
+        AppColors.feedbackInfo,
+        Icons.info_outline,
+        const Color(0xFFE0F2FE),
+        const Color(0xFFBAE6FD),
+      ),
+      CalloutTone.beige => (
+        AppColors.textSecondary,
+        Icons.lock_outline,
+        AppColors.surfaceElevated,
+        AppColors.border,
+      ),
     };
-    final background = tone == CalloutTone.beige
-        ? AppColors.surfaceElevated
-        : ink.withValues(alpha: AppColors.isDark ? 0.22 : 0.10);
+    final dark = AppColors.isDark && tone != CalloutTone.beige;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(14),
+        color: dark ? ink.withValues(alpha: 0.22) : bg,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: dark ? ink.withValues(alpha: 0.4) : line),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

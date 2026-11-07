@@ -7122,4 +7122,56 @@ class LAr extends L {
 
   @override
   String get callReconnecting => 'جارٍ إعادة الاتصال…';
+
+  @override
+  String get homeSearchEverything => 'ابحث عن جهة اتصال أو خدمة أو إعلان';
+
+  @override
+  String get homeBabaTitle => 'تحتاج إلى مساعدة؟';
+
+  @override
+  String get homeBabaSub => 'اسأل Baba، وهو يتكفّل بالباقي.';
+
+  @override
+  String homeAlertsActive(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count تنبيهات نشطة',
+      one: 'تنبيه نشط واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeSeeAllUnread(Object count) {
+    return 'عرض الكل ($count غير مقروءة)';
+  }
+
+  @override
+  String get homeServicesSub => 'خدمات بسيطة مصمَّمة لحياتك اليومية.';
+
+  @override
+  String get homeKoryOverline => 'الصناديق والجمعيات';
+
+  @override
+  String get homeHonamOverline => '«ساعدني»';
+
+  @override
+  String get homeAssimeOverline => '«في السوق»';
+
+  @override
+  String get homeTrustOverline => 'ثقة تامة';
+
+  @override
+  String get homeTrustBody => 'بياناتك ومحادثاتك مشفّرة من طرف إلى طرف.';
+
+  @override
+  String get homeKoryInProgress => 'KORY • صندوق';
+
+  @override
+  String get homeHonamInProgress => 'HONAM • صحة';
+
+  @override
+  String get homeKoryNoMoney => 'Pokou لا يلمس المال';
 }

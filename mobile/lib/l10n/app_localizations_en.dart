@@ -7128,4 +7128,58 @@ class LEn extends L {
 
   @override
   String get callReconnecting => 'Reconnecting…';
+
+  @override
+  String get homeSearchEverything => 'Search a contact, a service, an ad';
+
+  @override
+  String get homeBabaTitle => 'Need a hand?';
+
+  @override
+  String get homeBabaSub => 'Ask Baba, he takes care of the rest.';
+
+  @override
+  String homeAlertsActive(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active alerts',
+      one: '1 active alert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeSeeAllUnread(Object count) {
+    return 'See all ($count unread)';
+  }
+
+  @override
+  String get homeServicesSub =>
+      'Simple services, designed for your everyday life.';
+
+  @override
+  String get homeKoryOverline => 'POTS & SAVINGS CIRCLES';
+
+  @override
+  String get homeHonamOverline => '“HELP ME”';
+
+  @override
+  String get homeAssimeOverline => '“AT THE MARKET”';
+
+  @override
+  String get homeTrustOverline => 'COMPLETE TRUST';
+
+  @override
+  String get homeTrustBody =>
+      'Your data and conversations are end-to-end encrypted.';
+
+  @override
+  String get homeKoryInProgress => 'KORY • POT';
+
+  @override
+  String get homeHonamInProgress => 'HONAM • HEALTH';
+
+  @override
+  String get homeKoryNoMoney => 'Pokou never touches the money';
 }

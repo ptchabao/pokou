@@ -140,20 +140,27 @@ class _ContactAvatarState extends ConsumerState<ContactAvatar> {
         child: Icon(icon, color: Colors.white, size: widget.size * 0.5),
       );
     }
+    // Terre de Confiance : monogramme de deux lettres, terre cuite foncée
+    // sur beige — jamais une silhouette anonyme.
+    final custom = widget.fallbackBackgroundColor;
     return CircleAvatar(
       radius: widget.size / 2,
-      backgroundColor:
-          widget.fallbackBackgroundColor ?? AppColors.accentPrimaryLight,
+      backgroundColor: custom ?? AppColors.surfaceElevated,
       child: Text(
-        widget.displayName.isNotEmpty
-            ? widget.displayName[0].toUpperCase()
-            : '?',
+        monogramOf(widget.displayName),
         style: TextStyle(
-          color: Colors.white,
+          color: custom != null ? Colors.white : AppColors.accentPrimaryDark,
           fontWeight: FontWeight.w600,
-          fontSize: widget.size * 0.4,
+          fontSize: widget.size * 0.36,
         ),
       ),
     );
   }
+}
+
+/// « Famille Koffi » → « FK », « Ama » → « A ».
+String monogramOf(String name) {
+  final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+  if (words.isEmpty) return '?';
+  return words.take(2).map((w) => w.characters.first.toUpperCase()).join();
 }

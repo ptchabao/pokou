@@ -7157,4 +7157,59 @@ class LEs extends L {
 
   @override
   String get callReconnecting => 'Reconectando…';
+
+  @override
+  String get homeSearchEverything =>
+      'Buscar un contacto, un servicio, un anuncio';
+
+  @override
+  String get homeBabaTitle => '¿Necesitas una mano?';
+
+  @override
+  String get homeBabaSub => 'Pregúntale a Baba, él se ocupa del resto.';
+
+  @override
+  String homeAlertsActive(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alertas activas',
+      one: '1 alerta activa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeSeeAllUnread(Object count) {
+    return 'Ver todo ($count sin leer)';
+  }
+
+  @override
+  String get homeServicesSub =>
+      'Servicios sencillos, pensados para tu día a día.';
+
+  @override
+  String get homeKoryOverline => 'BOTES Y TONTINAS';
+
+  @override
+  String get homeHonamOverline => '«AYÚDAME»';
+
+  @override
+  String get homeAssimeOverline => '«EN EL MERCADO»';
+
+  @override
+  String get homeTrustOverline => 'CONFIANZA TOTAL';
+
+  @override
+  String get homeTrustBody =>
+      'Tus datos e intercambios están cifrados de extremo a extremo.';
+
+  @override
+  String get homeKoryInProgress => 'KORY • BOTE';
+
+  @override
+  String get homeHonamInProgress => 'HONAM • SALUD';
+
+  @override
+  String get homeKoryNoMoney => 'Pokou no toca el dinero';
 }

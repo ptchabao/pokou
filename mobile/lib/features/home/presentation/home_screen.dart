@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/country/country_config.dart';
@@ -11,25 +12,33 @@ import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../chat/presentation/chat_controller.dart';
+import '../../contacts/data/conversation_summary.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../contacts/presentation/open_discussion.dart';
+import '../../honam/data/honam_models.dart';
 import '../../honam/presentation/honam_controller.dart';
-import '../../honam/presentation/honam_screen.dart';
+import '../../honam/presentation/honam_order_screen.dart';
 import '../../honam/presentation/honam_send_screen.dart';
+import '../../kory/data/kory_model.dart';
 import '../../kory/presentation/kory_controller.dart';
 import '../../kory/presentation/kory_create_screen.dart';
-import '../../kory/presentation/kory_screen.dart';
-import '../../modules/shared/module_ui.dart';
+import '../../kory/presentation/kory_pot_screen.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
-import '../../profile/presentation/profile_screen.dart';
 import '../../notifications/presentation/notifications_center_screen.dart';
+import '../../profile/presentation/profile_screen.dart';
 import 'global_search_screen.dart';
 
-/// L'accueil après connexion (écran APP-1) : une carte par module ouvert
-/// dans le pays (NAV-08), chacune menant à son module.
+/// APP-1 · Accueil — maquette « Terre de Confiance » (Stitch) :
 ///
-/// Une carte vide montre l'action de départ du module plutôt qu'un état
-/// vide (NAV-09) : « Créer une cagnotte », pas « Aucune cagnotte ».
+/// 1. la salutation, avec la recherche ;
+/// 2. Baba, en un geste ;
+/// 3. « En cours » : la cagnotte ouverte et la commande qui avance ;
+/// 4. les dernières discussions ;
+/// 5. « Que veux-tu faire ? » : une carte par service, action directe ;
+/// 6. le rappel du chiffrement.
+///
+/// Les cartes ne s'affichent que pour les modules ouverts dans le pays.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.onOpenTab});
 
@@ -41,6 +50,8 @@ class HomeScreen extends ConsumerWidget {
     final config = ref.watch(currentCountryConfigProvider);
     final user = ref.watch(authControllerProvider).user;
     final firstName = (user?.fullName ?? '').split(' ').first;
+    final unreadNotifications =
+        ref.watch(serviceNotificationsProvider).valueOrNull?.unread ?? 0;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -48,6 +59,7 @@ class HomeScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(discussionsProvider);
           ref.invalidate(countryConfigProvider);
+          ref.invalidate(serviceNotificationsProvider);
           if (config.has('kory')) refreshKory(ref);
         },
         child: ListView(
@@ -63,6 +75,15 @@ class HomeScreen extends ConsumerWidget {
                 semanticLabel: 'Pokou',
               ),
               actions: [
+                // NOT-1 : la cloche ouvre le centre de notifications.
+                _Bell(
+                  unread: unreadNotifications,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsCenterScreen(),
+                    ),
+                  ),
+                ),
                 // La photo mène au PROFIL (cible de 44 pt).
                 if (user != null)
                   Semantics(
@@ -90,8 +111,6 @@ class HomeScreen extends ConsumerWidget {
                   ),
               ],
             ),
-            // Maquette Figma : la salutation est une carte au dégradé
-            // pêche, un anneau discret en coin, la date en pastille.
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: _GreetingCard(
@@ -99,75 +118,77 @@ class HomeScreen extends ConsumerWidget {
                 onSearch: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
                 ),
-                // NOT-1 : la cloche ouvre le centre de notifications.
-                onNotifications: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationsCenterScreen(),
-                  ),
-                ),
-                unread:
-                    ref
-                        .watch(serviceNotificationsProvider)
-                        .valueOrNull
-                        ?.unread ??
-                    0,
               ),
             ),
-            _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
-            // Ce qui est EN COURS (une cagnotte ouverte, une commande) —
-            // n'apparaît que s'il y a quelque chose à suivre.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: _BabaBanner(
+                onTap: () => context.push(
+                  '/chat/$kNoMonitor',
+                  extra: l.navBaba,
+                ),
+              ),
+            ),
             _InProgress(
               kory: config.has('kory'),
               honam: config.has('honam'),
-              onOpenKory: () => onOpenTab(PokouTab.kory),
-              onOpenHonam: () => onOpenTab(PokouTab.honam),
             ),
-            // Puis les services, en grandes cartes (inspiration « gobox » :
-            // icône teintée, titre, promesse, action directe).
-            _SectionTitle(l.homeWhatToDo),
+            _RecentDiscussions(
+              onSeeAll: () => onOpenTab(PokouTab.discussions),
+            ),
+            _SectionHeader(
+              title: l.homeWhatToDo,
+              subtitle: l.homeServicesSub,
+            ),
             if (config.has('kory'))
               _ServiceCard(
                 icon: Icons.savings_outlined,
                 tint: AppColors.terracottaTint,
                 ink: AppColors.accentPrimaryDark,
+                overline: l.homeKoryOverline,
                 title: l.navKory,
-                subtitle: l.korySubtitle,
                 pitch: l.homeKoryPitch,
-                ctaIcon: Icons.add_circle_outline,
-                ctaLabel: l.koryCreate,
+                cta: _ServiceCta.primary(
+                  label: l.koryCreate,
+                  icon: Icons.add_circle_outline,
+                  onPressed: () => openKoryCreate(context, ref),
+                ),
                 onTap: () => onOpenTab(PokouTab.kory),
-                onCta: () => openKoryCreate(context, ref),
               ),
             if (config.has('honam'))
               _ServiceCard(
-                icon: Icons.local_pharmacy_outlined,
-                tint: const Color(0xFFF5E5BD),
-                ink: AppColors.warning,
+                icon: Icons.health_and_safety_outlined,
+                tint: const Color(0xFFDCFCE7),
+                ink: AppColors.feedbackSuccess,
+                overline: l.homeHonamOverline,
                 title: l.navHonam,
-                subtitle: l.honamSubtitle,
                 pitch: l.homeHonamPitch,
-                ctaIcon: Icons.document_scanner_outlined,
-                ctaLabel: l.honamSend,
-                onTap: () => onOpenTab(PokouTab.honam),
-                onCta: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const HonamSendScreen()),
+                cta: _ServiceCta.secondary(
+                  label: l.honamSend,
+                  icon: Icons.document_scanner_outlined,
+                  iconColor: AppColors.feedbackSuccess,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const HonamSendScreen()),
+                  ),
                 ),
+                onTap: () => onOpenTab(PokouTab.honam),
               ),
             if (config.has('assime'))
               _ServiceCard(
                 icon: Icons.storefront_outlined,
-                tint: const Color(0xFFDCE9F0),
-                ink: const Color(0xFF245C9E),
+                tint: const Color(0xFFFEF3C7),
+                ink: AppColors.warning,
+                overline: l.homeAssimeOverline,
                 title: l.homeAssimeTitle,
-                subtitle: l.homeAssimeSubtitle,
                 pitch: l.homeAssimePitch,
-                ctaIcon: Icons.arrow_forward,
-                ctaLabel: l.homeAssimeCta,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
                 ),
               ),
-            const SizedBox(height: 24),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
+              child: _TrustCard(),
+            ),
           ],
         ),
       ),
@@ -175,19 +196,33 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// Carte de salutation (maquette Figma `.greeting`).
-class _GreetingCard extends StatelessWidget {
-  const _GreetingCard({
-    required this.firstName,
-    required this.onSearch,
-    required this.onNotifications,
-    this.unread = 0,
-  });
+/// Cloche avec pastille de non-lues (NOT-1).
+class _Bell extends StatelessWidget {
+  const _Bell({required this.unread, required this.onTap});
 
   final int unread;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: L.of(context).notifCenterTitle,
+    onPressed: onTap,
+    icon: Badge(
+      isLabelVisible: unread > 0,
+      backgroundColor: AppColors.accentPrimary,
+      label: Text(unread > 9 ? '9+' : '$unread'),
+      child: const Icon(Icons.notifications_none_outlined),
+    ),
+  );
+}
+
+/// La salutation : surtitre avec la date, le prénom, l'accroche, puis la
+/// recherche — en pastille blanche dans la carte.
+class _GreetingCard extends StatelessWidget {
+  const _GreetingCard({required this.firstName, required this.onSearch});
+
   final String firstName;
   final VoidCallback onSearch;
-  final VoidCallback onNotifications;
 
   @override
   Widget build(BuildContext context) {
@@ -200,120 +235,70 @@ class _GreetingCard extends StatelessWidget {
       today = DateFormat('d/M').format(DateTime.now());
     }
     return Container(
-      clipBehavior: Clip.antiAlias,
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
         gradient: AppGradients.greeting,
         borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.border),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // L'anneau décoratif en bas à droite.
-          Positioned(
-            right: -34,
-            bottom: -48,
-            child: IgnorePointer(
-              child: Container(
-                width: 130,
-                height: 130,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    width: 24,
-                    color: AppColors.accentPrimary.withValues(alpha: 0.06),
-                  ),
-                ),
-              ),
+          Text(
+            '${l.homeHelloOverline.toUpperCase()} • ${today.toUpperCase()}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11,
+              letterSpacing: 0.7,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textMuted,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          const SizedBox(height: 6),
+          Text(
+            firstName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 32,
+              height: 1.15,
+              letterSpacing: -0.6,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l.homeTagline,
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 14),
+          Material(
+            color: AppColors.surface,
+            shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: onSearch,
+              child: SizedBox(
+                height: 48,
+                child: Row(
                   children: [
-                    Text(
-                      l.homeHelloOverline.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        letterSpacing: 1.3,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accentPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
+                    Icon(Icons.search, color: AppColors.textMuted),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        today.toUpperCase(),
-                        textAlign: TextAlign.end,
+                        l.homeSearchEverything,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          letterSpacing: 0.4,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.accentPrimaryDark,
-                        ),
+                        style: TextStyle(color: AppColors.textMuted),
                       ),
                     ),
+                    const SizedBox(width: 14),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            firstName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 32,
-                              height: 1.1,
-                              letterSpacing: -0.7,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l.homeTagline,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _RoundAction(
-                      icon: Icons.search,
-                      tooltip: l.homeSearchHint,
-                      onTap: onSearch,
-                    ),
-                    const SizedBox(width: 8),
-                    _RoundAction(
-                      icon: Icons.notifications_none_outlined,
-                      tooltip: l.notifCenterTitle,
-                      onTap: onNotifications,
-                      badge: unread,
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -322,140 +307,574 @@ class _GreetingCard extends StatelessWidget {
   }
 }
 
-/// Une section de l'Accueil : UNE carte qui porte son propre en-tête
-/// (maquette APP-1) — rond teinté, titre, « Tout voir ». La carte des
-/// Discussions est terracotta, les autres blanches.
-class _HomeSection extends StatelessWidget {
-  const _HomeSection({
-    required this.icon,
-    required this.title,
-    required this.onSeeAll,
-    required this.child,
-    this.subtitle,
-    this.accent = false,
-  });
+/// « Besoin d'un coup de main ? » — Baba en un geste (ambre, jamais violet).
+class _BabaBanner extends StatelessWidget {
+  const _BabaBanner({required this.onTap});
 
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onSeeAll;
-  final Widget child;
-  final bool accent;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final ink = accent ? AppColors.neutralCreme : AppColors.textPrimary;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: accent ? null : AppColors.surface,
-          gradient: accent ? AppGradients.brand : null,
-          borderRadius: AppRadius.card,
-          boxShadow: accent ? AppElevation.brand : AppElevation.card,
+    final l = L.of(context);
+    return Material(
+      color: AppColors.isDark
+          ? AppColors.brandOr.withValues(alpha: 0.16)
+          : const Color(0xFFFEF3C7),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: AppColors.isDark
+              ? AppColors.brandOr.withValues(alpha: 0.4)
+              : const Color(0xFFFDE68A),
         ),
-        child: Stack(
-          children: [
-            if (accent)
-              // Anneau clair en haut à droite (maquette `.discussion-card`).
-              Positioned(
-                top: -90,
-                right: -90,
-                child: IgnorePointer(
-                  child: Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        width: 30,
-                        color: Colors.white.withValues(alpha: 0.06),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: AppColors.brandOr,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.auto_awesome, color: Color(0xFF3B2A00)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.homeBabaTitle,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
+                    Text(
+                      l.homeBabaSub,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 8, 18),
+              Icon(Icons.chevron_right, color: AppColors.textMuted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Un titre de section, avec un sous-titre ou une action à droite.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.dot = false,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final bool dot;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (dot) ...[
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(bottom: 7),
+            decoration: const BoxDecoration(
+              color: AppColors.accentPrimary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 20,
+                  height: 1.3,
+                  letterSpacing: -0.2,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                ),
+            ],
+          ),
+        ),
+        ?trailing,
+      ],
+    ),
+  );
+}
+
+/// Carte blanche « Terre de Confiance » : 18 pt, filet, ombre double.
+class _Card extends StatelessWidget {
+  const _Card({required this.child, this.onTap, this.padding});
+
+  final Widget child;
+  final VoidCallback? onTap;
+  final EdgeInsets? padding;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: AppRadius.card,
+      border: Border.all(color: AppColors.border),
+      boxShadow: AppElevation.card,
+    ),
+    child: Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: AppRadius.card,
+        onTap: onTap,
+        child: Padding(
+          padding: padding ?? const EdgeInsets.all(16),
+          child: child,
+        ),
+      ),
+    ),
+  );
+}
+
+/// Pastille de statut (« 65 % », « En livraison »).
+class _Chip extends StatelessWidget {
+  const _Chip(this.label, {required this.background, required this.ink});
+
+  final String label;
+  final Color background;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    decoration: BoxDecoration(
+      color: AppColors.isDark ? ink.withValues(alpha: 0.2) : background,
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: AppColors.isDark ? AppColors.textPrimary : ink,
+      ),
+    ),
+  );
+}
+
+/// Surtitre coloré + icône teintée, en tête des cartes de module.
+class _Overline extends StatelessWidget {
+  const _Overline({
+    required this.icon,
+    required this.tint,
+    required this.ink,
+    required this.overline,
+    required this.title,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final Color tint;
+  final Color ink;
+  final String overline;
+  final String title;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.isDark ? ink.withValues(alpha: 0.2) : tint,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, size: 22, color: ink),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              overline,
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 0.7,
+                fontWeight: FontWeight.w700,
+                color: ink,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+      ?trailing,
+    ],
+  );
+}
+
+/// « En cours » : la cagnotte ouverte et la commande Honam qui avance.
+/// Rien quand il n'y a rien à suivre — l'Accueil ne montre pas de vide.
+class _InProgress extends ConsumerWidget {
+  const _InProgress({required this.kory, required this.honam});
+
+  final bool kory;
+  final bool honam;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final pots = kory
+        ? (ref.watch(koryPotsProvider).valueOrNull ?? const <KoryPot>[])
+        : const <KoryPot>[];
+    final orders = honam
+        ? (ref.watch(honamOrdersProvider).valueOrNull ?? const <HonamOrder>[])
+        : const <HonamOrder>[];
+    final pot = pots.where((p) => p.isOpen).firstOrNull;
+    final order = orders.where((o) => !o.isFinished).firstOrNull;
+    final count = (pot == null ? 0 : 1) + (order == null ? 0 : 1);
+    if (count == 0) return const SizedBox.shrink();
+    return Column(
+      children: [
+        _SectionHeader(
+          title: l.homeInProgress,
+          dot: true,
+          trailing: Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(
+              l.homeAlertsActive(count),
+              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+            ),
+          ),
+        ),
+        if (pot != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: _KoryInProgress(pot: pot),
+          ),
+        if (order != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: _HonamInProgress(order: order),
+          ),
+      ],
+    );
+  }
+}
+
+class _KoryInProgress extends StatelessWidget {
+  const _KoryInProgress({required this.pot});
+
+  final KoryPot pot;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final progress = pot.progress;
+    return _Card(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Overline(
+            icon: Icons.savings_outlined,
+            tint: AppColors.terracottaTint,
+            ink: AppColors.accentPrimaryDark,
+            overline: l.homeKoryInProgress,
+            title: pot.title,
+            trailing: progress == null
+                ? null
+                : _Chip(
+                    '${(progress * 100).round()} %',
+                    background: AppColors.terracottaTint,
+                    ink: AppColors.accentPrimaryDark,
+                  ),
+          ),
+          if (progress != null) ...[
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 7,
+                backgroundColor: AppColors.surfaceElevated,
+                color: AppColors.accentPrimary,
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                formatFcfa(pot.confirmedTotal),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const Spacer(),
+              if (pot.goalAmount != null)
+                Text(
+                  l.koryOnGoal(formatFcfa(pot.goalAmount!)),
+                  style: TextStyle(color: AppColors.textMuted),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(
+                Icons.verified_user_outlined,
+                size: 16,
+                color: AppColors.feedbackSuccess,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  l.homeKoryNoMoney,
+                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HonamInProgress extends StatelessWidget {
+  const _HonamInProgress({required this.order});
+
+  final HonamOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return _Card(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => HonamOrderScreen(orderId: order.id)),
+      ),
+      child: _Overline(
+        icon: Icons.delivery_dining_outlined,
+        tint: const Color(0xFFDCFCE7),
+        ink: AppColors.feedbackSuccess,
+        overline: l.homeHonamInProgress,
+        // Jamais un nom de médicament (HON-04) : la pharmacie et l'étape.
+        title: order.pharmacy?.name ?? l.navHonam,
+        trailing: _Chip(
+          honamStatusLabel(l, order.status),
+          background: const Color(0xFFFEF3C7),
+          ink: AppColors.warning,
+        ),
+      ),
+    );
+  }
+}
+
+/// Les dernières discussions, dans une carte blanche ; toucher ouvre la
+/// discussion directement.
+class _RecentDiscussions extends ConsumerWidget {
+  const _RecentDiscussions({required this.onSeeAll});
+
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final discussions =
+        (ref.watch(discussionsProvider).valueOrNull ??
+                const <ConversationSummary>[])
+            .where((d) => !d.isArchived)
+            .toList();
+    final unread = discussions.fold<int>(0, (s, d) => s + d.unreadCount);
+    final recent = discussions.take(3).toList();
+    return Column(
+      children: [
+        _SectionHeader(
+          title: l.navChats,
+          trailing: TextButton(
+            onPressed: onSeeAll,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accentPrimaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll,
+                ),
+                const Icon(Icons.chevron_right, size: 18),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _Card(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            onTap: recent.isEmpty ? onSeeAll : null,
+            child: recent.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      l.homeNoChats,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      for (final (i, d) in recent.indexed) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            indent: 72,
+                            color: AppColors.border,
+                          ),
+                        _DiscussionRow(discussion: d),
+                      ],
+                    ],
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DiscussionRow extends ConsumerWidget {
+  const _DiscussionRow({required this.discussion});
+
+  final ConversationSummary discussion;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final d = discussion;
+    final last = d.lastMessage;
+    final unread = d.unreadCount > 0;
+    return InkWell(
+      onTap: () => openDiscussion(context, ref, d),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+        child: Row(
+          children: [
+            ContactAvatar(avatar: d.avatar, displayName: d.name, size: 44),
+            const SizedBox(width: 14),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: accent
-                              ? Colors.white.withValues(alpha: 0.16)
-                              : AppColors.terracottaTint,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          icon,
-                          size: 18,
-                          color: accent
-                              ? Colors.white
-                              : AppColors.accentPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: title,
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                  color: ink,
-                                ),
-                              ),
-                              if (subtitle != null)
-                                TextSpan(
-                                  text: ' · $subtitle',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    letterSpacing: 0.2,
-                                    color: accent
-                                        ? AppColors.neutralCreme.withValues(
-                                            alpha: 0.8,
-                                          )
-                                        : AppColors.textSecondary,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          maxLines: 2,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: accent
-                              ? AppColors.neutralCreme
-                              : AppColors.accentPrimary,
-                        ),
-                        onPressed: onSeeAll,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(L.of(context).homeSeeAll),
-                            const Icon(Icons.chevron_right, size: 18),
-                          ],
-                        ),
-                      ),
-                    ],
+                  Text(
+                    d.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: child,
-                  ),
+                  if (last != null)
+                    Text(
+                      last.displayTextOf(l),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: unread
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
                 ],
               ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (last != null)
+                  Text(
+                    DateFormat.Hm().format(last.createdAt.toLocal()),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: unread ? FontWeight.w600 : FontWeight.w400,
+                      color: unread
+                          ? AppColors.accentPrimary
+                          : AppColors.textMuted,
+                    ),
+                  ),
+                if (unread) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${d.unreadCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -464,467 +883,187 @@ class _HomeSection extends StatelessWidget {
   }
 }
 
-/// Rond beige de 44 pt (recherche, notifications) — maquette APP-1.
-class _RoundAction extends StatelessWidget {
-  const _RoundAction({
+/// L'action d'une carte de service : pleine (Kory) ou beige (Honam).
+class _ServiceCta {
+  const _ServiceCta.primary({
+    required this.label,
     required this.icon,
-    required this.tooltip,
-    required this.onTap,
-    this.badge = 0,
-  });
+    required this.onPressed,
+  }) : primary = true,
+       iconColor = null;
 
-  /// Pastille de non-lus (maquette : rond terre cuite, chiffre blanc).
-  final int badge;
+  const _ServiceCta.secondary({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.iconColor,
+  }) : primary = false;
+
+  final String label;
   final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final button = Tooltip(
-      message: tooltip,
-      child: Material(
-        color: AppColors.isDark
-            ? AppColors.surfaceElevated
-            : Colors.white.withValues(alpha: 0.82),
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: SizedBox(
-            width: 44,
-            height: 44,
-            child: Icon(icon, size: 22, color: AppColors.textPrimary),
-          ),
-        ),
-      ),
-    );
-    if (badge <= 0) return button;
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        button,
-        Positioned(
-          right: -2,
-          top: -2,
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: AppColors.accentPrimary,
-              borderRadius: BorderRadius.circular(9),
-              border: Border.all(color: AppColors.background, width: 2),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              badge > 9 ? '9+' : '$badge',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  final VoidCallback onPressed;
+  final bool primary;
+  final Color? iconColor;
 }
 
-/// Tuile intérieure d'une section (maquette : `rounded-lg`, fond beige).
-class _InnerTile extends StatelessWidget {
-  const _InnerTile({required this.child, this.onDark = false, this.onTap});
-
-  final Widget child;
-  final bool onDark;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: onDark
-          ? const Color(
-              0x33301508,
-            ) // rgba(48,21,10,.2) — maquette `.mini-thread`
-          : AppColors.surfaceElevated,
-      borderRadius: BorderRadius.circular(AppRadius.inner),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.inner),
-        onTap: onTap,
-        child: Padding(padding: const EdgeInsets.all(12), child: child),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
-    child: Text(
-      text,
-      style: TextStyle(
-        fontSize: 20,
-        height: 1.2,
-        letterSpacing: -0.3,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
-      ),
-    ),
-  );
-}
-
-/// Carte de service de l'Accueil — inspirée des cartes « gobox » : une
-/// grande icône teintée, le nom et sa promesse, une action directe en pied
-/// de carte, un chevron qui dit « on peut entrer ».
+/// Carte de service : icône teintée, surtitre, nom en grand, promesse, et
+/// une action directe en pleine largeur — sans écran intermédiaire.
 class _ServiceCard extends StatelessWidget {
   const _ServiceCard({
     required this.icon,
     required this.tint,
     required this.ink,
+    required this.overline,
     required this.title,
-    required this.subtitle,
     required this.pitch,
-    required this.ctaIcon,
-    required this.ctaLabel,
     required this.onTap,
-    this.onCta,
+    this.cta,
   });
 
   final IconData icon;
   final Color tint;
   final Color ink;
+  final String overline;
   final String title;
-  final String subtitle;
   final String pitch;
-  final IconData ctaIcon;
-  final String ctaLabel;
   final VoidCallback onTap;
-  final VoidCallback? onCta;
+  final _ServiceCta? cta;
 
   @override
   Widget build(BuildContext context) {
-    final tileTint = AppColors.isDark ? ink.withValues(alpha: 0.18) : tint;
+    final action = cta;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: AppRadius.card,
-          boxShadow: AppElevation.card,
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: AppRadius.card,
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 12, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: tileTint,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Icon(icon, size: 28, color: ink),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: title,
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -0.2,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: '  ·  $subtitle',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              pitch,
-                              style: TextStyle(
-                                fontSize: 14,
-                                height: 1.35,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.chevron_right, color: AppColors.textMuted),
-                    ],
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: _Card(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.isDark ? ink.withValues(alpha: 0.2) : tint,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  const SizedBox(height: 12),
-                  Divider(height: 1, color: AppColors.border),
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.accentPrimaryDark,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onPressed: onCta ?? onTap,
-                      icon: Icon(ctaIcon, size: 18),
-                      label: Text(ctaLabel),
-                    ),
-                  ),
-                ],
+                  child: Icon(icon, size: 26, color: ink),
+                ),
+                const Spacer(),
+                if (action == null)
+                  Icon(Icons.chevron_right, color: AppColors.textMuted),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              overline,
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 0.7,
+                fontWeight: FontWeight.w700,
+                color: ink,
               ),
             ),
-          ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 22,
+                height: 1.2,
+                letterSpacing: -0.3,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              pitch,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.4,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            if (action != null) ...[
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: action.primary
+                        ? AppColors.accentPrimary
+                        : AppColors.surfaceElevated,
+                    foregroundColor: action.primary
+                        ? Colors.white
+                        : AppColors.textPrimary,
+                    shape: const StadiumBorder(),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: action.onPressed,
+                  icon: Icon(action.icon, size: 20, color: action.iconColor),
+                  label: Text(action.label),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 }
 
-/// « En cours » : la cagnotte ouverte et la commande Honam qui avance.
-/// Rien quand il n'y a rien à suivre — l'Accueil ne montre pas de vide.
-class _InProgress extends ConsumerWidget {
-  const _InProgress({
-    required this.kory,
-    required this.honam,
-    required this.onOpenKory,
-    required this.onOpenHonam,
-  });
-
-  final bool kory;
-  final bool honam;
-  final VoidCallback onOpenKory;
-  final VoidCallback onOpenHonam;
+/// Le rappel du chiffrement, en bas de l'Accueil.
+class _TrustCard extends StatelessWidget {
+  const _TrustCard();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pots = kory
-        ? (ref.watch(koryPotsProvider).valueOrNull ?? const [])
-        : const [];
-    final orders = honam
-        ? (ref.watch(honamOrdersProvider).valueOrNull ?? const [])
-        : const [];
-    final hasPot = pots.any((p) => p.isOpen);
-    final hasOrder = orders.any((o) => !o.isFinished);
-    if (!hasPot && !hasOrder) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionTitle(L.of(context).homeInProgress),
-        if (hasPot) _KoryCard(onSeeAll: onOpenKory),
-        if (hasOrder) _HonamCard(onSeeAll: onOpenHonam),
-      ],
-    );
-  }
-}
-
-class _DiscussionsCard extends ConsumerWidget {
-  const _DiscussionsCard({required this.onSeeAll});
-
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = L.of(context);
-    final discussions = ref.watch(discussionsProvider).valueOrNull ?? const [];
-    final recent = discussions.take(2).toList();
-
-    return _HomeSection(
-      icon: Icons.forum_outlined,
-      title: l.navChats,
-      accent: true,
-      onSeeAll: onSeeAll,
-      child: recent.isEmpty
-          ? _InnerTile(
-              onDark: true,
-              onTap: onSeeAll,
-              child: Text(
-                l.homeNoChats,
-                style: const TextStyle(color: AppColors.neutralCreme),
-              ),
-            )
-          : Column(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 22, 18, 22),
+      decoration: BoxDecoration(
+        gradient: AppGradients.certified,
+        borderRadius: AppRadius.card,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final d in recent)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: _InnerTile(
-                      onDark: true,
-                      // Toucher une bulle ouvre LA discussion, directement.
-                      onTap: () => openDiscussion(context, ref, d),
-                      child: Row(
-                        children: [
-                          ContactAvatar(
-                            avatar: d.avatar,
-                            displayName: d.displayName,
-                            size: 44,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  d.displayName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: AppColors.neutralCreme,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                if (d.lastMessage != null)
-                                  Text(
-                                    d.lastMessage!.displayTextOf(l),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: AppColors.neutralCreme.withValues(
-                                        alpha: 0.85,
-                                      ),
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          if (d.unreadCount > 0)
-                            Container(
-                              constraints: const BoxConstraints(
-                                minWidth: 20,
-                                minHeight: 20,
-                              ),
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                              ),
-                              decoration: const BoxDecoration(
-                                color: AppColors.neutralCreme,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                '${d.unreadCount}',
-                                style: const TextStyle(
-                                  color: AppColors.accentPrimary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
+                Text(
+                  l.homeTrustOverline,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.brandOr,
                   ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l.homeTrustBody,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFFFF9E5),
+                  ),
+                ),
               ],
             ),
-    );
-  }
-}
-
-class _KoryCard extends ConsumerWidget {
-  const _KoryCard({required this.onSeeAll});
-
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    final pots = ref.watch(koryPotsProvider).valueOrNull ?? const [];
-    final open = pots.where((p) => p.isOpen).toList();
-
-    return _HomeSection(
-      icon: Icons.savings_outlined,
-      title: l.navKory,
-      subtitle: l.korySubtitle,
-      onSeeAll: onSeeAll,
-      child: open.isEmpty
-          ? _InnerTile(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.koryNoMoney,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  ModuleActionButton(
-                    label: l.koryCreate,
-                    icon: Icons.add,
-                    expanded: false,
-                    onPressed: () => openKoryCreate(context, ref),
-                  ),
-                ],
-              ),
-            )
-          : KoryPotCard(pot: open.first),
-    );
-  }
-}
-
-/// La carte Honam : la commande en cours, ou l'action de départ (NAV-09).
-/// Jamais un nom de médicament (HON-04).
-class _HonamCard extends ConsumerWidget {
-  const _HonamCard({required this.onSeeAll});
-
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    final orders = ref.watch(honamOrdersProvider).valueOrNull ?? const [];
-    final current = orders.where((o) => !o.isFinished).toList();
-    return _HomeSection(
-      icon: Icons.local_pharmacy_outlined,
-      title: l.navHonam,
-      subtitle: l.honamSubtitle,
-      onSeeAll: onSeeAll,
-      child: current.isEmpty
-          ? SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.document_scanner_outlined),
-                label: Text(l.honamSend),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const HonamSendScreen()),
-                ),
-              ),
-            )
-          : HonamOrderCard(order: current.first),
+          ),
+          const SizedBox(width: 12),
+          const Icon(Icons.lock_outline, color: AppColors.brandOr, size: 28),
+        ],
+      ),
     );
   }
 }

@@ -3255,5 +3255,19 @@
   "storageCallSaverSub": "Qualité réduite, appel plus stable",
   "storagePokouUses": "Pokou · {size}",
   "storageOtherDiscussion": "Autres fichiers",
-  "callReconnecting": "Reconnexion…"
+  "callReconnecting": "Reconnexion…",
+  "homeSearchEverything": "Rechercher un contact, un service, une annonce",
+  "homeBabaTitle": "Besoin d’un coup de main ?",
+  "homeBabaSub": "Pose ta question à Baba, il s’occupe du reste.",
+  "homeAlertsActive": "{count, plural, =1{1 alerte active} other{{count} alertes actives}}",
+  "homeSeeAllUnread": "Tout voir ({count} non lus)",
+  "homeServicesSub": "Des services simples, pensés pour ton quotidien.",
+  "homeKoryOverline": "CAGNOTTES & TONTINES",
+  "homeHonamOverline": "« AIDE-MOI »",
+  "homeAssimeOverline": "« AU MARCHÉ »",
+  "homeTrustOverline": "CONFIANCE ABSOLUE",
+  "homeTrustBody": "Tes données et échanges sont chiffrés de bout en bout.",
+  "homeKoryInProgress": "KORY • CAGNOTTE",
+  "homeHonamInProgress": "HONAM • SANTÉ",
+  "homeKoryNoMoney": "Pokou ne touche pas l’argent"
 }
