@@ -12,6 +12,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../contacts/data/contact_model.dart';
 import '../../contacts/presentation/contacts_controller.dart';
+import '../data/call_repository.dart';
 import 'call_controller.dart';
 import 'call_screen.dart';
 import 'call_session.dart';
@@ -21,6 +22,11 @@ import '../../../core/widgets/verified_badge.dart';
 /// Plein écran "appel entrant" — poussé par [callSignalingProvider] dès
 /// qu'un événement `call:invite` arrive, quel que soit l'écran affiché.
 class IncomingCallScreen extends ConsumerStatefulWidget {
+  /// Tests uniquement : remplace l'écran d'appel ouvert en décrochant, pour
+  /// ne pas démarrer un vrai moteur LiveKit dans un test d'interface.
+  @visibleForTesting
+  static Widget Function(Future<CallToken> pending)? debugCallScreenOverride;
+
   const IncomingCallScreen({
     super.key,
     required this.room,
@@ -78,6 +84,7 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     final current = activeCall.value;
     return current != null && !current.ended && current.roomName != widget.room;
   }
+
   late final RingtonePlayer _ringtonePlayer =
       widget.ringtonePlayer ?? RingtonePlayer();
 
@@ -162,11 +169,43 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
         previous != null && !previous.ended && previous.roomName != widget.room;
     try {
       final calls = ref.read(callRepositoryProvider);
-      final token = await calls.joinCall(
-        widget.room,
-        inviter: widget.fromUserId,
+      // Le jeton est DEMANDÉ ici mais pas attendu : l'écran d'appel s'ouvre
+      // tout de suite (« Connexion… ») au lieu de laisser l'écran de
+      // sonnerie figé pendant l'aller-retour serveur et l'ouverture de la
+      // clé. CallSession attend ce jeton avant d'entrer dans le salon.
+      // Future.sync : une erreur levée tout de suite passe par le même
+      // chemin qu'une erreur réseau (l'écran d'appel l'affiche).
+      final pending = Future.sync(
+        () => calls.joinCall(widget.room, inviter: widget.fromUserId),
       );
-      if (!mounted) return;
+      unawaited(
+        pending.then(
+          (_) => calls
+              .signal(
+                room: widget.room,
+                targetUserId: widget.fromUserId,
+                event: 'accept',
+              )
+              .catchError((Object error) {
+                debugPrint('[Calls] accept signal failed: $error');
+              }),
+          onError: (Object error) {
+            // Clé illisible ici : l'appelant doit l'apprendre, sinon il
+            // sonnerait dans le vide jusqu'au délai de non-réponse.
+            if (error is CallEncryptionException) {
+              unawaited(
+                calls
+                    .signal(
+                      room: widget.room,
+                      targetUserId: widget.fromUserId,
+                      event: 'decline',
+                    )
+                    .catchError((_) {}),
+              );
+            }
+          },
+        ),
+      );
       final navigator = Navigator.of(context);
       if (switching) {
         // 1. Retirer l'écran de l'ancien appel (il ne doit plus réagir).
@@ -182,38 +221,23 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
       }
       navigator.pushReplacement(
         MaterialPageRoute(
-          builder: (_) => CallScreen(
-            livekitUrl: token.livekitUrl,
-            token: token.token,
-            room: token.room,
-            // Dans un appel de groupe, raccrocher doit se signaler à TOUS les
-            // participants, pas seulement à celui qui a appelé — le serveur
-            // renvoie la liste à jour en rejoignant.
-            otherParticipantIds: token.participantIds.isEmpty
-                ? [widget.fromUserId]
-                : token.participantIds,
-            startWithVideo: widget.isVideo,
-            groupId: widget.groupId,
-            // On vient d'accepter : le correspondant est déjà connecté (ou en
-            // train de l'être) au salon, ce n'est pas un nouvel appel sortant
-            // qui sonne — jamais de ringback ici (voir CallScreen.joiningExistingCall).
-            joiningExistingCall: true,
-          ),
+          builder: (_) =>
+              IncomingCallScreen.debugCallScreenOverride?.call(pending) ??
+              CallScreen(
+                livekitUrl: '',
+                token: '',
+                room: widget.room,
+                pendingJoin: pending,
+                // Mis à jour par la session quand le serveur renvoie la liste
+                // complète (appel de groupe).
+                otherParticipantIds: [widget.fromUserId],
+                startWithVideo: widget.isVideo,
+                groupId: widget.groupId,
+                // On vient d'accepter : jamais de ringback ici (voir
+                // CallScreen.joiningExistingCall).
+                joiningExistingCall: true,
+              ),
         ),
-      );
-      // L'API du jeton a déjà inscrit l'invité comme participant accepté.
-      // La notification WebSocket complète l'état chez l'appelant, mais ne
-      // doit pas retarder l'ouverture du média si son réseau est lent.
-      unawaited(
-        calls
-            .signal(
-              room: widget.room,
-              targetUserId: widget.fromUserId,
-              event: 'accept',
-            )
-            .catchError((Object error) {
-              debugPrint('[Calls] accept signal failed: $error');
-            }),
       );
     } on CallEncryptionException {
       // La clé ne s'ouvre pas ici : on le dit à l'appelant, qui sinon
@@ -325,7 +349,10 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
               const SizedBox(height: 16),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 32),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white12,
                   borderRadius: BorderRadius.circular(12),

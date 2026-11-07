@@ -47,7 +47,8 @@ void main() {
       expect(
         code.contains('message.hashCode'),
         isFalse,
-        reason: 'aucune notification d\'appel ne doit être identifiée par '
+        reason:
+            'aucune notification d\'appel ne doit être identifiée par '
             'le hash du message — ni en arrière-plan, ni au premier plan',
       );
     });
@@ -65,7 +66,8 @@ void main() {
       expect(
         main.contains('nativeCallGateProvider'),
         isTrue,
-        reason: 'sans cette observation, répondre depuis la notification '
+        reason:
+            'sans cette observation, répondre depuis la notification '
             'ouvre Pokou sur l\'écran d\'accueil et perd l\'appel',
       );
     });

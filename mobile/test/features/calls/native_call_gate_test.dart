@@ -45,10 +45,7 @@ void main() {
       final decision = NativeCallGateDecision();
 
       expect(decision.roomToJoin(_call(NativeCallState.answering)), isNull);
-      expect(
-        decision.roomToJoin(_call(NativeCallState.connecting)),
-        'salon-1',
-      );
+      expect(decision.roomToJoin(_call(NativeCallState.connecting)), 'salon-1');
       expect(decision.roomToJoin(_call(NativeCallState.connected)), isNull);
     });
 

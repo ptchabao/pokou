@@ -16,6 +16,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../../messaging/presentation/conversation_screen.dart';
+import '../data/call_repository.dart';
 import 'call_controller.dart';
 import 'call_session.dart';
 import 'ringtone_player.dart';
@@ -50,8 +51,12 @@ class CallScreen extends ConsumerStatefulWidget {
     this.groupId,
     this.groupMembers = const [],
     this.joiningExistingCall = false,
+    this.pendingJoin,
     @visibleForTesting this.ringtonePlayer,
   });
+
+  /// Voir CallSession.pendingJoin : l'écran s'ouvre dès qu'on décroche.
+  final Future<CallToken>? pendingJoin;
 
   final String livekitUrl;
   final String token;
@@ -104,6 +109,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
       CallScreen.openRoutes.add(route);
     }
   }
+
   StreamSubscription<CallNotice>? _noticeSubscription;
   StreamSubscription<CallReaction>? _reactionSubscription;
   Timer? _reactionTimer;
@@ -133,6 +139,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
         groupId: widget.groupId,
         groupMembers: widget.groupMembers,
         joiningExistingCall: widget.joiningExistingCall,
+        pendingJoin: widget.pendingJoin,
         repository: ref.read(callRepositoryProvider),
         ws: ref.read(wsClientProvider),
         ringtonePlayer: widget.ringtonePlayer,

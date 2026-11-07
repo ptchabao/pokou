@@ -107,6 +107,14 @@ Widget _buildApp({
 }
 
 void main() {
+  setUp(() {
+    IncomingCallScreen.debugCallScreenOverride = (pending) {
+      pending.ignore();
+      return const Scaffold(body: Text('ecran-appel'));
+    };
+  });
+  tearDown(() => IncomingCallScreen.debugCallScreenOverride = null);
+
   group('IncomingCallScreen — RingtonePlayer', () {
     testWidgets('joue la sonnerie en boucle dès l’ouverture de l’écran', (
       tester,
@@ -150,7 +158,9 @@ void main() {
         await tester.pump();
 
         expect(player.stopCalls, greaterThanOrEqualTo(1));
-        expect(find.byType(IncomingCallScreen), findsOneWidget);
+        // L'écran d'appel s'ouvre AUSSITÔT (« Connexion… »), sans attendre
+        // la réponse du serveur : l'écran de sonnerie ne reste plus figé.
+        expect(find.text('ecran-appel', skipOffstage: false), findsOneWidget);
       },
     );
 

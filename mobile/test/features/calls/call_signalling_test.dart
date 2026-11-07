@@ -47,18 +47,21 @@ void main() {
       );
     });
 
-    test('appel établi : un départ ne fait pas quitter s\'il reste quelqu\'un', () {
-      expect(
-        shouldLeaveOnRemoteSignal(
-          someoneJoined: true,
-          fromUserId: 3,
-          remoteInRoom: const [2, 3],
-          invitees: const [2, 3],
-          gone: {3},
-        ),
-        isFalse,
-      );
-    });
+    test(
+      'appel établi : un départ ne fait pas quitter s\'il reste quelqu\'un',
+      () {
+        expect(
+          shouldLeaveOnRemoteSignal(
+            someoneJoined: true,
+            fromUserId: 3,
+            remoteInRoom: const [2, 3],
+            invitees: const [2, 3],
+            gone: {3},
+          ),
+          isFalse,
+        );
+      },
+    );
 
     test('appel établi : le dernier départ fait quitter', () {
       expect(
@@ -91,7 +94,11 @@ void main() {
   group('à qui envoyer `end` en raccrochant', () {
     test('en 1:1, à l\'autre', () {
       expect(
-        endSignalTargets(participantIds: const [2], inRoom: const [2], isGroup: false),
+        endSignalTargets(
+          participantIds: const [2],
+          inRoom: const [2],
+          isGroup: false,
+        ),
         [2],
       );
     });
@@ -107,16 +114,19 @@ void main() {
       );
     });
 
-    test('groupe qui se termine avec moi : à tout le monde, pour faire taire les sonneries', () {
-      expect(
-        endSignalTargets(
-          participantIds: const [2, 3, 4],
-          inRoom: const [2],
-          isGroup: true,
-        ),
-        [2, 3, 4],
-      );
-    });
+    test(
+      'groupe qui se termine avec moi : à tout le monde, pour faire taire les sonneries',
+      () {
+        expect(
+          endSignalTargets(
+            participantIds: const [2, 3, 4],
+            inRoom: const [2],
+            isGroup: true,
+          ),
+          [2, 3, 4],
+        );
+      },
+    );
 
     test('personne n\'a encore décroché : à tous les invités', () {
       expect(

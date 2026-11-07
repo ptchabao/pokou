@@ -116,6 +116,7 @@ class CallSession extends ChangeNotifier {
     this.groupId,
     this.groupMembers = const [],
     this.joiningExistingCall = false,
+    this.pendingJoin,
     RingtonePlayer? ringtonePlayer,
     NativeCallBridge? nativeBridge,
   }) : _nativeBridge = nativeBridge,
@@ -127,8 +128,15 @@ class CallSession extends ChangeNotifier {
        cameraEnabled = startWithVideo,
        speakerOn = startWithVideo;
 
-  final String livekitUrl;
-  final String token;
+  /// Adresse et jeton du salon. Vides tant que [pendingJoin] n'a pas
+  /// répondu : on DÉCROCHE d'abord (l'écran d'appel s'ouvre aussitôt), on
+  /// obtient le jeton ensuite, pendant que l'écran affiche « Connexion… ».
+  String livekitUrl;
+  String token;
+
+  /// Le jeton demandé au moment où l'on décroche (voir
+  /// IncomingCallScreen._accept). `null` : il est déjà dans [token].
+  final Future<CallToken>? pendingJoin;
   final String roomName;
   final bool startWithVideo;
   final int? groupId;
@@ -329,28 +337,50 @@ class CallSession extends ChangeNotifier {
     _listener!.on<DataReceivedEvent>(_onDataReceived);
 
     try {
+      final pending = pendingJoin;
+      if (pending != null) {
+        final joined = await pending;
+        livekitUrl = joined.livekitUrl;
+        token = joined.token;
+        if (joined.participantIds.isNotEmpty) {
+          participantIds
+            ..clear()
+            ..addAll(joined.participantIds);
+        }
+      }
       if (_isGroup && CallKeys.of(roomName) == null) {
         throw const CallEncryptionException(
           'un appel de groupe ne peut pas rejoindre sans clé',
         );
       }
+      // En PARALLÈLE : la clé de chiffrement du salon et le routage audio
+      // ne dépendent pas l'un de l'autre.
+      final options = _encryptedOptions();
       await _applySpeaker();
       await lkRoom.connect(
         livekitUrl,
         token,
+        // Le micro est publié PENDANT la connexion, et non après : un
+        // aller-retour de moins avant que l'autre nous entende.
+        fastConnectOptions: FastConnectOptions(
+          microphone: const TrackOption(enabled: true),
+        ),
         // Le chiffrement ne peut se régler qu'ici, et non à la création de
         // `lkRoom` : la clé LiveKit se prépare de façon asynchrone, alors
         // que l'écran lit `lkRoom` dès sa première image. LiveKit marque ce
         // paramètre déprécié, mais il reste le seul point d'entrée
         // asynchrone, et le seul endroit où le SDK lit ces options.
         // ignore: deprecated_member_use
-        roomOptions: await _encryptedOptions(),
+        roomOptions: await options,
       );
       // Quelqu'un était DÉJÀ dans le salon : on rejoint une conversation
       // active plutôt que d'appeler dans le vide (filet pour les points
       // d'entrée qui ne peuvent pas renseigner `joiningExistingCall`).
       if (lkRoom.remoteParticipants.isNotEmpty) _markJoined();
-      await lkRoom.localParticipant?.setMicrophoneEnabled(true);
+      // Filet : si la publication rapide n'a pas pris, on l'active ici.
+      if (lkRoom.localParticipant?.isMicrophoneEnabled() != true) {
+        await lkRoom.localParticipant?.setMicrophoneEnabled(true);
+      }
       if (startWithVideo) {
         await lkRoom.localParticipant?.setCameraEnabled(
           true,
@@ -366,6 +396,9 @@ class CallSession extends ChangeNotifier {
     } catch (_) {
       unawaited(_ringtonePlayer.stop());
       joinFailed = true;
+      // L'écran affiche l'échec ; la session, elle, libère tout de suite le
+      // salon (et sa minuterie interne), le micro et l'écoute des signaux.
+      unawaited(_releaseAfterFailedJoin());
     } finally {
       connecting = false;
       _changed();
@@ -535,6 +568,17 @@ class CallSession extends ChangeNotifier {
     return lkRoom.roomOptions.copyWith(
       encryption: E2EEOptions(keyProvider: provider),
     );
+  }
+
+  Future<void> _releaseAfterFailedJoin() async {
+    _noAnswerTimer?.cancel();
+    await _signalSubscription?.cancel();
+    CallKeys.forget(roomName);
+    if (identical(activeCall.value, this)) activeCall.value = null;
+    try {
+      await _listener?.dispose();
+      await lkRoom.dispose();
+    } catch (_) {}
   }
 
   Future<void> _end() async {
