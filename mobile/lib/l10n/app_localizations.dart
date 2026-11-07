@@ -11316,7 +11316,7 @@ abstract class L {
   /// No description provided for @homeKoryPitch.
   ///
   /// In fr, this message translates to:
-  /// **'Collectez à plusieurs pour un projet, un événement ou une tontine.'**
+  /// **'Collecte à plusieurs pour un projet, un événement ou une tontine.'**
   String get homeKoryPitch;
 
   /// No description provided for @homeHonamPitch.

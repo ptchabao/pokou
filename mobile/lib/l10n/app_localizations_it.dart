@@ -6494,7 +6494,7 @@ class LIt extends L {
 
   @override
   String get homeKoryPitch =>
-      'Raccogliete insieme per un progetto, un evento o una tontina.';
+      'Raccogli con altri per un progetto, un evento o una tontina.';
 
   @override
   String get homeHonamPitch =>

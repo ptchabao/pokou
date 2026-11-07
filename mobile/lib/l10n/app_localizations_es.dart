@@ -6478,7 +6478,7 @@ class LEs extends L {
 
   @override
   String get homeKoryPitch =>
-      'Reúnan dinero para un proyecto, un evento o una tontina.';
+      'Reúne dinero con otros para un proyecto, un evento o una tontina.';
 
   @override
   String get homeHonamPitch =>

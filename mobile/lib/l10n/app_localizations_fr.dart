@@ -6496,7 +6496,7 @@ class LFr extends L {
 
   @override
   String get homeKoryPitch =>
-      'Collectez à plusieurs pour un projet, un événement ou une tontine.';
+      'Collecte à plusieurs pour un projet, un événement ou une tontine.';
 
   @override
   String get homeHonamPitch =>
