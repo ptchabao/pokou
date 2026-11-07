@@ -93,9 +93,11 @@ class ComposerInputPill extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             // La pilule se détache de la barre par le contraste des deux
             // surfaces ; l'anneau ne dit que « c'est ici qu'on tape ».
+            // Terre de Confiance : un filet au repos, 1,5 pt terre cuite
+            // quand on tape — sans halo bruyant.
             border: Border.all(
-              color: ring ? AppColors.chatActionGreen : Colors.transparent,
-              width: ring ? 2 : 1,
+              color: ring ? AppColors.chatActionGreen : AppColors.border,
+              width: ring ? 1.5 : 1,
             ),
             boxShadow: glow
                 ? [

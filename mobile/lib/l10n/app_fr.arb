@@ -3269,5 +3269,15 @@
   "homeTrustBody": "Tes données et échanges sont chiffrés de bout en bout.",
   "homeKoryInProgress": "KORY • CAGNOTTE",
   "homeHonamInProgress": "HONAM • SANTÉ",
-  "homeKoryNoMoney": "Pokou ne touche pas l’argent"
+  "homeKoryNoMoney": "Pokou ne touche pas l’argent",
+  "discussionsStatusesNews": "STATUTS & NOUVELLES",
+  "statusMyStatus": "Mon statut",
+  "babaAssistantChip": "ASSISTANT IA",
+  "babaTranslate": "Traduire",
+  "babaSummarize": "Résumer",
+  "babaAlwaysThere": "Toujours là pour traduire, résumer ou répondre à tes questions.",
+  "koryHeadline": "Kory · Le cauris",
+  "koryWalletChip": "WALLET À WALLET",
+  "koryNeverTouches": "Pokou ne touche jamais ton argent. Les contributions passent directement de wallet à wallet, sans intermédiaire.",
+  "koryMonthActivity": "ACTIVITÉ DU MOIS"
 }

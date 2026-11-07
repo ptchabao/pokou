@@ -7174,4 +7174,36 @@ class LAr extends L {
 
   @override
   String get homeKoryNoMoney => 'Pokou لا يلمس المال';
+
+  @override
+  String get discussionsStatusesNews => 'الحالات والأخبار';
+
+  @override
+  String get statusMyStatus => 'حالتي';
+
+  @override
+  String get babaAssistantChip => 'مساعد ذكي';
+
+  @override
+  String get babaTranslate => 'ترجمة';
+
+  @override
+  String get babaSummarize => 'تلخيص';
+
+  @override
+  String get babaAlwaysThere =>
+      'دائمًا هنا للترجمة والتلخيص والإجابة عن أسئلتك.';
+
+  @override
+  String get koryHeadline => 'Kory · الودعة';
+
+  @override
+  String get koryWalletChip => 'من محفظة إلى محفظة';
+
+  @override
+  String get koryNeverTouches =>
+      'لا يلمس Pokou مالك أبدًا. تنتقل المساهمات مباشرة من محفظة إلى محفظة دون وسيط.';
+
+  @override
+  String get koryMonthActivity => 'نشاط الشهر';
 }

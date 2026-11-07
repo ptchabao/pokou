@@ -25,6 +25,7 @@ import '../../../core/providers.dart';
 import '../../kory/presentation/kory_create_screen.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/notifications/active_conversation.dart';
+import '../../messaging/presentation/encryption_banner.dart';
 import '../../messaging/presentation/composer/composer_state.dart';
 import '../../messaging/presentation/composer/mic_button.dart';
 import '../../messaging/presentation/composer/recording_bar.dart';
@@ -2960,41 +2961,8 @@ class GroupEncryptionNotice extends StatelessWidget {
   const GroupEncryptionNotice({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 420),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.lock_outline,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  L.of(context).groupNotEncryptedNotice,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.35,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: EncryptionNotice(text: L.of(context).groupNotEncryptedNotice),
+  );
 }

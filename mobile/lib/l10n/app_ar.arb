@@ -2064,5 +2064,15 @@
   "homeTrustBody": "بياناتك ومحادثاتك مشفّرة من طرف إلى طرف.",
   "homeKoryInProgress": "KORY • صندوق",
   "homeHonamInProgress": "HONAM • صحة",
-  "homeKoryNoMoney": "Pokou لا يلمس المال"
+  "homeKoryNoMoney": "Pokou لا يلمس المال",
+  "discussionsStatusesNews": "الحالات والأخبار",
+  "statusMyStatus": "حالتي",
+  "babaAssistantChip": "مساعد ذكي",
+  "babaTranslate": "ترجمة",
+  "babaSummarize": "تلخيص",
+  "babaAlwaysThere": "دائمًا هنا للترجمة والتلخيص والإجابة عن أسئلتك.",
+  "koryHeadline": "Kory · الودعة",
+  "koryWalletChip": "من محفظة إلى محفظة",
+  "koryNeverTouches": "لا يلمس Pokou مالك أبدًا. تنتقل المساهمات مباشرة من محفظة إلى محفظة دون وسيط.",
+  "koryMonthActivity": "نشاط الشهر"
 }

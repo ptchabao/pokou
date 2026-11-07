@@ -2064,5 +2064,15 @@
   "homeTrustBody": "I tuoi dati e scambi sono cifrati end-to-end.",
   "homeKoryInProgress": "KORY • RACCOLTA",
   "homeHonamInProgress": "HONAM • SALUTE",
-  "homeKoryNoMoney": "Pokou non tocca il denaro"
+  "homeKoryNoMoney": "Pokou non tocca il denaro",
+  "discussionsStatusesNews": "STATI E NOVITÀ",
+  "statusMyStatus": "Il mio stato",
+  "babaAssistantChip": "ASSISTENTE IA",
+  "babaTranslate": "Traduci",
+  "babaSummarize": "Riassumi",
+  "babaAlwaysThere": "Sempre qui per tradurre, riassumere o rispondere alle tue domande.",
+  "koryHeadline": "Kory · La conchiglia cauri",
+  "koryWalletChip": "DA WALLET A WALLET",
+  "koryNeverTouches": "Pokou non tocca mai il tuo denaro. I contributi passano direttamente da wallet a wallet, senza intermediari.",
+  "koryMonthActivity": "ATTIVITÀ DEL MESE"
 }

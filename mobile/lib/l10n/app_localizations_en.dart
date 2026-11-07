@@ -7182,4 +7182,36 @@ class LEn extends L {
 
   @override
   String get homeKoryNoMoney => 'Pokou never touches the money';
+
+  @override
+  String get discussionsStatusesNews => 'STATUSES & NEWS';
+
+  @override
+  String get statusMyStatus => 'My status';
+
+  @override
+  String get babaAssistantChip => 'AI ASSISTANT';
+
+  @override
+  String get babaTranslate => 'Translate';
+
+  @override
+  String get babaSummarize => 'Summarize';
+
+  @override
+  String get babaAlwaysThere =>
+      'Always here to translate, summarize or answer your questions.';
+
+  @override
+  String get koryHeadline => 'Kory · The cowrie';
+
+  @override
+  String get koryWalletChip => 'WALLET TO WALLET';
+
+  @override
+  String get koryNeverTouches =>
+      'Pokou never touches your money. Contributions go directly from wallet to wallet, with no intermediary.';
+
+  @override
+  String get koryMonthActivity => 'THIS MONTH’S ACTIVITY';
 }

@@ -7212,4 +7212,36 @@ class LEs extends L {
 
   @override
   String get homeKoryNoMoney => 'Pokou no toca el dinero';
+
+  @override
+  String get discussionsStatusesNews => 'ESTADOS Y NOVEDADES';
+
+  @override
+  String get statusMyStatus => 'Mi estado';
+
+  @override
+  String get babaAssistantChip => 'ASISTENTE IA';
+
+  @override
+  String get babaTranslate => 'Traducir';
+
+  @override
+  String get babaSummarize => 'Resumir';
+
+  @override
+  String get babaAlwaysThere =>
+      'Siempre aquí para traducir, resumir o responder tus preguntas.';
+
+  @override
+  String get koryHeadline => 'Kory · El cauri';
+
+  @override
+  String get koryWalletChip => 'BILLETERA A BILLETERA';
+
+  @override
+  String get koryNeverTouches =>
+      'Pokou nunca toca tu dinero. Las contribuciones pasan directamente de billetera a billetera, sin intermediarios.';
+
+  @override
+  String get koryMonthActivity => 'ACTIVIDAD DEL MES';
 }

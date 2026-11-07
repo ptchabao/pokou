@@ -48,58 +48,68 @@ class KoryScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            // Maquette APP-3 : surtitre « ÉPARGNE SOLIDAIRE », grand titre,
-            // pastille du sous-titre.
+            // Terre de Confiance : « Kory · Le cauris », la pastille « wallet à
+            // wallet », puis l'encadré qui rappelle que Pokou ne touche pas
+            // l'argent.
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.koryOverline.toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              letterSpacing: 0.6,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.accentPrimary,
-                            ),
-                          ),
-                          Text(
-                            l.navKory,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l.koryHeadline,
                             style: TextStyle(
-                              fontSize: 28,
-                              height: 36 / 28,
-                              letterSpacing: -0.2,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 22,
+                              height: 1.3,
+                              letterSpacing: -0.3,
+                              fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceElevated,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        l.korySubtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          letterSpacing: 0.2,
-                          color: AppColors.textSecondary,
                         ),
-                      ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceElevated,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.feedbackSuccess,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                l.koryWalletChip,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  letterSpacing: 0.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ModuleCallout(
+                      tone: CalloutTone.beige,
+                      text: l.koryNeverTouches,
                     ),
                   ],
                 ),
@@ -111,26 +121,38 @@ class KoryScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: Column(
                   children: [
-                    ModuleActionButton(
-                      label: l.koryCreate,
-                      icon: Icons.add,
-                      onPressed: () => openKoryCreate(context, ref),
-                    ),
-                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(
-                          child: ModuleQuietButton(
-                            icon: Icons.person_add_alt_1_outlined,
-                            label: l.koryJoin,
-                            onPressed: () => _join(context, ref),
+                          child: ModuleActionButton(
+                            label: l.koryCreate,
+                            icon: Icons.add_circle_outline,
+                            onPressed: () => openKoryCreate(context, ref),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: ModuleQuietButton(
-                            icon: Icons.receipt_long_outlined,
-                            label: l.koryJournalTab,
+                            icon: Icons.key_outlined,
+                            label: l.koryJoin,
+                            onPressed: () => _join(context, ref),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton.icon(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.textSecondary,
+                            ),
+                            icon: const Icon(
+                              Icons.receipt_long_outlined,
+                              size: 18,
+                            ),
+                            label: Text(l.koryJournalTab),
                             onPressed: () {
                               final first = pots.valueOrNull?.firstOrNull;
                               if (first == null) return;
@@ -298,9 +320,10 @@ class _SummaryCard extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surfaceElevated,
+          color: AppColors.surface,
           borderRadius: AppRadius.card,
-          boxShadow: AppElevation.subtle,
+          border: Border.all(color: AppColors.border),
+          boxShadow: AppElevation.card,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,17 +333,14 @@ class _SummaryCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    l.koryMonthTotal,
+                    l.koryMonthActivity,
                     style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                      letterSpacing: 0.8,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
-                const ModuleBadge(
-                  icon: Icons.savings_outlined,
-                  color: AppColors.accentPrimary,
-                  size: 44,
                 ),
               ],
             ),
@@ -330,7 +350,7 @@ class _SummaryCard extends ConsumerWidget {
                   TextSpan(
                     text: figure,
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AppColors.accentPrimaryDark,
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
                       letterSpacing: -0.5,
@@ -357,27 +377,6 @@ class _SummaryCard extends ConsumerWidget {
                 color: AppColors.feedbackWarning,
               ),
             ],
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.shield_outlined,
-                  size: 18,
-                  color: AppColors.accentPrimary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l.koryNoMoney,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

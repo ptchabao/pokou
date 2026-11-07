@@ -12494,6 +12494,66 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Pokou ne touche pas l’argent'**
   String get homeKoryNoMoney;
+
+  /// No description provided for @discussionsStatusesNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'STATUTS & NOUVELLES'**
+  String get discussionsStatusesNews;
+
+  /// No description provided for @statusMyStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon statut'**
+  String get statusMyStatus;
+
+  /// No description provided for @babaAssistantChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'ASSISTANT IA'**
+  String get babaAssistantChip;
+
+  /// No description provided for @babaTranslate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduire'**
+  String get babaTranslate;
+
+  /// No description provided for @babaSummarize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumer'**
+  String get babaSummarize;
+
+  /// No description provided for @babaAlwaysThere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toujours là pour traduire, résumer ou répondre à tes questions.'**
+  String get babaAlwaysThere;
+
+  /// No description provided for @koryHeadline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kory · Le cauris'**
+  String get koryHeadline;
+
+  /// No description provided for @koryWalletChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'WALLET À WALLET'**
+  String get koryWalletChip;
+
+  /// No description provided for @koryNeverTouches.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne touche jamais ton argent. Les contributions passent directement de wallet à wallet, sans intermédiaire.'**
+  String get koryNeverTouches;
+
+  /// No description provided for @koryMonthActivity.
+  ///
+  /// In fr, this message translates to:
+  /// **'ACTIVITÉ DU MOIS'**
+  String get koryMonthActivity;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

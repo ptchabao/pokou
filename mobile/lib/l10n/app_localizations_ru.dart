@@ -7263,4 +7263,36 @@ class LRu extends L {
 
   @override
   String get homeKoryNoMoney => 'Pokou не касается денег';
+
+  @override
+  String get discussionsStatusesNews => 'СТАТУСЫ И НОВОСТИ';
+
+  @override
+  String get statusMyStatus => 'Мой статус';
+
+  @override
+  String get babaAssistantChip => 'ИИ-АССИСТЕНТ';
+
+  @override
+  String get babaTranslate => 'Перевести';
+
+  @override
+  String get babaSummarize => 'Кратко';
+
+  @override
+  String get babaAlwaysThere =>
+      'Всегда рядом: переведу, перескажу, отвечу на вопросы.';
+
+  @override
+  String get koryHeadline => 'Kory · Каури';
+
+  @override
+  String get koryWalletChip => 'КОШЕЛЁК — КОШЕЛЁК';
+
+  @override
+  String get koryNeverTouches =>
+      'Pokou никогда не касается твоих денег. Взносы идут напрямую с кошелька на кошелёк, без посредников.';
+
+  @override
+  String get koryMonthActivity => 'АКТИВНОСТЬ ЗА МЕСЯЦ';
 }

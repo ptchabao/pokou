@@ -2064,5 +2064,15 @@
   "homeTrustBody": "Tus datos e intercambios están cifrados de extremo a extremo.",
   "homeKoryInProgress": "KORY • BOTE",
   "homeHonamInProgress": "HONAM • SALUD",
-  "homeKoryNoMoney": "Pokou no toca el dinero"
+  "homeKoryNoMoney": "Pokou no toca el dinero",
+  "discussionsStatusesNews": "ESTADOS Y NOVEDADES",
+  "statusMyStatus": "Mi estado",
+  "babaAssistantChip": "ASISTENTE IA",
+  "babaTranslate": "Traducir",
+  "babaSummarize": "Resumir",
+  "babaAlwaysThere": "Siempre aquí para traducir, resumir o responder tus preguntas.",
+  "koryHeadline": "Kory · El cauri",
+  "koryWalletChip": "BILLETERA A BILLETERA",
+  "koryNeverTouches": "Pokou nunca toca tu dinero. Las contribuciones pasan directamente de billetera a billetera, sin intermediarios.",
+  "koryMonthActivity": "ACTIVIDAD DEL MES"
 }

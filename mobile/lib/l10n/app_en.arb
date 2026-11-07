@@ -2064,5 +2064,15 @@
   "homeTrustBody": "Your data and conversations are end-to-end encrypted.",
   "homeKoryInProgress": "KORY • POT",
   "homeHonamInProgress": "HONAM • HEALTH",
-  "homeKoryNoMoney": "Pokou never touches the money"
+  "homeKoryNoMoney": "Pokou never touches the money",
+  "discussionsStatusesNews": "STATUSES & NEWS",
+  "statusMyStatus": "My status",
+  "babaAssistantChip": "AI ASSISTANT",
+  "babaTranslate": "Translate",
+  "babaSummarize": "Summarize",
+  "babaAlwaysThere": "Always here to translate, summarize or answer your questions.",
+  "koryHeadline": "Kory · The cowrie",
+  "koryWalletChip": "WALLET TO WALLET",
+  "koryNeverTouches": "Pokou never touches your money. Contributions go directly from wallet to wallet, with no intermediary.",
+  "koryMonthActivity": "THIS MONTH’S ACTIVITY"
 }

@@ -13,6 +13,7 @@ import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_fab.dart';
 import '../../settings/presentation/backup_screens.dart';
+import '../../status/presentation/status_strip.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
@@ -570,11 +571,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 children: [
                   Expanded(
                     child: Container(
-                      height: 44,
+                      height: 48,
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(999),
-                        boxShadow: AppElevation.subtle,
+                        border: Border.all(color: AppColors.border),
                       ),
                       child: TextField(
                         controller: _searchController,
@@ -605,7 +606,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 ],
               ),
             ),
-            const DiscoveryStrip(),
+            // APP-2 : la bande des statuts (« Mon statut », puis les statuts
+            // non vus), comme le cahier et la maquette Terre de Confiance.
+            const StatusStrip(),
             _ChatFilterRow(
               current: _filter,
               onChanged: (f) => setState(() => _filter = f),
@@ -727,18 +730,27 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             open: _showArchived,
             onTap: () => setState(() => _showArchived = !_showArchived),
           ),
-        for (final discussion in discussions) ...[
-          _DiscussionTile(
-            discussion: discussion,
-            myUserId: myUserId,
-            onLongPress: () => _openDiscussionMenu(discussion),
+        // Terre de Confiance : les fils dans UNE carte blanche, séparés par
+        // un filet.
+        Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: AppRadius.card,
+            border: Border.all(color: AppColors.border),
+            boxShadow: AppElevation.card,
           ),
-
-          // Filet fin plutôt qu'un blanc de 10px : deux conversations
-          // restent distinctes en occupant moins de place. En retrait des
-          // bords (comme les séparateurs de listes groupées) et absent
-          // après la dernière ligne, où il ne séparerait rien.
-        ],
+          child: Column(
+            children: [
+              for (final discussion in discussions)
+                _DiscussionTile(
+                  discussion: discussion,
+                  myUserId: myUserId,
+                  onLongPress: () => _openDiscussionMenu(discussion),
+                ),
+            ],
+          ),
+        ),
         // Le pied de liste rappelle le chiffrement.
         //
         // Il ne parle QUE des conversations à deux, parce que ce sont les
@@ -1477,48 +1489,111 @@ class _PinnedMahizuTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return InkWell(
-      borderRadius: AppRadius.card,
-      onTap: () => _open(context, ref),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AppColors.accentPrimaryLight.withValues(alpha: 0.18),
-          borderRadius: AppRadius.card,
-        ),
-        child: Row(
-          children: [
-            const AssistantOrb(size: 38),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Baba porte TOUJOURS son badge : c'est l'assistant de
-                  // Pokou, pas un contact qu'on pourrait confondre.
-                  Row(
-                    children: [
-                      Text(
-                        L.of(context).navBaba,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(width: 4),
-                      const VerifiedBadge(size: 15),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    L.of(context).contactsAssistantSub,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+    final l = L.of(context);
+    // Terre de Confiance : Baba sur une carte ambre (jamais violette), son
+    // badge « ASSISTANT IA », et deux gestes rapides.
+    Widget quick(IconData icon, String label) => Material(
+      color: AppColors.surface,
+      shape: const StadiumBorder(),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: () => _open(context, ref),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: AppColors.warning),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(fontSize: 13, color: AppColors.warning),
               ),
-            ),
-            Icon(Icons.push_pin, size: 16, color: AppColors.accentPrimaryDark),
-          ],
+            ],
+          ),
+        ),
+      ),
+    );
+    return Material(
+      color: AppColors.isDark
+          ? AppColors.brandOr.withValues(alpha: 0.14)
+          : const Color(0xFFFEF3C7),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card,
+        side: BorderSide(
+          color: AppColors.isDark
+              ? AppColors.brandOr.withValues(alpha: 0.4)
+              : const Color(0xFFFDE68A),
+        ),
+      ),
+      child: InkWell(
+        borderRadius: AppRadius.card,
+        onTap: () => _open(context, ref),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AssistantOrb(size: 44),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          l.navBaba,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6B5412),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            l.babaAssistantChip,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              letterSpacing: 0.6,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFFFFF4D9),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l.babaAlwaysThere,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        quick(Icons.translate, l.babaTranslate),
+                        quick(Icons.summarize_outlined, l.babaSummarize),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1569,13 +1644,8 @@ class _ChatFilterRow extends ConsumerWidget {
     // Le compte des non-lues s'affiche DANS la puce, comme la maquette le
     // montre. Il vient de la liste réelle, pas d'un compteur à part : deux
     // sources donneraient deux chiffres différents un jour ou l'autre.
-    final nonLues =
-        ref
-            .watch(discussionsProvider)
-            .valueOrNull
-            ?.where((d) => d.unreadCount > 0)
-            .length ??
-        0;
+    final all = ref.watch(discussionsProvider).valueOrNull ?? const [];
+    final nonLues = all.where((d) => d.unreadCount > 0).length;
 
     return SizedBox(
       height: 44,
@@ -1585,9 +1655,10 @@ class _ChatFilterRow extends ConsumerWidget {
         children: [
           for (final f in ChatFilter.values) ...[
             _FilterChip(
-              label: f == ChatFilter.unread && nonLues > 0
-                  ? '${f.labelOf(l)} ($nonLues)'
+              label: f == ChatFilter.all && all.isNotEmpty
+                  ? '${f.labelOf(l)} (${all.length})'
                   : f.labelOf(l),
+              count: f == ChatFilter.unread ? nonLues : 0,
               selected: f == current,
               onTap: () => onChanged(f),
             ),
@@ -1604,11 +1675,15 @@ class _FilterChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.count = 0,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Compteur en pastille dans le filtre (« Non lues ③ »).
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -1621,9 +1696,9 @@ class _FilterChip extends StatelessWidget {
         // Maquette : h-8, pastille ; active terracotta-100 / -700, inactive
         // beige-100 / taupe-600.
         child: Container(
-          height: 32,
+          height: 36,
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             // Maquette Figma : le filtre actif est plein, terre cuite.
             color: selected
@@ -1640,14 +1715,39 @@ class _FilterChip extends StatelessWidget {
                   ]
                 : null,
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              letterSpacing: 0.2,
-              fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : AppColors.textSecondary,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? Colors.white : AppColors.textSecondary,
+                ),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 20),
+                  height: 20,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected ? Colors.white : AppColors.accentPrimary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: selected ? AppColors.accentPrimary : Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),

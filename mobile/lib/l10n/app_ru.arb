@@ -2064,5 +2064,15 @@
   "homeTrustBody": "Твои данные и переписка защищены сквозным шифрованием.",
   "homeKoryInProgress": "KORY • СБОР",
   "homeHonamInProgress": "HONAM • ЗДОРОВЬЕ",
-  "homeKoryNoMoney": "Pokou не касается денег"
+  "homeKoryNoMoney": "Pokou не касается денег",
+  "discussionsStatusesNews": "СТАТУСЫ И НОВОСТИ",
+  "statusMyStatus": "Мой статус",
+  "babaAssistantChip": "ИИ-АССИСТЕНТ",
+  "babaTranslate": "Перевести",
+  "babaSummarize": "Кратко",
+  "babaAlwaysThere": "Всегда рядом: переведу, перескажу, отвечу на вопросы.",
+  "koryHeadline": "Kory · Каури",
+  "koryWalletChip": "КОШЕЛЁК — КОШЕЛЁК",
+  "koryNeverTouches": "Pokou никогда не касается твоих денег. Взносы идут напрямую с кошелька на кошелёк, без посредников.",
+  "koryMonthActivity": "АКТИВНОСТЬ ЗА МЕСЯЦ"
 }

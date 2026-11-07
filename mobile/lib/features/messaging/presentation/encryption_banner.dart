@@ -261,30 +261,60 @@ class _Reassurance extends StatelessWidget {
   final String text;
 
   @override
+  Widget build(BuildContext context) => EncryptionNotice(text: text);
+}
+
+/// Le bandeau de chiffrement des conversations (maquette Terre de
+/// Confiance) : encadré beige, cadenas, et la première partie de la phrase
+/// en gras — « Chiffré de bout en bout : … ».
+class EncryptionNotice extends StatelessWidget {
+  const EncryptionNotice({super.key, required this.text});
+
+  final String text;
+
+  @override
   Widget build(BuildContext context) {
+    final cut = text.indexOf(':');
+    final head = cut > 0 ? text.substring(0, cut + 1) : '';
+    final tail = cut > 0 ? text.substring(cut + 1) : text;
     return Center(
       child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 10, 16, 2),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        constraints: const BoxConstraints(maxWidth: 380),
+        margin: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        constraints: const BoxConstraints(maxWidth: 420),
         decoration: BoxDecoration(
-          color: const Color(0xFFFBEDE4),
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: AppColors.border),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.lock, size: 16, color: AppColors.accentPrimary),
-            const SizedBox(width: 8),
+            Icon(
+              Icons.lock_outline,
+              size: 18,
+              color: AppColors.accentPrimaryDark,
+            ),
+            const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  height: 1.35,
-                  color: Color(0xFF6B3415),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    if (head.isNotEmpty)
+                      TextSpan(
+                        text: head,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    TextSpan(text: tail),
+                  ],
+                ),
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),

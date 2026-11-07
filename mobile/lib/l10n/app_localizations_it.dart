@@ -7231,4 +7231,36 @@ class LIt extends L {
 
   @override
   String get homeKoryNoMoney => 'Pokou non tocca il denaro';
+
+  @override
+  String get discussionsStatusesNews => 'STATI E NOVITÀ';
+
+  @override
+  String get statusMyStatus => 'Il mio stato';
+
+  @override
+  String get babaAssistantChip => 'ASSISTENTE IA';
+
+  @override
+  String get babaTranslate => 'Traduci';
+
+  @override
+  String get babaSummarize => 'Riassumi';
+
+  @override
+  String get babaAlwaysThere =>
+      'Sempre qui per tradurre, riassumere o rispondere alle tue domande.';
+
+  @override
+  String get koryHeadline => 'Kory · La conchiglia cauri';
+
+  @override
+  String get koryWalletChip => 'DA WALLET A WALLET';
+
+  @override
+  String get koryNeverTouches =>
+      'Pokou non tocca mai il tuo denaro. I contributi passano direttamente da wallet a wallet, senza intermediari.';
+
+  @override
+  String get koryMonthActivity => 'ATTIVITÀ DEL MESE';
 }

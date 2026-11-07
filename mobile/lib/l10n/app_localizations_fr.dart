@@ -7234,4 +7234,36 @@ class LFr extends L {
 
   @override
   String get homeKoryNoMoney => 'Pokou ne touche pas l’argent';
+
+  @override
+  String get discussionsStatusesNews => 'STATUTS & NOUVELLES';
+
+  @override
+  String get statusMyStatus => 'Mon statut';
+
+  @override
+  String get babaAssistantChip => 'ASSISTANT IA';
+
+  @override
+  String get babaTranslate => 'Traduire';
+
+  @override
+  String get babaSummarize => 'Résumer';
+
+  @override
+  String get babaAlwaysThere =>
+      'Toujours là pour traduire, résumer ou répondre à tes questions.';
+
+  @override
+  String get koryHeadline => 'Kory · Le cauris';
+
+  @override
+  String get koryWalletChip => 'WALLET À WALLET';
+
+  @override
+  String get koryNeverTouches =>
+      'Pokou ne touche jamais ton argent. Les contributions passent directement de wallet à wallet, sans intermédiaire.';
+
+  @override
+  String get koryMonthActivity => 'ACTIVITÉ DU MOIS';
 }
