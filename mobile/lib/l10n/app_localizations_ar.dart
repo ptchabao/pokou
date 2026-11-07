@@ -6466,4 +6466,328 @@ class LAr extends L {
 
   @override
   String get homeAssimeCta => 'تصفح الإعلانات';
+
+  @override
+  String get koryPledgeTitle => 'أتعهّد';
+
+  @override
+  String koryPledgeSubtitleDue(Object date, Object title) {
+    return '$title · الإغلاق في $date';
+  }
+
+  @override
+  String get koryPledgeStart => 'المبلغ الأولي';
+
+  @override
+  String get koryPledgeDailyToggle => 'إضافة مبلغ يومي';
+
+  @override
+  String get koryPledgeDailyToggleSub => 'يُضاف كل يوم إلى تعهّدك حتى الإغلاق';
+
+  @override
+  String get koryPledgePerDay => 'المبلغ في اليوم';
+
+  @override
+  String get koryPledgeStartRow => 'البداية';
+
+  @override
+  String koryPledgeDailyRow(Object amount, Object days) {
+    return '$amount × $days يوم';
+  }
+
+  @override
+  String koryPledgeTotalAt(Object date) {
+    return 'إجمالي التعهّد حتى $date';
+  }
+
+  @override
+  String get koryPledgeEditableNotice =>
+      'يمكنك تعديل تعهّدك لمدة 8 ساعات. بعدها يصبح نهائيًا: يُسجَّل في السجل ويراه الجامع.';
+
+  @override
+  String get koryPledgeConfirm => 'تأكيد تعهّدي';
+
+  @override
+  String get koryPledgeNeedDue => 'يتطلّب المبلغ اليومي تاريخ انتهاء.';
+
+  @override
+  String get koryMyPledgeTitle => 'تعهّدي';
+
+  @override
+  String koryEditableFor(Object duration) {
+    return 'قابل للتعديل لمدة $duration';
+  }
+
+  @override
+  String koryFirmToday(Object time) {
+    return 'يصبح نهائيًا اليوم الساعة $time';
+  }
+
+  @override
+  String koryFirmOn(Object date, Object time) {
+    return 'يصبح نهائيًا في $date الساعة $time';
+  }
+
+  @override
+  String get koryDailyRow => 'المبلغ اليومي';
+
+  @override
+  String koryPerDay(Object amount) {
+    return '$amount في اليوم';
+  }
+
+  @override
+  String get koryPledgeEdit => 'تعديل تعهّدي';
+
+  @override
+  String get koryTimelineSaved => 'تم تسجيل التعهّد';
+
+  @override
+  String get koryTimelineEditable => 'قابل للتعديل لمدة 8 ساعات';
+
+  @override
+  String koryTimelineUntil(Object time) {
+    return 'حتى $time · لا يراه الجامع بعد';
+  }
+
+  @override
+  String get koryTimelineFirm => 'تعهّد نهائي';
+
+  @override
+  String get koryTimelineFirmSub => 'مسجَّل في السجل ومرئي للجامع';
+
+  @override
+  String get koryPayNowOrLater =>
+      'يمكنك الدفع الآن أو انتظار الإغلاق: سيذكّرك Pokou بما تبقّى للدفع.';
+
+  @override
+  String get koryPayNow => 'ادفع الآن';
+
+  @override
+  String koryFirmSince(Object date) {
+    return 'نهائي منذ $date';
+  }
+
+  @override
+  String get koryPaidConfirmed => 'مدفوع ومؤكَّد';
+
+  @override
+  String get koryRemainingToPay => 'المتبقّي للدفع';
+
+  @override
+  String koryNextDailyAdd(Object amount) {
+    return 'الإضافة اليومية التالية: غدًا، +$amount';
+  }
+
+  @override
+  String get koryFirmNotice =>
+      'لا يمكن تعديل التعهّد النهائي. في حال طارئ، راسل الجامع: هو وحده يستطيع إلغاءه، ويُسجَّل ذلك في السجل.';
+
+  @override
+  String koryPayAmount(Object amount) {
+    return 'ادفع $amount';
+  }
+
+  @override
+  String koryWriteTo(Object name) {
+    return 'راسل $name';
+  }
+
+  @override
+  String koryMyPledgeTotal(Object amount) {
+    return 'المتعهَّد به: $amount';
+  }
+
+  @override
+  String get koryContestedTitle => 'مساهمة متنازَع عليها';
+
+  @override
+  String koryContestedHead(Object name) {
+    return 'لم يجد $name تحويلك';
+  }
+
+  @override
+  String koryContestedDeclared(Object amount, Object time) {
+    return '$amount مصرَّح بها الساعة $time';
+  }
+
+  @override
+  String koryContestedReason(Object reason) {
+    return 'السبب: «$reason»';
+  }
+
+  @override
+  String get koryCheckReference => 'تحقّق من المرجع';
+
+  @override
+  String get koryAddSmsCapture => 'أضف لقطة من الرسالة القصيرة';
+
+  @override
+  String get koryContestedOperatorNotice =>
+      'إذا أرسلتَ إلى رقم آخر، فلا يستطيع استرجاع المال إلا مشغّلك: فهو لا يمرّ أبدًا عبر Pokou.';
+
+  @override
+  String get koryResubmitted => 'أُعيد إرساله إلى الجامع للتحقّق مجددًا.';
+
+  @override
+  String get koryRejectReasonTitle => 'لماذا لم تستلمه؟';
+
+  @override
+  String get koryRejectReasonHint =>
+      'مثال: لم يصل شيء إلى محفظتي في ذلك الوقت.';
+
+  @override
+  String get koryFinishTitle => 'نهاية الجمع';
+
+  @override
+  String koryFinishSubtitle(Object title) {
+    return '$title · عرض الجامع';
+  }
+
+  @override
+  String get koryFinishDueNotice =>
+      'وصل تاريخ الانتهاء: الأمر لك للإغلاق أو التمديد.';
+
+  @override
+  String get koryEngaged => 'المتعهَّد به';
+
+  @override
+  String koryParticipantsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مشاركين',
+      one: 'مشارك واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryConfirmedLabel => 'مؤكَّد';
+
+  @override
+  String koryOnGoal(Object amount) {
+    return 'من $amount';
+  }
+
+  @override
+  String get koryToConfirmLabel => 'بانتظار التأكيد';
+
+  @override
+  String koryDeclarationsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count تصريحات',
+      one: 'تصريح واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryWhatDoYouDo => 'ماذا ستفعل؟';
+
+  @override
+  String get koryCloseCollect => 'إغلاق الجمع';
+
+  @override
+  String get koryCloseCollectSub =>
+      'يتلقّى كل واحد ما تبقّى عليه دفعه، ورابط محفظته';
+
+  @override
+  String get koryExtend => 'تمديد';
+
+  @override
+  String koryExtendSub(Object date) {
+    return 'تاريخ الانتهاء الجديد: $date · تبقى التعهّدات نهائية';
+  }
+
+  @override
+  String get koryFinishJournalNote =>
+      'يُبلَّغ المشاركون بإشعار. يحتفظ السجل بالتاريخ وباختيارك.';
+
+  @override
+  String koryCloseAndNotify(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'إغلاق وإبلاغ $count مشاركين',
+      one: 'إغلاق وإبلاغ المشارك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryExtendTo(Object date) {
+    return 'تمديد حتى $date';
+  }
+
+  @override
+  String get koryFinishCta => 'إغلاق أو تمديد';
+
+  @override
+  String get koryClosedTitle => 'تم إغلاق الجمع';
+
+  @override
+  String koryClosedSubtitle(Object title) {
+    return '$title · عرض المشارك';
+  }
+
+  @override
+  String koryClosedBody(Object date, Object name) {
+    return 'أغلق $name الجمع في $date. يتبقّى عليك دفع بقية تعهّدك.';
+  }
+
+  @override
+  String get koryAlreadyConfirmed => 'مؤكَّد مسبقًا';
+
+  @override
+  String get koryToPay => 'للدفع';
+
+  @override
+  String get korySendTo => 'أرسل إلى';
+
+  @override
+  String koryReferenceToGive(Object reference) {
+    return 'المرجع الذي يجب ذكره $reference';
+  }
+
+  @override
+  String get koryCopyReference => 'نسخ المرجع';
+
+  @override
+  String koryPayFromWallet(Object amount) {
+    return 'ادفع $amount من محفظتي';
+  }
+
+  @override
+  String get koryAlreadySent => 'لقد أرسلت بالفعل';
+
+  @override
+  String get notifCenterTitle => 'الإشعارات';
+
+  @override
+  String get notifReadAll => 'قراءة الكل';
+
+  @override
+  String get notifToday => 'اليوم';
+
+  @override
+  String get notifYesterday => 'أمس';
+
+  @override
+  String get notifEarlier => 'في وقت سابق';
+
+  @override
+  String get notifMessagesElsewhere =>
+      'لا تظهر الرسائل هنا: تبقى في المحادثات.';
+
+  @override
+  String get notifEmpty => 'لا توجد إشعارات بعد.';
+
+  @override
+  String get notifServiceCertified => 'Pokou المعتمد';
+
+  @override
+  String get notifSettings => 'إعدادات الإشعارات';
 }

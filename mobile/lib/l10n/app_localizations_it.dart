@@ -6511,4 +6511,331 @@ class LIt extends L {
 
   @override
   String get homeAssimeCta => 'Vedi annunci';
+
+  @override
+  String get koryPledgeTitle => 'Mi impegno';
+
+  @override
+  String koryPledgeSubtitleDue(Object date, Object title) {
+    return '$title · chiude il $date';
+  }
+
+  @override
+  String get koryPledgeStart => 'Importo iniziale';
+
+  @override
+  String get koryPledgeDailyToggle => 'Aggiungi un importo giornaliero';
+
+  @override
+  String get koryPledgeDailyToggleSub =>
+      'Aggiunto ogni giorno al tuo impegno, fino alla chiusura';
+
+  @override
+  String get koryPledgePerDay => 'Importo al giorno';
+
+  @override
+  String get koryPledgeStartRow => 'Partenza';
+
+  @override
+  String koryPledgeDailyRow(Object amount, Object days) {
+    return '$amount × $days giorni';
+  }
+
+  @override
+  String koryPledgeTotalAt(Object date) {
+    return 'Totale impegnato al $date';
+  }
+
+  @override
+  String get koryPledgeEditableNotice =>
+      'Puoi modificare il tuo impegno per 8 ore. Poi diventa definitivo: entra nel registro e il collettore lo vede.';
+
+  @override
+  String get koryPledgeConfirm => 'Conferma il mio impegno';
+
+  @override
+  String get koryPledgeNeedDue =>
+      'Un importo giornaliero richiede una data di fine.';
+
+  @override
+  String get koryMyPledgeTitle => 'Il mio impegno';
+
+  @override
+  String koryEditableFor(Object duration) {
+    return 'Modificabile ancora per $duration';
+  }
+
+  @override
+  String koryFirmToday(Object time) {
+    return 'Diventa definitivo oggi alle $time';
+  }
+
+  @override
+  String koryFirmOn(Object date, Object time) {
+    return 'Diventa definitivo il $date alle $time';
+  }
+
+  @override
+  String get koryDailyRow => 'Importo giornaliero';
+
+  @override
+  String koryPerDay(Object amount) {
+    return '$amount al giorno';
+  }
+
+  @override
+  String get koryPledgeEdit => 'Modifica il mio impegno';
+
+  @override
+  String get koryTimelineSaved => 'Impegno registrato';
+
+  @override
+  String get koryTimelineEditable => 'Modificabile per 8 ore';
+
+  @override
+  String koryTimelineUntil(Object time) {
+    return 'Fino alle $time · il collettore non lo vede ancora';
+  }
+
+  @override
+  String get koryTimelineFirm => 'Impegno definitivo';
+
+  @override
+  String get koryTimelineFirmSub => 'Nel registro, visibile al collettore';
+
+  @override
+  String get koryPayNowOrLater =>
+      'Puoi versare subito o attendere la chiusura: Pokou ti ricorderà quanto resta da versare.';
+
+  @override
+  String get koryPayNow => 'Versa ora';
+
+  @override
+  String koryFirmSince(Object date) {
+    return 'Definitivo dal $date';
+  }
+
+  @override
+  String get koryPaidConfirmed => 'Versato e confermato';
+
+  @override
+  String get koryRemainingToPay => 'Resta da versare';
+
+  @override
+  String koryNextDailyAdd(Object amount) {
+    return 'Prossima aggiunta giornaliera: domani, +$amount';
+  }
+
+  @override
+  String get koryFirmNotice =>
+      'Un impegno definitivo non si modifica più. In caso di imprevisti, scrivi al collettore: solo lui può annullarlo, e viene annotato nel registro.';
+
+  @override
+  String koryPayAmount(Object amount) {
+    return 'Versa $amount';
+  }
+
+  @override
+  String koryWriteTo(Object name) {
+    return 'Scrivi a $name';
+  }
+
+  @override
+  String koryMyPledgeTotal(Object amount) {
+    return 'Impegnato: $amount';
+  }
+
+  @override
+  String get koryContestedTitle => 'Contributo contestato';
+
+  @override
+  String koryContestedHead(Object name) {
+    return '$name non ha riscontrato il tuo invio';
+  }
+
+  @override
+  String koryContestedDeclared(Object amount, Object time) {
+    return '$amount dichiarati alle $time';
+  }
+
+  @override
+  String koryContestedReason(Object reason) {
+    return 'Motivo: «$reason»';
+  }
+
+  @override
+  String get koryCheckReference => 'Verifica il riferimento';
+
+  @override
+  String get koryAddSmsCapture => 'Aggiungi uno screenshot dell’SMS';
+
+  @override
+  String get koryContestedOperatorNotice =>
+      'Se hai inviato a un altro numero, solo il tuo operatore può recuperare il denaro: non passa mai da Pokou.';
+
+  @override
+  String get koryResubmitted =>
+      'Rinviato al collettore per una nuova verifica.';
+
+  @override
+  String get koryRejectReasonTitle => 'Perché non l’hai ricevuto?';
+
+  @override
+  String get koryRejectReasonHint =>
+      'Es. Nulla ricevuto sul mio wallet a quell’ora.';
+
+  @override
+  String get koryFinishTitle => 'Fine della raccolta';
+
+  @override
+  String koryFinishSubtitle(Object title) {
+    return '$title · vista del collettore';
+  }
+
+  @override
+  String get koryFinishDueNotice =>
+      'La data di fine è arrivata: tocca a te chiudere o prolungare.';
+
+  @override
+  String get koryEngaged => 'Impegnato';
+
+  @override
+  String koryParticipantsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count partecipanti',
+      one: '1 partecipante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryConfirmedLabel => 'Confermato';
+
+  @override
+  String koryOnGoal(Object amount) {
+    return 'su $amount';
+  }
+
+  @override
+  String get koryToConfirmLabel => 'Da confermare';
+
+  @override
+  String koryDeclarationsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dichiarazioni',
+      one: '1 dichiarazione',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryWhatDoYouDo => 'Cosa fai?';
+
+  @override
+  String get koryCloseCollect => 'Chiudi la raccolta';
+
+  @override
+  String get koryCloseCollectSub =>
+      'Ognuno riceve quanto gli resta da versare, e il link al suo wallet';
+
+  @override
+  String get koryExtend => 'Prolunga';
+
+  @override
+  String koryExtendSub(Object date) {
+    return 'Nuova data di fine: $date · gli impegni restano definitivi';
+  }
+
+  @override
+  String get koryFinishJournalNote =>
+      'I partecipanti ricevono una notifica. Il registro conserva la data e la tua scelta.';
+
+  @override
+  String koryCloseAndNotify(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Chiudi e avvisa i $count partecipanti',
+      one: 'Chiudi e avvisa il partecipante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryExtendTo(Object date) {
+    return 'Prolunga fino al $date';
+  }
+
+  @override
+  String get koryFinishCta => 'Chiudi o prolunga';
+
+  @override
+  String get koryClosedTitle => 'Raccolta chiusa';
+
+  @override
+  String koryClosedSubtitle(Object title) {
+    return '$title · vista del partecipante';
+  }
+
+  @override
+  String koryClosedBody(Object date, Object name) {
+    return '$name ha chiuso la raccolta il $date. Ti resta da versare il resto del tuo impegno.';
+  }
+
+  @override
+  String get koryAlreadyConfirmed => 'Già confermato';
+
+  @override
+  String get koryToPay => 'Da versare';
+
+  @override
+  String get korySendTo => 'Invia a';
+
+  @override
+  String koryReferenceToGive(Object reference) {
+    return 'Riferimento da indicare $reference';
+  }
+
+  @override
+  String get koryCopyReference => 'Copia il riferimento';
+
+  @override
+  String koryPayFromWallet(Object amount) {
+    return 'Versa $amount dal mio wallet';
+  }
+
+  @override
+  String get koryAlreadySent => 'Ho già inviato';
+
+  @override
+  String get notifCenterTitle => 'Notifiche';
+
+  @override
+  String get notifReadAll => 'Segna tutto come letto';
+
+  @override
+  String get notifToday => 'Oggi';
+
+  @override
+  String get notifYesterday => 'Ieri';
+
+  @override
+  String get notifEarlier => 'Prima';
+
+  @override
+  String get notifMessagesElsewhere =>
+      'I messaggi non compaiono qui: restano in Chat.';
+
+  @override
+  String get notifEmpty => 'Ancora nessuna notifica.';
+
+  @override
+  String get notifServiceCertified => 'Pokou certificato';
+
+  @override
+  String get notifSettings => 'Impostazioni notifiche';
 }

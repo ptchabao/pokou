@@ -11348,6 +11348,492 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Voir les annonces'**
   String get homeAssimeCta;
+
+  /// No description provided for @koryPledgeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je m’engage'**
+  String get koryPledgeTitle;
+
+  /// No description provided for @koryPledgeSubtitleDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · clôture le {date}'**
+  String koryPledgeSubtitleDue(Object date, Object title);
+
+  /// No description provided for @koryPledgeStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant de départ'**
+  String get koryPledgeStart;
+
+  /// No description provided for @koryPledgeDailyToggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un montant journalier'**
+  String get koryPledgeDailyToggle;
+
+  /// No description provided for @koryPledgeDailyToggleSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouté chaque jour à ton engagement, jusqu’à la clôture'**
+  String get koryPledgeDailyToggleSub;
+
+  /// No description provided for @koryPledgePerDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant par jour'**
+  String get koryPledgePerDay;
+
+  /// No description provided for @koryPledgeStartRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ'**
+  String get koryPledgeStartRow;
+
+  /// No description provided for @koryPledgeDailyRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} × {days} jours'**
+  String koryPledgeDailyRow(Object amount, Object days);
+
+  /// No description provided for @koryPledgeTotalAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total engagé au {date}'**
+  String koryPledgeTotalAt(Object date);
+
+  /// No description provided for @koryPledgeEditableNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu peux modifier ton engagement pendant 8 h. Ensuite il devient ferme : il s’inscrit au journal et le collecteur le voit.'**
+  String get koryPledgeEditableNotice;
+
+  /// No description provided for @koryPledgeConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer mon engagement'**
+  String get koryPledgeConfirm;
+
+  /// No description provided for @koryPledgeNeedDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un montant journalier demande une date de fin.'**
+  String get koryPledgeNeedDue;
+
+  /// No description provided for @koryMyPledgeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon engagement'**
+  String get koryMyPledgeTitle;
+
+  /// No description provided for @koryEditableFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifiable encore {duration}'**
+  String koryEditableFor(Object duration);
+
+  /// No description provided for @koryFirmToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devient ferme aujourd’hui à {time}'**
+  String koryFirmToday(Object time);
+
+  /// No description provided for @koryFirmOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devient ferme le {date} à {time}'**
+  String koryFirmOn(Object date, Object time);
+
+  /// No description provided for @koryDailyRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant journalier'**
+  String get koryDailyRow;
+
+  /// No description provided for @koryPerDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} par jour'**
+  String koryPerDay(Object amount);
+
+  /// No description provided for @koryPledgeEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier mon engagement'**
+  String get koryPledgeEdit;
+
+  /// No description provided for @koryTimelineSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Engagement enregistré'**
+  String get koryTimelineSaved;
+
+  /// No description provided for @koryTimelineEditable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifiable pendant 8 h'**
+  String get koryTimelineEditable;
+
+  /// No description provided for @koryTimelineUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à {time} · le collecteur ne le voit pas encore'**
+  String koryTimelineUntil(Object time);
+
+  /// No description provided for @koryTimelineFirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Engagement ferme'**
+  String get koryTimelineFirm;
+
+  /// No description provided for @koryTimelineFirmSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscrit au journal, visible du collecteur'**
+  String get koryTimelineFirmSub;
+
+  /// No description provided for @koryPayNowOrLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu peux verser dès maintenant, ou attendre la clôture : Pokou te rappellera ce qu’il reste à verser.'**
+  String get koryPayNowOrLater;
+
+  /// No description provided for @koryPayNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verser maintenant'**
+  String get koryPayNow;
+
+  /// No description provided for @koryFirmSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ferme depuis le {date}'**
+  String koryFirmSince(Object date);
+
+  /// No description provided for @koryPaidConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versé et confirmé'**
+  String get koryPaidConfirmed;
+
+  /// No description provided for @koryRemainingToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à verser'**
+  String get koryRemainingToPay;
+
+  /// No description provided for @koryNextDailyAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain ajout journalier : demain, +{amount}'**
+  String koryNextDailyAdd(Object amount);
+
+  /// No description provided for @koryFirmNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un engagement ferme ne se modifie plus. En cas d’imprévu, écris au collecteur : lui seul peut l’annuler, et c’est noté au journal.'**
+  String get koryFirmNotice;
+
+  /// No description provided for @koryPayAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verser {amount}'**
+  String koryPayAmount(Object amount);
+
+  /// No description provided for @koryWriteTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {name}'**
+  String koryWriteTo(Object name);
+
+  /// No description provided for @koryMyPledgeTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Engagé : {amount}'**
+  String koryMyPledgeTotal(Object amount);
+
+  /// No description provided for @koryContestedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contribution contestée'**
+  String get koryContestedTitle;
+
+  /// No description provided for @koryContestedHead.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} n’a pas constaté ton envoi'**
+  String koryContestedHead(Object name);
+
+  /// No description provided for @koryContestedDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} déclarés à {time}'**
+  String koryContestedDeclared(Object amount, Object time);
+
+  /// No description provided for @koryContestedReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif : « {reason} »'**
+  String koryContestedReason(Object reason);
+
+  /// No description provided for @koryCheckReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier la référence'**
+  String get koryCheckReference;
+
+  /// No description provided for @koryAddSmsCapture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une capture du SMS'**
+  String get koryAddSmsCapture;
+
+  /// No description provided for @koryContestedOperatorNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si tu as envoyé sur un autre numéro, seul ton opérateur peut récupérer l’argent : il ne passe jamais par Pokou.'**
+  String get koryContestedOperatorNotice;
+
+  /// No description provided for @koryResubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyé au collecteur pour une nouvelle vérification.'**
+  String get koryResubmitted;
+
+  /// No description provided for @koryRejectReasonTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi ne l’as-tu pas reçu ?'**
+  String get koryRejectReasonTitle;
+
+  /// No description provided for @koryRejectReasonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Rien reçu sur mon wallet à cette heure-là.'**
+  String get koryRejectReasonHint;
+
+  /// No description provided for @koryFinishTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin de la collecte'**
+  String get koryFinishTitle;
+
+  /// No description provided for @koryFinishSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · vue du collecteur'**
+  String koryFinishSubtitle(Object title);
+
+  /// No description provided for @koryFinishDueNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date de fin est atteinte : à toi de clôturer ou de prolonger.'**
+  String get koryFinishDueNotice;
+
+  /// No description provided for @koryEngaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Engagé'**
+  String get koryEngaged;
+
+  /// No description provided for @koryParticipantsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String koryParticipantsCount(num count);
+
+  /// No description provided for @koryConfirmedLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmé'**
+  String get koryConfirmedLabel;
+
+  /// No description provided for @koryOnGoal.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {amount}'**
+  String koryOnGoal(Object amount);
+
+  /// No description provided for @koryToConfirmLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'À confirmer'**
+  String get koryToConfirmLabel;
+
+  /// No description provided for @koryDeclarationsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 déclaration} other{{count} déclarations}}'**
+  String koryDeclarationsCount(num count);
+
+  /// No description provided for @koryWhatDoYouDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que fais-tu ?'**
+  String get koryWhatDoYouDo;
+
+  /// No description provided for @koryCloseCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer la collecte'**
+  String get koryCloseCollect;
+
+  /// No description provided for @koryCloseCollectSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chacun reçoit ce qu’il lui reste à verser, et le lien vers son wallet'**
+  String get koryCloseCollectSub;
+
+  /// No description provided for @koryExtend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prolonger'**
+  String get koryExtend;
+
+  /// No description provided for @koryExtendSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle date de fin : {date} · les engagements restent fermes'**
+  String koryExtendSub(Object date);
+
+  /// No description provided for @koryFinishJournalNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les participants sont prévenus par une notification. Le journal garde la date et ton choix.'**
+  String get koryFinishJournalNote;
+
+  /// No description provided for @koryCloseAndNotify.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Clôturer et prévenir le participant} other{Clôturer et prévenir les {count} participants}}'**
+  String koryCloseAndNotify(num count);
+
+  /// No description provided for @koryExtendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prolonger jusqu’au {date}'**
+  String koryExtendTo(Object date);
+
+  /// No description provided for @koryFinishCta.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer ou prolonger'**
+  String get koryFinishCta;
+
+  /// No description provided for @koryClosedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecte clôturée'**
+  String get koryClosedTitle;
+
+  /// No description provided for @koryClosedSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · vue du participant'**
+  String koryClosedSubtitle(Object title);
+
+  /// No description provided for @koryClosedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a clôturé la collecte le {date}. Il te reste à verser la fin de ton engagement.'**
+  String koryClosedBody(Object date, Object name);
+
+  /// No description provided for @koryAlreadyConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà confirmé'**
+  String get koryAlreadyConfirmed;
+
+  /// No description provided for @koryToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'À verser'**
+  String get koryToPay;
+
+  /// No description provided for @korySendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoie à'**
+  String get korySendTo;
+
+  /// No description provided for @koryReferenceToGive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence à indiquer {reference}'**
+  String koryReferenceToGive(Object reference);
+
+  /// No description provided for @koryCopyReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier la référence'**
+  String get koryCopyReference;
+
+  /// No description provided for @koryPayFromWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verser {amount} depuis mon wallet'**
+  String koryPayFromWallet(Object amount);
+
+  /// No description provided for @koryAlreadySent.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai déjà envoyé'**
+  String get koryAlreadySent;
+
+  /// No description provided for @notifCenterTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notifCenterTitle;
+
+  /// No description provided for @notifReadAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout lire'**
+  String get notifReadAll;
+
+  /// No description provided for @notifToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui'**
+  String get notifToday;
+
+  /// No description provided for @notifYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier'**
+  String get notifYesterday;
+
+  /// No description provided for @notifEarlier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tôt'**
+  String get notifEarlier;
+
+  /// No description provided for @notifMessagesElsewhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les messages n’apparaissent pas ici : ils restent dans Discussions.'**
+  String get notifMessagesElsewhere;
+
+  /// No description provided for @notifEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune notification pour l’instant.'**
+  String get notifEmpty;
+
+  /// No description provided for @notifServiceCertified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié'**
+  String get notifServiceCertified;
+
+  /// No description provided for @notifSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages des notifications'**
+  String get notifSettings;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

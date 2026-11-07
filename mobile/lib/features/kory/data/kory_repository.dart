@@ -79,10 +79,53 @@ class KoryRepository {
     );
   }
 
-  Future<void> review(int potId, int entryId, {required bool confirm}) async {
+  Future<void> review(
+    int potId,
+    int entryId, {
+    required bool confirm,
+    String? reason,
+  }) async {
     await _api.post(
       '/kory/pots/$potId/entries/$entryId/review',
-      body: {'decision': confirm ? 'CONFIRM' : 'REJECT'},
+      body: {
+        'decision': confirm ? 'CONFIRM' : 'REJECT',
+        if (!confirm && reason != null && reason.trim().isNotEmpty)
+          'reason': reason.trim(),
+      },
+    );
+  }
+
+  /// KOR-12 / 13 : s'engager, ou corriger son engagement dans les 8 h.
+  Future<KoryPot> pledge(int potId, {required int base, int? daily}) async {
+    final response = await _api.put(
+      '/kory/pots/$potId/pledge',
+      body: {'base': base, if (daily != null && daily > 0) 'daily': daily},
+    );
+    return KoryPot.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// KOR-15 : prolonger la collecte jusqu'à [dueAt].
+  Future<KoryPot> extend(int potId, DateTime dueAt) async {
+    final response = await _api.post(
+      '/kory/pots/$potId/extend',
+      body: {'due_at': dueAt.toUtc().toIso8601String()},
+    );
+    return KoryPot.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// KOR-5 : corriger la référence ou joindre la capture du SMS.
+  Future<void> resubmit(
+    int potId,
+    int entryId, {
+    String? walletReference,
+    int? proofMediaId,
+  }) async {
+    await _api.post(
+      '/kory/pots/$potId/entries/$entryId/resubmit',
+      body: {
+        'wallet_reference': ?walletReference,
+        'proof_media_id': ?proofMediaId,
+      },
     );
   }
 

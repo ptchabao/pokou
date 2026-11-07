@@ -13,15 +13,20 @@ import '../../modules/shared/module_ui.dart';
 import 'certified_pro_screen.dart';
 import '../../../core/time/server_time.dart';
 
-final _certifiedProvider = FutureProvider.autoDispose<
-    ({Map<String, dynamic> status, Map<String, dynamic> offer})>((ref) async {
-  final api = ref.watch(apiClientProvider);
-  final results = await Future.wait([api.get('/certified/me'), api.get('/certified/offer')]);
-  return (
-    status: results[0] as Map<String, dynamic>,
-    offer: results[1] as Map<String, dynamic>,
-  );
-});
+final _certifiedProvider =
+    FutureProvider.autoDispose<
+      ({Map<String, dynamic> status, Map<String, dynamic> offer})
+    >((ref) async {
+      final api = ref.watch(apiClientProvider);
+      final results = await Future.wait([
+        api.get('/certified/me'),
+        api.get('/certified/offer'),
+      ]);
+      return (
+        status: results[0] as Map<String, dynamic>,
+        offer: results[1] as Map<String, dynamic>,
+      );
+    });
 
 /// Pokou certifié (section 9.5) : l'offre, l'essai, le paiement, et l'écran
 /// « noms différents » quand le wallet n'est pas au nom affiché.
@@ -34,8 +39,9 @@ class CertifiedScreen extends ConsumerWidget {
     final data = ref.watch(_certifiedProvider);
     final api = ref.read(apiClientProvider);
     final locale = Localizations.localeOf(context).toLanguageTag();
-    String date(String? iso) =>
-        iso == null ? '' : DateFormat.yMMMd(locale).format(parseServerTime(iso));
+    String date(String? iso) => iso == null
+        ? ''
+        : DateFormat.yMMMd(locale).format(parseServerTime(iso));
 
     Future<void> post(String path, [Map<String, dynamic>? body]) async {
       try {
@@ -44,7 +50,9 @@ class CertifiedScreen extends ConsumerWidget {
         await ref.read(authControllerProvider.notifier).reloadProfile();
       } catch (_) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
       }
     }
 
@@ -52,14 +60,19 @@ class CertifiedScreen extends ConsumerWidget {
       title: l.certTitle,
       child: data.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => ModuleEmptyState(icon: Icons.cloud_off, title: l.honamFailed, message: l.modulesCheckNetwork),
+        error: (_, _) => ModuleEmptyState(
+          icon: Icons.cloud_off,
+          title: l.honamFailed,
+          message: l.modulesCheckNetwork,
+        ),
         data: (data) {
           final status = data.status;
           final state = status['status'] as String;
           // La formule Pro a son propre parcours : justificatif d'abord,
           // paiement après validation (maquettes Pro).
           final plans = [
-            for (final plan in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
+            for (final plan
+                in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
               if (!(plan['code'] as String).startsWith('PRO')) plan,
           ];
           return RefreshIndicator(
@@ -73,35 +86,69 @@ class CertifiedScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.verified, color: AppColors.feedbackInfo),
+                          const Icon(
+                            Icons.verified,
+                            color: AppColors.feedbackInfo,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               l.certTitle,
-                              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           if (status['badge_visible'] == true)
-                            KoryStatusPill(icon: Icons.check_circle, label: l.certActive, color: AppColors.feedbackSuccess),
+                            KoryStatusPill(
+                              icon: Icons.check_circle,
+                              label: l.certActive,
+                              color: AppColors.feedbackSuccess,
+                            ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(l.certPitch),
                       const SizedBox(height: 8),
-                      Text(l.certHowItWorks, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                      Text(
+                        l.certHowItWorks,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      if (state == 'TRIAL') Text(l.certTrialUntil(date(status['trial_ends_at'] as String?))),
-                      if (state == 'ACTIVE') Text(l.certActiveUntil(date(status['current_period_end'] as String?))),
-                      if (state == 'EXPIRED') Text(l.certExpired, style: const TextStyle(color: AppColors.feedbackDanger)),
+                      if (state == 'TRIAL')
+                        Text(
+                          l.certTrialUntil(
+                            date(status['trial_ends_at'] as String?),
+                          ),
+                        ),
+                      if (state == 'ACTIVE')
+                        Text(
+                          l.certActiveUntil(
+                            date(status['current_period_end'] as String?),
+                          ),
+                        ),
+                      if (state == 'EXPIRED')
+                        Text(
+                          l.certExpired,
+                          style: const TextStyle(
+                            color: AppColors.feedbackDanger,
+                          ),
+                        ),
                     ],
                   ),
                 ),
                 if (state == 'NAME_MISMATCH') ...[
                   const SizedBox(height: 12),
-                  _NameMismatch(onResolved: () {
-                    ref.invalidate(_certifiedProvider);
-                    ref.read(authControllerProvider.notifier).reloadProfile();
-                  }),
+                  _NameMismatch(
+                    onResolved: () {
+                      ref.invalidate(_certifiedProvider);
+                      ref.read(authControllerProvider.notifier).reloadProfile();
+                    },
+                  ),
                 ],
                 if (status['trial_available'] == true) ...[
                   const SizedBox(height: 12),
@@ -110,7 +157,13 @@ class CertifiedScreen extends ConsumerWidget {
                     onPressed: () => post('/certified/trial'),
                   ),
                   const SizedBox(height: 4),
-                  Text(l.certTrialNote, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                  Text(
+                    l.certTrialNote,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
                 for (final plan in plans)
                   Padding(
@@ -122,11 +175,18 @@ class CertifiedScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(plan['label'] as String, style: const TextStyle(fontWeight: FontWeight.w600)),
-                                Text(l.certPlanPrice(
-                                  formatFcfa(plan['price_ht'] as int),
-                                  formatFcfa(plan['price_ttc'] as int),
-                                )),
+                                Text(
+                                  plan['label'] as String,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  l.certPlanPrice(
+                                    formatFcfa(plan['price_ht'] as int),
+                                    formatFcfa(plan['price_ttc'] as int),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -135,9 +195,20 @@ class CertifiedScreen extends ConsumerWidget {
                             expanded: false,
                             onPressed: () => openPayment(
                               context,
-                              api.post('/certified/subscribe', body: {'plan': plan['code']}).then(
-                                (json) => (json as Map<String, dynamic>)['payment_url'] as String?,
-                              ),
+                              api
+                                  .post(
+                                    '/certified/subscribe',
+                                    body: {'plan': plan['code']},
+                                  )
+                                  .then(
+                                    (json) =>
+                                        (json
+                                                as Map<
+                                                  String,
+                                                  dynamic
+                                                >)['payment_url']
+                                            as String?,
+                                  ),
                             ),
                           ),
                         ],
@@ -145,17 +216,28 @@ class CertifiedScreen extends ConsumerWidget {
                     ),
                   ),
                 const SizedBox(height: 8),
-                Text(l.honamPriceNote, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                Text(
+                  l.honamPriceNote,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 ModuleCard(
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.hexagon_outlined, color: AppColors.accentPrimary),
+                    leading: const Icon(
+                      Icons.hexagon_outlined,
+                      color: AppColors.accentPrimary,
+                    ),
                     title: Text(l.proTitle),
                     subtitle: Text(l.proTeaser),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const CertifiedProScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const CertifiedProScreen(),
+                      ),
                     ),
                   ),
                 ),
@@ -167,7 +249,6 @@ class CertifiedScreen extends ConsumerWidget {
     );
   }
 }
-
 
 /// « Noms différents » (maquette 2b) : on demande de corriger le nom saisi,
 /// sans jamais montrer celui du titulaire du wallet.
@@ -198,10 +279,12 @@ class _NameMismatchState extends ConsumerState<_NameMismatch> {
       _error = null;
     });
     try {
-      await ref.read(apiClientProvider).post(
-        '/certified/resolve-name',
-        body: {'full_name': _name.text.trim()},
-      );
+      await ref
+          .read(apiClientProvider)
+          .post(
+            '/certified/resolve-name',
+            body: {'full_name': _name.text.trim()},
+          );
       widget.onResolved();
     } catch (_) {
       if (mounted) setState(() => _error = l.certStillMismatch);
@@ -217,16 +300,26 @@ class _NameMismatchState extends ConsumerState<_NameMismatch> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.certMismatchTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            l.certMismatchTitle,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 4),
           Text(l.certMismatchBody),
           TextField(
             controller: _name,
             textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(labelText: l.certCorrectName, errorText: _error),
+            decoration: InputDecoration(
+              labelText: l.certCorrectName,
+              errorText: _error,
+            ),
           ),
           const SizedBox(height: 8),
-          ModuleActionButton(label: l.certRetryName, busy: _busy, onPressed: _busy ? null : _submit),
+          ModuleActionButton(
+            label: l.certRetryName,
+            busy: _busy,
+            onPressed: _busy ? null : _submit,
+          ),
         ],
       ),
     );

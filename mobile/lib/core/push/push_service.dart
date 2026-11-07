@@ -15,6 +15,7 @@ import 'web_notifications_stub.dart'
     if (dart.library.js_interop) 'web_notifications_web.dart'
     as web_notifications;
 
+import '../../features/notifications/presentation/notifications_center_screen.dart';
 import '../../features/calls/presentation/call_controller.dart';
 import '../../features/calls/presentation/call_screen.dart';
 import '../../features/calls/presentation/incoming_call_screen.dart';
@@ -406,9 +407,15 @@ class PushService {
         }
       }
 
-      FirebaseMessaging.onMessage.listen(
-        kIsWeb ? _showWebForegroundNotification : _showForegroundNotification,
-      );
+      FirebaseMessaging.onMessage.listen((message) {
+        // Une notification de SERVICE : la cloche de l'Accueil se met à jour.
+        if (message.data['type'] == 'service') {
+          _ref.invalidate(serviceNotificationsProvider);
+        }
+        kIsWeb
+            ? _showWebForegroundNotification(message)
+            : _showForegroundNotification(message);
+      });
 
       if (!kIsWeb) {
         // Notification système (payload "notification") touchée alors que
@@ -813,6 +820,12 @@ class PushService {
       _handleCallResponse(actionId, data);
     } else if (type == 'verse') {
       _openVerse(data);
+    } else if (type == 'service') {
+      // Kory, Honam… : l'écran que la notification désigne.
+      final navigator = rootNavigatorKey.currentState;
+      if (navigator != null) {
+        openServiceRoute(navigator, data['route']?.toString());
+      }
     }
   }
 

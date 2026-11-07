@@ -24,9 +24,9 @@ Future<void> openKoryCreate(
   );
   if (potId == null || !context.mounted) return;
   refreshKory(ref);
-  await Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => KoryPotScreen(potId: potId)),
-  );
+  await Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: potId)));
 }
 
 class KoryCreateScreen extends ConsumerStatefulWidget {
@@ -38,9 +38,11 @@ class KoryCreateScreen extends ConsumerStatefulWidget {
   ConsumerState<KoryCreateScreen> createState() => _KoryCreateScreenState();
 }
 
-final _groupMembersProvider = FutureProvider.autoDispose.family<List<GroupMember>, int>(
-  (ref, groupId) async => (await ref.watch(groupRepositoryProvider).getGroup(groupId)).members,
-);
+final _groupMembersProvider = FutureProvider.autoDispose
+    .family<List<GroupMember>, int>(
+      (ref, groupId) async =>
+          (await ref.watch(groupRepositoryProvider).getGroup(groupId)).members,
+    );
 
 class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
   static const _kinds = ['CAGNOTTE', 'COTISATION', 'TONTINE'];
@@ -131,7 +133,8 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
     // Kory Plus (BM-13) : la tontine ne se propose que dans un pays qui l'a
     // ouverte, et depuis un groupe — l'ordre des tours se fixe entre ses
     // membres.
-    final tontineOpen = widget.groupId != null &&
+    final tontineOpen =
+        widget.groupId != null &&
         ref.watch(currentCountryConfigProvider).has('kory_plus');
     final kinds = tontineOpen ? _kinds : _kinds.sublist(0, 2);
     final members = widget.groupId == null || _kind != 'TONTINE'
@@ -140,7 +143,8 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
     if (members != null && _rotation.isEmpty && members.isNotEmpty) {
       _rotation = [for (final m in members) m.userId];
     }
-    String nameOf(int id) => members?.where((m) => m.userId == id).firstOrNull?.displayName ?? '—';
+    String nameOf(int id) =>
+        members?.where((m) => m.userId == id).firstOrNull?.displayName ?? '—';
     return ModuleScaffold(
       title: l.koryCreateTitle,
       subtitle: l.korySubtitle,
@@ -193,9 +197,15 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
           ],
           if (_kind == 'TONTINE') ...[
             ModuleSectionTitle(l.koryRotation),
-            Text(l.koryRotationHint, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            Text(
+              l.koryRotationHint,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
             if (members == null)
-              const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              )
             else
               ReorderableListView(
                 shrinkWrap: true,
@@ -215,23 +225,26 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
                       trailing: IconButton(
                         tooltip: l.koryRemoveFromRotation,
                         icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => setState(() => _rotation = [..._rotation]..remove(id)),
+                        onPressed: () => setState(
+                          () => _rotation = [..._rotation]..remove(id),
+                        ),
                       ),
                     ),
                 ],
               ),
           ],
           const SizedBox(height: 16),
-          if (_kind != 'TONTINE') ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.event_outlined),
-            title: Text(
-              _dueAt == null
-                  ? l.koryFieldDue
-                  : l.koryDue(DateFormat.yMMMd(locale).format(_dueAt!)),
+          if (_kind != 'TONTINE')
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.event_outlined),
+              title: Text(
+                _dueAt == null
+                    ? l.koryFieldDue
+                    : l.koryDue(DateFormat.yMMMd(locale).format(_dueAt!)),
+              ),
+              onTap: _pickDue,
             ),
-            onTap: _pickDue,
-          ),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,

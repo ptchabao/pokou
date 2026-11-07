@@ -324,3 +324,38 @@ def test_le_centre_de_notifications_recoit_les_evenements_kory(client):
 
     assert client.post("/api/v1/notifications/read-all", headers=organizer).json()["unread"] == 0
     assert client.get("/api/v1/notifications", headers=organizer).json()["unread"] == 0
+
+
+def test_apres_la_cloture_on_verse_encore_le_reste_de_son_engagement(client):
+    organizer, member, _, pot = _pot_with_member(client)
+    other, _ = _signup(client)
+    client.post("/api/v1/kory/join", json={"code": pot["join_code"]}, headers=other)
+    client.put(f"/api/v1/kory/pots/{pot['id']}/pledge", json={"base": 8000}, headers=member)
+    client.post(f"/api/v1/kory/pots/{pot['id']}/close", headers=organizer)
+    ok = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 8000}, headers=member)
+    assert ok.status_code == 201
+    # Sans engagement, plus rien à déclarer après la clôture.
+    late = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 500}, headers=other)
+    assert late.status_code == 409
+
+
+def test_une_capture_doit_venir_de_son_auteur(client):
+    from app.models import MediaAsset
+
+    organizer, member, _, pot = _pot_with_member(client)
+    entry = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 5000}, headers=member).json()
+    client.post(
+        f"/api/v1/kory/pots/{pot['id']}/entries/{entry['id']}/review",
+        json={"decision": "REJECT"}, headers=organizer,
+    )
+    stranger, stranger_id = _signup(client)
+    with TestingSessionLocal() as db:
+        asset = MediaAsset(uploader_id=stranger_id, mime_type="image/jpeg", size_bytes=10, storage_path="x")
+        db.add(asset)
+        db.commit()
+        foreign_id = asset.id
+    bad = client.post(
+        f"/api/v1/kory/pots/{pot['id']}/entries/{entry['id']}/resubmit",
+        json={"proof_media_id": foreign_id}, headers=member,
+    )
+    assert bad.status_code == 403

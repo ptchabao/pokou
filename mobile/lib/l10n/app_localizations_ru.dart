@@ -6546,4 +6546,331 @@ class LRu extends L {
 
   @override
   String get homeAssimeCta => 'Смотреть объявления';
+
+  @override
+  String get koryPledgeTitle => 'Я обязуюсь';
+
+  @override
+  String koryPledgeSubtitleDue(Object date, Object title) {
+    return '$title · закрытие $date';
+  }
+
+  @override
+  String get koryPledgeStart => 'Начальная сумма';
+
+  @override
+  String get koryPledgeDailyToggle => 'Добавлять сумму каждый день';
+
+  @override
+  String get koryPledgeDailyToggleSub =>
+      'Добавляется к обязательству каждый день до закрытия';
+
+  @override
+  String get koryPledgePerDay => 'Сумма в день';
+
+  @override
+  String get koryPledgeStartRow => 'Начало';
+
+  @override
+  String koryPledgeDailyRow(Object amount, Object days) {
+    return '$amount × $days дн.';
+  }
+
+  @override
+  String koryPledgeTotalAt(Object date) {
+    return 'Всего обещано к $date';
+  }
+
+  @override
+  String get koryPledgeEditableNotice =>
+      'Обязательство можно изменить в течение 8 часов. Затем оно становится твёрдым: попадает в журнал и его видит сборщик.';
+
+  @override
+  String get koryPledgeConfirm => 'Подтвердить обязательство';
+
+  @override
+  String get koryPledgeNeedDue => 'Для ежедневной суммы нужна дата окончания.';
+
+  @override
+  String get koryMyPledgeTitle => 'Моё обязательство';
+
+  @override
+  String koryEditableFor(Object duration) {
+    return 'Можно изменить ещё $duration';
+  }
+
+  @override
+  String koryFirmToday(Object time) {
+    return 'Станет твёрдым сегодня в $time';
+  }
+
+  @override
+  String koryFirmOn(Object date, Object time) {
+    return 'Станет твёрдым $date в $time';
+  }
+
+  @override
+  String get koryDailyRow => 'Ежедневная сумма';
+
+  @override
+  String koryPerDay(Object amount) {
+    return '$amount в день';
+  }
+
+  @override
+  String get koryPledgeEdit => 'Изменить обязательство';
+
+  @override
+  String get koryTimelineSaved => 'Обязательство сохранено';
+
+  @override
+  String get koryTimelineEditable => 'Можно изменить в течение 8 часов';
+
+  @override
+  String koryTimelineUntil(Object time) {
+    return 'До $time · сборщик его пока не видит';
+  }
+
+  @override
+  String get koryTimelineFirm => 'Твёрдое обязательство';
+
+  @override
+  String get koryTimelineFirmSub => 'В журнале, виден сборщику';
+
+  @override
+  String get koryPayNowOrLater =>
+      'Можно внести сейчас или дождаться закрытия: Pokou напомнит, сколько осталось.';
+
+  @override
+  String get koryPayNow => 'Внести сейчас';
+
+  @override
+  String koryFirmSince(Object date) {
+    return 'Твёрдое с $date';
+  }
+
+  @override
+  String get koryPaidConfirmed => 'Внесено и подтверждено';
+
+  @override
+  String get koryRemainingToPay => 'Осталось внести';
+
+  @override
+  String koryNextDailyAdd(Object amount) {
+    return 'Следующее ежедневное добавление: завтра, +$amount';
+  }
+
+  @override
+  String get koryFirmNotice =>
+      'Твёрдое обязательство больше не меняется. Если что-то случилось, напиши сборщику: только он может его отменить, и это записывается в журнал.';
+
+  @override
+  String koryPayAmount(Object amount) {
+    return 'Внести $amount';
+  }
+
+  @override
+  String koryWriteTo(Object name) {
+    return 'Написать $name';
+  }
+
+  @override
+  String koryMyPledgeTotal(Object amount) {
+    return 'Обещано: $amount';
+  }
+
+  @override
+  String get koryContestedTitle => 'Оспоренный взнос';
+
+  @override
+  String koryContestedHead(Object name) {
+    return '$name не обнаружил твой перевод';
+  }
+
+  @override
+  String koryContestedDeclared(Object amount, Object time) {
+    return '$amount заявлено в $time';
+  }
+
+  @override
+  String koryContestedReason(Object reason) {
+    return 'Причина: «$reason»';
+  }
+
+  @override
+  String get koryCheckReference => 'Проверить номер операции';
+
+  @override
+  String get koryAddSmsCapture => 'Добавить снимок SMS';
+
+  @override
+  String get koryContestedOperatorNotice =>
+      'Если ты отправил на другой номер, вернуть деньги может только оператор: они никогда не проходят через Pokou.';
+
+  @override
+  String get koryResubmitted => 'Отправлено сборщику на повторную проверку.';
+
+  @override
+  String get koryRejectReasonTitle => 'Почему ты не получил перевод?';
+
+  @override
+  String get koryRejectReasonHint =>
+      'Напр. Ничего не пришло на кошелёк в это время.';
+
+  @override
+  String get koryFinishTitle => 'Конец сбора';
+
+  @override
+  String koryFinishSubtitle(Object title) {
+    return '$title · вид сборщика';
+  }
+
+  @override
+  String get koryFinishDueNotice =>
+      'Дата окончания наступила: тебе решать — закрыть или продлить.';
+
+  @override
+  String get koryEngaged => 'Обещано';
+
+  @override
+  String koryParticipantsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count участников',
+      few: '$count участника',
+      one: '1 участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryConfirmedLabel => 'Подтверждено';
+
+  @override
+  String koryOnGoal(Object amount) {
+    return 'из $amount';
+  }
+
+  @override
+  String get koryToConfirmLabel => 'К подтверждению';
+
+  @override
+  String koryDeclarationsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count заявлений',
+      few: '$count заявления',
+      one: '1 заявление',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryWhatDoYouDo => 'Что ты сделаешь?';
+
+  @override
+  String get koryCloseCollect => 'Закрыть сбор';
+
+  @override
+  String get koryCloseCollectSub =>
+      'Каждый получит, сколько ему осталось внести, и ссылку на свой кошелёк';
+
+  @override
+  String get koryExtend => 'Продлить';
+
+  @override
+  String koryExtendSub(Object date) {
+    return 'Новая дата окончания: $date · обязательства остаются твёрдыми';
+  }
+
+  @override
+  String get koryFinishJournalNote =>
+      'Участники получат уведомление. Журнал сохранит дату и твой выбор.';
+
+  @override
+  String koryCloseAndNotify(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Закрыть и уведомить участников ($count)',
+      one: 'Закрыть и уведомить участника',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryExtendTo(Object date) {
+    return 'Продлить до $date';
+  }
+
+  @override
+  String get koryFinishCta => 'Закрыть или продлить';
+
+  @override
+  String get koryClosedTitle => 'Сбор закрыт';
+
+  @override
+  String koryClosedSubtitle(Object title) {
+    return '$title · вид участника';
+  }
+
+  @override
+  String koryClosedBody(Object date, Object name) {
+    return '$name закрыл сбор $date. Тебе осталось внести остаток обязательства.';
+  }
+
+  @override
+  String get koryAlreadyConfirmed => 'Уже подтверждено';
+
+  @override
+  String get koryToPay => 'К оплате';
+
+  @override
+  String get korySendTo => 'Отправь';
+
+  @override
+  String koryReferenceToGive(Object reference) {
+    return 'Укажи номер $reference';
+  }
+
+  @override
+  String get koryCopyReference => 'Скопировать номер';
+
+  @override
+  String koryPayFromWallet(Object amount) {
+    return 'Внести $amount со своего кошелька';
+  }
+
+  @override
+  String get koryAlreadySent => 'Я уже отправил';
+
+  @override
+  String get notifCenterTitle => 'Уведомления';
+
+  @override
+  String get notifReadAll => 'Прочитать все';
+
+  @override
+  String get notifToday => 'Сегодня';
+
+  @override
+  String get notifYesterday => 'Вчера';
+
+  @override
+  String get notifEarlier => 'Ранее';
+
+  @override
+  String get notifMessagesElsewhere =>
+      'Сообщения здесь не появляются: они остаются в разделе «Чаты».';
+
+  @override
+  String get notifEmpty => 'Пока нет уведомлений.';
+
+  @override
+  String get notifServiceCertified => 'Pokou certifié';
+
+  @override
+  String get notifSettings => 'Настройки уведомлений';
 }

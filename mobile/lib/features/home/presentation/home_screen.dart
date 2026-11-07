@@ -20,9 +20,9 @@ import '../../kory/presentation/kory_controller.dart';
 import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_screen.dart';
 import '../../modules/shared/module_ui.dart';
-import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
+import '../../notifications/presentation/notifications_center_screen.dart';
 import 'global_search_screen.dart';
 
 /// L'accueil après connexion (écran APP-1) : une carte par module ouvert
@@ -99,11 +99,18 @@ class HomeScreen extends ConsumerWidget {
                 onSearch: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
                 ),
+                // NOT-1 : la cloche ouvre le centre de notifications.
                 onNotifications: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const NotificationsSettingsScreen(),
+                    builder: (_) => const NotificationsCenterScreen(),
                   ),
                 ),
+                unread:
+                    ref
+                        .watch(serviceNotificationsProvider)
+                        .valueOrNull
+                        ?.unread ??
+                    0,
               ),
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
@@ -174,8 +181,10 @@ class _GreetingCard extends StatelessWidget {
     required this.firstName,
     required this.onSearch,
     required this.onNotifications,
+    this.unread = 0,
   });
 
+  final int unread;
   final String firstName;
   final VoidCallback onSearch;
   final VoidCallback onNotifications;
@@ -298,8 +307,9 @@ class _GreetingCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _RoundAction(
                       icon: Icons.notifications_none_outlined,
-                      tooltip: l.profileNotifications,
+                      tooltip: l.notifCenterTitle,
                       onTap: onNotifications,
+                      badge: unread,
                     ),
                   ],
                 ),
@@ -460,15 +470,18 @@ class _RoundAction extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onTap,
+    this.badge = 0,
   });
 
+  /// Pastille de non-lus (maquette : rond terre cuite, chiffre blanc).
+  final int badge;
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    final button = Tooltip(
       message: tooltip,
       child: Material(
         color: AppColors.isDark
@@ -485,6 +498,35 @@ class _RoundAction extends StatelessWidget {
           ),
         ),
       ),
+    );
+    if (badge <= 0) return button;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        button,
+        Positioned(
+          right: -2,
+          top: -2,
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary,
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: AppColors.background, width: 2),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              badge > 9 ? '9+' : '$badge',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

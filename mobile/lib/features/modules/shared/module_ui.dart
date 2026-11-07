@@ -222,7 +222,12 @@ class ModuleActionButton extends StatelessWidget {
             onPressed: onPressed,
             style: style,
             icon: Icon(icon, size: 18),
-            label: Text(label, textAlign: TextAlign.center, maxLines: 2, softWrap: true),
+            label: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              softWrap: true,
+            ),
           );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }
@@ -266,7 +271,12 @@ class ModuleQuietButton extends StatelessWidget {
             onPressed: onPressed,
             style: style,
             icon: Icon(icon, size: 20),
-            label: Text(label, textAlign: TextAlign.center, maxLines: 2, softWrap: true),
+            label: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              softWrap: true,
+            ),
           );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }
@@ -553,6 +563,90 @@ class ModuleAmountPicker extends StatelessWidget {
             onSelected: (_) => onChanged(amount),
           ),
       ],
+    );
+  }
+}
+
+/// Le ton d'un encadré (cahier v3.4) : ambre pour l'attention, rouge pour
+/// l'irréversible ou le refus, vert pour le succès, bleu pour l'information,
+/// beige pour le neutre.
+enum CalloutTone { amber, red, green, blue, beige }
+
+/// Un encadré : un fond clair, une icône, une phrase — jamais la couleur
+/// seule pour porter le sens.
+class ModuleCallout extends StatelessWidget {
+  const ModuleCallout({
+    super.key,
+    required this.tone,
+    required this.text,
+    this.title,
+    this.children = const [],
+  });
+
+  final CalloutTone tone;
+  final String text;
+  final String? title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final (Color ink, IconData icon) = switch (tone) {
+      CalloutTone.amber => (AppColors.feedbackWarning, Icons.info_outline),
+      CalloutTone.red => (AppColors.feedbackDanger, Icons.error_outline),
+      CalloutTone.green => (
+        AppColors.feedbackSuccess,
+        Icons.check_circle_outline,
+      ),
+      CalloutTone.blue => (AppColors.feedbackInfo, Icons.info_outline),
+      CalloutTone.beige => (AppColors.textSecondary, Icons.info_outline),
+    };
+    final background = tone == CalloutTone.beige
+        ? AppColors.surfaceElevated
+        : ink.withValues(alpha: AppColors.isDark ? 0.22 : 0.10);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: AppColors.isDark ? AppColors.textPrimary : ink,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title != null) ...[
+                  Text(
+                    title!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                ...children,
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

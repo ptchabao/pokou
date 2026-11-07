@@ -115,6 +115,22 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
         viewer = db.query(User).filter(User.id == user_id).first()
         return viewer is not None and viewer.role in _TEAM_ROLES
 
+    # Capture du SMS jointe à une contribution Kory contestée (KOR-5) : celui
+    # qui doit la confirmer — le collecteur, ou le bénéficiaire du tour —,
+    # et personne d'autre dans le groupe.
+    from app.models.kory import KoryEntry, KoryPot, KoryRound
+
+    proof = db.query(KoryEntry).filter(KoryEntry.proof_media_id == asset.id).first()
+    if proof is not None:
+        pot = db.get(KoryPot, proof.pot_id)
+        reviewer = pot.collector_id if pot else None
+        if pot is not None and pot.kind == "TONTINE" and proof.round_number is not None:
+            round_ = db.query(KoryRound).filter(
+                KoryRound.pot_id == pot.id, KoryRound.number == proof.round_number
+            ).first()
+            reviewer = round_.beneficiary_id if round_ else reviewer
+        return user_id == reviewer
+
     # Justificatif Pokou certifié Pro : le support qui le vérifie, et lui
     # seul. Jamais affiché sur le profil Pro.
     from app.models.certified import CertifiedProApplication

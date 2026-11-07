@@ -49,13 +49,13 @@ class MoreScreen extends ConsumerWidget {
       context,
     ).push(MaterialPageRoute(builder: (_) => _Pushed(child: screen)));
 
-    void showAbout() => Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => AboutScreen(lot1: lot1)),
-    );
+    void showAbout() => Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => AboutScreen(lot1: lot1)));
 
-    void showHelp() => Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const HelpScreen()),
-    );
+    void showHelp() => Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const HelpScreen()));
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
@@ -64,9 +64,9 @@ class MoreScreen extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: ModuleCard(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ProfileScreen()),
-            ),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
             child: Row(
               children: [
                 ContactAvatar(
@@ -193,7 +193,10 @@ class MoreScreen extends ConsumerWidget {
                 children: [
                   ModuleBadge(
                     icon: Icons.delivery_dining,
-                    color: courier != null && courier.status != 'SUSPENDED' && courier.status != 'PENDING'
+                    color:
+                        courier != null &&
+                            courier.status != 'SUSPENDED' &&
+                            courier.status != 'PENDING'
                         ? AppColors.feedbackSuccess
                         : AppColors.accentPrimary,
                   ),
@@ -205,15 +208,26 @@ class MoreScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              courier != null ? 'Mode coursier' : 'Devenir coursier Honam',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              courier != null
+                                  ? 'Mode coursier'
+                                  : 'Devenir coursier Honam',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            if (courier != null && courier.status != 'SUSPENDED' && courier.status != 'PENDING') ...[
+                            if (courier != null &&
+                                courier.status != 'SUSPENDED' &&
+                                courier.status != 'PENDING') ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.feedbackSuccess.withValues(alpha: 0.15),
+                                  color: AppColors.feedbackSuccess.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text(
@@ -231,10 +245,10 @@ class MoreScreen extends ConsumerWidget {
                         Text(
                           courier != null
                               ? (courier.launchPeriod
-                                  ? 'Période de lancement · courses illimitées'
-                                  : (courier.unlimited
-                                      ? 'Pack Queen Pokou illimité'
-                                      : '${courier.ridesLeft} courses restantes'))
+                                    ? 'Période de lancement · courses illimitées'
+                                    : (courier.unlimited
+                                          ? 'Pack Queen Pokou illimité'
+                                          : '${courier.ridesLeft} courses restantes'))
                               : '1 000 FCFA par course, près de chez toi',
                           style: TextStyle(
                             color: AppColors.textSecondary,
@@ -244,7 +258,10 @@ class MoreScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: AppColors.accentPrimary),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.accentPrimary,
+                  ),
                 ],
               ),
             ),
@@ -260,29 +277,44 @@ class MoreScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.auto_awesome, color: AppColors.brandOr, size: 20),
+                      const Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.brandOr,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Bientôt : Kory, Honam, Assimé',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Cagnottes, pharmacie et petites annonces arrivent ville par ville.',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('C’est noté : tu seras prévenu dès l’ouverture dans ta ville.'),
+                          content: Text(
+                            'C’est noté : tu seras prévenu dès l’ouverture dans ta ville.',
+                          ),
                         ),
                       );
                     },
-                    icon: const Icon(Icons.notifications_active_outlined, size: 16),
+                    icon: const Icon(
+                      Icons.notifications_active_outlined,
+                      size: 16,
+                    ),
                     label: const Text('Me prévenir'),
                   ),
                 ],
@@ -295,17 +327,33 @@ class MoreScreen extends ConsumerWidget {
           _Section(
             title: l.moreSectionServices,
             rows: [
-              _Row(Icons.donut_large_outlined, l.navStatus,
-                  () => push(const StatusListScreen())),
-              _Row(Icons.call_outlined, l.navCalls,
-                  () => push(const CallLogScreen())),
-              _Row(Icons.storefront_outlined, 'Assimé',
-                  () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const MarketplaceScreen()))),
-              _Row(Icons.apps_rounded, l.navModules,
-                  () => push(const ModulesScreen())),
-              _Row(Icons.campaign_outlined, l.navBroadcasts,
-                  () => push(const BroadcastListsScreen())),
+              _Row(
+                Icons.donut_large_outlined,
+                l.navStatus,
+                () => push(const StatusListScreen()),
+              ),
+              _Row(
+                Icons.call_outlined,
+                l.navCalls,
+                () => push(const CallLogScreen()),
+              ),
+              _Row(
+                Icons.storefront_outlined,
+                'Assimé',
+                () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
+                ),
+              ),
+              _Row(
+                Icons.apps_rounded,
+                l.navModules,
+                () => push(const ModulesScreen()),
+              ),
+              _Row(
+                Icons.campaign_outlined,
+                l.navBroadcasts,
+                () => push(const BroadcastListsScreen()),
+              ),
             ],
           ),
 
@@ -313,18 +361,36 @@ class MoreScreen extends ConsumerWidget {
         _Section(
           title: l.moreSectionSettings,
           rows: [
-            _Row(Icons.lock_outline, l.moreAccount,
-                () => push(const ProfileScreen())),
-            _Row(Icons.visibility_outlined, l.privacyTitle,
-                () => push(const PrivacySettingsScreen())),
-            _Row(Icons.notifications_outlined, l.profileNotifications,
-                () => push(const NotificationsSettingsScreen())),
-            _Row(Icons.storage_outlined, l.storageTitle,
-                () => push(const StorageSettingsScreen())),
-            _Row(Icons.palette_outlined, l.profileTheme,
-                () => push(const ThemeScreen())),
-            _Row(Icons.language, l.profileLanguage,
-                () => push(const LanguageScreen())),
+            _Row(
+              Icons.lock_outline,
+              l.moreAccount,
+              () => push(const ProfileScreen()),
+            ),
+            _Row(
+              Icons.visibility_outlined,
+              l.privacyTitle,
+              () => push(const PrivacySettingsScreen()),
+            ),
+            _Row(
+              Icons.notifications_outlined,
+              l.profileNotifications,
+              () => push(const NotificationsSettingsScreen()),
+            ),
+            _Row(
+              Icons.storage_outlined,
+              l.storageTitle,
+              () => push(const StorageSettingsScreen()),
+            ),
+            _Row(
+              Icons.palette_outlined,
+              l.profileTheme,
+              () => push(const ThemeScreen()),
+            ),
+            _Row(
+              Icons.language,
+              l.profileLanguage,
+              () => push(const LanguageScreen()),
+            ),
             _Row(Icons.help_outline, l.helpTitle, showHelp),
             _Row(Icons.info_outline, l.aboutTitle, showAbout),
           ],

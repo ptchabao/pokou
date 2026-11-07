@@ -256,6 +256,18 @@ def _is_firm(member: KoryMember, now: datetime) -> bool:
     return member.pledged_at is not None and now >= member.pledged_at + PLEDGE_EDIT_WINDOW
 
 
+def _owes_after_close(db: Session, pot: KoryPot, user_id: int) -> bool:
+    """KOR-16 : après la clôture, un participant engagé peut encore déclarer
+    ce qu'il lui reste à verser — et rien d'autre."""
+    if pot.kind == "TONTINE":
+        return False
+    member = db.query(KoryMember).filter(
+        KoryMember.pot_id == pot.id, KoryMember.user_id == user_id,
+        KoryMember.pledged_at.isnot(None), KoryMember.pledge_cancelled_at.is_(None),
+    ).first()
+    return member is not None and _pledge_total(pot, member) > _confirmed_total(db, pot.id, user_id)
+
+
 def _pledge_json(db: Session, pot: KoryPot, member: KoryMember, now: datetime) -> dict:
     total = _pledge_total(pot, member)
     confirmed = _confirmed_total(db, pot.id, member.user_id)
@@ -559,7 +571,7 @@ def declare_entry(
     me = _me(current_user)
     _require_kory_open(db, me)
     pot = _get_visible_pot(db, pot_id, me)
-    if pot.status != "OPEN":
+    if pot.status != "OPEN" and not _owes_after_close(db, pot, me):
         raise HTTPException(status_code=409, detail="Cette cagnotte est clôturée")
     round_number = None
     if pot.kind == "TONTINE":
@@ -821,6 +833,13 @@ def resubmit_entry(
     if body.note is not None:
         entry.note = body.note.strip() or None
     if body.proof_media_id is not None:
+        # Seulement un fichier envoyé par l'auteur lui-même : sinon, désigner
+        # le média d'un autre l'ouvrirait au collecteur (voir media.py).
+        from app.models import MediaAsset
+
+        asset = db.get(MediaAsset, body.proof_media_id)
+        if asset is None or asset.uploader_id != me:
+            raise HTTPException(status_code=403, detail="Capture introuvable")
         entry.proof_media_id = body.proof_media_id
     entry.status = "DECLARED"
     entry.reviewed_at = None
