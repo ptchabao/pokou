@@ -10,6 +10,7 @@ import '../../groups/data/group_model.dart';
 import '../../groups/presentation/group_controller.dart';
 import '../../modules/shared/module_ui.dart';
 import 'kory_controller.dart';
+import 'kory_participants_screen.dart';
 import 'kory_pot_screen.dart';
 
 /// Ouvre la création, puis la cagnotte créée. `groupId` la rattache au
@@ -24,6 +25,21 @@ Future<void> openKoryCreate(
   );
   if (potId == null || !context.mounted) return;
   refreshKory(ref);
+  // KOR-11 : étape 2 sur 3, les participants — sauf pour une cagnotte
+  // rattachée à un groupe, dont les membres participent déjà.
+  if (groupId == null) {
+    final pot = await ref.read(koryRepositoryProvider).pot(potId);
+    if (!context.mounted) return;
+    if (!pot.isTontine) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) =>
+              KoryParticipantsScreen(potId: potId, title: pot.title),
+        ),
+      );
+      if (!context.mounted) return;
+    }
+  }
   await Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: potId)));

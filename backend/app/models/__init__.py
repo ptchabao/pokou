@@ -142,6 +142,7 @@ from app.models.kory import (  # noqa: F401
     KoryMember,
     KoryEntry,
     KoryRound,
+    KoryInvite,
 )
 from app.models.events import (  # noqa: F401
     OutboxEvent,

@@ -266,7 +266,26 @@ def get_or_create_user_by_phone(db: Session, phone: str) -> User:
     db.add(user)
     db.commit()
     db.refresh(user)
+    _accept_kory_invites(db, user)
     return user
+
+
+def _accept_kory_invites(db: Session, user: User) -> None:
+    """KOR-11 : invité à une cagnotte avant d'avoir Pokou, on la retrouve
+    à l'inscription — et l'on s'y engage comme les autres."""
+    from app.models import KoryInvite, KoryMember
+
+    invites = db.query(KoryInvite).filter(
+        KoryInvite.phone == user.phone, KoryInvite.joined_user_id.is_(None)
+    ).all()
+    for invite in invites:
+        invite.joined_user_id = user.id
+        if not db.query(KoryMember).filter(
+            KoryMember.pot_id == invite.pot_id, KoryMember.user_id == user.id
+        ).first():
+            db.add(KoryMember(pot_id=invite.pot_id, user_id=user.id))
+    if invites:
+        db.commit()
 
 
 def verify_otp(db: Session, raw_phone: str, code: str) -> User:

@@ -359,3 +359,26 @@ def test_une_capture_doit_venir_de_son_auteur(client):
         json={"proof_media_id": foreign_id}, headers=member,
     )
     assert bad.status_code == 403
+
+
+def test_participants_de_pokou_et_invites_par_numero(client):
+    organizer, _ = _signup(client, "+22890400001")
+    friend, friend_id = _signup(client, "+22890400002")
+    pot = client.post("/api/v1/kory/pots", json={"title": "Mariage d’Akossiwa"}, headers=organizer).json()
+    with patch("app.services.notifications.sms_service.send_sms", return_value=True) as sms:
+        added = client.post(
+            f"/api/v1/kory/pots/{pot['id']}/participants",
+            json={"user_ids": [friend_id], "phones": [{"phone": "+22891000007", "name": "Mensah Yawa"}]},
+            headers=organizer,
+        ).json()
+    assert sms.call_count == 1 and "t'invite à la cagnotte" in sms.call_args.args[2]
+    people = {p["name"]: p for p in added["participants"]}
+    assert people["Mensah Yawa"]["on_pokou"] is False
+    assert people["Mensah Yawa"]["phone"].endswith("•• •• 07")
+    assert any(p.get("user_id") == friend_id for p in added["participants"])
+    # Le participant de Pokou voit la cagnotte.
+    assert client.get(f"/api/v1/kory/pots/{pot['id']}", headers=friend).status_code == 200
+
+    # À l'inscription, l'invitée devient membre.
+    yawa, _ = _signup(client, "+22891000007")
+    assert client.get(f"/api/v1/kory/pots/{pot['id']}", headers=yawa).status_code == 200

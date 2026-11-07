@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from app.core.countries import module_open
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models import GroupMember, KoryEntry, KoryMember, KoryPot, KoryRound, User
+from app.models import GroupMember, KoryEntry, KoryInvite, KoryMember, KoryPot, KoryRound, User
 from app.services.events.outbox import record_event
 from app.services.notifications.inbox import notify
 
@@ -87,6 +87,18 @@ class PledgeBody(BaseModel):
 
 class ExtendBody(BaseModel):
     due_at: datetime
+
+
+class InvitePhone(BaseModel):
+    phone: str = Field(..., min_length=6, max_length=32)
+    name: Optional[str] = Field(None, max_length=120)
+
+
+class ParticipantsBody(BaseModel):
+    """KOR-11 : des personnes de Pokou (par identifiant) et d'autres par
+    leur numéro."""
+    user_ids: List[int] = Field(default_factory=list, max_length=200)
+    phones: List[InvitePhone] = Field(default_factory=list, max_length=200)
 
 
 #: KORY-13 : un engagement se corrige pendant 8 h, compté par le serveur.
@@ -228,6 +240,28 @@ def _participants(db: Session, pot: KoryPot) -> set:
     return {u for u in users if u}
 
 
+def _mask(phone: Optional[str]) -> str:
+    """« +228 91 •• •• 07 » : assez pour reconnaître, pas pour recopier."""
+    digits = (phone or "").replace(" ", "")
+    if len(digits) < 8:
+        return "••"
+    return f"{digits[:4]} {digits[4:6]} •• •• {digits[-2:]}"
+
+
+def _participants_json(db: Session, pot: KoryPot) -> list:
+    members = [
+        {"user_id": m.user_id, "name": _name(db, m.user_id) or "Pokou", "on_pokou": True,
+         "is_collector": m.user_id == pot.collector_id}
+        for m in db.query(KoryMember).filter(KoryMember.pot_id == pot.id).all()
+    ]
+    invited = [
+        {"invite_id": i.id, "name": i.display_name or _mask(i.phone), "phone": _mask(i.phone),
+         "on_pokou": False, "is_collector": False}
+        for i in db.query(KoryInvite).filter(KoryInvite.pot_id == pot.id, KoryInvite.joined_user_id.is_(None)).all()
+    ]
+    return members + invited
+
+
 def _notify(db: Session, pot: KoryPot, user_ids, body: str) -> None:
     notify(db, user_ids, service="kory", title=pot.title, body=body, route=f"kory/{pot.id}")
 
@@ -350,6 +384,9 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         "closed_at": pot.closed_at.isoformat() if pot.closed_at else None,
         "extended_at": pot.extended_at.isoformat() if pot.extended_at else None,
     }
+    # KOR-11 : les participants, numéros masqués (KORY-15).
+    if viewer_id in (pot.organizer_id, pot.collector_id):
+        data["participants"] = _participants_json(db, pot)
     # Engagements (KOR-12 à 16). L'heure du SERVEUR accompagne la réponse :
     # le délai de 8 h ne dépend pas de l'horloge du téléphone.
     now = datetime.utcnow()
@@ -846,3 +883,66 @@ def resubmit_entry(
     _emit(db, pot, "kory.entry.resubmitted", entry_id=entry.id, contributor_id=me, amount=entry.amount)
     db.commit()
     return _entry_json(db, entry, me, pot)
+
+
+@router.post("/pots/{pot_id}/participants")
+def add_participants(
+    pot_id: int,
+    body: ParticipantsBody,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-11 : l'organisateur ajoute des participants. Ceux de Pokou entrent
+    tout de suite ; les autres reçoivent un SMS et restent « Invités »
+    jusqu'à leur inscription."""
+    from app.core.config import get_settings
+    from app.services.auth.otp_service import normalize_phone
+    from app.services.notifications import sms_service
+
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    if me not in (pot.organizer_id, pot.collector_id):
+        raise HTTPException(status_code=403, detail="Seul l'organisateur ajoute des participants")
+    if pot.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Cette cagnotte est clôturée")
+    organizer = _name(db, me) or "Un proche"
+    added = []
+
+    def add_member(user_id: int) -> None:
+        if user_id == me or db.query(KoryMember).filter(
+            KoryMember.pot_id == pot.id, KoryMember.user_id == user_id
+        ).first():
+            return
+        db.add(KoryMember(pot_id=pot.id, user_id=user_id))
+        added.append(user_id)
+
+    for user_id in body.user_ids:
+        if db.query(User.id).filter(User.id == user_id).first():
+            add_member(user_id)
+    for item in body.phones:
+        try:
+            phone = normalize_phone(item.phone)
+        except Exception:
+            raise HTTPException(status_code=422, detail=f"Numéro invalide : {item.phone}")
+        existing = db.query(User).filter(User.phone == phone).first()
+        if existing is not None:
+            add_member(existing.id)
+            continue
+        if db.query(KoryInvite).filter(KoryInvite.pot_id == pot.id, KoryInvite.phone == phone).first():
+            continue
+        db.add(KoryInvite(pot_id=pot.id, phone=phone, display_name=(item.name or "").strip() or None, invited_by=me))
+        link = f"{get_settings().public_link_base_url}/k/{pot.join_code}"
+        try:
+            sms_service.send_sms(
+                db, phone,
+                f"{organizer} t'invite à la cagnotte « {pot.title} » sur Pokou. Installe Pokou : {link}",
+                get_settings().sms_sender_id,
+            )
+        except Exception:  # SMS best-effort : l'invitation reste enregistrée
+            pass
+    db.flush()
+    if added:
+        _notify(db, pot, added, f"{organizer} t’a ajouté·e à la cagnotte. Tu peux t’y engager.")
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)

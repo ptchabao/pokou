@@ -2022,5 +2022,20 @@
   "restoreWrongPassword": "Questa password non corrisponde al backup.",
   "restoreCardTitle": "Ripristino delle tue chat",
   "restoreCardBody": "{done} chat su {total}. Foto e video dopo, all’apertura.",
-  "restoreDone": "Le tue chat sono tornate."
+  "restoreDone": "Le tue chat sono tornate.",
+  "koryParticipantsTitle": "Partecipanti",
+  "koryStepOf": "{title} · passo {step} di {total}",
+  "koryLastName": "Cognome",
+  "koryFirstName": "Nome",
+  "koryPhoneField": "Numero",
+  "koryAddParticipant": "Aggiungi",
+  "koryAddedCount": "Aggiunti · {count}",
+  "koryFromContacts": "Dai miei contatti",
+  "koryOnPokou": "Su Pokou",
+  "koryInvitedChip": "Invitato/a",
+  "koryCollectorChip": "Collettore",
+  "koryRemoveParticipant": "Rimuovi {name}",
+  "koryInviteNote": "Senza Pokou, la persona riceve un SMS di invito. Resta «Invitata» fino all’iscrizione, poi si impegna come gli altri.",
+  "koryContinueWith": "{count, plural, =0{Continua} =1{Continua con 1 partecipante} other{Continua con {count} partecipanti}}",
+  "koryInvalidPhone": "Questo numero non è valido."
 }

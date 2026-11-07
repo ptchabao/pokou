@@ -104,6 +104,24 @@ class KoryRepository {
     return KoryPot.fromJson(response as Map<String, dynamic>);
   }
 
+  /// KOR-11 : ajouter des participants (Pokou, ou invités par SMS).
+  Future<KoryPot> addParticipants(
+    int potId, {
+    List<int> userIds = const [],
+    List<({String phone, String name})> phones = const [],
+  }) async {
+    final response = await _api.post(
+      '/kory/pots/$potId/participants',
+      body: {
+        'user_ids': userIds,
+        'phones': [
+          for (final p in phones) {'phone': p.phone, 'name': p.name},
+        ],
+      },
+    );
+    return KoryPot.fromJson(response as Map<String, dynamic>);
+  }
+
   /// KOR-15 : prolonger la collecte jusqu'à [dueAt].
   Future<KoryPot> extend(int potId, DateTime dueAt) async {
     final response = await _api.post(

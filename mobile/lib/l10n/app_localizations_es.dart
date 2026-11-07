@@ -7055,4 +7055,65 @@ class LEs extends L {
 
   @override
   String get restoreDone => 'Tus conversaciones han vuelto.';
+
+  @override
+  String get koryParticipantsTitle => 'Participantes';
+
+  @override
+  String koryStepOf(Object step, Object title, Object total) {
+    return '$title · paso $step de $total';
+  }
+
+  @override
+  String get koryLastName => 'Apellido';
+
+  @override
+  String get koryFirstName => 'Nombre';
+
+  @override
+  String get koryPhoneField => 'Número';
+
+  @override
+  String get koryAddParticipant => 'Añadir';
+
+  @override
+  String koryAddedCount(Object count) {
+    return 'Añadidos · $count';
+  }
+
+  @override
+  String get koryFromContacts => 'Desde mis contactos';
+
+  @override
+  String get koryOnPokou => 'En Pokou';
+
+  @override
+  String get koryInvitedChip => 'Invitado/a';
+
+  @override
+  String get koryCollectorChip => 'Recaudador';
+
+  @override
+  String koryRemoveParticipant(Object name) {
+    return 'Quitar a $name';
+  }
+
+  @override
+  String get koryInviteNote =>
+      'Sin Pokou, la persona recibe un SMS de invitación. Queda como «Invitada» hasta registrarse y luego se compromete como los demás.';
+
+  @override
+  String koryContinueWith(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Continuar con $count participantes',
+      one: 'Continuar con 1 participante',
+      zero: 'Continuar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryInvalidPhone => 'Este número no es válido.';
 }

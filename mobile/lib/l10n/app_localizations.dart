@@ -12242,6 +12242,96 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Tes discussions sont de retour.'**
   String get restoreDone;
+
+  /// No description provided for @koryParticipantsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Participants'**
+  String get koryParticipantsTitle;
+
+  /// No description provided for @koryStepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · étape {step} sur {total}'**
+  String koryStepOf(Object step, Object title, Object total);
+
+  /// No description provided for @koryLastName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get koryLastName;
+
+  /// No description provided for @koryFirstName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénom'**
+  String get koryFirstName;
+
+  /// No description provided for @koryPhoneField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro'**
+  String get koryPhoneField;
+
+  /// No description provided for @koryAddParticipant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get koryAddParticipant;
+
+  /// No description provided for @koryAddedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutés · {count}'**
+  String koryAddedCount(Object count);
+
+  /// No description provided for @koryFromContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis mes contacts'**
+  String get koryFromContacts;
+
+  /// No description provided for @koryOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur Pokou'**
+  String get koryOnPokou;
+
+  /// No description provided for @koryInvitedChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invité·e'**
+  String get koryInvitedChip;
+
+  /// No description provided for @koryCollectorChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecteur'**
+  String get koryCollectorChip;
+
+  /// No description provided for @koryRemoveParticipant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {name}'**
+  String koryRemoveParticipant(Object name);
+
+  /// No description provided for @koryInviteNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans Pokou, la personne reçoit un SMS d’invitation. Elle reste « Invitée » jusqu’à son inscription, puis s’engage comme les autres.'**
+  String get koryInviteNote;
+
+  /// No description provided for @koryContinueWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Continuer} =1{Continuer avec 1 participant} other{Continuer avec {count} participants}}'**
+  String koryContinueWith(num count);
+
+  /// No description provided for @koryInvalidPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro n’est pas valide.'**
+  String get koryInvalidPhone;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

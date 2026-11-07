@@ -2022,5 +2022,20 @@
   "restoreWrongPassword": "Этот пароль не подходит к копии.",
   "restoreCardTitle": "Восстановление чатов",
   "restoreCardBody": "{done} из {total} чатов. Фото и видео — потом, при открытии.",
-  "restoreDone": "Твои чаты вернулись."
+  "restoreDone": "Твои чаты вернулись.",
+  "koryParticipantsTitle": "Участники",
+  "koryStepOf": "{title} · шаг {step} из {total}",
+  "koryLastName": "Фамилия",
+  "koryFirstName": "Имя",
+  "koryPhoneField": "Номер",
+  "koryAddParticipant": "Добавить",
+  "koryAddedCount": "Добавлено · {count}",
+  "koryFromContacts": "Из контактов",
+  "koryOnPokou": "В Pokou",
+  "koryInvitedChip": "Приглашён",
+  "koryCollectorChip": "Сборщик",
+  "koryRemoveParticipant": "Убрать {name}",
+  "koryInviteNote": "Без Pokou человек получит SMS-приглашение. Он остаётся «Приглашённым» до регистрации, а затем вносит обязательство, как все.",
+  "koryContinueWith": "{count, plural, =0{Продолжить} =1{Продолжить с 1 участником} other{Продолжить с участниками: {count}}}",
+  "koryInvalidPhone": "Неверный номер."
 }

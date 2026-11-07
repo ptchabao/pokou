@@ -123,3 +123,18 @@ class KoryRound(Base):
     #: UPCOMING | CURRENT | DONE
     status = Column(String(10), nullable=False, default="UPCOMING")
     closed_at = Column(DateTime, nullable=True)
+
+
+class KoryInvite(Base):
+    """KOR-11 : une personne ajoutée par son numéro, qui n'est pas (encore)
+    sur Pokou. Elle reçoit un SMS et reste « Invitée » jusqu'à son
+    inscription ; elle devient alors membre (voir otp_service)."""
+    __tablename__ = "kory_invites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pot_id = Column(Integer, ForeignKey("kory_pots.id", ondelete="CASCADE"), nullable=False, index=True)
+    phone = Column(String(32), nullable=False, index=True)
+    display_name = Column(String(120), nullable=True)
+    invited_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    joined_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)

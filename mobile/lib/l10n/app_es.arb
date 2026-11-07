@@ -2022,5 +2022,20 @@
   "restoreWrongPassword": "Esta contraseña no corresponde a la copia.",
   "restoreCardTitle": "Restaurando tus conversaciones",
   "restoreCardBody": "{done} de {total} conversaciones. Fotos y vídeos después, al abrirlas.",
-  "restoreDone": "Tus conversaciones han vuelto."
+  "restoreDone": "Tus conversaciones han vuelto.",
+  "koryParticipantsTitle": "Participantes",
+  "koryStepOf": "{title} · paso {step} de {total}",
+  "koryLastName": "Apellido",
+  "koryFirstName": "Nombre",
+  "koryPhoneField": "Número",
+  "koryAddParticipant": "Añadir",
+  "koryAddedCount": "Añadidos · {count}",
+  "koryFromContacts": "Desde mis contactos",
+  "koryOnPokou": "En Pokou",
+  "koryInvitedChip": "Invitado/a",
+  "koryCollectorChip": "Recaudador",
+  "koryRemoveParticipant": "Quitar a {name}",
+  "koryInviteNote": "Sin Pokou, la persona recibe un SMS de invitación. Queda como «Invitada» hasta registrarse y luego se compromete como los demás.",
+  "koryContinueWith": "{count, plural, =0{Continuar} =1{Continuar con 1 participante} other{Continuar con {count} participantes}}",
+  "koryInvalidPhone": "Este número no es válido."
 }

@@ -7020,4 +7020,65 @@ class LAr extends L {
 
   @override
   String get restoreDone => 'عادت محادثاتك.';
+
+  @override
+  String get koryParticipantsTitle => 'المشاركون';
+
+  @override
+  String koryStepOf(Object step, Object title, Object total) {
+    return '$title · الخطوة $step من $total';
+  }
+
+  @override
+  String get koryLastName => 'اسم العائلة';
+
+  @override
+  String get koryFirstName => 'الاسم الأول';
+
+  @override
+  String get koryPhoneField => 'الرقم';
+
+  @override
+  String get koryAddParticipant => 'إضافة';
+
+  @override
+  String koryAddedCount(Object count) {
+    return 'المضافون · $count';
+  }
+
+  @override
+  String get koryFromContacts => 'من جهات اتصالي';
+
+  @override
+  String get koryOnPokou => 'على Pokou';
+
+  @override
+  String get koryInvitedChip => 'مدعو';
+
+  @override
+  String get koryCollectorChip => 'الجامع';
+
+  @override
+  String koryRemoveParticipant(Object name) {
+    return 'إزالة $name';
+  }
+
+  @override
+  String get koryInviteNote =>
+      'من دون Pokou، يتلقّى الشخص رسالة دعوة قصيرة. يبقى «مدعوًا» حتى يسجّل، ثم يتعهّد مثل الآخرين.';
+
+  @override
+  String koryContinueWith(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'متابعة مع $count مشاركين',
+      one: 'متابعة مع مشارك واحد',
+      zero: 'متابعة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryInvalidPhone => 'هذا الرقم غير صالح.';
 }

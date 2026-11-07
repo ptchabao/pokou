@@ -2022,5 +2022,20 @@
   "restoreWrongPassword": "This password doesn’t match the backup.",
   "restoreCardTitle": "Restoring your chats",
   "restoreCardBody": "{done} of {total} chats. Photos and videos afterwards, when opened.",
-  "restoreDone": "Your chats are back."
+  "restoreDone": "Your chats are back.",
+  "koryParticipantsTitle": "Participants",
+  "koryStepOf": "{title} · step {step} of {total}",
+  "koryLastName": "Last name",
+  "koryFirstName": "First name",
+  "koryPhoneField": "Number",
+  "koryAddParticipant": "Add",
+  "koryAddedCount": "Added · {count}",
+  "koryFromContacts": "From my contacts",
+  "koryOnPokou": "On Pokou",
+  "koryInvitedChip": "Invited",
+  "koryCollectorChip": "Collector",
+  "koryRemoveParticipant": "Remove {name}",
+  "koryInviteNote": "Without Pokou, the person gets an invitation SMS. They stay “Invited” until they sign up, then pledge like everyone else.",
+  "koryContinueWith": "{count, plural, =0{Continue} =1{Continue with 1 participant} other{Continue with {count} participants}}",
+  "koryInvalidPhone": "This number isn’t valid."
 }

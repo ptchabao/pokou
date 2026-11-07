@@ -2022,5 +2022,20 @@
   "restoreWrongPassword": "كلمة المرور هذه لا تطابق النسخة.",
   "restoreCardTitle": "استعادة محادثاتك",
   "restoreCardBody": "{done} من {total} محادثة. الصور ومقاطع الفيديو لاحقًا عند الفتح.",
-  "restoreDone": "عادت محادثاتك."
+  "restoreDone": "عادت محادثاتك.",
+  "koryParticipantsTitle": "المشاركون",
+  "koryStepOf": "{title} · الخطوة {step} من {total}",
+  "koryLastName": "اسم العائلة",
+  "koryFirstName": "الاسم الأول",
+  "koryPhoneField": "الرقم",
+  "koryAddParticipant": "إضافة",
+  "koryAddedCount": "المضافون · {count}",
+  "koryFromContacts": "من جهات اتصالي",
+  "koryOnPokou": "على Pokou",
+  "koryInvitedChip": "مدعو",
+  "koryCollectorChip": "الجامع",
+  "koryRemoveParticipant": "إزالة {name}",
+  "koryInviteNote": "من دون Pokou، يتلقّى الشخص رسالة دعوة قصيرة. يبقى «مدعوًا» حتى يسجّل، ثم يتعهّد مثل الآخرين.",
+  "koryContinueWith": "{count, plural, =0{متابعة} =1{متابعة مع مشارك واحد} other{متابعة مع {count} مشاركين}}",
+  "koryInvalidPhone": "هذا الرقم غير صالح."
 }

@@ -7107,4 +7107,65 @@ class LRu extends L {
 
   @override
   String get restoreDone => 'Твои чаты вернулись.';
+
+  @override
+  String get koryParticipantsTitle => 'Участники';
+
+  @override
+  String koryStepOf(Object step, Object title, Object total) {
+    return '$title · шаг $step из $total';
+  }
+
+  @override
+  String get koryLastName => 'Фамилия';
+
+  @override
+  String get koryFirstName => 'Имя';
+
+  @override
+  String get koryPhoneField => 'Номер';
+
+  @override
+  String get koryAddParticipant => 'Добавить';
+
+  @override
+  String koryAddedCount(Object count) {
+    return 'Добавлено · $count';
+  }
+
+  @override
+  String get koryFromContacts => 'Из контактов';
+
+  @override
+  String get koryOnPokou => 'В Pokou';
+
+  @override
+  String get koryInvitedChip => 'Приглашён';
+
+  @override
+  String get koryCollectorChip => 'Сборщик';
+
+  @override
+  String koryRemoveParticipant(Object name) {
+    return 'Убрать $name';
+  }
+
+  @override
+  String get koryInviteNote =>
+      'Без Pokou человек получит SMS-приглашение. Он остаётся «Приглашённым» до регистрации, а затем вносит обязательство, как все.';
+
+  @override
+  String koryContinueWith(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Продолжить с участниками: $count',
+      one: 'Продолжить с 1 участником',
+      zero: 'Продолжить',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryInvalidPhone => 'Неверный номер.';
 }

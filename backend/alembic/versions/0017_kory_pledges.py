@@ -33,6 +33,19 @@ def upgrade() -> None:
     with op.batch_alter_table("seller_reviews") as t:
         t.add_column(sa.Column("product_id", sa.Integer(), nullable=True))
         t.add_column(sa.Column("tags", sa.JSON(), nullable=True))
+    # Kory : participants invités par leur numéro (KOR-11).
+    op.create_table(
+        "kory_invites",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("pot_id", sa.Integer(), sa.ForeignKey("kory_pots.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("phone", sa.String(length=32), nullable=False),
+        sa.Column("display_name", sa.String(length=120), nullable=True),
+        sa.Column("invited_by", sa.Integer(), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("joined_user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True),
+    )
+    op.create_index("ix_kory_invites_pot_id", "kory_invites", ["pot_id"])
+    op.create_index("ix_kory_invites_phone", "kory_invites", ["phone"])
     # Sauvegarde chiffrée (MSG-12).
     op.create_table(
         "user_backups",
@@ -64,6 +77,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("service_notifications")
     op.drop_table("user_backups")
+    op.drop_table("kory_invites")
     with op.batch_alter_table("seller_reviews") as t:
         t.drop_column("tags")
         t.drop_column("product_id")
