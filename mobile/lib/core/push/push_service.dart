@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../media/media_repository.dart';
 import '../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'web_notifications_stub.dart'
@@ -911,9 +912,24 @@ class PushService {
           // Déjà résolu par le serveur pour CE destinataire (carnet, ou
           // nom d'un compte certifié) — voir calls.py::_ring.
           callerName: data['caller_name'] as String?,
+          callerAvatar: _avatarFromId(data['caller_avatar_id']),
+          groupAvatar: _avatarFromId(data['group_avatar_id']),
           callerIsVerified: data['caller_is_verified'] == '1',
         ),
       ),
+    );
+  }
+
+  /// Le push ne porte que l'identifiant de la photo (taille limitée) : il
+  /// suffit à l'avatar pour la charger.
+  static MediaMeta? _avatarFromId(Object? raw) {
+    final id = int.tryParse('${raw ?? ''}');
+    if (id == null) return null;
+    return MediaMeta(
+      id: id,
+      mimeType: 'image/jpeg',
+      sizeBytes: 0,
+      originalFilename: null,
     );
   }
 

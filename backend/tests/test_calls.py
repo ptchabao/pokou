@@ -133,6 +133,10 @@ def test_call_token_generated_and_invite_pushed_over_websocket(client):
             assert event["room"] == body["room"]
             assert event["from_user_id"] == user_id_a
             assert event["call_type"] == "1:1"
+            # B n'a PAS A dans son carnet : le nom arrive quand même avec
+            # l'invitation (avant, l'écran affichait « Appel entrant »).
+            assert event["caller_name"]
+            assert "caller_avatar" in event
 
 
 def test_call_token_group_call_has_group_call_type(client):

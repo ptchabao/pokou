@@ -22,6 +22,7 @@ from app.services.auth import action_token_service
 from app.services.calls import call_housekeeping, call_thread_service, livekit_service
 from app.services.messaging import notification_policy
 from app.services.notifications.push_service import send_push
+from app.services.privacy import privacy_service
 from app.utils.identity import est_certifie, nom_affiche, nom_certifie
 from app.core.security import get_current_user
 
@@ -167,7 +168,28 @@ async def _ring(
     """Sonne chez chaque invité : WebSocket si connecté, push sinon. Partagé
     par le lancement d'appel et l'ajout de participants en cours d'appel."""
     caller_verified = est_certifie(caller)
+    group_avatar = _serialize_avatar(group.avatar_media) if group else None
     for invitee_id in invitee_ids:
+        # Le petname que CET invité a posé sur l'appelant l'emporte sur le
+        # nom que l'appelant s'est choisi — propre à chaque destinataire,
+        # donc résolu DANS la boucle (voir la même priorité dans
+        # messages.py::_deliver). Résolu AVANT le WebSocket : sans lui, un
+        # appelant absent du carnet s'affichait « Appel entrant », sans nom.
+        invitee_contact = db.query(Contact).filter(
+            Contact.owner_user_id == invitee_id, Contact.contact_user_id == caller.id
+        ).first()
+        caller_name = nom_affiche(
+            caller, invitee_contact.display_name if invitee_contact else None, repli="Pokou"
+        )
+        # La photo, seulement si l'appelant la montre à CET invité (réglage
+        # « Photo de profil ») — même règle que le profil.
+        caller_avatar = (
+            _serialize_avatar(caller.avatar_media)
+            if privacy_service.peut_voir(
+                db, caller.id, invitee_id, privacy_service.Aspect.PHOTO_DE_PROFIL, cible=caller
+            )
+            else None
+        )
         delivered = await manager.send_to_user(invitee_id, {
             "type": "call:invite",
             "room": call.room,
@@ -177,23 +199,16 @@ async def _ring(
             # qui n'est pas dans son carnet.
             "caller_is_verified": caller_verified,
             "caller_certified_name": nom_certifie(caller),
+            "caller_name": caller_name,
+            "caller_avatar": caller_avatar,
             "call_type": call.call_type,
             "is_video": is_video,
             "group_id": call.group_id,
             "group_name": group.name if group else None,
+            "group_avatar": group_avatar,
         })
         if delivered:
             continue
-        # Le petname que CET invité a posé sur l'appelant l'emporte sur le
-        # nom que l'appelant s'est choisi — propre à chaque destinataire,
-        # donc résolu DANS la boucle (voir la même priorité dans
-        # messages.py::_deliver).
-        invitee_contact = db.query(Contact).filter(
-            Contact.owner_user_id == invitee_id, Contact.contact_user_id == caller.id
-        ).first()
-        caller_name = nom_affiche(
-            caller, invitee_contact.display_name if invitee_contact else None, repli="Pokou"
-        )
         send_push(
             db,
             invitee_id,
@@ -224,7 +239,22 @@ async def _ring(
                 **action_token_service.issue_call_pair(
                     db, user_id=invitee_id, room=call.room
                 ),
-                **({"group_id": str(call.group_id), "group_name": group.name} if group else {}),
+                **(
+                    {"caller_avatar_id": str(caller_avatar["id"])} if caller_avatar else {}
+                ),
+                **(
+                    {
+                        "group_id": str(call.group_id),
+                        "group_name": group.name,
+                        **(
+                            {"group_avatar_id": str(group_avatar["id"])}
+                            if group_avatar
+                            else {}
+                        ),
+                    }
+                    if group
+                    else {}
+                ),
             },
             # data-only : le client construit lui-même la notification
             # d'appel (plein écran, actions Répondre/Refuser) depuis

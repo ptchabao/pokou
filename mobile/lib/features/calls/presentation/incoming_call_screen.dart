@@ -7,6 +7,7 @@ import '../../../core/crypto/call_keys.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/media/media_repository.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
@@ -36,9 +37,19 @@ class IncomingCallScreen extends ConsumerStatefulWidget {
     this.groupId,
     this.groupName,
     this.callerName,
+    this.callerAvatar,
+    this.groupAvatar,
     this.callerIsVerified = false,
     @visibleForTesting this.ringtonePlayer,
   });
+
+  /// La photo de l'appelant envoyée par le serveur avec l'invitation (si
+  /// l'appelant la montre à cet utilisateur) : sans elle, quelqu'un absent
+  /// du carnet n'apparaissait qu'en initiale.
+  final MediaMeta? callerAvatar;
+
+  /// La photo du groupe, pour un appel de groupe.
+  final MediaMeta? groupAvatar;
 
   final String room;
   final int fromUserId;
@@ -294,18 +305,61 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
           children: [
             const Spacer(),
             if (widget.groupName != null)
-              Container(
-                width: 96,
-                height: 96,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white24,
+              // Appel de groupe : la photo du GROUPE, et en médaillon celle
+              // de la personne qui appelle.
+              SizedBox(
+                width: 112,
+                height: 104,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      left: 8,
+                      top: 0,
+                      child: widget.groupAvatar != null
+                          ? ContactAvatar(
+                              avatar: widget.groupAvatar,
+                              displayName: widget.groupName!,
+                              size: 96,
+                              fallbackBackgroundColor: Colors.white24,
+                            )
+                          : Container(
+                              width: 96,
+                              height: 96,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white24,
+                              ),
+                              child: const Icon(
+                                Icons.groups,
+                                size: 44,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.accentPrimaryDark,
+                        ),
+                        child: ContactAvatar(
+                          avatar: widget.callerAvatar ?? contact?.avatar,
+                          displayName: callerName,
+                          size: 40,
+                          fallbackBackgroundColor: Colors.white24,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.groups, size: 44, color: Colors.white),
               )
             else
               ContactAvatar(
-                avatar: contact?.avatar,
+                avatar: widget.callerAvatar ?? contact?.avatar,
                 displayName: displayName,
                 size: 96,
                 fallbackBackgroundColor: Colors.white24,

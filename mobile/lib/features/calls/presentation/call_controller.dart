@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/media/media_repository.dart';
 import '../../../core/crypto/e2ee_service.dart';
 import '../../auth/presentation/auth_controller.dart';
 
@@ -52,6 +53,11 @@ final callSignalingProvider = Provider<void>((ref) {
     final groupName = event['group_name'] as String?;
     final callerIsVerified = event['caller_is_verified'] as bool? ?? false;
     final callerCertifiedName = event['caller_certified_name'] as String?;
+    // Nom résolu par le serveur pour CET utilisateur (son carnet d'abord) :
+    // annoncé même quand l'appelant n'est pas dans le carnet de l'appareil.
+    final callerName = event['caller_name'] as String?;
+    MediaMeta? media(Object? raw) =>
+        raw is Map<String, dynamic> ? MediaMeta.fromJson(raw) : null;
 
     rootNavigatorKey.currentState?.push(
       MaterialPageRoute(
@@ -62,7 +68,9 @@ final callSignalingProvider = Provider<void>((ref) {
           isVideo: isVideo,
           groupId: groupId,
           groupName: groupName,
-          callerName: callerCertifiedName,
+          callerName: callerCertifiedName ?? callerName,
+          callerAvatar: media(event['caller_avatar']),
+          groupAvatar: media(event['group_avatar']),
           callerIsVerified: callerIsVerified,
         ),
       ),
