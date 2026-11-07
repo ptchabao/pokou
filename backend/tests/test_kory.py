@@ -227,3 +227,100 @@ def test_une_contribution_previent_le_collecteur_en_temps_reel(client):
         client.get(f"/api/v1/kory/pots/{pot['id']}", headers=organizer)
         events = [(c.args[0], c.args[1]) for c in envoi.await_args_list]
     assert (organizer_id, {"type": "kory:updated", "pot_id": pot["id"]}) in events
+
+
+def _pot_with_member(client, **pot):
+    organizer, _ = _signup(client)
+    body = {"title": "Anniversaire de Papa", **pot}
+    created = client.post("/api/v1/kory/pots", json=body, headers=organizer).json()
+    member, member_id = _signup(client)
+    client.post("/api/v1/kory/join", json={"code": created["join_code"]}, headers=member)
+    return organizer, member, member_id, created
+
+
+def test_engagement_modifiable_8h_puis_ferme(client):
+    from datetime import datetime, timedelta
+
+    from app.models import KoryMember
+
+    due = (datetime.utcnow() + timedelta(days=6)).isoformat()
+    organizer, member, member_id, pot = _pot_with_member(client, due_at=due)
+    url = f"/api/v1/kory/pots/{pot['id']}/pledge"
+
+    first = client.put(url, json={"base": 15000, "daily": 500}, headers=member).json()
+    mine = first["my_pledge"]
+    assert mine["total"] == 15000 + 500 * mine["days"] and mine["days"] >= 5
+    assert mine["is_firm"] is False and mine["remaining"] == mine["total"]
+    # Le collecteur ne voit pas encore un engagement modifiable.
+    seen = client.get(f"/api/v1/kory/pots/{pot['id']}", headers=organizer).json()
+    assert seen["pledge_summary"]["engaged_count"] == 0
+
+    # Corrigé dans les 8 h : accepté.
+    assert client.put(url, json={"base": 10000}, headers=member).json()["my_pledge"]["total"] == 10000
+
+    # 8 h plus tard (heure du serveur) : ferme, plus modifiable.
+    with TestingSessionLocal() as db:
+        row = db.query(KoryMember).filter(KoryMember.user_id == member_id).first()
+        row.pledged_at = datetime.utcnow() - timedelta(hours=9)
+        db.commit()
+    assert client.put(url, json={"base": 5000}, headers=member).status_code == 409
+    summary = client.get(f"/api/v1/kory/pots/{pot['id']}", headers=organizer).json()["pledge_summary"]
+    assert summary["engaged_total"] == 10000 and summary["remaining_count"] == 1
+
+    # Seul le collecteur l'annule.
+    cancel = f"/api/v1/kory/pots/{pot['id']}/pledges/{member_id}/cancel"
+    assert client.post(cancel, headers=member).status_code == 403
+    assert client.post(cancel, headers=organizer).status_code == 200
+    assert client.get(f"/api/v1/kory/pots/{pot['id']}", headers=member).json()["my_pledge"] is None
+
+
+def test_contribution_contestee_puis_renvoyee(client):
+    organizer, member, _, pot = _pot_with_member(client)
+    entry = client.post(
+        f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 5000, "wallet_reference": "TG26"}, headers=member
+    ).json()
+    client.post(
+        f"/api/v1/kory/pots/{pot['id']}/entries/{entry['id']}/review",
+        json={"decision": "REJECT", "reason": "Rien reçu sur Flooz à cette heure-là."},
+        headers=organizer,
+    )
+    seen = client.get(f"/api/v1/kory/pots/{pot['id']}", headers=member).json()["entries"][0]
+    assert seen["status"] == "REJECTED" and seen["review_reason"].startswith("Rien reçu")
+
+    resubmitted = client.post(
+        f"/api/v1/kory/pots/{pot['id']}/entries/{entry['id']}/resubmit",
+        json={"wallet_reference": "TG2610311320B2"},
+        headers=member,
+    ).json()
+    assert resubmitted["status"] == "DECLARED" and resubmitted["wallet_reference"] == "TG2610311320B2"
+
+
+def test_le_collecteur_prolonge_la_collecte(client):
+    from datetime import datetime, timedelta
+
+    organizer, member, _, pot = _pot_with_member(client, due_at=(datetime.utcnow() + timedelta(days=1)).isoformat())
+    later = (datetime.utcnow() + timedelta(days=8)).isoformat()
+    url = f"/api/v1/kory/pots/{pot['id']}/extend"
+    assert client.post(url, json={"due_at": later}, headers=member).status_code == 403
+    extended = client.post(url, json={"due_at": later}, headers=organizer).json()
+    assert extended["due_at"].startswith(later[:10]) and extended["extended_at"]
+    past = (datetime.utcnow() - timedelta(days=1)).isoformat()
+    assert client.post(url, json={"due_at": past}, headers=organizer).status_code == 422
+
+
+def test_le_centre_de_notifications_recoit_les_evenements_kory(client):
+    organizer, member, _, pot = _pot_with_member(client)
+    entry = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 10000}, headers=member).json()
+    inbox = client.get("/api/v1/notifications", headers=organizer).json()
+    assert inbox["unread"] == 1
+    assert inbox["items"][0]["service"] == "kory" and "a déclaré 10 000 FCFA. À confirmer." in inbox["items"][0]["body"]
+    assert inbox["items"][0]["route"] == f"kory/{pot['id']}"
+
+    client.post(
+        f"/api/v1/kory/pots/{pot['id']}/entries/{entry['id']}/review",
+        json={"decision": "CONFIRM"}, headers=organizer,
+    )
+    assert "a confirmé tes 10 000 FCFA" in client.get("/api/v1/notifications", headers=member).json()["items"][0]["body"]
+
+    assert client.post("/api/v1/notifications/read-all", headers=organizer).json()["unread"] == 0
+    assert client.get("/api/v1/notifications", headers=organizer).json()["unread"] == 0

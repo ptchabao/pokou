@@ -47,6 +47,8 @@ class KoryPot(Base):
     status = Column(String(8), nullable=False, default="OPEN", index=True)  # OPEN|CLOSED
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     closed_at = Column(DateTime, nullable=True)
+    #: Dernière prolongation de la date de fin par le collecteur (KOR-15).
+    extended_at = Column(DateTime, nullable=True)
 
 
 class KoryMember(Base):
@@ -61,6 +63,14 @@ class KoryMember(Base):
     pot_id = Column(Integer, ForeignKey("kory_pots.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     joined_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    #: Engagement (KOR-12 à 14) : un montant de départ, plus éventuellement
+    #: un montant par jour jusqu'à la date de fin. Modifiable 8 h après
+    #: `pledged_at` (compté par le serveur), ferme ensuite ; seul le
+    #: collecteur peut alors l'annuler (`pledge_cancelled_at`).
+    pledge_base = Column(Integer, nullable=True)
+    pledge_daily = Column(Integer, nullable=True)
+    pledged_at = Column(DateTime, nullable=True)
+    pledge_cancelled_at = Column(DateTime, nullable=True)
 
 
 class KoryEntry(Base):
@@ -89,6 +99,10 @@ class KoryEntry(Base):
     status = Column(String(10), nullable=False, default="DECLARED", index=True)  # DECLARED|CONFIRMED|REJECTED
     declared_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     reviewed_at = Column(DateTime, nullable=True)
+    #: Pourquoi le collecteur n'a pas constaté l'envoi (KOR-5).
+    review_reason = Column(String(280), nullable=True)
+    #: Capture du SMS de l'opérateur ajoutée par le contributeur (KOR-5).
+    proof_media_id = Column(Integer, nullable=True)
 
 
 class KoryRound(Base):

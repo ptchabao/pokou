@@ -23,6 +23,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models import GroupMember, KoryEntry, KoryMember, KoryPot, KoryRound, User
 from app.services.events.outbox import record_event
+from app.services.notifications.inbox import notify
 
 router = APIRouter(prefix="/kory", tags=["Pokou Kory"])
 
@@ -67,6 +68,29 @@ class EntryCreate(BaseModel):
 
 class EntryReview(BaseModel):
     decision: str  # CONFIRM|REJECT
+    #: Motif du refus, montré au contributeur (KOR-5).
+    reason: Optional[str] = Field(None, max_length=280)
+
+
+class EntryResubmit(BaseModel):
+    """KOR-5 : le contributeur corrige sa référence ou joint la capture du
+    SMS ; la contribution redevient « à confirmer »."""
+    wallet_reference: Optional[str] = Field(None, max_length=64)
+    note: Optional[str] = Field(None, max_length=280)
+    proof_media_id: Optional[int] = None
+
+
+class PledgeBody(BaseModel):
+    base: int = Field(..., ge=100, le=MAX_AMOUNT)
+    daily: Optional[int] = Field(None, ge=0, le=MAX_AMOUNT)
+
+
+class ExtendBody(BaseModel):
+    due_at: datetime
+
+
+#: KORY-13 : un engagement se corrige pendant 8 h, compté par le serveur.
+PLEDGE_EDIT_WINDOW = timedelta(hours=8)
 
 
 class JoinBody(BaseModel):
@@ -167,6 +191,8 @@ def _entry_json(db: Session, entry: KoryEntry, viewer_id: int, pot: KoryPot) -> 
         "reviewed_at": entry.reviewed_at.isoformat() if entry.reviewed_at else None,
         "is_mine": entry.contributor_id == viewer_id,
         "round_number": entry.round_number,
+        "review_reason": entry.review_reason,
+        "proof_media_id": entry.proof_media_id,
     }
     reviewer_id = _entry_reviewer(db, pot, entry)
     data["can_review"] = viewer_id == reviewer_id and entry.status == "DECLARED"
@@ -185,6 +211,99 @@ def _emit(db: Session, pot: KoryPot, event_type: str, **data) -> None:
         {"pot_id": pot.id, "group_id": pot.group_id, "kind": pot.kind, **data},
         key=f"pot-{pot.id}",
     )
+
+
+def _fcfa(amount: int) -> str:
+    return f"{amount:,}".replace(",", " ") + " FCFA"
+
+
+def _participants(db: Session, pot: KoryPot) -> set:
+    """Tous ceux qui suivent la cagnotte : collecteur, organisateur, membres
+    par code et membres du groupe rattaché."""
+    users = {pot.collector_id, pot.organizer_id} | {
+        uid for (uid,) in db.query(KoryMember.user_id).filter(KoryMember.pot_id == pot.id)
+    }
+    if pot.group_id:
+        users |= {uid for (uid,) in db.query(GroupMember.user_id).filter(GroupMember.group_id == pot.group_id)}
+    return {u for u in users if u}
+
+
+def _notify(db: Session, pot: KoryPot, user_ids, body: str) -> None:
+    notify(db, user_ids, service="kory", title=pot.title, body=body, route=f"kory/{pot.id}")
+
+
+def _pledge_days(pot: KoryPot, member: KoryMember) -> int:
+    """Le nombre de jours où le montant journalier s'ajoute : de la date
+    d'engagement à la date de fin (KOR-12 : « 500 FCFA × 6 jours »)."""
+    if not member.pledge_daily or not pot.due_at or not member.pledged_at:
+        return 0
+    return max((pot.due_at.date() - member.pledged_at.date()).days, 0)
+
+
+def _pledge_total(pot: KoryPot, member: KoryMember) -> int:
+    return (member.pledge_base or 0) + (member.pledge_daily or 0) * _pledge_days(pot, member)
+
+
+def _active_pledges(db: Session, pot: KoryPot) -> List[KoryMember]:
+    return db.query(KoryMember).filter(
+        KoryMember.pot_id == pot.id,
+        KoryMember.pledged_at.isnot(None),
+        KoryMember.pledge_cancelled_at.is_(None),
+    ).all()
+
+
+def _is_firm(member: KoryMember, now: datetime) -> bool:
+    return member.pledged_at is not None and now >= member.pledged_at + PLEDGE_EDIT_WINDOW
+
+
+def _pledge_json(db: Session, pot: KoryPot, member: KoryMember, now: datetime) -> dict:
+    total = _pledge_total(pot, member)
+    confirmed = _confirmed_total(db, pot.id, member.user_id)
+    firm_at = member.pledged_at + PLEDGE_EDIT_WINDOW
+    next_add = None
+    if member.pledge_daily and pot.due_at and now < pot.due_at and pot.status == "OPEN":
+        next_add = (now + timedelta(days=1)).date().isoformat()
+    return {
+        "base": member.pledge_base,
+        "daily": member.pledge_daily,
+        "days": _pledge_days(pot, member),
+        "total": total,
+        "pledged_at": member.pledged_at.isoformat(),
+        "firm_at": firm_at.isoformat(),
+        "is_firm": _is_firm(member, now),
+        "confirmed": confirmed,
+        # KORY-13 : reste à verser = engagé − confirmé.
+        "remaining": max(total - confirmed, 0),
+        "next_daily_add": next_add,
+    }
+
+
+def _pledge_summary(db: Session, pot: KoryPot, now: datetime) -> dict:
+    """La vue du collecteur (KOR-15). Il ne voit que les engagements
+    FERMES : pendant 8 h, un engagement reste l'affaire de son auteur."""
+    firm = [m for m in _active_pledges(db, pot) if _is_firm(m, now)]
+    remaining = [(m, max(_pledge_total(pot, m) - _confirmed_total(db, pot.id, m.user_id), 0)) for m in firm]
+    to_confirm = db.query(
+        func.coalesce(func.sum(KoryEntry.amount), 0), func.count(KoryEntry.id)
+    ).filter(KoryEntry.pot_id == pot.id, KoryEntry.status == "DECLARED").one()
+    return {
+        "engaged_total": sum(_pledge_total(pot, m) for m in firm),
+        "engaged_count": len(firm),
+        "confirmed_total": _confirmed_total(db, pot.id),
+        "to_confirm_total": int(to_confirm[0] or 0),
+        "to_confirm_count": int(to_confirm[1] or 0),
+        "remaining_total": sum(r for _, r in remaining),
+        "remaining_count": sum(1 for _, r in remaining if r > 0),
+        "pledges": [
+            {
+                "user_id": m.user_id,
+                "name": _name(db, m.user_id),
+                "total": _pledge_total(pot, m),
+                "remaining": r,
+            }
+            for m, r in remaining
+        ],
+    }
 
 
 def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool = False) -> dict:
@@ -217,7 +336,23 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         "join_code": pot.join_code if pot.kind != "TONTINE" else None,
         "created_at": pot.created_at.isoformat(),
         "closed_at": pot.closed_at.isoformat() if pot.closed_at else None,
+        "extended_at": pot.extended_at.isoformat() if pot.extended_at else None,
     }
+    # Engagements (KOR-12 à 16). L'heure du SERVEUR accompagne la réponse :
+    # le délai de 8 h ne dépend pas de l'horloge du téléphone.
+    now = datetime.utcnow()
+    data["server_now"] = now.isoformat()
+    data["is_due"] = bool(pot.due_at and now >= pot.due_at and pot.status == "OPEN")
+    if pot.kind != "TONTINE":
+        mine = db.query(KoryMember).filter(
+            KoryMember.pot_id == pot.id,
+            KoryMember.user_id == viewer_id,
+            KoryMember.pledged_at.isnot(None),
+            KoryMember.pledge_cancelled_at.is_(None),
+        ).first()
+        data["my_pledge"] = _pledge_json(db, pot, mine, now) if mine else None
+        if viewer_id in (pot.collector_id, pot.organizer_id):
+            data["pledge_summary"] = _pledge_summary(db, pot, now)
     # Le numéro du collecteur est ce à quoi on envoie l'argent : visible
     # des seuls participants, ce que `_get_visible_pot` a déjà vérifié.
     collector = db.query(User).filter(User.id == pot.collector_id).first()
@@ -454,6 +589,9 @@ def declare_entry(
         db, pot, "kory.entry.declared",
         entry_id=entry.id, contributor_id=me, amount=entry.amount, status=entry.status,
     )
+    if entry.status == "DECLARED":
+        reviewer = _entry_reviewer(db, pot, entry)
+        _notify(db, pot, [reviewer], f"{_name(db, me) or 'Un membre'} a déclaré {_fcfa(entry.amount)}. À confirmer.")
     db.commit()
     db.refresh(entry)
     return _entry_json(db, entry, me, pot)
@@ -485,9 +623,18 @@ def review_entry(
         raise HTTPException(status_code=422, detail="Décision inconnue")
     entry.status = "CONFIRMED" if decision == "CONFIRM" else "REJECTED"
     entry.reviewed_at = datetime.utcnow()
+    entry.review_reason = (
+        (body.reason or "").strip() or None if decision == "REJECT" else None
+    )
     _emit(
         db, pot, f"kory.entry.{entry.status.lower()}",
         entry_id=entry.id, contributor_id=entry.contributor_id, amount=entry.amount,
+    )
+    reviewer_name = _name(db, me) or "Le collecteur"
+    _notify(
+        db, pot, [entry.contributor_id],
+        f"{reviewer_name} a confirmé tes {_fcfa(entry.amount)}." if entry.status == "CONFIRMED"
+        else f"{reviewer_name} n’a pas constaté ton envoi de {_fcfa(entry.amount)}.",
     )
     db.commit()
     return _entry_json(db, entry, me, pot)
@@ -531,11 +678,152 @@ def close_pot(pot_id: int, current_user: dict = Depends(get_current_user), db: S
     me = _me(current_user)
     _require_kory_open(db, me)
     pot = _get_visible_pot(db, pot_id, me)
-    if me != pot.organizer_id:
-        raise HTTPException(status_code=403, detail="Seul l'organisateur clôture la cagnotte")
+    if me not in (pot.organizer_id, pot.collector_id):
+        raise HTTPException(status_code=403, detail="Seul le collecteur clôture la cagnotte")
     if pot.status != "CLOSED":
         pot.status = "CLOSED"
         pot.closed_at = datetime.utcnow()
         _emit(db, pot, "kory.pot.closed", confirmed_total=_confirmed_total(db, pot.id))
+        # KOR-16 : chacun est prévenu, avec ce qu'il lui reste à verser.
+        closer = _name(db, me) or "Le collecteur"
+        now = datetime.utcnow()
+        for member in _active_pledges(db, pot):
+            remaining = max(_pledge_total(pot, member) - _confirmed_total(db, pot.id, member.user_id), 0)
+            if member.user_id != me and remaining > 0:
+                _notify(db, pot, [member.user_id], f"{closer} a clôturé la collecte. Il te reste {_fcfa(remaining)} à verser.")
+        pledged = {m.user_id for m in _active_pledges(db, pot)}
+        others = _participants(db, pot) - pledged - {me}
+        _notify(db, pot, others, f"{closer} a clôturé la collecte.")
         db.commit()
     return _pot_json(db, pot, me, with_entries=True)
+
+
+@router.put("/pots/{pot_id}/pledge")
+def set_pledge(
+    pot_id: int,
+    body: PledgeBody,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-12 et 13 : s'engager, ou corriger son engagement pendant 8 h."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    if pot.kind == "TONTINE":
+        raise HTTPException(status_code=409, detail="Une tontine a un montant fixe par tour")
+    if pot.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Cette cagnotte est clôturée")
+    if body.daily and not pot.due_at:
+        raise HTTPException(status_code=422, detail="Un montant journalier demande une date de fin")
+    now = datetime.utcnow()
+    member = db.query(KoryMember).filter(KoryMember.pot_id == pot.id, KoryMember.user_id == me).first()
+    if member is None:
+        # Membre par le groupe rattaché : il n'a pas encore de ligne.
+        member = KoryMember(pot_id=pot.id, user_id=me)
+        db.add(member)
+    active = member.pledged_at is not None and member.pledge_cancelled_at is None
+    if active and _is_firm(member, now):
+        raise HTTPException(
+            status_code=409,
+            detail="Ton engagement est ferme : seul le collecteur peut l'annuler",
+        )
+    if not active:
+        member.pledged_at = now
+        member.pledge_cancelled_at = None
+    member.pledge_base = body.base
+    member.pledge_daily = body.daily or None
+    db.flush()
+    _emit(db, pot, "kory.pledge.saved", user_id=me, total=_pledge_total(pot, member))
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)
+
+
+@router.post("/pots/{pot_id}/pledges/{user_id}/cancel")
+def cancel_pledge(
+    pot_id: int,
+    user_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-14 : un engagement ferme ne s'annule que par le collecteur, et
+    c'est noté au journal (évènement)."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    if me != pot.collector_id:
+        raise HTTPException(status_code=403, detail="Seul le collecteur annule un engagement")
+    member = db.query(KoryMember).filter(
+        KoryMember.pot_id == pot.id, KoryMember.user_id == user_id,
+        KoryMember.pledged_at.isnot(None), KoryMember.pledge_cancelled_at.is_(None),
+    ).first()
+    if member is None:
+        raise HTTPException(status_code=404, detail="Engagement introuvable")
+    member.pledge_cancelled_at = datetime.utcnow()
+    _emit(db, pot, "kory.pledge.cancelled", user_id=user_id)
+    _notify(db, pot, [user_id], f"{_name(db, me) or 'Le collecteur'} a annulé ton engagement. C’est noté au journal.")
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)
+
+
+@router.post("/pots/{pot_id}/extend")
+def extend_pot(
+    pot_id: int,
+    body: ExtendBody,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-15 : prolonger la collecte. Les engagements restent fermes."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    if me not in (pot.collector_id, pot.organizer_id):
+        raise HTTPException(status_code=403, detail="Seul le collecteur prolonge la collecte")
+    if pot.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Cette cagnotte est clôturée")
+    new_due = body.due_at.replace(tzinfo=None)
+    now = datetime.utcnow()
+    if new_due <= now or (pot.due_at and new_due <= pot.due_at):
+        raise HTTPException(status_code=422, detail="La nouvelle date doit être plus tard")
+    pot.due_at = new_due
+    pot.extended_at = now
+    _emit(db, pot, "kory.pot.extended", due_at=new_due.isoformat())
+    _notify(
+        db, pot, _participants(db, pot) - {me},
+        f"La collecte est prolongée jusqu’au {new_due.strftime('%d/%m/%Y')}. Les engagements restent fermes.",
+    )
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)
+
+
+@router.post("/pots/{pot_id}/entries/{entry_id}/resubmit")
+def resubmit_entry(
+    pot_id: int,
+    entry_id: int,
+    body: EntryResubmit,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-5 : le contributeur dont l'envoi est contesté corrige sa
+    référence ou joint la capture du SMS. La contribution redevient « à
+    confirmer » ; elle n'entrait dans aucun total pendant la contestation."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    entry = db.query(KoryEntry).filter(KoryEntry.id == entry_id, KoryEntry.pot_id == pot.id).first()
+    if entry is None or entry.contributor_id != me:
+        raise HTTPException(status_code=404, detail="Contribution introuvable")
+    if entry.status != "REJECTED":
+        raise HTTPException(status_code=409, detail="Cette contribution n'est pas contestée")
+    if pot.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Cette cagnotte est clôturée")
+    if body.wallet_reference is not None:
+        entry.wallet_reference = body.wallet_reference.strip() or None
+    if body.note is not None:
+        entry.note = body.note.strip() or None
+    if body.proof_media_id is not None:
+        entry.proof_media_id = body.proof_media_id
+    entry.status = "DECLARED"
+    entry.reviewed_at = None
+    _emit(db, pot, "kory.entry.resubmitted", entry_id=entry.id, contributor_id=me, amount=entry.amount)
+    db.commit()
+    return _entry_json(db, entry, me, pot)

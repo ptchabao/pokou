@@ -167,3 +167,6 @@ from app.models.baba import (  # noqa: F401
 from app.models.e2ee_retry import (  # noqa: F401
     E2EERetry,
 )
+from app.models.service_notifications import (  # noqa: F401
+    ServiceNotification,
+)

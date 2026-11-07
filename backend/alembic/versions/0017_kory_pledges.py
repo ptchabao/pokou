@@ -1,0 +1,55 @@
+"""Kory : engagements (KOR-12 à 14), motif de refus (KOR-5), prolongation ;
+centre de notifications (NOT-1).
+
+Revision ID: 0017_kory_pledges
+Revises: 0016_e2ee_retries
+"""
+from alembic import op
+import sqlalchemy as sa
+
+
+revision = "0017_kory_pledges"
+down_revision = "0016_e2ee_retries"
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+    with op.batch_alter_table("kory_members") as t:
+        t.add_column(sa.Column("pledge_base", sa.Integer(), nullable=True))
+        t.add_column(sa.Column("pledge_daily", sa.Integer(), nullable=True))
+        t.add_column(sa.Column("pledged_at", sa.DateTime(), nullable=True))
+        t.add_column(sa.Column("pledge_cancelled_at", sa.DateTime(), nullable=True))
+    with op.batch_alter_table("kory_entries") as t:
+        t.add_column(sa.Column("review_reason", sa.String(length=280), nullable=True))
+        t.add_column(sa.Column("proof_media_id", sa.Integer(), nullable=True))
+    with op.batch_alter_table("kory_pots") as t:
+        t.add_column(sa.Column("extended_at", sa.DateTime(), nullable=True))
+    # Centre de notifications (NOT-1).
+    op.create_table(
+        "service_notifications",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("service", sa.String(length=16), nullable=False),
+        sa.Column("title", sa.String(length=120), nullable=False),
+        sa.Column("body", sa.String(length=280), nullable=False),
+        sa.Column("route", sa.String(length=120), nullable=True),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("read_at", sa.DateTime(), nullable=True),
+    )
+    op.create_index("ix_service_notifications_user_id", "service_notifications", ["user_id"])
+    op.create_index("ix_service_notifications_created_at", "service_notifications", ["created_at"])
+
+
+def downgrade() -> None:
+    op.drop_table("service_notifications")
+    with op.batch_alter_table("kory_pots") as t:
+        t.drop_column("extended_at")
+    with op.batch_alter_table("kory_entries") as t:
+        t.drop_column("proof_media_id")
+        t.drop_column("review_reason")
+    with op.batch_alter_table("kory_members") as t:
+        t.drop_column("pledge_cancelled_at")
+        t.drop_column("pledged_at")
+        t.drop_column("pledge_daily")
+        t.drop_column("pledge_base")
