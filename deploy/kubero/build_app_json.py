@@ -71,6 +71,17 @@ for k in ("GEMINI_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY", "GROK_API_KEY"):
         app_env[k] = env[k]
         app_env[k.replace("_API_KEY", "_ENABLED")] = "true"
 
+# Stockage objet : SeaweedFS (S3) dans l'app « pokou-minio », joignable
+# par son service interne. Les pièces jointes y sont écrites dès que les
+# clés sont présentes (voir app/services/media/object_storage.py).
+if env.get("S3_ACCESS_KEY") and env.get("S3_SECRET_KEY"):
+    app_env.update({
+        "S3_ENDPOINT_URL": "http://pokou-minio-kuberoapp:80",
+        "S3_ACCESS_KEY": env["S3_ACCESS_KEY"],
+        "S3_SECRET_KEY": env["S3_SECRET_KEY"],
+        "S3_BUCKET": env.get("S3_BUCKET", "pokou-media"),
+    })
+
 resources = {"requests": {"cpu": "250m", "memory": "384Mi"}, "limits": {"memory": "768Mi"}}
 
 app = {
