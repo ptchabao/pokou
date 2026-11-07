@@ -30,8 +30,9 @@ import 'package:just_audio/just_audio.dart';
 /// SONNERIE, qu'Android coupe lui-même en silencieux, et vibre avec le même
 /// motif que le natif (voir RingVibration.kt).
 ///
-/// La tonalité de retour, elle, reste sur le flux média : c'est l'appelant
-/// qui vient de la déclencher, le mode silencieux n'a pas à la couper.
+/// La tonalité de retour passe sur le flux de signalisation d'appel (voir
+/// [_ringbackAttributes]) : audible pendant la communication, et le mode
+/// silencieux ne la coupe pas — c'est l'appelant qui vient de la déclencher.
 class RingtonePlayer {
   RingtonePlayer()
     : _player = AudioPlayer(
@@ -50,6 +51,16 @@ class RingtonePlayer {
     contentType: AndroidAudioContentType.sonification,
   );
 
+  /// Tonalité de retour : flux « signalisation d'appel ». Sur le flux
+  /// média, elle devenait muette dès que l'appel se connectait — le micro
+  /// ouvert fait passer le téléphone en mode communication, où Android
+  /// atténue ou coupe les médias. C'est le flux des tonalités d'appel des
+  /// applications de téléphonie : il reste audible pendant la communication.
+  static const _ringbackAttributes = AndroidAudioAttributes(
+    usage: AndroidAudioUsage.voiceCommunicationSignalling,
+    contentType: AndroidAudioContentType.sonification,
+  );
+
   static const _ringbackAsset = 'assets/audio/ringback.wav';
   static const _ringtoneAsset = 'assets/audio/ringtone.wav';
 
@@ -64,7 +75,16 @@ class RingtonePlayer {
 
   /// Tonalité de retour d'appel, côté appelant, tant que personne n'a
   /// décroché.
-  Future<void> playRingback() => _playLooping(_ringbackAsset, _generation);
+  Future<void> playRingback() async {
+    if (_disposed) return;
+    final generation = _generation;
+    try {
+      await _player.setAndroidAudioAttributes(_ringbackAttributes);
+    } catch (exc) {
+      debugPrint('[Call] Flux de tonalité indisponible: $exc');
+    }
+    await _playLooping(_ringbackAsset, generation);
+  }
 
   /// Sonnerie d'appel entrant, côté appelé, avant qu'il ne réponde — sur le
   /// flux sonnerie, et avec vibration hors mode silencieux.
