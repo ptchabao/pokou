@@ -8,7 +8,7 @@ statistiques de messagerie sont des COMPTES.
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
@@ -59,9 +59,83 @@ def _user_json(u: User) -> dict:
 
 # ── Moi ──────────────────────────────────────────────────────────────────
 
+# ── Connexion à la console par e-mail et mot de passe ───────────────────
+#
+# L'app se connecte par code SMS. La console l'accepte aussi, mais le compte
+# super-administrateur créé au déploiement (scripts/seed.py) n'a pas de
+# téléphone : il lui faut un mot de passe. Ce mot de passe ne vaut QUE pour
+# la console, et seulement pour un compte de l'équipe.
+
+_MAX_FAILURES = 5
+_LOCK = timedelta(minutes=15)
+_BAD_CREDENTIALS = "E-mail ou mot de passe incorrect"
+
+
+class ConsoleLogin(BaseModel):
+    email: str = Field(..., min_length=3, max_length=255)
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+@router.post("/auth/login")
+def console_login(body: ConsoleLogin, response: Response, request: Request, db: Session = Depends(get_db)):
+    from app.api.v1.auth.auth import _issue_session
+    from app.core.security import verify_password
+
+    user = db.query(User).filter(func.lower(User.email) == body.email.strip().lower()).first()
+    now = datetime.utcnow()
+    if user is not None and user.console_locked_until and user.console_locked_until > now:
+        raise HTTPException(status_code=429, detail="Trop d'essais : réessaie dans quelques minutes")
+    ok = (
+        user is not None
+        and user.console_password_hash
+        and verify_password(body.password, user.console_password_hash)
+    )
+    if not ok:
+        if user is not None and user.console_password_hash:
+            user.console_failed_attempts = (user.console_failed_attempts or 0) + 1
+            if user.console_failed_attempts >= _MAX_FAILURES:
+                user.console_failed_attempts = 0
+                user.console_locked_until = now + _LOCK
+            db.commit()
+        # Même réponse que le compte existe ou non : pas d'énumération.
+        raise HTTPException(status_code=401, detail=_BAD_CREDENTIALS)
+    if not user.is_active or not permissions_of(user):
+        raise HTTPException(status_code=403, detail="Ce compte n'a pas accès à la console")
+    user.console_failed_attempts = 0
+    user.console_locked_until = None
+    access_token, _, _ = _issue_session(db, response, user)
+    _audit(db, user, "console_login", "user", user.id, {"method": "password"}, request)
+    db.commit()
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+class PasswordChange(BaseModel):
+    current_password: Optional[str] = Field(None, max_length=128)
+    new_password: str = Field(..., min_length=12, max_length=72)
+
+
+@router.put("/me/password")
+def change_console_password(
+    body: PasswordChange, request: Request,
+    user: User = Depends(require_permission("dashboard.view")),
+    db: Session = Depends(get_db),
+):
+    """Le mot de passe donné au déploiement est à remplacer dès la première
+    connexion. Un compte qui en a déjà un doit le fournir pour le changer."""
+    from app.core.security import hash_password, verify_password
+
+    if user.console_password_hash and not verify_password(body.current_password or "", user.console_password_hash):
+        raise HTTPException(status_code=403, detail="Mot de passe actuel incorrect")
+    user.console_password_hash = hash_password(body.new_password)
+    _audit(db, user, "console_password_change", "user", user.id, None, request)
+    db.commit()
+    return {"ok": True}
+
+
 @router.get("/me")
 def me(user: User = Depends(require_permission("dashboard.view"))):
-    return {**_user_json(user), "permissions": sorted(permissions_of(user))}
+    return {**_user_json(user), "email": user.email, "has_console_password": bool(user.console_password_hash),
+            "permissions": sorted(permissions_of(user))}
 
 
 @router.get("/roles")

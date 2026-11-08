@@ -158,6 +158,9 @@ if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
     exit 1
   fi
   echo "Migrations applied."
+  # Données de départ (catalogue des modules, super-administrateur de la
+  # console) : idempotent. Un échec ne doit pas empêcher l'API de démarrer.
+  python -m scripts.seed || echo "Seed : échec (l'API démarre quand même)."
 else
   echo "RUN_MIGRATIONS=0 : migrations laissées au Job de déploiement."
 fi

@@ -7,6 +7,8 @@ export type Me = {
   id: number
   full_name: string | null
   phone: string | null
+  email?: string | null
+  has_console_password?: boolean
   role: string
   role_label: string
   permissions: string[]

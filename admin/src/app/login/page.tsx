@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Illustration } from "@/components/illustration"
 
-type Step = "phone" | "code" | "pin"
+type Step = "phone" | "code" | "pin" | "email"
 type VerifyResponse = {
   access_token?: string
   two_step_required?: boolean
@@ -27,6 +27,8 @@ export default function LoginPage() {
   const [phone, setPhone] = React.useState("")
   const [code, setCode] = React.useState("")
   const [pin, setPin] = React.useState("")
+  const [email, setEmail] = React.useState("")
+  const [password, setPassword] = React.useState("")
   const [pending, setPending] = React.useState<string | null>(null)
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -37,7 +39,7 @@ export default function LoginPage() {
       await api("/admin/me")
     } catch (e) {
       setToken(null)
-      setStep("phone")
+      setStep(step === "email" ? "email" : "phone")
       setCode("")
       setPin("")
       throw e instanceof ApiError && e.status === 403
@@ -53,7 +55,10 @@ export default function LoginPage() {
     setBusy(true)
     setError(null)
     try {
-      if (step === "phone") {
+      if (step === "email") {
+        const r = await api<VerifyResponse>("/admin/auth/login", { body: { email: email.trim(), password } })
+        if (r.access_token) await finish(r.access_token)
+      } else if (step === "phone") {
         await api("/auth/phone/request-otp", { body: { phone: phone.trim() } })
         setStep("code")
       } else if (step === "code") {
@@ -101,6 +106,7 @@ export default function LoginPage() {
             {step === "phone" && "Connecte-toi avec le numéro de ton compte Pokou."}
             {step === "code" && `Saisis le code envoyé au ${phone}.`}
             {step === "pin" && "Saisis le code PIN de vérification en deux étapes."}
+            {step === "email" && "Connecte-toi avec l'e-mail et le mot de passe de la console."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -111,6 +117,20 @@ export default function LoginPage() {
                 <Input id="phone" type="tel" autoFocus placeholder="+229 01 00 00 00 00"
                   value={phone} onChange={(e) => setPhone(e.target.value)} required />
               </div>
+            )}
+            {step === "email" && (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input id="email" type="email" autoFocus autoComplete="username"
+                    value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Mot de passe</Label>
+                  <Input id="password" type="password" autoComplete="current-password"
+                    value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+              </>
             )}
             {step === "code" && (
               <div className="grid gap-2">
@@ -134,9 +154,13 @@ export default function LoginPage() {
             <Button type="submit" disabled={busy}>
               {busy ? "Un instant…" : step === "phone" ? "Recevoir le code" : "Se connecter"}
             </Button>
-            {step !== "phone" && (
+            {step === "phone" ? (
+              <Button type="button" variant="ghost" onClick={() => { setStep("email"); setError(null) }}>
+                Se connecter avec un e-mail
+              </Button>
+            ) : (
               <Button type="button" variant="ghost" onClick={() => { setStep("phone"); setError(null) }}>
-                Changer de numéro
+                {step === "email" ? "Se connecter avec un numéro" : "Changer de numéro"}
               </Button>
             )}
           </form>

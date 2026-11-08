@@ -10,6 +10,7 @@ import {
   IconFirstAidKit,
   IconFlag,
   IconHistory,
+  IconKey,
   IconLogout,
   IconPigMoney,
   IconPuzzle,
@@ -31,6 +32,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { PasswordDialog } from "@/components/password-dialog"
 
 /** La navigation, filtrée par les permissions du rôle (RBAC). */
 export const NAV = [
@@ -57,6 +59,7 @@ export const NAV = [
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { me, can, logout } = useAuth()
   const pathname = usePathname()
+  const [passwordOpen, setPasswordOpen] = React.useState(false)
   const initials = (me?.full_name ?? "P")
     .split(" ")
     .slice(0, 2)
@@ -115,9 +118,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{me?.full_name ?? me?.phone}</span>
+                <span className="truncate font-medium">{me?.full_name ?? me?.phone ?? me?.email}</span>
                 <span className="truncate text-xs text-muted-foreground">{me?.role_label}</span>
               </div>
+              <button
+                onClick={() => setPasswordOpen(true)}
+                title="Mot de passe de la console"
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <IconKey className="size-4" />
+              </button>
               <button
                 onClick={logout}
                 title="Se déconnecter"
@@ -129,6 +139,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <PasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </Sidebar>
   )
 }

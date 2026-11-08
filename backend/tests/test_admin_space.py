@@ -134,3 +134,56 @@ def test_sanctionner_regle_tous_les_signalements_du_compte(client):
     assert len(queue) == 2
     client.post(f"/api/v1/admin/reports/{queue[0]['id']}/resolve", json={"action": "suspend"}, headers=moderator)
     assert client.get("/api/v1/admin/reports", headers=moderator).json()["items"] == []
+
+
+def test_le_seed_cree_le_super_admin_et_se_connecte_a_la_console(client, monkeypatch, capsys):
+    from scripts import seed
+    monkeypatch.setenv("POKOU_SUPERADMIN_EMAIL", "chef@pokou.test")
+    monkeypatch.delenv("POKOU_SUPERADMIN_PASSWORD", raising=False)
+    with TestingSessionLocal() as db:
+        seed.seed_modules(db)
+        seed.seed_superadmin(db)
+        assert seed.seed_modules(db) == 0  # idempotent
+    out = capsys.readouterr().out
+    password = re.search(r"Mot de passe\s+: (\S+)", out).group(1)
+
+    with TestingSessionLocal() as db:
+        seed.seed_superadmin(db)  # second déploiement : rien de nouveau
+    assert "inchangé" in capsys.readouterr().out
+
+    bad = client.post("/api/v1/admin/auth/login", json={"email": "chef@pokou.test", "password": "faux"})
+    assert bad.status_code == 401
+    ok = client.post("/api/v1/admin/auth/login", json={"email": "CHEF@pokou.test", "password": password})
+    assert ok.status_code == 200
+    client.cookies.clear()
+    headers = {"Authorization": f"Bearer {ok.json()['access_token']}"}
+    me = client.get("/api/v1/admin/me", headers=headers).json()
+    assert me["role"] == "SUPER_ADMIN" and "team.manage" in me["permissions"]
+
+    changed = client.put("/api/v1/admin/me/password",
+                         json={"current_password": password, "new_password": "un-nouveau-mot-de-passe"}, headers=headers)
+    assert changed.status_code == 200
+    assert client.post("/api/v1/admin/auth/login",
+                       json={"email": "chef@pokou.test", "password": password}).status_code == 401
+
+
+def test_la_console_se_verrouille_apres_des_echecs(client, monkeypatch):
+    from scripts import seed
+    monkeypatch.setenv("POKOU_SUPERADMIN_EMAIL", "lock@pokou.test")
+    monkeypatch.setenv("POKOU_SUPERADMIN_PASSWORD", "le-bon-mot-de-passe")
+    with TestingSessionLocal() as db:
+        seed.seed_superadmin(db)
+    for _ in range(5):
+        client.post("/api/v1/admin/auth/login", json={"email": "lock@pokou.test", "password": "x"})
+    locked = client.post("/api/v1/admin/auth/login", json={"email": "lock@pokou.test", "password": "le-bon-mot-de-passe"})
+    assert locked.status_code == 429
+
+
+def test_un_utilisateur_sans_role_n_entre_pas_par_mot_de_passe(client):
+    from app.core.security import hash_password
+    with TestingSessionLocal() as db:
+        db.add(User(email="simple@pokou.test", role=UserRole.USER, is_active=True,
+                    console_password_hash=hash_password("mot-de-passe-123")))
+        db.commit()
+    r = client.post("/api/v1/admin/auth/login", json={"email": "simple@pokou.test", "password": "mot-de-passe-123"})
+    assert r.status_code == 403

@@ -182,6 +182,11 @@ class User(Base):
     #: au terme duquel le code SMS seul suffit de nouveau. Une connexion
     #: réussie AVEC le code PIN l'annule — c'est le cas du vol de carte SIM.
     two_step_reset_requested_at = Column(DateTime, nullable=True)
+    # Console d'administration (migration 0019) : mot de passe propre à la
+    # console, jamais utilisé par l'app. Verrouillage après échecs répétés.
+    console_password_hash = Column(String(100), nullable=True)
+    console_failed_attempts = Column(Integer, nullable=False, default=0, server_default="0")
+    console_locked_until = Column(DateTime, nullable=True)
     # ── Consentements (cahier des charges, section 8.1) ────────────────
     terms_accepted_at = Column(DateTime, nullable=True)
     terms_version = Column(String(16), nullable=True)
