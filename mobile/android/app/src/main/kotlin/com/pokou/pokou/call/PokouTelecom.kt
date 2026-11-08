@@ -32,6 +32,9 @@ object PokouTelecom {
     private const val TAG = "PokouTelecom"
     private const val ACCOUNT_ID = "pokou"
 
+    /** Coupé : voir MainActivity, « startOngoingCall ». */
+    const val ENABLED = false
+
     @Volatile
     internal var connection: PokouConnection? = null
 

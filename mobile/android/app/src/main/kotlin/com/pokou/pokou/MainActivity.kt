@@ -129,9 +129,14 @@ class MainActivity : FlutterActivity() {
                     }
                     "startOngoingCall" -> {
                         OngoingCallService.start(applicationContext, call.arguments == true)
-                        // Déclare l'appel au système : un appel téléphonique
-                        // ou WhatsApp en cours est mis EN ATTENTE.
-                        PokouTelecom.activate(applicationContext)
+                        // L'intégration Telecom (PokouTelecom) est COUPÉE :
+                        // sur Android 15/16, la connexion « self-managed »
+                        // devenue active prend le focus audio et le mode
+                        // d'appel au moment même où WebRTC configure les
+                        // siens — l'appel se connectait, mais personne
+                        // n'entendait personne. Le seul bénéfice (mettre en
+                        // attente un autre appel) ne vaut pas ce risque.
+                        if (PokouTelecom.ENABLED) PokouTelecom.activate(applicationContext)
                         result.success(null)
                     }
                     "stopOngoingCall" -> {

@@ -132,6 +132,7 @@ mkdir -p "$SYMBOLS_DIR"
 
 echo "   → App Bundle"
 flutter build appbundle --release \
+  --dart-define=POKOU_VERSION="$VERSION_NAME" \
   --obfuscate --split-debug-info="$SYMBOLS_DIR"
 cp build/app/outputs/bundle/release/app-release.aab \
    "$BUILD_DIR/pokou-v${VERSION_NAME}+${VERSION_CODE}-release.aab"
@@ -139,6 +140,7 @@ cp build/app/outputs/bundle/release/app-release.aab \
 if [ "$DO_APK" -eq 1 ]; then
   echo "   → APK par ABI (distribution directe)"
   flutter build apk --release --split-per-abi \
+    --dart-define=POKOU_VERSION="$VERSION_NAME" \
     --obfuscate --split-debug-info="$SYMBOLS_DIR"
   for abi in arm64-v8a armeabi-v7a x86_64; do
     src="build/app/outputs/flutter-apk/app-$abi-release.apk"

@@ -76,6 +76,9 @@ _BUILT_IN_SHA256_FINGERPRINTS = [
     # signe ce que les utilisateurs installent, dès lors que Play App Signing
     # est activé — voir _play_app_signing_fingerprints().
     "5F:2C:D7:94:E2:35:96:3D:2E:7B:0D:09:7E:41:A7:95:B4:13:D2:2C:12:51:B9:5A:76:87:5F:3E:3A:00:A5:7A",
+    # Clé de téléversement Play créée le 2026-11-08 (android/upload-keystore.jks,
+    # sauvegardée hors dépôt dans ~/Documents/pokou-signing).
+    "65:9E:06:2A:85:96:D8:8D:84:5B:7D:7D:0E:41:2F:B1:1E:51:5B:31:2E:E8:72:47:94:BA:1C:E3:17:D9:63:40",
     # Keystore de DEBUG de la machine de développement — conservé pour que
     # les liens fonctionnent aussi sur un build lancé depuis l'IDE. Sans
     # risque : cette clé ne signe rien qui soit distribué, et elle n'autorise
