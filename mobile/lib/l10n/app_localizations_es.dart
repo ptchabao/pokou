@@ -7244,4 +7244,42 @@ class LEs extends L {
 
   @override
   String get koryMonthActivity => 'ACTIVIDAD DEL MES';
+
+  @override
+  String get backupDestTitle => 'Dónde guardar';
+
+  @override
+  String get backupDestDrive => 'Google Drive';
+
+  @override
+  String get backupDestDriveSub =>
+      'En tu cuenta de Google, en una carpeta oculta que solo Pokou puede leer';
+
+  @override
+  String get backupDestPokou => 'Pokou';
+
+  @override
+  String get backupGoogleAccount => 'Cuenta de Google';
+
+  @override
+  String get backupChangeAccount => 'Cambiar de cuenta';
+
+  @override
+  String get backupNoAccount => 'Ninguna cuenta elegida';
+
+  @override
+  String backupWhereDrive(Object email) {
+    return 'Google Drive · $email';
+  }
+
+  @override
+  String get restoreFindDrive => 'Buscar mi copia en Google Drive';
+
+  @override
+  String get restoreNoDrive =>
+      'No hay copia de Pokou en esta cuenta de Google.';
+
+  @override
+  String get restoreWelcomeNoBackup =>
+      '¡Bienvenido de nuevo! Si guardaste tus conversaciones en Google Drive, recupéralas aquí.';
 }

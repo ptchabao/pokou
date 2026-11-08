@@ -3279,5 +3279,16 @@
   "koryHeadline": "Kory · Le cauris",
   "koryWalletChip": "WALLET À WALLET",
   "koryNeverTouches": "Pokou ne touche jamais ton argent. Les contributions passent directement de wallet à wallet, sans intermédiaire.",
-  "koryMonthActivity": "ACTIVITÉ DU MOIS"
+  "koryMonthActivity": "ACTIVITÉ DU MOIS",
+  "backupDestTitle": "Où sauvegarder",
+  "backupDestDrive": "Google Drive",
+  "backupDestDriveSub": "Sur ton compte Google, dans un dossier caché que seul Pokou peut lire",
+  "backupDestPokou": "Pokou",
+  "backupGoogleAccount": "Compte Google",
+  "backupChangeAccount": "Changer de compte",
+  "backupNoAccount": "Aucun compte choisi",
+  "backupWhereDrive": "Google Drive · {email}",
+  "restoreFindDrive": "Retrouver ma sauvegarde Google Drive",
+  "restoreNoDrive": "Aucune sauvegarde Pokou sur ce compte Google.",
+  "restoreWelcomeNoBackup": "Bon retour ! Si tu avais sauvegardé tes discussions sur Google Drive, retrouve-les ici."
 }

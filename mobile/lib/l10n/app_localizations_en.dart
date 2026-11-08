@@ -7214,4 +7214,41 @@ class LEn extends L {
 
   @override
   String get koryMonthActivity => 'THIS MONTH’S ACTIVITY';
+
+  @override
+  String get backupDestTitle => 'Where to back up';
+
+  @override
+  String get backupDestDrive => 'Google Drive';
+
+  @override
+  String get backupDestDriveSub =>
+      'On your Google account, in a hidden folder only Pokou can read';
+
+  @override
+  String get backupDestPokou => 'Pokou';
+
+  @override
+  String get backupGoogleAccount => 'Google account';
+
+  @override
+  String get backupChangeAccount => 'Change account';
+
+  @override
+  String get backupNoAccount => 'No account chosen';
+
+  @override
+  String backupWhereDrive(Object email) {
+    return 'Google Drive · $email';
+  }
+
+  @override
+  String get restoreFindDrive => 'Find my Google Drive backup';
+
+  @override
+  String get restoreNoDrive => 'No Pokou backup on this Google account.';
+
+  @override
+  String get restoreWelcomeNoBackup =>
+      'Welcome back! If you backed up your chats to Google Drive, find them here.';
 }

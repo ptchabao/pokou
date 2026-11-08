@@ -2074,5 +2074,16 @@
   "koryHeadline": "Kory · Каури",
   "koryWalletChip": "КОШЕЛЁК — КОШЕЛЁК",
   "koryNeverTouches": "Pokou никогда не касается твоих денег. Взносы идут напрямую с кошелька на кошелёк, без посредников.",
-  "koryMonthActivity": "АКТИВНОСТЬ ЗА МЕСЯЦ"
+  "koryMonthActivity": "АКТИВНОСТЬ ЗА МЕСЯЦ",
+  "backupDestTitle": "Куда сохранять",
+  "backupDestDrive": "Google Диск",
+  "backupDestDriveSub": "В твоём аккаунте Google, в скрытой папке, доступной только Pokou",
+  "backupDestPokou": "Pokou",
+  "backupGoogleAccount": "Аккаунт Google",
+  "backupChangeAccount": "Сменить аккаунт",
+  "backupNoAccount": "Аккаунт не выбран",
+  "backupWhereDrive": "Google Диск · {email}",
+  "restoreFindDrive": "Найти копию на Google Диске",
+  "restoreNoDrive": "В этом аккаунте Google нет копии Pokou.",
+  "restoreWelcomeNoBackup": "С возвращением! Если ты сохранял чаты на Google Диске, найди их здесь."
 }

@@ -2074,5 +2074,16 @@
   "koryHeadline": "Kory · The cowrie",
   "koryWalletChip": "WALLET TO WALLET",
   "koryNeverTouches": "Pokou never touches your money. Contributions go directly from wallet to wallet, with no intermediary.",
-  "koryMonthActivity": "THIS MONTH’S ACTIVITY"
+  "koryMonthActivity": "THIS MONTH’S ACTIVITY",
+  "backupDestTitle": "Where to back up",
+  "backupDestDrive": "Google Drive",
+  "backupDestDriveSub": "On your Google account, in a hidden folder only Pokou can read",
+  "backupDestPokou": "Pokou",
+  "backupGoogleAccount": "Google account",
+  "backupChangeAccount": "Change account",
+  "backupNoAccount": "No account chosen",
+  "backupWhereDrive": "Google Drive · {email}",
+  "restoreFindDrive": "Find my Google Drive backup",
+  "restoreNoDrive": "No Pokou backup on this Google account.",
+  "restoreWelcomeNoBackup": "Welcome back! If you backed up your chats to Google Drive, find them here."
 }

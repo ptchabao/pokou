@@ -7,13 +7,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../providers.dart';
+import 'drive_backup.dart';
 import '../time/server_time.dart';
 
 /// Ce que le serveur sait d'une sauvegarde : jamais son contenu, seulement
 /// de quoi la proposer (CNX-2) et la déchiffrer avec le mot de passe.
+/// Où se trouve la sauvegarde : chez Pokou, ou sur le Google Drive de
+/// l'utilisateur (comme WhatsApp).
+enum BackupSource { pokou, googleDrive }
+
 class BackupInfo {
   const BackupInfo({
-    required this.mediaId,
+    this.mediaId,
+    this.source = BackupSource.pokou,
+    this.driveFileId,
+    this.accountEmail,
     required this.salt,
     required this.iterations,
     required this.discussions,
@@ -22,7 +30,12 @@ class BackupInfo {
     required this.createdAt,
   });
 
-  final int mediaId;
+  final int? mediaId;
+  final BackupSource source;
+
+  /// Google Drive : le fichier et le compte qui le portent.
+  final String? driveFileId;
+  final String? accountEmail;
   final String salt;
   final int iterations;
   final int discussions;
@@ -81,10 +94,71 @@ class BackupService {
   static const _saltKey = 'pokou_backup_salt_v1';
   static const _lastKey = 'pokou_backup_last_v1';
   static const _format = 'pokou-backup-v1';
+  static const _destKey = 'pokou_backup_dest_v1';
+
+  final drive = DriveBackup();
+
+  /// Où les sauvegardes partent. Google Drive par défaut sur Android,
+  /// comme WhatsApp ; Pokou sinon.
+  Future<BackupSource> destination() async =>
+      await _storage.read(key: _destKey) == 'pokou'
+      ? BackupSource.pokou
+      : (await _storage.read(key: _destKey) == 'drive'
+            ? BackupSource.googleDrive
+            : (Platform.isAndroid
+                  ? BackupSource.googleDrive
+                  : BackupSource.pokou));
+
+  Future<void> setDestination(BackupSource value) => _storage.write(
+    key: _destKey,
+    value: value == BackupSource.googleDrive ? 'drive' : 'pokou',
+  );
+
+  /// La sauvegarde sur Google Drive du compte déjà connecté (sans fenêtre),
+  /// ou celle du compte choisi si [interactive].
+  Future<BackupInfo?> driveInfo({bool interactive = false}) async {
+    final account = interactive
+        ? await drive.chooseAccount()
+        : await drive.silentAccount();
+    if (account == null) return null;
+    final found = await drive.info(account);
+    if (found == null) return null;
+    return BackupInfo(
+      source: BackupSource.googleDrive,
+      driveFileId: found.fileId,
+      accountEmail: found.email,
+      salt: found.salt,
+      iterations: found.iterations,
+      discussions: found.discussions,
+      messages: found.messages,
+      sizeBytes: found.sizeBytes,
+      createdAt: found.createdAt,
+    );
+  }
+
+  /// La restauration ne se propose qu'UNE fois par téléphone : vrai au
+  /// premier appel, faux ensuite.
+  Future<bool> takeRestoreOffer() async {
+    const key = 'pokou_restore_offered_v1';
+    if (await _storage.read(key: key) == '1') return false;
+    await _storage.write(key: key, value: '1');
+    return true;
+  }
+
+  /// Le compte Google utilisé pour les sauvegardes, s'il y en a un.
+  Future<String?> driveAccountEmail() async =>
+      (await drive.silentAccount())?.email;
 
   final _aes = AesGcm.with256bits();
 
   Future<BackupInfo?> info() async {
+    if (await destination() == BackupSource.googleDrive) {
+      return driveInfo();
+    }
+    return serverInfo();
+  }
+
+  Future<BackupInfo?> serverInfo() async {
     final json =
         await _ref.read(apiClientProvider).get('/backup')
             as Map<String, dynamic>;
@@ -146,6 +220,35 @@ class BackupService {
       secretKey: SecretKey(base64Decode(keyB64)),
     );
     final blob = box.concatenation();
+    if (await destination() == BackupSource.googleDrive) {
+      final account =
+          await drive.silentAccount() ?? await drive.chooseAccount();
+      if (account == null) throw StateError('Aucun compte Google');
+      await drive.upload(
+        account,
+        blob,
+        properties: {
+          'salt': salt,
+          'iterations': '$_iterations',
+          'discussions': '${discussions.length}',
+          'messages': '${rows.direct.length + rows.group.length}',
+        },
+      );
+      await _storage.write(
+        key: _lastKey,
+        value: DateTime.now().toUtc().toIso8601String(),
+      );
+      return BackupInfo(
+        source: BackupSource.googleDrive,
+        accountEmail: account.email,
+        salt: salt,
+        iterations: _iterations,
+        discussions: discussions.length,
+        messages: rows.direct.length + rows.group.length,
+        sizeBytes: blob.length,
+        createdAt: DateTime.now(),
+      );
+    }
     final uploaded = await _ref
         .read(mediaRepositoryProvider)
         .upload(
@@ -193,14 +296,23 @@ class BackupService {
   /// reviennent par lots ; [onProgress] suit leur nombre.
   Future<void> restore(
     String password, {
+    BackupInfo? from,
     void Function(RestoreProgress progress)? onProgress,
   }) async {
-    final backup = await info();
+    final backup = from ?? await info();
     if (backup == null) throw StateError('Aucune sauvegarde');
     final key = await _derive(password, backup.salt, backup.iterations);
-    final blob = await _ref
-        .read(apiClientProvider)
-        .getBytes('/media/${backup.mediaId}');
+    final List<int> blob;
+    if (backup.source == BackupSource.googleDrive) {
+      final account =
+          await drive.silentAccount() ?? await drive.chooseAccount();
+      if (account == null) throw StateError('Aucun compte Google');
+      blob = await drive.download(account, backup.driveFileId!);
+    } else {
+      blob = await _ref
+          .read(apiClientProvider)
+          .getBytes('/media/${backup.mediaId}');
+    }
     List<int> packed;
     try {
       packed = await _aes.decrypt(
@@ -249,10 +361,16 @@ class BackupService {
       value: base64Encode(await key.extractBytes()),
     );
     await _storage.write(key: _saltKey, value: backup.salt);
+    await setDestination(backup.source);
   }
 
   Future<void> deleteBackup() async {
-    await _ref.read(apiClientProvider).delete('/backup');
+    if (await destination() == BackupSource.googleDrive) {
+      final account = await drive.silentAccount();
+      if (account != null) await drive.delete(account);
+    } else {
+      await _ref.read(apiClientProvider).delete('/backup');
+    }
     await _storage.delete(key: _keyKey);
     await _storage.delete(key: _saltKey);
     await _storage.delete(key: _lastKey);

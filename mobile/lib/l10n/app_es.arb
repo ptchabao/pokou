@@ -2074,5 +2074,16 @@
   "koryHeadline": "Kory · El cauri",
   "koryWalletChip": "BILLETERA A BILLETERA",
   "koryNeverTouches": "Pokou nunca toca tu dinero. Las contribuciones pasan directamente de billetera a billetera, sin intermediarios.",
-  "koryMonthActivity": "ACTIVIDAD DEL MES"
+  "koryMonthActivity": "ACTIVIDAD DEL MES",
+  "backupDestTitle": "Dónde guardar",
+  "backupDestDrive": "Google Drive",
+  "backupDestDriveSub": "En tu cuenta de Google, en una carpeta oculta que solo Pokou puede leer",
+  "backupDestPokou": "Pokou",
+  "backupGoogleAccount": "Cuenta de Google",
+  "backupChangeAccount": "Cambiar de cuenta",
+  "backupNoAccount": "Ninguna cuenta elegida",
+  "backupWhereDrive": "Google Drive · {email}",
+  "restoreFindDrive": "Buscar mi copia en Google Drive",
+  "restoreNoDrive": "No hay copia de Pokou en esta cuenta de Google.",
+  "restoreWelcomeNoBackup": "¡Bienvenido de nuevo! Si guardaste tus conversaciones en Google Drive, recupéralas aquí."
 }

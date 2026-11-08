@@ -7206,4 +7206,41 @@ class LAr extends L {
 
   @override
   String get koryMonthActivity => 'نشاط الشهر';
+
+  @override
+  String get backupDestTitle => 'أين يتم النسخ';
+
+  @override
+  String get backupDestDrive => 'Google Drive';
+
+  @override
+  String get backupDestDriveSub =>
+      'على حسابك في Google، في مجلد مخفي لا يقرؤه إلا Pokou';
+
+  @override
+  String get backupDestPokou => 'Pokou';
+
+  @override
+  String get backupGoogleAccount => 'حساب Google';
+
+  @override
+  String get backupChangeAccount => 'تغيير الحساب';
+
+  @override
+  String get backupNoAccount => 'لم يتم اختيار حساب';
+
+  @override
+  String backupWhereDrive(Object email) {
+    return 'Google Drive · $email';
+  }
+
+  @override
+  String get restoreFindDrive => 'ابحث عن نسختي على Google Drive';
+
+  @override
+  String get restoreNoDrive => 'لا توجد نسخة Pokou على حساب Google هذا.';
+
+  @override
+  String get restoreWelcomeNoBackup =>
+      'مرحبًا بعودتك! إذا نسختَ محادثاتك على Google Drive فاستعدها من هنا.';
 }

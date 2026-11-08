@@ -98,13 +98,18 @@ Future<String?> _askPassword(
 Future<bool> startRestore(
   BuildContext context,
   WidgetRef ref,
-  String password,
-) async {
+  String password, {
+  BackupInfo? from,
+}) async {
   final service = ref.read(backupServiceProvider);
   final progress = ref.read(restoreProgressProvider.notifier);
   progress.state = const RestoreProgress(done: 0, total: 1);
   try {
-    await service.restore(password, onProgress: (p) => progress.state = p);
+    await service.restore(
+      password,
+      from: from,
+      onProgress: (p) => progress.state = p,
+    );
     progress.state = null;
     return true;
   } on BackupWrongPasswordException {
@@ -139,13 +144,42 @@ class BackupSettingsScreen extends ConsumerStatefulWidget {
 class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
   bool _busy = false;
   bool? _hasPassword;
+  BackupSource? _dest;
+  String? _email;
 
   @override
   void initState() {
     super.initState();
-    ref.read(backupServiceProvider).hasPassword().then((v) {
+    final service = ref.read(backupServiceProvider);
+    service.hasPassword().then((v) {
       if (mounted) setState(() => _hasPassword = v);
     });
+    service.destination().then((d) {
+      if (mounted) setState(() => _dest = d);
+    });
+    service.driveAccountEmail().then((e) {
+      if (mounted) setState(() => _email = e);
+    });
+  }
+
+  Future<void> _setDest(BackupSource dest) async {
+    final service = ref.read(backupServiceProvider);
+    if (dest == BackupSource.googleDrive && _email == null) {
+      final account = await service.drive.chooseAccount();
+      if (account == null) return;
+      _email = account.email;
+    }
+    await service.setDestination(dest);
+    ref.invalidate(backupInfoProvider);
+    if (mounted) setState(() => _dest = dest);
+  }
+
+  Future<void> _changeAccount() async {
+    final service = ref.read(backupServiceProvider);
+    await service.drive.signOut();
+    final account = await service.drive.chooseAccount();
+    ref.invalidate(backupInfoProvider);
+    if (mounted) setState(() => _email = account?.email);
   }
 
   Future<void> _run(Future<void> Function() action, String done) async {
@@ -194,10 +228,68 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
           children: [
+            // MSG-12 : Google Drive (comme WhatsApp) ou Pokou.
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                l.backupDestTitle,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            ModuleCard(
+              child: RadioGroup<BackupSource>(
+                groupValue: _dest,
+                onChanged: (v) {
+                  if (v != null) _setDest(v);
+                },
+                child: Column(
+                  children: [
+                    RadioListTile<BackupSource>(
+                      contentPadding: EdgeInsets.zero,
+                      value: BackupSource.googleDrive,
+                      title: Text(l.backupDestDrive),
+                      subtitle: Text(l.backupDestDriveSub),
+                    ),
+                    if (_dest == BackupSource.googleDrive)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 48, bottom: 4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _email ?? l.backupNoAccount,
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _changeAccount,
+                              child: Text(l.backupChangeAccount),
+                            ),
+                          ],
+                        ),
+                      ),
+                    RadioListTile<BackupSource>(
+                      contentPadding: EdgeInsets.zero,
+                      value: BackupSource.pokou,
+                      title: Text(l.backupDestPokou),
+                      subtitle: Text(l.backupWhere),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
             ModuleCard(
               child: Column(
                 children: [
-                  _InfoRow(l.backupTitle, l.backupWhere),
+                  _InfoRow(
+                    l.backupTitle,
+                    _dest == BackupSource.googleDrive && _email != null
+                        ? l.backupWhereDrive(_email!)
+                        : l.backupWhere,
+                  ),
                   _InfoRow(
                     l.backupLast,
                     backup == null
@@ -298,13 +390,48 @@ class _InfoRow extends StatelessWidget {
 
 // ── CNX-2 · Bon retour et sauvegarde ────────────────────────────────────
 
-class WelcomeBackScreen extends ConsumerWidget {
-  const WelcomeBackScreen({super.key, required this.backup});
+class WelcomeBackScreen extends ConsumerStatefulWidget {
+  const WelcomeBackScreen({super.key, this.backup});
 
-  final BackupInfo backup;
+  /// `null` : aucune sauvegarde chez Pokou ; on propose de la retrouver sur
+  /// Google Drive (Android, comme WhatsApp).
+  final BackupInfo? backup;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WelcomeBackScreen> createState() => _WelcomeBackScreenState();
+}
+
+class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
+  late BackupInfo? backup = widget.backup;
+  bool _searching = false;
+
+  Future<void> _findDrive() async {
+    setState(() => _searching = true);
+    try {
+      final found = await ref
+          .read(backupServiceProvider)
+          .driveInfo(interactive: true);
+      if (!mounted) return;
+      if (found == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(L.of(context).restoreNoDrive)));
+      }
+      setState(() => backup = found ?? backup);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(L.of(context).modulesCheckNetwork)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _searching = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final backup = this.backup;
     final l = L.of(context);
     final user = ref.watch(authControllerProvider).user;
     final first = (user?.fullName ?? '').split(' ').first;
@@ -324,7 +451,13 @@ class WelcomeBackScreen extends ConsumerWidget {
               children: [
                 const Icon(Icons.auto_awesome, color: AppColors.brandOr),
                 const SizedBox(width: 10),
-                Expanded(child: Text(l.welcomeBackBaba(first))),
+                Expanded(
+                  child: Text(
+                    backup == null
+                        ? l.restoreWelcomeNoBackup
+                        : l.welcomeBackBaba(first),
+                  ),
+                ),
               ],
             ),
           ),
@@ -357,21 +490,27 @@ class WelcomeBackScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ModuleCard(
-            child: Column(
-              children: [
-                _InfoRow(l.backupTitle, l.backupWhere),
-                _InfoRow(l.backupLast, _when(context, backup.createdAt)),
-                _InfoRow(
-                  l.backupContent,
-                  l.backupContentValue(
-                    backup.discussions,
-                    _size(backup.sizeBytes),
+          if (backup != null)
+            ModuleCard(
+              child: Column(
+                children: [
+                  _InfoRow(
+                    l.backupTitle,
+                    backup.source == BackupSource.googleDrive
+                        ? l.backupWhereDrive(backup.accountEmail ?? '')
+                        : l.backupWhere,
                   ),
-                ),
-              ],
+                  _InfoRow(l.backupLast, _when(context, backup.createdAt)),
+                  _InfoRow(
+                    l.backupContent,
+                    l.backupContentValue(
+                      backup.discussions,
+                      _size(backup.sizeBytes),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 12),
           ModuleCallout(tone: CalloutTone.beige, text: l.welcomeBackOrder),
           const SizedBox(height: 12),
@@ -385,26 +524,39 @@ class WelcomeBackScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ModuleActionButton(
-                label: l.welcomeBackRestore,
-                onPressed: () async {
-                  final password = await _askPassword(context, confirm: false);
-                  if (password == null || !context.mounted) return;
-                  // La main est rendue tout de suite (CNX-3) : la
-                  // restauration continue, sa carte s'affiche dans
-                  // Discussions.
-                  Navigator.of(context).pop();
-                  unawaited(
-                    startRestore(context, ref, password).then((ok) {
-                      if (ok && context.mounted) {
-                        ScaffoldMessenger.maybeOf(
-                          context,
-                        )?.showSnackBar(SnackBar(content: Text(l.restoreDone)));
-                      }
-                    }),
-                  );
-                },
-              ),
+              if (backup == null)
+                ModuleActionButton(
+                  label: l.restoreFindDrive,
+                  icon: Icons.cloud_download_outlined,
+                  busy: _searching,
+                  onPressed: _searching ? null : _findDrive,
+                )
+              else
+                ModuleActionButton(
+                  label: l.welcomeBackRestore,
+                  onPressed: () async {
+                    final password = await _askPassword(
+                      context,
+                      confirm: false,
+                    );
+                    if (password == null || !context.mounted) return;
+                    // La main est rendue tout de suite (CNX-3) : la
+                    // restauration continue, sa carte s'affiche dans
+                    // Discussions.
+                    Navigator.of(context).pop();
+                    unawaited(
+                      startRestore(context, ref, password, from: backup).then((
+                        ok,
+                      ) {
+                        if (ok && context.mounted) {
+                          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                            SnackBar(content: Text(l.restoreDone)),
+                          );
+                        }
+                      }),
+                    );
+                  },
+                ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(l.welcomeBackSkip),

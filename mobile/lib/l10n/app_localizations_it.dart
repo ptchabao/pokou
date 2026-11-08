@@ -7263,4 +7263,41 @@ class LIt extends L {
 
   @override
   String get koryMonthActivity => 'ATTIVITÀ DEL MESE';
+
+  @override
+  String get backupDestTitle => 'Dove salvare';
+
+  @override
+  String get backupDestDrive => 'Google Drive';
+
+  @override
+  String get backupDestDriveSub =>
+      'Sul tuo account Google, in una cartella nascosta che solo Pokou può leggere';
+
+  @override
+  String get backupDestPokou => 'Pokou';
+
+  @override
+  String get backupGoogleAccount => 'Account Google';
+
+  @override
+  String get backupChangeAccount => 'Cambia account';
+
+  @override
+  String get backupNoAccount => 'Nessun account scelto';
+
+  @override
+  String backupWhereDrive(Object email) {
+    return 'Google Drive · $email';
+  }
+
+  @override
+  String get restoreFindDrive => 'Trova il mio backup su Google Drive';
+
+  @override
+  String get restoreNoDrive => 'Nessun backup Pokou su questo account Google.';
+
+  @override
+  String get restoreWelcomeNoBackup =>
+      'Bentornato! Se hai salvato le tue chat su Google Drive, ritrovale qui.';
 }

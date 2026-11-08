@@ -12554,6 +12554,72 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'ACTIVITÉ DU MOIS'**
   String get koryMonthActivity;
+
+  /// No description provided for @backupDestTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où sauvegarder'**
+  String get backupDestTitle;
+
+  /// No description provided for @backupDestDrive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Google Drive'**
+  String get backupDestDrive;
+
+  /// No description provided for @backupDestDriveSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur ton compte Google, dans un dossier caché que seul Pokou peut lire'**
+  String get backupDestDriveSub;
+
+  /// No description provided for @backupDestPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou'**
+  String get backupDestPokou;
+
+  /// No description provided for @backupGoogleAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte Google'**
+  String get backupGoogleAccount;
+
+  /// No description provided for @backupChangeAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de compte'**
+  String get backupChangeAccount;
+
+  /// No description provided for @backupNoAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte choisi'**
+  String get backupNoAccount;
+
+  /// No description provided for @backupWhereDrive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Google Drive · {email}'**
+  String backupWhereDrive(Object email);
+
+  /// No description provided for @restoreFindDrive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouver ma sauvegarde Google Drive'**
+  String get restoreFindDrive;
+
+  /// No description provided for @restoreNoDrive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune sauvegarde Pokou sur ce compte Google.'**
+  String get restoreNoDrive;
+
+  /// No description provided for @restoreWelcomeNoBackup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon retour ! Si tu avais sauvegardé tes discussions sur Google Drive, retrouve-les ici.'**
+  String get restoreWelcomeNoBackup;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

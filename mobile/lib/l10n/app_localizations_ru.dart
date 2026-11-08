@@ -7295,4 +7295,41 @@ class LRu extends L {
 
   @override
   String get koryMonthActivity => 'АКТИВНОСТЬ ЗА МЕСЯЦ';
+
+  @override
+  String get backupDestTitle => 'Куда сохранять';
+
+  @override
+  String get backupDestDrive => 'Google Диск';
+
+  @override
+  String get backupDestDriveSub =>
+      'В твоём аккаунте Google, в скрытой папке, доступной только Pokou';
+
+  @override
+  String get backupDestPokou => 'Pokou';
+
+  @override
+  String get backupGoogleAccount => 'Аккаунт Google';
+
+  @override
+  String get backupChangeAccount => 'Сменить аккаунт';
+
+  @override
+  String get backupNoAccount => 'Аккаунт не выбран';
+
+  @override
+  String backupWhereDrive(Object email) {
+    return 'Google Диск · $email';
+  }
+
+  @override
+  String get restoreFindDrive => 'Найти копию на Google Диске';
+
+  @override
+  String get restoreNoDrive => 'В этом аккаунте Google нет копии Pokou.';
+
+  @override
+  String get restoreWelcomeNoBackup =>
+      'С возвращением! Если ты сохранял чаты на Google Диске, найди их здесь.';
 }

@@ -134,6 +134,7 @@ dependencies:
   # Export daté du mode preuve à deux, produit SUR l'appareil : le serveur
   # n'a pas le texte des messages chiffrés (voir proof_export.dart).
   pdf: ^3.13.1
+  google_sign_in: ^6.2.2
 
 dev_dependencies:
   flutter_test:

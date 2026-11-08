@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -57,9 +59,14 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     try {
       final empty =
           await ref.read(pokouMessageStoreProvider).messageCount() == 0;
-      if (empty && !await service.hasPassword()) {
-        final backup = await service.info();
-        if (backup != null && mounted) {
+      if (empty &&
+          !await service.hasPassword() &&
+          await service.takeRestoreOffer()) {
+        // Une sauvegarde chez Pokou, ou sur le compte Google déjà connecté.
+        // Sinon, sur Android, on propose quand même de la chercher sur
+        // Google Drive (comme WhatsApp).
+        final backup = await service.serverInfo() ?? await service.driveInfo();
+        if ((backup != null || Platform.isAndroid) && mounted) {
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => WelcomeBackScreen(backup: backup),

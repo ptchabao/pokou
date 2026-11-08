@@ -2074,5 +2074,16 @@
   "koryHeadline": "Kory · La conchiglia cauri",
   "koryWalletChip": "DA WALLET A WALLET",
   "koryNeverTouches": "Pokou non tocca mai il tuo denaro. I contributi passano direttamente da wallet a wallet, senza intermediari.",
-  "koryMonthActivity": "ATTIVITÀ DEL MESE"
+  "koryMonthActivity": "ATTIVITÀ DEL MESE",
+  "backupDestTitle": "Dove salvare",
+  "backupDestDrive": "Google Drive",
+  "backupDestDriveSub": "Sul tuo account Google, in una cartella nascosta che solo Pokou può leggere",
+  "backupDestPokou": "Pokou",
+  "backupGoogleAccount": "Account Google",
+  "backupChangeAccount": "Cambia account",
+  "backupNoAccount": "Nessun account scelto",
+  "backupWhereDrive": "Google Drive · {email}",
+  "restoreFindDrive": "Trova il mio backup su Google Drive",
+  "restoreNoDrive": "Nessun backup Pokou su questo account Google.",
+  "restoreWelcomeNoBackup": "Bentornato! Se hai salvato le tue chat su Google Drive, ritrovale qui."
 }

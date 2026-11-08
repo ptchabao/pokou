@@ -2074,5 +2074,16 @@
   "koryHeadline": "Kory · الودعة",
   "koryWalletChip": "من محفظة إلى محفظة",
   "koryNeverTouches": "لا يلمس Pokou مالك أبدًا. تنتقل المساهمات مباشرة من محفظة إلى محفظة دون وسيط.",
-  "koryMonthActivity": "نشاط الشهر"
+  "koryMonthActivity": "نشاط الشهر",
+  "backupDestTitle": "أين يتم النسخ",
+  "backupDestDrive": "Google Drive",
+  "backupDestDriveSub": "على حسابك في Google، في مجلد مخفي لا يقرؤه إلا Pokou",
+  "backupDestPokou": "Pokou",
+  "backupGoogleAccount": "حساب Google",
+  "backupChangeAccount": "تغيير الحساب",
+  "backupNoAccount": "لم يتم اختيار حساب",
+  "backupWhereDrive": "Google Drive · {email}",
+  "restoreFindDrive": "ابحث عن نسختي على Google Drive",
+  "restoreNoDrive": "لا توجد نسخة Pokou على حساب Google هذا.",
+  "restoreWelcomeNoBackup": "مرحبًا بعودتك! إذا نسختَ محادثاتك على Google Drive فاستعدها من هنا."
 }

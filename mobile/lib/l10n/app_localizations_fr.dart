@@ -7266,4 +7266,41 @@ class LFr extends L {
 
   @override
   String get koryMonthActivity => 'ACTIVITÉ DU MOIS';
+
+  @override
+  String get backupDestTitle => 'Où sauvegarder';
+
+  @override
+  String get backupDestDrive => 'Google Drive';
+
+  @override
+  String get backupDestDriveSub =>
+      'Sur ton compte Google, dans un dossier caché que seul Pokou peut lire';
+
+  @override
+  String get backupDestPokou => 'Pokou';
+
+  @override
+  String get backupGoogleAccount => 'Compte Google';
+
+  @override
+  String get backupChangeAccount => 'Changer de compte';
+
+  @override
+  String get backupNoAccount => 'Aucun compte choisi';
+
+  @override
+  String backupWhereDrive(Object email) {
+    return 'Google Drive · $email';
+  }
+
+  @override
+  String get restoreFindDrive => 'Retrouver ma sauvegarde Google Drive';
+
+  @override
+  String get restoreNoDrive => 'Aucune sauvegarde Pokou sur ce compte Google.';
+
+  @override
+  String get restoreWelcomeNoBackup =>
+      'Bon retour ! Si tu avais sauvegardé tes discussions sur Google Drive, retrouve-les ici.';
 }
