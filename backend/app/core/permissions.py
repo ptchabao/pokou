@@ -63,6 +63,10 @@ def require_permission(permission: str):
     assert permission in ALL, permission
 
     async def checker(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+        # La console seulement : une session de l'app (code SMS) n'ouvre
+        # aucune route d'administration — voir services/auth/console_session.
+        if current_user.get("scope") != "console":
+            raise HTTPException(status_code=403, detail="Connecte-toi à la console avec ton e-mail")
         user = db.query(User).filter(User.id == current_user.get("user_id")).first()
         if user is None or not user.is_active:
             raise HTTPException(status_code=401, detail="Compte introuvable")

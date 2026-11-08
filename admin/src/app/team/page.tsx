@@ -25,7 +25,9 @@ export default function TeamPage() {
   const team = useApi<{ items: AdminUser[] }>("/admin/team")
   const roles = useApi<{ items: Role[] }>("/admin/roles")
   const [adding, setAdding] = React.useState(false)
-  const [phone, setPhone] = React.useState("")
+  const [email, setEmail] = React.useState("")
+  const [name, setName] = React.useState("")
+  const [secret, setSecret] = React.useState<{ email: string; password: string } | null>(null)
   const [newRole, setNewRole] = React.useState("SUPPORT")
   const manage = can("team.manage")
 
@@ -39,10 +41,20 @@ export default function TeamPage() {
 
   async function add() {
     try {
-      await api("/admin/team", { body: { phone: phone.trim(), role: newRole } })
+      const r = await api<AdminUser & { temporary_password: string | null }>("/admin/team", {
+        body: { email: email.trim(), full_name: name.trim(), role: newRole },
+      })
       toast.success("Ajouté à l'équipe")
-      setAdding(false); setPhone("")
+      setAdding(false); setEmail(""); setName("")
+      if (r.temporary_password) setSecret({ email: r.email ?? email.trim(), password: r.temporary_password })
       team.reload()
+    } catch (e) { toast.error((e as Error).message) }
+  }
+
+  async function resetPassword(u: AdminUser) {
+    try {
+      const r = await api<{ temporary_password: string }>(`/admin/team/${u.id}/reset-password`, { method: "POST" })
+      setSecret({ email: u.email ?? "", password: r.temporary_password })
     } catch (e) { toast.error((e as Error).message) }
   }
 
@@ -55,7 +67,7 @@ export default function TeamPage() {
         empty="Personne dans l'équipe." illustration="team"
         columns={[
           { header: "Nom", cell: (u) => <span className="font-medium">{u.full_name ?? "—"}{u.id === me?.id && " (toi)"}</span> },
-          { header: "Numéro", cell: (u) => u.phone ?? "—" },
+          { header: "E-mail", cell: (u) => u.email ?? <span className="text-muted-foreground">sans accès console</span> },
           { header: "Rôle", cell: (u) => manage && u.id !== me?.id ? (
             <Select value={u.role} onValueChange={(v) => changeRole(u, v)}>
               <SelectTrigger size="sm" className="w-52"><SelectValue /></SelectTrigger>
@@ -66,6 +78,9 @@ export default function TeamPage() {
           ) : u.role_label },
           { header: "Compte", cell: (u) => <ActiveBadge active={u.is_active} /> },
           { header: "Vu le", cell: (u) => when(u.last_seen_at) },
+          { header: "", className: "text-right", cell: (u) => manage && u.id !== me?.id && u.email ? (
+            <Button size="sm" variant="outline" onClick={() => resetPassword(u)}>Nouveau mot de passe</Button>
+          ) : null },
         ]}
       />
       <Card>
@@ -103,13 +118,17 @@ export default function TeamPage() {
           <DialogHeader>
             <DialogTitle>Ajouter un membre</DialogTitle>
             <DialogDescription>
-              La personne doit déjà avoir un compte Pokou. Elle se connecte ensuite à la console avec son numéro.
+              Un compte de console est créé avec un mot de passe provisoire, à transmettre à la personne.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             <div className="grid gap-2">
-              <Label htmlFor="phone">Numéro</Label>
-              <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+229…" />
+              <Label htmlFor="name">Nom</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="prenom@pokou.app" />
             </div>
             <div className="grid gap-2">
               <Label>Rôle</Label>
@@ -123,7 +142,25 @@ export default function TeamPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAdding(false)}>Annuler</Button>
-            <Button disabled={phone.trim().length < 6} onClick={add}>Ajouter</Button>
+            <Button disabled={!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) || name.trim().length < 2} onClick={add}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={secret !== null} onOpenChange={(o) => !o && setSecret(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mot de passe provisoire</DialogTitle>
+            <DialogDescription>
+              Affiché une seule fois. Transmets-le à la personne par un canal sûr : elle le changera à sa première connexion.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm">
+            <span>{secret?.email}</span>
+            <span className="select-all text-base font-semibold">{secret?.password}</span>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { navigator.clipboard?.writeText(secret?.password ?? ""); toast.success("Copié") }}>Copier</Button>
+            <Button onClick={() => setSecret(null)}>J&apos;ai transmis le mot de passe</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

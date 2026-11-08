@@ -28,6 +28,7 @@ from app.models import (
 from app.services.auth import otp_service
 from app.services.honam import rules
 from app.services.marketplace.marketplace_monetization_service import confirm_payment
+from tests.helpers import console_bearer
 
 TEST_DATABASE_URL = "sqlite:///./test_pokou_finalisation.db"
 
@@ -90,9 +91,12 @@ def _signup(client, name="Kossi"):
 
 
 def _make_admin(user_id):
+    """Rend le compte membre de l'équipe et renvoie sa session de CONSOLE :
+    l'administration ne s'ouvre pas avec la session de l'app."""
     with TestingSessionLocal() as db:
         db.query(User).filter(User.id == user_id).update({User.role: UserRole.ADMIN})
         db.commit()
+    return console_bearer(TestingSessionLocal, user_id)
 
 
 def _confirm(payment_id):
@@ -161,7 +165,7 @@ def test_mode_preuve_a_deux(client):
 def test_pro_justificatif_puis_validation_puis_paiement(client):
     pro, pro_id, _ = _signup(client, "Kossi Amégan")
     team, team_id, _ = _signup(client, "Support")
-    _make_admin(team_id)
+    team = _make_admin(team_id)
 
     # On ne paie qu'après la validation.
     early = client.post("/api/v1/certified/subscribe", json={"plan": "PRO_MONTHLY"}, headers=pro)
@@ -272,7 +276,7 @@ def test_ville_non_desservie_liste_d_attente(client):
     info = client.get("/api/v1/honam/cities", headers=person).json()
     assert info["served_cities"] == ["Lomé"] and info["waitlist"]["city"] == "Kara"
     team, team_id, _ = _signup(client, "Équipe")
-    _make_admin(team_id)
+    team = _make_admin(team_id)
     counts = client.get("/api/v1/admin/honam/waitlist", headers=team).json()["items"]
     assert counts == [{"country": "TG", "city": "Kara", "role": "COURIER", "count": 1}]
     # « lome » vaut « Lomé ».
@@ -358,7 +362,7 @@ def test_statut_sponsorise_modere_reserve_au_badge_payant_et_bilan(client):
     seller, seller_id, _ = _signup(client, "Vendeur")
     viewer, _, _ = _signup(client, "Passante")
     team, team_id, _ = _signup(client, "Modération")
-    _make_admin(team_id)
+    team = _make_admin(team_id)
     product = _product(client, seller)
     boost = client.post(f"/api/v1/marketplace/{product['id']}/boost", json={"days": 7}, headers=seller).json()
     _confirm(boost["payment_id"])

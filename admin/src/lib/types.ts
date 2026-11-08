@@ -2,6 +2,7 @@ export type AdminUser = {
   id: number
   full_name: string | null
   phone: string | null
+  email?: string | null
   role: string
   role_label: string
   is_active: boolean

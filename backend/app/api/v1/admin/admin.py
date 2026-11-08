@@ -48,6 +48,7 @@ def _user_json(u: User) -> dict:
         "id": u.id,
         "full_name": u.full_name,
         "phone": u.phone,
+        "email": u.email,
         "role": role.value,
         "role_label": ROLE_LABELS.get(role, role.value),
         "is_active": bool(u.is_active),
@@ -77,9 +78,9 @@ class ConsoleLogin(BaseModel):
 
 
 @router.post("/auth/login")
-def console_login(body: ConsoleLogin, response: Response, request: Request, db: Session = Depends(get_db)):
-    from app.api.v1.auth.auth import _issue_session
+def console_login(body: ConsoleLogin, request: Request, db: Session = Depends(get_db)):
     from app.core.security import verify_password
+    from app.services.auth.console_session import issue_console_session
 
     user = db.query(User).filter(func.lower(User.email) == body.email.strip().lower()).first()
     now = datetime.utcnow()
@@ -103,7 +104,7 @@ def console_login(body: ConsoleLogin, response: Response, request: Request, db: 
         raise HTTPException(status_code=403, detail="Ce compte n'a pas accès à la console")
     user.console_failed_attempts = 0
     user.console_locked_until = None
-    access_token, _, _ = _issue_session(db, response, user)
+    access_token = issue_console_session(db, user)
     _audit(db, user, "console_login", "user", user.id, {"method": "password"}, request)
     db.commit()
     return {"access_token": access_token, "token_type": "bearer"}
@@ -347,8 +348,14 @@ def set_role(
 
 
 class InviteBody(BaseModel):
-    phone: str = Field(..., min_length=6, max_length=32)
+    email: str = Field(..., min_length=5, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    full_name: str = Field(..., min_length=2, max_length=120)
     role: str
+
+
+def _temporary_password() -> str:
+    import secrets
+    return secrets.token_urlsafe(12)
 
 
 @router.post("/team")
@@ -357,21 +364,56 @@ def add_member(
     user: User = Depends(require_permission("team.manage")),
     db: Session = Depends(get_db),
 ):
-    """Ajouter à l'équipe un compte Pokou EXISTANT (par son numéro)."""
-    from app.services.auth.otp_service import normalize_phone
+    """Ajouter un membre de l'équipe PAR SON E-MAIL. Le compte de console
+    est créé s'il n'existe pas, avec un mot de passe provisoire rendu UNE
+    seule fois, à transmettre à la personne (qui le change à sa première
+    connexion). Aucun numéro de téléphone : la console ne s'en sert pas."""
+    from app.core.security import hash_password
     try:
-        phone = normalize_phone(body.phone)
         role = UserRole(body.role)
     except ValueError:
-        raise HTTPException(status_code=422, detail="Numéro ou rôle invalide")
-    target = db.query(User).filter(User.phone == phone).first()
-    if target is None:
-        raise HTTPException(status_code=404, detail="Aucun compte Pokou avec ce numéro")
+        raise HTTPException(status_code=422, detail="Rôle inconnu")
+    if role == UserRole.USER:
+        raise HTTPException(status_code=422, detail="Choisis un rôle d'équipe")
+    email = body.email.strip().lower()
+    target = db.query(User).filter(func.lower(User.email) == email).first()
+    created = target is None
+    if created:
+        target = User(email=email, full_name=body.full_name.strip(), role=role, is_active=True)
+        db.add(target)
+        db.flush()
     old = target.role or UserRole.USER
     target.role = role
-    _audit(db, user, "role_change", "user", target.id, {"from": old.value, "to": role.value}, request)
+    password = None
+    if not target.console_password_hash:
+        password = _temporary_password()
+        target.console_password_hash = hash_password(password)
+    _audit(db, user, "team_add" if created else "role_change", "user", target.id,
+           {"from": old.value, "to": role.value, "email": email}, request)
     db.commit()
-    return _user_json(target)
+    return {**_user_json(target), "temporary_password": password}
+
+
+@router.post("/team/{user_id}/reset-password")
+def reset_member_password(
+    user_id: int, request: Request,
+    user: User = Depends(require_permission("team.manage")),
+    db: Session = Depends(get_db),
+):
+    """Nouveau mot de passe provisoire pour un membre qui a perdu le sien.
+    Ses sessions de console ouvertes sont révoquées."""
+    from app.core.security import hash_password
+    target = db.get(User, user_id)
+    if target is None or (target.role or UserRole.USER) == UserRole.USER or not target.email:
+        raise HTTPException(status_code=404, detail="Membre introuvable")
+    password = _temporary_password()
+    target.console_password_hash = hash_password(password)
+    target.console_failed_attempts = 0
+    target.console_locked_until = None
+    _revoke_sessions(db, target.id)
+    _audit(db, user, "console_password_reset", "user", target.id, None, request)
+    db.commit()
+    return {"temporary_password": password}
 
 
 # ── Signalements ────────────────────────────────────────────────────────

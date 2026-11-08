@@ -12,6 +12,7 @@ from app.core.database import Base, get_db
 from app.main import app
 from app.models import AuditLog, User, UserRole
 from app.services.auth import otp_service
+from tests.helpers import console_bearer
 
 engine = create_engine("sqlite:///./test_pokou_admin.db", connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -48,6 +49,7 @@ def _signup(client, phone, role=None):
         with TestingSessionLocal() as db:
             db.query(User).filter(User.id == body["user"]["id"]).update({User.role: role})
             db.commit()
+        return console_bearer(TestingSessionLocal, body["user"]["id"]), body["user"]["id"]
     return {"Authorization": f"Bearer {body['access_token']}"}, body["user"]["id"]
 
 
@@ -81,11 +83,11 @@ def test_suspendre_et_reactiver_est_journalise(client):
 def test_seul_le_super_admin_gere_l_equipe_et_il_en_reste_toujours_un(client):
     root, root_id = _signup(client, "+22890500006", UserRole.SUPER_ADMIN)
     admin, _ = _signup(client, "+22890500007", UserRole.ADMIN)
-    _, newbie = _signup(client, "+22890500008")
-    assert client.post("/api/v1/admin/team", json={"phone": "+22890500008", "role": "SUPPORT"},
-                       headers=admin).status_code == 403
-    added = client.post("/api/v1/admin/team", json={"phone": "+22890500008", "role": "SUPPORT"}, headers=root)
+    member = {"email": "nouveau@pokou.test", "full_name": "Nouveau", "role": "SUPPORT"}
+    assert client.post("/api/v1/admin/team", json=member, headers=admin).status_code == 403
+    added = client.post("/api/v1/admin/team", json=member, headers=root)
     assert added.json()["role"] == "SUPPORT"
+    newbie = added.json()["id"]
     assert {m["id"] for m in client.get("/api/v1/admin/team", headers=admin).json()["items"]} >= {root_id, newbie}
     last = client.put(f"/api/v1/admin/team/{root_id}", json={"role": "ADMIN"}, headers=root)
     assert last.status_code == 409
@@ -187,3 +189,38 @@ def test_un_utilisateur_sans_role_n_entre_pas_par_mot_de_passe(client):
         db.commit()
     r = client.post("/api/v1/admin/auth/login", json={"email": "simple@pokou.test", "password": "mot-de-passe-123"})
     assert r.status_code == 403
+
+
+def test_une_session_de_l_app_n_ouvre_pas_la_console(client):
+    """Même un membre de l'équipe : le code SMS de l'app ne suffit pas."""
+    with patch.object(otp_service.sms_service, "send_sms", return_value=True) as send:
+        client.post("/api/v1/auth/phone/request-otp", json={"phone": "+22890500040"})
+    code = re.search(r"\b(\d{6})\b", send.call_args.args[2]).group(1)
+    body = client.post("/api/v1/auth/phone/verify-otp", json={"phone": "+22890500040", "code": code}).json()
+    client.cookies.clear()
+    with TestingSessionLocal() as db:
+        db.query(User).filter(User.id == body["user"]["id"]).update({User.role: UserRole.SUPER_ADMIN})
+        db.commit()
+    app_session = {"Authorization": f"Bearer {body['access_token']}"}
+    assert client.get("/api/v1/admin/me", headers=app_session).status_code == 403
+
+
+def test_ajouter_un_membre_par_e_mail(client, monkeypatch):
+    from scripts import seed
+    monkeypatch.setenv("POKOU_SUPERADMIN_EMAIL", "boss@pokou.test")
+    monkeypatch.setenv("POKOU_SUPERADMIN_PASSWORD", "mot-de-passe-du-boss")
+    with TestingSessionLocal() as db:
+        seed.seed_superadmin(db)
+    boss = client.post("/api/v1/admin/auth/login", json={"email": "boss@pokou.test", "password": "mot-de-passe-du-boss"}).json()
+    client.cookies.clear()
+    h = {"Authorization": f"Bearer {boss['access_token']}"}
+    added = client.post("/api/v1/admin/team", json={"email": "Ama@Pokou.test", "full_name": "Ama", "role": "SUPPORT"}, headers=h)
+    assert added.status_code == 200, added.text
+    temp = added.json()["temporary_password"]
+    assert added.json()["phone"] is None
+    login = client.post("/api/v1/admin/auth/login", json={"email": "ama@pokou.test", "password": temp})
+    assert login.status_code == 200
+    client.cookies.clear()
+    reset = client.post(f"/api/v1/admin/team/{added.json()['id']}/reset-password", headers=h).json()["temporary_password"]
+    assert reset != temp
+    assert client.post("/api/v1/admin/auth/login", json={"email": "ama@pokou.test", "password": temp}).status_code == 401
