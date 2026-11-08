@@ -12,7 +12,14 @@ enum DeepLinkInviteKind {
   honamOrder,
 }
 
-const pokouLinkHost = 'apipokou.cabinet-p-et-associes.com';
+/// Le domaine des liens PARTAGÉS (`/g/`, `/k/`, `/c/`…). Réglable au build
+/// (`--dart-define=POKOU_LINK_HOST=pokou.link`) pour passer à un domaine
+/// court sans toucher au code. Les liens de l'API restent reconnus.
+const pokouLinkHost = String.fromEnvironment(
+  'POKOU_LINK_HOST',
+  defaultValue: pokouApiLinkHost,
+);
+const pokouApiLinkHost = 'apipokou.cabinet-p-et-associes.com';
 const pokouLinkBaseUrl = 'https://$pokouLinkHost';
 const _legacyLinkHost = 'pok.app';
 
@@ -51,7 +58,9 @@ class PendingInvite {
 PendingInvite? parseInviteLink(Uri uri) {
   final host = uri.host.toLowerCase();
   if (uri.scheme != 'https' ||
-      (host != pokouLinkHost && host != _legacyLinkHost)) {
+      (host != pokouLinkHost &&
+          host != pokouApiLinkHost &&
+          host != _legacyLinkHost)) {
     return null;
   }
 

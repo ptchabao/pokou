@@ -52,12 +52,16 @@ void main() async {
     ),
   );
 
-  // Sans configuration Firebase (iOS tant que GoogleService-Info.plist n'est
-  // pas fourni), l'application démarre sans notifications push au lieu de
-  // s'arrêter sur un écran noir. Le Web utilise ses options dédiées.
+  // Sans configuration Firebase, l'application démarre sans notifications
+  // push au lieu de s'arrêter sur un écran noir. Web et iOS ont leurs
+  // options dédiées (firebase_options.dart) ; Android lit google-services.json.
   try {
     await Firebase.initializeApp(
-      options: kIsWeb ? DefaultFirebaseOptions.web : null,
+      options: kIsWeb
+          ? DefaultFirebaseOptions.web
+          : defaultTargetPlatform == TargetPlatform.iOS
+          ? DefaultFirebaseOptions.ios
+          : null,
     );
     // Doit être enregistré tôt, avant runApp — voir push_service.dart pour
     // le reste de l'initialisation FCM (permission, écoute au premier plan,
