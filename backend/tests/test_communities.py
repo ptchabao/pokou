@@ -23,6 +23,30 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 Base.metadata.create_all(bind=engine)
 
 
+
+def _post(client, group_id, text, headers):
+    """Les messages de groupe sont chiffrés de bout en bout : le serveur ne
+    reçoit (et ne relit) que du chiffré, à l'époque courante du groupe."""
+    group = client.get(f"/api/v1/groups/{group_id}", headers=headers).json()
+    epoch = group.get("crypto_epoch", 0)
+    me = client.get("/api/v1/auth/me", headers=headers).json()["id"]
+    others = [m["user_id"] for m in group.get("members", []) if m["user_id"] != me]
+    if others:
+        # Comme l'app : remettre d'abord sa clé d'expéditeur aux autres.
+        client.post(
+            f"/api/v1/groups/{group_id}/sender-key-distributions",
+            json={"epoch": epoch, "distributions": [
+                {"recipient_id": uid, "encryption": "v1", "ciphertext": "cle", "envelope": {"sid": "s"}}
+                for uid in others
+            ]},
+            headers=headers,
+        )
+    return client.post(
+        f"/api/v1/groups/{group_id}/messages",
+        json={"encryption": "sender-key-v1", "ciphertext": text, "crypto_epoch": epoch},
+        headers=headers,
+    )
+
 def override_get_db():
     try:
         db = TestingSessionLocal()
@@ -139,25 +163,17 @@ def test_only_admins_can_post_in_the_announcement_group(client):
     announcements = _announcement_group(community)
 
     # Le créateur publie.
-    posted = client.post(
-        f"/api/v1/groups/{announcements['id']}/messages",
-        json={"content": "Ouverture à 6h demain"},
-        headers=headers_a,
-    )
+    posted = _post(client, announcements["id"], "Ouverture à 6h demain", headers_a)
     assert posted.status_code == 200, posted.text
 
     # Un membre simple ne publie pas — c'est ce qui fait des « annonces ».
-    refused = client.post(
-        f"/api/v1/groups/{announcements['id']}/messages",
-        json={"content": "moi aussi je parle"},
-        headers=headers_b,
-    )
+    refused = _post(client, announcements["id"], "moi aussi je parle", headers_b)
     assert refused.status_code == 403
 
     # Mais il lit.
     read = client.get(f"/api/v1/groups/{announcements['id']}/messages", headers=headers_b)
     assert read.status_code == 200
-    assert [m["content"] for m in read.json()["items"]] == ["Ouverture à 6h demain"]
+    assert [m["ciphertext"] for m in read.json()["items"]] == ["Ouverture à 6h demain"]
 
 
 def test_a_promoted_admin_can_post_announcements(client):
@@ -172,11 +188,7 @@ def test_a_promoted_admin_can_post_announcements(client):
     client.post(f"/api/v1/communities/invite/{code}/join", headers=headers_b)
     announcements = _announcement_group(community)
 
-    assert client.post(
-        f"/api/v1/groups/{announcements['id']}/messages",
-        json={"content": "avant"},
-        headers=headers_b,
-    ).status_code == 403
+    assert _post(client, announcements["id"], "avant", headers_b).status_code == 403
 
     promoted = client.put(
         f"/api/v1/communities/{community['id']}/members/{user_id_b}/role",
@@ -185,11 +197,7 @@ def test_a_promoted_admin_can_post_announcements(client):
     )
     assert promoted.status_code == 200
 
-    assert client.post(
-        f"/api/v1/groups/{announcements['id']}/messages",
-        json={"content": "après"},
-        headers=headers_b,
-    ).status_code == 200
+    assert _post(client, announcements["id"], "après", headers_b).status_code == 200
 
 
 def test_ordinary_groups_stay_open_to_every_member(client):
@@ -199,9 +207,7 @@ def test_ordinary_groups_stay_open_to_every_member(client):
     group = _create_group(client, headers_a, "Vendeurs", [("+22898000009", user_id_b)])
     _create_community(client, headers_a, "Marché", group_ids=[group["id"]])
 
-    sent = client.post(
-        f"/api/v1/groups/{group['id']}/messages", json={"content": "bonjour"}, headers=headers_b
-    )
+    sent = _post(client, group["id"], "bonjour", headers_b)
     assert sent.status_code == 200
 
 
@@ -344,7 +350,7 @@ def test_detaching_a_group_keeps_its_conversation(client):
     headers, _ = _signup(client, "+22898000024")
     group = _create_group(client, headers, "Vendeurs")
     community = _create_community(client, headers, "Marché", group_ids=[group["id"]])
-    client.post(f"/api/v1/groups/{group['id']}/messages", json={"content": "avant"}, headers=headers)
+    _post(client, group["id"], "avant", headers)
 
     detached = client.delete(
         f"/api/v1/communities/{community['id']}/groups/{group['id']}", headers=headers
@@ -353,7 +359,7 @@ def test_detaching_a_group_keeps_its_conversation(client):
 
     # Le groupe existe toujours, avec son historique.
     still = client.get(f"/api/v1/groups/{group['id']}/messages", headers=headers)
-    assert [m["content"] for m in still.json()["items"]] == ["avant"]
+    assert [m["ciphertext"] for m in still.json()["items"]] == ["avant"]
     assert client.get(f"/api/v1/groups/{group['id']}", headers=headers).json()["community_id"] is None
 
 

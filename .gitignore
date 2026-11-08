@@ -26,3 +26,6 @@ mobile/android/*.keystore
 # Config Firebase : fournie par projet, hors dépôt (voir docs/mise-en-service.md)
 mobile/android/app/google-services.json
 mobile/ios/Runner/GoogleService-Info.plist
+
+# Contient la clé secrète LiveKit
+deploy/kubero/livekit.json

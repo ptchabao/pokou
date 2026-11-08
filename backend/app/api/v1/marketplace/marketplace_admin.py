@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.permissions import require_permission_claims
 from app.core.rbac import require_admin_role
 from app.core.database import get_db
 from app.models import MarketplaceAd, MarketplaceBoost, MarketplacePayment, MarketplaceProduct, MediaAsset, SellerVerificationApplication, User, UserRole
@@ -69,7 +70,7 @@ def _media_url(asset: Optional[MediaAsset]) -> Optional[str]:
 @router.get("/overview")
 async def marketplace_overview(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.view")),
 ):
     """Ce qui attend une décision humaine, et ce que la Marketplace a encaissé.
 
@@ -140,7 +141,7 @@ async def list_verifications(
     status: str = Query("PENDING", pattern="^(PENDING|APPROVED|REJECTED|ALL)$"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.view")),
 ):
     """La file d'attente des dossiers — ce qui manquait pour que l'examen
     existe vraiment."""
@@ -208,7 +209,7 @@ async def decide_verification(
     application_id: int,
     payload: VerificationDecision,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.manage")),
 ):
     """Accorde ou refuse le badge, avec une NOTE.
 
@@ -289,7 +290,7 @@ async def list_ads(
     status: str = Query("PAID", pattern="^(PENDING|PAID|ACTIVE|REJECTED|ALL)$"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.view")),
 ):
     query = db.query(MarketplaceAd).options(joinedload(MarketplaceAd.media))
     if status != "ALL":
@@ -331,7 +332,7 @@ async def decide_ad(
     ad_id: int,
     payload: AdDecision,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.manage")),
 ):
     """Diffuse une campagne, ou la refuse.
 
@@ -387,7 +388,7 @@ async def list_products(
     only_inactive: bool = Query(False),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.view")),
 ):
     query = db.query(MarketplaceProduct)
     if only_inactive:
@@ -432,7 +433,7 @@ async def moderate_product(
     product_id: int,
     payload: ProductModeration,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.manage")),
 ):
     """Retire une annonce du marché, ou la remet.
 
@@ -476,7 +477,7 @@ async def list_payments(
     status: str = Query("ALL", pattern="^(PENDING|CONFIRMED|FAILED|ALL)$"),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("assime.view")),
 ):
     """Le registre des encaissements — et surtout des paiements RESTÉS en
     attente, qui sont le seul symptôme visible d'une passerelle Mobile Money

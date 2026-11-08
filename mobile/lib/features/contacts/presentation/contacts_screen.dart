@@ -41,6 +41,7 @@ import 'discussions_controller.dart';
 import '../data/conversation_summary.dart';
 import '../../channels/presentation/channel_search_screen.dart';
 import '../../../core/sharing/invite_sharing.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 const _kPriorityTags = ['BUSINESS', 'FOURNISSEUR', 'CLIENT', 'BOSS', 'AMI'];
 
@@ -1033,8 +1034,11 @@ class _NoNetworkYet extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
       child: Column(
         children: [
-          Icon(Icons.group_add_outlined, size: 44, color: AppColors.textMuted),
-          const SizedBox(height: 16),
+          const PokouIllustration(
+            PokouIllustrations.discussionsEmpty,
+            height: 170,
+          ),
+          const SizedBox(height: 20),
           Text(
             l.chatsNoNetworkTitle,
             textAlign: TextAlign.center,

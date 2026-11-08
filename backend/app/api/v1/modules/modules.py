@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core.permissions import require_permission_claims
 from app.core.rbac import require_admin_role
 from app.core.database import get_db
 from app.models import AppModule, UserModuleActivation, UserRole
@@ -178,7 +179,7 @@ async def deactivate_module(
 @admin_router.get("")
 async def admin_list_modules(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("modules.manage")),
 ):
     """TOUT le catalogue, ouvert ou non — c'est la différence avec la route
     utilisateur, et c'est ce qui permet de préparer un module avant de le
@@ -207,7 +208,7 @@ async def admin_update_module(
     slug: str,
     payload: ModuleUpdate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)),
+    current_user: dict = Depends(require_permission_claims("modules.manage")),
 ):
     """Ouvrir, fermer, recommander, ordonner.
 

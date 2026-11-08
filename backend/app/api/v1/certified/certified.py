@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.modules.common import open_payment, payment_json
 from app.core.countries import country_config, country_of_phone, module_open
 from app.core.database import get_db
+from app.core.permissions import require_permission_claims
 from app.core.rbac import require_admin_role
 from app.core.security import get_current_user
 from app.models import CertifiedProApplication, CertifiedSubscription, MediaAsset, Pharmacy, PharmacyStaff, User, UserRole
@@ -384,7 +385,7 @@ _TEAM = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
 
 
 @admin_router.get("/pro/pending")
-def pro_pending(current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def pro_pending(current_user: dict = Depends(require_permission_claims("certified.view")), db: Session = Depends(get_db)):
     """Les dossiers à vérifier, le plus proche de son échéance d'abord."""
     rows = (
         db.query(CertifiedProApplication)
@@ -405,7 +406,7 @@ def pro_pending(current_user: dict = Depends(require_admin_role(_TEAM)), db: Ses
 @admin_router.post("/pro/{application_id}/review")
 def pro_review(
     application_id: int, body: ProReviewBody,
-    current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db),
+    current_user: dict = Depends(require_permission_claims("certified.manage")), db: Session = Depends(get_db),
 ):
     application = db.query(CertifiedProApplication).filter(CertifiedProApplication.id == application_id).first()
     if application is None or application.status != "PENDING":

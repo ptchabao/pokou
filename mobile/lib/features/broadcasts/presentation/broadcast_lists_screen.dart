@@ -8,6 +8,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import 'broadcast_controller.dart';
 import 'broadcast_editor_screen.dart';
 import 'broadcast_screen.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 /// Les listes de diffusion de l'utilisateur — les siennes, forcément : une
 /// liste n'existe que pour son auteur, personne d'autre n'en connaît
@@ -151,7 +152,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.campaign_outlined, size: 48, color: AppColors.textMuted),
+            const PokouIllustration(PokouIllustrations.group, height: 150),
             const SizedBox(height: 16),
             Text(
               L.of(context).bcastEmptyTitle,

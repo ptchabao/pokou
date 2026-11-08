@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../modules/shared/module_ui.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 final backupInfoProvider = FutureProvider.autoDispose<BackupInfo?>(
   (ref) => ref.watch(backupServiceProvider).info(),
@@ -228,6 +229,10 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
           children: [
+            const Center(
+              child: PokouIllustration(PokouIllustrations.backup, height: 140),
+            ),
+            const SizedBox(height: 16),
             // MSG-12 : Google Drive (comme WhatsApp) ou Pokou.
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 8),
@@ -445,6 +450,10 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
+          const Center(
+            child: PokouIllustration(PokouIllustrations.backup, height: 150),
+          ),
+          const SizedBox(height: 16),
           ModuleCard(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

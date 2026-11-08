@@ -135,6 +135,7 @@ dependencies:
   # n'a pas le texte des messages chiffrés (voir proof_export.dart).
   pdf: ^3.13.1
   google_sign_in: ^6.2.2
+  flutter_svg: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -209,6 +210,7 @@ flutter:
     - assets/verses/
     - assets/fonts/
     - assets/audio/ringback.wav
+    - assets/illustrations/
     - assets/audio/ringtone.wav
     # Motif griffonné derrière les bulles — voir core/widgets/chat_wallpaper.dart.
     # WebP et non JPEG : sur du trait fin, la compression JPEG laisse des

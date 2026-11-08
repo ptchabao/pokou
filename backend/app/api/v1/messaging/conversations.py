@@ -416,9 +416,19 @@ async def report_conversation(
         payload.reason,
     )
 
+    if target_exists:
+        # File de modération de l'espace d'administration.
+        from app.models import AbuseReport
+
+        db.add(AbuseReport(
+            reporter_id=user_id,
+            target_user_id=payload.contact_user_id,
+            reason=(payload.reason or "")[:280] or None,
+            blocked=1 if contact is not None else 0,
+        ))
     if contact is not None:
         contact.is_blocked = True
-        db.commit()
+    db.commit()
 
     return {
         "reported": True,

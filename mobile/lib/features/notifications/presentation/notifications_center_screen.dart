@@ -10,6 +10,7 @@ import '../../kory/presentation/kory_pot_screen.dart';
 import '../../marketplace/presentation/assime_sale_screens.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../data/service_notification.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 final serviceNotificationsRepositoryProvider =
     Provider<ServiceNotificationsRepository>(
@@ -139,12 +140,11 @@ class _List extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 40),
             child: Column(
               children: [
-                Icon(
-                  Icons.notifications_none,
-                  size: 48,
-                  color: AppColors.textMuted,
+                const PokouIllustration(
+                  PokouIllustrations.notificationsEmpty,
+                  height: 150,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   l.notifEmpty,
                   style: TextStyle(color: AppColors.textSecondary),

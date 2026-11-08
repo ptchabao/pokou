@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/pokou_back_button.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 /// Le vocabulaire visuel des écrans de module.
 ///
@@ -349,12 +350,33 @@ class ModuleEmptyState extends StatelessWidget {
     required this.title,
     required this.message,
     this.action,
+    this.illustration,
   });
 
   final IconData icon;
   final String title;
   final String message;
   final Widget? action;
+
+  /// L'illustration à montrer. Par défaut, elle se déduit de l'icône : les
+  /// écrans existants gagnent une scène sans changer leur appel.
+  final PokouIllustrations? illustration;
+
+  static final _byIcon = <IconData, PokouIllustrations>{
+    Icons.cloud_off: PokouIllustrations.offline,
+    Icons.search_off: PokouIllustrations.searchEmpty,
+    Icons.person_search_outlined: PokouIllustrations.searchEmpty,
+    Icons.savings_outlined: PokouIllustrations.kory,
+    Icons.groups_outlined: PokouIllustrations.group,
+    Icons.lock_outline: PokouIllustrations.security,
+    Icons.outbox_outlined: PokouIllustrations.notificationsEmpty,
+    Icons.campaign_outlined: PokouIllustrations.notificationsEmpty,
+    Icons.description_outlined: PokouIllustrations.certified,
+    Icons.location_off_outlined: PokouIllustrations.delivery,
+    Icons.post_add_outlined: PokouIllustrations.market,
+    Icons.hourglass_empty: PokouIllustrations.allClear,
+    Icons.hourglass_bottom: PokouIllustrations.allClear,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -364,8 +386,11 @@ class ModuleEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 44, color: AppColors.textMuted),
-            const SizedBox(height: 14),
+            if ((illustration ?? _byIcon[icon]) case final scene?)
+              PokouIllustration(scene, height: 150)
+            else
+              Icon(icon, size: 44, color: AppColors.textMuted),
+            const SizedBox(height: 18),
             Text(
               title,
               textAlign: TextAlign.center,

@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.modules.common import open_payment, payment_json
 from app.core.countries import country_config, country_of_phone, module_open
 from app.core.database import get_db
+from app.core.permissions import require_permission_claims
 from app.core.rbac import require_admin_role
 from app.core.security import get_current_user
 from app.models import (
@@ -1256,7 +1257,7 @@ _TEAM = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
 
 
 @admin_router.post("/pharmacies", status_code=201)
-def create_pharmacy(body: PharmacyCreate, current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def create_pharmacy(body: PharmacyCreate, current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
     """Le commercial crée l'officine pendant sa visite (BM-06), puis envoie
     le lien de paiement de l'abonnement."""
     titulaire_phone = normalize_e164(body.titulaire_phone, body.country.upper())
@@ -1277,7 +1278,7 @@ def create_pharmacy(body: PharmacyCreate, current_user: dict = Depends(require_a
 
 
 @admin_router.post("/pharmacies/{pharmacy_id}/verify-wallet")
-def verify_wallet(pharmacy_id: int, current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def verify_wallet(pharmacy_id: int, current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
     pharmacy = db.query(Pharmacy).filter(Pharmacy.id == pharmacy_id).first()
     if pharmacy is None:
         raise HTTPException(status_code=404, detail="Officine introuvable")
@@ -1287,14 +1288,14 @@ def verify_wallet(pharmacy_id: int, current_user: dict = Depends(require_admin_r
 
 
 @admin_router.get("/couriers/pending")
-def pending_couriers(current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def pending_couriers(current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
     rows = db.query(CourierProfile).filter(CourierProfile.status == "PENDING").order_by(CourierProfile.created_at).all()
     return {"items": [{"user_id": c.user_id, "name": _name(db, c.user_id), "country": c.country,
                        "zones": c.zones, "wallet_phone": c.wallet_phone} for c in rows]}
 
 
 @admin_router.post("/couriers/{user_id}/validate")
-def validate_courier(user_id: int, current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def validate_courier(user_id: int, current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
     courier = db.query(CourierProfile).filter(CourierProfile.user_id == user_id).first()
     if courier is None or courier.status != "PENDING":
         raise HTTPException(status_code=404, detail="Candidature introuvable")
@@ -1307,7 +1308,7 @@ def validate_courier(user_id: int, current_user: dict = Depends(require_admin_ro
 
 
 @admin_router.post("/pharmacies/{pharmacy_id}/exclude")
-def exclude_pharmacy(pharmacy_id: int, body: ReasonBody, current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def exclude_pharmacy(pharmacy_id: int, body: ReasonBody, current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
     """L'exclusion, quand la suspension persiste (HON-35) : décision humaine."""
     pharmacy = db.query(Pharmacy).filter(Pharmacy.id == pharmacy_id).first()
     if pharmacy is None:
@@ -1319,7 +1320,7 @@ def exclude_pharmacy(pharmacy_id: int, body: ReasonBody, current_user: dict = De
 
 
 @admin_router.get("/waitlist")
-def waitlist_by_city(current_user: dict = Depends(require_admin_role(_TEAM)), db: Session = Depends(get_db)):
+def waitlist_by_city(current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
     """Où ouvrir ensuite : le nombre d'inscrits par ville et par rôle."""
     rows = (
         db.query(HonamWaitlistEntry.country, HonamWaitlistEntry.city, HonamWaitlistEntry.role, func.count(HonamWaitlistEntry.id))

@@ -174,3 +174,6 @@ from app.models.service_notifications import (  # noqa: F401
 from app.models.backups import (  # noqa: F401
     UserBackup,
 )
+from app.models.moderation import (  # noqa: F401
+    AbuseReport,
+)

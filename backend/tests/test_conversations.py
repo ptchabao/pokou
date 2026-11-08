@@ -82,8 +82,14 @@ def _send_direct(client, headers, recipient_id, content="Bonjour"):
 
 
 def _send_group(client, headers, group_id, content="Bonjour à tous"):
+    # Les messages de groupe sont chiffrés de bout en bout : le serveur ne
+    # reçoit (et ne renvoie) que du chiffré. Un groupe d'une personne n'a
+    # personne à qui remettre sa clé.
+    epoch = client.get(f"/api/v1/groups/{group_id}", headers=headers).json()["crypto_epoch"]
     response = client.post(
-        f"/api/v1/groups/{group_id}/messages", json={"content": content}, headers=headers
+        f"/api/v1/groups/{group_id}/messages",
+        json={"encryption": "sender-key-v1", "ciphertext": content, "crypto_epoch": epoch},
+        headers=headers,
     )
     assert response.status_code == 200, response.text
     return response.json()
@@ -619,7 +625,8 @@ def test_l_apercu_d_une_communaute_est_le_dernier_message_de_ses_groupes(client)
 
     row = _entry(_list(client, headers), "community", community["id"])
     assert row["last_message"] is not None
-    assert row["last_message"]["content"] == "On se voit ce soir"
+    # Chiffré : l'aperçu porte le message, pas son texte.
+    assert row["last_message"]["content"] is None
 
 
 def test_une_communaute_sans_message_se_range_quand_meme(client):

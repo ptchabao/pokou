@@ -11,6 +11,7 @@ import '../../profile/presentation/profile_screen.dart';
 import '../../../core/widgets/assistant_orb.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import 'auth_controller.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 /// Après le code : faut-il encore le profil ou les conditions ?
 ///
@@ -93,13 +94,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       // horodatés côté serveur et restent modifiables dans Confidentialité.
       // Les conditions et l'âge, eux, ont déjà été enregistrés à la
       // vérification du code (INS-1 / AUTH-09).
-      await ref.read(apiClientProvider).post(
-        '/auth/me/consents',
-        body: {
-          'consent_analytics': _analytics,
-          'consent_marketing': _marketing,
-        },
-      );
+      await ref
+          .read(apiClientProvider)
+          .post(
+            '/auth/me/consents',
+            body: {
+              'consent_analytics': _analytics,
+              'consent_marketing': _marketing,
+            },
+          );
       await ref.read(authControllerProvider.notifier).reloadProfile();
       setState(() {
         _busy = false;
@@ -127,7 +130,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
               children: [
                 if (_step == _Step.profile) ...[
-                  Text(l.onbStep('3'), style: TextStyle(color: AppColors.textSecondary)),
+                  Text(
+                    l.onbStep('3'),
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: 8),
                 ],
                 ...switch (_step) {
@@ -147,7 +153,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       Expanded(
                         child: Text(
                           _error!,
-                          style: const TextStyle(color: AppColors.feedbackDanger),
+                          style: const TextStyle(
+                            color: AppColors.feedbackDanger,
+                          ),
                         ),
                       ),
                     ],
@@ -198,6 +206,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   );
 
   List<Widget> _contacts(L l) => [
+    const Center(
+      child: PokouIllustration(PokouIllustrations.contactsEmpty, height: 170),
+    ),
+    const SizedBox(height: 20),
     Text(
       l.onbContactsTitle,
       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),

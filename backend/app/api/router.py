@@ -7,12 +7,13 @@ d'atterrissage des liens d'invitation, destinées à un navigateur.
 """
 from fastapi import APIRouter
 
-from app.api.public import deeplinks, legal, officine, suppression, wellknown
+from app.api.public import console, deeplinks, legal, officine, suppression, wellknown
 from app.api.v1.account import account_privacy, contacts, phone_change, profile
 from app.api.v1.baba import baba
 from app.api.v1.e2ee_retry import e2ee_retry
 from app.api.v1.notifications import notifications as service_notifications
 from app.api.v1.backup import backup as user_backup
+from app.api.v1.admin import admin as admin_space
 from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
 from app.api.v1.calls import calls
@@ -57,6 +58,7 @@ for router in (
     e2ee_retry.router,
     service_notifications.router,
     user_backup.router,
+    admin_space.router,
     media.router,
     link_preview.router,
     status.router,
@@ -97,6 +99,7 @@ public_router = APIRouter()
 public_router.include_router(wellknown.router)
 public_router.include_router(deeplinks.router)
 public_router.include_router(officine.router)
+public_router.include_router(console.router)
 public_router.include_router(suppression.router)
 # Aussi sous /api/v1, pour que l'application les lise avec son client habituel.
 public_router.include_router(legal.router)

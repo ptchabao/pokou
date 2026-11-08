@@ -9,6 +9,7 @@ import '../../../core/theme/app_radius.dart';
 import '../data/module_model.dart';
 import 'module_controller.dart';
 import 'module_routes.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 /// La galerie des modules.
 ///
@@ -574,8 +575,11 @@ class _CenteredMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 44, color: AppColors.textMuted),
-            const SizedBox(height: 14),
+            if (icon == Icons.cloud_off)
+              const PokouIllustration(PokouIllustrations.offline, height: 150)
+            else
+              Icon(icon, size: 44, color: AppColors.textMuted),
+            const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,

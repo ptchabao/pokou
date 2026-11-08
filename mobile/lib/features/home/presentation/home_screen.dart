@@ -28,6 +28,7 @@ import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../notifications/presentation/notifications_center_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import 'global_search_screen.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 
 /// APP-1 · Accueil — maquette « Terre de Confiance » (Stitch) :
 ///
@@ -123,26 +124,17 @@ class HomeScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: _BabaBanner(
-                onTap: () => context.push(
-                  '/chat/$kNoMonitor',
-                  extra: l.navBaba,
-                ),
+                onTap: () =>
+                    context.push('/chat/$kNoMonitor', extra: l.navBaba),
               ),
             ),
-            _InProgress(
-              kory: config.has('kory'),
-              honam: config.has('honam'),
-            ),
-            _RecentDiscussions(
-              onSeeAll: () => onOpenTab(PokouTab.discussions),
-            ),
-            _SectionHeader(
-              title: l.homeWhatToDo,
-              subtitle: l.homeServicesSub,
-            ),
+            _InProgress(kory: config.has('kory'), honam: config.has('honam')),
+            _RecentDiscussions(onSeeAll: () => onOpenTab(PokouTab.discussions)),
+            _SectionHeader(title: l.homeWhatToDo, subtitle: l.homeServicesSub),
             if (config.has('kory'))
               _ServiceCard(
                 icon: Icons.savings_outlined,
+                illustration: PokouIllustrations.kory,
                 tint: AppColors.terracottaTint,
                 ink: AppColors.accentPrimaryDark,
                 overline: l.homeKoryOverline,
@@ -158,6 +150,7 @@ class HomeScreen extends ConsumerWidget {
             if (config.has('honam'))
               _ServiceCard(
                 icon: Icons.health_and_safety_outlined,
+                illustration: PokouIllustrations.honam,
                 tint: const Color(0xFFDCFCE7),
                 ink: AppColors.feedbackSuccess,
                 overline: l.homeHonamOverline,
@@ -176,6 +169,7 @@ class HomeScreen extends ConsumerWidget {
             if (config.has('assime'))
               _ServiceCard(
                 icon: Icons.storefront_outlined,
+                illustration: PokouIllustrations.assime,
                 tint: const Color(0xFFFEF3C7),
                 ink: AppColors.warning,
                 overline: l.homeAssimeOverline,
@@ -614,9 +608,9 @@ class _KoryInProgress extends StatelessWidget {
     final l = L.of(context);
     final progress = pot.progress;
     return _Card(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
-      ),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -747,9 +741,7 @@ class _RecentDiscussions extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll,
-                ),
+                Text(unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll),
                 const Icon(Icons.chevron_right, size: 18),
               ],
             ),
@@ -918,9 +910,11 @@ class _ServiceCard extends StatelessWidget {
     required this.pitch,
     required this.onTap,
     this.cta,
+    this.illustration,
   });
 
   final IconData icon;
+  final PokouIllustrations? illustration;
   final Color tint;
   final Color ink;
   final String overline;
@@ -952,7 +946,11 @@ class _ServiceCard extends StatelessWidget {
                   child: Icon(icon, size: 26, color: ink),
                 ),
                 const Spacer(),
-                if (action == null)
+                // Une scène plutôt qu'un vide : on voit tout de suite à
+                // quoi sert le service.
+                if (illustration case final scene?)
+                  PokouIllustration(scene, height: 92)
+                else if (action == null)
                   Icon(Icons.chevron_right, color: AppColors.textMuted),
               ],
             ),
