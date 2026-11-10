@@ -513,7 +513,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             // de l'état de la connexion — l'information la plus utile à
             // afficher en permanence sur ce marché.
             PokouAppBar(
-              title: L.of(context).contactsTitle,
+              title: L.of(context).navChats,
               actions: [
                 // Les modules AVANT les listes de diffusion : c'est la
                 // porte d'entrée de tout ce que l'application peut

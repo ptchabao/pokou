@@ -91,9 +91,13 @@ class AppColors {
       _pick(const Color(0xFF6B5E57), const Color(0xFFB8AAA0));
 
   /// Indication de saisie, libellés désactivés, icônes au repos.
-  /// v3.4 Section 7.2 neutral.taupe-500 #8C7D73.
+  /// v3.4 Section 7.2 neutral.taupe-500 #8C7D73, ASSOMBRI en clair et
+  /// éclairci en sombre : le taupe d'origine donnait 3,7:1 à 3,97:1 sur les
+  /// fonds de l'app, sous le seuil WCAG AA (4,5:1) — or il porte les heures
+  /// des messages et les libellés d'onglets, en petit corps. Ces valeurs
+  /// donnent 4,7:1 sur le fond crème et 5,3:1 sur les cartes sombres.
   static Color get textMuted =>
-      _pick(const Color(0xFF8C7D73), const Color(0xFF8C7D73));
+      _pick(const Color(0xFF7A6C63), const Color(0xFFA3958B));
 
   // ── Marque & Jetons de charte v3.4 (Section 7.2 & 7.8) ─────────────────
   /// LA couleur d'action, terre cuite terracotta-500 (#A65527).
@@ -178,7 +182,7 @@ class AppColors {
   static const navPillBackground = Color(0x14A4512A);
   static const navPillForeground = accentPrimary;
   static Color get navIconInactive =>
-      _pick(const Color(0xFF8C7D73), const Color(0xFFB8AAA0));
+      _pick(const Color(0xFF7A6C63), const Color(0xFFB8AAA0));
 
   // ── Écran de discussion ────────────────────────────────────────────────
   /// Papier peint de conversation — crème / ébène.

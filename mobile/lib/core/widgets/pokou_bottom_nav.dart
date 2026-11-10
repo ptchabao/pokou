@@ -139,14 +139,18 @@ class PokouBottomNav extends ConsumerWidget {
             .fold<int>(0, (sum, d) => sum + d.unreadCount),
       ),
     );
-    return SafeArea(
-      top: false,
-      child: DecoratedBox(
-        // Un trait d'un point au lieu d'une ombre — voir `elevation: 0`.
-        decoration: BoxDecoration(
-          color: AppColors.navBackground,
-          border: Border(top: BorderSide(color: AppColors.border)),
-        ),
+    // Le fond couvre AUSSI la zone de l'indicateur d'accueil (iPhone) et de
+    // la navigation par gestes (Android) : la zone sûre est à l'intérieur du
+    // fond, pas autour. Sinon le contenu qui défile réapparaissait dans une
+    // bande sous la barre.
+    return DecoratedBox(
+      // Un trait d'un point au lieu d'une ombre — voir `elevation: 0`.
+      decoration: BoxDecoration(
+        color: AppColors.navBackground,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: SafeArea(
+        top: false,
         child: BottomNavigationBar(
           currentIndex: currentIndex,
           onTap: onTap,

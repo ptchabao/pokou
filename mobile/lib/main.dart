@@ -163,6 +163,7 @@ class PokouApp extends ConsumerWidget {
       ThemeMode.system => MediaQuery.platformBrightnessOf(context),
     };
     AppColors.applyBrightness(brightness);
+    _repaintTreeOnBrightnessChange(brightness);
     // Les icônes des barres système suivent, elles aussi. Elles étaient
     // fixées en SOMBRE une fois pour toutes dans `main()` — ce qui donnait,
     // en mode sombre, des icônes noires sur une barre noire : invisibles.
@@ -211,16 +212,49 @@ class PokouApp extends ConsumerWidget {
       ],
       // AppLockGate en dehors de la pile : l'écran de code doit couvrir
       // aussi la bulle d'appel différé du Mode Bouclier.
-      builder: (context, child) => AppLockGate(
-        child: Stack(
-          children: [
-            // Le bandeau « Appel en cours » au-dessus de toute l'application
-            // — voir OngoingCallFrame pour la structure qui ne doit jamais
-            // changer.
-            if (child != null) OngoingCallFrame(child: child),
-          ],
+      // Le texte suit la taille choisie dans les réglages du téléphone,
+      // jusqu'à +50 %. Au-delà (tailles « accessibilité » d'iOS, près de
+      // ×2), les en-têtes et les boutons à hauteur fixe débordaient et se
+      // chevauchaient : mieux vaut un grand texte lisible qu'un très grand
+      // texte coupé.
+      builder: (context, child) => MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.5,
+        child: AppLockGate(
+          child: Stack(
+            children: [
+              // Le bandeau « Appel en cours » au-dessus de toute
+              // l'application — voir OngoingCallFrame pour la structure qui
+              // ne doit jamais changer.
+              if (child != null) OngoingCallFrame(child: child),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+Brightness? _lastBrightness;
+
+/// Au changement clair/sombre EN COURS d'utilisation (réglage Apparence, ou
+/// bascule automatique du téléphone au coucher du soleil), force tout
+/// l'arbre à se reconstruire.
+///
+/// `AppColors` est lu sans `BuildContext` : un widget `const`, ou un onglet
+/// gardé en vie, ne dépend de rien qui change et ne se reconstruisait donc
+/// pas. Il gardait ses surfaces claires sous un texte devenu clair — cartes
+/// blanches au texte invisible dans « Plus », en-tête blanc dans Honam —
+/// jusqu'au redémarrage de l'application.
+void _repaintTreeOnBrightnessChange(Brightness brightness) {
+  final previous = _lastBrightness;
+  _lastBrightness = brightness;
+  if (previous == null || previous == brightness) return;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    void visit(Element element) {
+      element.markNeedsBuild();
+      element.visitChildren(visit);
+    }
+
+    WidgetsBinding.instance.rootElement?.visitChildren(visit);
+  });
 }

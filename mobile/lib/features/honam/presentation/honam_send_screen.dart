@@ -16,11 +16,16 @@ import 'honam_screen.dart';
 
 /// La position, demandée au moment où elle sert : trier les officines et
 /// guider le coursier. Refusée, l'annuaire reste dans l'ordre alphabétique.
-Future<Position?> currentPosition() async {
+///
+/// [ask] à `false` : on ne lit la position que si elle est DÉJÀ autorisée.
+/// Ouvrir l'onglet Honam ne doit pas faire surgir la demande du système
+/// avant que la personne ait fait quoi que ce soit ; elle arrive au moment
+/// d'envoyer une ordonnance, quand sa raison est évidente.
+Future<Position?> currentPosition({bool ask = true}) async {
   try {
     if (!await Geolocator.isLocationServiceEnabled()) return null;
     var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
+    if (permission == LocationPermission.denied && ask) {
       permission = await Geolocator.requestPermission();
     }
     if (permission == LocationPermission.denied ||
@@ -28,7 +33,9 @@ Future<Position?> currentPosition() async {
       return null;
     }
     return await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.medium,
+      ),
     );
   } catch (_) {
     return null;
@@ -92,7 +99,11 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
   }
 
   Future<void> _pick(ImageSource source) async {
-    final photo = await ImagePicker().pickImage(source: source, imageQuality: 80, maxWidth: 2000);
+    final photo = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 2000,
+    );
     if (photo != null) setState(() => _photo = photo);
   }
 
@@ -121,13 +132,15 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
           body: {'pharmacy_id': _pharmacyId},
         );
       } else {
-        final upload = await ref.read(mediaRepositoryProvider).upload(
-          bytes: await File(_photo!.path).readAsBytes(),
-          filename: 'ordonnance.jpg',
-          mimeType: 'image/jpeg',
-          messageType: 'IMAGE',
-          memoriser: false,
-        );
+        final upload = await ref
+            .read(mediaRepositoryProvider)
+            .upload(
+              bytes: await File(_photo!.path).readAsBytes(),
+              filename: 'ordonnance.jpg',
+              mimeType: 'image/jpeg',
+              messageType: 'IMAGE',
+              memoriser: false,
+            );
         order = await repository.submit(
           pharmacyId: _pharmacyId!,
           prescriptionMediaId: upload.id,
@@ -165,7 +178,11 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
             if (_photo != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.file(File(_photo!.path), height: 220, fit: BoxFit.cover),
+                child: Image.file(
+                  File(_photo!.path),
+                  height: 220,
+                  fit: BoxFit.cover,
+                ),
               ),
             const SizedBox(height: 8),
             Row(
@@ -202,7 +219,10 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
           if (_loading)
             const Center(child: CircularProgressIndicator())
           else if (_pharmacies.isEmpty)
-            Text(l.honamNoPharmacy, style: TextStyle(color: AppColors.textSecondary))
+            Text(
+              l.honamNoPharmacy,
+              style: TextStyle(color: AppColors.textSecondary),
+            )
           else
             for (final p in _pharmacies)
               PharmacyTile(
@@ -214,16 +234,26 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.error_outline, size: 18, color: AppColors.feedbackDanger),
+                const Icon(
+                  Icons.error_outline,
+                  size: 18,
+                  color: AppColors.feedbackDanger,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(_error!, style: const TextStyle(color: AppColors.feedbackDanger)),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: AppColors.feedbackDanger),
+                  ),
                 ),
               ],
             ),
           ],
           const SizedBox(height: 16),
-          Text(l.honamNotEmergency, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          Text(
+            l.honamNotEmergency,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          ),
           const SizedBox(height: 12),
           ModuleActionButton(
             label: l.honamSubmit,

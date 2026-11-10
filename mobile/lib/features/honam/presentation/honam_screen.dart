@@ -325,7 +325,7 @@ class _Emergency extends ConsumerWidget {
 }
 
 final _nearbyProvider = FutureProvider.autoDispose<List<Pharmacy>>((ref) async {
-  final position = await currentPosition();
+  final position = await currentPosition(ask: false);
   return ref
       .watch(honamRepositoryProvider)
       .pharmacies(lat: position?.latitude, lng: position?.longitude);
