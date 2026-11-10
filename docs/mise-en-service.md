@@ -13,11 +13,9 @@ Ce que le code ne peut pas faire seul. À cocher avant la première publication.
 
 ## Android (`com.pokou.pokou`)
 
-- [ ] Créer l'application dans Firebase et remplacer
-      `mobile/android/app/google-services.json` : le fichier actuel est celui
-      de Vault (`com.mahizu.vault`), et le plugin Google Services refusera de
-      construire tant qu'il ne déclare pas `com.pokou.pokou`.
-- [ ] Keystore de release dans `mobile/android/key.properties` (hors dépôt).
+- [x] Application Firebase `com.pokou.pokou` et `google-services.json`.
+- [x] Clé de téléversement Play : `mobile/android/upload-keystore.jks` et
+      `key.properties`, hors dépôt (voir [publication-mobile.md](publication-mobile.md)).
 - [ ] Créer la fiche Play, puis publier l'empreinte SHA-256 de la clé de
       signature Google : `ANDROID_PLAY_SIGNING_SHA256` côté API. Sans elle,
       les liens s'ouvrent dans le navigateur.
@@ -26,7 +24,9 @@ Ce que le code ne peut pas faire seul. À cocher avant la première publication.
 
 - [ ] Bundle `com.pokou.pokou` dans le compte développeur, capacité
       *Associated Domains* (`applinks:pok.app`).
-- [ ] Ajouter `GoogleService-Info.plist` de l'app iOS Firebase.
+- [x] Ajouter `GoogleService-Info.plist` de l'app iOS Firebase.
+- [ ] Compte Apple Developer dans Xcode pour signer l'archive, clé APNs
+      dans Firebase (notifications iPhone).
 - [ ] `APPLE_TEAM_ID` côté API (fichier `apple-app-site-association`).
 
 ## API
@@ -42,11 +42,14 @@ Ce que le code ne peut pas faire seul. À cocher avant la première publication.
       l'opérateur.
 - [ ] WhatsApp : passerelle ou Twilio.
 - [ ] Firebase : compte de service (`FIREBASE_CREDENTIALS_JSON`), `FCM_ENABLED=true`.
-- [ ] LiveKit Cloud (`LIVEKIT_*`).
+- [x] LiveKit auto-hébergé sur Kubero, avec relais TURN (voir
+      [deploiement-kubero.md](deploiement-kubero.md) § 9).
 - [ ] Semoa : réglages système `semoa_login`, `semoa_api_key`,
       `semoa_webhook_secret`… ; les rappels arrivent sur
       `/api/v1/webhooks/marketplace-payment/semoa`.
-- [ ] Un premier administrateur : `python -m scripts.promote_admin +228…`.
+- [x] Premier administrateur : créé au déploiement par le seed
+      (`admin@pokou.app`, mot de passe dans les journaux du premier
+      déploiement, à changer). Voir [administration.md](administration.md).
 
 ## Assistant Mahizu
 

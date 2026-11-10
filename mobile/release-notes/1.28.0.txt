@@ -1,0 +1,25 @@
+<fr-FR>
+• Appels : le son passe de nouveau dans les deux sens, et les appels tiennent mieux sur les réseaux mobiles.
+• Sauvegarde de vos discussions sur votre compte Google Drive, chiffrée, à restaurer sur un nouveau téléphone.
+• Des illustrations sur l'accueil et les écrans vides.
+</fr-FR>
+<en-US>
+• Calls: audio works both ways again, and calls hold up better on mobile networks.
+• Back up your chats to your Google Drive, encrypted, and restore them on a new phone.
+• Illustrations on the home screen and empty screens.
+</en-US>
+<es-ES>
+• Llamadas: el audio vuelve a funcionar en ambos sentidos y las llamadas aguantan mejor en redes móviles.
+• Copia de seguridad de tus chats en tu Google Drive, cifrada, para restaurarla en un teléfono nuevo.
+• Ilustraciones en la pantalla de inicio y en las pantallas vacías.
+</es-ES>
+<it-IT>
+• Chiamate: l'audio funziona di nuovo in entrambe le direzioni e le chiamate reggono meglio sulle reti mobili.
+• Backup delle chat sul tuo Google Drive, cifrato, da ripristinare su un nuovo telefono.
+• Illustrazioni nella schermata iniziale e nelle schermate vuote.
+</it-IT>
+<ru-RU>
+• Звонки: звук снова слышен с обеих сторон, а звонки стабильнее работают в мобильных сетях.
+• Резервная копия чатов на вашем Google Диске, в зашифрованном виде, для восстановления на новом телефоне.
+• Иллюстрации на главном экране и на пустых экранах.
+</ru-RU>

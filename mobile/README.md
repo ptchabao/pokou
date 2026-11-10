@@ -28,10 +28,13 @@ adresse joignable depuis le téléphone (IP locale, tunnel, ou déploiement).
 
 ## Builds de production
 
+Clé de signature, APK testeurs, Play Store et App Store pas à pas :
+[docs/publication-mobile.md](../docs/publication-mobile.md).
+
 | Plateforme | Commande | Prérequis |
 |---|---|---|
-| Android | `./build-production.sh --apk` | `android/key.properties` + keystore ; `google-services.json` de l'app Firebase **`com.pokou.pokou`** ; JDK 17 ou 21 (`flutter config --jdk-dir …`), Gradle 8.14 ne prend pas Java 25 |
-| iOS | `./build-ios.sh` | Xcode, CocoaPods sur le `PATH`, `ios/Runner/GoogleService-Info.plist`, équipe de signature dans Xcode |
+| Android | `./build-production.sh --apk` | `android/key.properties` + keystore ; `google-services.json` de l'app Firebase **`com.pokou.pokou`** ; JDK 17 ou 21 (`flutter config --jdk-dir …`), Gradle 8.14 ne prend pas Java 25 ; Android `cmdline-tools` (vérification des symboles du bundle) |
+| iOS | `./build-ios.sh` ou `flutter build ipa --no-codesign` | Xcode, CocoaPods sur le `PATH`, `ios/Runner/GoogleService-Info.plist`, équipe de signature dans Xcode (sans elle : archive non signée, à signer dans Xcode) |
 | Web | `flutter build web --release` | Application Web Firebase configurée dans `lib/firebase_options.dart` ; notifications servies en HTTPS |
 
 ### Notifications Web

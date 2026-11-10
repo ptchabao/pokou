@@ -8,6 +8,12 @@ de ports MÉDIA joignables directement depuis les téléphones : 7881/TCP et
 LoadBalancer — sur k3s, ServiceLB les publie sur l'adresse du nœud. Ce
 Service passe par les « addons » de l'application : le chart de Kubero
 rend tels quels les objets de `resourceDefinitions`.
+
+Relais TURN : celui intégré à LiveKit, pas un coturn à part. Il sert les
+téléphones dont le réseau empêche le média direct (NAT symétrique de
+certains opérateurs mobiles). Port 3478/UDP, publié par le même Service.
+Le TURN sur TLS (pour les réseaux qui ne laissent passer que du HTTPS)
+demanderait en plus de monter le certificat dans le pod.
 """
 import json, sys
 
@@ -27,6 +33,12 @@ rtc:
   udp_port: 7882
   use_external_ip: false
   node_ip: {NODE_IP}
+turn:
+  enabled: true
+  # L'IP et non {HOST} : ce nom passe par le proxy Cloudflare, qui ne
+  # relaie pas l'UDP — le relais y serait injoignable.
+  domain: {NODE_IP}
+  udp_port: 3478
 keys:
   {env['LIVEKIT_API_KEY']}: {env['LIVEKIT_API_SECRET']}
 logging:
@@ -96,6 +108,7 @@ app = {
                 "ports": [
                     {"name": "rtc-tcp", "port": 7881, "targetPort": 7881, "protocol": "TCP"},
                     {"name": "rtc-udp", "port": 7882, "targetPort": 7882, "protocol": "UDP"},
+                    {"name": "turn-udp", "port": 3478, "targetPort": 3478, "protocol": "UDP"},
                 ],
             },
         }},

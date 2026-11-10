@@ -83,11 +83,21 @@ Espace officine HONAM : `https://api.pok.app/officine/`.
 ## Production
 
 Kubernetes et Kafka : [docs/deploiement-kubernetes.md](docs/deploiement-kubernetes.md).
+Instance en service (Kubero, LiveKit, relais TURN, redéployer) :
+[docs/deploiement-kubero.md](docs/deploiement-kubero.md).
 Comptes et services à ouvrir avant : [docs/mise-en-service.md](docs/mise-en-service.md).
+
+## Administration
+
+Console de l'équipe : `https://apipokou.cabinet-p-et-associes.com/console/`
+(code dans `admin/`). Connexion par e-mail et mot de passe, rôles,
+super-administrateur créé au déploiement :
+[docs/administration.md](docs/administration.md).
 
 ## Mobile
 
-Voir `mobile/README.md`. L'API visée se règle au build :
+Voir `mobile/README.md`. Clé de signature, builds Play Store, App Store et
+APK : [docs/publication-mobile.md](docs/publication-mobile.md). L'API visée se règle au build :
 `--dart-define=API_BASE_URL=…` (défaut
 `https://apipokou.cabinet-p-et-associes.com/api/v1`).
 

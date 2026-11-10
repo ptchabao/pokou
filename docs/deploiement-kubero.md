@@ -193,7 +193,8 @@ restent compatibles avec la version précédente.
 | Pipeline / phase / namespace | `pokou` / `production` / `pokou-production` |
 | API | `https://apipokou.cabinet-p-et-associes.com` (Cloudflare devant, certificat Let's Encrypt à l'origine) |
 | Addons | PostgreSQL 17 `pokou-postgres:5432` (base et utilisateur `pokou`), Redis 8 `pokou-redis:6379`, Kafka 3.4 `pokou-kafka:9092` (PLAINTEXT, interne au cluster) |
-| Appels (LiveKit) | App `livekit` : signalisation `wss://rtc.cabinet-p-et-associes.com`, médias en direct sur `169.58.195.18` : 7881/TCP et 7882/UDP |
+| Appels (LiveKit) | App `livekit` : signalisation `wss://rtc.cabinet-p-et-associes.com`, médias en direct sur `169.58.195.18` : 7881/TCP et 7882/UDP, relais TURN 3478/UDP |
+| Console d'administration | `https://apipokou.cabinet-p-et-associes.com/console/` (servie par l'API, voir [administration.md](administration.md)) |
 | Pièces jointes | Volume `pokou-media` (10 Gi, local-path) monté sur `/data`, pas de S3 sur ce cluster |
 | Secrets | `deploy/kubero/secrets.env` sur le poste qui a déployé, jamais versionné |
 
@@ -238,3 +239,52 @@ tels quels. Ces deux ports doivent rester ouverts dans le pare-feu de
 l'hébergeur. Les clés LiveKit sont dans `secrets.env` (`LIVEKIT_API_KEY`,
 `LIVEKIT_API_SECRET`) ; `build_app_json.py` les donne aussi à l'API.
 
+**Relais TURN (10 novembre 2026).** Certains réseaux mobiles (NAT
+symétrique) empêchent le média direct vers 7881/7882 : l'appel se connecte
+mais le son ne passe pas. LiveKit embarque un relais TURN, activé sur
+3478/UDP : bloc `turn:` de `LIVEKIT_CONFIG` et port `turn-udp` du Service
+`livekit-rtc`. Le relais est annoncé aux téléphones **sous l'IP du nœud**
+(`domain: 169.58.195.18`) et non sous `rtc.cabinet-p-et-associes.com` : ce
+nom passe par le proxy Cloudflare, qui ne relaie pas l'UDP, et le relais y
+serait injoignable. Le TURN sur TLS (réseaux qui ne laissent passer que du
+HTTPS) demanderait un nom hors proxy et le certificat monté dans le pod.
+
+Sur une app `livekit` déjà en service, sans la recréer :
+
+```bash
+cd deploy/kubero
+python3 apply_livekit_turn.py     # ajoute ce qui manque, puis redémarre LiveKit
+```
+
+Le script ne touche que le relais, ne fait rien s'il est déjà en place et
+redémarre LiveKit (les appels en cours sont coupés quelques secondes).
+Vérifier ensuite que les journaux de LiveKit disent « Starting TURN server »,
+et que le port répond depuis l'extérieur à une requête STUN sur
+`169.58.195.18:3478` (https://icetest.info).
+
+## 10. Redéployer l'API
+
+Kubero clone `main` à chaque démarrage de pod : redéployer, c'est pousser
+puis redémarrer l'app `pokou-api` (interface Kubero → `pokou-api` →
+Restart, ou `POST /api/apps/pokou/production/pokou-api/restart`).
+
+Au démarrage, `docker-entrypoint.sh` :
+
+1. attend la base, puis `alembic upgrade head` ;
+2. lance le seed (`python -m scripts.seed`) : catalogue des modules et
+   super-administrateur de la console, idempotent (voir
+   [administration.md](administration.md) § 2) ;
+3. démarre uvicorn.
+
+Pendant le remplacement du pod (une à deux minutes), l'ancien sert encore
+les requêtes : une route toute neuve peut répondre 404 le temps de la
+bascule. Vérifier ensuite :
+
+```bash
+curl -s https://apipokou.cabinet-p-et-associes.com/health                  # 200
+curl -s -o /dev/null -w '%{http_code}' https://apipokou.cabinet-p-et-associes.com/console/login/   # 200
+```
+
+La console est un export statique committé dans `backend/app/console/` :
+après une modification de `admin/`, lancer `npm run publish` et committer le
+résultat **avant** de redéployer.
