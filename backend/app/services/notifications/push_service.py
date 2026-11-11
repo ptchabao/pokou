@@ -230,6 +230,37 @@ def send_push(
     for token_row, result in zip(tokens, response.responses):
         if result.success:
             continue
-        logger.info("[Push] Jeton rejeté pour l'utilisateur %s (%s) — suppression", user_id, result.exception)
-        db.delete(token_row)
+        if _token_is_dead(result.exception):
+            logger.info("[Push] Jeton invalide pour l'utilisateur %s (%s) — suppression", user_id, result.exception)
+            db.delete(token_row)
+        else:
+            # Erreur passagère (quota, Firebase indisponible, délai) : le
+            # jeton reste. Le supprimer laissait le téléphone sans aucune
+            # notification jusqu'au prochain démarrage de l'application.
+            logger.warning("[Push] Échec passager pour l'utilisateur %s (%s) — jeton conservé", user_id, result.exception)
     db.commit()
+
+
+#: Les seules réponses de Firebase qui disent que le jeton ne servira plus :
+#: application désinstallée, jeton expiré, ou jeton d'un autre projet.
+_DEAD_TOKEN_CODES = frozenset({
+    "UNREGISTERED", "SENDER_ID_MISMATCH",
+    "registration-token-not-registered", "invalid-registration-token", "mismatched-credential",
+})
+
+
+def _token_is_dead(exc) -> bool:
+    if exc is None:
+        return False
+    from firebase_admin import messaging as fcm
+
+    if isinstance(exc, (fcm.UnregisteredError, fcm.SenderIdMismatchError)):
+        return True
+    # INVALID_ARGUMENT vise parfois le MESSAGE (contenu trop gros), pas le
+    # jeton : mort seulement si Firebase parle du jeton.
+    if "registration token" in str(exc).lower():
+        return True
+    code = str(getattr(exc, "code", "") or "")
+    cause = getattr(exc, "cause", None)
+    details = f"{code} {exc} {cause or ''}"
+    return any(marker in details for marker in _DEAD_TOKEN_CODES)

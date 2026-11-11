@@ -517,7 +517,10 @@ class PushService {
 
   bool _isCurrentCall(Object? room) {
     final current = activeCall.value;
-    return room != null && current != null && !current.ended && current.roomName == room;
+    return room != null &&
+        current != null &&
+        !current.ended &&
+        current.roomName == room;
   }
 
   bool _isVideo(Map<String, dynamic> data) {
@@ -528,7 +531,8 @@ class PushService {
   void _showForegroundNotification(RemoteMessage message) {
     // L'appel que cette notification annonce est DÉJÀ en cours ici (push
     // arrivé en retard, ou en double avec le WebSocket) : rien à sonner.
-    if (message.data['type'] == 'call' && _isCurrentCall(message.data['room'])) {
+    if (message.data['type'] == 'call' &&
+        _isCurrentCall(message.data['room'])) {
       return;
     }
     if (MessagePush.tryParse(message.data) != null) {
@@ -779,7 +783,16 @@ class PushService {
       (_, next) => clear(next),
     );
     _lifecycle ??= AppLifecycleListener(
-      onResume: () => clear(_ref.read(activeConversationProvider)),
+      onResume: () {
+        clear(_ref.read(activeConversationProvider));
+        // Le jeton est republié à chaque retour au premier plan, pas
+        // seulement au démarrage : si le serveur l'a perdu (remise à zéro,
+        // reconnexion sur un autre téléphone puis retour, jeton renouvelé
+        // par Firebase), le téléphone se répare au prochain coup d'œil au
+        // lieu de rester muet jusqu'à un redémarrage complet. Sans effet
+        // tant que personne n'est connecté.
+        if (_authenticated) unawaited(registerCurrentToken());
+      },
     );
   }
 
