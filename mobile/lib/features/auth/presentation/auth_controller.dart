@@ -100,6 +100,7 @@ class AuthController extends StateNotifier<AuthState> {
 
     final cached = await _repository.cachedProfile();
     if (cached != null) {
+      await _claimLocalData(cached.id);
       _setState(AuthState.authenticated(cached));
       _push.drainPendingAcceptedCall();
       unawaited(_push.registerCurrentToken());
@@ -131,6 +132,7 @@ class AuthController extends StateNotifier<AuthState> {
   Future<bool> _loadProfile() async {
     try {
       final user = await _repository.getMyProfile();
+      await _claimLocalData(user.id);
       _setState(AuthState.authenticated(user));
       _push.drainPendingAcceptedCall();
       await _push.registerCurrentToken();
@@ -240,7 +242,22 @@ class AuthController extends StateNotifier<AuthState> {
     await _onSignedIn(user);
   }
 
+  /// Les données locales d'un AUTRE compte sont effacées avant d'afficher
+  /// celui-ci (voir PokouMessageStore.claimFor). Sans effet si elles sont
+  /// déjà à ce compte.
+  Future<void> _claimLocalData(int userId) async {
+    try {
+      if (await _messageStore.claimFor(userId)) {
+        await _linkedMahizuTokens?.clear();
+        MediaKeyRing.clear();
+      }
+    } catch (_) {
+      // Base locale illisible : elle sera recréée à la prochaine écriture.
+    }
+  }
+
   Future<void> _onSignedIn(PokouUser user) async {
+    await _claimLocalData(user.id);
     await _ws.connect();
     _setState(AuthState.authenticated(user));
     _push.drainPendingAcceptedCall();

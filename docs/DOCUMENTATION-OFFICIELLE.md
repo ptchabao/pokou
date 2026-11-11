@@ -296,7 +296,12 @@ tableau complet : [administration.md](administration.md).
   instances de l'API, Redis sait sur laquelle chaque utilisateur est connecté.
 - **Rattrapage** (`/sync`, table `sync_events`) : un appareil qui était hors
   ligne redemande ce qu'il a manqué. Le WebSocket est un accélérateur, pas la
-  source de vérité.
+  source de vérité. Les numéros d'événement et les curseurs portent la
+  « génération » de la base (`3f9a1c2e.93`, clé `sync_generation` de
+  `system_settings`) : après une remise à zéro, un curseur de l'ancienne base
+  repart de 0 au lieu de sauter des événements. Côté app, les données locales
+  appartiennent à un compte (`PokouMessageStore.claimFor`) : se connecter avec
+  un autre compte les efface.
 - **Présence** : « vu à » n'est écrit qu'aux connexions et déconnexions ;
   « écrit… » n'est jamais enregistré.
 

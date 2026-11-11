@@ -304,6 +304,35 @@ class PokouMessageStore {
 
   /// The last server cursor committed together with its corresponding inbox
   /// events. Cursors are opaque: only the server may interpret their order.
+  /// Le compte à qui appartiennent les données de ce téléphone.
+  static const _ownerScope = '__owner__';
+
+  /// À appeler à chaque connexion, AVANT d'afficher quoi que ce soit.
+  ///
+  /// Si la base locale appartient à un AUTRE compte, elle est effacée. Une
+  /// déconnexion volontaire l'efface déjà ; une session coupée par le
+  /// serveur (remise à zéro, nouveau téléphone, suspension) ne passait pas
+  /// par là, et le compte suivant héritait des conversations en cache et du
+  /// curseur de rattrapage du précédent — il sautait alors des messages.
+  ///
+  /// Le même compte qui se reconnecte garde tout : son historique n'existe
+  /// que sur ce téléphone. Renvoie `true` si la base a été effacée.
+  Future<bool> claimFor(int userId) async {
+    final owner = await syncCursor(_ownerScope);
+    var cleared = false;
+    if (owner != null && owner != '$userId') {
+      await clear();
+      cleared = true;
+    }
+    final db = await _database;
+    await db.insert('sync_state', {
+      'scope': _ownerScope,
+      'cursor': '$userId',
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    return cleared;
+  }
+
   Future<String?> syncCursor(String scope) async {
     final db = await _database;
     final rows = await db.query(

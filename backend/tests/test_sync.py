@@ -119,3 +119,60 @@ def test_transactional_sync_event_rolls_back_with_business_transaction():
         assert db.query(SyncEvent).count() == 0
 
     engine.dispose()
+
+def test_un_curseur_d_une_base_precedente_repart_du_debut():
+    """Après une remise à zéro, les numéros repartent de 1. Un téléphone qui
+    garde « après 93 » sautait tout ce qui arrivait ensuite : son curseur
+    est reconnu comme venant d'une autre base, et la lecture repart de 0."""
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    testing_session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+    def override_get_db():
+        db = testing_session()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    previous_db = app.dependency_overrides.get(get_db)
+    previous_user = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7}
+    try:
+        with testing_session() as db:
+            db.add_all([
+                SyncEvent(user_id=7, event_type="message:new", payload={"n": 1}),
+                SyncEvent(user_id=7, event_type="message:new", payload={"n": 2}),
+            ])
+            db.commit()
+        with TestClient(app) as client:
+            # Entier nu d'une ancienne version, plus grand que tout ce qui existe.
+            stale = client.get("/api/v1/sync/events?cursor=93").json()
+            assert [e["payload"]["n"] for e in stale["events"]] == [1, 2]
+            assert stale["cursor_reset"] is True
+            # Les numéros publiés portent la génération de la base.
+            generation = stale["next_cursor"].split(".")[0]
+            assert all(e["id"].startswith(generation + ".") for e in stale["events"])
+            # Curseur d'une autre génération : même chose.
+            other = client.get("/api/v1/sync/events?cursor=deadbeef.1").json()
+            assert [e["payload"]["n"] for e in other["events"]] == [1, 2]
+            assert other["cursor_reset"] is True
+            # Curseur de la génération courante : lecture normale.
+            ok = client.get(f"/api/v1/sync/events?cursor={generation}.1").json()
+            assert [e["payload"]["n"] for e in ok["events"]] == [2]
+            assert ok["cursor_reset"] is False
+            # Entier nu plausible (version actuelle de l'app) : accepté.
+            legacy = client.get("/api/v1/sync/events?cursor=1").json()
+            assert [e["payload"]["n"] for e in legacy["events"]] == [2]
+            assert legacy["cursor_reset"] is False
+    finally:
+        if previous_db is None:
+            app.dependency_overrides.pop(get_db, None)
+        else:
+            app.dependency_overrides[get_db] = previous_db
+        if previous_user is None:
+            app.dependency_overrides.pop(get_current_user, None)
+        else:
+            app.dependency_overrides[get_current_user] = previous_user
+        engine.dispose()

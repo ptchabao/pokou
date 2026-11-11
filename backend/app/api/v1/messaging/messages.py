@@ -19,7 +19,7 @@ from app.core.security import get_current_user
 from app.api.v1.modules import streak_lock
 from app.api.v1.messaging.ws import manager
 from app.services.messaging import notification_policy
-from app.services.messaging.sync_service import append_sync_event
+from app.services.messaging.sync_service import append_sync_event, public_event_id
 from app.services.notifications.push_service import send_push
 
 router = APIRouter(prefix="/messages", tags=["Pokou messages"])
@@ -399,7 +399,7 @@ async def _notify_other_party(
     actor_id: int,
     event_type: str,
     *,
-    sync_event_id: Optional[int] = None,
+    sync_event_id: Optional[str] = None,
 ) -> None:
     """Pousse une mise à jour de message à l'AUTRE partie — celle qui n'a pas
     agi ; l'auteur de la requête a déjà l'état à jour dans sa réponse HTTP."""
@@ -469,7 +469,7 @@ async def _deliver(
         "type": "message:new",
         "message": _serialize(message, message.recipient_id),
         **(
-            {"sync_event_id": str(sync_event_ids["recipient"])}
+            {"sync_event_id": public_event_id(db, sync_event_ids["recipient"])}
             if sync_event_ids and sync_event_ids.get("recipient") is not None
             else {}
         ),
@@ -1098,7 +1098,7 @@ async def edit_message(
     db.refresh(message)
 
     await _notify_other_party(
-        message, user_id, "message:edited", sync_event_id=sync_event.id
+        message, user_id, "message:edited", sync_event_id=public_event_id(db, sync_event.id)
     )
     return _serialize(message, user_id)
 
@@ -1130,7 +1130,7 @@ async def set_reaction(
     db.refresh(message)
 
     await _notify_other_party(
-        message, user_id, "message:reaction", sync_event_id=sync_event.id
+        message, user_id, "message:reaction", sync_event_id=public_event_id(db, sync_event.id)
     )
     return _serialize(message, user_id)
 
@@ -1158,7 +1158,7 @@ async def remove_reaction(
     db.refresh(message)
 
     await _notify_other_party(
-        message, user_id, "message:reaction", sync_event_id=sync_event.id
+        message, user_id, "message:reaction", sync_event_id=public_event_id(db, sync_event.id)
     )
     return _serialize(message, user_id)
 
@@ -1191,7 +1191,7 @@ async def mark_view_once_viewed(
         db.commit()
         db.refresh(message)
         await _notify_other_party(
-            message, user_id, "message:viewed", sync_event_id=sync_event.id
+            message, user_id, "message:viewed", sync_event_id=public_event_id(db, sync_event.id)
         )
 
     return _serialize(message, user_id)
