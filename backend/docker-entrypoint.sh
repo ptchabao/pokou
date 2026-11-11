@@ -153,6 +153,12 @@ if [ "${PROC_TYPE:-}" = "worker" ] && [ "$#" -eq 0 ]; then
 fi
 
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+  # Remise à zéro complète, uniquement sur phrase de confirmation datée
+  # (voir scripts/reset_database.py). Un échec arrête le démarrage : on ne
+  # migre pas une base à moitié effacée.
+  if [ -n "${POKOU_RESET_DATABASE:-}" ]; then
+    python -m scripts.reset_database || exit 1
+  fi
   if ! alembic upgrade head; then
     echo "alembic upgrade head a échoué alors que la base répond : l'erreur est dans la migration, pas dans la connexion."
     exit 1
