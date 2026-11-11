@@ -5,6 +5,7 @@ import '../../features/auth/presentation/auth_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../api/api_exceptions.dart';
 import 'mahizu_session.dart';
+import '../../core/widgets/pokou_context_menu.dart';
 
 /// Ce que montrent les écrans de l'assistant tant qu'aucun compte Mahizu
 /// n'est rattaché : une explication, puis le parcours code → (code du
@@ -80,6 +81,7 @@ class _MahizuConnectPanelState extends ConsumerState<MahizuConnectPanel> {
               const SizedBox(height: 24),
               if (askingCode || askingPin) ...[
                 TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _codeController,
                   enabled: !_busy,
                   keyboardType: TextInputType.number,

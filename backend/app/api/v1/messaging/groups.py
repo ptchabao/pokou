@@ -1607,7 +1607,7 @@ async def send_group_message(
                 "sender_id": str(sender_id),
                 "sender_name": serialized["sender_name"],
                 "sender_certified_name": serialized.get("sender_certified_name") or "",
-                "message_type": serialized["message_type"],
+                "msg_type": serialized["message_type"],  # pas `message_type`, réservé par Firebase
                 "sent_at": serialized["created_at"] + "Z",
                 "mentioned": "1" if member.user_id in mentioned else "0",
             },

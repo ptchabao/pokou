@@ -17,6 +17,7 @@ import 'legal_screen.dart';
 import 'phone_country.dart';
 import '../../../core/settings/app_settings.dart';
 import '../data/sim_country.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 class PhoneEntryScreen extends ConsumerStatefulWidget {
   const PhoneEntryScreen({super.key});
@@ -334,6 +335,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                           ),
                           Expanded(
                             child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                               controller: _phoneController,
                               focusNode: _focusNode,
                               keyboardType: TextInputType.phone,

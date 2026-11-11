@@ -16,6 +16,7 @@ import '../data/contact_model.dart';
 import '../data/device_contacts_service.dart';
 import 'contacts_controller.dart';
 import 'join_by_link.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Ouvrir une discussion, ou créer un groupe.
 ///
@@ -161,6 +162,7 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
                 child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _filterController,
                   style: const TextStyle(fontSize: 14),
                   onChanged: (value) =>

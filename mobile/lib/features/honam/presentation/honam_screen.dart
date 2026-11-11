@@ -12,6 +12,7 @@ import 'honam_controller.dart';
 import 'honam_order_screen.dart';
 import 'honam_send_screen.dart';
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
+import '../../../core/widgets/pokou_icon.dart';
 
 /// Honam côté patient (écran APP-4).
 ///
@@ -38,19 +39,8 @@ class HonamScreen extends ConsumerWidget {
               title: l.navHonam,
               subtitle: l.honamSubtitle,
               showStatus: false,
-              leading: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.neutralBeige,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.waving_hand_outlined,
-                  color: AppColors.accentPrimary,
-                ),
-              ),
+              // Le logo du module (guide des logos, novembre 2026).
+              leading: const PokouModuleLogo(PokouModule.honam, size: 40),
               actions: [
                 IconButton(
                   tooltip: l.honamMyOrders,

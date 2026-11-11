@@ -11,6 +11,8 @@ import '../../messaging/presentation/conversation_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/marketplace_repository.dart';
 import 'marketplace_controller.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 final favoritesProvider = FutureProvider.autoDispose<List<AssimeSnapshot>>(
   (ref) => ref.watch(marketplaceRepositoryProvider).favorites(),
@@ -129,11 +131,13 @@ class _Alerts extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: query,
               autofocus: true,
               decoration: InputDecoration(labelText: l.assimeAlertQuery),
             ),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: maxPrice,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: l.assimeAlertMaxPrice),
@@ -526,7 +530,7 @@ class SponsoredStatusTile extends ConsumerWidget {
                     child: sponsored.product.imageMediaId == null
                         ? Container(
                             color: AppColors.surface,
-                            child: const Icon(Icons.storefront_outlined),
+                            child: const PokouIcon(PokouModuleIcon.assime),
                           )
                         : MediaImage(
                             mediaId: sponsored.product.imageMediaId!,

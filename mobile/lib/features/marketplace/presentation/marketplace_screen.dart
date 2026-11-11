@@ -22,6 +22,7 @@ import 'ad_card.dart';
 import 'seller_verification_screen.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 const _kAdEvery = 8;
 
@@ -72,6 +73,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
@@ -1218,6 +1220,7 @@ class _MarketplaceSearchFieldState
   Widget build(BuildContext context) {
     final query = ref.watch(marketplaceQueryProvider);
     return TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
       controller: _controller,
       onChanged: _onChanged,
       textInputAction: TextInputAction.search,

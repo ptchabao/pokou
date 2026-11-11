@@ -9,6 +9,7 @@ import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import 'country_names.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Un pays au sens « indicatif téléphonique ».
 ///
@@ -229,6 +230,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _searchController,
                 autofocus: true,
                 onChanged: (value) => setState(() => _query = value),

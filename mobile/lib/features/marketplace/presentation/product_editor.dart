@@ -14,6 +14,7 @@ import '../data/product_model.dart';
 import 'marketplace_controller.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/api/api_exceptions.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Le formulaire d'annonce — création et modification.
 ///
@@ -436,10 +437,12 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
           ),
           const SizedBox(height: 20),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _name,
             decoration: InputDecoration(labelText: L.of(context).marketName),
           ),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _description,
             maxLines: 3,
             decoration: InputDecoration(
@@ -447,6 +450,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
             ),
           ),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _price,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: L.of(context).marketPrice),
@@ -492,6 +496,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
           ),
           if (_categorySlug == 'AUTRE')
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _categoryDetail,
               decoration: InputDecoration(
                 labelText: L.of(context).marketSpecifyCategory,
@@ -502,6 +507,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
             children: [
               Expanded(
                 child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _location,
                   decoration: InputDecoration(
                     labelText: L.of(context).marketCityOrArea,

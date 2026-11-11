@@ -12,6 +12,7 @@ import '../../groups/presentation/group_controller.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
 import '../data/community_model.dart';
 import 'community_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Détail d'une communauté : son groupe d'annonces en tête, puis ses autres
 /// groupes. Les actions d'administration n'apparaissent que si le serveur
@@ -74,6 +75,7 @@ class CommunityDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: nameController,
               autofocus: true,
               maxLength: 255,
@@ -84,6 +86,7 @@ class CommunityDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: descriptionController,
               maxLength: 2000,
               maxLines: 3,
@@ -232,6 +235,7 @@ class CommunityDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: controller,
                 autofocus: true,
                 maxLength: 255,

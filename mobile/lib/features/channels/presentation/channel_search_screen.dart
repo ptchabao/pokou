@@ -12,6 +12,7 @@ import 'channel_controller.dart';
 import 'channel_screen.dart';
 import 'channel_avatar.dart';
 import 'channel_skeletons.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Recherche de chaînes — une chaîne est PUBLIQUE : on la trouve et on la lit
 /// sans y être abonné, contrairement à un groupe dont l'existence même n'est
@@ -89,6 +90,7 @@ class _ChannelSearchScreenState extends ConsumerState<ChannelSearchScreen> {
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: _controller,
           autofocus: true,
           onChanged: _onChanged,

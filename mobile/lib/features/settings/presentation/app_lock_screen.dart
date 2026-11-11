@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/security/app_lock.dart';
 import '../../../core/theme/app_colors.dart';
 import 'settings_widgets.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Profil > Verrouillage de l'application. Activation, changement et
 /// désactivation du code — la vérification et le verrou lui-même vivent dans
@@ -54,6 +55,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: firstController,
                 autofocus: true,
                 obscureText: true,
@@ -66,6 +68,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
               ),
               const SizedBox(height: 8),
               TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: secondController,
                 obscureText: true,
                 keyboardType: TextInputType.number,
@@ -136,6 +139,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               obscureText: true,

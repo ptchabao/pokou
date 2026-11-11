@@ -12,6 +12,7 @@ import '../../kory/presentation/kory_screen.dart' show KoryStatusPill;
 import '../../modules/shared/module_ui.dart';
 import 'certified_pro_screen.dart';
 import '../../../core/time/server_time.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 final _certifiedProvider =
     FutureProvider.autoDispose<
@@ -327,6 +328,7 @@ class _NameMismatchState extends ConsumerState<_NameMismatch> {
           const SizedBox(height: 4),
           Text(l.certMismatchBody),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _name,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(

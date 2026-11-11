@@ -65,6 +65,7 @@ import '../../contacts/presentation/discussions_controller.dart';
 import 'group_controller.dart';
 import 'group_settings_screen.dart';
 import '../../messaging/presentation/message_text_actions.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Conversation de groupe — pendant de ConversationScreen. Différences
 /// assumées : pas de Mode Bouclier (il note une conversation par contact),
@@ -380,6 +381,7 @@ class _GroupConversationScreenState
       builder: (dialogContext) => AlertDialog(
         title: Text(_l.convEditTitle),
         content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           maxLength: 4000,
@@ -918,6 +920,7 @@ class _GroupConversationScreenState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                         controller: questionController,
                         autofocus: true,
                         maxLength: 500,
@@ -935,6 +938,7 @@ class _GroupConversationScreenState
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                             controller: optionControllers[index],
                             maxLength: 100,
                             decoration: InputDecoration(
@@ -1437,6 +1441,7 @@ class _GroupConversationScreenState
             ),
             const SizedBox(height: 16),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               maxLength: 255,

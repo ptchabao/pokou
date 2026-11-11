@@ -28,6 +28,7 @@ import '../../notifications/presentation/notifications_center_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import 'global_search_screen.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/pokou_icon.dart';
 
 /// APP-1 · Accueil — maquette « Terre de Confiance » (Stitch) :
 ///
@@ -62,6 +63,7 @@ class HomeScreen extends ConsumerWidget {
     final services = <_Service>[
       if (config.has('kory'))
         _Service(
+          module: PokouModule.kory,
           title: l.navKory,
           pitch: l.homeKoryShort,
           illustration: PokouIllustrations.kory,
@@ -75,6 +77,7 @@ class HomeScreen extends ConsumerWidget {
         ),
       if (config.has('honam'))
         _Service(
+          module: PokouModule.honam,
           title: l.navHonam,
           pitch: l.homeHonamShort,
           illustration: PokouIllustrations.honam,
@@ -90,6 +93,7 @@ class HomeScreen extends ConsumerWidget {
         ),
       if (config.has('assime'))
         _Service(
+          module: PokouModule.assime,
           title: l.homeAssimeTitle,
           pitch: l.homeAssimeShort,
           illustration: PokouIllustrations.assime,
@@ -370,6 +374,7 @@ class _SearchRow extends StatelessWidget {
 
 class _Service {
   const _Service({
+    required this.module,
     required this.title,
     required this.pitch,
     required this.illustration,
@@ -382,6 +387,7 @@ class _Service {
     required this.onTap,
   });
 
+  final PokouModule module;
   final String title;
   final String pitch;
   final PokouIllustrations illustration;
@@ -443,18 +449,26 @@ class _ServiceTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          service.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: 'Outfit',
-            fontSize: 19,
-            height: 1.2,
-            letterSpacing: -0.2,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
+        Row(
+          children: [
+            PokouModuleLogo(service.module, size: 26),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                service.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 19,
+                  height: 1.2,
+                  letterSpacing: -0.2,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 4),
         Text(

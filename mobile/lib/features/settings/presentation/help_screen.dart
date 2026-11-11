@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../chat/presentation/chat_controller.dart' show kNoMonitor;
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// REG-10 · Aide et support (MSG-22).
 ///
@@ -51,6 +52,7 @@ class _HelpScreenState extends State<HelpScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             onChanged: (v) => setState(() => _query = v),
             decoration: InputDecoration(
               hintText: l.helpSearchHint,

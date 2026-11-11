@@ -10,6 +10,8 @@ import '../../channels/presentation/channel_screen.dart';
 import '../../marketplace/data/product_model.dart';
 import '../../marketplace/presentation/product_detail_screen.dart';
 import '../../messaging/presentation/conversation_screen.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 class GlobalSearchScreen extends ConsumerStatefulWidget {
   const GlobalSearchScreen({super.key, this.initialQuery = ''});
@@ -96,6 +98,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _controller,
               autofocus: true,
               textInputAction: TextInputAction.search,
@@ -177,7 +180,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                       builder: (context) {
                         final product = MarketplaceProduct.fromJson(item);
                         return ListTile(
-                          leading: const Icon(Icons.storefront_outlined),
+                          leading: const PokouIcon(PokouModuleIcon.assime),
                           title: Text(product.name),
                           subtitle: Text(
                             '${product.price} ${product.currency}',

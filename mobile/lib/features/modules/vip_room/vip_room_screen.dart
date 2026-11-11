@@ -14,6 +14,7 @@ import '../shared/module_payment.dart';
 import '../shared/module_ui.dart';
 import 'vip_room_controller.dart';
 import 'vip_room_model.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La couleur du module — pastilles seulement.
 const _violet = Color(0xFF7C3AED);
@@ -678,6 +679,7 @@ Future<void> _showRoomSheet(
             ),
             FieldLabel(L.of(innerContext).vipRoomName),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: titleController,
               maxLength: 120,
               decoration: InputDecoration(
@@ -691,6 +693,7 @@ Future<void> _showRoomSheet(
             ),
             const SizedBox(height: 6),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: pitchController,
               maxLength: 500,
               maxLines: 3,
@@ -700,6 +703,7 @@ Future<void> _showRoomSheet(
             ),
             FieldLabel(L.of(innerContext).vipMonthlyPrice),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: priceController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(hintText: '2000'),
@@ -773,6 +777,7 @@ Future<void> _showPublishSheet(BuildContext context, WidgetRef ref) async {
           ),
           FieldLabel(L.of(innerContext).vipYourMessage),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             maxLines: 5,
             maxLength: 4000,

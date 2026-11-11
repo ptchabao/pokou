@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.28.2+51
+version: 1.28.3+52
 
 environment:
   sdk: ^3.11.0
@@ -211,6 +211,12 @@ flutter:
     - assets/fonts/
     - assets/audio/ringback.wav
     - assets/illustrations/
+    # Icônes et logos dessinés pour Pokou (paquet « pokou-icones » du
+    # 6 novembre 2026, voir core/widgets/pokou_icon.dart).
+    - assets/icons/modules/
+    - assets/icons/interface/
+    - assets/icons/badges/
+    - assets/logos/
     - assets/audio/ringtone.wav
     # Motif griffonné derrière les bulles — voir core/widgets/chat_wallpaper.dart.
     # WebP et non JPEG : sur du trait fin, la compression JPEG laisse des

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/widgets/pokou_context_menu.dart';
 
 /// La pilule de saisie, la même en conversation et en groupe :
 ///
@@ -144,9 +145,10 @@ class ComposerInputPill extends StatelessWidget {
                 controller: controller,
                 focusNode: focusNode,
                 onTap: onFieldTap,
-                // Couper, copier, coller, tout sélectionner : le menu du
-                // système, tel quel (rien ne le désactive). Et les images
-                // collées depuis le clavier :
+                // Couper, copier, COLLER, tout sélectionner — « Coller »
+                // toujours proposé (voir pokouContextMenuBuilder). Et les
+                // images collées depuis le clavier :
+                contextMenuBuilder: pokouContextMenuBuilder,
                 contentInsertionConfiguration: onContentInserted == null
                     ? null
                     : ContentInsertionConfiguration(

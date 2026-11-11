@@ -16,6 +16,7 @@ import '../data/chat_message_model.dart';
 import 'ai_style.dart';
 import 'chat_controller.dart';
 import 'voice_mode_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 class _Suggestion {
   const _Suggestion(this.label, this.subtitle, this.prompt);
@@ -809,6 +810,7 @@ class _Composer extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: controller,
                   minLines: 1,
                   maxLines: 5,

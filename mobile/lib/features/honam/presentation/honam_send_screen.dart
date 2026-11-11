@@ -13,6 +13,7 @@ import '../data/honam_models.dart';
 import 'honam_controller.dart';
 import 'honam_order_screen.dart';
 import 'honam_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La position, demandée au moment où elle sert : trier les officines et
 /// guider le coursier. Refusée, l'annuaire reste dans l'ordre alphabétique.
@@ -205,11 +206,13 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _address,
               maxLength: 255,
               decoration: InputDecoration(labelText: l.honamAddress),
             ),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _note,
               maxLength: 500,
               decoration: InputDecoration(labelText: l.honamNote),

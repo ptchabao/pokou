@@ -106,7 +106,10 @@ class MessagePush {
       senderId: senderId,
       senderName: data['sender_name']?.toString() ?? data['contact_name']?.toString() ?? '',
       senderCertifiedName: certified == null || certified.isEmpty ? null : certified,
-      messageType: data['message_type']?.toString() ?? 'TEXT',
+      // `msg_type` : Firebase réserve `message_type` (gardé en repli pour un
+      // serveur plus ancien).
+      messageType:
+          (data['msg_type'] ?? data['message_type'])?.toString() ?? 'TEXT',
       sentAt: tryParseServerTime(data['sent_at']?.toString() ?? '') ?? DateTime.now(),
       priority: data['priority']?.toString(),
       muted: data['muted'] == '1',

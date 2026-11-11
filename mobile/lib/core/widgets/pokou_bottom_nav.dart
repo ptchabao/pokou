@@ -4,16 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/contacts/presentation/discussions_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
+import 'pokou_icon.dart';
 
 class PokouNavDestination {
-  const PokouNavDestination({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-  });
+  const PokouNavDestination({required this.icon, required this.label});
 
-  final IconData icon;
-  final IconData activeIcon;
+  /// L'icône Pokou du module : en trait au repos, en plein quand l'onglet
+  /// est actif (barre d'onglets, style 1 du paquet d'icônes).
+  final PokouModuleIcon icon;
   final String label;
 }
 
@@ -73,43 +71,35 @@ List<PokouNavDestination> pokouNavDestinationsOf(
     for (final tab in tabs)
       switch (tab) {
         PokouTab.home => PokouNavDestination(
-          icon: Icons.home_outlined,
-          activeIcon: Icons.home,
+          icon: PokouModuleIcon.accueil,
           label: l.navHome,
         ),
         PokouTab.discussions => PokouNavDestination(
-          icon: Icons.chat_bubble_outline,
-          activeIcon: Icons.chat_bubble,
+          icon: PokouModuleIcon.discussions,
           label: l.navChats,
         ),
         PokouTab.kory => PokouNavDestination(
-          icon: Icons.savings_outlined,
-          activeIcon: Icons.savings,
+          icon: PokouModuleIcon.kory,
           label: l.navKory,
         ),
         PokouTab.honam => PokouNavDestination(
-          icon: Icons.health_and_safety_outlined,
-          activeIcon: Icons.health_and_safety,
+          icon: PokouModuleIcon.honam,
           label: l.navHonam,
         ),
         PokouTab.more => PokouNavDestination(
-          icon: Icons.grid_view_outlined,
-          activeIcon: Icons.grid_view_rounded,
+          icon: PokouModuleIcon.plus,
           label: l.navMore,
         ),
         PokouTab.statuses => PokouNavDestination(
-          icon: Icons.donut_large_outlined,
-          activeIcon: Icons.donut_large,
+          icon: PokouModuleIcon.statuts,
           label: l.navStatus,
         ),
         PokouTab.calls => PokouNavDestination(
-          icon: Icons.call_outlined,
-          activeIcon: Icons.call,
+          icon: PokouModuleIcon.appels,
           label: l.navCalls,
         ),
         PokouTab.settings => PokouNavDestination(
-          icon: Icons.settings_outlined,
-          activeIcon: Icons.settings,
+          icon: PokouModuleIcon.reglages,
           label: l.moreSectionSettings,
         ),
       },
@@ -178,7 +168,7 @@ class PokouBottomNav extends ConsumerWidget {
                   badge: tabs[i] == PokouTab.discussions ? unread : 0,
                 ),
                 activeIcon: _Glyph(
-                  icon: destination.activeIcon,
+                  icon: destination.icon,
                   active: true,
                   badge: tabs[i] == PokouTab.discussions ? unread : 0,
                 ),
@@ -204,7 +194,7 @@ class PokouBottomNav extends ConsumerWidget {
 class _Glyph extends StatelessWidget {
   const _Glyph({required this.icon, required this.active, this.badge = 0});
 
-  final IconData icon;
+  final PokouModuleIcon icon;
   final bool active;
   final int badge;
 
@@ -241,7 +231,7 @@ class _Glyph extends StatelessWidget {
             isLabelVisible: badge > 0,
             backgroundColor: AppColors.accentPrimary,
             label: Text(badge > 99 ? '99+' : '$badge'),
-            child: Icon(icon),
+            child: PokouIcon(icon, filled: active),
           ),
         ),
       ],

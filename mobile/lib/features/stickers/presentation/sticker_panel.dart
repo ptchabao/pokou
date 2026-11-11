@@ -10,6 +10,7 @@ import '../data/sticker_models.dart';
 import 'sticker_image.dart';
 import 'sticker_packs_screen.dart';
 import 'sticker_providers.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Le panneau de stickers, sous la barre de saisie.
 ///
@@ -158,6 +159,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel> {
                   ),
                 ),
                 child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _searchController,
                   autofocus: true,
                   onChanged: _onSearchChanged,

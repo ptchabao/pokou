@@ -11,6 +11,7 @@ import '../../marketplace/data/product_model.dart';
 import '../../marketplace/presentation/marketplace_actions.dart';
 import '../../marketplace/presentation/marketplace_controller.dart';
 import '../../marketplace/presentation/vitrine_viewer.dart';
+import '../../../core/widgets/pokou_icon.dart';
 
 /// La première page de la vitrine. Une erreur (hors ligne) donne une
 /// vitrine vide — la bande disparaît, les discussions restent.
@@ -127,8 +128,8 @@ class _SellTile extends ConsumerWidget {
                           )
                         : ColoredBox(
                             color: AppColors.surfaceElevated,
-                            child: Icon(
-                              Icons.storefront_outlined,
+                            child: PokouIcon(
+                              PokouModuleIcon.assime,
                               color: AppColors.textSecondary,
                               size: 28,
                             ),

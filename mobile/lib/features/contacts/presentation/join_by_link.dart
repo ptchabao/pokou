@@ -14,6 +14,7 @@ import '../../groups/data/group_model.dart';
 import '../../groups/presentation/group_controller.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
 import 'discussions_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Rejoindre un groupe ou une communauté par lien — **une seule porte**.
 ///
@@ -60,6 +61,7 @@ Future<void> showJoinByLinkSheet(
           ),
           const SizedBox(height: 16),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             autofocus: true,
             decoration: const InputDecoration(

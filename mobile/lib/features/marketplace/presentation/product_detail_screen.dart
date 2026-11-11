@@ -16,6 +16,8 @@ import 'marketplace_controller.dart';
 import '../../../core/widgets/image_viewer.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Fiche détaillée d'un produit — la tuile de la liste ne menait nulle part.
 ///
@@ -262,6 +264,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ],
               ),
               TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: commentController,
                 maxLines: 3,
                 maxLength: 1000,
@@ -522,8 +525,8 @@ class _SellerCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundColor: AppColors.accentPrimaryLight,
-                child: Icon(
-                  Icons.storefront_outlined,
+                child: PokouIcon(
+                  PokouModuleIcon.assime,
                   color: Colors.white,
                   size: 18,
                 ),

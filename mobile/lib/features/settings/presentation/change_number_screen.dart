@@ -6,6 +6,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// REG-4 · Changer de numéro (MSG-20).
 ///
@@ -117,6 +118,7 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
                         ),
                         const SizedBox(height: 12),
                         TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                           controller: _phone,
                           enabled: !_codeSent && !_busy,
                           keyboardType: TextInputType.phone,
@@ -127,6 +129,7 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
                         if (_codeSent) ...[
                           const SizedBox(height: 12),
                           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                             controller: _code,
                             enabled: !_busy,
                             autofocus: true,

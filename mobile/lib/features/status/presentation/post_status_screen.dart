@@ -12,6 +12,7 @@ import 'package:video_player/video_player.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/status_text_style.dart';
 import 'status_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 enum _Mode { text, mediaPreview }
 
@@ -242,6 +243,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 28),
                   child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _textController,
                     autofocus: true,
                     maxLines: null,
@@ -436,6 +438,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 18),
                         child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                           controller: _captionController,
                           minLines: 1,
                           maxLines: 4,

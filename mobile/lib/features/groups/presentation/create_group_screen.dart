@@ -10,6 +10,7 @@ import '../../../core/widgets/contact_avatar.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import 'group_controller.dart';
 import 'group_conversation_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Création d'un groupe — nom + sélection multiple de contacts sur un seul
 /// écran (plutôt que l'assistant en deux étapes de WhatsApp) : la liste des
@@ -120,6 +121,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _nameController,
               textCapitalization: TextCapitalization.sentences,
               maxLength: 255,

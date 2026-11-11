@@ -8,6 +8,7 @@ import '../../contacts/data/contact_model.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../../modules/shared/module_ui.dart';
 import 'kory_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Un participant en attente d'ajout : quelqu'un de Pokou (par son compte)
 /// ou un numéro, qui recevra un SMS d'invitation.
@@ -184,6 +185,7 @@ class _KoryParticipantsScreenState
                   children: [
                     Expanded(
                       child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _last,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(labelText: l.koryLastName),
@@ -192,6 +194,7 @@ class _KoryParticipantsScreenState
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _first,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(labelText: l.koryFirstName),
@@ -201,6 +204,7 @@ class _KoryParticipantsScreenState
                 ),
                 const SizedBox(height: 10),
                 TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _phone,
                   keyboardType: TextInputType.phone,
                   inputFormatters: [

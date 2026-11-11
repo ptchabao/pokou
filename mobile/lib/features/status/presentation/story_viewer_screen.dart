@@ -16,6 +16,7 @@ import '../../messaging/presentation/messaging_controller.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/status_halo.dart';
 import '../data/status_text_style.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Durée d'un statut texte ou photo.
 const _kStoryDuration = Duration(seconds: 6);
@@ -353,6 +354,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                       children: [
                         Expanded(
                           child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                             controller: _reply,
                             focusNode: _replyFocus,
                             onTap: _controller.stop,

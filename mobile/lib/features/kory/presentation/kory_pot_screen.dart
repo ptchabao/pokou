@@ -13,6 +13,7 @@ import '../data/kory_model.dart';
 import 'kory_controller.dart';
 import 'kory_pledge_screens.dart';
 import 'kory_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Une cagnotte : où envoyer l'argent, ce qui a été confirmé, et le journal.
 ///
@@ -499,6 +500,7 @@ class _EntryTile extends ConsumerWidget {
         builder: (dialogContext) => AlertDialog(
           title: Text(l.koryRejectReasonTitle),
           content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             autofocus: true,
             maxLength: 280,
@@ -622,6 +624,7 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
             ),
             const SizedBox(height: 12),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _amount,
               autofocus: true,
               keyboardType: TextInputType.number,
@@ -630,6 +633,7 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
             ),
             const SizedBox(height: 8),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _reference,
               maxLength: 64,
               decoration: InputDecoration(
@@ -641,6 +645,7 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
             if (widget.pot.isCotisation) ...[
               const SizedBox(height: 8),
               TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _period,
                 maxLength: 12,
                 decoration: InputDecoration(labelText: l.koryPeriodLabel),
@@ -648,6 +653,7 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
             ],
             const SizedBox(height: 8),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _note,
               maxLength: 280,
               decoration: InputDecoration(labelText: l.koryNote),

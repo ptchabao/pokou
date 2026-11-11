@@ -13,6 +13,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import 'marketplace_controller.dart';
 import '../../../core/widgets/paid_feature_widgets.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Créer une publicité — un écran, pas une boîte de dialogue.
 ///
@@ -193,6 +194,7 @@ class _CreateAdScreenState extends ConsumerState<CreateAdScreen> {
                   const SizedBox(height: 20),
                   FieldLabel(L.of(context).commonTitle),
                   TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _titleController,
                     maxLength: 120,
                     decoration: InputDecoration(
@@ -201,6 +203,7 @@ class _CreateAdScreenState extends ConsumerState<CreateAdScreen> {
                   ),
                   FieldLabel(L.of(context).mediaMessage),
                   TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _bodyController,
                     maxLines: 3,
                     maxLength: 500,

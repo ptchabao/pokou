@@ -25,6 +25,7 @@ import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
 import '../../status/presentation/status_list_screen.dart';
+import '../../../core/widgets/pokou_icon.dart';
 
 /// « Plus » (écran APP-6) ou « Réglages » au lot 1 (écran LOT-4).
 ///
@@ -334,11 +335,19 @@ class MoreScreen extends ConsumerWidget {
                 Icons.donut_large_outlined,
                 l.navStatus,
                 () => push(const StatusListScreen()),
+                leading: PokouIcon(
+                  PokouModuleIcon.statuts,
+                  color: AppColors.textSecondary,
+                ),
               ),
               _Row(
                 Icons.call_outlined,
                 l.navCalls,
                 () => push(const CallLogScreen()),
+                leading: PokouIcon(
+                  PokouModuleIcon.appels,
+                  color: AppColors.textSecondary,
+                ),
               ),
               _Row(
                 Icons.storefront_outlined,
@@ -346,6 +355,7 @@ class MoreScreen extends ConsumerWidget {
                 () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
                 ),
+                leading: const PokouModuleLogo(PokouModule.assime, size: 28),
               ),
               _Row(
                 Icons.apps_rounded,
@@ -450,9 +460,12 @@ class _Pushed extends StatelessWidget {
 }
 
 class _Row {
-  const _Row(this.icon, this.label, this.onTap);
+  const _Row(this.icon, this.label, this.onTap, {this.leading});
 
   final IconData icon;
+
+  /// Une icône ou un logo Pokou à la place de l'icône générique.
+  final Widget? leading;
   final String label;
   final VoidCallback onTap;
 }
@@ -477,7 +490,9 @@ class _Section extends StatelessWidget {
               children: [
                 for (final row in rows)
                   ListTile(
-                    leading: Icon(row.icon, color: AppColors.textSecondary),
+                    leading:
+                        row.leading ??
+                        Icon(row.icon, color: AppColors.textSecondary),
                     title: Text(row.label),
                     trailing: Icon(
                       Icons.chevron_right,

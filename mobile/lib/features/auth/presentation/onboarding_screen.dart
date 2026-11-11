@@ -12,6 +12,7 @@ import '../../../core/widgets/assistant_orb.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import 'auth_controller.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Après le code : faut-il encore le profil ou les conditions ?
 ///
@@ -229,6 +230,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     Text(l.onbProfileBody, style: TextStyle(color: AppColors.textSecondary)),
     const SizedBox(height: 20),
     TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
       controller: _name,
       autofocus: true,
       maxLength: 60,

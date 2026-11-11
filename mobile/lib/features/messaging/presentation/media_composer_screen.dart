@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Ce qu'on renvoie à l'écran de conversation : le fichier prêt, sa légende,
 /// et s'il doit disparaître après avoir été ouvert.
@@ -184,6 +185,7 @@ class _MediaComposerScreenState extends State<MediaComposerScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                           controller: _captionController,
                           style: const TextStyle(color: Colors.white),
                           maxLines: 4,

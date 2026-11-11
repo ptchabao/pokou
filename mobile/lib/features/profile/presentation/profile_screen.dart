@@ -35,6 +35,7 @@ import '../../settings/presentation/privacy_settings_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
 import '../../status/presentation/status_privacy_screen.dart';
 import '../data/profile_repository.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   return ProfileRepository(apiClient: ref.watch(apiClientProvider));
@@ -201,6 +202,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: nameController,
               decoration: InputDecoration(
                 hintText: L.of(context).profileFullName,
@@ -208,6 +210,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: aboutController,
               maxLength: 140,
               decoration: InputDecoration(hintText: L.of(context).profileAbout),

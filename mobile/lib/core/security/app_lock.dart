@@ -9,6 +9,7 @@ import '../../features/auth/presentation/auth_controller.dart';
 import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
+import '../../core/widgets/pokou_context_menu.dart';
 
 /// Verrouillage de l'application par code (Profil > Confidentialité &
 /// Sécurité). Un code à 4-8 chiffres gardé dans le Keystore/Keychain, pas de
@@ -242,6 +243,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                 ),
                 const SizedBox(height: 24),
                 TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _controller,
                   autofocus: true,
                   obscureText: true,
@@ -410,6 +412,7 @@ class _ForgottenPinSheetState extends ConsumerState<_ForgottenPinSheet> {
           if (_codeSent) ...[
             const SizedBox(height: 16),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _codeController,
               autofocus: true,
               keyboardType: TextInputType.number,

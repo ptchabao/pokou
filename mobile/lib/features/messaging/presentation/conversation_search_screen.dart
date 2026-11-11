@@ -11,6 +11,7 @@ import '../../../core/theme/app_radius.dart';
 import '../data/direct_message_model.dart';
 import 'day_separator.dart';
 import 'messaging_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Recherche DANS une conversation — l'écran renvoie l'identifiant du message
 /// choisi, que la conversation fait défiler jusqu'à lui (voir
@@ -90,6 +91,7 @@ class _ConversationSearchScreenState
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: _controller,
           autofocus: true,
           onChanged: _onChanged,

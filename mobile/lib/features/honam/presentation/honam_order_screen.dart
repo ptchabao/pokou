@@ -11,6 +11,8 @@ import '../data/honam_models.dart';
 import 'honam_controller.dart';
 import 'courier_tracking.dart';
 import 'honam_send_screen.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Le suivi d'une commande (fil de suivi, NAV-04) : devis, paiement à
 /// l'officine, code de remise, et les cas particuliers — refus, paiement non
@@ -255,6 +257,7 @@ class _OrderMessagesState extends ConsumerState<_OrderMessages> {
           children: [
             Expanded(
               child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _controller,
                 maxLength: 1000,
                 minLines: 1,
@@ -295,8 +298,8 @@ class _StatusHeader extends StatelessWidget {
     return ModuleCard(
       child: Row(
         children: [
-          const Icon(
-            Icons.local_pharmacy_outlined,
+          const PokouIcon(
+            PokouModuleIcon.honam,
             color: AppColors.feedbackSuccess,
           ),
           const SizedBox(width: 12),

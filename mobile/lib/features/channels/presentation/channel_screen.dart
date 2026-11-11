@@ -27,6 +27,7 @@ import 'channel_avatar.dart';
 import 'channel_controller.dart';
 import 'channel_editor_screen.dart';
 import '../../../core/widgets/media_image.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Écran d'une chaîne — le fil de ses publications, façon chaînes WhatsApp :
 /// diffusion à SENS UNIQUE. Les abonnés lisent et réagissent par emoji, ils
@@ -249,6 +250,7 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(L.of(context).channelEditPost),
         content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           maxLines: 5,
           autofocus: true,
@@ -1010,6 +1012,7 @@ class _PostComposerState extends ConsumerState<_PostComposer> {
               ),
             ),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _controller,
             maxLines: 5,
             minLines: 2,
@@ -1022,6 +1025,7 @@ class _PostComposerState extends ConsumerState<_PostComposer> {
           const SizedBox(height: 10),
           if (_pollMode) ...[
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _pollQuestion,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
@@ -1037,6 +1041,7 @@ class _PostComposerState extends ConsumerState<_PostComposer> {
                   children: [
                     Expanded(
                       child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _pollOptions[index],
                         onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(

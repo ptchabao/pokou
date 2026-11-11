@@ -18,6 +18,7 @@ import 'onboarding_screen.dart';
 import 'two_step_pin_screen.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import '../../../core/settings/app_settings.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 const _codeLength = 6;
 
@@ -359,6 +360,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
             child: SizedBox(
               width: _codeLength * 64,
               child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _codeController,
                 focusNode: _focusNode,
                 keyboardType: TextInputType.number,

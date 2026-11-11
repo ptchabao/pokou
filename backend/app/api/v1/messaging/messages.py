@@ -588,7 +588,9 @@ def _rich_push_data(message: DirectMessage, sender_name: str) -> dict[str, str]:
         "rich": "1",
         "sender_id": str(message.sender_id),
         "sender_name": sender_name,
-        "message_type": message.message_type.value,
+        # `msg_type` et non `message_type` : Firebase réserve ce nom et
+        # refusait TOUTE la notification (« Invalid data payload key »).
+        "msg_type": message.message_type.value,
         "sent_at": message.created_at.isoformat() + "Z",
         "is_encrypted": "1" if message.encryption else "0",
     }

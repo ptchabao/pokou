@@ -42,6 +42,7 @@ import '../data/conversation_summary.dart';
 import '../../channels/presentation/channel_search_screen.dart';
 import '../../../core/sharing/invite_sharing.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 const _kPriorityTags = ['BUSINESS', 'FOURNISSEUR', 'CLIENT', 'BOSS', 'AMI'];
 
@@ -579,6 +580,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                         border: Border.all(color: AppColors.border),
                       ),
                       child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _searchController,
                         decoration: InputDecoration(
                           hintText: L.of(context).chatsSearchHint,

@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/paid_feature_widgets.dart';
 import '../shared/module_ui.dart';
 import 'spark_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La création de la fiche Spark.
 ///
@@ -126,6 +127,7 @@ class _SparkOnboardingViewState extends ConsumerState<SparkOnboardingView> {
           ),
           FieldLabel(_l.sparkDisplayName),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _nameController,
             maxLength: 60,
             decoration: InputDecoration(hintText: _l.sparkNameExample),
@@ -196,6 +198,7 @@ class _SparkOnboardingViewState extends ConsumerState<SparkOnboardingView> {
           ),
           FieldLabel(_l.sparkBioLabel),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _bioController,
             maxLength: 300,
             maxLines: 3,

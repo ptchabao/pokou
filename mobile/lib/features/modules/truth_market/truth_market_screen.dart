@@ -10,6 +10,7 @@ import '../shared/module_payment.dart';
 import '../shared/module_ui.dart';
 import 'truth_market_controller.dart';
 import 'truth_market_model.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La couleur du module — pastilles seulement.
 const _sky = Color(0xFF0EA5E9);
@@ -121,6 +122,7 @@ class _ReceivedCardState extends ConsumerState<_ReceivedCard> {
           ),
           FieldLabel(L.of(sheetContext).truthWhatToSay),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             maxLines: 5,
             maxLength: 2000,
@@ -497,6 +499,7 @@ Future<void> showAskTruthSheet(
           ),
           FieldLabel(L.of(innerContext).truthYourQuestion),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: questionController,
             maxLength: 280,
             maxLines: 3,

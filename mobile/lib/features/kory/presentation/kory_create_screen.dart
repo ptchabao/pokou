@@ -12,6 +12,7 @@ import '../../modules/shared/module_ui.dart';
 import 'kory_controller.dart';
 import 'kory_participants_screen.dart';
 import 'kory_pot_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Ouvre la création, puis la cagnotte créée. `groupId` la rattache au
 /// groupe d'où l'on vient (NAV-03).
@@ -178,12 +179,14 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
           ),
           const SizedBox(height: 16),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _title,
             maxLength: 120,
             decoration: InputDecoration(labelText: l.koryFieldTitle),
           ),
           const SizedBox(height: 8),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _description,
             maxLength: 500,
             maxLines: 3,
@@ -192,6 +195,7 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
           ),
           const SizedBox(height: 8),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _amount,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],

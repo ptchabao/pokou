@@ -10,6 +10,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../data/broadcast_model.dart';
 import 'broadcast_controller.dart';
 import 'broadcast_editor_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La conversation d'une liste de diffusion — vue par son auteur seul.
 ///
@@ -174,6 +175,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                   children: [
                     Expanded(
                       child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _inputController,
                         minLines: 1,
                         maxLines: 5,

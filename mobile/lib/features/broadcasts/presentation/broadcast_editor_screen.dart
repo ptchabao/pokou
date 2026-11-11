@@ -9,6 +9,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../data/broadcast_model.dart';
 import 'broadcast_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Composer une liste — un nom, et des destinataires cochés dans son carnet.
 ///
@@ -111,6 +112,7 @@ class _BroadcastEditorScreenState extends ConsumerState<BroadcastEditorScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
               child: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _nameController,
                 decoration: InputDecoration(
                   hintText: L.of(context).bcastNameHint,

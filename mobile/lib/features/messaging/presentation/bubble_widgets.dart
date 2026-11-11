@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../data/direct_message_model.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Émojis de réaction rapide, façon barre WhatsApp — six choix courants
 /// suffisent à la plupart des réactions, le bouton "plus" couvre le reste
@@ -65,6 +66,7 @@ Future<String?> promptCustomEmoji(BuildContext context) {
     builder: (dialogContext) => AlertDialog(
       title: Text(L.of(context).reactWith),
       content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
         controller: controller,
         autofocus: true,
         maxLength: 16,

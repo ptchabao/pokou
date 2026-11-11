@@ -10,6 +10,7 @@ import '../shared/module_payment.dart';
 import '../shared/module_ui.dart';
 import 'hype_train_controller.dart';
 import 'hype_train_model.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La couleur du module — pastilles et barre d'avancement.
 const _rocket = Color(0xFFDC2626);
@@ -487,6 +488,7 @@ Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
             ),
             FieldLabel(L.of(innerContext).commonTitle),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: titleController,
               maxLength: 120,
               decoration: InputDecoration(
@@ -495,6 +497,7 @@ Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
             ),
             FieldLabel(L.of(innerContext).hypePromiseLabel),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: promiseController,
               maxLength: 500,
               maxLines: 3,
@@ -504,6 +507,7 @@ Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
             ),
             FieldLabel(L.of(innerContext).hypeGoalAmount),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: goalController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(hintText: '10000'),

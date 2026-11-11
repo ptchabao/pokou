@@ -16,6 +16,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
 import 'honam_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 final _ridesProvider = FutureProvider.autoDispose<({List<HonamOrder> available, List<HonamOrder> mine})>((ref) {
   return ref.watch(honamRepositoryProvider).rides();
@@ -248,6 +249,7 @@ class _RideCard extends ConsumerWidget {
         builder: (dialogContext) => AlertDialog(
           title: Text(l.honamDeliver),
           content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             autofocus: true,
             keyboardType: TextInputType.number,
@@ -826,6 +828,7 @@ class _ApplicationState extends ConsumerState<_Application> {
           const SizedBox(height: 8),
           Text(l.honamNotServed),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _otherCityName,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(labelText: l.honamYourCity),
@@ -839,17 +842,20 @@ class _ApplicationState extends ConsumerState<_Application> {
           ),
         ] else ...[
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _zones,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(labelText: l.honamZones),
           ),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _wallet,
             keyboardType: TextInputType.phone,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(labelText: l.honamWallet),
           ),
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _referral,
             textCapitalization: TextCapitalization.characters,
             decoration: InputDecoration(labelText: l.honamReferralCodeField),

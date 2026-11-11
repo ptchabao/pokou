@@ -9,6 +9,7 @@ import '../shared/module_payment.dart';
 import '../shared/module_ui.dart';
 import 'social_tax_controller.dart';
 import 'social_tax_model.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// La couleur du module — pastilles et barre d'avancement.
 final _fundColor = AppColors.accentPrimaryDark;
@@ -497,6 +498,7 @@ Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
             ),
             FieldLabel(L.of(innerContext).commonTitle),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: titleController,
               maxLength: 120,
               decoration: InputDecoration(
@@ -505,6 +507,7 @@ Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
             ),
             FieldLabel(L.of(innerContext).ceremonyFewWords),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: descriptionController,
               maxLength: 500,
               maxLines: 2,
@@ -519,6 +522,7 @@ Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
             ),
             const SizedBox(height: 6),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: goalController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(hintText: '100000'),
@@ -592,6 +596,7 @@ Future<void> _showContributeSheet(
             ),
             const SizedBox(height: 10),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: customController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
@@ -604,6 +609,7 @@ Future<void> _showContributeSheet(
             ),
             FieldLabel(L.of(innerContext).ceremonyWordOptional),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: messageController,
               maxLength: 280,
               decoration: InputDecoration(

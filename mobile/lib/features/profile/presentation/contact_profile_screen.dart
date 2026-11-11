@@ -25,6 +25,7 @@ import 'profile_screen.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Fiche contact, façon WhatsApp Business — accessible en tapant le nom ou
 /// l'avatar dans l'en-tête d'une conversation : ce qu'on a échangé (médias,
@@ -218,6 +219,7 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
             Text(phone, style: TextStyle(color: AppColors.textSecondary)),
             const SizedBox(height: 12),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               textCapitalization: TextCapitalization.words,

@@ -206,7 +206,7 @@ def send_push(
         silencieux = silent or riche
         return messaging.Message(
             notification=None if silencieux else messaging.Notification(title=title, body=body),
-            data={**(data or {}), **(rich_data or {})} if riche else (data or {}),
+            data=_firebase_safe_data({**(data or {}), **(rich_data or {})} if riche else (data or {})),
             token=t.token,
             android=messaging.AndroidConfig(priority="high"),
             apns=apns_silencieux if silencieux else None,
@@ -264,3 +264,24 @@ def _token_is_dead(exc) -> bool:
     cause = getattr(exc, "cause", None)
     details = f"{code} {exc} {cause or ''}"
     return any(marker in details for marker in _DEAD_TOKEN_CODES)
+
+
+#: Clés que Firebase réserve dans `data` : une seule suffit à faire refuser la
+#: notification entière (« Invalid data payload key »). C'est ainsi que TOUTES
+#: les notifications de message échouaient, avec `message_type`.
+_FIREBASE_RESERVED_KEYS = {"from": "from_user", "message_type": "msg_type", "notification": "notif"}
+
+
+def _firebase_safe_data(data):
+    """Renomme les clés réservées, retire les préfixes interdits."""
+    if not data:
+        return data
+    safe = {}
+    for key, value in data.items():
+        if key.startswith(("google.", "gcm.")):
+            continue
+        new_key = _FIREBASE_RESERVED_KEYS.get(key, key)
+        if new_key != key and new_key in data:
+            continue  # la version sûre est déjà là
+        safe[new_key] = value
+    return safe

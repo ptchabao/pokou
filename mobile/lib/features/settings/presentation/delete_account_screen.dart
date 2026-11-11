@@ -8,6 +8,7 @@ import '../../../core/security/app_lock.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// REG-7 · Supprimer mon compte (AUTH-06, AUTH-12, CERT-15).
 ///
@@ -143,6 +144,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _phone,
                     keyboardType: TextInputType.phone,
                     enabled: !_deleting,

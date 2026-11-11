@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import 'auth_controller.dart';
 import 'forgot_pin_screen.dart';
 import 'onboarding_screen.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Seconde étape de la connexion : le code du compte, après le SMS.
 ///
@@ -122,6 +123,7 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
                 ),
                 const SizedBox(height: 24),
                 TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _pinController,
                   autofocus: true,
                   obscureText: true,

@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../modules/shared/module_ui.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 final backupInfoProvider = FutureProvider.autoDispose<BackupInfo?>(
   (ref) => ref.watch(backupServiceProvider).info(),
@@ -47,6 +48,7 @@ Future<String?> _askPassword(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: first,
               obscureText: true,
               autofocus: true,
@@ -54,6 +56,7 @@ Future<String?> _askPassword(
             ),
             if (confirm)
               TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                 controller: second,
                 obscureText: true,
                 decoration: InputDecoration(labelText: l.backupPasswordConfirm),

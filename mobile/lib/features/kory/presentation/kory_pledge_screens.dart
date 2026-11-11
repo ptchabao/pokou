@@ -14,6 +14,7 @@ import '../../messaging/presentation/conversation_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Ce qu'un écran Kory demande à l'écran de la cagnotte en se refermant :
 /// ouvrir la déclaration d'un versement (KOR-2 / KOR-3).
@@ -205,6 +206,7 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
             controller: _base,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -237,6 +239,7 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
           if (_withDaily && due != null) ...[
             const SizedBox(height: 12),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _daily,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -636,6 +639,7 @@ class _KoryContestedScreenState extends ConsumerState<KoryContestedScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(l.koryCheckReference),
         content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           decoration: InputDecoration(

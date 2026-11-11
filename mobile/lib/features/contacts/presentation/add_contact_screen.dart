@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_background.dart';
 import 'contacts_controller.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 class AddContactScreen extends ConsumerStatefulWidget {
   const AddContactScreen({super.key});
@@ -74,6 +75,7 @@ class _AddContactScreenState extends ConsumerState<AddContactScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _nameController,
                   decoration: InputDecoration(
                     hintText: L.of(context).addContactName,
@@ -81,6 +83,7 @@ class _AddContactScreenState extends ConsumerState<AddContactScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(

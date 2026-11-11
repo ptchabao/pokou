@@ -13,6 +13,7 @@ import '../../../core/widgets/pokou_back_button.dart';
 import '../data/channel_model.dart';
 import 'channel_controller.dart';
 import '../../../core/widgets/media_image.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 class ChannelEditorScreen extends ConsumerStatefulWidget {
   const ChannelEditorScreen({super.key, this.channel});
@@ -230,6 +231,7 @@ class _ChannelEditorScreenState extends ConsumerState<ChannelEditorScreen> {
             ),
             const SizedBox(height: 28),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _nameController,
               autofocus: !_isEditing,
               maxLength: 255,
@@ -241,6 +243,7 @@ class _ChannelEditorScreenState extends ConsumerState<ChannelEditorScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
               controller: _descriptionController,
               maxLength: 2000,
               maxLines: 5,

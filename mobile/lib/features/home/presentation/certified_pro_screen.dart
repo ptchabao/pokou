@@ -12,6 +12,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../honam/presentation/honam_controller.dart' show openPayment;
 import '../../modules/shared/module_ui.dart';
 import '../../../core/time/server_time.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 final _proProvider =
     FutureProvider.autoDispose<
@@ -344,16 +345,19 @@ class _ProFormState extends ConsumerState<_ProForm> {
           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
         TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: _business,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(labelText: l.proBusinessName),
         ),
         TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: _activity,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(labelText: l.proActivityField),
         ),
         TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: _city,
           decoration: InputDecoration(labelText: l.honamCity),
         ),

@@ -12,6 +12,8 @@ import '../data/kory_model.dart';
 import 'kory_controller.dart';
 import 'kory_create_screen.dart';
 import 'kory_pot_screen.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Kory — l'entrée du module (écran APP-3).
 ///
@@ -41,11 +43,8 @@ class KoryScreen extends ConsumerWidget {
                 title: l.koryTitle,
                 subtitle: l.korySubtitle,
                 showStatus: false,
-                leading: const ModuleBadge(
-                  icon: Icons.savings_outlined,
-                  color: AppColors.accentPrimary,
-                  size: 36,
-                ),
+                // Le logo du module (guide des logos, novembre 2026).
+                leading: const PokouModuleLogo(PokouModule.kory, size: 38),
               ),
             ),
             // Terre de Confiance : « Kory · Le cauris », la pastille « wallet à
@@ -267,6 +266,7 @@ class KoryScreen extends ConsumerWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text(l.koryJoinTitle),
         content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.characters,

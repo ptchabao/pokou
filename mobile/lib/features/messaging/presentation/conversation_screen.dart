@@ -71,6 +71,7 @@ import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'message_text_actions.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
 
 class ConversationScreen extends ConsumerStatefulWidget {
   const ConversationScreen({
@@ -1828,6 +1829,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(_l.convEditTitle),
         content: TextField(
+  contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           maxLines: 5,
