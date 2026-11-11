@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/text/emoji_only.dart';
 import '../../../core/media/media_repository.dart'
@@ -69,6 +70,7 @@ import 'poll_bubble.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../contacts/presentation/discussions_controller.dart';
+import 'message_text_actions.dart';
 
 class ConversationScreen extends ConsumerStatefulWidget {
   const ConversationScreen({
@@ -765,6 +767,25 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void _startReply(DirectMessage message) {
     setState(() => _replyingTo = message);
     FocusScope.of(context).requestFocus();
+  }
+
+  /// Une image ou un GIF venu du clavier : envoyé comme une photo.
+  Future<void> _sendInsertedContent(KeyboardInsertedContent content) async {
+    final bytes = content.data;
+    if (bytes == null || bytes.isEmpty) return;
+    final extension = content.mimeType.split('/').last;
+    final directory = await getTemporaryDirectory();
+    final file = File(
+      '${directory.path}/clavier-${DateTime.now().millisecondsSinceEpoch}.$extension',
+    );
+    await file.writeAsBytes(bytes, flush: true);
+    await _sendMediaFile(
+      path: file.path,
+      bytes: bytes,
+      filename: file.uri.pathSegments.last,
+      mimeType: content.mimeType,
+      messageType: 'IMAGE',
+    );
   }
 
   Future<void> _sendMediaFile({
@@ -1918,6 +1939,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               title: Text(_l.conversationReply),
               onTap: () => Navigator.pop(sheetContext, 'reply'),
             ),
+            // Copier, sélectionner, partager : seulement s'il y a un texte
+            // lisible (pas un média sans légende, ni un message supprimé ou
+            // pas encore déchiffré).
+            if (copyableText(
+                  message.content,
+                  deleted: message.deletedAt != null,
+                  locked: message.isEncrypted,
+                )
+                case final text?)
+              ...messageTextActionTiles(
+                context: context,
+                text: text,
+                close: () => Navigator.pop(sheetContext),
+              ),
             // « Enregistrer sur le téléphone » — seulement pour un média.
             //
             // Un fichier reçu vivait UNIQUEMENT dans le cache de
@@ -2110,6 +2145,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             // groupe, voir composer_input.dart.
             child: ComposerInputPill(
               controller: _inputController,
+              onContentInserted: (content) =>
+                  unawaited(_sendInsertedContent(content)),
               focusNode: _inputFocus,
               // « Message chiffré… » seulement si la conversation l'est
               // vraiment : l'écrire sur une conversation en clair serait un

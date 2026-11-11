@@ -40,6 +40,35 @@ class CallKey {
     't': to,
   });
 
+  /// Le texte scellé UNE fois pour tout le groupe [groupId], avec la clé
+  /// d'expéditeur de [from] (voir CallRepository.startGroupCall). Le groupe
+  /// voyage chiffré avec la clé, pour la même raison que `to` ci-dessus :
+  /// elle ne vaut que pour un appel de CE groupe.
+  String sealForGroup({required int from, required int groupId}) => jsonEncode({
+    'pokou': format,
+    'k': base64.encode(bytes),
+    'f': from,
+    'g': groupId,
+  });
+
+  /// La clé d'un appel de groupe, scellée par [from] pour le groupe
+  /// [groupId] — `null` sinon.
+  static CallKey? tryParseGroup(
+    String plaintext, {
+    required int from,
+    required int groupId,
+  }) {
+    try {
+      final json = jsonDecode(plaintext);
+      if (json is! Map || json['pokou'] != format) return null;
+      if (json['f'] != from || json['g'] != groupId) return null;
+      final bytes = base64.decode(json['k'] as String);
+      return bytes.length == 32 ? CallKey(bytes) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// La clé, si [plaintext] en est une de ce format, scellée par [from] pour
   /// [to] — `null` sinon.
   static CallKey? tryParse(

@@ -7400,4 +7400,20 @@ class LRu extends L {
 
   @override
   String get composerBackspace => 'Стереть';
+
+  @override
+  String get messageCopy => 'Копировать';
+
+  @override
+  String get messageCopied => 'Сообщение скопировано';
+
+  @override
+  String get messageSelectText => 'Выбрать текст';
+
+  @override
+  String get messageSelectHint =>
+      'Нажмите и удерживайте слово, чтобы выделить его, затем расширьте выделение.';
+
+  @override
+  String get messageCopyAll => 'Копировать всё';
 }

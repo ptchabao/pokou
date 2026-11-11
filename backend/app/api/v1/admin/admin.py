@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.permissions import ROLE_LABELS, ROLE_PERMISSIONS, permissions_of, require_permission
 from app.models import (
+    DeviceToken,
     AbuseReport, AuditLog, CertifiedSubscription, DirectMessage, Group, GroupMessage,
     HonamOrder, KoryEntry, KoryPot, MarketplaceProduct, Pharmacy, User, UserRole,
 )
@@ -268,6 +269,15 @@ def user_detail(
             "reports_received": db.query(func.count(AbuseReport.id)).filter(AbuseReport.target_user_id == user_id).scalar() or 0,
         },
         "certified": {"status": sub.status, "plan": sub.plan} if sub else None,
+        # Les téléphones qui peuvent recevoir ses notifications. Vide : il ne
+        # reçoit aucune notification (iPhone sans clé APNs, téléphone repris
+        # par un autre compte, Firebase absent de l'appareil).
+        "devices": [
+            {"platform": d.platform,
+             "registered_at": (d.updated_at or d.created_at).isoformat() if (d.updated_at or d.created_at) else None}
+            for d in db.query(DeviceToken).filter(DeviceToken.user_id == user_id)
+            .order_by(DeviceToken.id.desc()).all()
+        ],
     }
 
 

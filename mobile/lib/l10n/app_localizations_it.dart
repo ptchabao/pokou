@@ -7367,4 +7367,20 @@ class LIt extends L {
 
   @override
   String get composerBackspace => 'Cancella';
+
+  @override
+  String get messageCopy => 'Copia';
+
+  @override
+  String get messageCopied => 'Messaggio copiato';
+
+  @override
+  String get messageSelectText => 'Seleziona testo';
+
+  @override
+  String get messageSelectHint =>
+      'Tieni premuta una parola per selezionarla, poi estendi la selezione.';
+
+  @override
+  String get messageCopyAll => 'Copia tutto';
 }

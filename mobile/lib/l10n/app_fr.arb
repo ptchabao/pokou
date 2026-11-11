@@ -3308,5 +3308,10 @@
   "@homeDaysLeft": {"placeholders": {"days": {"type": "int"}}},
   "emojiNoRecents": "Tes emojis récents apparaîtront ici.",
   "emojiSearchHint": "Rechercher un emoji",
-  "composerBackspace": "Effacer"
+  "composerBackspace": "Effacer",
+  "messageCopy": "Copier",
+  "messageCopied": "Message copié",
+  "messageSelectText": "Sélectionner le texte",
+  "messageSelectHint": "Appui long sur un mot pour le sélectionner, puis étends la sélection.",
+  "messageCopyAll": "Tout copier"
 }

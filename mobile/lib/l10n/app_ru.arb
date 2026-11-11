@@ -2100,5 +2100,10 @@
   "homeDaysLeft": "{days, plural, =0{Срок сегодня} =1{1 день} few{{days} дня} other{{days} дней}}",
   "emojiNoRecents": "Здесь появятся недавние эмодзи.",
   "emojiSearchHint": "Поиск эмодзи",
-  "composerBackspace": "Стереть"
+  "composerBackspace": "Стереть",
+  "messageCopy": "Копировать",
+  "messageCopied": "Сообщение скопировано",
+  "messageSelectText": "Выбрать текст",
+  "messageSelectHint": "Нажмите и удерживайте слово, чтобы выделить его, затем расширьте выделение.",
+  "messageCopyAll": "Копировать всё"
 }

@@ -1064,3 +1064,47 @@ def test_un_membre_sans_cle_ne_bloque_pas_l_appel_de_groupe(client):
     assert started.status_code == 200, started.text
     assert started.json()["e2ee"] is True
     assert started.json()["participant_ids"] == [a_id]
+
+
+def test_un_appel_de_groupe_peut_etre_scelle_avec_la_cle_d_expediteur(client):
+    """Les membres n'ont pas besoin de s'être écrit en privé : la clé de
+    l'appel est scellée une fois avec la clé d'expéditeur du groupe, et
+    chacun la reçoit en rejoignant."""
+    headers_a, _, _ = _signup(client, "+22893300001")
+    headers_b, user_id_b, _ = _signup(client, "+22893300002")
+    _, user_id_c, _ = _signup(client, "+22893300003")
+    group = _make_group(client, headers_a, "Famille", [("+22893300002", user_id_b), ("+22893300003", user_id_c)])
+    entry = {"encryption": "sender-key-v1", "ciphertext": "chiffre-groupe",
+             "envelope": {"group_id": group["id"], "epoch": 1}}
+
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        started = client.post(
+            "/api/v1/calls/token",
+            json={"group_id": group["id"], "is_video": False,
+                  "sealed_keys": {str(user_id_b): entry, str(user_id_c): entry}},
+            headers=headers_a,
+        )
+        assert started.status_code == 200, started.text
+        assert started.json()["e2ee"] is True
+        joined = client.post("/api/v1/calls/token", json={"room": started.json()["room"]}, headers=headers_b)
+        assert joined.status_code == 200, joined.text
+        assert joined.json()["sealed_key"]["encryption"] == "sender-key-v1"
+        assert joined.json()["sealed_key"]["envelope"]["group_id"] == group["id"]
+
+
+def test_une_cle_de_groupe_ne_vaut_pas_pour_un_autre_appel(client):
+    headers_a, _, _ = _signup(client, "+22893300011")
+    _, user_id_b, _ = _signup(client, "+22893300012")
+    _, user_id_c, _ = _signup(client, "+22893300013")
+    _add_contact(client, headers_a, "+22893300012", "B") if "_add_contact" in globals() else None
+    group = _make_group(client, headers_a, "Famille", [("+22893300012", user_id_b), ("+22893300013", user_id_c)])
+    wrong = {"encryption": "sender-key-v1", "ciphertext": "x", "envelope": {"group_id": group["id"] + 99, "epoch": 1}}
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        refused = client.post(
+            "/api/v1/calls/token",
+            json={"group_id": group["id"], "sealed_keys": {str(user_id_b): wrong, str(user_id_c): wrong}},
+            headers=headers_a,
+        )
+    assert refused.status_code == 400

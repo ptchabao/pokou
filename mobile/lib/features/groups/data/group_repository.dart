@@ -110,6 +110,45 @@ class GroupRepository {
     }
   }
 
+  /// Chiffre [plaintext] avec MA clé d'expéditeur du groupe — après l'avoir
+  /// remise aux membres qui ne l'ont pas encore. Sert à la clé d'un appel de
+  /// groupe : un seul chiffré pour tous, qui ne dépend d'aucune session à
+  /// deux.
+  Future<({int epoch, String ciphertext})> sealWithMySenderKey({
+    required int groupId,
+    required int senderId,
+    required String plaintext,
+  }) async {
+    final group = await getGroup(groupId);
+    await _ensureSenderKeyDistributed(group, senderId);
+    final ciphertext = await _senderKeys.encrypt(
+      groupId: group.id,
+      epoch: group.cryptoEpoch,
+      senderId: senderId,
+      plaintext: plaintext,
+    );
+    return (epoch: group.cryptoEpoch, ciphertext: ciphertext);
+  }
+
+  /// Ouvre un chiffré fait avec la clé d'expéditeur de [senderId] — en
+  /// récupérant d'abord sa clé si ce téléphone ne l'a pas encore.
+  Future<String> openWithSenderKey({
+    required int groupId,
+    required int epoch,
+    required int senderId,
+    required int myUserId,
+    required String ciphertext,
+  }) async {
+    final group = await getGroup(groupId);
+    await prepareReceiverKeys(group, myUserId, epoch: epoch);
+    return _senderKeys.decrypt(
+      groupId: groupId,
+      epoch: epoch,
+      senderId: senderId,
+      ciphertext: ciphertext,
+    );
+  }
+
   /// Donne ma clé d'expéditeur aux membres qui ne l'ont pas (ou plus).
   ///
   /// La liste vient du SERVEUR (`/sender-key-distributions/status`), pas de

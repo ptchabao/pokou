@@ -269,7 +269,10 @@ class SealedCallKey(BaseModel):
     """La clé d'un appel chiffrée de bout en bout pour UN invité — même forme
     qu'un message chiffré (voir messages.py::MessageCreate). Le serveur ne
     peut pas l'ouvrir : il la range et la rend à l'invité quand il rejoint."""
-    encryption: str = Field(..., pattern="^v1$")
+    # « v1 » : scellée par la session à deux de l'invité. « sender-key-v1 » :
+    # appel de groupe, scellée une fois avec la clé d'expéditeur de
+    # l'appelant dans ce groupe (enveloppe {group_id, epoch}).
+    encryption: str = Field(..., pattern="^(v1|sender-key-v1)$")
     ciphertext: str = Field(..., max_length=4000)
     envelope: Dict[str, Any]
 
@@ -414,6 +417,15 @@ async def get_call_token(
         raise HTTPException(
             status_code=400, detail="Seul un nouvel appel peut recevoir des clés"
         )
+    # Une clé scellée avec la clé d'expéditeur d'un groupe ne vaut que pour
+    # un appel de CE groupe.
+    for sealed in (payload.sealed_keys or {}).values():
+        if sealed.encryption == "sender-key-v1" and (
+            not payload.group_id or sealed.envelope.get("group_id") != payload.group_id
+        ):
+            raise HTTPException(
+                status_code=400, detail="Clé de groupe pour un autre appel que ce groupe"
+            )
     if call_type == "group" and payload.group_id and payload.sealed_keys:
         # Un membre que l'appelant n'a pas pu chiffrer (application trop
         # ancienne, aucune session encore) ne fait plus échouer l'appel de

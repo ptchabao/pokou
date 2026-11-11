@@ -4,6 +4,7 @@ import '../../../core/crypto/e2ee_outcome.dart';
 import '../../../core/crypto/e2ee_service.dart';
 import '../../../core/media/media_repository.dart';
 import '../../../core/time/server_time.dart';
+import '../../groups/data/group_repository.dart';
 
 class CallToken {
   const CallToken({
@@ -158,10 +159,16 @@ class CallRepository {
   CallRepository({
     required ApiClient apiClient,
     E2EEService? e2ee,
+    GroupRepository? groups,
     int? Function()? myUserId,
   }) : _api = apiClient,
        _e2ee = e2ee,
+       _groups = groups,
        _myUserId = myUserId ?? (() => null);
+
+  /// Pour sceller et ouvrir la clé d'un appel de groupe avec les clés
+  /// d'expéditeur du groupe (voir [startGroupCall]).
+  final GroupRepository? _groups;
 
   final ApiClient _api;
 
@@ -264,6 +271,55 @@ class CallRepository {
     return (key: key, sealedKeys: sealedKeys);
   }
 
+  /// La clé d'un appel de GROUPE, scellée UNE fois avec ma clé
+  /// d'expéditeur du groupe, la même que pour mes messages de groupe.
+  ///
+  /// Scellée par session à deux (ci-dessus), elle exigeait d'avoir déjà
+  /// échangé en privé avec chaque membre : dans un groupe neuf, ou après une
+  /// remise à zéro, personne ne l'avait fait, et l'appel échouait sur
+  /// « aucun membre ne peut encore recevoir un appel chiffré ». La clé
+  /// d'expéditeur, elle, est remise à chaque membre par le groupe lui-même,
+  /// et chacun la récupère en rejoignant ([_open]). Aucune session à deux
+  /// n'est touchée.
+  Future<({CallKey key, Map<String, dynamic> sealedKeys})> _groupCallKeys(
+    int groupId,
+    List<int> inviteeIds, {
+    required int? from,
+  }) async {
+    final groups = _groups;
+    if (groups == null) return _sealedGroupKeys(inviteeIds, from: from);
+    if (from == null) {
+      throw const CallEncryptionException('session expirée, reconnecte-toi');
+    }
+    final key = CallKey.generate();
+    final ({int epoch, String ciphertext}) sealed;
+    try {
+      sealed = await groups.sealWithMySenderKey(
+        groupId: groupId,
+        senderId: from,
+        plaintext: key.sealForGroup(from: from, groupId: groupId),
+      );
+    } catch (_) {
+      throw const CallEncryptionException(
+        'aucun membre ne peut encore recevoir un appel chiffré',
+      );
+    }
+    final entry = {
+      'encryption': groupCallKeyEncryption,
+      'ciphertext': sealed.ciphertext,
+      'envelope': {'group_id': groupId, 'epoch': sealed.epoch},
+    };
+    return (
+      key: key,
+      sealedKeys: {
+        for (final id in inviteeIds.toSet())
+          if (id != from) '$id': entry,
+      },
+    );
+  }
+
+  static const groupCallKeyEncryption = 'sender-key-v1';
+
   Future<bool> _canEncryptFor(int peerUserId) async {
     final e2ee = _e2ee;
     if (e2ee == null) return false;
@@ -363,6 +419,37 @@ class CallRepository {
         'clé d\'appel d\'un autre expéditeur',
       );
     }
+    // Appel de groupe : un chiffré fait avec la clé d'expéditeur de
+    // l'appelant dans ce groupe (voir _groupCallKeys).
+    if (sealed['encryption'] == groupCallKeyEncryption) {
+      final groups = _groups;
+      final groupId = envelope['group_id'];
+      final epoch = envelope['epoch'];
+      if (groups == null || groupId is! int || epoch is! int) {
+        throw const CallEncryptionException('clé d\'appel illisible');
+      }
+      final String clear;
+      try {
+        clear = await groups.openWithSenderKey(
+          groupId: groupId,
+          epoch: epoch,
+          senderId: inviter,
+          myUserId: me,
+          ciphertext: ciphertext,
+        );
+      } catch (_) {
+        throw const CallEncryptionException('clé d\'appel impossible à ouvrir');
+      }
+      final groupKey = CallKey.tryParseGroup(
+        clear,
+        from: inviter,
+        groupId: groupId,
+      );
+      if (groupKey == null) {
+        throw const CallEncryptionException('clé d\'appel illisible');
+      }
+      return groupKey;
+    }
     // Jamais par une enveloppe qui OUVRE une session (préambule) : une clé
     // d'appel n'est scellée que sur une session existante (voir _keyFor).
     // En accepter une ici laisserait n'importe qui — le serveur compris —
@@ -411,7 +498,7 @@ class CallRepository {
     } catch (_) {
       // Hors ligne : on garde la liste de l'écran.
     }
-    final keys = await _sealedGroupKeys(invitees, from: _myUserId());
+    final keys = await _groupCallKeys(groupId, invitees, from: _myUserId());
     final response = await _api.post(
       '/calls/token',
       body: {

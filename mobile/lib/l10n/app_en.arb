@@ -2100,5 +2100,10 @@
   "homeDaysLeft": "{days, plural, =0{Due today} =1{1 day} other{{days} days}}",
   "emojiNoRecents": "Your recent emojis will appear here.",
   "emojiSearchHint": "Search emoji",
-  "composerBackspace": "Delete"
+  "composerBackspace": "Delete",
+  "messageCopy": "Copy",
+  "messageCopied": "Message copied",
+  "messageSelectText": "Select text",
+  "messageSelectHint": "Long-press a word to select it, then drag to extend.",
+  "messageCopyAll": "Copy all"
 }

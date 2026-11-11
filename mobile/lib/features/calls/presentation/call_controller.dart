@@ -11,11 +11,13 @@ import '../../../core/router/app_router.dart';
 import '../data/call_repository.dart';
 import 'call_session.dart';
 import 'incoming_call_screen.dart';
+import '../../groups/presentation/group_controller.dart';
 
 final callRepositoryProvider = Provider<CallRepository>((ref) {
   return CallRepository(
     apiClient: ref.watch(apiClientProvider),
     e2ee: ref.watch(e2eeServiceProvider),
+    groups: ref.watch(groupRepositoryProvider),
     myUserId: () => ref.read(authControllerProvider).user?.id,
   );
 });

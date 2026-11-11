@@ -7310,4 +7310,20 @@ class LAr extends L {
 
   @override
   String get composerBackspace => 'حذف';
+
+  @override
+  String get messageCopy => 'نسخ';
+
+  @override
+  String get messageCopied => 'تم نسخ الرسالة';
+
+  @override
+  String get messageSelectText => 'تحديد النص';
+
+  @override
+  String get messageSelectHint =>
+      'اضغط مطولاً على كلمة لتحديدها، ثم وسّع التحديد.';
+
+  @override
+  String get messageCopyAll => 'نسخ الكل';
 }

@@ -2100,5 +2100,10 @@
   "homeDaysLeft": "{days, plural, =0{Scade oggi} =1{1 giorno} other{{days} giorni}}",
   "emojiNoRecents": "Le tue emoji recenti appariranno qui.",
   "emojiSearchHint": "Cerca un'emoji",
-  "composerBackspace": "Cancella"
+  "composerBackspace": "Cancella",
+  "messageCopy": "Copia",
+  "messageCopied": "Messaggio copiato",
+  "messageSelectText": "Seleziona testo",
+  "messageSelectHint": "Tieni premuta una parola per selezionarla, poi estendi la selezione.",
+  "messageCopyAll": "Copia tutto"
 }

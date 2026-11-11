@@ -19,6 +19,7 @@ import type { AdminUser, Paged } from "@/lib/types"
 type Detail = AdminUser & {
   stats: Record<string, number>
   certified: { status: string; plan: string } | null
+  devices: { platform: string; registered_at: string | null }[]
 }
 
 const STAT_LABELS: Record<string, string> = {
@@ -110,6 +111,23 @@ export default function UsersPage() {
                 <span className="text-muted-foreground">Vu le</span><span>{when(d.last_seen_at)}</span>
                 <span className="text-muted-foreground">Pokou certifié</span>
                 <span>{d.certified ? `${d.certified.plan} · ${d.certified.status}` : "Non"}</span>
+              </div>
+              <Separator />
+              <div className="flex flex-col gap-1">
+                <span className="font-medium">Notifications</span>
+                {d.devices.length === 0 ? (
+                  <span className="text-destructive">
+                    Aucun téléphone enregistré : ce compte ne reçoit aucune notification.
+                  </span>
+                ) : (
+                  d.devices.map((device, i) => (
+                    <span key={i} className="text-muted-foreground">
+                      {device.platform === "ios" ? "iPhone" : device.platform === "android" ? "Android" : device.platform}
+                      {" · enregistré le "}
+                      {when(device.registered_at)}
+                    </span>
+                  ))
+                )}
               </div>
               <Separator />
               <div className="grid grid-cols-2 gap-y-1">

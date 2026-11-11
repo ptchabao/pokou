@@ -7349,4 +7349,20 @@ class LEs extends L {
 
   @override
   String get composerBackspace => 'Borrar';
+
+  @override
+  String get messageCopy => 'Copiar';
+
+  @override
+  String get messageCopied => 'Mensaje copiado';
+
+  @override
+  String get messageSelectText => 'Seleccionar texto';
+
+  @override
+  String get messageSelectHint =>
+      'Mantén pulsada una palabra para seleccionarla y luego amplía la selección.';
+
+  @override
+  String get messageCopyAll => 'Copiar todo';
 }

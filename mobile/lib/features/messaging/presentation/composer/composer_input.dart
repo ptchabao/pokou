@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:flutter/services.dart';
 
 /// La pilule de saisie, la même en conversation et en groupe :
 ///
@@ -43,6 +44,7 @@ class ComposerInputPill extends StatelessWidget {
     required this.emojiTooltip,
     required this.cameraTooltip,
     this.onFieldTap,
+    this.onContentInserted,
     this.extraActions = const [],
     this.highlighted = false,
     this.glow = false,
@@ -61,6 +63,10 @@ class ComposerInputPill extends StatelessWidget {
   final VoidCallback onCamera;
   final ValueChanged<String> onSubmitted;
   final VoidCallback? onFieldTap;
+
+  /// Une image ou un GIF inséré depuis le clavier (Gboard, clavier iOS,
+  /// claviers de stickers). `null` : le champ les refuse, comme avant.
+  final ValueChanged<KeyboardInsertedContent>? onContentInserted;
 
   final String attachTooltip;
   final String emojiTooltip;
@@ -138,6 +144,20 @@ class ComposerInputPill extends StatelessWidget {
                 controller: controller,
                 focusNode: focusNode,
                 onTap: onFieldTap,
+                // Couper, copier, coller, tout sélectionner : le menu du
+                // système, tel quel (rien ne le désactive). Et les images
+                // collées depuis le clavier :
+                contentInsertionConfiguration: onContentInserted == null
+                    ? null
+                    : ContentInsertionConfiguration(
+                        onContentInserted: onContentInserted!,
+                        allowedMimeTypes: const [
+                          'image/png',
+                          'image/gif',
+                          'image/jpeg',
+                          'image/webp',
+                        ],
+                      ),
                 minLines: 1,
                 maxLines: maxLines,
                 textInputAction: TextInputAction.send,

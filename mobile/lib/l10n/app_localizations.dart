@@ -12710,6 +12710,36 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Effacer'**
   String get composerBackspace;
+
+  /// No description provided for @messageCopy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get messageCopy;
+
+  /// No description provided for @messageCopied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message copié'**
+  String get messageCopied;
+
+  /// No description provided for @messageSelectText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner le texte'**
+  String get messageSelectText;
+
+  /// No description provided for @messageSelectHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appui long sur un mot pour le sélectionner, puis étends la sélection.'**
+  String get messageSelectHint;
+
+  /// No description provided for @messageCopyAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout copier'**
+  String get messageCopyAll;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

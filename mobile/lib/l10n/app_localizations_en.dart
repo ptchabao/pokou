@@ -7318,4 +7318,20 @@ class LEn extends L {
 
   @override
   String get composerBackspace => 'Delete';
+
+  @override
+  String get messageCopy => 'Copy';
+
+  @override
+  String get messageCopied => 'Message copied';
+
+  @override
+  String get messageSelectText => 'Select text';
+
+  @override
+  String get messageSelectHint =>
+      'Long-press a word to select it, then drag to extend.';
+
+  @override
+  String get messageCopyAll => 'Copy all';
 }

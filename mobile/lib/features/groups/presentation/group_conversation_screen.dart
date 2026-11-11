@@ -64,6 +64,7 @@ import '../data/group_model.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'group_controller.dart';
 import 'group_settings_screen.dart';
+import '../../messaging/presentation/message_text_actions.dart';
 
 /// Conversation de groupe — pendant de ConversationScreen. Différences
 /// assumées : pas de Mode Bouclier (il note une conversation par contact),
@@ -311,6 +312,17 @@ class _GroupConversationScreenState
                 _inputFocus.requestFocus();
               },
             ),
+            if (copyableText(
+                  message.content,
+                  deleted: message.deletedAt != null,
+                  locked: message.isEncrypted,
+                )
+                case final text?)
+              ...messageTextActionTiles(
+                context: context,
+                text: text,
+                close: () => Navigator.pop(sheetContext),
+              ),
             if (ref
                 .read(groupChatControllerProvider(widget.groupId).notifier)
                 .canEdit(message))
@@ -685,6 +697,25 @@ class _GroupConversationScreenState
         .read(groupChatControllerProvider(widget.groupId).notifier)
         .send(text, replyTo: replyTo);
     _scrollToBottom();
+  }
+
+  /// Une image ou un GIF venu du clavier : envoyé comme une photo.
+  Future<void> _sendInsertedContent(KeyboardInsertedContent content) async {
+    final bytes = content.data;
+    if (bytes == null || bytes.isEmpty) return;
+    final extension = content.mimeType.split('/').last;
+    final directory = await getTemporaryDirectory();
+    final file = File(
+      '${directory.path}/clavier-${DateTime.now().millisecondsSinceEpoch}.$extension',
+    );
+    await file.writeAsBytes(bytes, flush: true);
+    await _sendMediaFile(
+      path: file.path,
+      bytes: bytes,
+      filename: file.uri.pathSegments.last,
+      mimeType: content.mimeType,
+      messageType: 'IMAGE',
+    );
   }
 
   Future<void> _sendMediaFile({
@@ -2202,6 +2233,8 @@ class _GroupConversationScreenState
             // La même pilule qu'en conversation — voir composer_input.dart.
             child: ComposerInputPill(
               controller: _inputController,
+              onContentInserted: (content) =>
+                  unawaited(_sendInsertedContent(content)),
               focusNode: _inputFocus,
               hintText: _l.conversationMessageHint,
               emojiOpen: _emojiOpen,

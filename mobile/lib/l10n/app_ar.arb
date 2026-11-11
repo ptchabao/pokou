@@ -2100,5 +2100,10 @@
   "homeDaysLeft": "{days, plural, =0{ينتهي اليوم} =1{يوم واحد} other{{days} أيام}}",
   "emojiNoRecents": "ستظهر هنا رموزك التعبيرية الأخيرة.",
   "emojiSearchHint": "ابحث عن رمز تعبيري",
-  "composerBackspace": "حذف"
+  "composerBackspace": "حذف",
+  "messageCopy": "نسخ",
+  "messageCopied": "تم نسخ الرسالة",
+  "messageSelectText": "تحديد النص",
+  "messageSelectHint": "اضغط مطولاً على كلمة لتحديدها، ثم وسّع التحديد.",
+  "messageCopyAll": "نسخ الكل"
 }

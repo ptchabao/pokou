@@ -7370,4 +7370,20 @@ class LFr extends L {
 
   @override
   String get composerBackspace => 'Effacer';
+
+  @override
+  String get messageCopy => 'Copier';
+
+  @override
+  String get messageCopied => 'Message copié';
+
+  @override
+  String get messageSelectText => 'Sélectionner le texte';
+
+  @override
+  String get messageSelectHint =>
+      'Appui long sur un mot pour le sélectionner, puis étends la sélection.';
+
+  @override
+  String get messageCopyAll => 'Tout copier';
 }
