@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/product_model.dart';
 import 'marketplace_controller.dart';
 import '../../../core/widgets/media_image.dart';
+import '../../../core/api/api_exceptions.dart';
 
 /// Le formulaire d'annonce — création et modification.
 ///
@@ -51,7 +52,13 @@ class ProductDraft {
 }
 
 class ProductEditor extends ConsumerStatefulWidget {
-  const ProductEditor({this.product});
+  const ProductEditor({this.product, this.onSubmit});
+
+  /// Envoie l'annonce au serveur. Quand il est fourni, le formulaire RESTE
+  /// ouvert pendant l'envoi et en cas d'échec : il fermait d'abord, puis
+  /// envoyait — un refus du serveur faisait perdre tout ce qui avait été
+  /// saisi, derrière un simple « Produit indisponible ».
+  final Future<void> Function(ProductDraft draft)? onSubmit;
 
   final MarketplaceProduct? product;
 
@@ -75,6 +82,16 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
   final List<MediaMeta> _gallery = [];
 
   bool _uploading = false;
+  bool _saving = false;
+
+  /// Les CODES envoyés au serveur (« XOF », « TELEPHONES »), tenus à part
+  /// des champs affichés : un `DropdownMenu` écrit dans son contrôleur le
+  /// LIBELLÉ de l'entrée choisie (« FCFA (XOF) », « Téléphones »). Tant que
+  /// le formulaire relisait ce contrôleur, il envoyait le libellé — une
+  /// devise que le serveur refuse, et une catégorie qui n'apparaît sous
+  /// aucun filtre.
+  late String _currencyCode;
+  late String _categorySlug;
 
   static const _maxGallery = 8;
 
@@ -88,15 +105,17 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
     // Catégories et devises viennent de l'administration, plus de la liste
     // écrite en dur dans l'application (voir `marketplaceConfigProvider`).
     final config = ref.read(marketplaceConfigProvider);
-    _currency = TextEditingController(
-      text: product?.currency ?? config.defaultCurrency.code,
-    );
-    _category = TextEditingController(text: product?.category ?? 'AUTRE');
+    final codesConnus = config.currencies.map((c) => c.code).toSet();
+    _currencyCode = codesConnus.contains(product?.currency)
+        ? product!.currency
+        : config.defaultCurrency.code;
+    _currency = TextEditingController();
+    _category = TextEditingController();
     final slugsConnus = config.categories.map((c) => c.slug).toSet();
     final knownCategory = slugsConnus.contains(product?.category)
         ? product!.category
         : 'AUTRE';
-    _category.text = knownCategory;
+    _categorySlug = knownCategory;
     _categoryDetail = TextEditingController(
       text: knownCategory == 'AUTRE' && product?.category != 'AUTRE'
           ? product?.category
@@ -248,55 +267,117 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
     }
   }
 
+  /// Le prix tel que le serveur l'attend : des chiffres, un point décimal.
+  /// « 5 000 », « 5.000,50 » ou « 5000 F » se saisissent naturellement et
+  /// étaient refusés en bloc. `null` : ce n'est pas un prix.
+  static String? normalizePrice(String raw) {
+    var text = raw.replaceAll(RegExp(r'[\s\u00A0\u202F]'), '');
+    text = text.replaceAll(RegExp(r'[^0-9.,]'), '');
+    if (text.isEmpty) return null;
+    final lastSeparator = text.lastIndexOf(RegExp(r'[.,]'));
+    if (lastSeparator != -1) {
+      final decimals = text.length - lastSeparator - 1;
+      final whole = text
+          .substring(0, lastSeparator)
+          .replaceAll(RegExp(r'[.,]'), '');
+      final fraction = text.substring(lastSeparator + 1);
+      // Un séparateur suivi de trois chiffres est un séparateur de
+      // milliers (« 5.000 »), pas une décimale.
+      text = decimals == 3 || decimals == 0
+          ? '$whole$fraction'
+          : '$whole.${fraction.length > 2 ? fraction.substring(0, 2) : fraction}';
+    }
+    final value = double.tryParse(text);
+    if (value == null || value < 0 || value >= 10000000000) return null;
+    return text;
+  }
+
+  /// La position, si elle s'obtient VITE. Elle sert à trier « près de chez
+  /// toi » ; elle ne doit jamais retenir une publication. Sans limite de
+  /// temps, un téléphone sans signal GPS laissait le bouton « Enregistrer »
+  /// sans effet apparent.
+  Future<void> _attachPositionIfQuick() async {
+    if (_latitude != null && _longitude != null) return;
+    try {
+      await () async {
+        if (!await Geolocator.isLocationServiceEnabled()) return;
+        final permission = await Geolocator.checkPermission();
+        if (permission != LocationPermission.always &&
+            permission != LocationPermission.whileInUse) {
+          return;
+        }
+        final position =
+            await Geolocator.getLastKnownPosition() ??
+            await Geolocator.getCurrentPosition(
+              locationSettings: const LocationSettings(
+                accuracy: LocationAccuracy.medium,
+                timeLimit: Duration(seconds: 4),
+              ),
+            );
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      }().timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Pas de position : l'annonce part sans.
+    }
+  }
+
   Future<void> _save() async {
+    if (_saving) return;
+    final price = normalizePrice(_price.text);
     if (_name.text.trim().isEmpty || _price.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(L.of(context).marketNameAndPrice)));
       return;
     }
-    if (_latitude == null || _longitude == null) {
-      try {
-        if (await Geolocator.isLocationServiceEnabled()) {
-          var permission = await Geolocator.checkPermission();
-          if (permission == LocationPermission.denied)
-            permission = await Geolocator.requestPermission();
-          if (permission != LocationPermission.denied &&
-              permission != LocationPermission.deniedForever) {
-            final position = await Geolocator.getCurrentPosition(
-              locationSettings: const LocationSettings(
-                accuracy: LocationAccuracy.medium,
-              ),
-            );
-            _latitude = position.latitude;
-            _longitude = position.longitude;
-          }
-        }
-      } catch (_) {}
+    if (price == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(L.of(context).marketPriceInvalid)));
+      return;
     }
+    setState(() => _saving = true);
+    await _attachPositionIfQuick();
     if (!mounted) return;
-    Navigator.pop(
-      context,
-      ProductDraft(
-        name: _name.text.trim(),
-        description: _description.text.trim(),
-        category:
-            _category.text == 'AUTRE' && _categoryDetail.text.trim().isNotEmpty
-            ? _categoryDetail.text.trim().toUpperCase()
-            : (_category.text.trim().isEmpty
-                  ? 'AUTRE'
-                  : _category.text.trim().toUpperCase()),
-        location: _location.text.trim().isEmpty ? null : _location.text.trim(),
-        latitude: _latitude ?? widget.product?.latitude,
-        longitude: _longitude ?? widget.product?.longitude,
-        price: _price.text.trim(),
-        currency: _currency.text.trim().isEmpty
-            ? ref.read(marketplaceConfigProvider).defaultCurrency.code
-            : _currency.text.trim().toUpperCase(),
-        imageMediaId: _mainImage?.id,
-        galleryMediaIds: [for (final media in _gallery) media.id],
-      ),
+    final detail = _categoryDetail.text.trim();
+    final draft = ProductDraft(
+      name: _name.text.trim(),
+      description: _description.text.trim(),
+      category: _categorySlug == 'AUTRE' && detail.isNotEmpty
+          ? detail.toUpperCase()
+          : _categorySlug,
+      location: _location.text.trim().isEmpty ? null : _location.text.trim(),
+      latitude: _latitude ?? widget.product?.latitude,
+      longitude: _longitude ?? widget.product?.longitude,
+      price: price,
+      currency: _currencyCode,
+      imageMediaId: _mainImage?.id,
+      galleryMediaIds: [for (final media in _gallery) media.id],
     );
+    final submit = widget.onSubmit;
+    if (submit == null) {
+      Navigator.pop(context, draft);
+      return;
+    }
+    try {
+      await submit(draft);
+      if (mounted) Navigator.pop(context, draft);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      // Le message du serveur quand il en donne un lisible (médicament
+      // refusé, devise fermée) ; sinon, dire que rien n'est perdu.
+      final message =
+          error is ApiException &&
+              error.statusCode < 500 &&
+              !error.message.startsWith('[')
+          ? error.message
+          : L.of(context).marketPublishFailed;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   @override
@@ -367,7 +448,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
           ),
           TextField(
             controller: _price,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: L.of(context).marketPrice),
           ),
           // ── La devise se CHOISIT ──────────────────────────────────
@@ -379,7 +460,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
           // est pas.
           DropdownMenu<String>(
             controller: _currency,
-            initialSelection: _currency.text,
+            initialSelection: _currencyCode,
             label: Text(L.of(context).marketCurrency),
             dropdownMenuEntries: [
               for (final devise in config.currencies)
@@ -391,12 +472,12 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
                 ),
             ],
             onSelected: (value) => setState(
-              () => _currency.text = value ?? config.defaultCurrency.code,
+              () => _currencyCode = value ?? config.defaultCurrency.code,
             ),
           ),
           DropdownMenu<String>(
             controller: _category,
-            enableFilter: true,
+            initialSelection: _categorySlug,
             enableSearch: true,
             label: Text(L.of(context).marketCategory),
             dropdownMenuEntries: [
@@ -407,9 +488,9 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
                 ),
             ],
             onSelected: (value) =>
-                setState(() => _category.text = value ?? 'AUTRE'),
+                setState(() => _categorySlug = value ?? 'AUTRE'),
           ),
-          if (_category.text == 'AUTRE')
+          if (_categorySlug == 'AUTRE')
             TextField(
               controller: _categoryDetail,
               decoration: InputDecoration(
@@ -460,12 +541,18 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
             ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: _uploading ? null : _save,
-            child: Text(
-              _uploading
-                  ? L.of(context).marketUploadingPhoto
-                  : L.of(context).actionSave,
-            ),
+            onPressed: _uploading || _saving ? null : _save,
+            child: _saving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    _uploading
+                        ? L.of(context).marketUploadingPhoto
+                        : L.of(context).actionSave,
+                  ),
           ),
         ],
       ),

@@ -2085,5 +2085,20 @@
   "backupWhereDrive": "Google Drive · {email}",
   "restoreFindDrive": "Buscar mi copia en Google Drive",
   "restoreNoDrive": "No hay copia de Pokou en esta cuenta de Google.",
-  "restoreWelcomeNoBackup": "¡Bienvenido de nuevo! Si guardaste tus conversaciones en Google Drive, recupéralas aquí."
+  "restoreWelcomeNoBackup": "¡Bienvenido de nuevo! Si guardaste tus conversaciones en Google Drive, recupéralas aquí.",
+  "marketPriceInvalid": "Este precio no es válido. Escribe solo el importe, por ejemplo 5000.",
+  "marketPublishFailed": "No se pudo publicar el anuncio. No se ha perdido nada: revisa tu conexión e inténtalo de nuevo.",
+  "statusChangeFont": "Cambiar la fuente",
+  "statusChangeBackground": "Cambiar el fondo",
+  "statusBackgroundNumber": "Fondo {number}",
+  "statusVisible24h": "Visible 24 h para los contactos que elegiste.",
+  "homeUnreadSummary": "{count, plural, =1{1 mensaje sin leer} other{{count} mensajes sin leer}}",
+  "homeServicesTitle": "Servicios",
+  "homeKoryShort": "Colectas y tontinas en grupo",
+  "homeHonamShort": "Tus medicamentos a domicilio",
+  "homeAssimeShort": "Compra y vende cerca de ti",
+  "homeDaysLeft": "{days, plural, =0{Vence hoy} =1{1 día} other{{days} días}}",
+  "emojiNoRecents": "Tus emojis recientes aparecerán aquí.",
+  "emojiSearchHint": "Buscar un emoji",
+  "composerBackspace": "Borrar"
 }

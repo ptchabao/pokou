@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,9 +10,10 @@ import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../data/status_text_style.dart';
 import 'status_controller.dart';
 
-enum _Mode { choose, text, mediaPreview }
+enum _Mode { text, mediaPreview }
 
 /// Écran de publication d'un statut — texte, ou photo/vidéo (galerie ou
 /// caméra) avec légende optionnelle. Retourne `true` via `Navigator.pop`
@@ -24,7 +26,8 @@ class PostStatusScreen extends ConsumerStatefulWidget {
 }
 
 class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
-  _Mode _mode = _Mode.choose;
+  _Mode _mode = _Mode.text;
+  StatusTextStyle _style = StatusTextStyle.plain;
   final _textController = TextEditingController();
   final _captionController = TextEditingController();
 
@@ -110,7 +113,9 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
     try {
-      await ref.read(statusPostControllerProvider.notifier).postText(text);
+      await ref
+          .read(statusPostControllerProvider.notifier)
+          .postText(text, style: _style);
     } catch (_) {
       _showPublishFailed();
       return;
@@ -152,159 +157,317 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
     if (mounted) Navigator.of(context).pop(true);
   }
 
+  void _backToText() {
+    _previewController?.dispose();
+    setState(() {
+      _previewController = null;
+      _pickedFile = null;
+      _pickedContentType = null;
+      _mode = _Mode.text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final posting = ref.watch(statusPostControllerProvider);
-
-    return Scaffold(
-      backgroundColor: _mode == _Mode.text
-          ? AppColors.accentPrimaryDark
-          : Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          L.of(context).statusNewTitle,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
-      body: switch (_mode) {
-        _Mode.choose => _buildChooser(),
-        _Mode.text => _buildTextComposer(posting),
-        _Mode.mediaPreview => _buildMediaPreview(posting),
-      },
-    );
-  }
-
-  Widget _buildChooser() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ChoiceTile(
-            icon: Icons.text_fields,
-            label: L.of(context).statusText,
-            onTap: () => setState(() => _mode = _Mode.text),
-          ),
-          const SizedBox(height: 16),
-          _ChoiceTile(
-            icon: Icons.photo,
-            label: L.of(context).mediaPhoto,
-            onTap: () => _chooseSource(video: false),
-          ),
-          const SizedBox(height: 16),
-          _ChoiceTile(
-            icon: Icons.videocam,
-            label: L.of(context).mediaVideo,
-            onTap: () => _chooseSource(video: true),
-          ),
-        ],
+    final onMedia = _mode == _Mode.mediaPreview;
+    // Les icônes de la barre du téléphone suivent le fond : sombres sur un
+    // fond clair (or, crème), claires sinon.
+    final lightInk = onMedia || _style.look.ink == Colors.white;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: lightInk ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: onMedia
+            ? _buildMediaPreview(posting)
+            : _buildTextComposer(posting),
       ),
     );
   }
 
   Widget _buildTextComposer(bool posting) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: TextField(
-                controller: _textController,
-                autofocus: true,
-                maxLines: null,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-                decoration: InputDecoration(
-                  hintText: L.of(context).statusTypeHint,
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  border: InputBorder.none,
+    final l = L.of(context);
+    final ink = _style.look.ink;
+    final text = _textController.text;
+    final count = text.runes.length;
+    return StatusTextCanvas(
+      style: _style,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // ── En haut : fermer, police, fond ─────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 12, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: l.actionClose,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: Icon(Icons.close, color: ink),
+                  ),
+                  const Spacer(),
+                  _GlassButton(
+                    tooltip: l.statusChangeFont,
+                    ink: ink,
+                    onTap: () => setState(
+                      () => _style = _style.copyWith(
+                        font: (_style.font + 1) % statusFonts.length,
+                      ),
+                    ),
+                    child: Text(
+                      'Aa',
+                      style: _style
+                          .textStyle('Aa')
+                          .copyWith(fontSize: 17, height: 1),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _GlassButton(
+                    tooltip: l.statusChangeBackground,
+                    ink: ink,
+                    onTap: () => setState(
+                      () => _style = _style.copyWith(
+                        background:
+                            (_style.background + 1) % statusBackgrounds.length,
+                      ),
+                    ),
+                    child: Icon(Icons.palette_outlined, color: ink, size: 20),
+                  ),
+                ],
+              ),
+            ),
+            // ── Le texte, au centre, à la taille qu'il aura une fois publié
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: TextField(
+                    controller: _textController,
+                    autofocus: true,
+                    maxLines: null,
+                    maxLength: 700,
+                    textAlign: TextAlign.center,
+                    textCapitalization: TextCapitalization.sentences,
+                    cursorColor: ink,
+                    cursorWidth: 2.5,
+                    onChanged: (_) => setState(() {}),
+                    style: _style.textStyle(text),
+                    decoration: InputDecoration(
+                      hintText: l.statusTypeHint,
+                      hintStyle: _style
+                          .textStyle('')
+                          .copyWith(color: ink.withValues(alpha: 0.55)),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      counterText: '',
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: posting ? null : _publishText,
-              child: posting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(L.of(context).statusPublish),
+            if (count > 560)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  '$count / 700',
+                  style: TextStyle(
+                    color: ink.withValues(alpha: 0.75),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            // ── Les fonds, d'un geste ──────────────────────────────────
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: statusBackgrounds.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (context, index) => _Swatch(
+                  background: statusBackgrounds[index],
+                  selected: index == _style.background,
+                  ring: ink,
+                  label: l.statusBackgroundNumber('${index + 1}'),
+                  onTap: () => setState(
+                    () => _style = _style.copyWith(background: index),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            // ── En bas : photo, vidéo, à qui, publier ──────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 16, 12),
+              child: Row(
+                children: [
+                  _GlassButton(
+                    tooltip: l.mediaPhoto,
+                    ink: ink,
+                    onTap: posting ? null : () => _chooseSource(video: false),
+                    child: Icon(
+                      Icons.photo_camera_outlined,
+                      color: ink,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _GlassButton(
+                    tooltip: l.mediaVideo,
+                    ink: ink,
+                    onTap: posting ? null : () => _chooseSource(video: true),
+                    child: Icon(Icons.videocam_outlined, color: ink, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 14,
+                          color: ink.withValues(alpha: 0.75),
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            l.statusVisible24h,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink.withValues(alpha: 0.75),
+                              fontSize: 12,
+                              height: 1.25,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  _SendButton(
+                    label: l.statusPublish,
+                    busy: posting,
+                    enabled: text.trim().isNotEmpty,
+                    // Le bouton prend la couleur du TEXTE : il se détache
+                    // de n'importe quel fond de la palette.
+                    color: ink,
+                    onColor: _style.look.bottom,
+                    onTap: _publishText,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMediaPreview(bool posting) {
+    final l = L.of(context);
     final file = _pickedFile;
     if (file == null) return const SizedBox.shrink();
     final previewController = _previewController;
+    final isVideo =
+        _pickedContentType == 'VIDEO' &&
+        previewController != null &&
+        previewController.value.isInitialized;
 
-    return Column(
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        Expanded(
-          child:
-              _pickedContentType == 'VIDEO' &&
-                  previewController != null &&
-                  previewController.value.isInitialized
+        Center(
+          child: isVideo
               ? AspectRatio(
                   aspectRatio: previewController.value.aspectRatio,
                   child: VideoPlayer(previewController),
                 )
               : Image.file(File(file.path), fit: BoxFit.contain),
         ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+        // Un voile en haut et en bas : les commandes restent lisibles sur
+        // une photo claire.
+        const IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0x99000000),
+                  Color(0x00000000),
+                  Color(0x00000000),
+                  Color(0xB3000000),
+                ],
+                stops: [0, 0.18, 0.68, 1],
+              ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Column(
             children: [
-              Expanded(
-                child: TextField(
-                  controller: _captionController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: L.of(context).composerCaptionHint,
-                    hintStyle: const TextStyle(color: Colors.white70),
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white54),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 6),
+                  child: IconButton(
+                    tooltip: l.actionClose,
+                    onPressed: posting ? null : _backToText,
+                    icon: const Icon(Icons.close, color: Colors.white),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              InkWell(
-                onTap: posting ? null : _publishMedia,
-                customBorder: const CircleBorder(),
-                child: Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  child: posting
-                      ? const Padding(
-                          padding: EdgeInsets.all(14),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(26),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.28),
                           ),
-                        )
-                      : const Icon(Icons.send, color: Colors.white),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: TextField(
+                          controller: _captionController,
+                          minLines: 1,
+                          maxLines: 4,
+                          maxLength: 700,
+                          textCapitalization: TextCapitalization.sentences,
+                          cursorColor: Colors.white,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: l.composerCaptionHint,
+                            hintStyle: const TextStyle(color: Colors.white70),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _SendButton(
+                      label: l.statusPublish,
+                      busy: posting,
+                      enabled: true,
+                      color: Colors.white,
+                      onColor: AppColors.accentPrimary,
+                      onTap: _publishMedia,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -315,42 +478,145 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
   }
 }
 
-class _ChoiceTile extends StatelessWidget {
-  const _ChoiceTile({
-    required this.icon,
+/// Un bouton rond translucide, lisible sur tous les fonds de la palette.
+class _GlassButton extends StatelessWidget {
+  const _GlassButton({
+    required this.tooltip,
+    required this.ink,
+    required this.onTap,
+    required this.child,
+  });
+
+  final String tooltip;
+  final Color ink;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: Material(
+          color: ink.withValues(alpha: 0.14),
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(child: ExcludeSemantics(child: child)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Swatch extends StatelessWidget {
+  const _Swatch({
+    required this.background,
+    required this.selected,
+    required this.ring,
     required this.label,
     required this.onTap,
   });
 
-  final IconData icon;
+  final StatusBackground background;
+  final bool selected;
+  final Color ring;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: 220,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          width: 44,
+          height: 44,
+          padding: EdgeInsets.all(selected ? 3 : 7),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: selected ? ring : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: background.gradient,
+              border: Border.all(color: ring.withValues(alpha: 0.35)),
+            ),
+          ),
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: 16),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class _SendButton extends StatelessWidget {
+  const _SendButton({
+    required this.label,
+    required this.busy,
+    required this.enabled,
+    required this.color,
+    required this.onColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool busy;
+  final bool enabled;
+  final Color color;
+  final Color onColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = enabled && !busy;
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        button: true,
+        enabled: active,
+        label: label,
+        child: Material(
+          color: enabled ? color : color.withValues(alpha: 0.35),
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: active ? onTap : null,
+            child: SizedBox(
+              width: 56,
+              height: 56,
+              child: Center(
+                child: busy
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: onColor,
+                        ),
+                      )
+                    : ExcludeSemantics(
+                        child: Icon(Icons.send_rounded, color: onColor),
+                      ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

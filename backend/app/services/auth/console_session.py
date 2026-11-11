@@ -37,6 +37,7 @@ def issue_console_session(db: Session, user: User) -> str:
         # aléatoire occupe la colonne, qui ne correspondra à aucun jeton.
         refresh_token=_token_digest(secrets.token_urlsafe(32)),
         jti=jti,
+        client="console",
         expires_at=datetime.utcnow() + CONSOLE_SESSION,
     ))
     db.commit()

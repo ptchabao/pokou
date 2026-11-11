@@ -7243,4 +7243,71 @@ class LAr extends L {
   @override
   String get restoreWelcomeNoBackup =>
       'مرحبًا بعودتك! إذا نسختَ محادثاتك على Google Drive فاستعدها من هنا.';
+
+  @override
+  String get marketPriceInvalid =>
+      'هذا السعر غير صالح. اكتب المبلغ فقط، مثلاً 5000.';
+
+  @override
+  String get marketPublishFailed =>
+      'تعذّر نشر الإعلان. لم يُفقد شيء: تحقق من الاتصال وحاول مجدداً.';
+
+  @override
+  String get statusChangeFont => 'تغيير الخط';
+
+  @override
+  String get statusChangeBackground => 'تغيير الخلفية';
+
+  @override
+  String statusBackgroundNumber(String number) {
+    return 'الخلفية $number';
+  }
+
+  @override
+  String get statusVisible24h =>
+      'يظهر لمدة 24 ساعة لجهات الاتصال التي اخترتها.';
+
+  @override
+  String homeUnreadSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count رسائل غير مقروءة',
+      one: 'رسالة واحدة غير مقروءة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeServicesTitle => 'الخدمات';
+
+  @override
+  String get homeKoryShort => 'صناديق وجمعيات مشتركة';
+
+  @override
+  String get homeHonamShort => 'أدويتك تصلك';
+
+  @override
+  String get homeAssimeShort => 'اشترِ وبِع بالقرب منك';
+
+  @override
+  String homeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days أيام',
+      one: 'يوم واحد',
+      zero: 'ينتهي اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get emojiNoRecents => 'ستظهر هنا رموزك التعبيرية الأخيرة.';
+
+  @override
+  String get emojiSearchHint => 'ابحث عن رمز تعبيري';
+
+  @override
+  String get composerBackspace => 'حذف';
 }

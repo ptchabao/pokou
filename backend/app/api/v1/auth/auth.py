@@ -100,7 +100,41 @@ def _token_digest(token: str) -> str:
 REFRESH_GRACE = timedelta(seconds=60)
 
 
-def _issue_session(db: Session, response: Response, user: User) -> tuple[str, str, str]:
+def _client_kind(request: Optional[Request]) -> str:
+    """L'application mobile envoie `X-Pokou-Crypto` à chaque requête ; les
+    clients web (officine) non."""
+    if request is not None and request.headers.get("x-pokou-crypto"):
+        return "app"
+    return "web"
+
+
+def _close_other_phones(db: Session, user_id: int) -> int:
+    """UN SEUL téléphone par compte, comme WhatsApp.
+
+    Le chiffrement de bout en bout repose sur UNE identité par compte, que
+    l'application publie à chaque démarrage. Deux téléphones connectés au
+    même compte se la reprenaient donc à tour de rôle : chaque message
+    n'était lisible que sur celui qui avait démarré en dernier, et restait
+    « En attente de ce message… » sur l'autre — indéfiniment, puisque les
+    nouveaux essais sont rescellés pour l'identité du moment.
+
+    Se connecter depuis l'application ferme donc les sessions des autres
+    téléphones (et leurs jetons de notification : l'ancien ne doit plus
+    sonner). Les sessions web (officine) et console ne sont pas touchées.
+    """
+    closed = db.query(Token).filter(
+        Token.user_id == user_id,
+        Token.revoked_at.is_(None),
+        # NULL : sessions d'avant la migration, dont on ne sait rien.
+        (Token.client == "app") | (Token.client.is_(None)),
+    ).update({Token.revoked_at: datetime.utcnow()}, synchronize_session=False)
+    db.query(DeviceToken).filter(DeviceToken.user_id == user_id).delete(synchronize_session=False)
+    return closed
+
+
+def _issue_session(
+    db: Session, response: Response, user: User, client: Optional[str] = None
+) -> tuple[str, str, str]:
     """Mints an access+refresh token pair sharing one `jti`, persists a
     Token row so the session is revocable (see /auth/logout), and sets the
     admin-only httpOnly cookie. Returns (access_token, refresh_token, jti).
@@ -124,6 +158,7 @@ def _issue_session(db: Session, response: Response, user: User) -> tuple[str, st
         access_token=_token_digest(access_token),
         refresh_token=_token_digest(refresh_token),
         jti=jti,
+        client=client,
         expires_at=datetime.utcnow() + timedelta(days=settings.refresh_token_expire_days),
     ))
     db.commit()
@@ -230,7 +265,10 @@ async def verify_phone_otp(
             },
         )
 
-    access_token, refresh_token, _ = _issue_session(db, response, user)
+    client = _client_kind(request)
+    if client == "app":
+        _close_other_phones(db, user.id)
+    access_token, refresh_token, _ = _issue_session(db, response, user, client)
     await _announce_arrival(db, user)
 
     ip_address = request.client.host if request else None
@@ -358,7 +396,10 @@ async def verify_phone_two_step(
         user.two_step_reset_requested_at = None
         db.commit()
 
-    access_token, refresh_token, _ = _issue_session(db, response, user)
+    client = _client_kind(request)
+    if client == "app":
+        _close_other_phones(db, user.id)
+    access_token, refresh_token, _ = _issue_session(db, response, user, client)
     await _announce_arrival(db, user)
 
     ip_address = request.client.host if request else None
@@ -554,7 +595,10 @@ async def refresh_access_token(
         db.commit()
 
     # Create new tokens (refresh token rotation)
-    new_access_token, new_refresh_token, nouveau_jti = _issue_session(db, response, user)
+    # La session garde son type de client à travers les rotations.
+    new_access_token, new_refresh_token, nouveau_jti = _issue_session(
+        db, response, user, presente.client if presente is not None else None
+    )
     if presente is not None:
         presente.replaced_by_jti = nouveau_jti
         # ── L'APPAREIL suit sa session ───────────────────────────────────

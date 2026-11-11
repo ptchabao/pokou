@@ -102,7 +102,10 @@ class HonamScreen extends ConsumerWidget {
                       child: FilledButton.icon(
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: AppColors.accentPrimaryDark,
+                          // Fond blanc dans les deux thèmes : l'encre reste
+                          // la terre cuite foncée (en sombre, la variante
+                          // claire donnait du saumon sur blanc).
+                          foregroundColor: AppColors.accentPrimary,
                           minimumSize: const Size.fromHeight(52),
                         ),
                         onPressed: () => Navigator.of(context).push(

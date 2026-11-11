@@ -77,31 +77,63 @@ Future<void> tour(String p) async {
   await shot('${p}plus3');
 }
 
+Future<void> statusComposer(String p) async {
+  await tab('Discussions');
+  await Future<void>.delayed(const Duration(seconds: 1));
+  if (!await open('Mon statut')) return;
+  await shot('${p}status_empty');
+  final field = find.byType(TextField);
+  if (field.evaluate().isNotEmpty) {
+    c.widget<TextField>(field.first).controller?.text =
+        'Bonne fête de Tabaski à toute la famille';
+  }
+  final palette = find.byIcon(Icons.palette_outlined);
+  if (palette.evaluate().isNotEmpty) {
+    await c.tap(palette.first);
+    await c.tap(palette.first);
+    await c.tap(palette.first);
+  }
+  await shot('${p}status_text');
+  final font = find.text('Aa');
+  if (font.evaluate().isNotEmpty) await c.tap(font.first);
+  if (palette.evaluate().isNotEmpty) {
+    await c.tap(palette.first);
+    await c.tap(palette.first);
+    await c.tap(palette.first);
+    await c.tap(palette.first);
+  }
+  await shot('${p}status_text2');
+  await back();
+  await Future<void>.delayed(const Duration(seconds: 1));
+}
+
 void main() async {
   app.main();
   c = LiveWidgetController(WidgetsBinding.instance);
   await Future<void>.delayed(const Duration(seconds: 14));
-  await tab('Honam');
-  await shot('v_honam');
+  await tab('Accueil');
+  await shot('h_home');
+  await scrollDown(520);
+  await shot('h_home2');
+  await statusComposer('h_');
   await tab('Plus');
-  await shot('v_plus');
-  await tab('Discussions');
-  await shot('v_chats');
+  await Future<void>.delayed(const Duration(seconds: 1));
+  if (await open('Assimé')) {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (await open('Publier une annonce')) {
+      await shot('h_editor');
+      await back();
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    await back();
+  }
   print('TOURCMD:dark');
   await Future<void>.delayed(const Duration(seconds: 4));
-  await tab('Plus');
-  await shot('v_dark_plus');
-  await tab('Honam');
-  await shot('v_dark_honam');
-  print('TOURCMD:light');
-  await Future<void>.delayed(const Duration(seconds: 3));
-  print('TOURCMD:bigtext');
-  await Future<void>.delayed(const Duration(seconds: 4));
   await tab('Accueil');
-  await shot('v_big_home');
-  await tab('Discussions');
-  await shot('v_big_chats');
-  print('TOURCMD:normaltext');
+  await shot('h_dark_home');
+  await tab('Honam');
+  await shot('h_dark_honam');
+  print('TOURCMD:light');
   await Future<void>.delayed(const Duration(seconds: 3));
   print('TOUR:END');
 }

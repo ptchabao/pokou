@@ -15,6 +15,7 @@ import 'status_viewers_sheet.dart';
 import '../../messaging/presentation/messaging_controller.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/status_halo.dart';
+import '../data/status_text_style.dart';
 
 /// Durée d'un statut texte ou photo.
 const _kStoryDuration = Duration(seconds: 6);
@@ -72,10 +73,12 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     final l = L.of(context);
     setState(() => _sendingReply = true);
     try {
-      await ref.read(messagingRepositoryProvider).send(
-        recipientId: widget.item.userId,
-        content: '${l.statusReplyQuote}\n$text',
-      );
+      await ref
+          .read(messagingRepositoryProvider)
+          .send(
+            recipientId: widget.item.userId,
+            content: '${l.statusReplyQuote}\n$text',
+          );
       if (!mounted) return;
       _reply.clear();
       _replyFocus.unfocus();
@@ -357,9 +360,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                             textInputAction: TextInputAction.send,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              hintText: L.of(context).statusReplyHint(
-                                widget.item.displayName,
-                              ),
+                              hintText: L
+                                  .of(context)
+                                  .statusReplyHint(widget.item.displayName),
                               hintStyle: const TextStyle(color: Colors.white70),
                               filled: true,
                               fillColor: Colors.black54,
@@ -487,17 +490,17 @@ class _StoryContent extends ConsumerWidget {
       );
     }
     if (status.contentType == 'TEXT') {
-      return Container(
-        alignment: Alignment.center,
-        color: AppColors.accentPrimaryDark,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Text(
-          status.textContent ?? '',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+      final text = status.textContent ?? '';
+      return StatusTextCanvas(
+        style: status.textStyle,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(28, 96, 28, 120),
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: status.textStyle.textStyle(text),
+            ),
           ),
         ),
       );

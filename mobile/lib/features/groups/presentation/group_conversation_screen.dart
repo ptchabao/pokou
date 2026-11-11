@@ -826,14 +826,11 @@ class _GroupConversationScreenState
               title: Text(_l.convAttachCamera),
               onTap: () => Navigator.pop(sheetContext, 'camera'),
             ),
-            ListTile(
-              leading: Icon(
-                Icons.poll_outlined,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.pollOne),
-              onTap: () => Navigator.pop(sheetContext, 'poll'),
-            ),
+            // Pas de sondage dans les groupes pour l'instant : depuis le
+            // chiffrement de bout en bout, le serveur ne peut plus tenir
+            // les votes en clair et refuse leur création (409). L'entrée
+            // restait proposée — on remplissait le sondage, puis il
+            // échouait. Elle reviendra avec des sondages chiffrés.
             // Une cagnotte se crée DEPUIS le groupe, déjà rattachée à lui
             // (NAV-03) — seulement là où Kory est ouvert.
             if (ref.read(currentCountryConfigProvider).has('kory'))
@@ -1778,6 +1775,8 @@ class _GroupConversationScreenState
         // la bande de statut au-dessus d'elle.
         child: SafeArea(
           top: false,
+          // Panneau ouvert : il couvre lui-même le bas de l'écran.
+          bottom: !_emojiOpen,
           child: Column(
             children: [
               Container(
@@ -2089,7 +2088,7 @@ class _GroupConversationScreenState
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: EdgeInsets.fromLTRB(16, 8, 16, _emojiOpen ? 8 : 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -2117,22 +2116,25 @@ class _GroupConversationScreenState
                         emoji: _trailingEmoji,
                         onSelected: _sendSticker,
                       ),
-                    if (_emojiOpen)
-                      ComposerPanel(
-                        controller: _inputController,
-                        height: _keyboardHeight,
-                        onBackspace: _emojiBackspace,
-                        tab: _panelTab,
-                        onTabChanged: (tab) => setState(() => _panelTab = tab),
-                        onStickerSelected: _sendSticker,
-                        onGifRequested: () {
-                          setState(() => _emojiOpen = false);
-                          _pickAndSendGif();
-                        },
-                      ),
                   ],
                 ),
               ),
+              // Le panneau emoji/stickers occupe TOUTE la largeur et descend
+              // jusqu'au bas de l'écran, comme le clavier qu'il remplace : il
+              // flottait en retrait, avec le papier peint visible autour.
+              if (_emojiOpen)
+                ComposerPanel(
+                  controller: _inputController,
+                  height: _keyboardHeight,
+                  onBackspace: _emojiBackspace,
+                  tab: _panelTab,
+                  onTabChanged: (tab) => setState(() => _panelTab = tab),
+                  onStickerSelected: _sendSticker,
+                  onGifRequested: () {
+                    setState(() => _emojiOpen = false);
+                    _pickAndSendGif();
+                  },
+                ),
             ],
           ),
         ),

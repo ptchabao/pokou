@@ -2085,5 +2085,20 @@
   "backupWhereDrive": "Google Drive · {email}",
   "restoreFindDrive": "ابحث عن نسختي على Google Drive",
   "restoreNoDrive": "لا توجد نسخة Pokou على حساب Google هذا.",
-  "restoreWelcomeNoBackup": "مرحبًا بعودتك! إذا نسختَ محادثاتك على Google Drive فاستعدها من هنا."
+  "restoreWelcomeNoBackup": "مرحبًا بعودتك! إذا نسختَ محادثاتك على Google Drive فاستعدها من هنا.",
+  "marketPriceInvalid": "هذا السعر غير صالح. اكتب المبلغ فقط، مثلاً 5000.",
+  "marketPublishFailed": "تعذّر نشر الإعلان. لم يُفقد شيء: تحقق من الاتصال وحاول مجدداً.",
+  "statusChangeFont": "تغيير الخط",
+  "statusChangeBackground": "تغيير الخلفية",
+  "statusBackgroundNumber": "الخلفية {number}",
+  "statusVisible24h": "يظهر لمدة 24 ساعة لجهات الاتصال التي اخترتها.",
+  "homeUnreadSummary": "{count, plural, =1{رسالة واحدة غير مقروءة} other{{count} رسائل غير مقروءة}}",
+  "homeServicesTitle": "الخدمات",
+  "homeKoryShort": "صناديق وجمعيات مشتركة",
+  "homeHonamShort": "أدويتك تصلك",
+  "homeAssimeShort": "اشترِ وبِع بالقرب منك",
+  "homeDaysLeft": "{days, plural, =0{ينتهي اليوم} =1{يوم واحد} other{{days} أيام}}",
+  "emojiNoRecents": "ستظهر هنا رموزك التعبيرية الأخيرة.",
+  "emojiSearchHint": "ابحث عن رمز تعبيري",
+  "composerBackspace": "حذف"
 }

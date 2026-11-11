@@ -370,19 +370,15 @@ def test_la_configuration_enregistree_est_du_json_relisible(client):
 
 
 def test_la_formule_par_defaut_reprend_le_tarif_existant(client):
-    """Aucun tarif n'est inventé : sans configuration, c'est 5 000 FCFA."""
+    """Sans configuration, ce sont les deux formules du cahier des charges :
+    mensuelle à 3 000 FCFA, annuelle à 30 000 FCFA (proposée par défaut)."""
     entetes = auth_headers(client, "acheteur@example.com")
     formules = client.get("/api/v1/marketplace/config", headers=entetes).json()[
         "verification_plans"
     ]
-    assert formules == [
-        {
-            "code": "ANNUAL",
-            "label": "Vendeur vérifié",
-            "description": "Badge vérifié sur toutes vos annonces.",
-            "amount": 5000,
-            "default": True,
-        }
+    assert [(f["code"], f["amount"], f["duration_days"], f["default"]) for f in formules] == [
+        ("MONTHLY", 3000, 30, False),
+        ("ANNUAL", 30000, 365, True),
     ]
 
 
@@ -453,7 +449,7 @@ def test_sans_formule_demandee_c_est_celle_par_defaut(client):
         headers=vendeur_entetes,
     )
     assert reponse.status_code == 200, reponse.text
-    assert reponse.json()["amount"] == 5000
+    assert reponse.json()["amount"] == 30000
 
 
 def test_on_ne_peut_pas_desactiver_toutes_les_formules(client):
@@ -475,3 +471,37 @@ def test_on_ne_peut_pas_desactiver_toutes_les_formules(client):
         headers=admin,
     )
     assert reponse.status_code == 422
+
+
+def test_les_anciennes_versions_de_l_app_publient_quand_meme(client):
+    """Jusqu'à la 1.28.0, le formulaire envoyait les LIBELLÉS de ses menus :
+    « FCFA (XOF) » pour la devise, « TÉLÉPHONES » pour la catégorie. La
+    publication était refusée ; elle passe, et l'annonce est rangée sous les
+    vrais codes."""
+    entetes = auth_headers(client, "vendeur@example.com")
+    reponse = client.post(
+        "/api/v1/marketplace",
+        json={
+            "name": "Téléphone",
+            "description": "Neuf",
+            "price": "50000",
+            "currency": "FCFA (XOF)",
+            "category": "TÉLÉPHONES",
+        },
+        headers=entetes,
+    )
+    assert reponse.status_code == 200, reponse.text
+    assert reponse.json()["currency"] == "XOF"
+    assert reponse.json()["category"] == "TELEPHONES"
+
+
+def test_une_categorie_libre_est_gardee(client):
+    entetes = auth_headers(client, "vendeur@example.com")
+    reponse = client.post(
+        "/api/v1/marketplace",
+        json={"name": "Igname", "price": "500", "currency": "xof", "category": "Vivrier"},
+        headers=entetes,
+    )
+    assert reponse.status_code == 200, reponse.text
+    assert reponse.json()["category"] == "VIVRIER"
+    assert reponse.json()["currency"] == "XOF"

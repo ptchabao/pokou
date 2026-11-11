@@ -60,7 +60,10 @@ class MoreScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
       children: [
-        PokouAppBar(title: lot1 ? l.moreSectionSettings : l.navMore),
+        PokouAppBar(
+          title: lot1 ? l.moreSectionSettings : l.navMore,
+          showStatus: false,
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: ModuleCard(

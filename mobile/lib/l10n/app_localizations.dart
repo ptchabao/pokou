@@ -12620,6 +12620,96 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Bon retour ! Si tu avais sauvegardé tes discussions sur Google Drive, retrouve-les ici.'**
   String get restoreWelcomeNoBackup;
+
+  /// No description provided for @marketPriceInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce prix n\'est pas valide. Écris seulement le montant, par exemple 5000.'**
+  String get marketPriceInvalid;
+
+  /// No description provided for @marketPublishFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'annonce n\'a pas pu être publiée. Rien n\'est perdu : vérifie ta connexion et réessaie.'**
+  String get marketPublishFailed;
+
+  /// No description provided for @statusChangeFont.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la police'**
+  String get statusChangeFont;
+
+  /// No description provided for @statusChangeBackground.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le fond'**
+  String get statusChangeBackground;
+
+  /// No description provided for @statusBackgroundNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fond {number}'**
+  String statusBackgroundNumber(String number);
+
+  /// No description provided for @statusVisible24h.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible 24 h, par les contacts que tu as choisis.'**
+  String get statusVisible24h;
+
+  /// No description provided for @homeUnreadSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 message non lu} other{{count} messages non lus}}'**
+  String homeUnreadSummary(int count);
+
+  /// No description provided for @homeServicesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Services'**
+  String get homeServicesTitle;
+
+  /// No description provided for @homeKoryShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnottes et tontines à plusieurs'**
+  String get homeKoryShort;
+
+  /// No description provided for @homeHonamShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes médicaments livrés'**
+  String get homeHonamShort;
+
+  /// No description provided for @homeAssimeShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheter et vendre près de chez toi'**
+  String get homeAssimeShort;
+
+  /// No description provided for @homeDaysLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =0{Dernier jour} =1{1 jour} other{{days} jours}}'**
+  String homeDaysLeft(int days);
+
+  /// No description provided for @emojiNoRecents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes emojis récents apparaîtront ici.'**
+  String get emojiNoRecents;
+
+  /// No description provided for @emojiSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un emoji'**
+  String get emojiSearchHint;
+
+  /// No description provided for @composerBackspace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get composerBackspace;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

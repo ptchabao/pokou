@@ -4,6 +4,7 @@ import '../../../core/crypto/media_cipher.dart';
 import '../../../core/storage/pokou_message_store.dart';
 import '../../../core/sync/queued_mutation.dart';
 import 'status_model.dart';
+import 'status_text_style.dart';
 
 abstract interface class StatusCrypto {
   Future<SealOutcome> seal({
@@ -90,10 +91,15 @@ class StatusRepository {
     return StatusFeedItem.fromJson(json);
   }
 
-  Future<PokouStatus> createText(String text) async {
-    if (text.runes.length > 700) {
+  Future<PokouStatus> createText(
+    String visibleText, {
+    StatusTextStyle style = StatusTextStyle.plain,
+  }) async {
+    if (visibleText.runes.length > 700) {
       throw const FormatException('Le statut est limité à 700 caractères');
     }
+    // Le fond et la police partent DANS le chiffré (voir StatusTextStyle).
+    final text = StatusTextStyle.encode(style, visibleText);
     final recipients = await _sealForAudience(text);
     final response = await _api.post(
       '/status',

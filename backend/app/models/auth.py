@@ -16,6 +16,11 @@ class Token(Base):
     refresh_token = Column(String(500), nullable=False)
     jti = Column(String(64), nullable=True, index=True)
     revoked_at = Column(DateTime, nullable=True)
+    # « app » (le téléphone), « web » (officine) ou « console ». Sert à la
+    # règle « un seul téléphone par compte » : une connexion depuis l'app
+    # ferme les autres sessions « app » — voir auth.py, _close_other_phones.
+    # NULL : session ouverte avant la migration 0020.
+    client = Column(String(16), nullable=True)
 
     # ── La fenêtre de grâce à la rotation ────────────────────────────────
     #

@@ -7332,4 +7332,72 @@ class LRu extends L {
   @override
   String get restoreWelcomeNoBackup =>
       'С возвращением! Если ты сохранял чаты на Google Диске, найди их здесь.';
+
+  @override
+  String get marketPriceInvalid =>
+      'Цена указана неверно. Введите только сумму, например 5000.';
+
+  @override
+  String get marketPublishFailed =>
+      'Не удалось опубликовать объявление. Ничего не потеряно: проверьте соединение и попробуйте снова.';
+
+  @override
+  String get statusChangeFont => 'Сменить шрифт';
+
+  @override
+  String get statusChangeBackground => 'Сменить фон';
+
+  @override
+  String statusBackgroundNumber(String number) {
+    return 'Фон $number';
+  }
+
+  @override
+  String get statusVisible24h => 'Виден 24 часа выбранным вами контактам.';
+
+  @override
+  String homeUnreadSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count непрочитанных сообщений',
+      few: '$count непрочитанных сообщения',
+      one: '1 непрочитанное сообщение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeServicesTitle => 'Сервисы';
+
+  @override
+  String get homeKoryShort => 'Общие сборы и тонтины';
+
+  @override
+  String get homeHonamShort => 'Доставка ваших лекарств';
+
+  @override
+  String get homeAssimeShort => 'Покупайте и продавайте рядом';
+
+  @override
+  String homeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days дней',
+      few: '$days дня',
+      one: '1 день',
+      zero: 'Срок сегодня',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get emojiNoRecents => 'Здесь появятся недавние эмодзи.';
+
+  @override
+  String get emojiSearchHint => 'Поиск эмодзи';
+
+  @override
+  String get composerBackspace => 'Стереть';
 }

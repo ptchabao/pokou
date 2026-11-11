@@ -1,6 +1,7 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../l10n/app_localizations.dart';
 import '../../../core/time/server_time.dart';
+import 'status_text_style.dart';
 
 class PokouStatus {
   const PokouStatus({
@@ -14,6 +15,7 @@ class PokouStatus {
     required this.viewedByMe,
     required this.viewCount,
     this.contentUnavailable = false,
+    this.textStyle = StatusTextStyle.plain,
   });
 
   final String id;
@@ -27,13 +29,24 @@ class PokouStatus {
   final int viewCount;
   final bool contentUnavailable;
 
+  /// Le fond et la police d'un statut en texte (voir [StatusTextStyle]).
+  final StatusTextStyle textStyle;
+
   factory PokouStatus.fromJson(Map<String, dynamic> json) {
     final mediaJson = json['media'] as Map<String, dynamic>?;
+    // Le style voyage devant le texte, en caractères invisibles : on le
+    // sépare ici, une fois, pour que `textContent` soit partout le texte
+    // que l'auteur a écrit.
+    final rawText = json['text_content'] as String?;
+    final (style, text) = rawText == null
+        ? (StatusTextStyle.plain, null)
+        : StatusTextStyle.decode(rawText);
     return PokouStatus(
       id: json['id'] as String,
       userId: json['user_id'] as int,
       contentType: json['content_type'] as String,
-      textContent: json['text_content'] as String?,
+      textContent: text,
+      textStyle: style,
       media: mediaJson != null ? MediaMeta.fromJson(mediaJson) : null,
       createdAt: parseServerTime(json['created_at'] as String),
       expiresAt: parseServerTime(json['expires_at'] as String),

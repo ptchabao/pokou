@@ -11,6 +11,7 @@ import '../../../core/crypto/e2ee_outcome.dart';
 import '../../../core/crypto/media_cipher.dart';
 import '../data/status_model.dart';
 import '../data/status_repository.dart';
+import '../data/status_text_style.dart';
 
 class _StatusCryptoAdapter implements StatusCrypto {
   const _StatusCryptoAdapter(this.service);
@@ -113,10 +114,13 @@ class StatusPostController extends StateNotifier<bool> {
   final StatusRepository _repository;
   final MediaRepository _media;
 
-  Future<PokouStatus> postText(String text) async {
+  Future<PokouStatus> postText(
+    String text, {
+    StatusTextStyle style = StatusTextStyle.plain,
+  }) async {
     state = true;
     try {
-      return await _repository.createText(text);
+      return await _repository.createText(text, style: style);
     } finally {
       state = false;
     }

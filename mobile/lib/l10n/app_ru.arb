@@ -2085,5 +2085,20 @@
   "backupWhereDrive": "Google Диск · {email}",
   "restoreFindDrive": "Найти копию на Google Диске",
   "restoreNoDrive": "В этом аккаунте Google нет копии Pokou.",
-  "restoreWelcomeNoBackup": "С возвращением! Если ты сохранял чаты на Google Диске, найди их здесь."
+  "restoreWelcomeNoBackup": "С возвращением! Если ты сохранял чаты на Google Диске, найди их здесь.",
+  "marketPriceInvalid": "Цена указана неверно. Введите только сумму, например 5000.",
+  "marketPublishFailed": "Не удалось опубликовать объявление. Ничего не потеряно: проверьте соединение и попробуйте снова.",
+  "statusChangeFont": "Сменить шрифт",
+  "statusChangeBackground": "Сменить фон",
+  "statusBackgroundNumber": "Фон {number}",
+  "statusVisible24h": "Виден 24 часа выбранным вами контактам.",
+  "homeUnreadSummary": "{count, plural, =1{1 непрочитанное сообщение} few{{count} непрочитанных сообщения} other{{count} непрочитанных сообщений}}",
+  "homeServicesTitle": "Сервисы",
+  "homeKoryShort": "Общие сборы и тонтины",
+  "homeHonamShort": "Доставка ваших лекарств",
+  "homeAssimeShort": "Покупайте и продавайте рядом",
+  "homeDaysLeft": "{days, plural, =0{Срок сегодня} =1{1 день} few{{days} дня} other{{days} дней}}",
+  "emojiNoRecents": "Здесь появятся недавние эмодзи.",
+  "emojiSearchHint": "Поиск эмодзи",
+  "composerBackspace": "Стереть"
 }

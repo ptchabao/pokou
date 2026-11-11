@@ -25,7 +25,8 @@ class StatusStrip extends ConsumerWidget {
     final l = L.of(context);
     final me = ref.watch(authControllerProvider).user;
     final feed = [
-      ...(ref.watch(statusFeedProvider).valueOrNull ?? const <StatusFeedItem>[]),
+      ...(ref.watch(statusFeedProvider).valueOrNull ??
+          const <StatusFeedItem>[]),
     ]..sort((a, b) => (b.hasUnseen ? 1 : 0) - (a.hasUnseen ? 1 : 0));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

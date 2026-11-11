@@ -1,0 +1,30 @@
+<fr-FR>
+• Assimé : la publication d'une annonce aboutit, et le formulaire garde ta saisie si le réseau coupe.
+• Statuts en texte : choisis le fond et la police.
+• Nouvel accueil, et clavier d'emojis, de stickers et de GIF revu.
+• Un seul téléphone par compte : te connecter sur un nouveau téléphone déconnecte l'ancien, pour que tes messages restent lisibles.
+</fr-FR>
+<en-US>
+• Assimé: publishing a listing now goes through, and the form keeps what you typed if the network drops.
+• Text statuses: pick the background and the font.
+• New home screen, and a redesigned emoji, sticker and GIF keyboard.
+• One phone per account: signing in on a new phone signs out the old one, so your messages stay readable.
+</en-US>
+<es-ES>
+• Assimé: la publicación de un anuncio ya funciona, y el formulario conserva lo escrito si falla la red.
+• Estados de texto: elige el fondo y la fuente.
+• Nueva pantalla de inicio y teclado de emojis, stickers y GIF renovado.
+• Un solo teléfono por cuenta: iniciar sesión en un teléfono nuevo cierra la sesión del anterior, para que tus mensajes sigan legibles.
+</es-ES>
+<it-IT>
+• Assimé: la pubblicazione di un annuncio ora va a buon fine e il modulo conserva ciò che hai scritto se la rete cade.
+• Stati di testo: scegli lo sfondo e il carattere.
+• Nuova schermata iniziale e tastiera di emoji, sticker e GIF rinnovata.
+• Un solo telefono per account: accedere da un nuovo telefono disconnette il vecchio, così i messaggi restano leggibili.
+</it-IT>
+<ru-RU>
+• Assimé: объявление теперь публикуется, а форма сохраняет введённое при обрыве сети.
+• Текстовые статусы: выберите фон и шрифт.
+• Новый главный экран и обновлённая клавиатура эмодзи, стикеров и GIF.
+• Один телефон на аккаунт: вход на новом телефоне завершает сеанс на старом, чтобы сообщения оставались читаемыми.
+</ru-RU>

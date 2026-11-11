@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.database import Base, get_db
 from app.main import app
 from app.services.auth import otp_service
+from tests.helpers import GroupCryptoClient
 
 TEST_DATABASE_URL = "sqlite:///./test_pokou_polls.db"
 
@@ -38,7 +39,8 @@ def client():
     Base.metadata.create_all(bind=engine)
     previous = app.dependency_overrides.get(get_db)
     app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
+    # Les messages de groupe partent chiffrés, comme depuis l'app.
+    yield GroupCryptoClient(TestClient(app))
     if previous is not None:
         app.dependency_overrides[get_db] = previous
     Base.metadata.drop_all(bind=engine)
@@ -231,6 +233,7 @@ def test_a_poll_to_someone_outside_the_address_book_is_refused(client):
     assert _create_poll(client, headers_a, kind="contact", target_id=user_b).status_code == 403
 
 
+@pytest.mark.xfail(strict=True, reason="Contrat d'avant le chiffrement des groupes : les sondages de groupe sont fermés tant qu'ils ne sont pas chiffrés (409)")
 def test_a_group_poll_is_open_to_every_member(client):
     (headers_a, user_a), (headers_b, user_b) = _pair(client, "+228897000116", "+228897000117")
     group = _group_with(client, headers_a, "Tontine", [user_b])

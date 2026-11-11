@@ -7251,4 +7251,71 @@ class LEn extends L {
   @override
   String get restoreWelcomeNoBackup =>
       'Welcome back! If you backed up your chats to Google Drive, find them here.';
+
+  @override
+  String get marketPriceInvalid =>
+      'This price is not valid. Enter just the amount, for example 5000.';
+
+  @override
+  String get marketPublishFailed =>
+      'The listing could not be published. Nothing is lost: check your connection and try again.';
+
+  @override
+  String get statusChangeFont => 'Change font';
+
+  @override
+  String get statusChangeBackground => 'Change background';
+
+  @override
+  String statusBackgroundNumber(String number) {
+    return 'Background $number';
+  }
+
+  @override
+  String get statusVisible24h =>
+      'Visible for 24 hours to the contacts you chose.';
+
+  @override
+  String homeUnreadSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unread messages',
+      one: '1 unread message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeServicesTitle => 'Services';
+
+  @override
+  String get homeKoryShort => 'Group pots and tontines';
+
+  @override
+  String get homeHonamShort => 'Your medicines delivered';
+
+  @override
+  String get homeAssimeShort => 'Buy and sell near you';
+
+  @override
+  String homeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+      zero: 'Due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get emojiNoRecents => 'Your recent emojis will appear here.';
+
+  @override
+  String get emojiSearchHint => 'Search emoji';
+
+  @override
+  String get composerBackspace => 'Delete';
 }

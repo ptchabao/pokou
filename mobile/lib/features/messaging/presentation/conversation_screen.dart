@@ -1345,6 +1345,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         // au-dessus d'une barre pourtant opaque.
         child: SafeArea(
           top: false,
+          // Panneau ouvert : il couvre lui-même le bas de l'écran.
+          bottom: !_emojiOpen,
           child: Column(
             children: [
               Container(
@@ -1707,7 +1709,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           ),
                         ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          8,
+                          16,
+                          _emojiOpen ? 8 : 16,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -1750,27 +1757,30 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                 emoji: _trailingEmoji,
                                 onSelected: _sendSticker,
                               ),
-                            if (_emojiOpen)
-                              ComposerPanel(
-                                controller: _inputController,
-                                height: _keyboardHeight,
-                                onBackspace: _emojiBackspace,
-                                tab: _panelTab,
-                                onTabChanged: (tab) =>
-                                    setState(() => _panelTab = tab),
-                                onStickerSelected: _sendSticker,
-                                // Le panneau se referme : le sélecteur de
-                                // fichiers prend l'écran, et le retrouver
-                                // ouvert derrière au retour ferait un
-                                // empilement que personne n'a demandé.
-                                onGifRequested: () {
-                                  setState(() => _emojiOpen = false);
-                                  _pickAndSendGif();
-                                },
-                              ),
                           ],
                         ),
                       ),
+                      // Le panneau emoji/stickers occupe TOUTE la largeur et descend
+                      // jusqu'au bas de l'écran, comme le clavier qu'il remplace : il
+                      // flottait en retrait, avec le papier peint visible autour.
+                      if (_emojiOpen)
+                        ComposerPanel(
+                          controller: _inputController,
+                          height: _keyboardHeight,
+                          onBackspace: _emojiBackspace,
+                          tab: _panelTab,
+                          onTabChanged: (tab) =>
+                              setState(() => _panelTab = tab),
+                          onStickerSelected: _sendSticker,
+                          // Le panneau se referme : le sélecteur de
+                          // fichiers prend l'écran, et le retrouver
+                          // ouvert derrière au retour ferait un
+                          // empilement que personne n'a demandé.
+                          onGifRequested: () {
+                            setState(() => _emojiOpen = false);
+                            _pickAndSendGif();
+                          },
+                        ),
                     ],
                   ),
                 ),

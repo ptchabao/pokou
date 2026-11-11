@@ -8,7 +8,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/contact_avatar.dart';
-import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -53,6 +52,60 @@ class HomeScreen extends ConsumerWidget {
     final firstName = (user?.fullName ?? '').split(' ').first;
     final unreadNotifications =
         ref.watch(serviceNotificationsProvider).valueOrNull?.unread ?? 0;
+    final unreadMessages = ref.watch(
+      discussionsProvider.select(
+        (async) => (async.valueOrNull ?? const <ConversationSummary>[])
+            .where((d) => !d.isArchived)
+            .fold<int>(0, (sum, d) => sum + d.unreadCount),
+      ),
+    );
+    final services = <_Service>[
+      if (config.has('kory'))
+        _Service(
+          title: l.navKory,
+          pitch: l.homeKoryShort,
+          illustration: PokouIllustrations.kory,
+          tint: const Color(0xFFF9E4D6),
+          darkTint: const Color(0xFF3A2A22),
+          ink: AppColors.accentPrimaryDark,
+          actionIcon: Icons.add,
+          actionLabel: l.koryCreate,
+          onAction: () => openKoryCreate(context, ref),
+          onTap: () => onOpenTab(PokouTab.kory),
+        ),
+      if (config.has('honam'))
+        _Service(
+          title: l.navHonam,
+          pitch: l.homeHonamShort,
+          illustration: PokouIllustrations.honam,
+          tint: const Color(0xFFDFF3E4),
+          darkTint: const Color(0xFF1F2E24),
+          ink: AppColors.feedbackSuccess,
+          actionIcon: Icons.document_scanner_outlined,
+          actionLabel: l.honamSend,
+          onAction: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const HonamSendScreen())),
+          onTap: () => onOpenTab(PokouTab.honam),
+        ),
+      if (config.has('assime'))
+        _Service(
+          title: l.homeAssimeTitle,
+          pitch: l.homeAssimeShort,
+          illustration: PokouIllustrations.assime,
+          tint: const Color(0xFFFCEFC7),
+          darkTint: const Color(0xFF33290F),
+          ink: AppColors.warning,
+          actionIcon: Icons.arrow_forward,
+          actionLabel: l.homeAssimeCta,
+          onAction: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen())),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen())),
+        ),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -66,119 +119,77 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 120),
           children: [
-            PokouAppBar(
-              title: l.navHome,
-              showStatus: false,
-              leading: Image.asset(
-                'assets/brand/pokou_logo.png',
-                width: 36,
-                height: 36,
-                semanticLabel: 'Pokou',
-              ),
-              actions: [
-                // NOT-1 : la cloche ouvre le centre de notifications.
-                _Bell(
-                  unread: unreadNotifications,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const NotificationsCenterScreen(),
+            // ── En-tête : la salutation et l'état du jour à gauche, la
+            // cloche et la photo à droite. Pas de barre de titre : l'onglet
+            // dit déjà « Accueil ».
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 12, 0),
+                child: _Header(
+                  firstName: firstName,
+                  unreadMessages: unreadMessages,
+                  bell: _Bell(
+                    unread: unreadNotifications,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsCenterScreen(),
+                      ),
                     ),
                   ),
-                ),
-                // La photo mène au PROFIL (cible de 44 pt).
-                if (user != null)
-                  Semantics(
-                    button: true,
-                    label: l.navProfile,
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ProfileScreen(),
-                        ),
-                      ),
-                      child: SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: Center(
-                          child: ContactAvatar(
-                            avatar: user.avatar,
-                            displayName: user.fullName ?? '',
-                            size: 32,
+                  avatar: user == null
+                      ? null
+                      : Semantics(
+                          button: true,
+                          label: l.navProfile,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const ProfileScreen(),
+                              ),
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.border,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: ContactAvatar(
+                                avatar: user.avatar,
+                                displayName: user.fullName ?? '',
+                                size: 42,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-              ],
+                ),
+              ),
             ),
+            // ── Recherche en pilule, et Baba dans le carré sombre voisin.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: _GreetingCard(
-                firstName: firstName.isEmpty ? l.navHome : firstName,
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+              child: _SearchRow(
                 onSearch: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: _BabaBanner(
-                onTap: () =>
+                onBaba: () =>
                     context.push('/chat/$kNoMonitor', extra: l.navBaba),
               ),
             ),
+            // ── Les services, en grille de cartes pastel illustrées.
+            if (services.isNotEmpty) ...[
+              _SectionHeader(title: l.homeServicesTitle),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _ServiceGrid(services: services),
+              ),
+            ],
             _InProgress(kory: config.has('kory'), honam: config.has('honam')),
             _RecentDiscussions(onSeeAll: () => onOpenTab(PokouTab.discussions)),
-            _SectionHeader(title: l.homeWhatToDo, subtitle: l.homeServicesSub),
-            if (config.has('kory'))
-              _ServiceCard(
-                icon: Icons.savings_outlined,
-                illustration: PokouIllustrations.kory,
-                tint: AppColors.terracottaTint,
-                ink: AppColors.accentPrimaryDark,
-                overline: l.homeKoryOverline,
-                title: l.navKory,
-                pitch: l.homeKoryPitch,
-                cta: _ServiceCta.primary(
-                  label: l.koryCreate,
-                  icon: Icons.add_circle_outline,
-                  onPressed: () => openKoryCreate(context, ref),
-                ),
-                onTap: () => onOpenTab(PokouTab.kory),
-              ),
-            if (config.has('honam'))
-              _ServiceCard(
-                icon: Icons.health_and_safety_outlined,
-                illustration: PokouIllustrations.honam,
-                tint: const Color(0xFFDCFCE7),
-                ink: AppColors.feedbackSuccess,
-                overline: l.homeHonamOverline,
-                title: l.navHonam,
-                pitch: l.homeHonamPitch,
-                cta: _ServiceCta.secondary(
-                  label: l.honamSend,
-                  icon: Icons.document_scanner_outlined,
-                  iconColor: AppColors.feedbackSuccess,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const HonamSendScreen()),
-                  ),
-                ),
-                onTap: () => onOpenTab(PokouTab.honam),
-              ),
-            if (config.has('assime'))
-              _ServiceCard(
-                icon: Icons.storefront_outlined,
-                illustration: PokouIllustrations.assime,
-                tint: const Color(0xFFFEF3C7),
-                ink: AppColors.warning,
-                overline: l.homeAssimeOverline,
-                title: l.homeAssimeTitle,
-                pitch: l.homeAssimePitch,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
-                ),
-              ),
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: _TrustCard(),
@@ -210,75 +221,98 @@ class _Bell extends StatelessWidget {
   );
 }
 
-/// La salutation : surtitre avec la date, le prénom, l'accroche, puis la
-/// recherche — en pastille blanche dans la carte.
-class _GreetingCard extends StatelessWidget {
-  const _GreetingCard({required this.firstName, required this.onSearch});
+/// L'en-tête : « Bonjour Parrain » en gras, et dessous ce qui attend
+/// aujourd'hui — les messages non lus, ou l'accroche quand tout est lu.
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.firstName,
+    required this.unreadMessages,
+    required this.bell,
+    required this.avatar,
+  });
 
   final String firstName;
-  final VoidCallback onSearch;
+  final int unreadMessages;
+  final Widget bell;
+  final Widget? avatar;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    String today;
-    try {
-      today = DateFormat('EEE d MMM', locale).format(DateTime.now());
-    } catch (_) {
-      today = DateFormat('d/M').format(DateTime.now());
-    }
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-      decoration: BoxDecoration(
-        gradient: AppGradients.greeting,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${l.homeHelloOverline.toUpperCase()} • ${today.toUpperCase()}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11,
-              letterSpacing: 0.7,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textMuted,
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                firstName.isEmpty
+                    ? l.homeHelloOverline
+                    : l.homeGreeting(firstName),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 26,
+                  height: 1.2,
+                  letterSpacing: -0.4,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                unreadMessages > 0
+                    ? l.homeUnreadSummary(unreadMessages)
+                    : l.homeTagline,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: unreadMessages > 0
+                      ? AppColors.accentPrimaryDark
+                      : AppColors.textSecondary,
+                  fontWeight: unreadMessages > 0
+                      ? FontWeight.w600
+                      : FontWeight.w400,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            firstName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 32,
-              height: 1.15,
-              letterSpacing: -0.6,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l.homeTagline,
-            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 14),
-          Material(
+        ),
+        bell,
+        if (avatar != null) ...[const SizedBox(width: 4), avatar!],
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+}
+
+/// La recherche en pilule, et à côté un carré sombre : Baba, l'assistant.
+/// Le contraste du carré dit qu'il fait autre chose que chercher.
+class _SearchRow extends StatelessWidget {
+  const _SearchRow({required this.onSearch, required this.onBaba});
+
+  final VoidCallback onSearch;
+  final VoidCallback onBaba;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Material(
             color: AppColors.surface,
             shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
             child: InkWell(
               customBorder: const StadiumBorder(),
               onTap: onSearch,
               child: SizedBox(
-                height: 48,
+                height: 52,
                 child: Row(
                   children: [
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 16),
                     Icon(Icons.search, color: AppColors.textMuted),
                     const SizedBox(width: 10),
                     Expanded(
@@ -286,114 +320,236 @@ class _GreetingCard extends StatelessWidget {
                         l.homeSearchEverything,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: AppColors.textMuted),
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 16),
                   ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 10),
+        Tooltip(
+          message: l.homeBabaTitle,
+          child: Semantics(
+            button: true,
+            label: l.navBaba,
+            child: Material(
+              // Ébène sur fond clair ; en sombre, l'ébène se fondrait dans
+              // le fond — le carré passe à l'or, l'étoile à l'ébène.
+              color: AppColors.isDark
+                  ? AppColors.brandOr
+                  : AppColors.brandEbene,
+              borderRadius: BorderRadius.circular(16),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onBaba,
+                child: SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: AppColors.isDark
+                        ? AppColors.brandEbene
+                        : AppColors.brandOr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-/// « Besoin d'un coup de main ? » — Baba en un geste (ambre, jamais violet).
-class _BabaBanner extends StatelessWidget {
-  const _BabaBanner({required this.onTap});
+class _Service {
+  const _Service({
+    required this.title,
+    required this.pitch,
+    required this.illustration,
+    required this.tint,
+    required this.darkTint,
+    required this.ink,
+    required this.actionIcon,
+    required this.actionLabel,
+    required this.onAction,
+    required this.onTap,
+  });
 
+  final String title;
+  final String pitch;
+  final PokouIllustrations illustration;
+  final Color tint;
+  final Color darkTint;
+  final Color ink;
+  final IconData actionIcon;
+  final String actionLabel;
+  final VoidCallback onAction;
   final VoidCallback onTap;
+}
+
+/// Les services en grille à deux colonnes. Un nombre impair : le dernier
+/// prend toute la largeur, à l'horizontale, plutôt que de laisser un trou.
+class _ServiceGrid extends StatelessWidget {
+  const _ServiceGrid({required this.services});
+
+  final List<_Service> services;
 
   @override
   Widget build(BuildContext context) {
-    final l = L.of(context);
-    return Material(
-      color: AppColors.isDark
-          ? AppColors.brandOr.withValues(alpha: 0.16)
-          : const Color(0xFFFEF3C7),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(
-          color: AppColors.isDark
-              ? AppColors.brandOr.withValues(alpha: 0.4)
-              : const Color(0xFFFDE68A),
+    final rows = <Widget>[];
+    for (var i = 0; i < services.length; i += 2) {
+      final last = i + 1 >= services.length;
+      rows.add(
+        Padding(
+          padding: EdgeInsets.only(top: i == 0 ? 0 : 12),
+          child: last
+              ? _ServiceTile(service: services[i], wide: true)
+              : IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: _ServiceTile(service: services[i])),
+                      const SizedBox(width: 12),
+                      Expanded(child: _ServiceTile(service: services[i + 1])),
+                    ],
+                  ),
+                ),
         ),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: AppColors.brandOr,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.auto_awesome, color: Color(0xFF3B2A00)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.homeBabaTitle,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Text(
-                      l.homeBabaSub,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: AppColors.textMuted),
-            ],
+      );
+    }
+    return Column(children: rows);
+  }
+}
+
+/// Une carte de service : fond pastel uni, le nom et sa promesse en haut,
+/// l'illustration en bas, et un bouton rond pour l'action directe.
+class _ServiceTile extends StatelessWidget {
+  const _ServiceTile({required this.service, this.wide = false});
+
+  final _Service service;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = AppColors.isDark ? service.darkTint : service.tint;
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          service.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontFamily: 'Outfit',
+            fontSize: 19,
+            height: 1.2,
+            letterSpacing: -0.2,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          service.pitch,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.3,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+    final action = Tooltip(
+      message: service.actionLabel,
+      child: Semantics(
+        button: true,
+        label: service.actionLabel,
+        child: Material(
+          color: AppColors.surface,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: service.onAction,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(service.actionIcon, size: 20, color: service.ink),
+            ),
           ),
         ),
       ),
     );
+    return Material(
+      color: background,
+      borderRadius: BorderRadius.circular(22),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: service.onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 12, 12),
+          child: wide
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [text, const SizedBox(height: 12), action],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    PokouIllustration(service.illustration, height: 104),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    text,
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        action,
+                        const Spacer(),
+                        PokouIllustration(service.illustration, height: 88),
+                      ],
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
   }
 }
 
-/// Un titre de section, avec un sous-titre ou une action à droite.
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    this.dot = false,
-  });
+  const _SectionHeader({required this.title, this.trailing, this.dot = false});
 
   final String title;
-  final String? subtitle;
   final Widget? trailing;
   final bool dot;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+    padding: const EdgeInsets.fromLTRB(20, 26, 12, 10),
+    // Le titre à gauche, le lien à droite, sur la MÊME ligne médiane : le
+    // lien flottait au-dessus du titre.
     child: Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (dot) ...[
           Container(
             width: 8,
             height: 8,
-            margin: const EdgeInsets.only(bottom: 7),
             decoration: const BoxDecoration(
               color: AppColors.accentPrimary,
               shape: BoxShape.circle,
@@ -402,28 +558,19 @@ class _SectionHeader extends StatelessWidget {
           const SizedBox(width: 8),
         ],
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 20,
-                  height: 1.3,
-                  letterSpacing: -0.2,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              if (subtitle != null)
-                Text(
-                  subtitle!,
-                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-                ),
-            ],
+          child: Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 20,
+              height: 1.3,
+              letterSpacing: -0.2,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
-        ?trailing,
+        if (trailing != null) trailing! else const SizedBox(width: 8),
       ],
     ),
   );
@@ -576,7 +723,7 @@ class _InProgress extends ConsumerWidget {
           title: l.homeInProgress,
           dot: true,
           trailing: Padding(
-            padding: const EdgeInsets.only(bottom: 3),
+            padding: const EdgeInsets.only(right: 8),
             child: Text(
               l.homeAlertsActive(count),
               style: TextStyle(fontSize: 13, color: AppColors.textMuted),
@@ -607,6 +754,17 @@ class _KoryInProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final progress = pot.progress;
+    final due = pot.dueAt;
+    final daysLeft = due?.difference(DateTime.now()).inDays;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    String? dueLabel;
+    if (due != null) {
+      try {
+        dueLabel = l.koryDue(DateFormat('d MMM', locale).format(due));
+      } catch (_) {
+        dueLabel = l.koryDue(DateFormat('d/M').format(due));
+      }
+    }
     return _Card(
       onTap: () => Navigator.of(
         context,
@@ -614,69 +772,149 @@ class _KoryInProgress extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Overline(
-            icon: Icons.savings_outlined,
-            tint: AppColors.terracottaTint,
-            ink: AppColors.accentPrimaryDark,
-            overline: l.homeKoryInProgress,
-            title: pot.title,
-            trailing: progress == null
-                ? null
-                : _Chip(
-                    '${(progress * 100).round()} %',
-                    background: AppColors.terracottaTint,
-                    ink: AppColors.accentPrimaryDark,
-                  ),
-          ),
-          if (progress != null) ...[
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 7,
-                backgroundColor: AppColors.surfaceElevated,
-                color: AppColors.accentPrimary,
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
+          // Ligne du haut : le titre, et le temps qui reste en pastille.
           Row(
             children: [
-              Text(
-                formatFcfa(pot.confirmedTotal),
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.homeKoryInProgress,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 0.7,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      pot.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              if (pot.goalAmount != null)
-                Text(
-                  l.koryOnGoal(formatFcfa(pot.goalAmount!)),
-                  style: TextStyle(color: AppColors.textMuted),
+              if (daysLeft != null && daysLeft >= 0) ...[
+                const SizedBox(width: 8),
+                _Chip(
+                  l.homeDaysLeft(daysLeft),
+                  background: AppColors.terracottaTint,
+                  ink: AppColors.accentPrimaryDark,
                 ),
+              ],
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
+          // Ligne du milieu : ce qui est réuni, et l'anneau de progression.
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      formatFcfa(pot.confirmedTotal),
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 22,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    if (pot.goalAmount != null)
+                      Text(
+                        l.koryOnGoal(formatFcfa(pot.goalAmount!)),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (progress != null) _ProgressRing(value: progress),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Ligne du bas : l'échéance, ou le rappel que l'argent ne passe
+          // pas par Pokou.
           Row(
             children: [
               Icon(
-                Icons.verified_user_outlined,
+                dueLabel != null
+                    ? Icons.schedule
+                    : Icons.verified_user_outlined,
                 size: 16,
-                color: AppColors.feedbackSuccess,
+                color: dueLabel != null
+                    ? AppColors.textMuted
+                    : AppColors.feedbackSuccess,
               ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  l.homeKoryNoMoney,
+                  dueLabel ?? l.homeKoryNoMoney,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// L'avancement en anneau, le pourcentage au centre.
+class _ProgressRing extends StatelessWidget {
+  const _ProgressRing({required this.value});
+
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (value.clamp(0, 1) * 100).round();
+    return Semantics(
+      label: '$percent %',
+      child: SizedBox(
+        width: 58,
+        height: 58,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox.expand(
+              child: CircularProgressIndicator(
+                value: value.clamp(0, 1).toDouble(),
+                strokeWidth: 6,
+                strokeCap: StrokeCap.round,
+                backgroundColor: AppColors.surfaceElevated,
+                color: AppColors.accentPrimary,
+              ),
+            ),
+            ExcludeSemantics(
+              child: Text(
+                '$percent%',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -736,7 +974,9 @@ class _RecentDiscussions extends ConsumerWidget {
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.accentPrimaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(44, 44),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -868,147 +1108,6 @@ class _DiscussionRow extends ConsumerWidget {
                 ],
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// L'action d'une carte de service : pleine (Kory) ou beige (Honam).
-class _ServiceCta {
-  const _ServiceCta.primary({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  }) : primary = true,
-       iconColor = null;
-
-  const _ServiceCta.secondary({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-    this.iconColor,
-  }) : primary = false;
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool primary;
-  final Color? iconColor;
-}
-
-/// Carte de service : icône teintée, surtitre, nom en grand, promesse, et
-/// une action directe en pleine largeur — sans écran intermédiaire.
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({
-    required this.icon,
-    required this.tint,
-    required this.ink,
-    required this.overline,
-    required this.title,
-    required this.pitch,
-    required this.onTap,
-    this.cta,
-    this.illustration,
-  });
-
-  final IconData icon;
-  final PokouIllustrations? illustration;
-  final Color tint;
-  final Color ink;
-  final String overline;
-  final String title;
-  final String pitch;
-  final VoidCallback onTap;
-  final _ServiceCta? cta;
-
-  @override
-  Widget build(BuildContext context) {
-    final action = cta;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: _Card(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.isDark ? ink.withValues(alpha: 0.2) : tint,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, size: 26, color: ink),
-                ),
-                const Spacer(),
-                // Une scène plutôt qu'un vide : on voit tout de suite à
-                // quoi sert le service.
-                if (illustration case final scene?)
-                  PokouIllustration(scene, height: 92)
-                else if (action == null)
-                  Icon(Icons.chevron_right, color: AppColors.textMuted),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              overline,
-              style: TextStyle(
-                fontSize: 11,
-                letterSpacing: 0.7,
-                fontWeight: FontWeight.w700,
-                color: ink,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 22,
-                height: 1.2,
-                letterSpacing: -0.3,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              pitch,
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.4,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            if (action != null) ...[
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: action.primary
-                        ? AppColors.accentPrimary
-                        : AppColors.surfaceElevated,
-                    foregroundColor: action.primary
-                        ? Colors.white
-                        : AppColors.textPrimary,
-                    shape: const StadiumBorder(),
-                    textStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  onPressed: action.onPressed,
-                  icon: Icon(action.icon, size: 20, color: action.iconColor),
-                  label: Text(action.label),
-                ),
-              ),
-            ],
           ],
         ),
       ),

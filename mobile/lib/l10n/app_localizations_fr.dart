@@ -7303,4 +7303,71 @@ class LFr extends L {
   @override
   String get restoreWelcomeNoBackup =>
       'Bon retour ! Si tu avais sauvegardé tes discussions sur Google Drive, retrouve-les ici.';
+
+  @override
+  String get marketPriceInvalid =>
+      'Ce prix n\'est pas valide. Écris seulement le montant, par exemple 5000.';
+
+  @override
+  String get marketPublishFailed =>
+      'L\'annonce n\'a pas pu être publiée. Rien n\'est perdu : vérifie ta connexion et réessaie.';
+
+  @override
+  String get statusChangeFont => 'Changer la police';
+
+  @override
+  String get statusChangeBackground => 'Changer le fond';
+
+  @override
+  String statusBackgroundNumber(String number) {
+    return 'Fond $number';
+  }
+
+  @override
+  String get statusVisible24h =>
+      'Visible 24 h, par les contacts que tu as choisis.';
+
+  @override
+  String homeUnreadSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages non lus',
+      one: '1 message non lu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeServicesTitle => 'Services';
+
+  @override
+  String get homeKoryShort => 'Cagnottes et tontines à plusieurs';
+
+  @override
+  String get homeHonamShort => 'Tes médicaments livrés';
+
+  @override
+  String get homeAssimeShort => 'Acheter et vendre près de chez toi';
+
+  @override
+  String homeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+      zero: 'Dernier jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get emojiNoRecents => 'Tes emojis récents apparaîtront ici.';
+
+  @override
+  String get emojiSearchHint => 'Rechercher un emoji';
+
+  @override
+  String get composerBackspace => 'Effacer';
 }

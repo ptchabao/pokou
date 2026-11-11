@@ -59,7 +59,9 @@ class ProductPayload(BaseModel):
     latitude: Optional[float] = Field(None, ge=-90, le=90)
     longitude: Optional[float] = Field(None, ge=-180, le=180)
     price: Decimal = Field(..., ge=0, max_digits=12, decimal_places=2)
-    currency: str = Field("XOF", min_length=3, max_length=8)
+    # 32 et non 8 : les anciennes versions de l'app envoient le libellé du
+    # menu (« FCFA (XOF) »), ramené au code par `code_devise`.
+    currency: str = Field("XOF", min_length=3, max_length=32)
     image_media_id: Optional[int] = None
     # Galerie : ids de médias déjà téléversés, dans l'ordre d'affichage
     # voulu. `None` laisse la galerie inchangée, `[]` la vide — la
@@ -463,9 +465,11 @@ async def create_product(payload: ProductPayload, db: Session = Depends(get_db),
     user_id = current_user["user_id"]
     if payload.image_media_id is not None:
         _require_own_media(db, payload.image_media_id, user_id)
-    _exiger_devise_connue(db, payload.currency)
+    currency = marketplace_config_service.code_devise(db, payload.currency)
+    _exiger_devise_connue(db, currency)
     fields = payload.model_dump(exclude={"gallery_media_ids"})
-    fields["category"] = (payload.category or "AUTRE").upper()
+    fields["currency"] = currency
+    fields["category"] = marketplace_config_service.slug_categorie(db, payload.category)
     _refuse_medicines(fields["category"])
     item = MarketplaceProduct(seller_id=user_id, **fields)
     db.add(item)
@@ -507,8 +511,9 @@ async def update_product(product_id: int, payload: ProductPayload, db: Session =
         raise HTTPException(status_code=404, detail="Produit introuvable")
     if payload.image_media_id is not None:
         _require_own_media(db, payload.image_media_id, user_id)
+    currency = marketplace_config_service.code_devise(db, payload.currency)
     if "currency" in payload.model_fields_set:
-        _exiger_devise_connue(db, payload.currency)
+        _exiger_devise_connue(db, currency)
     # `exclude_unset` : un PATCH ne parle que des champs qu'il envoie.
     #
     # Sans cela, `image_media_id` valait None par défaut et était écrit tel
@@ -524,6 +529,10 @@ async def update_product(product_id: int, payload: ProductPayload, db: Session =
         _refuse_medicines(payload.category)
     if payload.category is None:
         updates.pop("category", None)
+    else:
+        updates["category"] = marketplace_config_service.slug_categorie(db, payload.category)
+    if "currency" in updates:
+        updates["currency"] = currency
     for key, value in updates.items():
         setattr(item, key, value)
     # `None` = galerie inchangée ; `[]` = galerie vidée (voir ProductPayload).

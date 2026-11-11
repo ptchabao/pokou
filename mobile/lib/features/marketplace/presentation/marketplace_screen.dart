@@ -292,11 +292,17 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
                     ),
                   ),
                 ),
-                OutlinedButton(
+                // « Mes annonces » était écrit deux fois côte à côte (le
+                // titre et le bouton), et le bouton devenait illisible en
+                // sombre.
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.accentPrimaryDark,
+                  ),
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const MyCatalogScreen()),
                   ),
-                  child: const Text('Mes annonces'),
+                  child: Text(L.of(context).homeSeeAll),
                 ),
               ],
             ),
@@ -1261,6 +1267,8 @@ class _MarketAppBar extends StatelessWidget implements PreferredSizeWidget {
     // Ouvert depuis l'Accueil ou Plus : un retour. En onglet : aucun.
     return PokouAppBar(
       title: L.of(context).marketTitle,
+      // Pas de « En ligne » sous le titre : il parle de la messagerie.
+      showStatus: false,
       leading: Navigator.of(context).canPop() ? const PokouBackButton() : null,
       actions: actions,
     );

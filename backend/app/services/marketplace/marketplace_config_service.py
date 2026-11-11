@@ -166,6 +166,44 @@ def devise_connue(db: Session, code: str) -> bool:
     return any(d["code"] == code for d in devises(db))
 
 
+def _sans_accents(texte: str) -> str:
+    import unicodedata
+    return "".join(
+        c for c in unicodedata.normalize("NFD", texte) if unicodedata.category(c) != "Mn"
+    )
+
+
+def code_devise(db: Session, saisie: Optional[str]) -> str:
+    """Le code d'une devise à partir de ce qu'un client a envoyé.
+
+    Les versions de l'application jusqu'à la 1.28.0 envoyaient le LIBELLÉ du
+    menu déroulant (« FCFA (XOF) ») à la place du code (« XOF ») : toute
+    publication était refusée. On reconnaît donc le code, le libellé, et la
+    forme « libellé (code) ». Une saisie qui ne correspond à rien est rendue
+    telle quelle, pour que `devise_connue` la refuse avec son message.
+    """
+    brut = (saisie or "").strip()
+    haut = brut.upper()
+    for d in devises(db):
+        code = d["code"]
+        label = (d.get("label") or code).upper()
+        if haut in (code, label, f"{label} ({code})", f"{code} ({label})"):
+            return code
+    return haut
+
+
+def slug_categorie(db: Session, saisie: Optional[str]) -> str:
+    """Même réparation pour la catégorie : « TÉLÉPHONES » (le libellé mis en
+    majuscules par les anciennes versions) redevient « TELEPHONES ». Une
+    catégorie libre (« Autre » précisée par le vendeur) est gardée."""
+    haut = (saisie or "AUTRE").strip().upper() or "AUTRE"
+    cle = _sans_accents(haut)
+    for c in categories(db):
+        if cle in (c["slug"].upper(), _sans_accents((c.get("label") or "").upper())):
+            return c["slug"]
+    return haut
+
+
 def configuration_publique(db: Session) -> dict[str, Any]:
     """Ce que l'application mobile lit au démarrage du marché."""
     return {

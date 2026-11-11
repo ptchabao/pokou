@@ -81,49 +81,49 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     WidgetRef ref, {
     MarketplaceProduct? product,
   }) async {
-    final result = await Navigator.of(context).push<ProductDraft>(
-      MaterialPageRoute(builder: (_) => ProductEditor(product: product)),
+    final repo = ref.read(marketplaceRepositoryProvider);
+    // L'envoi se fait DEPUIS le formulaire, qui reste ouvert tant que le
+    // serveur n'a pas accepté l'annonce (voir ProductEditor.onSubmit).
+    final saved = await Navigator.of(context).push<ProductDraft>(
+      MaterialPageRoute(
+        builder: (_) => ProductEditor(
+          product: product,
+          onSubmit: (result) async {
+            if (product == null) {
+              await repo.create(
+                name: result.name,
+                description: result.description,
+                category: result.category,
+                location: result.location,
+                latitude: result.latitude,
+                longitude: result.longitude,
+                price: result.price,
+                currency: result.currency,
+                imageMediaId: result.imageMediaId,
+                galleryMediaIds: result.galleryMediaIds,
+              );
+            } else {
+              await repo.update(
+                id: product.id,
+                name: result.name,
+                description: result.description,
+                category: result.category,
+                location: result.location,
+                latitude: result.latitude,
+                longitude: result.longitude,
+                price: result.price,
+                currency: result.currency,
+                imageMediaId: result.imageMediaId,
+                galleryMediaIds: result.galleryMediaIds,
+              );
+            }
+          },
+        ),
+      ),
     );
-    if (result == null || !context.mounted) return;
-    try {
-      final repo = ref.read(marketplaceRepositoryProvider);
-      if (product == null) {
-        await repo.create(
-          name: result.name,
-          description: result.description,
-          category: result.category,
-          location: result.location,
-          latitude: result.latitude,
-          longitude: result.longitude,
-          price: result.price,
-          currency: result.currency,
-          imageMediaId: result.imageMediaId,
-          galleryMediaIds: result.galleryMediaIds,
-        );
-      } else {
-        await repo.update(
-          id: product.id,
-          name: result.name,
-          description: result.description,
-          category: result.category,
-          location: result.location,
-          latitude: result.latitude,
-          longitude: result.longitude,
-          price: result.price,
-          currency: result.currency,
-          imageMediaId: result.imageMediaId,
-          galleryMediaIds: result.galleryMediaIds,
-        );
-      }
-      ref.read(marketplaceProductsProvider.notifier).invalidate();
-      ref.invalidate(myProductsProvider);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(L.of(context).marketProductUnavailable)),
-        );
-      }
-    }
+    if (saved == null) return;
+    ref.read(marketplaceProductsProvider.notifier).invalidate();
+    ref.invalidate(myProductsProvider);
   }
 
   Future<void> boostProduct(

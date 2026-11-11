@@ -51,13 +51,20 @@ class ComposerPanel extends StatelessWidget {
   /// « choisir un fichier » ferait une promesse que le panneau ne tient pas.
   final VoidCallback onGifRequested;
 
-  /// La barre de sélection, en points. Assez haute pour que les segments
-  /// soient touchables sans viser.
-  static const _hauteurBarre = 48.0;
+  /// La barre de sélection, en points. Assez haute pour que ses boutons
+  /// fassent 44 points, la cible tactile minimale.
+  static const _hauteurBarre = 56.0;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    // Le bas de l'écran (indicateur d'accueil, barre de gestes) : le fond du
+    // panneau le couvre, son contenu s'arrête au-dessus.
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final contentHeight = (height - _hauteurBarre - bottomInset).clamp(
+      120.0,
+      height,
+    );
     return _KeyboardHandoff(
       height: height,
       child: SizedBox(
@@ -65,33 +72,24 @@ class ComposerPanel extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.chatComposerBg,
-            border: Border(
-              top: BorderSide(color: AppColors.border, width: 0.5),
-            ),
+            border: Border(top: BorderSide(color: AppColors.border)),
           ),
           child: Column(
             children: [
               SizedBox(
                 height: _hauteurBarre,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
                   child: Row(
                     children: [
-                      // Sélecteur d'onglets groupé en capsule moderne
+                      // Les deux choses qu'on PARCOURT : emoji et stickers.
                       Expanded(
                         child: Container(
-                          height: 36,
-                          padding: const EdgeInsets.all(3),
+                          height: 44,
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppColors.border.withValues(alpha: 0.6),
-                              width: 0.5,
-                            ),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                           child: Row(
                             children: [
@@ -102,14 +100,6 @@ class ComposerPanel extends StatelessWidget {
                                   selectionne: tab == ComposerPanelTab.emoji,
                                   onTap: () =>
                                       onTabChanged(ComposerPanelTab.emoji),
-                                ),
-                              ),
-                              Expanded(
-                                child: _Segment(
-                                  icone: Icons.gif_box_outlined,
-                                  label: l.convAttachGif,
-                                  selectionne: false,
-                                  onTap: onGifRequested,
                                 ),
                               ),
                               Expanded(
@@ -125,22 +115,71 @@ class ComposerPanel extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      // Le GIF est une ACTION (choisir un fichier), pas un
+                      // onglet : il ne ressemble donc plus à un onglet.
+                      Semantics(
+                        button: true,
+                        label: l.convAttachGif,
+                        child: Material(
+                          color: AppColors.surfaceElevated,
+                          borderRadius: BorderRadius.circular(22),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: onGifRequested,
+                            child: SizedBox(
+                              height: 44,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
+                                child: Center(
+                                  child: ExcludeSemantics(
+                                    child: Text(
+                                      l.convAttachGif,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.6,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Effacer : à portée du pouce, en haut à droite, au
+                      // lieu d'un bouton flottant qui recouvrait la grille.
+                      if (tab == ComposerPanelTab.emoji)
+                        IconButton(
+                          tooltip: l.composerBackspace,
+                          onPressed: onBackspace,
+                          icon: Icon(
+                            Icons.backspace_outlined,
+                            color: AppColors.textSecondary,
+                            size: 22,
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ),
-              Expanded(
+              SizedBox(
+                height: contentHeight,
                 child: switch (tab) {
                   // La hauteur passée aux panneaux est celle qui RESTE une
-                  // fois la barre retirée — sinon ils débordent d'autant, et
-                  // Flutter le signale.
+                  // fois la barre et le bas de l'écran retirés — sinon ils
+                  // débordent d'autant, et Flutter le signale.
                   ComposerPanelTab.emoji => EmojiPanel(
                     controller: controller,
-                    height: height - _hauteurBarre,
+                    height: contentHeight,
                     onBackspace: onBackspace,
                   ),
                   ComposerPanelTab.stickers => StickerPanel(
-                    height: height - _hauteurBarre,
+                    height: contentHeight,
                     onSend: onStickerSelected,
                   ),
                 },
@@ -273,15 +312,15 @@ class _Segment extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOutCubic,
-            height: 30,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: selectionne ? AppColors.surface : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               boxShadow: selectionne
                   ? [
                       BoxShadow(
@@ -293,17 +332,17 @@ class _Segment extends StatelessWidget {
                   : null,
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icone, size: 17, color: couleur),
-                const SizedBox(width: 3),
+                Icon(icone, size: 19, color: couleur),
+                const SizedBox(width: 6),
                 Flexible(
                   child: Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 13.5,
                       fontWeight: selectionne
                           ? FontWeight.w700
                           : FontWeight.w500,
