@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../modules/shared/module_payment.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../data/kory_model.dart';
@@ -58,6 +59,64 @@ Future<void> _run(
     if (done != null && context.mounted) koryToast(context, done);
   } catch (_) {
     if (context.mounted) koryFailed(context);
+  }
+}
+
+/// Kory Plus : ouvrir le paiement des frais d'ouverture. Rien n'est accordé
+/// ici — c'est la confirmation reçue par le serveur qui fait entrer dans la
+/// tontine, et la page se met à jour d'elle-même (kory:updated).
+Future<void> _payPlusFee(
+  BuildContext context,
+  WidgetRef ref,
+  KoryPot pot,
+) async {
+  final l = L.of(context);
+  try {
+    final url = await ref.read(koryRepositoryProvider).payPlusFee(pot.id);
+    if (!context.mounted) return;
+    await openPaymentGateway(
+      context,
+      url,
+      pendingMessage: l.koryXFeePaymentPending,
+    );
+    refreshKory(ref, potId: pot.id);
+  } catch (_) {
+    if (context.mounted) koryFailed(context);
+  }
+}
+
+/// KOR-8 / 25 : le montant des frais. Qui les a réglés se lit juste dessous,
+/// dans la liste des membres.
+class _PlusFeeCard extends StatelessWidget {
+  const _PlusFeeCard({required this.fee});
+
+  final KoryPlusFee fee;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return KoryCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.koryXPlusFeeTitle,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l.koryXPlusFeeBody(
+              formatFcfa(fee.amountHt),
+              formatFcfa(fee.amountTtc),
+            ),
+            style: TextStyle(color: AppColors.textSecondary, height: 1.35),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -341,8 +400,21 @@ class KoryTontineScreen extends ConsumerWidget {
   }
 }
 
-/// La pastille d'un membre invité : accepté, en attente, a refusé.
-Widget _memberPill(L l, KoryMemberInfo m) {
+/// La pastille d'un membre invité : accepté (ou payé), en attente, a refusé.
+Widget _memberPill(L l, KoryMemberInfo m, {bool feeDue = false}) {
+  if (feeDue && !m.declined) {
+    return m.feePaid
+        ? KoryStatusPill(
+            icon: Icons.check_circle,
+            label: l.koryXFeePaid,
+            color: AppColors.feedbackSuccess,
+          )
+        : KoryStatusPill(
+            icon: Icons.hourglass_top,
+            label: l.koryXWaiting,
+            color: AppColors.securityWarning,
+          );
+  }
   if (m.declined) {
     return KoryStatusPill(
       icon: Icons.block,
@@ -372,13 +444,18 @@ class _AcceptedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final invited = pot.members.where((m) => !m.declined).toList();
-    final accepted = invited.where((m) => m.accepted).length;
+    final feeDue = pot.plusFee?.isDue ?? false;
+    final accepted = invited
+        .where((m) => feeDue ? m.feePaid : m.accepted)
+        .length;
     return KoryCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l.koryXAcceptedOf('$accepted', '${invited.length}'),
+            feeDue
+                ? l.koryXPlusFeePaidOf('$accepted', '${invited.length}')
+                : l.koryXAcceptedOf('$accepted', '${invited.length}'),
             style: TextStyle(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -404,7 +481,7 @@ class _AcceptedCard extends StatelessWidget {
                   ? l.koryXDeputy
                   : null,
               muted: m.declined,
-              trailing: _memberPill(l, m),
+              trailing: _memberPill(l, m, feeDue: pot.plusFee?.isDue ?? false),
             ),
         ],
       ),
@@ -435,6 +512,8 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
     final accepted = pot.members.where((m) => m.accepted).length;
     final canStart = waiting == 0 && declined > 0 && accepted >= 2;
     final count = pot.members.where((m) => !m.declined).length;
+    final fee = pot.plusFee;
+    final mustPay = fee != null && fee.isDue && !fee.iPaid;
     return KoryPage(
       title: pot.title,
       subtitle: l.koryXPendingSubtitle(pot.groupName ?? l.koryKindTontine),
@@ -451,7 +530,18 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
       ],
       footer: KoryFooter(
         children: [
-          if (canStart)
+          if (mustPay)
+            KoryButton(
+              icon: Icons.account_balance_wallet_outlined,
+              label: l.koryXPayMyFee(formatFcfa(fee.amountTtc)),
+              busy: _busy,
+              onPressed: () async {
+                setState(() => _busy = true);
+                await _payPlusFee(context, ref, pot);
+                if (mounted) setState(() => _busy = false);
+              },
+            )
+          else if (canStart)
             KoryButton(
               label: l.koryXStartWithout(declined),
               busy: _busy,
@@ -523,12 +613,18 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
                 ],
               ),
             ),
+            if (fee != null && fee.isDue) ...[
+              const SizedBox(height: 10),
+              _PlusFeeCard(fee: fee),
+            ],
             const SizedBox(height: 10),
             _AcceptedCard(pot: pot),
             const SizedBox(height: 12),
             KoryNotice(
               text: declined > 0
                   ? l.koryXSomeoneDeclined
+                  : (fee?.isDue ?? false)
+                  ? l.koryXStartsWhenAllPaid
                   : l.koryXStartsWhenAllAccept,
             ),
           ],
@@ -596,7 +692,12 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
     final l = L.of(context);
     final pot = widget.pot;
     final member = widget.member;
-    final answered = member == null || member.accepted || member.declined;
+    final fee = pot.plusFee;
+    final feeDue = fee != null && fee.isDue;
+    final answered =
+        member == null ||
+        member.declined ||
+        (feeDue ? member.feePaid : member.accepted);
     final count = pot.members.where((m) => !m.declined).length;
     return KoryPage(
       title: l.koryXInvitation,
@@ -606,9 +707,18 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
           : KoryFooter(
               children: [
                 KoryButton(
-                  label: l.koryXAcceptInvite,
+                  icon: feeDue ? Icons.account_balance_wallet_outlined : null,
+                  label: feeDue
+                      ? l.koryXPayAndJoin(formatFcfa(fee.amountTtc))
+                      : l.koryXAcceptInvite,
                   busy: _busy,
-                  onPressed: () => _answer(true),
+                  onPressed: feeDue
+                      ? () async {
+                          setState(() => _busy = true);
+                          await _payPlusFee(context, ref, pot);
+                          if (mounted) setState(() => _busy = false);
+                        }
+                      : () => _answer(true),
                 ),
                 TextButton(
                   onPressed: _busy ? null : () => _answer(false),
@@ -665,10 +775,15 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
               ],
             ),
           ),
+          if (feeDue) ...[const SizedBox(height: 10), _PlusFeeCard(fee: fee)],
           const SizedBox(height: 10),
           _AcceptedCard(pot: pot),
           const SizedBox(height: 12),
-          if (member != null && member.accepted)
+          if (feeDue && member != null && member.feePaid)
+            KoryNotice(tone: KoryTone.success, text: l.koryXFeeYouPaid)
+          else if (feeDue && member != null && !member.declined)
+            KoryNotice(text: l.koryXStartsWhenAllPaid)
+          else if (member != null && member.accepted)
             KoryNotice(tone: KoryTone.success, text: l.koryXYouAccepted)
           else if (member != null && member.declined)
             KoryNotice(tone: KoryTone.danger, text: l.koryXYouDeclined)

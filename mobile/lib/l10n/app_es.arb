@@ -2495,5 +2495,14 @@
   "koryXYouReceive": "Recibes el cobro de este turno",
   "koryXYourContributions": "Tus aportes",
   "koryXYourMonth": "Tu mes",
-  "koryXUpToDate": "Al día"
+  "koryXUpToDate": "Al día",
+  "koryXPlusFeeTitle": "Gastos de apertura Kory Plus",
+  "koryXPlusFeeBody": "{ht} sin IVA ({ttc} con IVA) por miembro, una sola vez, por Mobile Money.",
+  "koryXPlusFeePaidOf": "{paid} de {total} miembros han pagado",
+  "koryXPayAndJoin": "Pagar {amount} y unirme",
+  "koryXPayMyFee": "Pagar mis gastos · {amount}",
+  "koryXFeePaymentPending": "Pago en confirmación. La página se actualiza en cuanto se recibe.",
+  "koryXFeePaid": "Pagado",
+  "koryXFeeYouPaid": "Tus gastos están pagados: formas parte de la tontina.",
+  "koryXStartsWhenAllPaid": "La tontina empieza en cuanto todos los miembros pagan los gastos de apertura."
 }

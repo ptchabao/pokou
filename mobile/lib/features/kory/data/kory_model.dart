@@ -56,6 +56,7 @@ class KoryPot {
     this.drawnAt,
     this.members = const [],
     this.swaps = const [],
+    this.plusFee,
     this.cotisation,
     this.organizerId,
   });
@@ -93,6 +94,9 @@ class KoryPot {
   final DateTime? drawnAt;
   final List<KoryMemberInfo> members;
   final List<KorySwap> swaps;
+
+  /// Tontine Kory Plus : ses frais d'ouverture, `null` hors tontine.
+  final KoryPlusFee? plusFee;
   final KoryCotisation? cotisation;
   final int? organizerId;
 
@@ -227,6 +231,7 @@ class KoryPot {
       for (final w in (json['swaps'] as List? ?? const []))
         KorySwap.fromJson(w as Map<String, dynamic>),
     ],
+    plusFee: KoryPlusFee.tryParse(json['plus_fee']),
     cotisation: json['cotisation'] is Map<String, dynamic>
         ? KoryCotisation.fromJson(json['cotisation'] as Map<String, dynamic>)
         : null,
@@ -401,7 +406,11 @@ class KoryMemberInfo {
     this.declined = false,
     this.isAdmin = false,
     this.isDeputy = false,
+    this.feePaid = false,
   });
+
+  /// Kory Plus : a réglé ses frais d'ouverture (payer vaut accepter).
+  final bool feePaid;
 
   final int userId;
   final String? name;
@@ -417,7 +426,39 @@ class KoryMemberInfo {
     declined: json['declined'] as bool? ?? false,
     isAdmin: json['is_admin'] as bool? ?? false,
     isDeputy: json['is_deputy'] as bool? ?? false,
+    feePaid: json['fee_paid'] as bool? ?? false,
   );
+}
+
+/// Kory Plus : les frais d'ouverture d'une tontine (KOR-8 / 25), fixés par le
+/// serveur selon le pays de l'administrateur. `amountHt == 0` : gratuite.
+class KoryPlusFee {
+  const KoryPlusFee({
+    required this.amountHt,
+    required this.amountTtc,
+    this.paidCount = 0,
+    this.memberCount = 0,
+    this.iPaid = false,
+  });
+
+  final int amountHt;
+  final int amountTtc;
+  final int paidCount;
+  final int memberCount;
+  final bool iPaid;
+
+  bool get isDue => amountHt > 0;
+
+  static KoryPlusFee? tryParse(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    return KoryPlusFee(
+      amountHt: json['amount_ht'] as int? ?? 0,
+      amountTtc: json['amount_ttc'] as int? ?? 0,
+      paidCount: json['paid_count'] as int? ?? 0,
+      memberCount: json['member_count'] as int? ?? 0,
+      iPaid: json['i_paid'] as bool? ?? false,
+    );
+  }
 }
 
 /// KOR-28 : un échange de mois. PENDING (attend l'autre membre), ACCEPTED

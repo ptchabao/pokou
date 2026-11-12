@@ -50,7 +50,7 @@ def client():
     with TestingSessionLocal() as db:
         db.add(SystemSetting(
             key="country.TG",
-            value='{"modules": ["discussions", "kory", "kory_plus", "honam", "certified"]}',
+            value='{"modules": ["discussions", "kory", "kory_plus", "honam", "certified"], "kory_plus_fee_ht": 0}',
         ))
         db.commit()
     previous = app.dependency_overrides.get(get_db)

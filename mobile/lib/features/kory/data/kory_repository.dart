@@ -118,6 +118,14 @@ class KoryRepository {
   Future<KoryPot> acceptTontine(int potId) => _action(potId, 'accept');
   Future<KoryPot> declineTontine(int potId) => _action(potId, 'decline');
 
+  /// Kory Plus : ouvre le paiement Mobile Money des frais d'ouverture.
+  /// Renvoie l'adresse de la passerelle ; la confirmation du paiement, côté
+  /// serveur, vaut acceptation de l'invitation.
+  Future<String?> payPlusFee(int potId) async {
+    final response = await _api.post('/kory/pots/$potId/fee', body: const {});
+    return (response as Map<String, dynamic>)['payment_url'] as String?;
+  }
+
   /// L'administrateur démarre sans ceux qui ont refusé.
   Future<KoryPot> startTontine(int potId) => _action(potId, 'start');
 

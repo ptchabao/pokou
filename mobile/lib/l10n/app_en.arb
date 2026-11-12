@@ -2495,5 +2495,14 @@
   "koryXYouReceive": "You receive this round’s payout",
   "koryXYourContributions": "Your payments",
   "koryXYourMonth": "Your month",
-  "koryXUpToDate": "Up to date"
+  "koryXUpToDate": "Up to date",
+  "koryXPlusFeeTitle": "Kory Plus opening fee",
+  "koryXPlusFeeBody": "{ht} excl. VAT ({ttc} incl. VAT) per member, once, by Mobile Money.",
+  "koryXPlusFeePaidOf": "{paid} of {total} members have paid",
+  "koryXPayAndJoin": "Pay {amount} and join",
+  "koryXPayMyFee": "Pay my fee · {amount}",
+  "koryXFeePaymentPending": "Payment being confirmed. This page updates as soon as it is received.",
+  "koryXFeePaid": "Paid",
+  "koryXFeeYouPaid": "Your fee is paid: you are in the savings circle.",
+  "koryXStartsWhenAllPaid": "The savings circle starts as soon as every member has paid the opening fee."
 }

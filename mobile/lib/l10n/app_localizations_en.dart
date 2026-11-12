@@ -8953,4 +8953,42 @@ class LEn extends L {
 
   @override
   String get koryXUpToDate => 'Up to date';
+
+  @override
+  String get koryXPlusFeeTitle => 'Kory Plus opening fee';
+
+  @override
+  String koryXPlusFeeBody(String ht, String ttc) {
+    return '$ht excl. VAT ($ttc incl. VAT) per member, once, by Mobile Money.';
+  }
+
+  @override
+  String koryXPlusFeePaidOf(String paid, String total) {
+    return '$paid of $total members have paid';
+  }
+
+  @override
+  String koryXPayAndJoin(String amount) {
+    return 'Pay $amount and join';
+  }
+
+  @override
+  String koryXPayMyFee(String amount) {
+    return 'Pay my fee · $amount';
+  }
+
+  @override
+  String get koryXFeePaymentPending =>
+      'Payment being confirmed. This page updates as soon as it is received.';
+
+  @override
+  String get koryXFeePaid => 'Paid';
+
+  @override
+  String get koryXFeeYouPaid =>
+      'Your fee is paid: you are in the savings circle.';
+
+  @override
+  String get koryXStartsWhenAllPaid =>
+      'The savings circle starts as soon as every member has paid the opening fee.';
 }

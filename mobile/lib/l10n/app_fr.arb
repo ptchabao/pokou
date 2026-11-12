@@ -4668,5 +4668,48 @@
   "koryXYouReceive": "Tu reçois la levée de ce tour",
   "koryXYourContributions": "Tes cotisations",
   "koryXYourMonth": "Ton mois",
-  "koryXUpToDate": "À jour"
+  "koryXUpToDate": "À jour",
+  "koryXPlusFeeTitle": "Frais d’ouverture Kory Plus",
+  "koryXPlusFeeBody": "{ht} HT ({ttc} TTC) par membre, une seule fois, par Mobile Money.",
+  "@koryXPlusFeeBody": {
+    "placeholders": {
+      "ht": {
+        "type": "String"
+      },
+      "ttc": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPlusFeePaidOf": "{paid} membres sur {total} ont payé",
+  "@koryXPlusFeePaidOf": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPayAndJoin": "Payer {amount} et rejoindre",
+  "@koryXPayAndJoin": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPayMyFee": "Payer mes frais · {amount}",
+  "@koryXPayMyFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXFeePaymentPending": "Paiement en cours de confirmation. La page se met à jour dès qu’il est reçu.",
+  "koryXFeePaid": "Payé",
+  "koryXFeeYouPaid": "Tes frais sont réglés : tu fais partie de la tontine.",
+  "koryXStartsWhenAllPaid": "La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture."
 }

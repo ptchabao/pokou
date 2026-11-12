@@ -9042,4 +9042,41 @@ class LRu extends L {
 
   @override
   String get koryXUpToDate => 'Оплачено';
+
+  @override
+  String get koryXPlusFeeTitle => 'Плата за открытие Kory Plus';
+
+  @override
+  String koryXPlusFeeBody(String ht, String ttc) {
+    return '$ht без НДС ($ttc с НДС) с участника, один раз, через Mobile Money.';
+  }
+
+  @override
+  String koryXPlusFeePaidOf(String paid, String total) {
+    return 'Оплатили $paid из $total участников';
+  }
+
+  @override
+  String koryXPayAndJoin(String amount) {
+    return 'Оплатить $amount и вступить';
+  }
+
+  @override
+  String koryXPayMyFee(String amount) {
+    return 'Оплатить взнос · $amount';
+  }
+
+  @override
+  String get koryXFeePaymentPending =>
+      'Платёж подтверждается. Страница обновится, как только он поступит.';
+
+  @override
+  String get koryXFeePaid => 'Оплачено';
+
+  @override
+  String get koryXFeeYouPaid => 'Взнос оплачен: ты участник тонтины.';
+
+  @override
+  String get koryXStartsWhenAllPaid =>
+      'Тонтина начнётся, как только все участники оплатят взнос за открытие.';
 }

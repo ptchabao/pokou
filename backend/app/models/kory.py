@@ -110,6 +110,11 @@ class KoryMember(Base):
     #: démarre que lorsque tous les membres ont accepté.
     accepted_at = Column(DateTime, nullable=True)
     declined_at = Column(DateTime, nullable=True)
+    #: Kory Plus (KOR-8 / 25) : frais d'ouverture réglés par ce membre. Payer
+    #: vaut acceptation : c'est la confirmation du paiement qui pose aussi
+    #: `accepted_at`.
+    fee_paid_at = Column(DateTime, nullable=True)
+    fee_payment_id = Column(Integer, nullable=True)
     #: Tontine (KOR-24) : la place voulue par l'administrateur quand il fixe
     #: l'ordre lui-même.
     position = Column(Integer, nullable=True)

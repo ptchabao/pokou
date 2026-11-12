@@ -8939,4 +8939,41 @@ class LAr extends L {
 
   @override
   String get koryXUpToDate => 'ملتزمون';
+
+  @override
+  String get koryXPlusFeeTitle => 'رسوم فتح Kory Plus';
+
+  @override
+  String koryXPlusFeeBody(String ht, String ttc) {
+    return '$ht دون ضريبة ($ttc مع الضريبة) لكل عضو، مرة واحدة، عبر الدفع بالهاتف.';
+  }
+
+  @override
+  String koryXPlusFeePaidOf(String paid, String total) {
+    return 'دفع $paid من أصل $total أعضاء';
+  }
+
+  @override
+  String koryXPayAndJoin(String amount) {
+    return 'ادفع $amount وانضم';
+  }
+
+  @override
+  String koryXPayMyFee(String amount) {
+    return 'ادفع رسومي · $amount';
+  }
+
+  @override
+  String get koryXFeePaymentPending =>
+      'جارٍ تأكيد الدفع. تُحدَّث الصفحة فور استلامه.';
+
+  @override
+  String get koryXFeePaid => 'مدفوع';
+
+  @override
+  String get koryXFeeYouPaid => 'تم دفع رسومك: أنت عضو في الجمعية.';
+
+  @override
+  String get koryXStartsWhenAllPaid =>
+      'تبدأ الجمعية بمجرد أن يدفع جميع الأعضاء رسوم الفتح.';
 }

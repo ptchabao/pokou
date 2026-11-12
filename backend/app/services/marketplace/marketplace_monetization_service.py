@@ -152,6 +152,9 @@ _MODULE_PAYMENT_KINDS = {
     # règlement d'une facture postpayée.
     "BOT_CREDIT": "app.api.v1.business.business",
     "BOT_INVOICE": "app.api.v1.business.business",
+    # Kory Plus : les frais d'ouverture d'une tontine. Le seul argent que
+    # Pokou encaisse dans Kory — les mises, elles, vont de wallet à wallet.
+    "KORY_PLUS_FEE": "app.api.v1.kory.kory",
 }
 
 

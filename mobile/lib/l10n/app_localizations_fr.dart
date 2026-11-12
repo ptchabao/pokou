@@ -9010,4 +9010,42 @@ class LFr extends L {
 
   @override
   String get koryXUpToDate => 'À jour';
+
+  @override
+  String get koryXPlusFeeTitle => 'Frais d’ouverture Kory Plus';
+
+  @override
+  String koryXPlusFeeBody(String ht, String ttc) {
+    return '$ht HT ($ttc TTC) par membre, une seule fois, par Mobile Money.';
+  }
+
+  @override
+  String koryXPlusFeePaidOf(String paid, String total) {
+    return '$paid membres sur $total ont payé';
+  }
+
+  @override
+  String koryXPayAndJoin(String amount) {
+    return 'Payer $amount et rejoindre';
+  }
+
+  @override
+  String koryXPayMyFee(String amount) {
+    return 'Payer mes frais · $amount';
+  }
+
+  @override
+  String get koryXFeePaymentPending =>
+      'Paiement en cours de confirmation. La page se met à jour dès qu’il est reçu.';
+
+  @override
+  String get koryXFeePaid => 'Payé';
+
+  @override
+  String get koryXFeeYouPaid =>
+      'Tes frais sont réglés : tu fais partie de la tontine.';
+
+  @override
+  String get koryXStartsWhenAllPaid =>
+      'La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture.';
 }

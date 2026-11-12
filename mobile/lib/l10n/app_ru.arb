@@ -2495,5 +2495,14 @@
   "koryXYouReceive": "Вы получаете выплату этого круга",
   "koryXYourContributions": "Ваши взносы",
   "koryXYourMonth": "Ваш месяц",
-  "koryXUpToDate": "Оплачено"
+  "koryXUpToDate": "Оплачено",
+  "koryXPlusFeeTitle": "Плата за открытие Kory Plus",
+  "koryXPlusFeeBody": "{ht} без НДС ({ttc} с НДС) с участника, один раз, через Mobile Money.",
+  "koryXPlusFeePaidOf": "Оплатили {paid} из {total} участников",
+  "koryXPayAndJoin": "Оплатить {amount} и вступить",
+  "koryXPayMyFee": "Оплатить взнос · {amount}",
+  "koryXFeePaymentPending": "Платёж подтверждается. Страница обновится, как только он поступит.",
+  "koryXFeePaid": "Оплачено",
+  "koryXFeeYouPaid": "Взнос оплачен: ты участник тонтины.",
+  "koryXStartsWhenAllPaid": "Тонтина начнётся, как только все участники оплатят взнос за открытие."
 }

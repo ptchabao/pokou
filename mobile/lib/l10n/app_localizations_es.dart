@@ -8986,4 +8986,42 @@ class LEs extends L {
 
   @override
   String get koryXUpToDate => 'Al día';
+
+  @override
+  String get koryXPlusFeeTitle => 'Gastos de apertura Kory Plus';
+
+  @override
+  String koryXPlusFeeBody(String ht, String ttc) {
+    return '$ht sin IVA ($ttc con IVA) por miembro, una sola vez, por Mobile Money.';
+  }
+
+  @override
+  String koryXPlusFeePaidOf(String paid, String total) {
+    return '$paid de $total miembros han pagado';
+  }
+
+  @override
+  String koryXPayAndJoin(String amount) {
+    return 'Pagar $amount y unirme';
+  }
+
+  @override
+  String koryXPayMyFee(String amount) {
+    return 'Pagar mis gastos · $amount';
+  }
+
+  @override
+  String get koryXFeePaymentPending =>
+      'Pago en confirmación. La página se actualiza en cuanto se recibe.';
+
+  @override
+  String get koryXFeePaid => 'Pagado';
+
+  @override
+  String get koryXFeeYouPaid =>
+      'Tus gastos están pagados: formas parte de la tontina.';
+
+  @override
+  String get koryXStartsWhenAllPaid =>
+      'La tontina empieza en cuanto todos los miembros pagan los gastos de apertura.';
 }

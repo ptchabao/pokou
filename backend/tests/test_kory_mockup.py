@@ -77,7 +77,7 @@ def _kory_plus():
     with TestingSessionLocal() as db:
         db.add(SystemSetting(
             key="country.TG",
-            value='{"modules": ["discussions", "kory", "kory_plus", "honam", "assime", "certified"]}',
+            value='{"modules": ["discussions", "kory", "kory_plus", "honam", "assime", "certified"], "kory_plus_fee_ht": 0}',
         ))
         db.commit()
 
@@ -332,3 +332,86 @@ def test_aucune_route_kory_ne_parle_de_solde(client):
     assert not any(k for k in body if "balance" in k)
     with TestingSessionLocal() as db:
         assert db.query(KoryEntry).count() == 0
+
+
+# ── Kory Plus : frais d'ouverture (1 000 FCFA HT par membre) ────────────────
+
+@pytest.fixture
+def mobile_money():
+    from app.services.marketplace import marketplace_monetization_service as service
+
+    with patch.object(service, "semoa_client") as gateway:
+        gateway.create_order.side_effect = lambda db, **kw: {
+            "order_reference": kw["merchant_reference"], "payment_url": "https://exemple.test/payer",
+        }
+        gateway.build_callback_url.return_value = "https://exemple.test/webhook"
+        yield gateway
+
+
+def _paid_tontine(client, size=3):
+    people, pot = _tontine(client, size=size, draw_mode="FIXED")
+    # Le pays de l'administrateur fixe le tarif : les 1 000 FCFA du Togo.
+    with TestingSessionLocal() as db:
+        db.query(SystemSetting).filter(SystemSetting.key == "country.TG").delete()
+        db.add(SystemSetting(key="country.TG", value='{"modules": ["discussions", "kory", "kory_plus", "honam"]}'))
+        db.commit()
+    return people, client.get(f"/api/v1/kory/pots/{pot['id']}", headers=people[0][0]).json()
+
+
+def _pay(client, headers, pot_id):
+    from app.models import MarketplacePayment
+    from app.services.marketplace.marketplace_monetization_service import confirm_payment
+
+    opened = client.post(f"/api/v1/kory/pots/{pot_id}/fee", headers=headers)
+    assert opened.status_code == 200, opened.text
+    with TestingSessionLocal() as db:
+        reference = db.get(MarketplacePayment, opened.json()["payment_id"]).provider_reference
+        confirm_payment(db, reference)
+    return opened.json()
+
+
+def test_les_frais_kory_plus_sont_de_1180_fcfa_ttc_au_togo(client, mobile_money):
+    people, pot = _paid_tontine(client)
+    assert pot["plus_fee"]["amount_ht"] == 1000
+    assert pot["plus_fee"]["amount_ttc"] == 1180
+    assert pot["plus_fee"]["paid_count"] == 0 and pot["plus_fee"]["i_paid"] is False
+    payment = _pay(client, people[1][0], pot["id"])
+    assert payment["amount"] == 1180 and payment["payment_url"]
+
+
+def test_accepter_sans_payer_est_refuse(client, mobile_money):
+    people, pot = _paid_tontine(client)
+    response = client.post(f"/api/v1/kory/pots/{pot['id']}/accept", headers=people[1][0])
+    assert response.status_code == 402
+
+
+def test_payer_vaut_acceptation_et_le_dernier_paiement_demarre_la_tontine(client, mobile_money):
+    people, pot = _paid_tontine(client, size=3)
+    url = f"/api/v1/kory/pots/{pot['id']}"
+    for headers, _ in people[:-1]:
+        _pay(client, headers, pot["id"])
+    pending = client.get(url, headers=people[0][0]).json()
+    assert pending["status"] == "PENDING" and pending["plus_fee"]["paid_count"] == 2
+    # Tant que tous n'ont pas payé, l'administrateur ne peut pas forcer le départ.
+    assert client.post(f"{url}/start", headers=people[0][0]).status_code == 409
+
+    _pay(client, people[-1][0], pot["id"])
+    started = client.get(url, headers=people[-1][0]).json()
+    assert started["status"] == "OPEN" and len(started["rounds"]) == 3
+    assert started["plus_fee"]["i_paid"] is True
+    assert all(m["fee_paid"] and m["accepted"] for m in started["members"])
+
+
+def test_un_paiement_ne_se_regle_qu_une_fois(client, mobile_money):
+    people, pot = _paid_tontine(client)
+    _pay(client, people[1][0], pot["id"])
+    again = client.post(f"/api/v1/kory/pots/{pot['id']}/fee", headers=people[1][0])
+    assert again.status_code == 409
+
+
+def test_un_paiement_abandonne_n_accorde_rien(client, mobile_money):
+    people, pot = _paid_tontine(client)
+    client.post(f"/api/v1/kory/pots/{pot['id']}/fee", headers=people[1][0])  # jamais confirmé
+    detail = client.get(f"/api/v1/kory/pots/{pot['id']}", headers=people[1][0]).json()
+    assert detail["plus_fee"]["i_paid"] is False
+    assert not next(m for m in detail["members"] if m["user_id"] == people[1][1])["accepted"]

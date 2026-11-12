@@ -2495,5 +2495,14 @@
   "koryXYouReceive": "تستلم مبلغ هذه الدورة",
   "koryXYourContributions": "مساهماتك",
   "koryXYourMonth": "شهرك",
-  "koryXUpToDate": "ملتزمون"
+  "koryXUpToDate": "ملتزمون",
+  "koryXPlusFeeTitle": "رسوم فتح Kory Plus",
+  "koryXPlusFeeBody": "{ht} دون ضريبة ({ttc} مع الضريبة) لكل عضو، مرة واحدة، عبر الدفع بالهاتف.",
+  "koryXPlusFeePaidOf": "دفع {paid} من أصل {total} أعضاء",
+  "koryXPayAndJoin": "ادفع {amount} وانضم",
+  "koryXPayMyFee": "ادفع رسومي · {amount}",
+  "koryXFeePaymentPending": "جارٍ تأكيد الدفع. تُحدَّث الصفحة فور استلامه.",
+  "koryXFeePaid": "مدفوع",
+  "koryXFeeYouPaid": "تم دفع رسومك: أنت عضو في الجمعية.",
+  "koryXStartsWhenAllPaid": "تبدأ الجمعية بمجرد أن يدفع جميع الأعضاء رسوم الفتح."
 }

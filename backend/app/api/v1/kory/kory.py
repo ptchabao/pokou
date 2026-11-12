@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.core.countries import module_open
+from app.core.countries import country_config, country_of_phone, module_open
 from app.core.database import get_db
 from app.core.security import get_current_user
 from sqlalchemy.orm.attributes import flag_modified
@@ -498,6 +498,14 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         data["draw_seal"] = pot.draw_seal
         data["drawn_at"] = pot.drawn_at.isoformat() if pot.drawn_at else None
         data["members"] = _tontine_members_json(db, pot)
+        fee = _plus_fee(db, pot)
+        mine = db.query(KoryMember).filter(KoryMember.pot_id == pot.id, KoryMember.user_id == viewer_id).first()
+        data["plus_fee"] = {
+            **fee,
+            "paid_count": sum(1 for m in data["members"] if m.get("fee_paid")),
+            "member_count": sum(1 for m in data["members"] if not m.get("declined")),
+            "i_paid": bool(mine and mine.fee_paid_at),
+        }
         data["swaps"] = _swaps_json(db, pot, viewer_id)
     if pot.kind == "COTISATION" and pot.due_at is not None and pot.period:
         data["cotisation"] = cotisation_service.summary(
@@ -683,6 +691,7 @@ def _tontine_members_json(db: Session, pot: KoryPot) -> list:
             "name": _name(db, m.user_id),
             "accepted": m.accepted_at is not None,
             "declined": m.declined_at is not None,
+            "fee_paid": m.fee_paid_at is not None,
             "is_admin": m.user_id == pot.organizer_id,
             "is_deputy": m.user_id == pot.deputy_id,
         }
@@ -1276,7 +1285,80 @@ def _tontine_for_member(db: Session, pot_id: int, me: int) -> tuple:
 
 def _all_accepted(db: Session, pot: KoryPot) -> bool:
     rows = db.query(KoryMember).filter(KoryMember.pot_id == pot.id, KoryMember.declined_at.is_(None)).all()
-    return len(rows) >= MIN_ROUNDS and all(m.accepted_at is not None for m in rows)
+    fee = _plus_fee(db, pot)["amount_ht"]
+    return len(rows) >= MIN_ROUNDS and all(
+        m.accepted_at is not None and (fee == 0 or m.fee_paid_at is not None) for m in rows
+    )
+
+
+# ── Kory Plus : frais d'ouverture ────────────────────────────────────────
+
+
+def _plus_fee(db: Session, pot: KoryPot) -> dict:
+    """Les frais d'ouverture d'une tontine, décidés par le pays de son
+    administrateur — jamais reçus du client. 0 : gratuite."""
+    organizer = db.query(User).filter(User.id == pot.organizer_id).first()
+    config = country_config(db, country_of_phone(organizer.phone if organizer else None))
+    amount_ht = int(config.get("kory_plus_fee_ht") or 0)
+    vat = float(config.get("vat_rate") or 0)
+    return {"amount_ht": amount_ht, "amount_ttc": int(round(amount_ht * (1 + vat))), "currency": "XOF"}
+
+
+def _maybe_start(db: Session, pot: KoryPot) -> None:
+    nobody_declined = db.query(KoryMember.id).filter(
+        KoryMember.pot_id == pot.id, KoryMember.declined_at.isnot(None)
+    ).first() is None
+    if pot.status == "PENDING" and nobody_declined and _all_accepted(db, pot):
+        _start_tontine(db, pot)
+
+
+@router.post("/pots/{pot_id}/fee")
+def pay_plus_fee(pot_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """KOR-8 / 25 : régler ses frais Kory Plus par Mobile Money. Le paiement
+    confirmé vaut acceptation de l'invitation ; le dernier démarre la
+    tontine."""
+    from app.api.v1.modules.common import open_payment, payment_json
+
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot, member = _tontine_for_member(db, pot_id, me)
+    if member is None or member.declined_at is not None:
+        raise HTTPException(status_code=403, detail="Vous n'êtes pas invité dans cette tontine")
+    if pot.status != "PENDING":
+        raise HTTPException(status_code=409, detail="Cette tontine a déjà démarré")
+    if member.fee_paid_at is not None:
+        raise HTTPException(status_code=409, detail="Tes frais Kory Plus sont déjà réglés")
+    fee = _plus_fee(db, pot)
+    if fee["amount_ht"] == 0:
+        raise HTTPException(status_code=409, detail="Cette tontine n'a pas de frais d'ouverture")
+    payment = open_payment(
+        db, me, kind="KORY_PLUS_FEE", amount=fee["amount_ttc"],
+        description=f"Kory Plus — ouverture de « {pot.title} »",
+        metadata={"pot_id": pot.id, "member_id": member.id, "amount_ht": fee["amount_ht"]},
+    )
+    member.fee_payment_id = payment.id
+    db.commit()
+    return payment_json(payment)
+
+
+def apply_confirmed_payment(db: Session, payment) -> dict | None:
+    """Appelé par marketplace_monetization_service.confirm_payment."""
+    if payment.kind != "KORY_PLUS_FEE":
+        return None
+    metadata = payment.metadata_json or {}
+    member = db.query(KoryMember).filter(KoryMember.id == metadata.get("member_id")).first()
+    if member is None or member.user_id != payment.user_id:
+        return None
+    pot = db.get(KoryPot, member.pot_id)
+    now = datetime.utcnow()
+    member.fee_paid_at = member.fee_paid_at or now
+    if member.declined_at is None:
+        member.accepted_at = member.accepted_at or now
+    db.flush()
+    if pot is not None:
+        _emit(db, pot, "kory.tontine.fee_paid", user_id=member.user_id)
+        _maybe_start(db, pot)
+    return {"pot_id": member.pot_id, "fee_paid": True}
 
 
 @router.post("/pots/{pot_id}/accept")
@@ -1290,15 +1372,15 @@ def accept_tontine(pot_id: int, current_user: dict = Depends(get_current_user), 
         raise HTTPException(status_code=403, detail="Vous n'êtes pas invité dans cette tontine")
     if pot.status != "PENDING":
         raise HTTPException(status_code=409, detail="Cette tontine a déjà démarré")
+    # Kory Plus payant : accepter, c'est payer (POST …/fee). La confirmation
+    # du paiement pose l'acceptation.
+    if _plus_fee(db, pot)["amount_ht"] > 0 and member.fee_paid_at is None:
+        raise HTTPException(status_code=402, detail="Règle d'abord tes frais d'ouverture Kory Plus")
     if member.accepted_at is None:
         member.accepted_at = datetime.utcnow()
         db.flush()
         _emit(db, pot, "kory.tontine.accepted", user_id=me)
-        nobody_declined = db.query(KoryMember.id).filter(
-            KoryMember.pot_id == pot.id, KoryMember.declined_at.isnot(None)
-        ).first() is None
-        if nobody_declined and _all_accepted(db, pot):
-            _start_tontine(db, pot)
+        _maybe_start(db, pot)
         db.commit()
     return _pot_json(db, pot, me, with_entries=True)
 
@@ -1339,7 +1421,7 @@ def start_tontine(pot_id: int, current_user: dict = Depends(get_current_user), d
     if pot.status != "PENDING":
         raise HTTPException(status_code=409, detail="Cette tontine a déjà démarré")
     if not _all_accepted(db, pot):
-        raise HTTPException(status_code=409, detail="Tous les membres n'ont pas encore accepté")
+        raise HTTPException(status_code=409, detail="Tous les membres n'ont pas encore accepté et payé leurs frais")
     _start_tontine(db, pot)
     db.commit()
     return _pot_json(db, pot, me, with_entries=True)
@@ -1347,10 +1429,12 @@ def start_tontine(pot_id: int, current_user: dict = Depends(get_current_user), d
 
 def _remind_targets(db: Session, pot: KoryPot, now: datetime) -> set:
     if pot.kind == "TONTINE" and pot.status == "PENDING":
+        fee_due = _plus_fee(db, pot)["amount_ht"] > 0
         return {
             m.user_id for m in db.query(KoryMember).filter(
-                KoryMember.pot_id == pot.id, KoryMember.accepted_at.is_(None), KoryMember.declined_at.is_(None)
+                KoryMember.pot_id == pot.id, KoryMember.declined_at.is_(None)
             )
+            if m.accepted_at is None or (fee_due and m.fee_paid_at is None)
         }
     if pot.kind == "TONTINE":
         current = _current_round(db, pot)

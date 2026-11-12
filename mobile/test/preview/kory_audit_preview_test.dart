@@ -422,8 +422,18 @@ Map<String, dynamic> _tontine({required String status, bool admin = false}) {
           'declined': false,
           'is_admin': admin ? i == 2 : i == 0,
           'is_deputy': i == 1,
+          'fee_paid':
+              open || (i < 5 && !(i == 2 && !admin) && !(i == 2 && admin)),
         },
     ],
+    'plus_fee': {
+      'amount_ht': 1000,
+      'amount_ttc': 1180,
+      'currency': 'XOF',
+      'paid_count': open ? 8 : 4,
+      'member_count': 8,
+      'i_paid': open,
+    },
     'rounds': open
         ? [
             for (var i = 0; i < 8; i++)

@@ -15085,6 +15085,60 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'À jour'**
   String get koryXUpToDate;
+
+  /// No description provided for @koryXPlusFeeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais d’ouverture Kory Plus'**
+  String get koryXPlusFeeTitle;
+
+  /// No description provided for @koryXPlusFeeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{ht} HT ({ttc} TTC) par membre, une seule fois, par Mobile Money.'**
+  String koryXPlusFeeBody(String ht, String ttc);
+
+  /// No description provided for @koryXPlusFeePaidOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{paid} membres sur {total} ont payé'**
+  String koryXPlusFeePaidOf(String paid, String total);
+
+  /// No description provided for @koryXPayAndJoin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} et rejoindre'**
+  String koryXPayAndJoin(String amount);
+
+  /// No description provided for @koryXPayMyFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer mes frais · {amount}'**
+  String koryXPayMyFee(String amount);
+
+  /// No description provided for @koryXFeePaymentPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement en cours de confirmation. La page se met à jour dès qu’il est reçu.'**
+  String get koryXFeePaymentPending;
+
+  /// No description provided for @koryXFeePaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé'**
+  String get koryXFeePaid;
+
+  /// No description provided for @koryXFeeYouPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes frais sont réglés : tu fais partie de la tontine.'**
+  String get koryXFeeYouPaid;
+
+  /// No description provided for @koryXStartsWhenAllPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture.'**
+  String get koryXStartsWhenAllPaid;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

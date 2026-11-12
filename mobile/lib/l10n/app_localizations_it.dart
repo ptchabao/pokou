@@ -9006,4 +9006,42 @@ class LIt extends L {
 
   @override
   String get koryXUpToDate => 'In regola';
+
+  @override
+  String get koryXPlusFeeTitle => 'Costo di apertura Kory Plus';
+
+  @override
+  String koryXPlusFeeBody(String ht, String ttc) {
+    return '$ht IVA esclusa ($ttc IVA inclusa) per membro, una sola volta, tramite Mobile Money.';
+  }
+
+  @override
+  String koryXPlusFeePaidOf(String paid, String total) {
+    return '$paid membri su $total hanno pagato';
+  }
+
+  @override
+  String koryXPayAndJoin(String amount) {
+    return 'Paga $amount e unisciti';
+  }
+
+  @override
+  String koryXPayMyFee(String amount) {
+    return 'Paga la mia quota · $amount';
+  }
+
+  @override
+  String get koryXFeePaymentPending =>
+      'Pagamento in conferma. La pagina si aggiorna appena viene ricevuto.';
+
+  @override
+  String get koryXFeePaid => 'Pagato';
+
+  @override
+  String get koryXFeeYouPaid =>
+      'La tua quota è pagata: fai parte della tontina.';
+
+  @override
+  String get koryXStartsWhenAllPaid =>
+      'La tontina parte appena tutti i membri hanno pagato la quota di apertura.';
 }
