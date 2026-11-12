@@ -63,6 +63,35 @@ def seed_modules(db) -> int:
     return added
 
 
+def _rotation_requested(db) -> bool:
+    """Un nouveau mot de passe de super-administrateur, une seule fois.
+
+    `POKOU_SUPERADMIN_ROTATE` doit valoir `NOUVEAU-MOT-DE-PASSE-<AAAA-MM-JJ>`
+    pour la date du jour (UTC) : une valeur oubliée dans la configuration ne
+    change rien un autre jour. Chaque phrase ne sert qu'une fois (mémorisée
+    dans les réglages système) : les redémarrages suivants n'y touchent plus.
+    """
+    from datetime import datetime, timezone
+
+    from app.services import settings_service
+
+    phrase = os.environ.get("POKOU_SUPERADMIN_ROTATE", "").strip()
+    expected = "NOUVEAU-MOT-DE-PASSE-" + datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if not phrase:
+        return False
+    if phrase != expected:
+        print(f"Nouveau mot de passe REFUSÉ : POKOU_SUPERADMIN_ROTATE doit valoir « {expected} » aujourd'hui.")
+        return False
+    if settings_service.get_setting(db, "superadmin_rotation") == phrase:
+        return False
+    settings_service.set_setting(db, "superadmin_rotation", phrase)
+    return True
+
+
+def _rotated_now(password, user) -> bool:
+    return bool(os.environ.get("POKOU_SUPERADMIN_ROTATE"))
+
+
 def seed_superadmin(db) -> None:
     email = os.environ.get("POKOU_SUPERADMIN_EMAIL", "admin@pokou.app").strip().lower()
     phone = os.environ.get("POKOU_SUPERADMIN_PHONE", "").strip()
@@ -85,13 +114,29 @@ def seed_superadmin(db) -> None:
     if not user.console_password_hash:
         password = os.environ.get("POKOU_SUPERADMIN_PASSWORD") or secrets.token_urlsafe(12)
         user.console_password_hash = hash_password(password)
+    elif _rotation_requested(db):
+        # Nouveau mot de passe demandé (POKOU_SUPERADMIN_ROTATE) : aléatoire,
+        # affiché une fois, et toutes les sessions de console fermées.
+        password = secrets.token_urlsafe(12)
+        user.console_password_hash = hash_password(password)
+        user.console_failed_attempts = 0
+        user.console_locked_until = None
+        from datetime import datetime
+
+        from app.models import Token
+        db.query(Token).filter(
+            Token.user_id == user.id, Token.client == "console", Token.revoked_at.is_(None)
+        ).update({Token.revoked_at: datetime.utcnow()}, synchronize_session=False)
     db.commit()
 
     base = os.environ.get("PUBLIC_LINK_BASE_URL", "https://apipokou.cabinet-p-et-associes.com").rstrip("/")
     print("─" * 64)
     print(f"Console d'administration : {base}/console/")
     print(f"Super-administrateur     : {email}" + (" (créé)" if created else ""))
-    if password and not os.environ.get("POKOU_SUPERADMIN_PASSWORD"):
+    if password and _rotated_now(password, user):
+        print(f"Mot de passe             : {password}  (NOUVEAU)")
+        print("→ affiché une seule fois. Retire POKOU_SUPERADMIN_ROTATE de la configuration.")
+    elif password and not os.environ.get("POKOU_SUPERADMIN_PASSWORD"):
         print(f"Mot de passe             : {password}")
         print("→ affiché une seule fois : change-le dès la première connexion.")
     elif password:
