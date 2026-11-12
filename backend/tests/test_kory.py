@@ -190,6 +190,10 @@ def test_cotisation_demande_montant_et_periode(client):
 
 
 def test_tontine_reservee_a_kory_plus(client):
+    # Un pays qui n'a pas ouvert Kory Plus (le Togo l'a ouvert par défaut).
+    with TestingSessionLocal() as db:
+        db.add(SystemSetting(key="country.TG", value='{"modules": ["discussions", "kory", "honam"]}'))
+        db.commit()
     organizer, _ = _signup(client)
     response = client.post("/api/v1/kory/pots", json={"kind": "TONTINE", "title": "Tontine"}, headers=organizer)
     assert response.status_code == 403

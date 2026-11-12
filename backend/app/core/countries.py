@@ -31,7 +31,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         #: Villes où Honam livre. Ailleurs, l'offre coursier laisse place à
         #: la liste d'attente (maquette Coursiers 16).
         "honam_cities": ["Lomé"],
-        "modules": ["discussions", "kory", "honam", "assime", "certified"],
+        "modules": ["discussions", "kory", "kory_plus", "honam", "assime", "certified"],
     },
     "CI": {
         "currency": "XOF",
@@ -41,7 +41,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         "pharmacy_yearly_price": 75000,
         "emergency_numbers": {"police": "110", "pompiers": "180", "samu": "185"},
         "honam_cities": ["Abidjan"],
-        "modules": ["discussions", "kory", "honam", "assime"],
+        "modules": ["discussions", "kory", "kory_plus", "honam", "assime"],
     },
 }
 
