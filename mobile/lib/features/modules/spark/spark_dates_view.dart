@@ -11,6 +11,7 @@ import '../shared/module_ui.dart';
 import 'spark_controller.dart';
 import 'spark_model.dart';
 import 'spark_safety_view.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Mes sorties — celles à venir, et ce qu'elles sont devenues.
 class SparkDatesView extends ConsumerWidget {
@@ -21,7 +22,7 @@ class SparkDatesView extends ConsumerWidget {
     final datesAsync = ref.watch(sparkDatesProvider);
 
     return datesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCards(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).datesUnavailable,

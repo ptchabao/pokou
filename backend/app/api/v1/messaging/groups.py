@@ -1550,6 +1550,16 @@ async def send_group_message(
         {"type": "group:message:new", "message": serialized},
         exclude_user_id=sender_id,
     )
+    # L'expéditeur est prévenu que SA liste de discussions a bougé, comme en
+    # conversation à deux (messages.py) : sans ça, le groupe où il venait
+    # d'écrire ne remontait en tête de sa liste qu'en tirant pour rafraîchir.
+    try:
+        await manager.send_to_user(
+            sender_id,
+            {"type": "conversation:updated", "group_id": group_id, "message_id": str(message.id)},
+        )
+    except Exception:  # pragma: no cover - transport au mieux
+        logger.warning("conversation:updated non remis à %s", sender_id, exc_info=True)
 
     group = db.query(Group).filter(Group.id == group_id).first()
     body = "Nouveau message chiffré"

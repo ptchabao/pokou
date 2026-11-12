@@ -129,7 +129,10 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
                 KoryRound.pot_id == pot.id, KoryRound.number == proof.round_number
             ).first()
             reviewer = round_.beneficiary_id if round_ else reviewer
-        return user_id == reviewer
+        # Le co-organisateur d'une cotisation confirme lui aussi les
+        # réceptions : il doit pouvoir lire la capture qu'on lui montre.
+        deputy = pot.deputy_id if pot is not None and pot.kind == "COTISATION" else None
+        return user_id == reviewer or (deputy is not None and user_id == deputy)
 
     # Justificatif Pokou certifié Pro : le support qui le vérifie, et lui
     # seul. Jamais affiché sur le profil Pro.
@@ -284,6 +287,13 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
     # local), alors qu'un avatar se redemande bien plus souvent. Placée
     # plus haut, cette requête aurait été payée par chacun d'eux.
     if sticker_service.is_public_sticker_media(db, asset.id):
+        return True
+
+    # L'image d'une bannière de l'accueil EN COURS : visible de tous, c'est
+    # une publicité. Hors de sa période, elle redevient privée.
+    from app.api.v1.config.banners import is_banner_image
+
+    if is_banner_image(db, asset.id):
         return True
 
     # ── Spark ─────────────────────────────────────────────────────────────────

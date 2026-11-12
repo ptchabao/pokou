@@ -11,6 +11,7 @@ import '../../contacts/presentation/contacts_controller.dart';
 import 'group_controller.dart';
 import 'group_conversation_screen.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Création d'un groupe — nom + sélection multiple de contacts sur un seul
 /// écran (plutôt que l'assistant en deux étapes de WhatsApp) : la liste des
@@ -150,7 +151,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           ),
           Expanded(
             child: contactsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const SkeletonList(),
               error: (error, _) => Center(
                 child: Text(
                   error is ApiException

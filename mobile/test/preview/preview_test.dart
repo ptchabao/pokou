@@ -20,6 +20,8 @@ import 'package:pokou/core/theme/app_theme.dart';
 import 'package:pokou/core/widgets/pokou_bottom_nav.dart';
 import 'package:pokou/features/contacts/data/conversation_summary.dart';
 import 'package:pokou/features/contacts/presentation/discussions_controller.dart';
+import 'package:pokou/features/contacts/presentation/contacts_screen.dart';
+import 'package:pokou/features/home/data/home_banner.dart';
 import 'package:pokou/features/home/presentation/home_screen.dart';
 import 'package:pokou/features/honam/data/honam_models.dart';
 import 'package:pokou/features/honam/presentation/honam_controller.dart';
@@ -131,6 +133,19 @@ List<Override> _homeData() => [
     (ref) async => const ServiceNotificationsPage(items: [], unread: 2),
   ),
   honamOrdersProvider.overrideWith((ref) async => const <HonamOrder>[]),
+  homeBannersProvider.overrideWith(
+    (ref) => Stream.value(const [
+      HomeBanner(
+        id: 1,
+        label: 'Pharmacie du Golfe',
+        title: 'Livraison offerte ce week-end à Lomé',
+        body: 'Sur toutes les commandes Honam de plus de 5 000 FCFA.',
+        ctaLabel: 'Commander',
+        ctaUrl: 'app:honam',
+      ),
+      HomeBanner(id: 2, title: 'La foire d’Assimé revient en décembre'),
+    ]),
+  ),
   koryPotsProvider.overrideWith(
     (ref) async => [
       KoryPot.fromJson({
@@ -181,6 +196,23 @@ Widget _home() => Scaffold(
   body: HomeScreen(onOpenTab: (_) {}),
   bottomNavigationBar: PokouBottomNav(
     currentIndex: 0,
+    onTap: (_) {},
+    tabs: const [
+      PokouTab.home,
+      PokouTab.discussions,
+      PokouTab.kory,
+      PokouTab.honam,
+      PokouTab.more,
+    ],
+  ),
+);
+
+Widget _discussions() => Scaffold(
+  backgroundColor: AppColors.background,
+  extendBody: true,
+  body: const ContactsScreen(),
+  bottomNavigationBar: PokouBottomNav(
+    currentIndex: 1,
     onTap: (_) {},
     tabs: const [
       PokouTab.home,
@@ -271,6 +303,25 @@ void main() {
       () => _shot(tester, 'panel_dark', _panel, brightness: Brightness.dark),
     );
     await safe(
+      'discussions',
+      () => _shot(
+        tester,
+        'discussions',
+        _discussions,
+        overrides: _homeData(),
+      ),
+    );
+    await safe(
+      'discussions_dark',
+      () => _shot(
+        tester,
+        'discussions_dark',
+        _discussions,
+        overrides: _homeData(),
+        brightness: Brightness.dark,
+      ),
+    );
+    await safe(
       'home',
       () => _shot(tester, 'home', _home, overrides: _homeData()),
     );
@@ -293,6 +344,18 @@ void main() {
         overrides: _homeData(),
         after: () async {
           await tester.drag(find.byType(ListView).first, const Offset(0, -420));
+        },
+      ),
+    );
+    await safe(
+      'home3',
+      () => _shot(
+        tester,
+        'home3',
+        _home,
+        overrides: _homeData(),
+        after: () async {
+          await tester.drag(find.byType(ListView).first, const Offset(0, -900));
         },
       ),
     );

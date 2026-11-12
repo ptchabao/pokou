@@ -11,7 +11,7 @@ celle-là fait de Pokou un intermédiaire financier, celle-ci non.
 """
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 
 from app.core.database import Base
 
@@ -40,7 +40,9 @@ class KoryPot(Base):
     goal_amount = Column(Integer, nullable=True)
     #: Montant attendu de chaque membre par période, pour une cotisation.
     amount_per_member = Column(Integer, nullable=True)
-    period = Column(String(8), nullable=True)  # WEEKLY|MONTHLY
+    #: WEEKLY | MONTHLY | QUARTERLY (cotisation, KOR-17) ; WEEKLY |
+    #: BIWEEKLY | MONTHLY (tontine, KOR-23).
+    period = Column(String(10), nullable=True)
     due_at = Column(DateTime, nullable=True)
     #: Code de partage, pour rejoindre sans être membre du groupe.
     join_code = Column(String(12), nullable=False, unique=True, index=True)
@@ -49,6 +51,39 @@ class KoryPot(Base):
     closed_at = Column(DateTime, nullable=True)
     #: Dernière prolongation de la date de fin par le collecteur (KOR-15).
     extended_at = Column(DateTime, nullable=True)
+    #: KOR-6 : pour qui l'on collecte (« Akossiwa K. »). Un nom, pas un
+    #: compte : le bénéficiaire ne reçoit rien de Pokou.
+    beneficiary_name = Column(String(120), nullable=True)
+    #: KOR-6 / 17 : les montants de chacun sont-ils visibles de tous ? Sinon
+    #: seuls l'auteur et celui qui confirme les voient ; les totaux restent.
+    amounts_visible = Column(Boolean, nullable=False, default=True)
+    #: KOR-18 : une cotisation de groupe limitée à certains membres. Les
+    #: membres concernés sont alors les lignes `KoryMember`, et un nouveau
+    #: venu du groupe ne cotise pas d'office.
+    members_selected = Column(Boolean, nullable=False, default=False)
+    #: KOR-18 : co-organisateur qui confirme aussi les réceptions d'une
+    #: cotisation ; KOR-24 : suppléant de l'administrateur d'une tontine.
+    deputy_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    #: KOR-17 / 22 : dernière échéance d'une cotisation (sans date : sans fin).
+    ends_at = Column(DateTime, nullable=True)
+    #: KOR-22 : l'échéance sautée par une pause (« 2027-03 »).
+    paused_period = Column(String(12), nullable=True)
+    #: KOR-22 : nouveau montant par membre, à partir de l'échéance indiquée ;
+    #: les échéances passées gardent leur montant.
+    next_amount = Column(Integer, nullable=True)
+    next_amount_from = Column(String(12), nullable=True)
+    #: KOR-24 / 26 : ordre des tours tiré au sort par Pokou (DRAW) ou fixé
+    #: par l'administrateur (FIXED). Le tirage est scellé : son empreinte
+    #: est publiée et il ne se rejoue pas.
+    draw_mode = Column(String(8), nullable=True)
+    draw_seal = Column(String(16), nullable=True)
+    drawn_at = Column(DateTime, nullable=True)
+    #: KOR-30 : dissolution d'une tontine, avec son motif.
+    dissolved_at = Column(DateTime, nullable=True)
+    dissolve_reason = Column(String(280), nullable=True)
+    #: Dernière relance envoyée par l'organisateur (KOR-8 / 20) : une par
+    #: tranche de 12 h, pour ne pas harceler.
+    reminded_at = Column(DateTime, nullable=True)
 
 
 class KoryMember(Base):
@@ -71,6 +106,13 @@ class KoryMember(Base):
     pledge_daily = Column(Integer, nullable=True)
     pledged_at = Column(DateTime, nullable=True)
     pledge_cancelled_at = Column(DateTime, nullable=True)
+    #: Tontine (KOR-25) : l'invité accepte ou refuse d'entrer. La tontine ne
+    #: démarre que lorsque tous les membres ont accepté.
+    accepted_at = Column(DateTime, nullable=True)
+    declined_at = Column(DateTime, nullable=True)
+    #: Tontine (KOR-24) : la place voulue par l'administrateur quand il fixe
+    #: l'ordre lui-même.
+    position = Column(Integer, nullable=True)
 
 
 class KoryEntry(Base):
@@ -138,3 +180,27 @@ class KoryInvite(Base):
     invited_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     joined_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+
+class KorySwap(Base):
+    """KOR-28 : un échange de mois entre deux membres d'une tontine.
+
+    Le demandeur propose, l'autre membre accepte, puis l'administrateur (ou
+    son suppléant) valide : alors seulement les deux tours échangent leur
+    bénéficiaire. Rien ne s'efface : une demande refusée reste avec son
+    statut.
+    """
+    __tablename__ = "kory_swaps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pot_id = Column(Integer, ForeignKey("kory_pots.id", ondelete="CASCADE"), nullable=False, index=True)
+    requester_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    target_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    requester_round = Column(Integer, nullable=False)
+    target_round = Column(Integer, nullable=False)
+    message = Column(String(280), nullable=True)
+    #: PENDING (attend l'autre membre) | ACCEPTED (attend l'administrateur)
+    #: | DONE | REFUSED
+    status = Column(String(10), nullable=False, default="PENDING", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    decided_at = Column(DateTime, nullable=True)

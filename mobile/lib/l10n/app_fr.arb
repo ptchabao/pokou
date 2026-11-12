@@ -3296,16 +3296,34 @@
   "statusChangeFont": "Changer la police",
   "statusChangeBackground": "Changer le fond",
   "statusBackgroundNumber": "Fond {number}",
-  "@statusBackgroundNumber": {"placeholders": {"number": {"type": "String"}}},
+  "@statusBackgroundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "statusVisible24h": "Visible 24 h, par les contacts que tu as choisis.",
   "homeUnreadSummary": "{count, plural, =1{1 message non lu} other{{count} messages non lus}}",
-  "@homeUnreadSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@homeUnreadSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "homeServicesTitle": "Services",
   "homeKoryShort": "Cagnottes et tontines à plusieurs",
   "homeHonamShort": "Tes médicaments livrés",
   "homeAssimeShort": "Acheter et vendre près de chez toi",
   "homeDaysLeft": "{days, plural, =0{Dernier jour} =1{1 jour} other{{days} jours}}",
-  "@homeDaysLeft": {"placeholders": {"days": {"type": "int"}}},
+  "@homeDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "emojiNoRecents": "Tes emojis récents apparaîtront ici.",
   "emojiSearchHint": "Rechercher un emoji",
   "composerBackspace": "Effacer",
@@ -3313,5 +3331,1342 @@
   "messageCopied": "Message copié",
   "messageSelectText": "Sélectionner le texte",
   "messageSelectHint": "Appui long sur un mot pour le sélectionner, puis étends la sélection.",
-  "messageCopyAll": "Tout copier"
+  "messageCopyAll": "Tout copier",
+  "honamUiFilterToReceive": "À recevoir",
+  "honamUiFilterCompleted": "Terminées",
+  "honamUiFilterCancelled": "Annulées",
+  "honamUiInProgressCount": "{count, plural, =1{1 commande en cours} other{{count} commandes en cours}}",
+  "@honamUiInProgressCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "honamUiOrderNo": "N° {id}",
+  "@honamUiOrderNo": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiPrescription": "Ordonnance",
+  "honamUiQuotePending": "Devis en attente",
+  "honamUiQuotePendingBody": "Le pharmacien n'a pas encore envoyé son devis.",
+  "honamUiItemsCount": "{count, plural, =1{1 article} other{{count} articles}}",
+  "@honamUiItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "honamUiSeeMore": "Voir plus",
+  "honamUiSeeLess": "Voir moins",
+  "honamUiSeeOrder": "Voir la commande",
+  "honamUiDateAt": "{date} à {time}",
+  "@honamUiDateAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiSubmittedOn": "Envoyée le {date}",
+  "@honamUiSubmittedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiQuotedOn": "Devis reçu le {date}",
+  "@honamUiQuotedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiDeliveredOn": "Livrée le {date}",
+  "@honamUiDeliveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiRejectedOn": "Refusée le {date}",
+  "@honamUiRejectedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiExpiredOn": "Devis expiré le {date}",
+  "@honamUiExpiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiCancelledOn": "Annulée le {date}",
+  "@honamUiCancelledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiStepOf": "Étape {step} sur {total}",
+  "@honamUiStepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "honamUiEmptyTitle": "Aucune commande en cours",
+  "honamUiEmptyBody": "Photographie ton ordonnance : une pharmacie proche t'envoie son devis.",
+  "honamUiEmptyCompleted": "Aucune commande terminée pour l'instant.",
+  "honamUiEmptyCancelled": "Aucune commande annulée.",
+  "honamUiOrdersError": "Impossible de charger tes commandes",
+  "honamUiPharmaciesError": "Impossible de charger les pharmacies",
+  "honamUiKm": "{km} km",
+  "@honamUiKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiCall": "Appeler {name}",
+  "@honamUiCall": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "honamUiSamu": "SAMU",
+  "honamUiFire": "Pompiers",
+  "honamUiPolice": "Police",
+  "honamUiHeadSubmitted": "Ordonnance envoyée",
+  "honamUiHelpSubmitted": "Le pharmacien prépare ton devis. On te prévient dès qu'il arrive.",
+  "honamUiHeadQuoted": "Ton devis est arrivé",
+  "honamUiHelpQuoted": "Vérifie les articles et le total, puis accepte le devis.",
+  "honamUiHeadAccepted": "Paie la pharmacie",
+  "honamUiHelpAccepted": "Envoie le montant depuis ton wallet, puis confirme ton paiement.",
+  "honamUiHeadPaid": "Commande en préparation",
+  "honamUiHelpPaid": "La pharmacie prépare ton colis. Garde ton code de remise sous la main.",
+  "honamUiHeadReady": "Ton colis est prêt",
+  "honamUiHelpReady": "Un coursier vient le chercher à la pharmacie.",
+  "honamUiHeadInDelivery": "Ta commande est en route",
+  "honamUiHelpInDelivery": "Donne ton code au coursier seulement quand tu as le colis en main.",
+  "honamUiHeadDelivered": "Commande livrée !",
+  "honamUiHelpDelivered": "Merci d'avoir commandé avec Honam. Prends soin de toi.",
+  "honamUiHeadRejected": "Ordonnance refusée",
+  "honamUiHelpRejected": "Tu peux l'envoyer à une autre pharmacie.",
+  "honamUiHeadExpired": "Devis expiré",
+  "honamUiHelpExpired": "Le devis n'a pas été accepté à temps. Tu peux renvoyer ton ordonnance.",
+  "honamUiHeadCancelled": "Commande annulée",
+  "honamUiHelpCancelled": "Cette commande n'ira pas plus loin.",
+  "honamUiDeliveryInfo": "Suivi de livraison",
+  "honamUiNoSteps": "Aucune étape enregistrée pour l'instant.",
+  "honamUiItemsTitle": "Articles de la commande",
+  "honamUiOrderId": "N° de commande",
+  "honamUiCopy": "Copier",
+  "honamUiOrderIdCopied": "Numéro de commande copié",
+  "honamUiOrderTime": "Commande passée",
+  "honamUiQuoteTime": "Devis reçu",
+  "honamUiPaymentTime": "Paiement confirmé",
+  "honamUiShipTime": "Départ du coursier",
+  "honamUiDeliveredTime": "Remise du colis",
+  "honamUiClosedTime": "Fin de la commande",
+  "honamUiPharmacy": "Pharmacie",
+  "honamUiCourier": "Coursier",
+  "honamUiNoMessages": "Aucun message pour l'instant.",
+  "honamUiTrack": "Suivre ma commande",
+  "honamUiRefundTitle": "Remboursement",
+  "honamUiUnitPrice": "{price} l'unité",
+  "@honamUiUnitPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "koryHomeNewPot": "Nouvelle cagnotte",
+  "koryHomeActivePots": "{count, plural, =0{Aucune cagnotte active} =1{1 cagnotte active} other{{count} cagnottes actives}}",
+  "@koryHomeActivePots": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryHomeCollected": "{amount} réunis",
+  "@koryHomeCollected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryHomeSearchHint": "Trouver une cagnotte",
+  "koryHomeSearchClear": "Effacer la recherche",
+  "koryHomeFilterAll": "Toutes",
+  "koryHomeFilterCagnottes": "Cagnottes",
+  "koryHomeFilterCotisations": "Cotisations",
+  "koryHomeFilterTontines": "Tontines",
+  "koryHomeFilterOpen": "En cours",
+  "koryHomeFilterClosed": "Clôturées",
+  "koryHomeFeatured": "À la une",
+  "koryHomeDaysLeft": "{days, plural, =0{Dernier jour aujourd’hui} =1{1 jour restant} other{{days} jours restants}}",
+  "@koryHomeDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "koryHomeOverdue": "Échéance dépassée",
+  "koryHomeContribute": "Contribuer",
+  "koryHomeView": "Consulter",
+  "koryHomeRoundOf": "Tour {current} sur {total}",
+  "@koryHomeRoundOf": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryHomeBeneficiary": "Bénéficiaire : {name}",
+  "@koryHomeBeneficiary": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryHomeNoMatch": "Aucune cagnotte ne correspond",
+  "koryHomeNoMatchBody": "Essaie un autre nom, ou retire le filtre.",
+  "koryHomeShowAll": "Tout afficher",
+  "koryHomePercent": "{percent} %",
+  "@koryHomePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "groupClosedDeleted": "Ce groupe a été supprimé.",
+  "groupClosedRemoved": "Tu ne fais plus partie de ce groupe.",
+  "statusVideoTooLong": "Vidéo trop longue : 60 secondes au plus pour un statut.",
+  "statusVideoLimitHint": "Vidéo de 60 secondes au plus",
+  "homeAdLabel": "Sponsorisé",
+  "homeAdCta": "Découvrir",
+  "homeBabaHello": "Moi, c’est Baba.",
+  "homeBabaOffer": "Dis-moi ce qu’il te faut, je m’en occupe.",
+  "homeBabaCta": "Parler à Baba",
+  "koryXAcceptInvite": "Accepter l’invitation",
+  "koryXAcceptSwap": "Accepter l’échange",
+  "koryXAccepted": "Accepté",
+  "koryXAcceptedOf": "Ont accepté : {accepted} sur {total}",
+  "@koryXAcceptedOf": {
+    "placeholders": {
+      "accepted": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXAcceptedToast": "C’est noté : tu fais partie de la tontine.",
+  "koryXAddMemberHint": "Ajouter un membre : il cotise dès l’échéance suivante",
+  "koryXAdminOnly": "{title} · réservé à l’administrateur",
+  "@koryXAdminOnly": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXAdminWithDeputy": "{admin} · suppléant {deputy}",
+  "@koryXAdminWithDeputy": {
+    "placeholders": {
+      "admin": {
+        "type": "String"
+      },
+      "deputy": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXAdministrator": "Administrateur",
+  "koryXAllAccepted": "{count, plural, =1{Le membre a accepté. La tontine est ouverte.} other{Les {count} membres ont accepté. La tontine est ouverte.}}",
+  "@koryXAllAccepted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXAllGroupMembers": "Tous les membres de la discussion",
+  "koryXAllPaid": "Tu es à jour : aucune échéance à régler pour l’instant.",
+  "koryXAmount": "Montant",
+  "koryXAmountHidden": "un montant masqué",
+  "koryXAmountLabel": "Montant",
+  "koryXAmountPer": "{amount}, {period}",
+  "@koryXAmountPer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXAmountTo": "{amount} à {name}",
+  "@koryXAmountTo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXAmountsLabel": "Montants individuels",
+  "koryXApproveSwap": "Valider l’échange",
+  "koryXBeneficiary": "Bénéficiaire",
+  "koryXBeneficiaryField": "Bénéficiaire (facultatif)",
+  "koryXCalendar": "Calendrier des tours",
+  "koryXCalendarDay": "Calendrier des tours · levée le {day}",
+  "@koryXCalendarDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXCalendarUpdated": "Échange validé : le calendrier est à jour.",
+  "koryXCancelled": "Annulé",
+  "koryXCancelledRounds": "Tours annulés",
+  "koryXCaptureAdded": "Capture du SMS ajoutée",
+  "koryXChangeAmount": "Changer le montant",
+  "koryXChangeCollector": "Changer de collecteur",
+  "koryXChangeCollectorSub": "Un membre de la cotisation ; tous sont prévenus",
+  "koryXCheckAndCreate": "Vérifier et créer",
+  "koryXCheckWallet": "Vérifie dans ton application de wallet ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.",
+  "koryXCheckWalletShort": "Vérifie ton wallet, puis réponds",
+  "koryXChoose": "Choisir",
+  "koryXChooseMembers": "Choisir les membres",
+  "koryXChooseMembersSub": "Par exemple, seulement les adultes du groupe",
+  "koryXClosesOn": "clôture le {date}",
+  "@koryXClosesOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXClosing": "Clôture",
+  "koryXCoOrganizer": "Co-organisateur · confirme",
+  "koryXCollectType": "Type de collecte",
+  "koryXCollectorLabel": "Collecteur",
+  "koryXCollectorWallet": "Collecteur · {wallet}",
+  "@koryXCollectorWallet": {
+    "placeholders": {
+      "wallet": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXConcernedMembers": "{count, plural, =1{Membre concerné · 1} other{Membres concernés · {count}}}",
+  "@koryXConcernedMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXConfirmReceipts": "Confirment les réceptions",
+  "koryXConfirmedOf": "Confirmées : {done} sur {total}",
+  "@koryXConfirmedOf": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXConfirmedOnExpected": "confirmés sur {expected} attendus",
+  "@koryXConfirmedOnExpected": {
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXConfirmedOnPlanned": "confirmés sur {planned} prévus",
+  "@koryXConfirmedOnPlanned": {
+    "placeholders": {
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXContestedCount": "{count, plural, =1{1 contestée} other{{count} contestées}}",
+  "@koryXContestedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXContestedThenConfirmed": "contestée, puis confirmée",
+  "koryXContinue": "Continuer",
+  "koryXContinueWithMembers": "{count, plural, =1{Continuer avec 1 membre} other{Continuer avec {count} membres}}",
+  "@koryXContinueWithMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXContributeAmount": "Contribuer {amount}",
+  "@koryXContributeAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXContributionsCount": "{count, plural, =0{Aucune contribution} =1{1 contribution} other{{count} contributions}}",
+  "@koryXContributionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXCotisationJournal": "Journal de la cotisation",
+  "koryXCotisationStopped": "Cette cotisation est arrêtée. Le journal reste consultable.",
+  "koryXCreateCagnotte": "Créer la cagnotte",
+  "koryXCreateCotisation": "Créer la cotisation",
+  "koryXCsvAmount": "Montant (FCFA)",
+  "koryXCsvDate": "Date",
+  "koryXCsvEvent": "Évènement",
+  "koryXCsvPerson": "Personne",
+  "koryXCsvReference": "Référence",
+  "koryXCsvStatus": "Statut",
+  "koryXDeclared": "Déclarée",
+  "koryXDeclaredLabel": "Total déclaré",
+  "koryXDeclaredUntil": "Ta contribution reste « Déclarée » jusqu’à ce que {name} confirme l’avoir reçue. Tu es prévenu dès qu’il confirme ou conteste.",
+  "@koryXDeclaredUntil": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDeclineConfirm": "Tu ne feras pas partie de la tontine. L’administrateur est prévenu.",
+  "koryXDeclineInvite": "Refuser l’invitation",
+  "koryXDeclinedInvite": "A refusé",
+  "koryXDeputy": "Suppléant",
+  "koryXDeputyIs": "Suppléant de l’administrateur : {name}",
+  "@koryXDeputyIs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDeputyNotice": "{name} a les mêmes droits que toi sur la tontine : relancer, valider un échange de mois, passer au tour suivant, dissoudre.",
+  "@koryXDeputyNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDialUssd": "Composer le code USSD {operator}",
+  "@koryXDialUssd": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDissolve": "Dissoudre la tontine",
+  "koryXDissolveFinal": "Dissoudre arrête la tontine pour tous. C’est définitif.",
+  "koryXDissolveNoMoreRounds": "Plus aucun tour n’est appelé.",
+  "koryXDissolveNotified": "{count, plural, =1{Le membre est prévenu, avec le motif.} other{Les {count} membres sont prévenus, avec le motif.}}",
+  "@koryXDissolveNotified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXDissolveSettle": "Ce qui a été versé entre membres se règle entre vous : Pokou n’a jamais touché l’argent.",
+  "koryXDissolved": "Dissoute",
+  "koryXDissolvedReason": "Motif : « {reason} ». Le journal et le rapport restent consultables.",
+  "@koryXDissolvedReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDissolvedTitle": "Tontine dissoute",
+  "koryXDrawAt": "Tirage au sort · {date}, {time}",
+  "@koryXDrawAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDrawAtStart": "Tirage au sort au démarrage",
+  "koryXDrawAtStartSub": "Fait par Pokou, journalisé, non rejouable",
+  "koryXDrawLogged": "Tirage au sort journalisé",
+  "koryXDrawnOn": "Ordre tiré au sort le {date}, journalisé.",
+  "@koryXDrawnOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXDue": "À venir",
+  "koryXDueOn": "{month} · échéance le {day}",
+  "@koryXDueOn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEach": "{amount} chacun",
+  "@koryXEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEditCotisation": "Modifier ou arrêter la cotisation",
+  "koryXEditCotisationTitle": "Modifier la cotisation",
+  "koryXEditNotice": "{count, plural, =1{Ce qui est dû pour {month} reste dû, et les mois passés restent au journal. Le membre est prévenu.} other{Ce qui est dû pour {month} reste dû, et les mois passés restent au journal. Les {count} membres sont prévenus.}}",
+  "@koryXEditNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEditableRemaining": "Modifiable · reste {amount} à verser",
+  "@koryXEditableRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEnd": "Fin",
+  "koryXEveryFortnight": "Chaque quinzaine",
+  "koryXEveryMonth": "Chaque mois",
+  "koryXEveryQuarter": "Chaque trimestre",
+  "koryXEveryWeek": "Chaque semaine",
+  "koryXEvtClosed": "La collecte est clôturée.",
+  "koryXEvtConfirmed": "{reviewer} a confirmé {amount} de {who}",
+  "@koryXEvtConfirmed": {
+    "placeholders": {
+      "reviewer": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtContested": "{reviewer} a contesté {amount} de {who}",
+  "@koryXEvtContested": {
+    "placeholders": {
+      "reviewer": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtContestedReason": "{reviewer} a contesté {amount} de {who} : « {reason} »",
+  "@koryXEvtContestedReason": {
+    "placeholders": {
+      "reviewer": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtCreated": "{name} a créé la collecte ({kind})",
+  "@koryXEvtCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtDeclared": "{who} a déclaré {amount}",
+  "@koryXEvtDeclared": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtDeclaredRef": "{who} a déclaré {amount} · réf. {ref}",
+  "@koryXEvtDeclaredRef": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtDissolved": "La tontine est dissoute : « {reason} »",
+  "@koryXEvtDissolved": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtDrawn": "Pokou a tiré l’ordre des tours au sort · empreinte {seal}",
+  "@koryXEvtDrawn": {
+    "placeholders": {
+      "seal": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtExtended": "La collecte est prolongée jusqu’au {date}",
+  "@koryXEvtExtended": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXEvtOrderFixed": "L’ordre des tours est fixé ; la tontine démarre",
+  "koryXEvtSwap": "{a} et {b} ont échangé leurs mois",
+  "@koryXEvtSwap": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXExportCsv": "Exporter en CSV",
+  "koryXExportPdf": "Exporter en PDF",
+  "koryXFilterAll": "Tout",
+  "koryXFilterConfirmed": "Confirmées",
+  "koryXFilterContested": "Contestées",
+  "koryXFirmRemaining": "Ferme · reste {amount} à verser",
+  "@koryXFirmRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXFirstDue": "Première échéance",
+  "koryXFirstRound": "Premier tour",
+  "koryXFixOrder": "Je fixe l’ordre moi-même",
+  "koryXFixOrderSub": "Chacun voit son mois dès l’ouverture",
+  "koryXFixedAt": "Ordre fixé par l’administrateur · {date}",
+  "@koryXFixedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXFixedOn": "Ordre fixé par l’administrateur le {date}, journalisé.",
+  "@koryXFixedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXFixedOrder": "Ordre fixé par l’administrateur",
+  "koryXFreeNotice": "Sans frais. Pokou ne touche pas l’argent : chacun verse depuis son wallet au collecteur.",
+  "koryXFromDueOf": "À partir de l’échéance du {date}",
+  "@koryXFromDueOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXGoalLabel": "Objectif",
+  "koryXGroupPeople": "{count, plural, =1{{name} · 1 personne} other{{name} · {count} personnes}}",
+  "@koryXGroupPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXHaveContributed": "Ont cotisé : {done} sur {total}",
+  "@koryXHaveContributed": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXHoursAgo": "{count, plural, =1{il y a 1 h} other{il y a {count} h}}",
+  "@koryXHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXISent": "J’ai envoyé",
+  "koryXInProgress": "en cours",
+  "koryXIncludingYou": "{count, plural, =1{Toi seul} other{{count}, dont toi}}",
+  "@koryXIncludingYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXIndividualAmounts": "Montants individuels",
+  "koryXInvitation": "Invitation",
+  "koryXJoinAndPledge": "Rejoindre et m’engager",
+  "koryXJoinNotice": "Pokou ne touche pas l’argent. Tu t’engages sur un montant, puis tu verses depuis ton wallet au collecteur et tu déclares ton versement.",
+  "koryXJournalLocked": "Chaque action est horodatée et ne peut pas être effacée, même par l’organisateur.",
+  "koryXKoryPlus": "Kory Plus",
+  "koryXLastDue": "Dernière échéance",
+  "koryXLastDueOn": "Dernière échéance : {date}",
+  "@koryXLastDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXLate": "En retard",
+  "koryXLateCount": "En retard · {count}",
+  "@koryXLateCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXLeveeCaption": "{count, plural, =1{1 membre × {amount}} other{{count} membres × {amount}}}",
+  "@koryXLeveeCaption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXLeveePerRound": "Levée de chaque tour",
+  "koryXLinkFrom": "Organisée par {name}",
+  "@koryXLinkFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXLinkedChat": "Discussion liée",
+  "koryXMakeCoOrganizer": "Désigner co-organisateur",
+  "koryXMakeDeputy": "Désigner suppléant",
+  "koryXMembersAndOrder": "Membres et ordre",
+  "koryXMembersAndRounds": "Membres et tours",
+  "koryXMembersCount": "{count, plural, =1{Membres · 1} other{Membres · {count}}}",
+  "@koryXMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXMembersLabel": "Membres",
+  "koryXMembersNoticeAlone": "Tu confirmes les réceptions. Un membre qui rejoint le groupe plus tard ne cotise pas d’office : tu l’ajoutes depuis la cotisation, et il cotise dès l’échéance suivante.",
+  "koryXMembersNoticeWith": "Toi et {name} confirmez les réceptions. Un membre qui rejoint le groupe plus tard ne cotise pas d’office : tu l’ajoutes depuis la cotisation, et il cotise dès l’échéance suivante.",
+  "@koryXMembersNoticeWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXMembersTimes": "{count, plural, =1{1 membre × {amount}, {period}} other{{count} membres × {amount}, {period}}}",
+  "@koryXMembersTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXMembersTitle": "Membres",
+  "koryXMessageOptional": "Message (facultatif)",
+  "koryXMinutesAgo": "{count, plural, =1{il y a 1 min} other{il y a {count} min}}",
+  "@koryXMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXMoreActions": "Plus d’actions",
+  "koryXMyDues": "Mes échéances",
+  "koryXMyLevee": "Ma levée",
+  "koryXMyLeveeOf": "Ta levée de {month}",
+  "@koryXMyLeveeOf": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXMyPledgeAmount": "Mon engagement · {amount}",
+  "@koryXMyPledgeAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXName": "Nom",
+  "koryXNeedFirstDue": "Choisis la date de la première échéance.",
+  "koryXNeedGroup": "Une tontine s’ouvre depuis une discussion de groupe : choisis-la.",
+  "koryXNewAmountPerMember": "Nouveau montant par membre",
+  "koryXNewCotisation": "Nouvelle cotisation",
+  "koryXNewTontine": "Nouvelle tontine",
+  "koryXNextDueIn": "{days, plural, =0{Prochaine échéance · {date}, aujourd’hui} =1{Prochaine échéance · {date}, demain} other{Prochaine échéance · {date}, dans {days} jours}}",
+  "@koryXNextDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXNextDues": "Prochaines échéances",
+  "koryXNextRounds": "Prochains tours",
+  "koryXNoDeputyNotice": "Sans suppléant, toi seul administres la tontine : relances, échanges de mois, tour suivant, dissolution.",
+  "koryXNoDueYet": "Pas encore d’échéance : le calendrier commence à la première date choisie.",
+  "koryXNoEnd": "Sans date de fin",
+  "koryXNoGroups": "Aucune discussion de groupe pour l’instant.",
+  "koryXNoLinkedChat": "Aucune discussion",
+  "koryXNoSwapPossible": "Aucun mois à venir ne peut être échangé.",
+  "koryXNoTransferNotice": "Pokou ne transfère pas l’argent. Vérifie le nom du destinataire affiché par ton opérateur avant de valider. Les frais de ton opérateur s’appliquent.",
+  "koryXNotNow": "Pas maintenant",
+  "koryXNothingToConfirm": "Rien à confirmer pour l’instant.",
+  "koryXOfWhichToConfirm": "dont {amount} à confirmer",
+  "@koryXOfWhichToConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXOnDay": "le {date}",
+  "@koryXOnDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXOnGoalOf": "sur un objectif de {amount}",
+  "@koryXOnGoalOf": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXOnlyYouConfirm": "Vérifie dans ton application de wallet ou dans le SMS de l’opérateur. Tu es le seul à confirmer ce que tu as reçu ; chaque réponse est horodatée au journal.",
+  "koryXOnlyYouConfirmShort": "C’est ta levée : toi seul confirmes",
+  "koryXOpenAndInvite": "{count, plural, =1{Ouvrir et inviter 1 membre} other{Ouvrir et inviter {count} membres}}",
+  "@koryXOpenAndInvite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXOpenPot": "Voir la collecte",
+  "koryXOrganizerCollector": "Organisateur · collecteur",
+  "koryXOrganizerSide": "vue de l’organisateur",
+  "koryXOrganizerView": "{title} · vue de l’organisateur",
+  "@koryXOrganizerView": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXOutOf": "{done} sur {total}",
+  "@koryXOutOf": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXOverdueSince": "Échéance du {date} dépassée",
+  "@koryXOverdueSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPaidOf": "À jour : {paid} sur {total}",
+  "@koryXPaidOf": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXParticipants": "Participants",
+  "koryXPastRounds": "Tours passés",
+  "koryXPause": "Mettre en pause",
+  "koryXPauseSub": "Pas d’échéance le {date} ; reprise à la suivante",
+  "@koryXPauseSub": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPendingSubtitle": "Kory Plus · {group} · en attente des membres",
+  "@koryXPendingSubtitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPeople": "{count, plural, =1{1 personne} other{{count} personnes}}",
+  "@koryXPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXPeriodBiweekly": "chaque quinzaine",
+  "koryXPeriodCounts": "À jour : {up} · à confirmer : {pending} · en retard : {late}",
+  "@koryXPeriodCounts": {
+    "placeholders": {
+      "up": {
+        "type": "String"
+      },
+      "pending": {
+        "type": "String"
+      },
+      "late": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPeriodQuarterly": "chaque trimestre",
+  "koryXPeriodicity": "Périodicité",
+  "koryXPickCollector": "Choisis le nouveau collecteur.",
+  "koryXPlannedPerDue": "Total prévu à chaque échéance",
+  "koryXPlannedTo": "Prévue · à verser à {name}",
+  "@koryXPlannedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXPreviousDues": "Échéances précédentes",
+  "koryXReasonRequired": "Motif (obligatoire)",
+  "koryXRecapNotice": "{count, plural, =1{Le membre est prévenu par une notification de « {group} ».} other{Les {count} membres sont prévenus par une notification de « {group} ».}}",
+  "@koryXRecapNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXRecapNoticeAlone": "Ensuite, ajoute les membres par leur numéro, ou partage le lien de la cotisation.",
+  "koryXRefShort": "réf. {ref}",
+  "@koryXRefShort": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXReferenceLabel": "Référence à indiquer",
+  "koryXRefuse": "Refuser",
+  "koryXRejectNeedsReason": "« Pas reçu » demande un motif ; la contribution passe en « Contestée » et la personne est prévenue.",
+  "koryXRemainingLabel": "Reste à collecter",
+  "koryXRemindHint": "Relance-les : chacun reçoit une notification.",
+  "koryXRemindLate": "Relancer les retardataires",
+  "koryXRemindMembers": "{count, plural, =0{Tout le monde a répondu} =1{Relancer 1 membre} other{Relancer les {count} membres}}",
+  "@koryXRemindMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXRemindTooSoon": "Une relance a déjà été envoyée il y a moins de 12 h.",
+  "koryXReminded": "{count, plural, =0{Personne à relancer.} =1{1 personne relancée.} other{{count} personnes relancées.}}",
+  "@koryXReminded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXRemindedAt": "Relancés le {date} à {time} ; chacun peut couper ses notifications.",
+  "@koryXRemindedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXRemoveCapture": "Retirer la capture",
+  "koryXReport": "Rapport",
+  "koryXReportKept": "Le rapport et le journal restent consultables et exportables par chacun, même si la tontine est dissoute.",
+  "koryXReportMeaning": "« A cotisé » veut dire « confirmé par le bénéficiaire du tour » : Pokou ne voit jamais l’argent.",
+  "koryXReportTitle": "Rapport de la tontine",
+  "koryXRequestSent": "Demande envoyée.",
+  "koryXRoundCounts": "Confirmées : {confirmed} · déclarées : {declared} · en retard : {late}",
+  "@koryXRoundCounts": {
+    "placeholders": {
+      "confirmed": {
+        "type": "String"
+      },
+      "declared": {
+        "type": "String"
+      },
+      "late": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXRoundOfMonth": "Tour {number} sur {total} · {month}",
+  "@koryXRoundOfMonth": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXRoundsSpan": "{count, plural, =1{1 · en {from}} other{{count} · de {from} à {to}}}",
+  "@koryXRoundsSpan": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSaveAndNotify": "{count, plural, =1{Enregistrer et prévenir le membre} other{Enregistrer et prévenir les {count} membres}}",
+  "@koryXSaveAndNotify": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXSavedAndNotified": "Enregistré. Les membres sont prévenus.",
+  "koryXSeal": "Fait par Pokou, journalisé, non rejouable · empreinte {seal}",
+  "@koryXSeal": {
+    "placeholders": {
+      "seal": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSeeJournal": "Voir tout le journal",
+  "koryXSeeReport": "Voir le rapport de la tontine",
+  "koryXSendRequest": "Envoyer la demande",
+  "koryXSendRequestTo": "Envoyer la demande à {name}",
+  "@koryXSendRequestTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSentAt": "Envoyé",
+  "koryXShareLink": "Partager le lien",
+  "koryXSmsCaptureAttached": "Capture du SMS jointe",
+  "koryXSomeoneDeclined": "Quelqu’un a refusé : quand tous les autres auront accepté, tu pourras démarrer sans lui, ou dissoudre.",
+  "koryXStakeDue": "{amount} par membre · échéance le {date}",
+  "@koryXStakeDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXStakeLabel": "Cotisation par membre",
+  "koryXStakePerMember": "Cotisation par membre",
+  "koryXStartWithout": "{count, plural, =1{Démarrer sans la personne qui a refusé} other{Démarrer sans les {count} personnes qui ont refusé}}",
+  "@koryXStartWithout": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryXStartsWhenAllAccept": "La tontine démarre quand tous les membres ont accepté l’invitation. Chacun est prévenu, et l’ordre des tours est alors fixé.",
+  "koryXStatusAfter": "Statut après déclaration",
+  "koryXStepParams": "Étape 1 sur 3 · paramètres",
+  "koryXStopConfirm": "Plus aucune échéance après celle en cours. Ce qui est dû reste dû, et le journal reste consultable.",
+  "koryXStopCotisation": "Arrêter la cotisation",
+  "koryXSwapCalendarNotice": "Le calendrier change pour tous ; c’est noté au journal.",
+  "koryXSwapMyMonth": "Échanger mon mois",
+  "koryXSwapNotice": "Chacun voit ce calendrier. Un échange de mois se fait entre deux membres, avec l’accord de l’administrateur.",
+  "koryXSwapRequest": "Échange de mois entre {a} et {b}",
+  "@koryXSwapRequest": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSwapRounds": "Tour {a} contre tour {b}",
+  "@koryXSwapRounds": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSwapStep1": "Tu envoies la demande",
+  "koryXSwapStep2": "{name} accepte",
+  "@koryXSwapStep2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSwapStep3": "{name}, l’administrateur, valide",
+  "@koryXSwapStep3": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXSwapWaitingAdmin": "Accepté · en attente de l’administrateur",
+  "koryXSwapWaitingMember": "En attente de la réponse de {name}",
+  "@koryXSwapWaitingMember": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXThisRound": "Ce tour",
+  "koryXToConfirmCount": "À confirmer · {count}",
+  "@koryXToConfirmCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXTodayAt": "Aujourd’hui, {time}",
+  "@koryXTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXTontineDone": "La tontine est terminée : tous les tours ont eu lieu.",
+  "koryXTontineInviteFrom": "Tontine Kory Plus · invitation de {name}",
+  "@koryXTontineInviteFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXTontinePlus": "Tontine Plus",
+  "koryXTontineStarts": "La tontine démarre",
+  "koryXTontineStep": "Kory Plus · étape {step} sur 3",
+  "@koryXTontineStep": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXTontineStepOf": "{title} · étape {step} sur 3",
+  "@koryXTontineStepOf": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXTransactionRef": "Référence de transaction",
+  "koryXTransactionRefHelp": "Elle figure dans le SMS de confirmation de ton opérateur.",
+  "koryXUpcoming": "À venir",
+  "koryXVisibleToAll": "Visibles de tous",
+  "koryXVisibleToAllMembers": "{title} · visible de tous les membres",
+  "@koryXVisibleToAllMembers": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXVisibleToCollector": "Visibles du collecteur seulement",
+  "koryXWaiting": "En attente",
+  "koryXWhatHappensNext": "Ce qui se passe ensuite",
+  "koryXWhatToChange": "Que veux-tu changer ?",
+  "koryXWhichJournal": "Quel journal ouvrir ?",
+  "koryXWithAnotherMember": "avec un autre membre",
+  "koryXWithWhom": "Avec qui ?",
+  "koryXWithdrawRequest": "Retirer ma demande",
+  "koryXYouAccepted": "Tu as accepté. La tontine démarre dès que tous auront répondu.",
+  "koryXYouAnd": "Toi et {name}",
+  "@koryXYouAnd": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryXYouDeclined": "Tu as refusé cette invitation.",
+  "koryXYouReceive": "Tu reçois la levée de ce tour",
+  "koryXYourContributions": "Tes cotisations",
+  "koryXYourMonth": "Ton mois",
+  "koryXUpToDate": "À jour"
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../../profile/presentation/profile_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,14 +9,14 @@ import 'package:intl/intl.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../home/presentation/pokou_page_header.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_fab.dart';
 import '../../settings/presentation/backup_screens.dart';
 import '../../status/presentation/status_strip.dart';
-import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
-import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import '../../groups/presentation/group_invitation_card.dart';
 import '../../../core/widgets/verified_badge.dart';
@@ -509,18 +508,24 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         },
         child: Column(
           children: [
-            // L'en-tête partagé : titre en Outfit et ligne de statut. Il
-            // remplace un titre posé à même le canevas, qui ne disait rien
-            // de l'état de la connexion — l'information la plus utile à
-            // afficher en permanence sur ce marché.
-            PokouAppBar(
+            // Le même en-tête que l'Accueil, Kory et Honam : le titre en
+            // gras, et dessous l'état de la connexion — l'information la
+            // plus utile à afficher en permanence sur ce marché. Sans barre
+            // ni trait : l'écran commence par son titre.
+            PokouPageHeader(
               title: L.of(context).navChats,
+              subtitle: (ref.watch(wsOnlineProvider).valueOrNull ?? true)
+                  ? L.of(context).appBarOnline
+                  : L.of(context).appBarOffline,
+              emphasized: !(ref.watch(wsOnlineProvider).valueOrNull ?? true),
+              showBell: false,
               actions: [
                 // Les modules AVANT les listes de diffusion : c'est la
                 // porte d'entrée de tout ce que l'application peut
                 // devenir, alors que la diffusion est un outil parmi
                 // d'autres. L'ordre de gauche à droite dit lequel compte.
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const ModulesScreen()),
                   ),
@@ -531,6 +536,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                   tooltip: L.of(context).navModules,
                 ),
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const BroadcastListsScreen(),
@@ -542,33 +548,13 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                   ),
                   tooltip: L.of(context).navBroadcasts,
                 ),
-                // L'avatar mène au PROFIL. Il n'était que décoratif, et le
-                // profil avait son propre onglet. Sans ce geste, l'écran
-                // deviendrait INATTEIGNABLE.
-                Semantics(
-                  button: true,
-                  label: L.of(context).navProfile,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                    ),
-                    child: ContactAvatar(
-                      avatar: ref.watch(authControllerProvider).user?.avatar,
-                      displayName:
-                          ref.watch(authControllerProvider).user?.displayName ??
-                          L.of(context).callYou,
-                      size: 36,
-                    ),
-                  ),
-                ),
               ],
             ),
             // Maquette « Discussions » : recherche en pastille blanche et
             // « + » terracotta (nouvelle discussion), PUIS la bande des
             // statuts, puis les filtres.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -580,7 +566,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                         border: Border.all(color: AppColors.border),
                       ),
                       child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                        contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _searchController,
                         decoration: InputDecoration(
                           hintText: L.of(context).chatsSearchHint,
@@ -734,14 +720,13 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             onTap: () => setState(() => _showArchived = !_showArchived),
           ),
         // Terre de Confiance : les fils dans UNE carte blanche, séparés par
-        // un filet.
+        // un filet. À plat : un filet autour, pas d'ombre dessous.
         Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: AppRadius.card,
             border: Border.all(color: AppColors.border),
-            boxShadow: AppElevation.card,
           ),
           child: Column(
             children: [
@@ -848,16 +833,19 @@ class _AvatarWithKind extends StatelessWidget {
     );
     if (icone == null) return avatar;
 
+    // Même gabarit que l'avatar seul : la pastille déborde sur le coin au
+    // lieu d'élargir la colonne — sinon le nom d'un groupe commençait
+    // quatre points plus à droite que celui d'un contact.
     return SizedBox(
-      width: 52,
-      height: 52,
+      width: 48,
+      height: 48,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           avatar,
           Positioned(
-            right: 0,
-            bottom: 0,
+            right: -3,
+            bottom: -3,
             child: Container(
               width: 19,
               height: 19,
@@ -876,16 +864,22 @@ class _AvatarWithKind extends StatelessWidget {
   }
 }
 
-/// Le rond qui tourne — réservé à la toute première ouverture, quand
-/// l'appareil n'a encore rien à montrer.
+/// L'attente de la toute première ouverture, quand l'appareil n'a encore
+/// rien à montrer : la forme de la liste — une carte, des lignes avec leur
+/// photo ronde — plutôt qu'un rond qui tourne au milieu d'un écran vide.
 class _DiscussionsSpinner extends StatelessWidget {
   const _DiscussionsSpinner();
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 40),
-      child: Center(child: CircularProgressIndicator()),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.card,
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: const SkeletonList(count: 6),
     );
   }
 }
@@ -929,10 +923,7 @@ class _ChatsEmptyState extends ConsumerWidget {
     final contacts = ref.watch(contactsProvider);
 
     return contacts.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const _DiscussionsSpinner(),
       // Le carnet n'a pas pu être lu : on retombe sur l'invitation, qui
       // reste vraie dans tous les cas.
       error: (_, _) => _NoNetworkYet(),
@@ -1496,24 +1487,32 @@ class _PinnedMahizuTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    // Terre de Confiance : Baba sur une carte ambre (jamais violette), son
-    // badge « ASSISTANT IA », et deux gestes rapides.
+    // Baba se présente comme sur l'Accueil : un visage (son orbe, qui
+    // respire), une phrase à la première personne, et les couleurs de
+    // l'écran. Il était posé sur une carte jaune, avec une étiquette
+    // « ASSISTANT IA » brune : une affiche collée au-dessus des
+    // conversations, que rien ne reliait au reste — ni la couleur, ni le
+    // ton. C'est le premier fil de la liste, pas une publicité.
     Widget quick(IconData icon, String label) => Material(
-      color: AppColors.surface,
+      color: AppColors.accentPrimary.withValues(alpha: 0.10),
       shape: const StadiumBorder(),
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: () => _open(context, ref),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: AppColors.warning),
+              Icon(icon, size: 15, color: AppColors.accentPrimaryDark),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: TextStyle(fontSize: 13, color: AppColors.warning),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accentPrimaryDark,
+                ),
               ),
             ],
           ),
@@ -1521,69 +1520,74 @@ class _PinnedMahizuTile extends ConsumerWidget {
       ),
     );
     return Material(
-      color: AppColors.isDark
-          ? AppColors.brandOr.withValues(alpha: 0.14)
-          : const Color(0xFFFEF3C7),
+      color: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
-        side: BorderSide(
-          color: AppColors.isDark
-              ? AppColors.brandOr.withValues(alpha: 0.4)
-              : const Color(0xFFFDE68A),
-        ),
+        side: BorderSide(color: AppColors.border),
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: AppRadius.card,
         onTap: () => _open(context, ref),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AssistantOrb(size: 44),
+              const ExcludeSemantics(child: AssistantOrb(size: 48)),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
+                    Row(
                       children: [
-                        Text(
-                          l.navBaba,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Text(
+                            l.navBaba,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 17,
+                              height: 1.2,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6B5412),
+                            color: AppColors.accentPrimary.withValues(
+                              alpha: 0.12,
+                            ),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             l.babaAssistantChip,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               letterSpacing: 0.6,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFFFFF4D9),
+                              color: AppColors.accentPrimaryDark,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
-                      l.babaAlwaysThere,
+                      l.homeBabaOffer,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 14,
+                        height: 1.3,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -1711,15 +1715,6 @@ class _FilterChip extends StatelessWidget {
                 ? AppColors.accentPrimary
                 : AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(999),
-            boxShadow: selected
-                ? const [
-                    BoxShadow(
-                      color: Color(0x29A4512A),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ]
-                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1792,7 +1787,7 @@ class _ArchivedRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: AppRadius.chip,
-            boxShadow: AppElevation.subtle,
+            border: Border.all(color: AppColors.border),
           ),
           child: Row(
             children: [

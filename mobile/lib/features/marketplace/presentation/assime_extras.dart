@@ -13,6 +13,7 @@ import '../data/marketplace_repository.dart';
 import 'marketplace_controller.dart';
 import '../../../core/widgets/pokou_icon.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 final favoritesProvider = FutureProvider.autoDispose<List<AssimeSnapshot>>(
   (ref) => ref.watch(marketplaceRepositoryProvider).favorites(),
@@ -73,7 +74,7 @@ class _Favorites extends ConsumerWidget {
     return ref
         .watch(favoritesProvider)
         .when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonCards(),
           error: (_, _) => ModuleEmptyState(
             icon: Icons.cloud_off,
             title: l.honamFailed,
@@ -186,7 +187,7 @@ class _Alerts extends ConsumerWidget {
     return ref
         .watch(_alertsProvider)
         .when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonCards(),
           error: (_, _) => ModuleEmptyState(
             icon: Icons.cloud_off,
             title: l.honamFailed,
@@ -324,7 +325,7 @@ class BoostReportScreen extends ConsumerWidget {
       title: l.assimeReportTitle,
       subtitle: productName,
       child: report.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.cloud_off,
           title: l.honamFailed,

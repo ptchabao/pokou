@@ -212,6 +212,11 @@ class Settings(BaseSettings):
     #: Ou un service de messagerie Twilio, qui choisit l'expéditeur par pays.
     twilio_messaging_service_sid: str = ""
     twilio_whatsapp_from: str = ""  # E.g. "whatsapp:+1415..."
+    #: Twilio Verify pour les codes de connexion (services/auth/twilio_verify).
+    #: Actif dès que le compte Twilio est configuré ; le service est retrouvé
+    #: ou créé automatiquement si son SID n'est pas donné.
+    twilio_verify_enabled: bool = True
+    twilio_verify_service_sid: str = ""
 
     # Passerelle SMS NGH (canal principal des codes de connexion)
     ngh_api_key: str = ""

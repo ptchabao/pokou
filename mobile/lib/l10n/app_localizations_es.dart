@@ -7365,4 +7365,1625 @@ class LEs extends L {
 
   @override
   String get messageCopyAll => 'Copiar todo';
+
+  @override
+  String get honamUiFilterToReceive => 'Por recibir';
+
+  @override
+  String get honamUiFilterCompleted => 'Completados';
+
+  @override
+  String get honamUiFilterCancelled => 'Cancelados';
+
+  @override
+  String honamUiInProgressCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pedidos en curso',
+      one: '1 pedido en curso',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String honamUiOrderNo(String id) {
+    return 'N.º $id';
+  }
+
+  @override
+  String get honamUiPrescription => 'Receta';
+
+  @override
+  String get honamUiQuotePending => 'Presupuesto pendiente';
+
+  @override
+  String get honamUiQuotePendingBody =>
+      'El farmacéutico aún no ha enviado su presupuesto.';
+
+  @override
+  String honamUiItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count artículos',
+      one: '1 artículo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get honamUiSeeMore => 'Ver más';
+
+  @override
+  String get honamUiSeeLess => 'Ver menos';
+
+  @override
+  String get honamUiSeeOrder => 'Ver el pedido';
+
+  @override
+  String honamUiDateAt(String date, String time) {
+    return '$date a las $time';
+  }
+
+  @override
+  String honamUiSubmittedOn(String date) {
+    return 'Enviado el $date';
+  }
+
+  @override
+  String honamUiQuotedOn(String date) {
+    return 'Presupuesto recibido el $date';
+  }
+
+  @override
+  String honamUiDeliveredOn(String date) {
+    return 'Entregado el $date';
+  }
+
+  @override
+  String honamUiRejectedOn(String date) {
+    return 'Rechazado el $date';
+  }
+
+  @override
+  String honamUiExpiredOn(String date) {
+    return 'Presupuesto caducado el $date';
+  }
+
+  @override
+  String honamUiCancelledOn(String date) {
+    return 'Cancelado el $date';
+  }
+
+  @override
+  String honamUiStepOf(int step, int total) {
+    return 'Paso $step de $total';
+  }
+
+  @override
+  String get honamUiEmptyTitle => 'Ningún pedido en curso';
+
+  @override
+  String get honamUiEmptyBody =>
+      'Fotografía tu receta: una farmacia cercana te envía su presupuesto.';
+
+  @override
+  String get honamUiEmptyCompleted => 'Aún no hay pedidos completados.';
+
+  @override
+  String get honamUiEmptyCancelled => 'Ningún pedido cancelado.';
+
+  @override
+  String get honamUiOrdersError => 'No se pudieron cargar tus pedidos';
+
+  @override
+  String get honamUiPharmaciesError => 'No se pudieron cargar las farmacias';
+
+  @override
+  String honamUiKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String honamUiCall(String name) {
+    return 'Llamar a $name';
+  }
+
+  @override
+  String get honamUiSamu => 'Ambulancia';
+
+  @override
+  String get honamUiFire => 'Bomberos';
+
+  @override
+  String get honamUiPolice => 'Policía';
+
+  @override
+  String get honamUiHeadSubmitted => 'Receta enviada';
+
+  @override
+  String get honamUiHelpSubmitted =>
+      'El farmacéutico prepara tu presupuesto. Te avisamos en cuanto llegue.';
+
+  @override
+  String get honamUiHeadQuoted => 'Tu presupuesto ha llegado';
+
+  @override
+  String get honamUiHelpQuoted =>
+      'Revisa los artículos y el total, y acepta el presupuesto.';
+
+  @override
+  String get honamUiHeadAccepted => 'Paga a la farmacia';
+
+  @override
+  String get honamUiHelpAccepted =>
+      'Envía el importe desde tu billetera y confirma tu pago.';
+
+  @override
+  String get honamUiHeadPaid => 'Pedido en preparación';
+
+  @override
+  String get honamUiHelpPaid =>
+      'La farmacia prepara tu paquete. Ten a mano tu código de entrega.';
+
+  @override
+  String get honamUiHeadReady => 'Tu paquete está listo';
+
+  @override
+  String get honamUiHelpReady => 'Un repartidor va a recogerlo a la farmacia.';
+
+  @override
+  String get honamUiHeadInDelivery => 'Tu pedido está en camino';
+
+  @override
+  String get honamUiHelpInDelivery =>
+      'Da tu código al repartidor solo cuando tengas el paquete en la mano.';
+
+  @override
+  String get honamUiHeadDelivered => '¡Pedido entregado!';
+
+  @override
+  String get honamUiHelpDelivered =>
+      'Gracias por pedir con Honam. Cuídate mucho.';
+
+  @override
+  String get honamUiHeadRejected => 'Receta rechazada';
+
+  @override
+  String get honamUiHelpRejected => 'Puedes enviarla a otra farmacia.';
+
+  @override
+  String get honamUiHeadExpired => 'Presupuesto caducado';
+
+  @override
+  String get honamUiHelpExpired =>
+      'El presupuesto no se aceptó a tiempo. Puedes volver a enviar tu receta.';
+
+  @override
+  String get honamUiHeadCancelled => 'Pedido cancelado';
+
+  @override
+  String get honamUiHelpCancelled => 'Este pedido no seguirá adelante.';
+
+  @override
+  String get honamUiDeliveryInfo => 'Seguimiento de la entrega';
+
+  @override
+  String get honamUiNoSteps => 'Aún no hay etapas registradas.';
+
+  @override
+  String get honamUiItemsTitle => 'Artículos del pedido';
+
+  @override
+  String get honamUiOrderId => 'N.º de pedido';
+
+  @override
+  String get honamUiCopy => 'Copiar';
+
+  @override
+  String get honamUiOrderIdCopied => 'Número de pedido copiado';
+
+  @override
+  String get honamUiOrderTime => 'Pedido realizado';
+
+  @override
+  String get honamUiQuoteTime => 'Presupuesto recibido';
+
+  @override
+  String get honamUiPaymentTime => 'Pago confirmado';
+
+  @override
+  String get honamUiShipTime => 'Salida del repartidor';
+
+  @override
+  String get honamUiDeliveredTime => 'Entrega del paquete';
+
+  @override
+  String get honamUiClosedTime => 'Cierre del pedido';
+
+  @override
+  String get honamUiPharmacy => 'Farmacia';
+
+  @override
+  String get honamUiCourier => 'Repartidor';
+
+  @override
+  String get honamUiNoMessages => 'Aún no hay mensajes.';
+
+  @override
+  String get honamUiTrack => 'Seguir mi pedido';
+
+  @override
+  String get honamUiRefundTitle => 'Reembolso';
+
+  @override
+  String honamUiUnitPrice(String price) {
+    return '$price por unidad';
+  }
+
+  @override
+  String get koryHomeNewPot => 'Nueva colecta';
+
+  @override
+  String koryHomeActivePots(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count colectas activas',
+      one: '1 colecta activa',
+      zero: 'Ninguna colecta activa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryHomeCollected(String amount) {
+    return '$amount reunidos';
+  }
+
+  @override
+  String get koryHomeSearchHint => 'Buscar una colecta';
+
+  @override
+  String get koryHomeSearchClear => 'Borrar la búsqueda';
+
+  @override
+  String get koryHomeFilterAll => 'Todas';
+
+  @override
+  String get koryHomeFilterCagnottes => 'Colectas';
+
+  @override
+  String get koryHomeFilterCotisations => 'Cotizaciones';
+
+  @override
+  String get koryHomeFilterTontines => 'Tontinas';
+
+  @override
+  String get koryHomeFilterOpen => 'En curso';
+
+  @override
+  String get koryHomeFilterClosed => 'Cerradas';
+
+  @override
+  String get koryHomeFeatured => 'Destacadas';
+
+  @override
+  String koryHomeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Quedan $days días',
+      one: 'Queda 1 día',
+      zero: 'Último día hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryHomeOverdue => 'Plazo vencido';
+
+  @override
+  String get koryHomeContribute => 'Contribuir';
+
+  @override
+  String get koryHomeView => 'Consultar';
+
+  @override
+  String koryHomeRoundOf(String current, String total) {
+    return 'Turno $current de $total';
+  }
+
+  @override
+  String koryHomeBeneficiary(String name) {
+    return 'Beneficiario: $name';
+  }
+
+  @override
+  String get koryHomeNoMatch => 'Ninguna colecta coincide';
+
+  @override
+  String get koryHomeNoMatchBody => 'Prueba con otro nombre o quita el filtro.';
+
+  @override
+  String get koryHomeShowAll => 'Mostrar todo';
+
+  @override
+  String koryHomePercent(String percent) {
+    return '$percent %';
+  }
+
+  @override
+  String get groupClosedDeleted => 'Este grupo ha sido eliminado.';
+
+  @override
+  String get groupClosedRemoved => 'Ya no formas parte de este grupo.';
+
+  @override
+  String get statusVideoTooLong =>
+      'Vídeo demasiado largo: 60 segundos como máximo para un estado.';
+
+  @override
+  String get statusVideoLimitHint => 'Vídeos de hasta 60 segundos';
+
+  @override
+  String get homeAdLabel => 'Patrocinado';
+
+  @override
+  String get homeAdCta => 'Descubrir';
+
+  @override
+  String get homeBabaHello => 'Hola, soy Baba.';
+
+  @override
+  String get homeBabaOffer => 'Dime qué necesitas y yo me encargo.';
+
+  @override
+  String get homeBabaCta => 'Hablar con Baba';
+
+  @override
+  String get koryXAcceptInvite => 'Aceptar la invitación';
+
+  @override
+  String get koryXAcceptSwap => 'Aceptar el intercambio';
+
+  @override
+  String get koryXAccepted => 'Aceptado';
+
+  @override
+  String koryXAcceptedOf(String accepted, String total) {
+    return 'Han aceptado: $accepted de $total';
+  }
+
+  @override
+  String get koryXAcceptedToast => 'Anotado: formas parte de la tontina.';
+
+  @override
+  String get koryXAddMemberHint =>
+      'Añadir un miembro: paga desde el próximo vencimiento';
+
+  @override
+  String koryXAdminOnly(String title) {
+    return '$title · solo el administrador';
+  }
+
+  @override
+  String koryXAdminWithDeputy(String admin, String deputy) {
+    return '$admin · suplente $deputy';
+  }
+
+  @override
+  String get koryXAdministrator => 'Administrador';
+
+  @override
+  String koryXAllAccepted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Los $count miembros han aceptado. La tontina está abierta.',
+      one: 'El miembro ha aceptado. La tontina está abierta.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXAllGroupMembers => 'Todos los miembros del chat';
+
+  @override
+  String get koryXAllPaid => 'Estás al día: nada pendiente por ahora.';
+
+  @override
+  String get koryXAmount => 'Importe';
+
+  @override
+  String get koryXAmountHidden => 'un importe oculto';
+
+  @override
+  String get koryXAmountLabel => 'Importe';
+
+  @override
+  String koryXAmountPer(String amount, String period) {
+    return '$amount, $period';
+  }
+
+  @override
+  String koryXAmountTo(String amount, String name) {
+    return '$amount a $name';
+  }
+
+  @override
+  String get koryXAmountsLabel => 'Importes individuales';
+
+  @override
+  String get koryXApproveSwap => 'Validar el intercambio';
+
+  @override
+  String get koryXBeneficiary => 'Beneficiario';
+
+  @override
+  String get koryXBeneficiaryField => 'Beneficiario (opcional)';
+
+  @override
+  String get koryXCalendar => 'Calendario de turnos';
+
+  @override
+  String koryXCalendarDay(String day) {
+    return 'Calendario de turnos · cobro el día $day';
+  }
+
+  @override
+  String get koryXCalendarUpdated =>
+      'Intercambio validado: el calendario está actualizado.';
+
+  @override
+  String get koryXCancelled => 'Cancelado';
+
+  @override
+  String get koryXCancelledRounds => 'Turnos cancelados';
+
+  @override
+  String get koryXCaptureAdded => 'Captura del SMS añadida';
+
+  @override
+  String get koryXChangeAmount => 'Cambiar el importe';
+
+  @override
+  String get koryXChangeCollector => 'Cambiar de recaudador';
+
+  @override
+  String get koryXChangeCollectorSub =>
+      'Un miembro de la cotización; todos reciben aviso';
+
+  @override
+  String get koryXCheckAndCreate => 'Revisar y crear';
+
+  @override
+  String get koryXCheckWallet =>
+      'Verifica en tu aplicación de monedero o en el SMS del operador. Cada respuesta queda registrada con fecha y hora.';
+
+  @override
+  String get koryXCheckWalletShort => 'Revisa tu monedero y responde';
+
+  @override
+  String get koryXChoose => 'Elegir';
+
+  @override
+  String get koryXChooseMembers => 'Elegir miembros';
+
+  @override
+  String get koryXChooseMembersSub => 'Por ejemplo, solo los adultos del grupo';
+
+  @override
+  String koryXClosesOn(String date) {
+    return 'cierra el $date';
+  }
+
+  @override
+  String get koryXClosing => 'Cierre';
+
+  @override
+  String get koryXCoOrganizer => 'Coorganizador · confirma';
+
+  @override
+  String get koryXCollectType => 'Tipo de colecta';
+
+  @override
+  String get koryXCollectorLabel => 'Recaudador';
+
+  @override
+  String koryXCollectorWallet(String wallet) {
+    return 'Recaudador · $wallet';
+  }
+
+  @override
+  String koryXConcernedMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Miembros incluidos · $count',
+      one: 'Miembro incluido · 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXConfirmReceipts => 'Confirman los cobros';
+
+  @override
+  String koryXConfirmedOf(String done, String total) {
+    return 'Confirmadas: $done de $total';
+  }
+
+  @override
+  String koryXConfirmedOnExpected(String expected) {
+    return 'confirmados de $expected esperados';
+  }
+
+  @override
+  String koryXConfirmedOnPlanned(String planned) {
+    return 'confirmados de $planned previstos';
+  }
+
+  @override
+  String koryXContestedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count impugnadas',
+      one: '1 impugnada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXContestedThenConfirmed => 'impugnada y luego confirmada';
+
+  @override
+  String get koryXContinue => 'Continuar';
+
+  @override
+  String koryXContinueWithMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Continuar con $count miembros',
+      one: 'Continuar con 1 miembro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryXContributeAmount(String amount) {
+    return 'Aportar $amount';
+  }
+
+  @override
+  String koryXContributionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count aportaciones',
+      one: '1 aportación',
+      zero: 'Ninguna aportación',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXCotisationJournal => 'Registro de la cotización';
+
+  @override
+  String get koryXCotisationStopped =>
+      'Esta cotización está detenida. El registro sigue disponible.';
+
+  @override
+  String get koryXCreateCagnotte => 'Crear la colecta';
+
+  @override
+  String get koryXCreateCotisation => 'Crear la cotización';
+
+  @override
+  String get koryXCsvAmount => 'Importe (FCFA)';
+
+  @override
+  String get koryXCsvDate => 'Fecha';
+
+  @override
+  String get koryXCsvEvent => 'Evento';
+
+  @override
+  String get koryXCsvPerson => 'Persona';
+
+  @override
+  String get koryXCsvReference => 'Referencia';
+
+  @override
+  String get koryXCsvStatus => 'Estado';
+
+  @override
+  String get koryXDeclared => 'Declarada';
+
+  @override
+  String get koryXDeclaredLabel => 'Total declarado';
+
+  @override
+  String koryXDeclaredUntil(String name) {
+    return 'Tu aportación queda como «Declarada» hasta que $name confirme haberla recibido. Recibirás un aviso en cuanto la confirme o la impugne.';
+  }
+
+  @override
+  String get koryXDeclineConfirm =>
+      'No formarás parte de la tontina. El administrador recibirá un aviso.';
+
+  @override
+  String get koryXDeclineInvite => 'Rechazar la invitación';
+
+  @override
+  String get koryXDeclinedInvite => 'Rechazó';
+
+  @override
+  String get koryXDeputy => 'Suplente';
+
+  @override
+  String koryXDeputyIs(String name) {
+    return 'Suplente del administrador: $name';
+  }
+
+  @override
+  String koryXDeputyNotice(String name) {
+    return '$name tiene los mismos derechos que tú sobre la tontina: enviar recordatorios, validar un intercambio de mes, pasar al turno siguiente, disolver.';
+  }
+
+  @override
+  String koryXDialUssd(String operator) {
+    return 'Marcar el código USSD de $operator';
+  }
+
+  @override
+  String get koryXDissolve => 'Disolver la tontina';
+
+  @override
+  String get koryXDissolveFinal =>
+      'Disolver detiene la tontina para todos. Es definitivo.';
+
+  @override
+  String get koryXDissolveNoMoreRounds => 'No se convoca ningún turno más.';
+
+  @override
+  String koryXDissolveNotified(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Los $count miembros reciben un aviso con el motivo.',
+      one: 'El miembro recibe un aviso con el motivo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXDissolveSettle =>
+      'Lo pagado entre miembros se arregla entre ustedes: Pokou nunca tocó el dinero.';
+
+  @override
+  String get koryXDissolved => 'Disuelta';
+
+  @override
+  String koryXDissolvedReason(String reason) {
+    return 'Motivo: «$reason». El registro y el informe siguen disponibles.';
+  }
+
+  @override
+  String get koryXDissolvedTitle => 'Tontina disuelta';
+
+  @override
+  String koryXDrawAt(String date, String time) {
+    return 'Sorteo · $date, $time';
+  }
+
+  @override
+  String get koryXDrawAtStart => 'Sorteo al empezar';
+
+  @override
+  String get koryXDrawAtStartSub => 'Hecho por Pokou, registrado, no repetible';
+
+  @override
+  String get koryXDrawLogged => 'Sorteo registrado';
+
+  @override
+  String koryXDrawnOn(String date) {
+    return 'Orden sorteado el $date, registrado.';
+  }
+
+  @override
+  String get koryXDue => 'Pendiente';
+
+  @override
+  String koryXDueOn(String month, String day) {
+    return '$month · vence el $day';
+  }
+
+  @override
+  String koryXEach(String amount) {
+    return '$amount cada uno';
+  }
+
+  @override
+  String get koryXEditCotisation => 'Modificar o detener la cotización';
+
+  @override
+  String get koryXEditCotisationTitle => 'Modificar la cotización';
+
+  @override
+  String koryXEditNotice(int count, String month) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Lo que se debe de $month sigue debiéndose, y los meses pasados quedan en el registro. Los $count miembros reciben un aviso.',
+      one:
+          'Lo que se debe de $month sigue debiéndose, y los meses pasados quedan en el registro. El miembro recibe un aviso.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryXEditableRemaining(String amount) {
+    return 'Modificable · quedan $amount por pagar';
+  }
+
+  @override
+  String get koryXEnd => 'Fin';
+
+  @override
+  String get koryXEveryFortnight => 'Cada quince días';
+
+  @override
+  String get koryXEveryMonth => 'Cada mes';
+
+  @override
+  String get koryXEveryQuarter => 'Cada trimestre';
+
+  @override
+  String get koryXEveryWeek => 'Cada semana';
+
+  @override
+  String get koryXEvtClosed => 'La colecta está cerrada.';
+
+  @override
+  String koryXEvtConfirmed(String reviewer, String amount, String who) {
+    return '$reviewer confirmó $amount de $who';
+  }
+
+  @override
+  String koryXEvtContested(String reviewer, String amount, String who) {
+    return '$reviewer impugnó $amount de $who';
+  }
+
+  @override
+  String koryXEvtContestedReason(
+    String reviewer,
+    String amount,
+    String who,
+    String reason,
+  ) {
+    return '$reviewer impugnó $amount de $who: «$reason»';
+  }
+
+  @override
+  String koryXEvtCreated(String name, String kind) {
+    return '$name creó la colecta ($kind)';
+  }
+
+  @override
+  String koryXEvtDeclared(String who, String amount) {
+    return '$who declaró $amount';
+  }
+
+  @override
+  String koryXEvtDeclaredRef(String who, String amount, String ref) {
+    return '$who declaró $amount · ref. $ref';
+  }
+
+  @override
+  String koryXEvtDissolved(String reason) {
+    return 'La tontina está disuelta: «$reason»';
+  }
+
+  @override
+  String koryXEvtDrawn(String seal) {
+    return 'Pokou sorteó el orden de los turnos · huella $seal';
+  }
+
+  @override
+  String koryXEvtExtended(String date) {
+    return 'La colecta se prolonga hasta el $date';
+  }
+
+  @override
+  String get koryXEvtOrderFixed =>
+      'El orden de los turnos queda fijado; la tontina empieza';
+
+  @override
+  String koryXEvtSwap(String a, String b) {
+    return '$a y $b intercambiaron sus meses';
+  }
+
+  @override
+  String get koryXExportCsv => 'Exportar en CSV';
+
+  @override
+  String get koryXExportPdf => 'Exportar en PDF';
+
+  @override
+  String get koryXFilterAll => 'Todo';
+
+  @override
+  String get koryXFilterConfirmed => 'Confirmadas';
+
+  @override
+  String get koryXFilterContested => 'Impugnadas';
+
+  @override
+  String koryXFirmRemaining(String amount) {
+    return 'Firme · quedan $amount por pagar';
+  }
+
+  @override
+  String get koryXFirstDue => 'Primer vencimiento';
+
+  @override
+  String get koryXFirstRound => 'Primer turno';
+
+  @override
+  String get koryXFixOrder => 'Fijo el orden yo mismo';
+
+  @override
+  String get koryXFixOrderSub => 'Cada uno ve su mes desde la apertura';
+
+  @override
+  String koryXFixedAt(String date) {
+    return 'Orden fijado por el administrador · $date';
+  }
+
+  @override
+  String koryXFixedOn(String date) {
+    return 'Orden fijado por el administrador el $date, registrado.';
+  }
+
+  @override
+  String get koryXFixedOrder => 'Orden fijado por el administrador';
+
+  @override
+  String get koryXFreeNotice =>
+      'Sin comisiones. Pokou no toca el dinero: cada uno paga al recaudador desde su monedero.';
+
+  @override
+  String koryXFromDueOf(String date) {
+    return 'A partir del vencimiento del $date';
+  }
+
+  @override
+  String get koryXGoalLabel => 'Objetivo';
+
+  @override
+  String koryXGroupPeople(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name · $count personas',
+      one: '$name · 1 persona',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryXHaveContributed(String done, String total) {
+    return 'Han pagado: $done de $total';
+  }
+
+  @override
+  String koryXHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count h',
+      one: 'hace 1 h',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXISent => 'Ya lo envié';
+
+  @override
+  String get koryXInProgress => 'en curso';
+
+  @override
+  String koryXIncludingYou(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count, contigo',
+      one: 'Solo tú',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXIndividualAmounts => 'Importes individuales';
+
+  @override
+  String get koryXInvitation => 'Invitación';
+
+  @override
+  String get koryXJoinAndPledge => 'Unirme y comprometerme';
+
+  @override
+  String get koryXJoinNotice =>
+      'Pokou no toca el dinero. Te comprometes con un importe, pagas al recaudador desde tu monedero y declaras tu pago.';
+
+  @override
+  String get koryXJournalLocked =>
+      'Cada acción queda registrada con fecha y hora y no se puede borrar, ni siquiera el organizador.';
+
+  @override
+  String get koryXKoryPlus => 'Kory Plus';
+
+  @override
+  String get koryXLastDue => 'Último vencimiento';
+
+  @override
+  String koryXLastDueOn(String date) {
+    return 'Último vencimiento: $date';
+  }
+
+  @override
+  String get koryXLate => 'Atrasado';
+
+  @override
+  String koryXLateCount(String count) {
+    return 'Atrasados · $count';
+  }
+
+  @override
+  String koryXLeveeCaption(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miembros × $amount',
+      one: '1 miembro × $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXLeveePerRound => 'Cobro por turno';
+
+  @override
+  String koryXLinkFrom(String name) {
+    return 'Organizada por $name';
+  }
+
+  @override
+  String get koryXLinkedChat => 'Chat vinculado';
+
+  @override
+  String get koryXMakeCoOrganizer => 'Nombrar coorganizador';
+
+  @override
+  String get koryXMakeDeputy => 'Nombrar suplente';
+
+  @override
+  String get koryXMembersAndOrder => 'Miembros y orden';
+
+  @override
+  String get koryXMembersAndRounds => 'Miembros y turnos';
+
+  @override
+  String koryXMembersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Miembros · $count',
+      one: 'Miembros · 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXMembersLabel => 'Miembros';
+
+  @override
+  String get koryXMembersNoticeAlone =>
+      'Tú confirmas los cobros. Quien se una al grupo más tarde no cotiza automáticamente: lo añades desde la cotización y cotiza desde el siguiente vencimiento.';
+
+  @override
+  String koryXMembersNoticeWith(String name) {
+    return 'Tú y $name confirman los cobros. Quien se una al grupo más tarde no cotiza automáticamente: lo añades desde la cotización y cotiza desde el siguiente vencimiento.';
+  }
+
+  @override
+  String koryXMembersTimes(int count, String amount, String period) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miembros × $amount, $period',
+      one: '1 miembro × $amount, $period',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXMembersTitle => 'Miembros';
+
+  @override
+  String get koryXMessageOptional => 'Mensaje (opcional)';
+
+  @override
+  String koryXMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count min',
+      one: 'hace 1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXMoreActions => 'Más acciones';
+
+  @override
+  String get koryXMyDues => 'Mis vencimientos';
+
+  @override
+  String get koryXMyLevee => 'Mi cobro';
+
+  @override
+  String koryXMyLeveeOf(String month) {
+    return 'Tu cobro de $month';
+  }
+
+  @override
+  String koryXMyPledgeAmount(String amount) {
+    return 'Mi compromiso · $amount';
+  }
+
+  @override
+  String get koryXName => 'Nombre';
+
+  @override
+  String get koryXNeedFirstDue => 'Elige la fecha del primer vencimiento.';
+
+  @override
+  String get koryXNeedGroup =>
+      'Una tontina se abre desde un chat de grupo: elígelo.';
+
+  @override
+  String get koryXNewAmountPerMember => 'Nuevo importe por miembro';
+
+  @override
+  String get koryXNewCotisation => 'Nueva cotización';
+
+  @override
+  String get koryXNewTontine => 'Nueva tontina';
+
+  @override
+  String koryXNextDueIn(int days, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Próximo vencimiento · $date, en $days días',
+      one: 'Próximo vencimiento · $date, mañana',
+      zero: 'Próximo vencimiento · $date, hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXNextDues => 'Próximos vencimientos';
+
+  @override
+  String get koryXNextRounds => 'Próximos turnos';
+
+  @override
+  String get koryXNoDeputyNotice =>
+      'Sin suplente, solo tú administras la tontina: recordatorios, intercambios de mes, turno siguiente, disolución.';
+
+  @override
+  String get koryXNoDueYet =>
+      'Aún no hay vencimiento: el calendario empieza en la primera fecha elegida.';
+
+  @override
+  String get koryXNoEnd => 'Sin fecha de fin';
+
+  @override
+  String get koryXNoGroups => 'Aún no hay chats de grupo.';
+
+  @override
+  String get koryXNoLinkedChat => 'Ningún chat';
+
+  @override
+  String get koryXNoSwapPossible =>
+      'No se puede intercambiar ningún mes próximo.';
+
+  @override
+  String get koryXNoTransferNotice =>
+      'Pokou no transfiere el dinero. Comprueba el nombre del destinatario que muestra tu operador antes de validar. Se aplican las tarifas de tu operador.';
+
+  @override
+  String get koryXNotNow => 'Ahora no';
+
+  @override
+  String get koryXNothingToConfirm => 'Nada que confirmar por ahora.';
+
+  @override
+  String koryXOfWhichToConfirm(String amount) {
+    return 'de los cuales $amount por confirmar';
+  }
+
+  @override
+  String koryXOnDay(String date) {
+    return 'el $date';
+  }
+
+  @override
+  String koryXOnGoalOf(String amount) {
+    return 'de un objetivo de $amount';
+  }
+
+  @override
+  String get koryXOnlyYouConfirm =>
+      'Verifica en tu aplicación de monedero o en el SMS del operador. Solo tú confirmas lo que recibiste; cada respuesta queda registrada con fecha y hora.';
+
+  @override
+  String get koryXOnlyYouConfirmShort => 'Es tu cobro: solo tú confirmas';
+
+  @override
+  String koryXOpenAndInvite(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Abrir e invitar a $count miembros',
+      one: 'Abrir e invitar a 1 miembro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXOpenPot => 'Ver la colecta';
+
+  @override
+  String get koryXOrganizerCollector => 'Organizador · recaudador';
+
+  @override
+  String get koryXOrganizerSide => 'vista del organizador';
+
+  @override
+  String koryXOrganizerView(String title) {
+    return '$title · vista del organizador';
+  }
+
+  @override
+  String koryXOutOf(String done, String total) {
+    return '$done de $total';
+  }
+
+  @override
+  String koryXOverdueSince(String date) {
+    return 'Vencimiento del $date superado';
+  }
+
+  @override
+  String koryXPaidOf(String paid, String total) {
+    return 'Al día: $paid de $total';
+  }
+
+  @override
+  String get koryXParticipants => 'Participantes';
+
+  @override
+  String get koryXPastRounds => 'Turnos pasados';
+
+  @override
+  String get koryXPause => 'Pausar';
+
+  @override
+  String koryXPauseSub(String date) {
+    return 'Sin vencimiento el $date; se reanuda en el siguiente';
+  }
+
+  @override
+  String koryXPendingSubtitle(String group) {
+    return 'Kory Plus · $group · esperando a los miembros';
+  }
+
+  @override
+  String koryXPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas',
+      one: '1 persona',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXPeriodBiweekly => 'cada quince días';
+
+  @override
+  String koryXPeriodCounts(String up, String pending, String late) {
+    return 'Al día: $up · por confirmar: $pending · atrasados: $late';
+  }
+
+  @override
+  String get koryXPeriodQuarterly => 'cada trimestre';
+
+  @override
+  String get koryXPeriodicity => 'Periodicidad';
+
+  @override
+  String get koryXPickCollector => 'Elige el nuevo recaudador.';
+
+  @override
+  String get koryXPlannedPerDue => 'Total previsto por vencimiento';
+
+  @override
+  String koryXPlannedTo(String name) {
+    return 'Prevista · a pagar a $name';
+  }
+
+  @override
+  String get koryXPreviousDues => 'Vencimientos anteriores';
+
+  @override
+  String get koryXReasonRequired => 'Motivo (obligatorio)';
+
+  @override
+  String koryXRecapNotice(int count, String group) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Los $count miembros reciben un aviso de «$group».',
+      one: 'El miembro recibe un aviso de «$group».',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXRecapNoticeAlone =>
+      'Después, añade a los miembros por su número o comparte el enlace de la cotización.';
+
+  @override
+  String koryXRefShort(String ref) {
+    return 'ref. $ref';
+  }
+
+  @override
+  String get koryXReferenceLabel => 'Referencia a indicar';
+
+  @override
+  String get koryXRefuse => 'Rechazar';
+
+  @override
+  String get koryXRejectNeedsReason =>
+      '«No recibido» requiere un motivo; la aportación pasa a «Impugnada» y la persona recibe un aviso.';
+
+  @override
+  String get koryXRemainingLabel => 'Falta por recaudar';
+
+  @override
+  String get koryXRemindHint =>
+      'Recuérdaselo: cada uno recibe una notificación.';
+
+  @override
+  String get koryXRemindLate => 'Recordar a los atrasados';
+
+  @override
+  String koryXRemindMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Recordar a $count miembros',
+      one: 'Recordar a 1 miembro',
+      zero: 'Todos han respondido',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXRemindTooSoon =>
+      'Ya se envió un recordatorio hace menos de 12 h.';
+
+  @override
+  String koryXReminded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas avisadas.',
+      one: '1 persona avisada.',
+      zero: 'Nadie a quien recordar.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryXRemindedAt(String date, String time) {
+    return 'Avisados el $date a las $time; cada uno puede silenciar sus notificaciones.';
+  }
+
+  @override
+  String get koryXRemoveCapture => 'Quitar la captura';
+
+  @override
+  String get koryXReport => 'Informe';
+
+  @override
+  String get koryXReportKept =>
+      'El informe y el registro siguen disponibles y exportables para todos, aunque la tontina se disuelva.';
+
+  @override
+  String get koryXReportMeaning =>
+      '«Ha pagado» significa «confirmado por el beneficiario del turno»: Pokou nunca ve el dinero.';
+
+  @override
+  String get koryXReportTitle => 'Informe de la tontina';
+
+  @override
+  String get koryXRequestSent => 'Solicitud enviada.';
+
+  @override
+  String koryXRoundCounts(String confirmed, String declared, String late) {
+    return 'Confirmadas: $confirmed · declaradas: $declared · atrasadas: $late';
+  }
+
+  @override
+  String koryXRoundOfMonth(String number, String total, String month) {
+    return 'Turno $number de $total · $month';
+  }
+
+  @override
+  String koryXRoundsSpan(int count, String from, String to) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count · de $from a $to',
+      one: '1 · en $from',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryXSaveAndNotify(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Guardar y avisar a los $count miembros',
+      one: 'Guardar y avisar al miembro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXSavedAndNotified =>
+      'Guardado. Los miembros reciben un aviso.';
+
+  @override
+  String koryXSeal(String seal) {
+    return 'Hecho por Pokou, registrado, no repetible · huella $seal';
+  }
+
+  @override
+  String get koryXSeeJournal => 'Ver todo el registro';
+
+  @override
+  String get koryXSeeReport => 'Ver el informe de la tontina';
+
+  @override
+  String get koryXSendRequest => 'Enviar la solicitud';
+
+  @override
+  String koryXSendRequestTo(String name) {
+    return 'Enviar la solicitud a $name';
+  }
+
+  @override
+  String get koryXSentAt => 'Enviado';
+
+  @override
+  String get koryXShareLink => 'Compartir el enlace';
+
+  @override
+  String get koryXSmsCaptureAttached => 'Captura del SMS adjunta';
+
+  @override
+  String get koryXSomeoneDeclined =>
+      'Alguien rechazó: cuando todos los demás acepten, podrás empezar sin esa persona o disolver.';
+
+  @override
+  String koryXStakeDue(String amount, String date) {
+    return '$amount por miembro · vence el $date';
+  }
+
+  @override
+  String get koryXStakeLabel => 'Aporte por miembro';
+
+  @override
+  String get koryXStakePerMember => 'Aporte por miembro';
+
+  @override
+  String koryXStartWithout(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Empezar sin las $count personas que rechazaron',
+      one: 'Empezar sin la persona que rechazó',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryXStartsWhenAllAccept =>
+      'La tontina empieza cuando todos los miembros aceptan la invitación. Todos reciben un aviso y entonces se fija el orden de los turnos.';
+
+  @override
+  String get koryXStatusAfter => 'Estado tras declarar';
+
+  @override
+  String get koryXStepParams => 'Paso 1 de 3 · ajustes';
+
+  @override
+  String get koryXStopConfirm =>
+      'No habrá más vencimientos después del actual. Lo que se debe sigue debiéndose y el registro sigue disponible.';
+
+  @override
+  String get koryXStopCotisation => 'Detener la cotización';
+
+  @override
+  String get koryXSwapCalendarNotice =>
+      'El calendario cambia para todos; queda anotado en el registro.';
+
+  @override
+  String get koryXSwapMyMonth => 'Intercambiar mi mes';
+
+  @override
+  String get koryXSwapNotice =>
+      'Todos ven este calendario. Un intercambio de mes se hace entre dos miembros, con la aprobación del administrador.';
+
+  @override
+  String koryXSwapRequest(String a, String b) {
+    return 'Intercambio de mes entre $a y $b';
+  }
+
+  @override
+  String koryXSwapRounds(String a, String b) {
+    return 'Turno $a por turno $b';
+  }
+
+  @override
+  String get koryXSwapStep1 => 'Envías la solicitud';
+
+  @override
+  String koryXSwapStep2(String name) {
+    return '$name acepta';
+  }
+
+  @override
+  String koryXSwapStep3(String name) {
+    return '$name, el administrador, valida';
+  }
+
+  @override
+  String get koryXSwapWaitingAdmin => 'Aceptado · esperando al administrador';
+
+  @override
+  String koryXSwapWaitingMember(String name) {
+    return 'Esperando la respuesta de $name';
+  }
+
+  @override
+  String get koryXThisRound => 'Este turno';
+
+  @override
+  String koryXToConfirmCount(String count) {
+    return 'Por confirmar · $count';
+  }
+
+  @override
+  String koryXTodayAt(String time) {
+    return 'Hoy, $time';
+  }
+
+  @override
+  String get koryXTontineDone =>
+      'La tontina ha terminado: se han celebrado todos los turnos.';
+
+  @override
+  String koryXTontineInviteFrom(String name) {
+    return 'Tontina Kory Plus · invitación de $name';
+  }
+
+  @override
+  String get koryXTontinePlus => 'Tontina Plus';
+
+  @override
+  String get koryXTontineStarts => 'La tontina empieza';
+
+  @override
+  String koryXTontineStep(String step) {
+    return 'Kory Plus · paso $step de 3';
+  }
+
+  @override
+  String koryXTontineStepOf(String title, String step) {
+    return '$title · paso $step de 3';
+  }
+
+  @override
+  String get koryXTransactionRef => 'Referencia de la transacción';
+
+  @override
+  String get koryXTransactionRefHelp =>
+      'Aparece en el SMS de confirmación de tu operador.';
+
+  @override
+  String get koryXUpcoming => 'Próximamente';
+
+  @override
+  String get koryXVisibleToAll => 'Visibles para todos';
+
+  @override
+  String koryXVisibleToAllMembers(String title) {
+    return '$title · visible para todos los miembros';
+  }
+
+  @override
+  String get koryXVisibleToCollector => 'Visibles solo para el recaudador';
+
+  @override
+  String get koryXWaiting => 'En espera';
+
+  @override
+  String get koryXWhatHappensNext => 'Lo que pasa después';
+
+  @override
+  String get koryXWhatToChange => '¿Qué quieres cambiar?';
+
+  @override
+  String get koryXWhichJournal => '¿Qué registro abrir?';
+
+  @override
+  String get koryXWithAnotherMember => 'con otro miembro';
+
+  @override
+  String get koryXWithWhom => '¿Con quién?';
+
+  @override
+  String get koryXWithdrawRequest => 'Retirar mi solicitud';
+
+  @override
+  String get koryXYouAccepted =>
+      'Has aceptado. La tontina empieza en cuanto todos respondan.';
+
+  @override
+  String koryXYouAnd(String name) {
+    return 'Tú y $name';
+  }
+
+  @override
+  String get koryXYouDeclined => 'Rechazaste esta invitación.';
+
+  @override
+  String get koryXYouReceive => 'Recibes el cobro de este turno';
+
+  @override
+  String get koryXYourContributions => 'Tus aportes';
+
+  @override
+  String get koryXYourMonth => 'Tu mes';
+
+  @override
+  String get koryXUpToDate => 'Al día';
 }

@@ -1,218 +1,136 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
-import '../../../core/widgets/pokou_app_bar.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../modules/shared/module_ui.dart';
+import '../../home/presentation/pokou_page_header.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
 import 'kory_create_screen.dart';
+import 'kory_home_widgets.dart';
+import 'kory_invite_screen.dart';
+import 'kory_journal_screen.dart';
 import 'kory_pot_screen.dart';
-import '../../../core/widgets/pokou_icon.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
+import 'kory_ui.dart';
 
 /// Kory — l'entrée du module (écran APP-3).
 ///
+/// De haut en bas : l'en-tête des onglets, le bloc du mois avec le geste
+/// « Nouvelle cagnotte », la recherche, les filtres en pilules, le carrousel
+/// « À la une » des échéances qui approchent, puis la liste.
+///
 /// Le chiffre en tête est « mes contributions confirmées », jamais un
-/// solde : rien n'est détenu par Pokou (BM-01). Le rappel juste en dessous
+/// solde : rien n'est détenu par Pokou (BM-01). Le rappel en bas de page
 /// le dit en toutes lettres, parce que c'est la question que pose quelqu'un
 /// qui voit un montant dans une application.
-class KoryScreen extends ConsumerWidget {
+class KoryScreen extends ConsumerStatefulWidget {
   const KoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<KoryScreen> createState() => _KoryScreenState();
+}
+
+class _KoryScreenState extends ConsumerState<KoryScreen> {
+  final _search = TextEditingController();
+  KoryHomeFilter _filter = KoryHomeFilter.all;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _openPot(int potId) => Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: potId)));
+
+  void _showAll() => setState(() {
+    _search.clear();
+    _filter = KoryHomeFilter.all;
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final l = L.of(context);
     final pots = ref.watch(koryPotsProvider);
+    final summary = ref.watch(korySummaryProvider);
+    final items = pots.valueOrNull;
+    final toReview = summary.valueOrNull?.toReviewCount ?? 0;
+    final open = [...?items?.where((pot) => pot.isOpen)];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: RefreshIndicator(
+        color: AppColors.accentPrimary,
         onRefresh: () async {
           refreshKory(ref);
           await ref.read(koryPotsProvider.future);
         },
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
+            // Le même en-tête que l'Accueil : la ligne du dessous passe en
+            // terre cuite quand des contributions attendent ma confirmation.
             SliverToBoxAdapter(
-              child: PokouAppBar(
+              child: PokouPageHeader(
                 title: l.koryTitle,
-                subtitle: l.korySubtitle,
-                showStatus: false,
+                subtitle: toReview > 0
+                    ? l.koryToReview('$toReview')
+                    : l.korySubtitle,
+                emphasized: toReview > 0,
                 // Le logo du module (guide des logos, novembre 2026).
                 leading: const PokouModuleLogo(PokouModule.kory, size: 38),
               ),
             ),
-            // Terre de Confiance : « Kory · Le cauris », la pastille « wallet à
-            // wallet », puis l'encadré qui rappelle que Pokou ne touche pas
-            // l'argent.
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l.koryHeadline,
-                            style: TextStyle(
-                              fontSize: 22,
-                              height: 1.3,
-                              letterSpacing: -0.3,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.feedbackSuccess,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                l.koryWalletChip,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  letterSpacing: 0.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ModuleCallout(
-                      tone: CalloutTone.beige,
-                      text: l.koryNeverTouches,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: _SummaryCard()),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ModuleActionButton(
-                            label: l.koryCreate,
-                            icon: Icons.add_circle_outline,
-                            onPressed: () => openKoryCreate(context, ref),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ModuleQuietButton(
-                            icon: Icons.key_outlined,
-                            label: l.koryJoin,
-                            onPressed: () => _join(context, ref),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton.icon(
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.textSecondary,
-                            ),
-                            icon: const Icon(
-                              Icons.receipt_long_outlined,
-                              size: 18,
-                            ),
-                            label: Text(l.koryJournalTab),
-                            onPressed: () {
-                              final first = pots.valueOrNull?.firstOrNull;
-                              if (first == null) return;
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      KoryPotScreen(potId: first.id),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l.koryMyPots,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          height: 28 / 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    if ((pots.valueOrNull ?? const []).any((p) => p.isOpen))
-                      Text(
-                        l.koryActiveCount(
-                          '${pots.valueOrNull!.where((p) => p.isOpen).length}',
-                        ),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                child: KoryHomeHero(
+                  monthTotal: summary.valueOrNull?.monthConfirmedTotal,
+                  monthLoading: summary.isLoading,
+                  activeCount: items == null ? null : open.length,
+                  statsLoading: items == null && pots.isLoading,
+                  collectedTotal: open.fold(
+                    0,
+                    (sum, pot) => sum + pot.confirmedTotal,
+                  ),
+                  onCreate: () => openKoryCreate(context, ref),
+                  onJoin: () => _join(context, ref),
+                  onJournal: items == null || items.isEmpty
+                      ? null
+                      : () => _openJournal(items),
                 ),
               ),
             ),
             ...pots.when(
               loading: () => const [
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+                SliverToBoxAdapter(child: KoryHomeSkeleton()),
+                SliverToBoxAdapter(child: SizedBox(height: 120)),
               ],
               error: (_, _) => [
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: ModuleEmptyState(
-                    icon: Icons.cloud_off,
-                    title: l.koryUnavailable,
-                    message: l.modulesCheckNetwork,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 120),
+                    child: Center(
+                      child: KoryHomeMessage(
+                        illustration: PokouIllustrations.offline,
+                        title: l.koryUnavailable,
+                        message: l.modulesCheckNetwork,
+                        actions: [
+                          KoryHomePillButton(
+                            icon: Icons.refresh,
+                            label: l.actionRetry,
+                            onPressed: () => refreshKory(ref),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -220,42 +138,154 @@ class KoryScreen extends ConsumerWidget {
                   ? [
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: ModuleEmptyState(
-                          icon: Icons.savings_outlined,
-                          title: l.koryNone,
-                          message: l.koryNoneBody,
-                          // Un état vide qui GUIDE : l'action est là.
-                          action: ModuleActionButton(
-                            label: l.koryCreate,
-                            icon: Icons.add,
-                            expanded: false,
-                            onPressed: () => openKoryCreate(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 120),
+                          child: Center(
+                            // Un état vide qui GUIDE : les deux entrées sont là.
+                            child: KoryHomeMessage(
+                              illustration: PokouIllustrations.kory,
+                              title: l.koryNone,
+                              message: l.koryNoneBody,
+                              actions: [
+                                KoryHomePillButton(
+                                  icon: Icons.add,
+                                  label: l.koryCreate,
+                                  onPressed: () => openKoryCreate(context, ref),
+                                ),
+                                KoryHomePillButton(
+                                  quiet: true,
+                                  icon: Icons.key_outlined,
+                                  label: l.koryJoinTitle,
+                                  onPressed: () => _join(context, ref),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ]
-                  : [
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-                        sliver: SliverList.separated(
-                          itemCount: items.length + 1,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (_, index) => index == items.length
-                              ? _TontineCard(
-                                  pot: items
-                                      .where((pot) => pot.isTontine)
-                                      .firstOrNull,
-                                )
-                              : KoryPotCard(pot: items[index]),
-                        ),
-                      ),
-                    ],
+                  : _content(l, items, open.length),
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// La page quand il y a des cagnottes : recherche, filtres, « À la une »,
+  /// liste, et le rappel « wallet à wallet ».
+  List<Widget> _content(L l, List<KoryPot> items, int openCount) {
+    // Un filtre n'est proposé que s'il a de quoi montrer.
+    final filters = [
+      for (final filter in KoryHomeFilter.values)
+        if (filter == KoryHomeFilter.all || items.any(filter.matches)) filter,
+    ];
+    final filter = filters.contains(_filter) ? _filter : KoryHomeFilter.all;
+    final query = _fold(_search.text);
+    final narrowed = query.isNotEmpty || filter != KoryHomeFilter.all;
+    final shown = [
+      for (final pot in items)
+        if (filter.matches(pot) &&
+            (query.isEmpty || _fold(pot.title).contains(query)))
+          pot,
+    ];
+    // « À la une » : les collectes ouvertes qui ont une échéance, la plus
+    // proche d'abord. Une recherche ou un filtre la replie : on cherche
+    // alors dans la liste, pas dans une vitrine.
+    final featured = narrowed
+        ? const <KoryPot>[]
+        : (items.where((pot) => pot.isOpen && pot.dueAt != null).toList()
+                ..sort((a, b) => a.dueAt!.compareTo(b.dueAt!)))
+              .take(6)
+              .toList();
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+          child: KoryHomeSearchField(
+            controller: _search,
+            onChanged: (_) => setState(() {}),
+            onClear: () => setState(_search.clear),
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: KoryHomeFilterBar(
+            filters: filters,
+            selected: filter,
+            onSelected: (next) => setState(() => _filter = next),
+          ),
+        ),
+      ),
+      if (featured.isNotEmpty) ...[
+        SliverToBoxAdapter(child: KoryHomeSectionTitle(l.koryHomeFeatured)),
+        SliverToBoxAdapter(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            // Toutes les cartes à la hauteur de la plus haute, quelle que
+            // soit la taille du texte.
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (i, pot) in featured.indexed)
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: i == 0 ? 0 : 12,
+                      ),
+                      child: KoryFeaturedCard(
+                        pot: pot,
+                        onTap: () => _openPot(pot.id),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+      SliverToBoxAdapter(
+        child: KoryHomeSectionTitle(
+          l.koryMyPots,
+          trailing: openCount > 0 ? l.koryActiveCount('$openCount') : null,
+        ),
+      ),
+      if (shown.isEmpty)
+        SliverToBoxAdapter(
+          child: KoryHomeMessage(
+            illustration: PokouIllustrations.searchEmpty,
+            illustrationHeight: 120,
+            title: l.koryHomeNoMatch,
+            message: l.koryHomeNoMatchBody,
+            actions: [
+              KoryHomePillButton(
+                quiet: true,
+                label: l.koryHomeShowAll,
+                onPressed: _showAll,
+              ),
+            ],
+          ),
+        )
+      else
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverList.separated(
+            itemCount: shown.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (_, index) => KoryPotCard(pot: shown[index]),
+          ),
+        ),
+      const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 24, 16, 120),
+          child: _TrustCard(),
+        ),
+      ),
+    ];
   }
 
   Future<void> _join(BuildContext context, WidgetRef ref) async {
@@ -266,7 +296,7 @@ class KoryScreen extends ConsumerWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text(l.koryJoinTitle),
         content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.characters,
@@ -287,297 +317,356 @@ class KoryScreen extends ConsumerWidget {
     );
     controller.dispose();
     if (code == null || code.isEmpty || !context.mounted) return;
-    try {
-      final pot = await ref.read(koryRepositoryProvider).join(code);
-      refreshKory(ref);
-      if (!context.mounted) return;
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)));
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.koryJoinUnknown)));
-    }
+    // KOR-10 : on voit ce qu'on rejoint AVANT de le rejoindre.
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => KoryInviteScreen(code: code)));
+    refreshKory(ref);
   }
-}
 
-class _SummaryCard extends ConsumerWidget {
-  const _SummaryCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  /// « Journal » : le journal d'une collecte, choisie dans la liste.
+  Future<void> _openJournal(List<KoryPot> items) async {
     final l = L.of(context);
-    final summary = ref.watch(korySummaryProvider).valueOrNull;
-    final amount = formatFcfa(summary?.monthConfirmedTotal ?? 0);
-    // « 15 000 FCFA » : le chiffre en grand, la devise en terracotta.
-    final split = amount.lastIndexOf(' ');
-    final figure = split > 0 ? amount.substring(0, split) : amount;
-    final currency = split > 0 ? amount.substring(split + 1) : '';
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: AppRadius.card,
-          border: Border.all(color: AppColors.border),
-          boxShadow: AppElevation.card,
+    if (items.length == 1) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => KoryJournalScreen(potId: items.first.id),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    l.koryMonthActivity,
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
-                      letterSpacing: 0.8,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+      );
+      return;
+    }
+    final picked = await showModalBottomSheet<KoryPot>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.7,
+          ),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            children: [
+              KorySection(l.koryXWhichJournal),
+              for (final pot in items)
+                KoryPersonRow(
+                  name: pot.title,
+                  subtitle: koryKindLabel(l, pot),
+                  onTap: () => Navigator.pop(sheetContext, pot),
                 ),
-              ],
-            ),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: figure,
-                    style: TextStyle(
-                      color: AppColors.accentPrimaryDark,
-                      fontSize: 40,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.5,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                  if (currency.isNotEmpty)
-                    TextSpan(
-                      text: ' $currency',
-                      style: const TextStyle(
-                        color: AppColors.accentPrimary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if ((summary?.toReviewCount ?? 0) > 0) ...[
-              const SizedBox(height: 6),
-              KoryStatusPill(
-                icon: Icons.hourglass_top,
-                label: l.koryToReview('${summary!.toReviewCount}'),
-                color: AppColors.feedbackWarning,
-              ),
             ],
-          ],
+          ),
         ),
       ),
+    );
+    if (picked == null || !mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => KoryJournalScreen(potId: picked.id)),
     );
   }
 }
 
-/// Une cagnotte dans une liste — réutilisée par l'accueil.
+/// « mariage » trouve « Mariage », « bapteme » trouve « Baptême » : la
+/// recherche ignore la casse et les accents courants.
+String _fold(String text) {
+  const from = 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿ';
+  const to = 'aaaaaaceeeeiiiinooooouuuuyy';
+  final lower = text.trim().toLowerCase();
+  final buffer = StringBuffer();
+  for (final rune in lower.runes) {
+    final char = String.fromCharCode(rune);
+    final index = from.indexOf(char);
+    buffer.write(index < 0 ? char : to[index]);
+  }
+  return buffer.toString();
+}
+
+/// Une cagnotte dans la liste : la vignette à son initiale, le titre, la
+/// barre d'avancement, ce qui est réuni sur ce qui est visé, et le bouton.
+///
+/// Toute la carte ouvre la cagnotte ; le bouton aussi — c'est là que l'on
+/// déclare sa contribution.
 class KoryPotCard extends StatelessWidget {
-  const KoryPotCard({super.key, required this.pot, this.dark = false});
+  const KoryPotCard({super.key, required this.pot});
 
   final KoryPot pot;
-  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final progress = pot.progress;
-    return ModuleCard(
-      backgroundColor: dark ? AppColors.brandEbene : null,
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final look = KoryKindLook.of(pot);
+    final figures = KoryPotFigures.of(pot);
+    final round = koryCurrentRound(pot);
+    final days = pot.isOpen ? koryDaysLeft(pot) : null;
+    final pending = pot.pendingCount ?? 0;
+    final period = switch (pot.period) {
+      'WEEKLY' => l.koryPeriodWeekly,
+      'MONTHLY' => l.koryPeriodMonthly,
+      _ => null,
+    };
+    // « Cagnotte · Kossi », « Tontine · Tour 2 sur 6 », « Cotisation ·
+    // 5 000 FCFA par membre, chaque mois ».
+    final detail = round != null
+        ? l.koryHomeRoundOf(
+            '${pot.currentRound ?? round.number}',
+            '${pot.rounds.length}',
+          )
+        : pot.isCotisation && pot.amountPerMember != null && period != null
+        ? l.koryPerMember(formatFcfa(pot.amountPerMember!), period)
+        : pot.organizerName;
+    final subtitle = [
+      koryKindLabel(l, pot),
+      if (detail != null && detail.isNotEmpty) detail,
+    ].join(' · ');
+    // Sous le montant : la cible et le pourcentage en TEXTE, pas seulement
+    // en barre (section 7.6) ; sans cible, ce que le chiffre représente.
+    final target = figures.target;
+    final caption = target != null
+        ? '${l.koryOnGoal(formatFcfa(target))} · '
+              '${l.koryHomePercent('${figures.percent}')}'
+        : round?.beneficiaryName != null
+        ? l.koryHomeBeneficiary(round!.beneficiaryName!)
+        : l.koryTotalConfirmed;
+    final signal = !pot.isOpen
+        ? KoryStatusPill(
+            icon: Icons.lock_outline,
+            label: l.koryClosed,
+            color: AppColors.textSecondary,
+          )
+        : pending > 0
+        ? KoryStatusPill(
+            icon: Icons.hourglass_top,
+            label: l.koryToReview('$pending'),
+            color: AppColors.securityWarning,
+          )
+        : days != null
+        ? KoryStatusPill(
+            icon: days < 0 ? Icons.event_busy_outlined : Icons.schedule,
+            label: days < 0 ? l.koryHomeOverdue : l.homeDaysLeft(days),
+            color: days <= 3
+                ? AppColors.securityCritical
+                : AppColors.accentPrimaryDark,
+          )
+        : null;
+    void open() => Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)));
+
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card,
+        side: BorderSide(color: AppColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: open,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ModuleBadge(
-                icon: pot.isCotisation
-                    ? Icons.event_repeat_outlined
-                    : Icons.savings_outlined,
-                color: dark ? AppColors.brandOr : AppColors.accentPrimary,
-                muted: !pot.isOpen,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      pot.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: dark
-                            ? AppColors.neutralCreme
-                            : AppColors.textPrimary,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      pot.isCotisation
-                          ? l.koryKindCotisation
-                          : l.koryKindCagnotte,
-                      style: TextStyle(
-                        color: dark
-                            ? AppColors.neutralCreme.withValues(alpha: 0.8)
-                            : AppColors.textSecondary,
-                        fontSize: 13,
-                      ),
-                    ),
-                    if (pot.organizerName != null)
-                      Text(
-                        '${pot.organizerName} · ${pot.entries.length} contributions confirmées',
-                        style: TextStyle(
-                          color: dark
-                              ? AppColors.neutralCreme.withValues(alpha: 0.8)
-                              : AppColors.textSecondary,
-                          fontSize: 13,
+              Row(
+                children: [
+                  _PotThumb(title: pot.title, look: look, muted: !pot.isOpen),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          pot.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                  ],
-                ),
+                        const SizedBox(height: 3),
+                        // La nature et son détail à gauche ; à droite un
+                        // seul signal, le plus pressant : clôturée, à
+                        // confirmer, ou le temps qui reste. Le titre garde
+                        // ainsi toute la largeur.
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            if (signal != null) ...[
+                              const SizedBox(width: 8),
+                              Flexible(flex: 0, child: signal),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              if (!pot.isOpen)
-                KoryStatusPill(
-                  icon: Icons.lock_outline,
-                  label: l.koryClosed,
-                  color: dark
-                      ? AppColors.neutralCreme
-                      : AppColors.textSecondary,
-                )
-              else if ((pot.pendingCount ?? 0) > 0)
-                KoryStatusPill(
-                  icon: Icons.hourglass_top,
-                  label: l.koryToReview('${pot.pendingCount}'),
-                  color: dark ? AppColors.brandOr : AppColors.feedbackWarning,
-                ),
+              const SizedBox(height: 14),
+              if (figures.value != null) ...[
+                KoryProgressBar(value: figures.value!, muted: !pot.isOpen),
+                const SizedBox(height: 12),
+              ],
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formatFcfa(figures.amount),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    flex: 0,
+                    child: KoryHomePillButton(
+                      quiet: !pot.isOpen,
+                      label: pot.isOpen ? l.koryHomeContribute : l.koryHomeView,
+                      onPressed: open,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            l.koryTotalConfirmed,
-            style: TextStyle(
-              color: dark ? AppColors.neutralCreme : AppColors.textSecondary,
-              fontSize: 12,
-            ),
-          ),
-          Text(
-            formatFcfa(pot.confirmedTotal),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-          ),
-          if (progress != null) ...[
-            const SizedBox(height: 8),
-            ModuleProgressBar(
-              value: progress,
-              color: dark ? AppColors.brandOr : AppColors.accentPrimary,
-              done: progress >= 1,
-            ),
-            const SizedBox(height: 4),
-            // Le pourcentage en TEXTE, pas seulement en barre (section 7.6).
-            Text(
-              '${(progress * 100).round()} % · ${l.koryGoal(formatFcfa(pot.goalAmount!))}',
-              style: TextStyle(
-                color: dark
-                    ? AppColors.neutralCreme.withValues(alpha: 0.8)
-                    : AppColors.textSecondary,
-                fontSize: 12,
-              ),
-            ),
-          ],
-          if (pot.dueAt != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              l.koryDue(
-                DateFormat.yMMMd(
-                  Localizations.localeOf(context).toLanguageTag(),
-                ).format(pot.dueAt!.toLocal()),
-              ),
-              style: TextStyle(
-                color: dark
-                    ? AppColors.neutralCreme.withValues(alpha: 0.8)
-                    : AppColors.textSecondary,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
 }
 
-/// La tontine en rotation existe dans le cahier des charges, mais pas
-/// avant Kory Plus (mois 13). On l'annonce sans la proposer.
-class _TontineCard extends StatelessWidget {
-  const _TontineCard({required this.pot});
+/// La vignette d'une cagnotte : son initiale sur l'aplat de sa nature.
+/// Clôturée, elle s'éteint — l'œil trie la liste sans la lire.
+class _PotThumb extends StatelessWidget {
+  const _PotThumb({
+    required this.title,
+    required this.look,
+    required this.muted,
+  });
 
-  final KoryPot? pot;
+  final String title;
+  final KoryKindLook look;
+  final bool muted;
 
   @override
   Widget build(BuildContext context) {
-    if (pot == null) return const SizedBox.shrink();
-    final round =
-        pot!.currentRound != null &&
-            pot!.currentRound! > 0 &&
-            pot!.currentRound! <= pot!.rounds.length
-        ? pot!.rounds[pot!.currentRound! - 1]
-        : pot!.rounds.firstOrNull;
-    return ModuleCard(
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot!.id))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${pot!.title} · Kory Plus · tour ${pot!.currentRound ?? 0} sur ${pot!.rounds.length}',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Tontine · ${pot!.groupId == null ? '' : pot!.organizerName ?? ''} · bénéficiaire du mois : ${round?.beneficiaryName ?? '—'}',
-          ),
-          if (round != null) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                KoryStatusPill(
-                  icon: Icons.schedule,
-                  label:
-                      '${formatFcfa(round.expectedTotal)} attendus aujourd’hui',
-                  color: AppColors.feedbackWarning,
+    final trimmed = title.trim();
+    final initial = trimmed.isEmpty
+        ? ''
+        : String.fromCharCode(trimmed.runes.first).toUpperCase();
+    return ExcludeSemantics(
+      child: Container(
+        width: 52,
+        height: 52,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: muted ? AppColors.surfaceElevated : look.tint,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: initial.isEmpty
+            ? Icon(
+                Icons.savings_outlined,
+                color: muted ? AppColors.textMuted : look.ink,
+              )
+            : Text(
+                initial,
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: muted ? AppColors.textMuted : look.ink,
                 ),
-                const Spacer(),
+              ),
+      ),
+    );
+  }
+}
+
+/// Le rappel du bas de page, à la manière de celui de l'Accueil : Pokou ne
+/// touche jamais l'argent, il passe de wallet à wallet.
+class _TrustCard extends StatelessWidget {
+  const _TrustCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+      decoration: const BoxDecoration(
+        gradient: AppGradients.certified,
+        borderRadius: AppRadius.card,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  'Contribuer',
-                  style: TextStyle(
-                    color: AppColors.accentPrimaryDark,
-                    fontWeight: FontWeight.w600,
+                  l.koryWalletChip,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.brandOr,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // Fond de marque fixe : le crème ne change pas en sombre.
+                Text(
+                  l.koryNeverTouches,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.neutralCreme,
                   ),
                 ),
               ],
             ),
-          ],
+          ),
+          const SizedBox(width: 12),
+          const ExcludeSemantics(
+            child: Icon(
+              Icons.verified_user_outlined,
+              color: AppColors.brandOr,
+              size: 28,
+            ),
+          ),
         ],
       ),
     );
@@ -610,12 +699,17 @@ class KoryStatusPill extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+          // Faute de place, le libellé se coupe au lieu de déborder.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],

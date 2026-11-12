@@ -115,6 +115,7 @@ class Scheduler:
             db = SessionLocal()
             try:
                 call_housekeeping.run(db)
+                await call_housekeeping.close_deserted_group_calls(db)
             except Exception as exc:
                 logger.error("Calls housekeeping error: %s", str(exc), exc_info=True)
             finally:

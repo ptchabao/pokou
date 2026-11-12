@@ -11,6 +11,7 @@ import '../shared/module_ui.dart';
 import 'truth_market_controller.dart';
 import 'truth_market_model.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// La couleur du module — pastilles seulement.
 const _sky = Color(0xFF0EA5E9);
@@ -65,7 +66,7 @@ class _ReceivedTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(truthReceivedProvider);
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCards(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).truthUnavailable,
@@ -251,7 +252,7 @@ class _SentTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(truthSentProvider);
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCards(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).truthHistoryUnavailable,

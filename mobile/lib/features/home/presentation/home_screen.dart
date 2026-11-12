@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
@@ -25,8 +24,11 @@ import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_pot_screen.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../notifications/presentation/notifications_center_screen.dart';
-import '../../profile/presentation/profile_screen.dart';
+import '../data/home_banner.dart';
 import 'global_search_screen.dart';
+import 'home_carousel.dart';
+import 'pokou_page_header.dart';
+import '../../../core/widgets/assistant_orb.dart';
 import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/pokou_icon.dart';
 
@@ -51,8 +53,6 @@ class HomeScreen extends ConsumerWidget {
     final config = ref.watch(currentCountryConfigProvider);
     final user = ref.watch(authControllerProvider).user;
     final firstName = (user?.fullName ?? '').split(' ').first;
-    final unreadNotifications =
-        ref.watch(serviceNotificationsProvider).valueOrNull?.unread ?? 0;
     final unreadMessages = ref.watch(
       discussionsProvider.select(
         (async) => (async.valueOrNull ?? const <ConversationSummary>[])
@@ -118,6 +118,7 @@ class HomeScreen extends ConsumerWidget {
           ref.invalidate(discussionsProvider);
           ref.invalidate(countryConfigProvider);
           ref.invalidate(serviceNotificationsProvider);
+          ref.invalidate(homeBannersProvider);
           if (config.has('kory')) refreshKory(ref);
         },
         child: ListView(
@@ -126,61 +127,29 @@ class HomeScreen extends ConsumerWidget {
             // ── En-tête : la salutation et l'état du jour à gauche, la
             // cloche et la photo à droite. Pas de barre de titre : l'onglet
             // dit déjà « Accueil ».
-            SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 14, 12, 0),
-                child: _Header(
-                  firstName: firstName,
-                  unreadMessages: unreadMessages,
-                  bell: _Bell(
-                    unread: unreadNotifications,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationsCenterScreen(),
-                      ),
-                    ),
-                  ),
-                  avatar: user == null
-                      ? null
-                      : Semantics(
-                          button: true,
-                          label: l.navProfile,
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const ProfileScreen(),
-                              ),
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.border,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: ContactAvatar(
-                                avatar: user.avatar,
-                                displayName: user.fullName ?? '',
-                                size: 42,
-                              ),
-                            ),
-                          ),
-                        ),
+            PokouPageHeader(
+              title: firstName.isEmpty
+                  ? l.homeHelloOverline
+                  : l.homeGreeting(firstName),
+              subtitle: unreadMessages > 0
+                  ? l.homeUnreadSummary(unreadMessages)
+                  : l.homeTagline,
+              emphasized: unreadMessages > 0,
+            ),
+            // ── Recherche en pilule.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+              child: _SearchPill(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
                 ),
               ),
             ),
-            // ── Recherche en pilule, et Baba dans le carré sombre voisin.
+            // ── Baba se présente, à la première personne.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-              child: _SearchRow(
-                onSearch: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
-                ),
-                onBaba: () =>
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: _BabaCard(
+                onTap: () =>
                     context.push('/chat/$kNoMonitor', extra: l.navBaba),
               ),
             ),
@@ -194,9 +163,11 @@ class HomeScreen extends ConsumerWidget {
             ],
             _InProgress(kory: config.has('kory'), honam: config.has('honam')),
             _RecentDiscussions(onSeeAll: () => onOpenTab(PokouTab.discussions)),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
-              child: _TrustCard(),
+            // ── Le carrousel : les annonces de ma zone, puis le rappel du
+            // chiffrement.
+            Padding(
+              padding: const EdgeInsets.only(top: 24),
+              child: HomeCarousel(onOpenTab: onOpenTab),
             ),
           ],
         ),
@@ -205,169 +176,124 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// Cloche avec pastille de non-lues (NOT-1).
-class _Bell extends StatelessWidget {
-  const _Bell({required this.unread, required this.onTap});
+/// La recherche, en pilule pleine largeur.
+class _SearchPill extends StatelessWidget {
+  const _SearchPill({required this.onTap});
 
-  final int unread;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-    tooltip: L.of(context).notifCenterTitle,
-    onPressed: onTap,
-    icon: Badge(
-      isLabelVisible: unread > 0,
-      backgroundColor: AppColors.accentPrimary,
-      label: Text(unread > 9 ? '9+' : '$unread'),
-      child: const Icon(Icons.notifications_none_outlined),
+  Widget build(BuildContext context) => Material(
+    color: AppColors.surface,
+    shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+    child: InkWell(
+      customBorder: const StadiumBorder(),
+      onTap: onTap,
+      child: SizedBox(
+        height: 52,
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(Icons.search, color: AppColors.textMuted),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                L.of(context).homeSearchEverything,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 15),
+              ),
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+      ),
     ),
   );
 }
 
-/// L'en-tête : « Bonjour Parrain » en gras, et dessous ce qui attend
-/// aujourd'hui — les messages non lus, ou l'accroche quand tout est lu.
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.firstName,
-    required this.unreadMessages,
-    required this.bell,
-    required this.avatar,
-  });
+/// Baba, l'assistant — une personne qui se présente, pas un bouton.
+///
+/// Il était un carré sombre marqué d'une étoile, à côté de la recherche :
+/// une icône de plus, que rien ne reliait au reste de l'écran et qui ne
+/// disait pas à qui l'on allait parler. Ici il a un visage (son orbe, qui
+/// respire), il parle à la première personne, et sa carte reprend les
+/// formes des cartes de services : même arrondi, même bouton rond.
+class _BabaCard extends StatelessWidget {
+  const _BabaCard({required this.onTap});
 
-  final String firstName;
-  final int unreadMessages;
-  final Widget bell;
-  final Widget? avatar;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                firstName.isEmpty
-                    ? l.homeHelloOverline
-                    : l.homeGreeting(firstName),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 26,
-                  height: 1.2,
-                  letterSpacing: -0.4,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                unreadMessages > 0
-                    ? l.homeUnreadSummary(unreadMessages)
-                    : l.homeTagline,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: unreadMessages > 0
-                      ? AppColors.accentPrimaryDark
-                      : AppColors.textSecondary,
-                  fontWeight: unreadMessages > 0
-                      ? FontWeight.w600
-                      : FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
+    return Semantics(
+      button: true,
+      label: l.homeBabaCta,
+      child: Material(
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.card,
+          side: BorderSide(color: AppColors.border),
         ),
-        bell,
-        if (avatar != null) ...[const SizedBox(width: 4), avatar!],
-        const SizedBox(width: 8),
-      ],
-    );
-  }
-}
-
-/// La recherche en pilule, et à côté un carré sombre : Baba, l'assistant.
-/// Le contraste du carré dit qu'il fait autre chose que chercher.
-class _SearchRow extends StatelessWidget {
-  const _SearchRow({required this.onSearch, required this.onBaba});
-
-  final VoidCallback onSearch;
-  final VoidCallback onBaba;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: Material(
-            color: AppColors.surface,
-            shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
-            child: InkWell(
-              customBorder: const StadiumBorder(),
-              onTap: onSearch,
-              child: SizedBox(
-                height: 52,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 16),
-                    Icon(Icons.search, color: AppColors.textMuted),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        l.homeSearchEverything,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+            child: Row(
+              children: [
+                const ExcludeSemantics(child: AssistantOrb(size: 48)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.homeBabaHello,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 15,
+                          fontFamily: 'Outfit',
+                          fontSize: 17,
+                          height: 1.2,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Tooltip(
-          message: l.homeBabaTitle,
-          child: Semantics(
-            button: true,
-            label: l.navBaba,
-            child: Material(
-              // Ébène sur fond clair ; en sombre, l'ébène se fondrait dans
-              // le fond — le carré passe à l'or, l'étoile à l'ébène.
-              color: AppColors.isDark
-                  ? AppColors.brandOr
-                  : AppColors.brandEbene,
-              borderRadius: BorderRadius.circular(16),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onBaba,
-                child: SizedBox(
-                  width: 52,
-                  height: 52,
-                  child: Icon(
-                    Icons.auto_awesome,
-                    color: AppColors.isDark
-                        ? AppColors.brandEbene
-                        : AppColors.brandOr,
+                      const SizedBox(height: 2),
+                      Text(
+                        l.homeBabaOffer,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          height: 1.3,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accentPrimary.withValues(alpha: 0.12),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    size: 20,
+                    color: AppColors.accentPrimaryDark,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -590,7 +516,9 @@ class _SectionHeader extends StatelessWidget {
   );
 }
 
-/// Carte blanche « Terre de Confiance » : 18 pt, filet, ombre double.
+/// Carte blanche « Terre de Confiance » : 18 pt et un filet — à plat, sans
+/// ombre. Les cartes ne flottent plus au-dessus du fond : elles y sont
+/// posées, comme les cartes de services.
 class _Card extends StatelessWidget {
   const _Card({required this.child, this.onTap, this.padding});
 
@@ -604,7 +532,6 @@ class _Card extends StatelessWidget {
       color: AppColors.surface,
       borderRadius: AppRadius.card,
       border: Border.all(color: AppColors.border),
-      boxShadow: AppElevation.card,
     ),
     child: Material(
       type: MaterialType.transparency,
@@ -1124,56 +1051,6 @@ class _DiscussionRow extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Le rappel du chiffrement, en bas de l'Accueil.
-class _TrustCard extends StatelessWidget {
-  const _TrustCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 22, 18, 22),
-      decoration: BoxDecoration(
-        gradient: AppGradients.certified,
-        borderRadius: AppRadius.card,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.homeTrustOverline,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 0.8,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.brandOr,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  l.homeTrustBody,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.35,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFF9E5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Icon(Icons.lock_outline, color: AppColors.brandOr, size: 28),
-        ],
       ),
     );
   }

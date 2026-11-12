@@ -13,6 +13,7 @@ import '../../honam/presentation/honam_controller.dart' show openPayment;
 import '../../modules/shared/module_ui.dart';
 import '../../../core/time/server_time.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 final _proProvider =
     FutureProvider.autoDispose<
@@ -53,7 +54,7 @@ class CertifiedProScreen extends ConsumerWidget {
     return ModuleScaffold(
       title: l.proTitle,
       child: data.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.cloud_off,
           title: l.honamFailed,
@@ -345,19 +346,19 @@ class _ProFormState extends ConsumerState<_ProForm> {
           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
         TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: _business,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(labelText: l.proBusinessName),
         ),
         TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: _activity,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(labelText: l.proActivityField),
         ),
         TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: _city,
           decoration: InputDecoration(labelText: l.honamCity),
         ),

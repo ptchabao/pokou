@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../api/api_client.dart';
@@ -20,13 +21,20 @@ bool _isExpiredOrNearExpiry(String jwt) {
     final parts = jwt.split('.');
     if (parts.length != 3) return true;
     final normalized = base64Url.normalize(parts[1]);
-    final payload = jsonDecode(utf8.decode(base64Url.decode(normalized))) as Map<String, dynamic>;
+    final payload =
+        jsonDecode(utf8.decode(base64Url.decode(normalized)))
+            as Map<String, dynamic>;
     final exp = payload['exp'] as int?;
     if (exp == null) return true;
-    final expiresAt = DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true);
+    final expiresAt = DateTime.fromMillisecondsSinceEpoch(
+      exp * 1000,
+      isUtc: true,
+    );
     // Marge de 60s pour ne pas se faire rejeter par un jeton qui expire
     // pendant le temps du handshake lui-même.
-    return DateTime.now().toUtc().isAfter(expiresAt.subtract(const Duration(seconds: 60)));
+    return DateTime.now().toUtc().isAfter(
+      expiresAt.subtract(const Duration(seconds: 60)),
+    );
   } catch (_) {
     return true;
   }
@@ -53,10 +61,28 @@ Duration reconnectDelay(int attempt, Random random) {
 /// backoff (see [reconnectDelay]). When the app is backgrounded or killed,
 /// push notifications take over (core/push/push_service.dart).
 class WsClient {
-  WsClient({required String baseWsUrl, required SecureTokenStorage tokenStorage, required ApiClient apiClient})
-      : _baseWsUrl = baseWsUrl,
-        _tokenStorage = tokenStorage,
-        _apiClient = apiClient;
+  WsClient({
+    required String baseWsUrl,
+    required SecureTokenStorage tokenStorage,
+    required ApiClient apiClient,
+    this.pingInterval = const Duration(seconds: 25),
+  }) : _baseWsUrl = baseWsUrl,
+       _tokenStorage = tokenStorage,
+       _apiClient = apiClient;
+
+  /// Le signal de vie du socket.
+  ///
+  /// Sans lui, une connexion morte ne se voyait pas : après une mise en
+  /// veille, un passage du wifi à la 4G ou un proxy qui coupe les
+  /// connexions muettes, le socket restait « ouvert » des deux côtés sans
+  /// plus rien transporter. Aucune fermeture n'était signalée, donc aucune
+  /// reconnexion, aucun rattrapage — et plus un seul écran ne se mettait à
+  /// jour tant qu'on ne relançait pas l'application. Le serveur, qui
+  /// croyait livrer par le socket, n'envoyait pas non plus de notification.
+  ///
+  /// Un ping part à cet intervalle ; sans réponse avant le suivant, le
+  /// socket est fermé, et [_scheduleReconnect] prend le relais.
+  final Duration pingInterval;
 
   final String _baseWsUrl;
   final SecureTokenStorage _tokenStorage;
@@ -69,6 +95,13 @@ class WsClient {
 
   /// Tentatives ratées depuis la dernière connexion réussie.
   int _attempt = 0;
+
+  /// La connexion en cours d'ouverture. Ouvrir un socket prend plusieurs
+  /// allers-retours (jeton, ticket, poignée de main) ; une seconde demande
+  /// arrivée entre-temps (retour au premier plan, reconnexion programmée)
+  /// ouvrait un SECOND socket, et chaque événement arrivait alors en double.
+  /// Seule la demande la plus récente garde son socket.
+  int _generation = 0;
   final _random = Random();
 
   final _eventsController = StreamController<Map<String, dynamic>>.broadcast();
@@ -108,8 +141,10 @@ class WsClient {
 
   Future<void> connect() async {
     if (_disposed) return;
+    final generation = ++_generation;
+    bool superseded() => _disposed || generation != _generation;
     var token = await _tokenStorage.readAccessToken();
-    if (token == null) return;
+    if (token == null || superseded()) return;
 
     if (_isExpiredOrNearExpiry(token)) {
       // Passe par ApiClient (dédup partagée, voir refreshTokens()) plutôt
@@ -117,7 +152,7 @@ class WsClient {
       // token, donc un rafraîchissement concurrent depuis un appel REST
       // invaliderait celui-ci s'ils n'étaient pas coordonnés.
       final refreshed = await _apiClient.refreshTokens();
-      if (_disposed) return;
+      if (superseded()) return;
       if (!refreshed) {
         _scheduleReconnect();
         return;
@@ -140,18 +175,26 @@ class WsClient {
       // une API qui ne l'est pas, et refuser de se connecter couperait le
       // temps réel pour rien.
       final ticket = await _fetchTicket();
+      if (superseded()) return;
       final freshToken = await _tokenStorage.readAccessToken() ?? token;
       final query = ticket != null ? 'ticket=$ticket' : 'token=$freshToken';
-      final channel = WebSocketChannel.connect(Uri.parse('$_baseWsUrl?$query'));
+      final channel = IOWebSocketChannel.connect(
+        Uri.parse('$_baseWsUrl?$query'),
+        pingInterval: pingInterval,
+      );
       // `connect()` returns before the handshake completes — awaiting
       // `ready` is what actually surfaces a failed lookup/upgrade (DNS,
       // refused upgrade, etc.) here instead of as an unhandled exception
       // from the channel's internal future.
       await channel.ready;
-      if (_disposed) {
+      if (superseded()) {
         unawaited(channel.sink.close());
         return;
       }
+      // Un socket précédent encore ouvert (connexion demandée deux fois de
+      // suite) est fermé : un seul écoute.
+      unawaited(_subscription?.cancel());
+      unawaited(_channel?.sink.close());
       _channel = channel;
       _attempt = 0;
       _emitConnection(true);
@@ -164,11 +207,15 @@ class WsClient {
             // Ignore malformed frames rather than crash the connection.
           }
         },
-        onDone: _scheduleReconnect,
-        onError: (_) => _scheduleReconnect(),
+        onDone: () {
+          if (identical(_channel, channel)) _scheduleReconnect();
+        },
+        onError: (_) {
+          if (identical(_channel, channel)) _scheduleReconnect();
+        },
       );
     } catch (_) {
-      _scheduleReconnect();
+      if (!superseded()) _scheduleReconnect();
     }
   }
 
@@ -180,10 +227,32 @@ class WsClient {
     _reconnectTimer = Timer(reconnectDelay(_attempt++, _random), connect);
   }
 
+  /// L'application revient au premier plan après [pausedFor].
+  ///
+  /// Le système suspend les sockets d'une application en arrière-plan sans
+  /// toujours le dire. Après une vraie absence on ne fait donc pas confiance
+  /// au socket : on en rouvre un, ce qui déclenche le rattrapage de tout ce
+  /// qui s'est passé entre-temps (voir PokouSyncEngine). Après un simple
+  /// aller-retour (sélecteur de photo, demande de permission) on le garde ;
+  /// et s'il était déjà tombé, on n'attend pas la fin du délai de
+  /// reconnexion — l'utilisateur regarde l'écran MAINTENANT.
+  Future<void> resume(Duration pausedFor) async {
+    if (_disposed) return;
+    if (_channel != null && pausedFor < staleAfter) return;
+    disconnect();
+    _attempt = 0;
+    _emitConnection(false);
+    await connect();
+  }
+
+  /// Au-delà de cette absence, le socket est rouvert au retour.
+  static const staleAfter = Duration(seconds: 20);
+
   /// Closes the current socket without permanently killing this client —
   /// use on logout, so a subsequent login can `connect()` again. Contrast
   /// with `dispose()`, which is final (app teardown only).
   void disconnect() {
+    _generation++;
     _reconnectTimer?.cancel();
     _subscription?.cancel();
     _channel?.sink.close();

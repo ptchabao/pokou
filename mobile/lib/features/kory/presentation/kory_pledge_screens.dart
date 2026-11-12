@@ -11,9 +11,11 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../messaging/presentation/conversation_screen.dart';
-import '../../modules/shared/module_ui.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
+import 'kory_home_widgets.dart';
+import 'kory_ui.dart';
+import 'kory_wallet.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Ce qu'un écran Kory demande à l'écran de la cagnotte en se refermant :
@@ -25,66 +27,6 @@ String _day(BuildContext context, DateTime date) => DateFormat.MMMd(
 ).format(date.toLocal());
 
 String _hm(DateTime date) => DateFormat.Hm().format(date.toLocal());
-
-/// Une ligne « libellé … valeur » des cartes Kory.
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value, {this.strong = false, this.caption});
-
-  final String label;
-  final String value;
-  final bool strong;
-  final String? caption;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: TextStyle(color: AppColors.textSecondary)),
-                if (caption != null)
-                  Text(
-                    caption!,
-                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: strong ? FontWeight.w700 : FontWeight.w600,
-              fontSize: strong ? 17 : 15,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Le pied d'écran : l'action principale, puis une ligne secondaire.
-class _Footer extends StatelessWidget {
-  const _Footer({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => SafeArea(
-    top: false,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Column(mainAxisSize: MainAxisSize.min, children: children),
-    ),
-  );
-}
 
 void _writeTo(BuildContext context, WidgetRef ref, KoryPot pot) {
   final me = ref.read(authControllerProvider).user?.id;
@@ -196,7 +138,7 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
             Text(
               due == null
                   ? pot.title
-                  : l.koryPledgeSubtitleDue(pot.title, _day(context, due)),
+                  : l.koryPledgeSubtitleDue(_day(context, due), pot.title),
               style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
@@ -206,7 +148,7 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _base,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -217,13 +159,21 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 10),
-          ModuleAmountPicker(
-            amounts: _presets,
-            selected: _baseValue,
-            onChanged: (v) => setState(() => _base.text = '$v'),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final value in _presets)
+                ChoiceChip(
+                  label: Text(formatFcfa(value)),
+                  selected: value == _baseValue,
+                  showCheckmark: false,
+                  onSelected: (_) => setState(() => _base.text = '$value'),
+                ),
+            ],
           ),
           const SizedBox(height: 16),
-          ModuleCard(
+          KoryCard(
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l.koryPledgeDailyToggle),
@@ -239,7 +189,7 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
           if (_withDaily && due != null) ...[
             const SizedBox(height: 12),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: _daily,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -251,17 +201,17 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
             ),
           ],
           const SizedBox(height: 16),
-          ModuleCard(
+          KoryCard(
             child: Column(
               children: [
-                _Row(l.koryPledgeStartRow, formatFcfa(_baseValue)),
+                KoryLine(l.koryPledgeStartRow, formatFcfa(_baseValue)),
                 if (_dailyValue > 0)
-                  _Row(
+                  KoryLine(
                     l.koryPledgeDailyRow(formatFcfa(_dailyValue), '$_days'),
                     formatFcfa(_dailyValue * _days),
                   ),
                 const Divider(height: 16),
-                _Row(
+                KoryLine(
                   due == null
                       ? l.koryEngaged
                       : l.koryPledgeTotalAt(_day(context, due)),
@@ -272,15 +222,12 @@ class _KoryPledgeScreenState extends ConsumerState<KoryPledgeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          ModuleCallout(
-            tone: CalloutTone.amber,
-            text: l.koryPledgeEditableNotice,
-          ),
+          KoryNotice(tone: KoryTone.warning, text: l.koryPledgeEditableNotice),
         ],
       ),
-      bottomNavigationBar: _Footer(
+      bottomNavigationBar: KoryFooter(
         children: [
-          ModuleActionButton(
+          KoryButton(
             label: l.koryPledgeConfirm,
             busy: _busy,
             onPressed: _busy ? null : _submit,
@@ -352,16 +299,16 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
         ),
       ),
       body: pot == null || pledge == null
-          ? const Center(child: CircularProgressIndicator())
+          ? const KoryPageSkeleton()
           : (pledge.isFirm || !_now.isBefore(pledge.firmAt))
           ? _firm(context, pot, pledge)
           : _editable(context, pot, pledge),
       bottomNavigationBar: pot == null || pledge == null
           ? null
-          : _Footer(
+          : KoryFooter(
               children: [
                 if (pledge.remaining > 0 || !pledge.isFirm)
-                  ModuleActionButton(
+                  KoryButton(
                     label: pledge.isFirm
                         ? l.koryPayAmount(formatFcfa(pledge.remaining))
                         : l.koryPayNow,
@@ -388,11 +335,11 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        ModuleCard(
+        KoryCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Row(l.koryMyPledgeTitle, l.koryEditableFor(duration)),
+              KoryLine(l.koryMyPledgeTitle, l.koryEditableFor(duration)),
               Text(
                 formatFcfa(pledge.total),
                 style: const TextStyle(
@@ -402,11 +349,10 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              ModuleProgressBar(
+              KoryProgressBar(
                 value: pledge.total == 0
                     ? 0
                     : (pledge.confirmed / pledge.total).clamp(0, 1).toDouble(),
-                color: AppColors.accentPrimary,
               ),
               const SizedBox(height: 6),
               Text(
@@ -416,14 +362,18 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
                 style: TextStyle(color: AppColors.textSecondary),
               ),
               const Divider(height: 20),
-              _Row(l.koryPledgeStartRow, formatFcfa(pledge.base)),
+              KoryLine(l.koryPledgeStartRow, formatFcfa(pledge.base)),
               if ((pledge.daily ?? 0) > 0)
-                _Row(l.koryDailyRow, l.koryPerDay(formatFcfa(pledge.daily!))),
+                KoryLine(
+                  l.koryDailyRow,
+                  l.koryPerDay(formatFcfa(pledge.daily!)),
+                ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        ModuleQuietButton(
+        KoryButton(
+          quiet: true,
           label: l.koryPledgeEdit,
           icon: Icons.edit_outlined,
           onPressed: () => Navigator.of(
@@ -431,7 +381,7 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
           ).push(MaterialPageRoute(builder: (_) => KoryPledgeScreen(pot: pot))),
         ),
         const SizedBox(height: 16),
-        ModuleCard(
+        KoryCard(
           child: Column(
             children: [
               _Step(
@@ -456,7 +406,7 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        ModuleCallout(tone: CalloutTone.beige, text: l.koryPayNowOrLater),
+        KoryNotice(tone: KoryTone.neutral, text: l.koryPayNowOrLater),
       ],
     );
   }
@@ -466,11 +416,11 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        ModuleCard(
+        KoryCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Row(
+              KoryLine(
                 l.koryMyPledgeTitle,
                 l.koryFirmSince(_day(context, pledge.firmAt)),
               ),
@@ -483,28 +433,29 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
                 ),
               ),
               const Divider(height: 20),
-              _Row(l.koryPledgeStartRow, formatFcfa(pledge.base)),
+              KoryLine(l.koryPledgeStartRow, formatFcfa(pledge.base)),
               if ((pledge.daily ?? 0) > 0)
-                _Row(l.koryDailyRow, l.koryPerDay(formatFcfa(pledge.daily!))),
+                KoryLine(
+                  l.koryDailyRow,
+                  l.koryPerDay(formatFcfa(pledge.daily!)),
+                ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        ModuleCard(
+        KoryCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Row(l.koryPaidConfirmed, formatFcfa(pledge.confirmed)),
+              KoryLine(l.koryPaidConfirmed, formatFcfa(pledge.confirmed)),
               const SizedBox(height: 6),
-              ModuleProgressBar(
+              KoryProgressBar(
                 value: pledge.total == 0
                     ? 0
                     : (pledge.confirmed / pledge.total).clamp(0, 1).toDouble(),
-                color: AppColors.feedbackSuccess,
-                done: pledge.remaining == 0,
               ),
               const SizedBox(height: 6),
-              _Row(
+              KoryLine(
                 l.koryRemainingToPay,
                 formatFcfa(pledge.remaining),
                 strong: true,
@@ -518,7 +469,7 @@ class _KoryMyPledgeScreenState extends ConsumerState<KoryMyPledgeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        ModuleCallout(tone: CalloutTone.beige, text: l.koryFirmNotice),
+        KoryNotice(tone: KoryTone.neutral, text: l.koryFirmNotice),
       ],
     );
   }
@@ -639,7 +590,7 @@ class _KoryContestedScreenState extends ConsumerState<KoryContestedScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(l.koryCheckReference),
         content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           decoration: InputDecoration(
@@ -702,7 +653,8 @@ class _KoryContestedScreenState extends ConsumerState<KoryContestedScreen> {
     final collector = pot.collectorName ?? '—';
     final declared = [
       l.koryContestedDeclared(formatFcfa(entry.amount), _hm(entry.declaredAt)),
-      if (entry.walletReference != null) 'réf. ${entry.walletReference}',
+      if (entry.walletReference != null)
+        l.koryXRefShort(entry.walletReference!),
     ].join(' · ');
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -723,8 +675,8 @@ class _KoryContestedScreenState extends ConsumerState<KoryContestedScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
-            ModuleCallout(
-              tone: CalloutTone.red,
+            KoryNotice(
+              tone: KoryTone.danger,
               title: l.koryContestedHead(collector),
               text: declared,
               children: [
@@ -735,7 +687,7 @@ class _KoryContestedScreenState extends ConsumerState<KoryContestedScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            ModuleCard(
+            KoryCard(
               child: Column(
                 children: [
                   ListTile(
@@ -763,8 +715,8 @@ class _KoryContestedScreenState extends ConsumerState<KoryContestedScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            ModuleCallout(
-              tone: CalloutTone.amber,
+            KoryNotice(
+              tone: KoryTone.warning,
               text: l.koryContestedOperatorNotice,
             ),
             if (_busy) ...[
@@ -864,30 +816,30 @@ class _KoryFinishScreenState extends ConsumerState<KoryFinishScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           if (pot.isDue) ...[
-            ModuleCallout(tone: CalloutTone.amber, text: l.koryFinishDueNotice),
+            KoryNotice(tone: KoryTone.warning, text: l.koryFinishDueNotice),
             const SizedBox(height: 16),
           ],
-          ModuleCard(
+          KoryCard(
             child: Column(
               children: [
-                _Row(
+                KoryLine(
                   l.koryEngaged,
                   formatFcfa(s?.engagedTotal ?? 0),
                   caption: l.koryParticipantsCount(participants),
                 ),
-                _Row(
+                KoryLine(
                   l.koryConfirmedLabel,
                   formatFcfa(pot.confirmedTotal),
                   caption: pot.goalAmount == null
                       ? null
                       : l.koryOnGoal(formatFcfa(pot.goalAmount!)),
                 ),
-                _Row(
+                KoryLine(
                   l.koryToConfirmLabel,
                   formatFcfa(s?.toConfirmTotal ?? 0),
                   caption: l.koryDeclarationsCount(s?.toConfirmCount ?? 0),
                 ),
-                _Row(
+                KoryLine(
                   l.koryRemainingToPay,
                   formatFcfa(s?.remainingTotal ?? 0),
                   caption: l.koryParticipantsCount(s?.remainingCount ?? 0),
@@ -901,7 +853,7 @@ class _KoryFinishScreenState extends ConsumerState<KoryFinishScreen> {
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
-          ModuleCard(
+          KoryCard(
             child: RadioGroup<bool>(
               groupValue: _extend,
               onChanged: (v) => setState(() => _extend = v ?? false),
@@ -935,9 +887,9 @@ class _KoryFinishScreenState extends ConsumerState<KoryFinishScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _Footer(
+      bottomNavigationBar: KoryFooter(
         children: [
-          ModuleActionButton(
+          KoryButton(
             label: _extend
                 ? l.koryExtendTo(_day(context, _newDue))
                 : l.koryCloseAndNotify(participants),
@@ -959,7 +911,7 @@ class KoryClosedScreen extends ConsumerWidget {
 
   /// La référence à indiquer dans le transfert : elle aide le collecteur à
   /// rapprocher l'envoi de la cagnotte.
-  String get reference => 'KRY-${pot.joinCode.isEmpty ? pot.id : pot.joinCode}';
+  String get reference => koryReference(pot);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -991,24 +943,31 @@ class KoryClosedScreen extends ConsumerWidget {
         children: [
           Text(
             l.koryClosedBody(
-              collector,
               _day(context, pot.closedAt ?? DateTime.now()),
+              collector,
             ),
           ),
           const SizedBox(height: 16),
           if (pledge != null)
-            ModuleCard(
+            KoryCard(
               child: Column(
                 children: [
-                  _Row(l.koryEngaged, formatFcfa(pledge.total)),
-                  _Row(l.koryAlreadyConfirmed, formatFcfa(pledge.confirmed)),
+                  KoryLine(l.koryEngaged, formatFcfa(pledge.total)),
+                  KoryLine(
+                    l.koryAlreadyConfirmed,
+                    formatFcfa(pledge.confirmed),
+                  ),
                   const Divider(height: 16),
-                  _Row(l.koryToPay, formatFcfa(pledge.remaining), strong: true),
+                  KoryLine(
+                    l.koryToPay,
+                    formatFcfa(pledge.remaining),
+                    strong: true,
+                  ),
                 ],
               ),
             ),
           const SizedBox(height: 12),
-          ModuleCard(
+          KoryCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1066,9 +1025,9 @@ class KoryClosedScreen extends ConsumerWidget {
       ),
       bottomNavigationBar: pledge == null || pledge.remaining == 0
           ? null
-          : _Footer(
+          : KoryFooter(
               children: [
-                ModuleActionButton(
+                KoryButton(
                   label: l.koryPayFromWallet(formatFcfa(pledge.remaining)),
                   onPressed: () => Navigator.of(context).pop(KoryNextStep.pay),
                 ),

@@ -13,6 +13,7 @@ import '../../../core/widgets/verified_badge.dart';
 import '../data/call_repository.dart';
 import 'call_controller.dart';
 import 'call_screen.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Journal d'appels — historique des appels passés/reçus, façon WhatsApp.
 /// Les entrées viennent de GET /calls/log (voir app/routes/calls.py) ; le
@@ -72,8 +73,7 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
               child: RefreshIndicator(
                 onRefresh: () => ref.refresh(callLogProvider.future),
                 child: logAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const SkeletonList(avatarSize: 44),
                   error: (error, _) => ListView(
                     children: [
                       const SizedBox(height: 80),

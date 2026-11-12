@@ -11,6 +11,7 @@ import '../shared/module_ui.dart';
 import 'hype_train_controller.dart';
 import 'hype_train_model.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// La couleur du module — pastilles et barre d'avancement.
 const _rocket = Color(0xFFDC2626);
@@ -90,7 +91,7 @@ class _TrainList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(provider);
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCards(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).hypeUnavailable,
@@ -237,7 +238,7 @@ class HypeTrainDetailScreen extends ConsumerWidget {
     return ModuleScaffold(
       title: L.of(context).hypeGoal,
       child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.search_off,
           title: L.of(context).hypeNotFound,

@@ -16,6 +16,11 @@ import '../../../core/widgets/pokou_context_menu.dart';
 
 enum _Mode { text, mediaPreview }
 
+/// Durée maximale d'un statut vidéo. Une demi-seconde de marge : la durée
+/// lue dans le fichier d'un enregistrement « de 60 s » dépasse souvent de
+/// quelques images.
+const kStatusMaxVideoDuration = Duration(seconds: 60, milliseconds: 500);
+
 /// Écran de publication d'un statut — texte, ou photo/vidéo (galerie ou
 /// caméra) avec légende optionnelle. Retourne `true` via `Navigator.pop`
 /// quand la publication a réussi, pour que l'appelant rafraîchisse le feed.
@@ -86,7 +91,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
     final picked = video
         ? await picker.pickVideo(
             source: source,
-            maxDuration: const Duration(minutes: 1),
+            maxDuration: kStatusMaxVideoDuration,
           )
         : await picker.pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
@@ -94,6 +99,17 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
     if (video) {
       final controller = VideoPlayerController.file(File(picked.path));
       await controller.initialize();
+      // `maxDuration` ne borne que l'ENREGISTREMENT par la caméra : une
+      // vidéo choisie dans la galerie passait quelle que soit sa durée. Un
+      // statut dure 60 secondes au plus — on le dit, et on ne publie pas.
+      if (controller.value.duration > kStatusMaxVideoDuration) {
+        await controller.dispose();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(L.of(context).statusVideoTooLong)),
+        );
+        return;
+      }
       controller.setLooping(true);
       controller.play();
       if (!mounted) {
@@ -243,7 +259,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 28),
                   child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                    contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _textController,
                     autofocus: true,
                     maxLines: null,
@@ -317,7 +333,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
                   ),
                   const SizedBox(width: 8),
                   _GlassButton(
-                    tooltip: l.mediaVideo,
+                    tooltip: l.statusVideoLimitHint,
                     ink: ink,
                     onTap: posting ? null : () => _chooseSource(video: true),
                     child: Icon(Icons.videocam_outlined, color: ink, size: 22),
@@ -438,7 +454,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 18),
                         child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                          contextMenuBuilder: pokouContextMenuBuilder,
                           controller: _captionController,
                           minLines: 1,
                           maxLines: 4,

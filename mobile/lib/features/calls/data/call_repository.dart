@@ -160,11 +160,23 @@ class CallRepository {
     required ApiClient apiClient,
     E2EEService? e2ee,
     GroupRepository? groups,
+    CallKeyVault? vault,
     int? Function()? myUserId,
   }) : _api = apiClient,
        _e2ee = e2ee,
        _groups = groups,
+       _vault = vault,
        _myUserId = myUserId ?? (() => null);
+
+  /// Garde la clé d'un appel de groupe tant qu'il reste joignable : on peut
+  /// le quitter et y revenir, alors que son enveloppe ne s'ouvre qu'une
+  /// fois. Absent dans les tests qui ne s'en occupent pas.
+  final CallKeyVault? _vault;
+
+  Future<void> _rememberGroupKey(String room, CallKey key) async {
+    CallKeys.remember(room, key);
+    await _vault?.keep(room, key);
+  }
 
   /// Pour sceller et ouvrir la clé d'un appel de groupe avec les clés
   /// d'expéditeur du groupe (voir [startGroupCall]).
@@ -217,7 +229,7 @@ class CallRepository {
     }
     if (key != null && token.e2ee) CallKeys.remember(token.room, key);
     if (groupKeys != null && token.e2ee && !token.joinedExisting) {
-      CallKeys.remember(token.room, groupKeys.key);
+      await _rememberGroupKey(token.room, groupKeys.key);
     } else if (groupKeys != null && token.joinedExisting) {
       await _rememberReturnedKey(response, token, inviter: null);
     }
@@ -389,13 +401,30 @@ class CallRepository {
   }) async {
     final json = response as Map<String, dynamic>;
     if (!token.e2ee || CallKeys.of(token.room) != null) return;
+    // Un appel de groupe que l'on a quitté, et où l'on revient : sa clé est
+    // restée dans le coffre. Rouvrir l'enveloppe échouerait (elle ne
+    // s'ouvre qu'une fois), et l'appelant n'en a même pas.
+    final kept = await _vault?.restore(token.room);
+    if (kept != null) {
+      CallKeys.remember(token.room, kept);
+      return;
+    }
     final sealed = json['sealed_key'];
     final sender =
         inviter ??
         (sealed is Map<String, dynamic>
             ? sealed['from_user_id'] as int?
             : null);
-    CallKeys.remember(token.room, await _open(sealed, inviter: sender));
+    final key = await _open(sealed, inviter: sender);
+    final isGroup =
+        token.participantIds.length > 1 ||
+        (sealed is Map<String, dynamic> &&
+            sealed['encryption'] == groupCallKeyEncryption);
+    if (isGroup) {
+      await _rememberGroupKey(token.room, key);
+    } else {
+      CallKeys.remember(token.room, key);
+    }
   }
 
   Future<CallKey> _open(Object? sealed, {required int? inviter}) async {
@@ -517,7 +546,7 @@ class CallRepository {
     if (token.joinedExisting) {
       await _rememberReturnedKey(json, token, inviter: null);
     } else {
-      CallKeys.remember(token.room, keys.key);
+      await _rememberGroupKey(token.room, keys.key);
     }
     return token;
   }

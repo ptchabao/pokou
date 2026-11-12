@@ -100,6 +100,18 @@ def _active_group_call(db: Session, group_id: int) -> Optional[CallLog]:
     return None
 
 
+async def _live_group_call(db: Session, group_id: int) -> Optional[CallLog]:
+    """`_active_group_call`, moins les appels que tout le monde a quittés
+    sans que le serveur l'ait su — voir call_housekeeping.close_if_deserted.
+    Sans ça, le bandeau « Rejoindre » et tout nouvel appel du groupe menaient
+    à un salon vide."""
+    for _ in range(3):
+        call = _active_group_call(db, group_id)
+        if call is None or not await call_housekeeping.close_if_deserted(db, call):
+            return call
+    return None
+
+
 def _participant_user_ids(call: CallLog) -> List[int]:
     # dict.fromkeys : dédoublonne en gardant l'ordre — l'appelant peut aussi
     # avoir une ligne CallParticipant (créée pour enregistrer son départ).
@@ -374,7 +386,7 @@ async def get_call_token(
         call_type = None
     elif payload.group_id:
         group = _require_group_membership(db, payload.group_id, user_id)
-        joined = _active_group_call(db, group.id)
+        joined = await _live_group_call(db, group.id)
         if joined:
             # Convergence : un seul appel par groupe. Deux membres qui
             # appuient sur « appeler » au même moment rejoignent le même
@@ -548,7 +560,7 @@ async def get_active_group_call(
     d'appel est le cas NORMAL, pas une erreur."""
     user_id = current_user["user_id"]
     _require_group_membership(db, group_id, user_id)
-    call = _active_group_call(db, group_id)
+    call = await _live_group_call(db, group_id)
     if not call:
         return {"active": False}
 

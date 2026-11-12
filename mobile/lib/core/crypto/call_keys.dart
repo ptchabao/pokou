@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'e2ee_primitives.dart';
 
 /// La clé d'un appel chiffré de bout en bout.
@@ -98,7 +100,8 @@ class CallKey {
 ///
 /// Une enveloppe ne s'ouvre qu'UNE fois (le cliquet avance) : rejoindre à
 /// nouveau le même salon doit donc retrouver la clé ici plutôt que de
-/// tenter de rouvrir l'enveloppe.
+/// tenter de rouvrir l'enveloppe. La session l'oublie en raccrochant ; pour
+/// un appel de groupe, où l'on peut revenir, [CallKeyVault] la garde.
 abstract final class CallKeys {
   static final Map<String, CallKey> _keys = {};
 
@@ -107,6 +110,85 @@ abstract final class CallKeys {
   static CallKey? of(String room) => _keys[room];
 
   static void forget(String room) => _keys.remove(room);
+}
+
+/// Les clés des appels de GROUPE encore joignables, gardées sur le téléphone.
+///
+/// Dans un appel de groupe, raccrocher veut dire « JE quitte » : les autres
+/// continuent, et l'on doit pouvoir revenir. Or l'enveloppe qui porte la clé
+/// ne s'ouvre qu'UNE fois (le cliquet avance), et [CallKeys] oublie la clé
+/// en quittant : revenir échouait toujours sur « clé d'appel impossible à
+/// ouvrir » — pour l'appelant aussi, à qui aucune enveloppe n'est destinée.
+///
+/// La clé est donc gardée ici, dans le coffre du système (Keychain /
+/// Keystore), le temps où l'appel reste joignable : [lifetime], la borne
+/// après laquelle le serveur refuse d'y faire entrer quiconque. Passé ce
+/// délai elle est effacée — elle n'est jamais gardée « pour plus tard ».
+class CallKeyVault {
+  CallKeyVault({FlutterSecureStorage? storage, DateTime Function()? now})
+    : _storage = storage ?? const FlutterSecureStorage(),
+      _now = now ?? DateTime.now;
+
+  final FlutterSecureStorage _storage;
+  final DateTime Function() _now;
+
+  static const _storageKey = 'pokou_group_call_keys_v1';
+
+  /// Même borne que le serveur (ONGOING_TTL, call_housekeeping.py).
+  static const lifetime = Duration(hours: 4);
+
+  Future<void> keep(String room, CallKey key) async {
+    try {
+      final entries = await _load();
+      entries[room] = {
+        'k': base64.encode(key.bytes),
+        'exp': _now().add(lifetime).millisecondsSinceEpoch,
+      };
+      await _save(entries);
+    } catch (_) {
+      // Coffre indisponible : l'appel en cours n'en dépend pas, seul le
+      // retour après avoir quitté est perdu.
+    }
+  }
+
+  Future<CallKey?> restore(String room) async {
+    try {
+      final entries = await _load();
+      final entry = entries[room];
+      if (entry is! Map) return null;
+      final bytes = base64.decode(entry['k'] as String);
+      return bytes.length == 32 ? CallKey(bytes) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> drop(String room) async {
+    try {
+      final entries = await _load();
+      if (entries.remove(room) != null) await _save(entries);
+    } catch (_) {}
+  }
+
+  /// Les clés encore valables — les périmées sont effacées au passage.
+  Future<Map<String, dynamic>> _load() async {
+    final stored = await _storage.read(key: _storageKey);
+    if (stored == null) return {};
+    final decoded = jsonDecode(stored);
+    if (decoded is! Map<String, dynamic>) return {};
+    final now = _now().millisecondsSinceEpoch;
+    final before = decoded.length;
+    decoded.removeWhere((_, entry) {
+      final exp = entry is Map ? entry['exp'] : null;
+      return exp is! int || exp <= now;
+    });
+    if (decoded.length != before) await _save(decoded);
+    return decoded;
+  }
+
+  Future<void> _save(Map<String, dynamic> entries) => entries.isEmpty
+      ? _storage.delete(key: _storageKey)
+      : _storage.write(key: _storageKey, value: jsonEncode(entries));
 }
 
 /// Un appel chiffré qu'on ne peut pas rejoindre ou lancer chiffré : clé

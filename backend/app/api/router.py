@@ -18,7 +18,7 @@ from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
 from app.api.v1.calls import calls
 from app.api.v1.certified import certified
-from app.api.v1.config import country
+from app.api.v1.config import banners, country
 from app.api.v1.communities import channels, communities
 from app.api.v1.marketplace import assime, marketplace, marketplace_admin
 from app.api.v1.media import media, stickers, status
@@ -86,6 +86,8 @@ for router in (
     stickers.router,
     payment_webhooks.router,
     country.router,
+    banners.router,
+    banners.admin_router,
     kory.router,
     certified.router,
     certified.admin_router,

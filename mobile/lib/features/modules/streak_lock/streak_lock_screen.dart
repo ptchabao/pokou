@@ -10,6 +10,7 @@ import '../shared/module_payment.dart';
 import '../shared/module_ui.dart';
 import 'streak_lock_controller.dart';
 import 'streak_lock_model.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// La couleur du module — pastille et compte à rebours, rien d'autre.
 const _flame = Color(0xFFFF6B35);
@@ -26,7 +27,7 @@ class StreakLockScreen extends ConsumerWidget {
       title: 'Streak Lock',
       subtitle: L.of(context).streakSubtitle,
       child: streaksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.cloud_off,
           title: L.of(context).streakUnavailable,

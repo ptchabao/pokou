@@ -193,6 +193,44 @@ def _authenticate(token: Optional[str], db: Session) -> int:
     return user_id
 
 
+async def _acknowledge_delivery(db: Session, user_id: int) -> None:
+    """Les messages envoyés à [user_id] pendant qu'il était hors ligne sont
+    « remis » dès que son téléphone se reconnecte.
+
+    L'accusé de remise n'était posé qu'à l'ENVOI, si le destinataire était
+    en ligne à cet instant. Un message écrit à quelqu'un d'absent restait
+    donc à une seule coche jusqu'à ce qu'il le LISE — même une fois son
+    téléphone rallumé et le message reçu. Le rattrapage (/sync/events) que
+    fait l'application en se connectant lui livre ces messages : c'est le
+    moment de le dire à leurs expéditeurs.
+    """
+    from app.api.v1.messaging.messages import _serialize
+    from app.models import DirectMessage, MessageStatus
+    from app.services.messaging.sync_service import append_sync_event
+
+    pending = (
+        db.query(DirectMessage)
+        .filter(DirectMessage.recipient_id == user_id, DirectMessage.status == MessageStatus.SENT)
+        .order_by(DirectMessage.created_at.asc())
+        .limit(500)
+        .all()
+    )
+    if not pending:
+        return
+    now = datetime.utcnow()
+    events = []
+    for message in pending:
+        message.status = MessageStatus.DELIVERED
+        message.delivered_at = now
+        event = {"type": "message:status", "message": _serialize(message, message.sender_id)}
+        events.append((message.sender_id, event, append_sync_event(db, message.sender_id, event)))
+    db.commit()
+    for sender_id, event, row in events:
+        if row is not None:
+            event["sync_event_id"] = str(row.id)
+        await manager.send_to_user(sender_id, event)
+
+
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -230,6 +268,11 @@ async def websocket_endpoint(
     await manager.connect(user_id, websocket)
     _touch_last_seen(db, user_id)
     logger.info("[WS] Utilisateur %s connecté", user_id)
+    try:
+        await _acknowledge_delivery(db, user_id)
+    except Exception:  # noqa: BLE001 — jamais au prix de la connexion
+        db.rollback()
+        logger.warning("[WS] accusés de remise non envoyés pour %s", user_id, exc_info=True)
 
     try:
         while True:

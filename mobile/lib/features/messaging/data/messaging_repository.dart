@@ -41,6 +41,7 @@ class MessagingRepository {
   /// lisible qui subsistera : s'il n'est pas écrit sur le disque tout de
   /// suite, le message est perdu pour de bon.
   final PokouMessageStore? _store;
+
   /// Les déchiffrements en cours, partagés par TOUTES les instances du
   /// dépôt : le WebSocket et la notification reçoivent le même message au
   /// même instant, et le dépôt est reconstruit quand la langue change. Deux
@@ -127,7 +128,10 @@ class MessagingRepository {
   /// Le clair d'un message direct — un texte, ou la clé d'une pièce jointe
   /// — appliqué à [message]. Sert au déchiffrement normal ET à la
   /// re-livraison. Renvoie [message] inchangé si la clé ne correspond pas.
-  DirectMessage resolveDirectPlaintext(DirectMessage message, String plaintext) {
+  DirectMessage resolveDirectPlaintext(
+    DirectMessage message,
+    String plaintext,
+  ) {
     // Une pièce jointe chiffrée transporte sa CLÉ, pas un texte : la
     // légende, le nom et le type du fichier voyagent avec elle.
     final mediaKey = message.mediaAssetId != null
@@ -154,7 +158,9 @@ class MessagingRepository {
   /// Le clair d'un message que J'AI envoyé, pour le re-livrer.
   static String directPlaintextOf(DirectMessage message) =>
       message.mediaKey != null && message.mediaAssetId != null
-      ? jsonEncode(message.mediaKey!.withAssetId(message.mediaAssetId!).toJson())
+      ? jsonEncode(
+          message.mediaKey!.withAssetId(message.mediaAssetId!).toJson(),
+        )
       : (message.content ?? '');
 
   Future<DirectMessage> _openOnce(DirectMessage message, int peerUserId) async {
@@ -166,6 +172,12 @@ class MessagingRepository {
       );
       return resolveDirectPlaintext(message, plaintext);
     } catch (_) {
+      // L'isolat des notifications a son propre dépôt : il a pu ouvrir ce
+      // message à l'instant (une enveloppe ne s'ouvre qu'une fois) et être
+      // en train de ranger le clair. On le lui laisse le temps avant de
+      // demander une re-livraison à l'expéditeur.
+      final elsewhere = await _openedElsewhere(message);
+      if (elsewhere != null) return elsewhere;
       // Reçu de nouvel essai : seulement pour un message REÇU — le mien,
       // c'est moi qui en ai le clair.
       if (message.senderId == peerUserId) {
@@ -177,6 +189,27 @@ class MessagingRepository {
       // quelque chose cloche.
       return message;
     }
+  }
+
+  /// Voir GroupRepository.openedElsewhereWait.
+  static Duration openedElsewhereWait = const Duration(milliseconds: 900);
+
+  Future<DirectMessage?> _openedElsewhere(DirectMessage message) async {
+    final store = _store;
+    if (store == null) return null;
+    const steps = 3;
+    for (var i = 0; i <= steps; i++) {
+      try {
+        final cached = (await store.decryptedFor([message.id]))[message.id];
+        if (cached != null && cached.editedAt == message.editedAt) {
+          return message.resolvedWith(cached);
+        }
+      } catch (_) {
+        return null;
+      }
+      if (i < steps) await Future<void>.delayed(openedElsewhereWait ~/ steps);
+    }
+    return null;
   }
 
   /// Déchiffre un message arrivé par le WebSocket. Exposé parce que le temps
@@ -344,9 +377,7 @@ class MessagingRepository {
       if (sealed is! SealEncrypted) {
         // Le correspondant avait déclaré savoir ouvrir une pièce jointe, et
         // n'a plus de trousseau : on ne sait pas lui faire parvenir la clé.
-        throw const EncryptionUnavailableException(
-          SealFailure.keyLookupFailed,
-        );
+        throw const EncryptionUnavailableException(SealFailure.keyLookupFailed);
       }
       final response = await _api.post(
         '/messages',
@@ -477,13 +508,18 @@ class MessagingRepository {
 
   // ── Mode preuve à deux ──────────────────────────────────────────────────
 
-  Future<DirectProofMode> proofMode(int contactUserId) async => DirectProofMode.fromJson(
-    await _api.get('/messages/$contactUserId/proof-mode') as Map<String, dynamic>,
-  );
+  Future<DirectProofMode> proofMode(int contactUserId) async =>
+      DirectProofMode.fromJson(
+        await _api.get('/messages/$contactUserId/proof-mode')
+            as Map<String, dynamic>,
+      );
 
   Future<DirectProofMode> setProofMode(int contactUserId, bool enabled) async =>
       DirectProofMode.fromJson(
-        await _api.put('/messages/$contactUserId/proof-mode', body: {'enabled': enabled})
+        await _api.put(
+              '/messages/$contactUserId/proof-mode',
+              body: {'enabled': enabled},
+            )
             as Map<String, dynamic>,
       );
 

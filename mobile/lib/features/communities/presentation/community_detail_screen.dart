@@ -13,6 +13,7 @@ import '../../groups/presentation/group_conversation_screen.dart';
 import '../data/community_model.dart';
 import 'community_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Détail d'une communauté : son groupe d'annonces en tête, puis ses autres
 /// groupes. Les actions d'administration n'apparaissent que si le serveur
@@ -510,7 +511,7 @@ class CommunityDetailScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonList(),
           error: (_, _) => Center(
             child: Padding(
               padding: EdgeInsets.all(24),

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.models import User, PhoneOTP
+from app.services.auth import twilio_verify
 from app.services.notifications import sms_service, whatsapp_service
 from app.core.security import hash_password, verify_password
 
@@ -46,6 +47,12 @@ RESEND_MIN_SECONDS = OTP_TTL_SECONDS
 LOCKOUT_MINUTES = 15
 
 _PHONE_RE = re.compile(r"^\+[1-9]\d{6,14}$")
+
+
+#: Marque d'une ligne PhoneOTP dont le code a été confié à Twilio Verify :
+#: Pokou ne le connaît pas, et ce n'est pas une empreinte valide — aucun code
+#: saisi ne peut s'y vérifier localement.
+VERIFY_MARKER = "twilio-verify"
 
 
 class OTPError(Exception):
@@ -213,6 +220,22 @@ def generate_and_send_otp(db: Session, raw_phone: str, channel: str = "both") ->
 
     ttl_seconds = REVIEW_OTP_TTL_MINUTES * 60 if is_review else OTP_TTL_SECONDS
 
+    # Twilio Verify d'abord : il génère, envoie et vérifie le code. Le délai
+    # affiché reste le nôtre (le renvoi est permis au bout de 50 s), mais le
+    # code reste valable tant que Twilio l'accepte (10 minutes).
+    if not is_review and twilio_verify.configured():
+        verify_channel = "whatsapp" if channel == "whatsapp" else "sms"
+        if twilio_verify.start(db, phone, verify_channel):
+            db.add(PhoneOTP(
+                phone=phone,
+                code_hash=VERIFY_MARKER,
+                expires_at=datetime.utcnow() + timedelta(seconds=twilio_verify.CODE_TTL_SECONDS),
+            ))
+            db.commit()
+            logger.info("[OTP] Code confié à Twilio Verify pour %s (canal: %s)", phone, verify_channel)
+            return ttl_seconds
+        logger.warning("[OTP] Twilio Verify indisponible pour %s : code Pokou par SMS", phone)
+
     otp = PhoneOTP(
         phone=phone,
         code_hash=hash_password(code),
@@ -312,7 +335,16 @@ def consume_otp(db: Session, raw_phone: str, code: str) -> str:
     if otp is None or otp.expires_at < datetime.utcnow() or otp.attempts >= MAX_VERIFY_ATTEMPTS:
         raise OTPInvalidError("Code invalide ou expiré — redemandez un code.")
 
-    if not verify_password(code, otp.code_hash):
+    if otp.code_hash == VERIFY_MARKER:
+        verdict = twilio_verify.check(db, phone, (code or "").strip())
+        if verdict is None:
+            # Twilio injoignable : ni un succès ni une erreur de la personne.
+            raise OTPInvalidError("Vérification momentanément impossible — réessayez dans un instant.")
+        correct = verdict
+    else:
+        correct = verify_password(code, otp.code_hash)
+
+    if not correct:
         otp.attempts += 1
         db.commit()
         # Le nombre d'essais restants, comme le demande l'état « erreur avec

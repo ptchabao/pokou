@@ -16,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:flutter/gestures.dart';
 
+import '../../../core/widgets/skeleton.dart';
 import '../../../core/text/emoji_only.dart';
 import '../../../core/media/image_cropper.dart';
 import '../../../core/media/media_repository.dart' show MediaMeta;
@@ -133,6 +134,7 @@ class _GroupConversationScreenState
   bool _startingCall = false;
   GroupMessage? _replyingTo;
   StreamSubscription? _callWatch;
+  Timer? _callPoll;
 
   // Superposition d'événements temps réel que GroupChatController n'expose
   // pas encore dans son état (réaction, modification, vote de sondage) —
@@ -166,6 +168,36 @@ class _GroupConversationScreenState
       if (event['group_id'] != widget.groupId) return;
       ref.invalidate(activeGroupCallProvider(widget.groupId));
     });
+    // …et disparaître quand l'appel se termine. Seuls ses participants en
+    // reçoivent le signal : les autres membres gardaient le bandeau
+    // « Rejoindre » sur un appel fini. Tant qu'il est affiché, on revérifie.
+    _callPoll = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (!mounted) return;
+      final provider = activeGroupCallProvider(widget.groupId);
+      if (ref.read(provider).valueOrNull != null) ref.invalidate(provider);
+    });
+    // Groupe supprimé, ou moi retiré, pendant que l'écran est ouvert : il
+    // se ferme en le disant.
+    ref.listenManual(
+      groupChatControllerProvider(
+        widget.groupId,
+      ).select((state) => state.closed),
+      (_, closed) {
+        if (closed == null || !mounted) return;
+        final l = L.of(context);
+        final messenger = ScaffoldMessenger.of(context);
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              closed == GroupClosed.deleted
+                  ? l.groupClosedDeleted
+                  : l.groupClosedRemoved,
+            ),
+          ),
+        );
+      },
+    );
     _richContentSub = ref
         .read(wsClientProvider)
         .events
@@ -181,6 +213,7 @@ class _GroupConversationScreenState
     _scrollController.dispose();
     _voice.dispose();
     _callWatch?.cancel();
+    _callPoll?.cancel();
     _richContentSub?.cancel();
     // Après la phase de démontage : Riverpod refuse une modification
     // pendant que Flutter verrouille l'arbre.
@@ -381,7 +414,7 @@ class _GroupConversationScreenState
       builder: (dialogContext) => AlertDialog(
         title: Text(_l.convEditTitle),
         content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           maxLength: 4000,
@@ -920,7 +953,7 @@ class _GroupConversationScreenState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                        contextMenuBuilder: pokouContextMenuBuilder,
                         controller: questionController,
                         autofocus: true,
                         maxLength: 500,
@@ -938,7 +971,7 @@ class _GroupConversationScreenState
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                            contextMenuBuilder: pokouContextMenuBuilder,
                             controller: optionControllers[index],
                             maxLength: 100,
                             decoration: InputDecoration(
@@ -1441,7 +1474,7 @@ class _GroupConversationScreenState
             ),
             const SizedBox(height: 16),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               maxLength: 255,
@@ -1925,7 +1958,10 @@ class _GroupConversationScreenState
               ),
               Expanded(
                 child: !state.initialCacheLoaded
-                    ? const SizedBox.shrink()
+                    // L'attente a la forme d'une conversation — et seulement
+                    // si elle dure : le cache se lit en quelques
+                    // millisecondes.
+                    ? const DelayedSkeleton(child: SkeletonBubbles())
                     : state.messages.isEmpty
                     ? ListView(
                         padding: const EdgeInsets.all(16),
@@ -2797,7 +2833,7 @@ class _GroupBubbleState extends State<_GroupBubble> {
             constraints: BoxConstraints(maxWidth: maxWidth),
             decoration: BoxDecoration(
               // Maquette Figma : bulle envoyée en dégradé pêche, bulle
-              // reçue blanche cerclée ; ombre très douce sur les deux.
+              // reçue blanche cerclée. À plat : aucune ombre sous les bulles.
               color: isMine
                   ? AppColors.chatBubbleSent
                   : AppColors.chatBubbleReceived,
@@ -2806,13 +2842,6 @@ class _GroupBubbleState extends State<_GroupBubble> {
               border: isMine
                   ? null
                   : Border.all(color: AppColors.chatBubbleReceivedBorder),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.chatBubbleShadow,
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

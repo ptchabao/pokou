@@ -14,6 +14,7 @@ import {
   IconLogout,
   IconPigMoney,
   IconPuzzle,
+  IconSpeakerphone,
   IconShieldLock,
   IconUsers,
 } from "@tabler/icons-react"
@@ -49,6 +50,7 @@ export const NAV = [
     { title: "Assimé", url: "/assime/", icon: IconBuildingStore, perm: "assime.view" },
     { title: "Pokou certifié", url: "/certified/", icon: IconCertificate, perm: "certified.view" },
     { title: "Modules", url: "/modules/", icon: IconPuzzle, perm: "modules.manage" },
+    { title: "Bannières", url: "/banners/", icon: IconSpeakerphone, perm: "banners.view" },
   ] },
   { group: "Administration", items: [
     { title: "Équipe et rôles", url: "/team/", icon: IconShieldLock, perm: "team.view" },

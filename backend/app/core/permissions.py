@@ -22,6 +22,7 @@ ALL = {
     "assime.view", "assime.manage",
     "certified.view", "certified.manage",
     "modules.manage",
+    "banners.view", "banners.manage",
     "audit.view",
 }
 
@@ -31,7 +32,7 @@ ROLE_PERMISSIONS = {
     UserRole.SUPPORT: {
         "dashboard.view", "users.view", "users.manage", "team.view",
         "reports.view", "reports.manage", "kory.view", "honam.view",
-        "assime.view", "certified.view",
+        "assime.view", "certified.view", "banners.view",
     },
     UserRole.AI_OPERATOR: {
         "dashboard.view", "reports.view", "assime.view", "assime.manage",
@@ -39,7 +40,7 @@ ROLE_PERMISSIONS = {
     },
     UserRole.VIEWER: {
         "dashboard.view", "users.view", "kory.view", "honam.view",
-        "assime.view", "certified.view", "team.view",
+        "assime.view", "certified.view", "team.view", "banners.view",
     },
     UserRole.USER: set(),
 }

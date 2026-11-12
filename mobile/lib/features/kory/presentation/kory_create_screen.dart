@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../../core/country/country_config.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
 import '../../groups/data/group_model.dart';
 import '../../groups/presentation/group_controller.dart';
-import '../../modules/shared/module_ui.dart';
 import 'kory_controller.dart';
+import 'kory_cotisation_screens.dart';
+import 'kory_draft.dart';
 import 'kory_participants_screen.dart';
 import 'kory_pot_screen.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
+import 'kory_tontine_screens.dart';
+import 'kory_ui.dart';
+import 'kory_wallet.dart';
 
-/// Ouvre la création, puis la cagnotte créée. `groupId` la rattache au
+/// Ouvre la création, puis la collecte créée. `groupId` la rattache au
 /// groupe d'où l'on vient (NAV-03).
 Future<void> openKoryCreate(
   BuildContext context,
@@ -26,12 +30,13 @@ Future<void> openKoryCreate(
   );
   if (potId == null || !context.mounted) return;
   refreshKory(ref);
-  // KOR-11 : étape 2 sur 3, les participants — sauf pour une cagnotte
-  // rattachée à un groupe, dont les membres participent déjà.
-  if (groupId == null) {
+  try {
     final pot = await ref.read(koryRepositoryProvider).pot(potId);
     if (!context.mounted) return;
-    if (!pot.isTontine) {
+    // KOR-11 : les participants — sauf pour une collecte rattachée à un
+    // groupe, dont les membres participent déjà, et pour une tontine, dont
+    // les membres sont choisis à l'étape 2.
+    if (pot.groupId == null && !pot.isTontine) {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) =>
@@ -40,11 +45,53 @@ Future<void> openKoryCreate(
       );
       if (!context.mounted) return;
     }
+  } catch (_) {
+    // La collecte existe : on l'ouvre quand même.
   }
+  if (!context.mounted) return;
   await Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: potId)));
 }
+
+/// La dernière étape de toute création : envoyer le brouillon au serveur.
+/// Renvoie l'identifiant de la collecte, ou `null` après avoir dit l'échec.
+Future<int?> koryCreateFromDraft(
+  BuildContext context,
+  WidgetRef ref,
+  KoryDraft draft,
+) async {
+  final cotisation = draft.kind == 'COTISATION';
+  final tontine = draft.kind == 'TONTINE';
+  try {
+    final pot = await ref
+        .read(koryRepositoryProvider)
+        .create(
+          kind: draft.kind,
+          title: draft.title,
+          description: draft.description,
+          groupId: draft.group?.id,
+          goalAmount: draft.kind == 'CAGNOTTE' ? draft.amount : null,
+          amountPerMember: draft.kind == 'CAGNOTTE' ? null : draft.amount,
+          period: draft.kind == 'CAGNOTTE' ? null : draft.period,
+          dueAt: draft.dueAt,
+          endsAt: cotisation ? draft.endsAt : null,
+          beneficiaryName: draft.kind == 'CAGNOTTE' ? draft.beneficiary : null,
+          amountsVisible: draft.amountsVisible,
+          memberIds: cotisation && draft.group != null ? draft.memberIds : null,
+          rotation: tontine ? draft.memberIds : null,
+          deputyId: draft.deputyId,
+          drawMode: tontine ? draft.drawMode : null,
+        );
+    refreshKory(ref);
+    return pot.id;
+  } catch (_) {
+    if (context.mounted) koryFailed(context);
+    return null;
+  }
+}
+
+// ── KOR-6 · Nouvelle collecte / KOR-17 · 23 : paramètres ─────────────────
 
 class KoryCreateScreen extends ConsumerStatefulWidget {
   const KoryCreateScreen({super.key, this.groupId});
@@ -55,261 +102,424 @@ class KoryCreateScreen extends ConsumerStatefulWidget {
   ConsumerState<KoryCreateScreen> createState() => _KoryCreateScreenState();
 }
 
-final _groupMembersProvider = FutureProvider.autoDispose
-    .family<List<GroupMember>, int>(
-      (ref, groupId) async =>
-          (await ref.watch(groupRepositoryProvider).getGroup(groupId)).members,
-    );
-
 class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
-  static const _kinds = ['CAGNOTTE', 'COTISATION', 'TONTINE'];
-
-  /// Tontine : l'ordre des bénéficiaires, tour par tour (maquette Kory 8).
-  List<int> _rotation = const [];
-  static const _periods = ['MONTHLY', 'WEEKLY'];
-
+  final _draft = KoryDraft(kind: 'CAGNOTTE');
   final _title = TextEditingController();
+  final _beneficiary = TextEditingController();
   final _description = TextEditingController();
   final _amount = TextEditingController();
-  String _kind = 'CAGNOTTE';
-  String _period = 'MONTHLY';
-  DateTime? _dueAt;
-  String? _error;
+  bool _withEnd = false;
   bool _busy = false;
+  bool _loadingGroup = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final id = widget.groupId;
+    if (id != null) _loadGroup(id);
+  }
 
   @override
   void dispose() {
     _title.dispose();
+    _beneficiary.dispose();
     _description.dispose();
     _amount.dispose();
     super.dispose();
   }
 
-  Future<void> _pickDue() async {
+  Future<void> _loadGroup(int id) async {
+    setState(() => _loadingGroup = true);
+    try {
+      final group = await ref.read(groupRepositoryProvider).getGroup(id);
+      if (mounted) setState(() => _draft.group = group);
+    } catch (_) {
+      if (mounted) koryFailed(context);
+    } finally {
+      if (mounted) setState(() => _loadingGroup = false);
+    }
+  }
+
+  Future<void> _pickGroup() async {
+    final l = L.of(context);
+    final groups = ref.read(myGroupsProvider).valueOrNull ?? const <Group>[];
+    final picked = await showModalBottomSheet<(Group?,)>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.7,
+          ),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            children: [
+              KorySection(l.koryXLinkedChat),
+              if (_draft.kind != 'TONTINE')
+                KoryPersonRow(
+                  name: l.koryXNoLinkedChat,
+                  muted: true,
+                  onTap: () => Navigator.pop(sheetContext, (null,)),
+                ),
+              if (groups.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    l.koryXNoGroups,
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+              for (final g in groups)
+                KoryPersonRow(
+                  name: g.name,
+                  subtitle: l.koryXPeople(g.memberCount),
+                  onTap: () => Navigator.pop(sheetContext, (g,)),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    final group = picked.$1;
+    if (group == null) {
+      setState(() => _draft.group = null);
+    } else {
+      await _loadGroup(group.id);
+    }
+  }
+
+  Future<DateTime?> _pickDate(DateTime? initial) async {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
       firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-      initialDate: _dueAt ?? now.add(const Duration(days: 30)),
+      lastDate: now.add(const Duration(days: 730)),
+      initialDate: initial ?? now.add(const Duration(days: 30)),
     );
-    if (picked != null) setState(() => _dueAt = picked);
+    if (picked == null) return null;
+    return DateTime(picked.year, picked.month, picked.day, 12);
   }
 
-  Future<void> _submit() async {
+  bool _validate() {
     final l = L.of(context);
-    final title = _title.text.trim();
-    final amount = int.tryParse(_amount.text.replaceAll(RegExp(r'\D'), ''));
-    if (title.length < 3) {
-      setState(() => _error = l.koryNeedTitle);
-      return;
+    final d = _draft;
+    d.title = _title.text.trim();
+    d.beneficiary = _beneficiary.text.trim();
+    d.description = _description.text.trim();
+    d.amount = int.tryParse(_amount.text.replaceAll(RegExp(r'\D'), ''));
+    String? error;
+    if (d.title.length < 3) {
+      error = l.koryNeedTitle;
+    } else if ((d.kind != 'CAGNOTTE' || _amount.text.isNotEmpty) &&
+        (d.amount == null || d.amount! < 100)) {
+      error = l.koryNeedAmount;
+    } else if (d.kind == 'COTISATION' && d.dueAt == null) {
+      error = l.koryXNeedFirstDue;
+    } else if (d.kind == 'TONTINE' && d.group == null) {
+      error = l.koryXNeedGroup;
     }
-    final amountRequired = _kind != 'CAGNOTTE';
-    if (_kind == 'TONTINE' && _rotation.length < 2) {
-      setState(() => _error = l.koryNeedRotation);
-      return;
+    if (!_withEnd || d.kind != 'COTISATION') d.endsAt = null;
+    setState(() => _error = error);
+    return error == null;
+  }
+
+  Future<void> _continue() async {
+    if (!_validate()) return;
+    final d = _draft;
+    int? potId;
+    if (d.kind == 'CAGNOTTE') {
+      setState(() => _busy = true);
+      potId = await koryCreateFromDraft(context, ref, d);
+      if (mounted) setState(() => _busy = false);
+    } else if (d.kind == 'COTISATION') {
+      potId = await Navigator.of(context).push<int>(
+        MaterialPageRoute(
+          builder: (_) => d.group == null
+              ? KoryCotisationRecapScreen(draft: d)
+              : KoryCotisationMembersScreen(draft: d),
+        ),
+      );
+    } else {
+      potId = await Navigator.of(context).push<int>(
+        MaterialPageRoute(builder: (_) => KoryTontineMembersScreen(draft: d)),
+      );
     }
-    if ((amountRequired || _amount.text.isNotEmpty) &&
-        (amount == null || amount < 100)) {
-      setState(() => _error = l.koryNeedAmount);
-      return;
-    }
-    setState(() {
-      _error = null;
-      _busy = true;
-    });
-    try {
-      final pot = await ref
-          .read(koryRepositoryProvider)
-          .create(
-            kind: _kind,
-            title: title,
-            description: _description.text.trim(),
-            groupId: widget.groupId,
-            goalAmount: _kind == 'CAGNOTTE' ? amount : null,
-            amountPerMember: _kind != 'CAGNOTTE' ? amount : null,
-            period: _kind != 'CAGNOTTE' ? _period : null,
-            dueAt: _kind == 'TONTINE' ? null : _dueAt,
-            rotation: _kind == 'TONTINE' ? _rotation : null,
-          );
-      if (mounted) Navigator.of(context).pop(pot.id);
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _error = l.koryActionFailed;
-        });
-      }
-    }
+    if (potId != null && mounted) Navigator.of(context).pop(potId);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
+    final d = _draft;
+    final me = ref.watch(authControllerProvider).user;
+    final wallet = KoryWallet.of(me?.phone);
     // Kory Plus (BM-13) : la tontine ne se propose que dans un pays qui l'a
-    // ouverte, et depuis un groupe — l'ordre des tours se fixe entre ses
-    // membres.
-    final tontineOpen =
-        widget.groupId != null &&
-        ref.watch(currentCountryConfigProvider).has('kory_plus');
-    final kinds = tontineOpen ? _kinds : _kinds.sublist(0, 2);
-    final members = widget.groupId == null || _kind != 'TONTINE'
-        ? null
-        : ref.watch(_groupMembersProvider(widget.groupId!)).valueOrNull;
-    if (members != null && _rotation.isEmpty && members.isNotEmpty) {
-      _rotation = [for (final m in members) m.userId];
-    }
-    String nameOf(int id) =>
-        members?.where((m) => m.userId == id).firstOrNull?.displayName ?? '—';
-    return ModuleScaffold(
-      title: l.koryCreateTitle,
-      subtitle: l.korySubtitle,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+    // ouverte.
+    final tontineOpen = ref
+        .watch(currentCountryConfigProvider)
+        .has('kory_plus');
+    final kinds = [
+      ('CAGNOTTE', l.koryKindCagnotte),
+      ('COTISATION', l.koryKindCotisation),
+      if (tontineOpen) ('TONTINE', l.koryXTontinePlus),
+    ];
+    final periods = d.kind == 'TONTINE'
+        ? [
+            ('WEEKLY', l.koryXEveryWeek),
+            ('BIWEEKLY', l.koryXEveryFortnight),
+            ('MONTHLY', l.koryXEveryMonth),
+          ]
+        : [
+            ('WEEKLY', l.koryXEveryWeek),
+            ('MONTHLY', l.koryXEveryMonth),
+            ('QUARTERLY', l.koryXEveryQuarter),
+          ];
+    if (!periods.any((p) => p.$1 == d.period)) d.period = 'MONTHLY';
+    final (title, subtitle) = switch (d.kind) {
+      'COTISATION' => (l.koryXNewCotisation, l.koryXStepParams),
+      'TONTINE' => (l.koryXNewTontine, l.koryXTontineStep('1')),
+      _ => (l.koryCreateTitle, null),
+    };
+    final stake = int.tryParse(_amount.text) ?? 0;
+    final size = d.group?.members.length ?? 0;
+    return KoryPage(
+      title: title,
+      subtitle: subtitle,
+      footer: KoryFooter(
         children: [
-          ModuleSegmented(
-            labels: [
-              l.koryKindCagnotte,
-              l.koryKindCotisation,
-              if (tontineOpen) l.koryKindTontine,
-            ],
-            index: kinds.indexOf(_kind),
-            onChanged: (i) => setState(() => _kind = kinds[i]),
+          KoryButton(
+            label: d.kind == 'CAGNOTTE'
+                ? l.koryXCreateCagnotte
+                : l.koryXContinue,
+            busy: _busy,
+            onPressed: _continue,
           ),
-          const SizedBox(height: 16),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          Semantics(
+            label: l.koryXCollectType,
+            child: Wrap(
+              spacing: 8,
+              children: [
+                for (final (kind, label) in kinds)
+                  ChoiceChip(
+                    label: Text(label),
+                    selected: d.kind == kind,
+                    showCheckmark: false,
+                    onSelected: (_) => setState(() {
+                      d.kind = kind;
+                      _error = null;
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _title,
             maxLength: 120,
-            decoration: InputDecoration(labelText: l.koryFieldTitle),
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              labelText: d.kind == 'TONTINE' ? l.koryXName : l.koryFieldTitle,
+            ),
           ),
-          const SizedBox(height: 8),
+          if (d.kind == 'CAGNOTTE')
+            TextField(
+              contextMenuBuilder: pokouContextMenuBuilder,
+              controller: _beneficiary,
+              maxLength: 120,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(labelText: l.koryXBeneficiaryField),
+            ),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _description,
-            maxLength: 500,
-            maxLines: 3,
-            minLines: 1,
-            decoration: InputDecoration(labelText: l.koryFieldDescription),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _amount,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              labelText: _kind == 'CAGNOTTE'
-                  ? l.koryFieldGoal
-                  : _kind == 'TONTINE'
-                  ? l.koryFieldStake
-                  : l.koryFieldPerMember,
+              labelText: switch (d.kind) {
+                'CAGNOTTE' => l.koryFieldGoal,
+                'TONTINE' => l.koryXStakePerMember,
+                _ => l.koryFieldPerMember,
+              },
+              suffixText: 'FCFA',
             ),
           ),
-          if (_kind != 'CAGNOTTE') ...[
-            const SizedBox(height: 16),
-            ModuleSegmented(
-              labels: [l.koryPeriodMonthly, l.koryPeriodWeekly],
-              index: _periods.indexOf(_period),
-              onChanged: (i) => setState(() => _period = _periods[i]),
-            ),
-          ],
-          if (_kind == 'TONTINE') ...[
-            ModuleSectionTitle(l.koryRotation),
-            Text(
-              l.koryRotationHint,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-            if (members == null)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else
-              ReorderableListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                onReorderItem: (from, to) => setState(() {
-                  final next = [..._rotation];
-                  next.insert(to, next.removeAt(from));
-                  _rotation = next;
-                }),
+          if (d.kind != 'CAGNOTTE') ...[
+            KorySection(l.koryXPeriodicity),
+            Semantics(
+              label: l.koryXPeriodicity,
+              child: Wrap(
+                spacing: 8,
                 children: [
-                  for (final (index, id) in _rotation.indexed)
-                    ListTile(
-                      key: ValueKey(id),
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(child: Text('${index + 1}')),
-                      title: Text(nameOf(id)),
-                      trailing: IconButton(
-                        tooltip: l.koryRemoveFromRotation,
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => setState(
-                          () => _rotation = [..._rotation]..remove(id),
-                        ),
-                      ),
+                  for (final (period, label) in periods)
+                    ChoiceChip(
+                      label: Text(label),
+                      selected: d.period == period,
+                      showCheckmark: false,
+                      onSelected: (_) => setState(() => d.period = period),
                     ),
                 ],
               ),
-          ],
-          const SizedBox(height: 16),
-          if (_kind != 'TONTINE')
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.event_outlined),
-              title: Text(
-                _dueAt == null
-                    ? l.koryFieldDue
-                    : l.koryDue(DateFormat.yMMMd(locale).format(_dueAt!)),
-              ),
-              onTap: _pickDue,
             ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.info_outline, size: 18, color: AppColors.feedbackInfo),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  _kind == 'TONTINE' ? l.koryTontineNote : l.koryCollectorIsYou,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: 12),
-            Row(
+          ],
+          const SizedBox(height: 12),
+          KoryCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 18,
-                  color: AppColors.feedbackDanger,
+                _DateRow(
+                  label: switch (d.kind) {
+                    'COTISATION' => l.koryXFirstDue,
+                    'TONTINE' => l.koryXFirstRound,
+                    _ => l.koryXClosing,
+                  },
+                  value: d.dueAt == null
+                      ? l.koryXChoose
+                      : koryDate(context, d.dueAt!),
+                  onTap: () async {
+                    final date = await _pickDate(d.dueAt);
+                    if (date != null) setState(() => d.dueAt = date);
+                  },
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(color: AppColors.feedbackDanger),
+                if (d.kind == 'COTISATION')
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l.koryXEnd),
+                    subtitle: Text(
+                      !_withEnd || d.endsAt == null
+                          ? l.koryXNoEnd
+                          : koryDate(context, d.endsAt!),
+                    ),
+                    value: _withEnd,
+                    onChanged: (v) async {
+                      if (!v) {
+                        setState(() => _withEnd = false);
+                        return;
+                      }
+                      final date = await _pickDate(d.endsAt ?? d.dueAt);
+                      if (date != null) {
+                        setState(() {
+                          _withEnd = true;
+                          d.endsAt = date;
+                        });
+                      }
+                    },
                   ),
+                if (d.kind == 'TONTINE' && stake > 0 && size > 1)
+                  KoryLine(
+                    l.koryXLeveePerRound,
+                    formatFcfa(stake * (size - 1)),
+                    caption: l.koryXLeveeCaption(size - 1, formatFcfa(stake)),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          KoryCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
+              children: [
+                if (d.kind != 'TONTINE')
+                  KoryLine(
+                    l.koryXCollectorLabel,
+                    [l.koryYou, ?wallet?.shortLabel].join(' · '),
+                  ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l.koryXIndividualAmounts),
+                  subtitle: Text(
+                    d.amountsVisible
+                        ? l.koryXVisibleToAll
+                        : l.koryXVisibleToCollector,
+                  ),
+                  value: d.amountsVisible,
+                  onChanged: (v) => setState(() => d.amountsVisible = v),
+                ),
+                _DateRow(
+                  label: l.koryXLinkedChat,
+                  value: _loadingGroup
+                      ? '…'
+                      : (d.group?.name ?? l.koryXNoLinkedChat),
+                  icon: Icons.forum_outlined,
+                  onTap: widget.groupId != null ? null : _pickGroup,
                 ),
               ],
             ),
+          ),
+          if (d.kind == 'CAGNOTTE') ...[
+            const SizedBox(height: 10),
+            TextField(
+              contextMenuBuilder: pokouContextMenuBuilder,
+              controller: _description,
+              maxLength: 500,
+              maxLines: 3,
+              minLines: 1,
+              decoration: InputDecoration(labelText: l.koryFieldDescription),
+            ),
           ],
-          const SizedBox(height: 24),
-          ModuleActionButton(
-            label: l.koryCreate,
-            expanded: true,
-            busy: _busy,
-            onPressed: _busy ? null : _submit,
+          if (_error != null) ...[
+            const SizedBox(height: 10),
+            KoryNotice(tone: KoryTone.danger, text: _error!),
+          ],
+          const SizedBox(height: 12),
+          KoryNotice(
+            text: d.kind == 'TONTINE' ? l.koryTontineNote : l.koryXFreeNotice,
           ),
         ],
       ),
     );
   }
+}
+
+class _DateRow extends StatelessWidget {
+  const _DateRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+    this.icon = Icons.event_outlined,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.textSecondary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(label, style: TextStyle(color: AppColors.textPrimary)),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          if (onTap != null)
+            Icon(Icons.chevron_right, color: AppColors.textMuted),
+        ],
+      ),
+    ),
+  );
 }

@@ -166,6 +166,7 @@ final discussionsRealtimeProvider = Provider<void>((ref) {
     'message:reaction',
     'group:message:new',
     'group:message:edited',
+    'group:message:deleted',
     'group:message:reaction',
     'group:updated',
     'group:member:added',

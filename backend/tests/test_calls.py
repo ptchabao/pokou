@@ -1108,3 +1108,121 @@ def test_une_cle_de_groupe_ne_vaut_pas_pour_un_autre_appel(client):
             headers=headers_a,
         )
     assert refused.status_code == 400
+
+
+# ── Appel de groupe que tout le monde a quitté sans que le serveur le sache ──
+#
+# Production, 11 novembre 2026 : après avoir quitté l'appel du groupe, chacun
+# essayait d'y revenir ; la clé ne se rouvrait pas, mais le jeton avait déjà
+# été remis — le serveur recomptait la personne comme présente, sans `end`
+# ensuite. L'appel restait « en cours », salon vide, et tout nouvel appel du
+# groupe y était ramené.
+
+
+def _age_call(room, seconds):
+    """Vieillit l'appel et ses arrivées : passé le délai de grâce."""
+    from datetime import timedelta
+
+    db = TestingSessionLocal()
+    try:
+        call = db.query(CallLog).filter(CallLog.room == room).first()
+        call.created_at = call.created_at - timedelta(seconds=seconds)
+        for participant in call.participants:
+            if participant.responded_at:
+                participant.responded_at = participant.responded_at - timedelta(seconds=seconds)
+        db.commit()
+    finally:
+        db.close()
+
+
+def _ghost_group_call(client, prefix):
+    """Un appel de groupe où B a décroché, puis a « rejoint » de nouveau sans
+    jamais entrer dans le salon ni signaler son départ."""
+    headers_a, user_id_a, _ = _signup(client, f"+2289320{prefix}1")
+    headers_b, user_id_b, _ = _signup(client, f"+2289320{prefix}2")
+    group = _make_group(client, headers_a, "Fantôme", [(f"+2289320{prefix}2", user_id_b)])
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        room = _start_group_call(client, headers_a, group).json()["room"]
+        rejoined = client.post("/api/v1/calls/token", json={"room": room}, headers=headers_b)
+    assert rejoined.status_code == 200, rejoined.text
+    return headers_a, headers_b, group, room
+
+
+def test_un_appel_de_groupe_au_salon_vide_n_est_plus_propose(client):
+    headers_a, headers_b, group, room = _ghost_group_call(client, "01")
+    _age_call(room, 120)
+
+    with patch("app.services.calls.livekit_service.participant_count", return_value=0) as count:
+        active = client.get(f"/api/v1/calls/active?group_id={group['id']}", headers=headers_b).json()
+
+    count.assert_awaited_once_with(room)
+    assert active == {"active": False}
+    assert client.get("/api/v1/calls/log", headers=headers_a).json()["items"][0]["status"] == "ended"
+
+
+def test_un_nouvel_appel_de_groupe_n_est_pas_ramene_a_un_salon_vide(client):
+    headers_a, headers_b, group, room = _ghost_group_call(client, "02")
+    _age_call(room, 120)
+
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route, patch(
+        "app.services.calls.livekit_service.participant_count", return_value=0
+    ):
+        fresh = _start_group_call(client, headers_b, group).json()
+
+    assert fresh["joined_existing"] is False
+    assert fresh["room"] != room
+
+
+def test_un_appel_de_groupe_occupe_reste_joignable(client):
+    headers_a, headers_b, group, room = _ghost_group_call(client, "03")
+    _age_call(room, 120)
+
+    with patch("app.services.calls.livekit_service.participant_count", return_value=2):
+        active = client.get(f"/api/v1/calls/active?group_id={group['id']}", headers=headers_b).json()
+
+    assert active["active"] is True
+    assert active["room"] == room
+
+
+def test_sans_reponse_de_livekit_on_ne_clot_rien(client):
+    headers_a, headers_b, group, room = _ghost_group_call(client, "04")
+    _age_call(room, 120)
+
+    with patch("app.services.calls.livekit_service.participant_count", return_value=None):
+        active = client.get(f"/api/v1/calls/active?group_id={group['id']}", headers=headers_b).json()
+
+    assert active["active"] is True
+
+
+def test_un_appel_tout_juste_rejoint_n_est_pas_verifie(client):
+    """Celui qui vient de recevoir son jeton n'est pas encore connecté à
+    LiveKit : un salon vide à cet instant ne veut rien dire."""
+    headers_a, headers_b, group, room = _ghost_group_call(client, "05")
+
+    with patch("app.services.calls.livekit_service.participant_count", return_value=0) as count:
+        active = client.get(f"/api/v1/calls/active?group_id={group['id']}", headers=headers_b).json()
+
+    count.assert_not_called()
+    assert active["active"] is True
+
+
+def test_le_balayage_clot_les_appels_de_groupe_desertes(client):
+    import asyncio
+
+    from app.services.calls import call_housekeeping
+
+    headers_a, headers_b, group, room = _ghost_group_call(client, "06")
+    _age_call(room, 120)
+
+    db = TestingSessionLocal()
+    try:
+        with patch("app.services.calls.livekit_service.participant_count", return_value=0):
+            closed = asyncio.run(call_housekeeping.close_deserted_group_calls(db))
+        assert closed == 1
+        call = db.query(CallLog).filter(CallLog.room == room).first()
+        assert call.status == "ended" and call.ended_at is not None
+        assert all(p.left_at is not None for p in call.participants if p.status == "accepted")
+    finally:
+        db.close()

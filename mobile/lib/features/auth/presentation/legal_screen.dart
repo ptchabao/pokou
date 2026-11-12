@@ -5,6 +5,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../modules/shared/module_ui.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Les documents légaux, lus DANS l'application (section 8.1), servis par
 /// l'API pour qu'une correction n'attende pas une revue de store.
@@ -32,7 +33,7 @@ class LegalScreen extends ConsumerWidget {
       title: doc.valueOrNull?.title ??
           (name == 'conditions' ? l.legalTerms : l.legalPrivacy),
       child: doc.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.description_outlined,
           title: l.legalUnavailable,

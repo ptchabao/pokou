@@ -10,6 +10,7 @@ import '../shared/module_ui.dart';
 import 'social_tax_controller.dart';
 import 'social_tax_model.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// La couleur du module — pastilles et barre d'avancement.
 final _fundColor = AppColors.accentPrimaryDark;
@@ -58,7 +59,7 @@ class SocialTaxScreen extends ConsumerWidget {
         label: Text(L.of(context).ceremonyNew),
       ),
       child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.cloud_off,
           title: L.of(context).ceremonyUnavailable,
@@ -191,7 +192,7 @@ class CeremonyFundScreen extends ConsumerWidget {
     return ModuleScaffold(
       title: L.of(context).ceremonyOne,
       child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.search_off,
           title: L.of(context).ceremonyNotFound,

@@ -318,6 +318,7 @@ fichier suivent l'appartenance à la discussion ou au groupe.
 | Canal | Service | Réglages |
 |---|---|---|
 | Notifications de l'app | Firebase Cloud Messaging (`services/notifications/push_service.py`) | `FCM_ENABLED`, `FIREBASE_CREDENTIALS_JSON` ou `_PATH` |
+| Codes de connexion | Twilio Verify (`twilio_verify.py`) : Twilio génère, envoie et vérifie le code ; Pokou garde débit, délai de renvoi et verrouillage. Repli : code Pokou par SMS si Verify refuse | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SERVICE_SID` (facultatif : le service « Pokou » est retrouvé ou créé), `TWILIO_VERIFY_ENABLED` |
 | SMS | Twilio, secours NGH (`sms_service.py`) | `TWILIO_*`, `NGH_*`, `SMS_SENDER_ID` |
 | WhatsApp | Twilio ou passerelle interne (`whatsapp_service.py`) | `TWILIO_WHATSAPP_FROM`, `WHATSAPP_SERVICE_URL` |
 | Centre de notifications | table `service_notifications` (`inbox.notify`) | — |

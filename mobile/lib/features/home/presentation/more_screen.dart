@@ -6,7 +6,7 @@ import 'certified_screen.dart';
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
-import '../../../core/widgets/pokou_app_bar.dart';
+import 'pokou_page_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../broadcasts/presentation/broadcast_lists_screen.dart';
@@ -61,12 +61,14 @@ class MoreScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
       children: [
-        PokouAppBar(
+        // Le même en-tête que les autres onglets. Sans la photo : la carte
+        // du profil est juste dessous.
+        PokouPageHeader(
           title: lot1 ? l.moreSectionSettings : l.navMore,
-          showStatus: false,
+          showAvatar: false,
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
           child: ModuleCard(
             onTap: () => Navigator.of(
               context,

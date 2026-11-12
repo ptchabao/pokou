@@ -25,6 +25,8 @@ export const PERMISSION_LABELS: Record<string, string> = {
   "certified.view": "Voir Pokou certifié",
   "certified.manage": "Examiner les dossiers",
   "modules.manage": "Ouvrir / fermer les modules",
+  "banners.view": "Voir les bannières de l'accueil",
+  "banners.manage": "Gérer les bannières de l'accueil",
   "audit.view": "Voir le journal d'audit",
 }
 

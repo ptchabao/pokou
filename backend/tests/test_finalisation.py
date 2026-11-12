@@ -437,7 +437,13 @@ def test_tontine_en_rotation(client):
     pot = client.post("/api/v1/kory/pots", json={
         "kind": "TONTINE", "title": "Tontine du quartier", "group_id": group_id,
         "amount_per_member": 5000, "period": "MONTHLY", "rotation": [b_id, c_id, a_id],
+        "draw_mode": "FIXED",
     }, headers=a).json()
+    # Kory-8 : la tontine attend que chacun accepte, puis démarre seule.
+    assert pot["status"] == "PENDING" and pot["rounds"] == []
+    client.post(f"/api/v1/kory/pots/{pot['id']}/accept", headers=b)
+    pot = client.post(f"/api/v1/kory/pots/{pot['id']}/accept", headers=c).json()
+    assert pot["status"] == "OPEN"
     assert [r["beneficiary_id"] for r in pot["rounds"]] == [b_id, c_id, a_id]
     assert pot["current_round"] == 1 and pot["collector_id"] == b_id and pot["join_code"] is None
     assert pot["rounds"][0]["expected_total"] == 10000

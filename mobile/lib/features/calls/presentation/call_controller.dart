@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/media/media_repository.dart';
+import '../../../core/crypto/call_keys.dart';
 import '../../../core/crypto/e2ee_service.dart';
 import '../../auth/presentation/auth_controller.dart';
 
@@ -18,6 +19,7 @@ final callRepositoryProvider = Provider<CallRepository>((ref) {
     apiClient: ref.watch(apiClientProvider),
     e2ee: ref.watch(e2eeServiceProvider),
     groups: ref.watch(groupRepositoryProvider),
+    vault: CallKeyVault(),
     myUserId: () => ref.read(authControllerProvider).user?.id,
   );
 });

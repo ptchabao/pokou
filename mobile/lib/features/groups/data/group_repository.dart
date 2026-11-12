@@ -328,6 +328,18 @@ class GroupRepository {
     Group group,
     GroupMessage message,
   ) async {
+    // Déjà ouvert par un autre chemin : un message de groupe ne s'ouvre
+    // qu'UNE fois (la clé d'expéditeur avance), et il en arrive par trois —
+    // le temps réel, la notification, le chargement de la conversation.
+    // Chacun regardait le cache AVANT d'appeler ici, puis attendait le
+    // réseau (groupe, clés) : le second trouvait le cache vide, arrivait
+    // après que le premier avait fini, rouvrait le même chiffré, échouait,
+    // et demandait une re-livraison à l'expéditeur — pour CHAQUE message,
+    // dès que les notifications ont fonctionné (production, 11 novembre
+    // 2026). La vérification se fait donc ici, sous le verrou par message.
+    final known = await _alreadyOpened(message);
+    if (known != null) return known;
+
     GroupMessage resolved;
     MediaKey? mediaKey;
     try {
@@ -340,6 +352,11 @@ class GroupRepository {
       resolved = resolveGroupBody(message, clear);
       mediaKey = resolved.mediaKey;
     } catch (_) {
+      // L'isolat des notifications a son propre dépôt, donc son propre
+      // verrou : il a pu ouvrir ce message à l'instant et être en train de
+      // ranger le clair. On le lui laisse le temps avant de conclure.
+      final elsewhere = await _openedElsewhere(message);
+      if (elsewhere != null) return elsewhere;
       // Illisible ici : on demande à l'expéditeur de le re-livrer (voir
       // e2ee_retry_service.dart) plutôt que de laisser une bulle vide.
       reportUndecryptable('group', message.id);
@@ -352,6 +369,44 @@ class GroupRepository {
       MediaKeyRing.remember(message.mediaAssetId!, mediaKey);
     }
     return resolved;
+  }
+
+  /// Le clair de [message] s'il est déjà dans le cache — avec ce que le
+  /// serveur seul connaît (réactions, suppression). Une modification porte
+  /// un nouveau chiffré : l'ancien clair ne vaut plus pour elle.
+  Future<GroupMessage?> _alreadyOpened(GroupMessage message) async {
+    final GroupMessage? known;
+    try {
+      known = await _store.groupById(message.id);
+    } catch (_) {
+      return null;
+    }
+    if (known == null ||
+        known.isEncrypted ||
+        known.editedAt != message.editedAt) {
+      return null;
+    }
+    if (known.mediaKey != null && known.mediaAssetId != null) {
+      MediaKeyRing.remember(known.mediaAssetId!, known.mediaKey!);
+    }
+    return known.copyWith(
+      deletedAt: message.deletedAt,
+      reactions: message.reactions,
+    );
+  }
+
+  /// Combien de temps on laisse à un autre isolat pour ranger le clair d'un
+  /// message qu'il vient d'ouvrir, avant de le déclarer illisible.
+  static Duration openedElsewhereWait = const Duration(milliseconds: 900);
+
+  Future<GroupMessage?> _openedElsewhere(GroupMessage message) async {
+    const steps = 3;
+    for (var i = 0; i < steps; i++) {
+      final opened = await _alreadyOpened(message);
+      if (opened != null) return opened;
+      await Future<void>.delayed(openedElsewhereWait ~/ steps);
+    }
+    return _alreadyOpened(message);
   }
 
   /// Le corps en clair d'un message de groupe — `{content, payload,

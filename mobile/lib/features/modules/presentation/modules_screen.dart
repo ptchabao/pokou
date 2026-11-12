@@ -10,6 +10,7 @@ import '../data/module_model.dart';
 import 'module_controller.dart';
 import 'module_routes.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// La galerie des modules.
 ///
@@ -106,7 +107,7 @@ class _ModulesScreenState extends ConsumerState<ModulesScreen> {
             ),
             Expanded(
               child: catalogueAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const SkeletonCards(),
                 error: (_, _) => _CenteredMessage(
                   icon: Icons.cloud_off,
                   title: L.of(context).modulesUnavailable,

@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../core/widgets/skeleton.dart';
 import '../../../core/text/emoji_only.dart';
 import '../../../core/media/media_repository.dart'
     show MediaMeta, mediaExtension;
@@ -1539,7 +1540,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       if (proofOn) const ProofModeBanner(),
                       Expanded(
                         child: !state.initialCacheLoaded
-                            ? const SizedBox.shrink()
+                            // L'attente a la forme d'une conversation — et seulement
+                            // si elle dure : le cache se lit en quelques
+                            // millisecondes.
+                            ? const DelayedSkeleton(child: SkeletonBubbles())
                             : state.messages.isEmpty
                             ? Center(
                                 child: Text(
@@ -1829,7 +1833,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(_l.convEditTitle),
         content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           autofocus: true,
           maxLines: 5,
@@ -3013,7 +3017,7 @@ class _BubbleState extends State<_Bubble> {
                 constraints: BoxConstraints(maxWidth: maxWidth),
                 decoration: BoxDecoration(
                   // Maquette Figma : bulle envoyée en dégradé pêche, bulle
-                  // reçue blanche cerclée ; ombre très douce sur les deux.
+                  // reçue blanche cerclée. À plat : aucune ombre sous les bulles.
                   color: isMine
                       ? AppColors.chatBubbleSent
                       : AppColors.chatBubbleReceived,
@@ -3022,13 +3026,6 @@ class _BubbleState extends State<_Bubble> {
                   border: isMine
                       ? null
                       : Border.all(color: AppColors.chatBubbleReceivedBorder),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.chatBubbleShadow,
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

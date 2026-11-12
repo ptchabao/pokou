@@ -13,6 +13,7 @@ import 'marketplace_controller.dart';
 import 'product_detail_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import 'assime_sale_screens.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Le filtre du catalogue.
 ///
@@ -69,7 +70,7 @@ class _MyCatalogScreenState extends ConsumerState<MyCatalogScreen>
           await ref.read(myProductsProvider.future);
         },
         child: mine.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonCards(),
           error: (_, _) => _Message(texte: l.marketUnavailable),
           data: (produits) => _Liste(
             produits: produits,

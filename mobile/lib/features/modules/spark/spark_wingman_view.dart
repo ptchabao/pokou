@@ -9,6 +9,7 @@ import '../shared/module_ui.dart';
 import 'spark_controller.dart';
 import 'spark_feed_view.dart';
 import 'spark_model.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Les avis qu'on me demande.
 ///
@@ -25,7 +26,7 @@ class SparkWingmanScreen extends ConsumerWidget {
       title: L.of(context).wingmanTitle,
       subtitle: L.of(context).wingmanAnon,
       child: requestsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.cloud_off,
           title: L.of(context).wingmanUnavailable,

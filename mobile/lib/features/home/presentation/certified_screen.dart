@@ -13,6 +13,7 @@ import '../../modules/shared/module_ui.dart';
 import 'certified_pro_screen.dart';
 import '../../../core/time/server_time.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 final _certifiedProvider =
     FutureProvider.autoDispose<
@@ -60,7 +61,7 @@ class CertifiedScreen extends ConsumerWidget {
     return ModuleScaffold(
       title: l.certTitle,
       child: data.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.cloud_off,
           title: l.honamFailed,
@@ -328,7 +329,7 @@ class _NameMismatchState extends ConsumerState<_NameMismatch> {
           const SizedBox(height: 4),
           Text(l.certMismatchBody),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _name,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(

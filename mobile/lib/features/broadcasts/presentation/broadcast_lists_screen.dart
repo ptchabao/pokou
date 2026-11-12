@@ -9,6 +9,7 @@ import 'broadcast_controller.dart';
 import 'broadcast_editor_screen.dart';
 import 'broadcast_screen.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Les listes de diffusion de l'utilisateur — les siennes, forcément : une
 /// liste n'existe que pour son auteur, personne d'autre n'en connaît
@@ -53,7 +54,7 @@ class BroadcastListsScreen extends ConsumerWidget {
             ),
             Expanded(
               child: listsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const SkeletonList(),
                 error: (_, _) =>
                     Center(child: Text(L.of(context).bcastListsUnavailable)),
                 data: (lists) => lists.isEmpty

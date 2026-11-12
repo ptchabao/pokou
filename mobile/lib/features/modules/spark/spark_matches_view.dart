@@ -11,6 +11,7 @@ import 'spark_feed_view.dart';
 import 'spark_model.dart';
 import 'spark_room_screen.dart';
 import 'spark_screen.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Mes matchs — salles en cours d'abord, elles ont une échéance.
 class SparkMatchesView extends ConsumerWidget {
@@ -21,7 +22,7 @@ class SparkMatchesView extends ConsumerWidget {
     final matchesAsync = ref.watch(sparkMatchesProvider);
 
     return matchesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonList(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).sparkMatchesUnavailable,

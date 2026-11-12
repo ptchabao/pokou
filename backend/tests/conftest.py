@@ -38,3 +38,7 @@ for _key in (
     "TWILIO_WHATSAPP_FROM",
 ):
     os.environ[_key] = ""
+
+# Twilio Verify : jamais depuis la suite. Les tests qui le couvrent
+# (test_twilio_verify.py) le réactivent avec un Twilio simulé.
+os.environ["TWILIO_VERIFY_ENABLED"] = "false"

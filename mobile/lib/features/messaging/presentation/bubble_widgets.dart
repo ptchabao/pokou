@@ -66,7 +66,7 @@ Future<String?> promptCustomEmoji(BuildContext context) {
     builder: (dialogContext) => AlertDialog(
       title: Text(L.of(context).reactWith),
       content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+        contextMenuBuilder: pokouContextMenuBuilder,
         controller: controller,
         autofocus: true,
         maxLength: 16,
@@ -116,13 +116,6 @@ class ReactionPillRow extends StatelessWidget {
                       : AppColors.chatBubbleReceivedBorder,
                   width: reaction.mine ? 1.4 : 1,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowTint,
-                    blurRadius: 3,
-                    offset: Offset(0, 1),
-                  ),
-                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

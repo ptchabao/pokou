@@ -12740,6 +12740,2351 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Tout copier'**
   String get messageCopyAll;
+
+  /// No description provided for @honamUiFilterToReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'À recevoir'**
+  String get honamUiFilterToReceive;
+
+  /// No description provided for @honamUiFilterCompleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminées'**
+  String get honamUiFilterCompleted;
+
+  /// No description provided for @honamUiFilterCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulées'**
+  String get honamUiFilterCancelled;
+
+  /// No description provided for @honamUiInProgressCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 commande en cours} other{{count} commandes en cours}}'**
+  String honamUiInProgressCount(int count);
+
+  /// No description provided for @honamUiOrderNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° {id}'**
+  String honamUiOrderNo(String id);
+
+  /// No description provided for @honamUiPrescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance'**
+  String get honamUiPrescription;
+
+  /// No description provided for @honamUiQuotePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis en attente'**
+  String get honamUiQuotePending;
+
+  /// No description provided for @honamUiQuotePendingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le pharmacien n\'a pas encore envoyé son devis.'**
+  String get honamUiQuotePendingBody;
+
+  /// No description provided for @honamUiItemsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 article} other{{count} articles}}'**
+  String honamUiItemsCount(int count);
+
+  /// No description provided for @honamUiSeeMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir plus'**
+  String get honamUiSeeMore;
+
+  /// No description provided for @honamUiSeeLess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir moins'**
+  String get honamUiSeeLess;
+
+  /// No description provided for @honamUiSeeOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la commande'**
+  String get honamUiSeeOrder;
+
+  /// No description provided for @honamUiDateAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} à {time}'**
+  String honamUiDateAt(String date, String time);
+
+  /// No description provided for @honamUiSubmittedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée le {date}'**
+  String honamUiSubmittedOn(String date);
+
+  /// No description provided for @honamUiQuotedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis reçu le {date}'**
+  String honamUiQuotedOn(String date);
+
+  /// No description provided for @honamUiDeliveredOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée le {date}'**
+  String honamUiDeliveredOn(String date);
+
+  /// No description provided for @honamUiRejectedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée le {date}'**
+  String honamUiRejectedOn(String date);
+
+  /// No description provided for @honamUiExpiredOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis expiré le {date}'**
+  String honamUiExpiredOn(String date);
+
+  /// No description provided for @honamUiCancelledOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée le {date}'**
+  String honamUiCancelledOn(String date);
+
+  /// No description provided for @honamUiStepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape {step} sur {total}'**
+  String honamUiStepOf(int step, int total);
+
+  /// No description provided for @honamUiEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune commande en cours'**
+  String get honamUiEmptyTitle;
+
+  /// No description provided for @honamUiEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographie ton ordonnance : une pharmacie proche t\'envoie son devis.'**
+  String get honamUiEmptyBody;
+
+  /// No description provided for @honamUiEmptyCompleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune commande terminée pour l\'instant.'**
+  String get honamUiEmptyCompleted;
+
+  /// No description provided for @honamUiEmptyCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune commande annulée.'**
+  String get honamUiEmptyCancelled;
+
+  /// No description provided for @honamUiOrdersError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger tes commandes'**
+  String get honamUiOrdersError;
+
+  /// No description provided for @honamUiPharmaciesError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les pharmacies'**
+  String get honamUiPharmaciesError;
+
+  /// No description provided for @honamUiKm.
+  ///
+  /// In fr, this message translates to:
+  /// **'{km} km'**
+  String honamUiKm(String km);
+
+  /// No description provided for @honamUiCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler {name}'**
+  String honamUiCall(String name);
+
+  /// No description provided for @honamUiSamu.
+  ///
+  /// In fr, this message translates to:
+  /// **'SAMU'**
+  String get honamUiSamu;
+
+  /// No description provided for @honamUiFire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pompiers'**
+  String get honamUiFire;
+
+  /// No description provided for @honamUiPolice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Police'**
+  String get honamUiPolice;
+
+  /// No description provided for @honamUiHeadSubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance envoyée'**
+  String get honamUiHeadSubmitted;
+
+  /// No description provided for @honamUiHelpSubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le pharmacien prépare ton devis. On te prévient dès qu\'il arrive.'**
+  String get honamUiHelpSubmitted;
+
+  /// No description provided for @honamUiHeadQuoted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton devis est arrivé'**
+  String get honamUiHeadQuoted;
+
+  /// No description provided for @honamUiHelpQuoted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie les articles et le total, puis accepte le devis.'**
+  String get honamUiHelpQuoted;
+
+  /// No description provided for @honamUiHeadAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie la pharmacie'**
+  String get honamUiHeadAccepted;
+
+  /// No description provided for @honamUiHelpAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoie le montant depuis ton wallet, puis confirme ton paiement.'**
+  String get honamUiHelpAccepted;
+
+  /// No description provided for @honamUiHeadPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande en préparation'**
+  String get honamUiHeadPaid;
+
+  /// No description provided for @honamUiHelpPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'La pharmacie prépare ton colis. Garde ton code de remise sous la main.'**
+  String get honamUiHelpPaid;
+
+  /// No description provided for @honamUiHeadReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton colis est prêt'**
+  String get honamUiHeadReady;
+
+  /// No description provided for @honamUiHelpReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un coursier vient le chercher à la pharmacie.'**
+  String get honamUiHelpReady;
+
+  /// No description provided for @honamUiHeadInDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta commande est en route'**
+  String get honamUiHeadInDelivery;
+
+  /// No description provided for @honamUiHelpInDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donne ton code au coursier seulement quand tu as le colis en main.'**
+  String get honamUiHelpInDelivery;
+
+  /// No description provided for @honamUiHeadDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande livrée !'**
+  String get honamUiHeadDelivered;
+
+  /// No description provided for @honamUiHelpDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci d\'avoir commandé avec Honam. Prends soin de toi.'**
+  String get honamUiHelpDelivered;
+
+  /// No description provided for @honamUiHeadRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance refusée'**
+  String get honamUiHeadRejected;
+
+  /// No description provided for @honamUiHelpRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu peux l\'envoyer à une autre pharmacie.'**
+  String get honamUiHelpRejected;
+
+  /// No description provided for @honamUiHeadExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis expiré'**
+  String get honamUiHeadExpired;
+
+  /// No description provided for @honamUiHelpExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le devis n\'a pas été accepté à temps. Tu peux renvoyer ton ordonnance.'**
+  String get honamUiHelpExpired;
+
+  /// No description provided for @honamUiHeadCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée'**
+  String get honamUiHeadCancelled;
+
+  /// No description provided for @honamUiHelpCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette commande n\'ira pas plus loin.'**
+  String get honamUiHelpCancelled;
+
+  /// No description provided for @honamUiDeliveryInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi de livraison'**
+  String get honamUiDeliveryInfo;
+
+  /// No description provided for @honamUiNoSteps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune étape enregistrée pour l\'instant.'**
+  String get honamUiNoSteps;
+
+  /// No description provided for @honamUiItemsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles de la commande'**
+  String get honamUiItemsTitle;
+
+  /// No description provided for @honamUiOrderId.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° de commande'**
+  String get honamUiOrderId;
+
+  /// No description provided for @honamUiCopy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get honamUiCopy;
+
+  /// No description provided for @honamUiOrderIdCopied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de commande copié'**
+  String get honamUiOrderIdCopied;
+
+  /// No description provided for @honamUiOrderTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande passée'**
+  String get honamUiOrderTime;
+
+  /// No description provided for @honamUiQuoteTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis reçu'**
+  String get honamUiQuoteTime;
+
+  /// No description provided for @honamUiPaymentTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement confirmé'**
+  String get honamUiPaymentTime;
+
+  /// No description provided for @honamUiShipTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ du coursier'**
+  String get honamUiShipTime;
+
+  /// No description provided for @honamUiDeliveredTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remise du colis'**
+  String get honamUiDeliveredTime;
+
+  /// No description provided for @honamUiClosedTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin de la commande'**
+  String get honamUiClosedTime;
+
+  /// No description provided for @honamUiPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacie'**
+  String get honamUiPharmacy;
+
+  /// No description provided for @honamUiCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier'**
+  String get honamUiCourier;
+
+  /// No description provided for @honamUiNoMessages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun message pour l\'instant.'**
+  String get honamUiNoMessages;
+
+  /// No description provided for @honamUiTrack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre ma commande'**
+  String get honamUiTrack;
+
+  /// No description provided for @honamUiRefundTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement'**
+  String get honamUiRefundTitle;
+
+  /// No description provided for @honamUiUnitPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{price} l\'unité'**
+  String honamUiUnitPrice(String price);
+
+  /// No description provided for @koryHomeNewPot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle cagnotte'**
+  String get koryHomeNewPot;
+
+  /// No description provided for @koryHomeActivePots.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune cagnotte active} =1{1 cagnotte active} other{{count} cagnottes actives}}'**
+  String koryHomeActivePots(int count);
+
+  /// No description provided for @koryHomeCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} réunis'**
+  String koryHomeCollected(String amount);
+
+  /// No description provided for @koryHomeSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trouver une cagnotte'**
+  String get koryHomeSearchHint;
+
+  /// No description provided for @koryHomeSearchClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer la recherche'**
+  String get koryHomeSearchClear;
+
+  /// No description provided for @koryHomeFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get koryHomeFilterAll;
+
+  /// No description provided for @koryHomeFilterCagnottes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnottes'**
+  String get koryHomeFilterCagnottes;
+
+  /// No description provided for @koryHomeFilterCotisations.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cotisations'**
+  String get koryHomeFilterCotisations;
+
+  /// No description provided for @koryHomeFilterTontines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tontines'**
+  String get koryHomeFilterTontines;
+
+  /// No description provided for @koryHomeFilterOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get koryHomeFilterOpen;
+
+  /// No description provided for @koryHomeFilterClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturées'**
+  String get koryHomeFilterClosed;
+
+  /// No description provided for @koryHomeFeatured.
+  ///
+  /// In fr, this message translates to:
+  /// **'À la une'**
+  String get koryHomeFeatured;
+
+  /// No description provided for @koryHomeDaysLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =0{Dernier jour aujourd’hui} =1{1 jour restant} other{{days} jours restants}}'**
+  String koryHomeDaysLeft(int days);
+
+  /// No description provided for @koryHomeOverdue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance dépassée'**
+  String get koryHomeOverdue;
+
+  /// No description provided for @koryHomeContribute.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contribuer'**
+  String get koryHomeContribute;
+
+  /// No description provided for @koryHomeView.
+  ///
+  /// In fr, this message translates to:
+  /// **'Consulter'**
+  String get koryHomeView;
+
+  /// No description provided for @koryHomeRoundOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tour {current} sur {total}'**
+  String koryHomeRoundOf(String current, String total);
+
+  /// No description provided for @koryHomeBeneficiary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéficiaire : {name}'**
+  String koryHomeBeneficiary(String name);
+
+  /// No description provided for @koryHomeNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune cagnotte ne correspond'**
+  String get koryHomeNoMatch;
+
+  /// No description provided for @koryHomeNoMatchBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essaie un autre nom, ou retire le filtre.'**
+  String get koryHomeNoMatchBody;
+
+  /// No description provided for @koryHomeShowAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout afficher'**
+  String get koryHomeShowAll;
+
+  /// No description provided for @koryHomePercent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{percent} %'**
+  String koryHomePercent(String percent);
+
+  /// No description provided for @groupClosedDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce groupe a été supprimé.'**
+  String get groupClosedDeleted;
+
+  /// No description provided for @groupClosedRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu ne fais plus partie de ce groupe.'**
+  String get groupClosedRemoved;
+
+  /// No description provided for @statusVideoTooLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo trop longue : 60 secondes au plus pour un statut.'**
+  String get statusVideoTooLong;
+
+  /// No description provided for @statusVideoLimitHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo de 60 secondes au plus'**
+  String get statusVideoLimitHint;
+
+  /// No description provided for @homeAdLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sponsorisé'**
+  String get homeAdLabel;
+
+  /// No description provided for @homeAdCta.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découvrir'**
+  String get homeAdCta;
+
+  /// No description provided for @homeBabaHello.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moi, c’est Baba.'**
+  String get homeBabaHello;
+
+  /// No description provided for @homeBabaOffer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dis-moi ce qu’il te faut, je m’en occupe.'**
+  String get homeBabaOffer;
+
+  /// No description provided for @homeBabaCta.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parler à Baba'**
+  String get homeBabaCta;
+
+  /// No description provided for @koryXAcceptInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter l’invitation'**
+  String get koryXAcceptInvite;
+
+  /// No description provided for @koryXAcceptSwap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter l’échange'**
+  String get koryXAcceptSwap;
+
+  /// No description provided for @koryXAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepté'**
+  String get koryXAccepted;
+
+  /// No description provided for @koryXAcceptedOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ont accepté : {accepted} sur {total}'**
+  String koryXAcceptedOf(String accepted, String total);
+
+  /// No description provided for @koryXAcceptedToast.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est noté : tu fais partie de la tontine.'**
+  String get koryXAcceptedToast;
+
+  /// No description provided for @koryXAddMemberHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un membre : il cotise dès l’échéance suivante'**
+  String get koryXAddMemberHint;
+
+  /// No description provided for @koryXAdminOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · réservé à l’administrateur'**
+  String koryXAdminOnly(String title);
+
+  /// No description provided for @koryXAdminWithDeputy.
+  ///
+  /// In fr, this message translates to:
+  /// **'{admin} · suppléant {deputy}'**
+  String koryXAdminWithDeputy(String admin, String deputy);
+
+  /// No description provided for @koryXAdministrator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Administrateur'**
+  String get koryXAdministrator;
+
+  /// No description provided for @koryXAllAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le membre a accepté. La tontine est ouverte.} other{Les {count} membres ont accepté. La tontine est ouverte.}}'**
+  String koryXAllAccepted(int count);
+
+  /// No description provided for @koryXAllGroupMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les membres de la discussion'**
+  String get koryXAllGroupMembers;
+
+  /// No description provided for @koryXAllPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu es à jour : aucune échéance à régler pour l’instant.'**
+  String get koryXAllPaid;
+
+  /// No description provided for @koryXAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get koryXAmount;
+
+  /// No description provided for @koryXAmountHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'un montant masqué'**
+  String get koryXAmountHidden;
+
+  /// No description provided for @koryXAmountLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get koryXAmountLabel;
+
+  /// No description provided for @koryXAmountPer.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount}, {period}'**
+  String koryXAmountPer(String amount, String period);
+
+  /// No description provided for @koryXAmountTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} à {name}'**
+  String koryXAmountTo(String amount, String name);
+
+  /// No description provided for @koryXAmountsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants individuels'**
+  String get koryXAmountsLabel;
+
+  /// No description provided for @koryXApproveSwap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider l’échange'**
+  String get koryXApproveSwap;
+
+  /// No description provided for @koryXBeneficiary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéficiaire'**
+  String get koryXBeneficiary;
+
+  /// No description provided for @koryXBeneficiaryField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéficiaire (facultatif)'**
+  String get koryXBeneficiaryField;
+
+  /// No description provided for @koryXCalendar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calendrier des tours'**
+  String get koryXCalendar;
+
+  /// No description provided for @koryXCalendarDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calendrier des tours · levée le {day}'**
+  String koryXCalendarDay(String day);
+
+  /// No description provided for @koryXCalendarUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échange validé : le calendrier est à jour.'**
+  String get koryXCalendarUpdated;
+
+  /// No description provided for @koryXCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulé'**
+  String get koryXCancelled;
+
+  /// No description provided for @koryXCancelledRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tours annulés'**
+  String get koryXCancelledRounds;
+
+  /// No description provided for @koryXCaptureAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capture du SMS ajoutée'**
+  String get koryXCaptureAdded;
+
+  /// No description provided for @koryXChangeAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le montant'**
+  String get koryXChangeAmount;
+
+  /// No description provided for @koryXChangeCollector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de collecteur'**
+  String get koryXChangeCollector;
+
+  /// No description provided for @koryXChangeCollectorSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un membre de la cotisation ; tous sont prévenus'**
+  String get koryXChangeCollectorSub;
+
+  /// No description provided for @koryXCheckAndCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier et créer'**
+  String get koryXCheckAndCreate;
+
+  /// No description provided for @koryXCheckWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie dans ton application de wallet ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.'**
+  String get koryXCheckWallet;
+
+  /// No description provided for @koryXCheckWalletShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie ton wallet, puis réponds'**
+  String get koryXCheckWalletShort;
+
+  /// No description provided for @koryXChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir'**
+  String get koryXChoose;
+
+  /// No description provided for @koryXChooseMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir les membres'**
+  String get koryXChooseMembers;
+
+  /// No description provided for @koryXChooseMembersSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par exemple, seulement les adultes du groupe'**
+  String get koryXChooseMembersSub;
+
+  /// No description provided for @koryXClosesOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'clôture le {date}'**
+  String koryXClosesOn(String date);
+
+  /// No description provided for @koryXClosing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôture'**
+  String get koryXClosing;
+
+  /// No description provided for @koryXCoOrganizer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Co-organisateur · confirme'**
+  String get koryXCoOrganizer;
+
+  /// No description provided for @koryXCollectType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de collecte'**
+  String get koryXCollectType;
+
+  /// No description provided for @koryXCollectorLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecteur'**
+  String get koryXCollectorLabel;
+
+  /// No description provided for @koryXCollectorWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecteur · {wallet}'**
+  String koryXCollectorWallet(String wallet);
+
+  /// No description provided for @koryXConcernedMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Membre concerné · 1} other{Membres concernés · {count}}}'**
+  String koryXConcernedMembers(int count);
+
+  /// No description provided for @koryXConfirmReceipts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirment les réceptions'**
+  String get koryXConfirmReceipts;
+
+  /// No description provided for @koryXConfirmedOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmées : {done} sur {total}'**
+  String koryXConfirmedOf(String done, String total);
+
+  /// No description provided for @koryXConfirmedOnExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'confirmés sur {expected} attendus'**
+  String koryXConfirmedOnExpected(String expected);
+
+  /// No description provided for @koryXConfirmedOnPlanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'confirmés sur {planned} prévus'**
+  String koryXConfirmedOnPlanned(String planned);
+
+  /// No description provided for @koryXContestedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 contestée} other{{count} contestées}}'**
+  String koryXContestedCount(int count);
+
+  /// No description provided for @koryXContestedThenConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'contestée, puis confirmée'**
+  String get koryXContestedThenConfirmed;
+
+  /// No description provided for @koryXContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get koryXContinue;
+
+  /// No description provided for @koryXContinueWithMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Continuer avec 1 membre} other{Continuer avec {count} membres}}'**
+  String koryXContinueWithMembers(int count);
+
+  /// No description provided for @koryXContributeAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contribuer {amount}'**
+  String koryXContributeAmount(String amount);
+
+  /// No description provided for @koryXContributionsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune contribution} =1{1 contribution} other{{count} contributions}}'**
+  String koryXContributionsCount(int count);
+
+  /// No description provided for @koryXCotisationJournal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Journal de la cotisation'**
+  String get koryXCotisationJournal;
+
+  /// No description provided for @koryXCotisationStopped.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette cotisation est arrêtée. Le journal reste consultable.'**
+  String get koryXCotisationStopped;
+
+  /// No description provided for @koryXCreateCagnotte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer la cagnotte'**
+  String get koryXCreateCagnotte;
+
+  /// No description provided for @koryXCreateCotisation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer la cotisation'**
+  String get koryXCreateCotisation;
+
+  /// No description provided for @koryXCsvAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant (FCFA)'**
+  String get koryXCsvAmount;
+
+  /// No description provided for @koryXCsvDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get koryXCsvDate;
+
+  /// No description provided for @koryXCsvEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évènement'**
+  String get koryXCsvEvent;
+
+  /// No description provided for @koryXCsvPerson.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne'**
+  String get koryXCsvPerson;
+
+  /// No description provided for @koryXCsvReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence'**
+  String get koryXCsvReference;
+
+  /// No description provided for @koryXCsvStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get koryXCsvStatus;
+
+  /// No description provided for @koryXDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarée'**
+  String get koryXDeclared;
+
+  /// No description provided for @koryXDeclaredLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total déclaré'**
+  String get koryXDeclaredLabel;
+
+  /// No description provided for @koryXDeclaredUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta contribution reste « Déclarée » jusqu’à ce que {name} confirme l’avoir reçue. Tu es prévenu dès qu’il confirme ou conteste.'**
+  String koryXDeclaredUntil(String name);
+
+  /// No description provided for @koryXDeclineConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu ne feras pas partie de la tontine. L’administrateur est prévenu.'**
+  String get koryXDeclineConfirm;
+
+  /// No description provided for @koryXDeclineInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser l’invitation'**
+  String get koryXDeclineInvite;
+
+  /// No description provided for @koryXDeclinedInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'A refusé'**
+  String get koryXDeclinedInvite;
+
+  /// No description provided for @koryXDeputy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suppléant'**
+  String get koryXDeputy;
+
+  /// No description provided for @koryXDeputyIs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suppléant de l’administrateur : {name}'**
+  String koryXDeputyIs(String name);
+
+  /// No description provided for @koryXDeputyNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a les mêmes droits que toi sur la tontine : relancer, valider un échange de mois, passer au tour suivant, dissoudre.'**
+  String koryXDeputyNotice(String name);
+
+  /// No description provided for @koryXDialUssd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Composer le code USSD {operator}'**
+  String koryXDialUssd(String operator);
+
+  /// No description provided for @koryXDissolve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dissoudre la tontine'**
+  String get koryXDissolve;
+
+  /// No description provided for @koryXDissolveFinal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dissoudre arrête la tontine pour tous. C’est définitif.'**
+  String get koryXDissolveFinal;
+
+  /// No description provided for @koryXDissolveNoMoreRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus aucun tour n’est appelé.'**
+  String get koryXDissolveNoMoreRounds;
+
+  /// No description provided for @koryXDissolveNotified.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le membre est prévenu, avec le motif.} other{Les {count} membres sont prévenus, avec le motif.}}'**
+  String koryXDissolveNotified(int count);
+
+  /// No description provided for @koryXDissolveSettle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui a été versé entre membres se règle entre vous : Pokou n’a jamais touché l’argent.'**
+  String get koryXDissolveSettle;
+
+  /// No description provided for @koryXDissolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dissoute'**
+  String get koryXDissolved;
+
+  /// No description provided for @koryXDissolvedReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif : « {reason} ». Le journal et le rapport restent consultables.'**
+  String koryXDissolvedReason(String reason);
+
+  /// No description provided for @koryXDissolvedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tontine dissoute'**
+  String get koryXDissolvedTitle;
+
+  /// No description provided for @koryXDrawAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tirage au sort · {date}, {time}'**
+  String koryXDrawAt(String date, String time);
+
+  /// No description provided for @koryXDrawAtStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tirage au sort au démarrage'**
+  String get koryXDrawAtStart;
+
+  /// No description provided for @koryXDrawAtStartSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fait par Pokou, journalisé, non rejouable'**
+  String get koryXDrawAtStartSub;
+
+  /// No description provided for @koryXDrawLogged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tirage au sort journalisé'**
+  String get koryXDrawLogged;
+
+  /// No description provided for @koryXDrawnOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordre tiré au sort le {date}, journalisé.'**
+  String koryXDrawnOn(String date);
+
+  /// No description provided for @koryXDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'À venir'**
+  String get koryXDue;
+
+  /// No description provided for @koryXDueOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'{month} · échéance le {day}'**
+  String koryXDueOn(String month, String day);
+
+  /// No description provided for @koryXEach.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} chacun'**
+  String koryXEach(String amount);
+
+  /// No description provided for @koryXEditCotisation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier ou arrêter la cotisation'**
+  String get koryXEditCotisation;
+
+  /// No description provided for @koryXEditCotisationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la cotisation'**
+  String get koryXEditCotisationTitle;
+
+  /// No description provided for @koryXEditNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Ce qui est dû pour {month} reste dû, et les mois passés restent au journal. Le membre est prévenu.} other{Ce qui est dû pour {month} reste dû, et les mois passés restent au journal. Les {count} membres sont prévenus.}}'**
+  String koryXEditNotice(int count, String month);
+
+  /// No description provided for @koryXEditableRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifiable · reste {amount} à verser'**
+  String koryXEditableRemaining(String amount);
+
+  /// No description provided for @koryXEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin'**
+  String get koryXEnd;
+
+  /// No description provided for @koryXEveryFortnight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque quinzaine'**
+  String get koryXEveryFortnight;
+
+  /// No description provided for @koryXEveryMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque mois'**
+  String get koryXEveryMonth;
+
+  /// No description provided for @koryXEveryQuarter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque trimestre'**
+  String get koryXEveryQuarter;
+
+  /// No description provided for @koryXEveryWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque semaine'**
+  String get koryXEveryWeek;
+
+  /// No description provided for @koryXEvtClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La collecte est clôturée.'**
+  String get koryXEvtClosed;
+
+  /// No description provided for @koryXEvtConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reviewer} a confirmé {amount} de {who}'**
+  String koryXEvtConfirmed(String reviewer, String amount, String who);
+
+  /// No description provided for @koryXEvtContested.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reviewer} a contesté {amount} de {who}'**
+  String koryXEvtContested(String reviewer, String amount, String who);
+
+  /// No description provided for @koryXEvtContestedReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reviewer} a contesté {amount} de {who} : « {reason} »'**
+  String koryXEvtContestedReason(
+    String reviewer,
+    String amount,
+    String who,
+    String reason,
+  );
+
+  /// No description provided for @koryXEvtCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a créé la collecte ({kind})'**
+  String koryXEvtCreated(String name, String kind);
+
+  /// No description provided for @koryXEvtDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'{who} a déclaré {amount}'**
+  String koryXEvtDeclared(String who, String amount);
+
+  /// No description provided for @koryXEvtDeclaredRef.
+  ///
+  /// In fr, this message translates to:
+  /// **'{who} a déclaré {amount} · réf. {ref}'**
+  String koryXEvtDeclaredRef(String who, String amount, String ref);
+
+  /// No description provided for @koryXEvtDissolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine est dissoute : « {reason} »'**
+  String koryXEvtDissolved(String reason);
+
+  /// No description provided for @koryXEvtDrawn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou a tiré l’ordre des tours au sort · empreinte {seal}'**
+  String koryXEvtDrawn(String seal);
+
+  /// No description provided for @koryXEvtExtended.
+  ///
+  /// In fr, this message translates to:
+  /// **'La collecte est prolongée jusqu’au {date}'**
+  String koryXEvtExtended(String date);
+
+  /// No description provided for @koryXEvtOrderFixed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’ordre des tours est fixé ; la tontine démarre'**
+  String get koryXEvtOrderFixed;
+
+  /// No description provided for @koryXEvtSwap.
+  ///
+  /// In fr, this message translates to:
+  /// **'{a} et {b} ont échangé leurs mois'**
+  String koryXEvtSwap(String a, String b);
+
+  /// No description provided for @koryXExportCsv.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter en CSV'**
+  String get koryXExportCsv;
+
+  /// No description provided for @koryXExportPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter en PDF'**
+  String get koryXExportPdf;
+
+  /// No description provided for @koryXFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get koryXFilterAll;
+
+  /// No description provided for @koryXFilterConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmées'**
+  String get koryXFilterConfirmed;
+
+  /// No description provided for @koryXFilterContested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contestées'**
+  String get koryXFilterContested;
+
+  /// No description provided for @koryXFirmRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ferme · reste {amount} à verser'**
+  String koryXFirmRemaining(String amount);
+
+  /// No description provided for @koryXFirstDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Première échéance'**
+  String get koryXFirstDue;
+
+  /// No description provided for @koryXFirstRound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Premier tour'**
+  String get koryXFirstRound;
+
+  /// No description provided for @koryXFixOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je fixe l’ordre moi-même'**
+  String get koryXFixOrder;
+
+  /// No description provided for @koryXFixOrderSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chacun voit son mois dès l’ouverture'**
+  String get koryXFixOrderSub;
+
+  /// No description provided for @koryXFixedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordre fixé par l’administrateur · {date}'**
+  String koryXFixedAt(String date);
+
+  /// No description provided for @koryXFixedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordre fixé par l’administrateur le {date}, journalisé.'**
+  String koryXFixedOn(String date);
+
+  /// No description provided for @koryXFixedOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordre fixé par l’administrateur'**
+  String get koryXFixedOrder;
+
+  /// No description provided for @koryXFreeNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans frais. Pokou ne touche pas l’argent : chacun verse depuis son wallet au collecteur.'**
+  String get koryXFreeNotice;
+
+  /// No description provided for @koryXFromDueOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'À partir de l’échéance du {date}'**
+  String koryXFromDueOf(String date);
+
+  /// No description provided for @koryXGoalLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif'**
+  String get koryXGoalLabel;
+
+  /// No description provided for @koryXGroupPeople.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{{name} · 1 personne} other{{name} · {count} personnes}}'**
+  String koryXGroupPeople(int count, String name);
+
+  /// No description provided for @koryXHaveContributed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ont cotisé : {done} sur {total}'**
+  String koryXHaveContributed(String done, String total);
+
+  /// No description provided for @koryXHoursAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{il y a 1 h} other{il y a {count} h}}'**
+  String koryXHoursAgo(int count);
+
+  /// No description provided for @koryXISent.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai envoyé'**
+  String get koryXISent;
+
+  /// No description provided for @koryXInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'en cours'**
+  String get koryXInProgress;
+
+  /// No description provided for @koryXIncludingYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Toi seul} other{{count}, dont toi}}'**
+  String koryXIncludingYou(int count);
+
+  /// No description provided for @koryXIndividualAmounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants individuels'**
+  String get koryXIndividualAmounts;
+
+  /// No description provided for @koryXInvitation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invitation'**
+  String get koryXInvitation;
+
+  /// No description provided for @koryXJoinAndPledge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejoindre et m’engager'**
+  String get koryXJoinAndPledge;
+
+  /// No description provided for @koryXJoinNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne touche pas l’argent. Tu t’engages sur un montant, puis tu verses depuis ton wallet au collecteur et tu déclares ton versement.'**
+  String get koryXJoinNotice;
+
+  /// No description provided for @koryXJournalLocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque action est horodatée et ne peut pas être effacée, même par l’organisateur.'**
+  String get koryXJournalLocked;
+
+  /// No description provided for @koryXKoryPlus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kory Plus'**
+  String get koryXKoryPlus;
+
+  /// No description provided for @koryXLastDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière échéance'**
+  String get koryXLastDue;
+
+  /// No description provided for @koryXLastDueOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière échéance : {date}'**
+  String koryXLastDueOn(String date);
+
+  /// No description provided for @koryXLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard'**
+  String get koryXLate;
+
+  /// No description provided for @koryXLateCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard · {count}'**
+  String koryXLateCount(String count);
+
+  /// No description provided for @koryXLeveeCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 membre × {amount}} other{{count} membres × {amount}}}'**
+  String koryXLeveeCaption(int count, String amount);
+
+  /// No description provided for @koryXLeveePerRound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Levée de chaque tour'**
+  String get koryXLeveePerRound;
+
+  /// No description provided for @koryXLinkFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Organisée par {name}'**
+  String koryXLinkFrom(String name);
+
+  /// No description provided for @koryXLinkedChat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion liée'**
+  String get koryXLinkedChat;
+
+  /// No description provided for @koryXMakeCoOrganizer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désigner co-organisateur'**
+  String get koryXMakeCoOrganizer;
+
+  /// No description provided for @koryXMakeDeputy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désigner suppléant'**
+  String get koryXMakeDeputy;
+
+  /// No description provided for @koryXMembersAndOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres et ordre'**
+  String get koryXMembersAndOrder;
+
+  /// No description provided for @koryXMembersAndRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres et tours'**
+  String get koryXMembersAndRounds;
+
+  /// No description provided for @koryXMembersCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Membres · 1} other{Membres · {count}}}'**
+  String koryXMembersCount(int count);
+
+  /// No description provided for @koryXMembersLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get koryXMembersLabel;
+
+  /// No description provided for @koryXMembersNoticeAlone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu confirmes les réceptions. Un membre qui rejoint le groupe plus tard ne cotise pas d’office : tu l’ajoutes depuis la cotisation, et il cotise dès l’échéance suivante.'**
+  String get koryXMembersNoticeAlone;
+
+  /// No description provided for @koryXMembersNoticeWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toi et {name} confirmez les réceptions. Un membre qui rejoint le groupe plus tard ne cotise pas d’office : tu l’ajoutes depuis la cotisation, et il cotise dès l’échéance suivante.'**
+  String koryXMembersNoticeWith(String name);
+
+  /// No description provided for @koryXMembersTimes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 membre × {amount}, {period}} other{{count} membres × {amount}, {period}}}'**
+  String koryXMembersTimes(int count, String amount, String period);
+
+  /// No description provided for @koryXMembersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get koryXMembersTitle;
+
+  /// No description provided for @koryXMessageOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message (facultatif)'**
+  String get koryXMessageOptional;
+
+  /// No description provided for @koryXMinutesAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{il y a 1 min} other{il y a {count} min}}'**
+  String koryXMinutesAgo(int count);
+
+  /// No description provided for @koryXMoreActions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d’actions'**
+  String get koryXMoreActions;
+
+  /// No description provided for @koryXMyDues.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes échéances'**
+  String get koryXMyDues;
+
+  /// No description provided for @koryXMyLevee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma levée'**
+  String get koryXMyLevee;
+
+  /// No description provided for @koryXMyLeveeOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta levée de {month}'**
+  String koryXMyLeveeOf(String month);
+
+  /// No description provided for @koryXMyPledgeAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon engagement · {amount}'**
+  String koryXMyPledgeAmount(String amount);
+
+  /// No description provided for @koryXName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get koryXName;
+
+  /// No description provided for @koryXNeedFirstDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis la date de la première échéance.'**
+  String get koryXNeedFirstDue;
+
+  /// No description provided for @koryXNeedGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une tontine s’ouvre depuis une discussion de groupe : choisis-la.'**
+  String get koryXNeedGroup;
+
+  /// No description provided for @koryXNewAmountPerMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau montant par membre'**
+  String get koryXNewAmountPerMember;
+
+  /// No description provided for @koryXNewCotisation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle cotisation'**
+  String get koryXNewCotisation;
+
+  /// No description provided for @koryXNewTontine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle tontine'**
+  String get koryXNewTontine;
+
+  /// No description provided for @koryXNextDueIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =0{Prochaine échéance · {date}, aujourd’hui} =1{Prochaine échéance · {date}, demain} other{Prochaine échéance · {date}, dans {days} jours}}'**
+  String koryXNextDueIn(int days, String date);
+
+  /// No description provided for @koryXNextDues.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochaines échéances'**
+  String get koryXNextDues;
+
+  /// No description provided for @koryXNextRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochains tours'**
+  String get koryXNextRounds;
+
+  /// No description provided for @koryXNoDeputyNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans suppléant, toi seul administres la tontine : relances, échanges de mois, tour suivant, dissolution.'**
+  String get koryXNoDeputyNotice;
+
+  /// No description provided for @koryXNoDueYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore d’échéance : le calendrier commence à la première date choisie.'**
+  String get koryXNoDueYet;
+
+  /// No description provided for @koryXNoEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans date de fin'**
+  String get koryXNoEnd;
+
+  /// No description provided for @koryXNoGroups.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune discussion de groupe pour l’instant.'**
+  String get koryXNoGroups;
+
+  /// No description provided for @koryXNoLinkedChat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune discussion'**
+  String get koryXNoLinkedChat;
+
+  /// No description provided for @koryXNoSwapPossible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun mois à venir ne peut être échangé.'**
+  String get koryXNoSwapPossible;
+
+  /// No description provided for @koryXNoTransferNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne transfère pas l’argent. Vérifie le nom du destinataire affiché par ton opérateur avant de valider. Les frais de ton opérateur s’appliquent.'**
+  String get koryXNoTransferNotice;
+
+  /// No description provided for @koryXNotNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas maintenant'**
+  String get koryXNotNow;
+
+  /// No description provided for @koryXNothingToConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à confirmer pour l’instant.'**
+  String get koryXNothingToConfirm;
+
+  /// No description provided for @koryXOfWhichToConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'dont {amount} à confirmer'**
+  String koryXOfWhichToConfirm(String amount);
+
+  /// No description provided for @koryXOnDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'le {date}'**
+  String koryXOnDay(String date);
+
+  /// No description provided for @koryXOnGoalOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur un objectif de {amount}'**
+  String koryXOnGoalOf(String amount);
+
+  /// No description provided for @koryXOnlyYouConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie dans ton application de wallet ou dans le SMS de l’opérateur. Tu es le seul à confirmer ce que tu as reçu ; chaque réponse est horodatée au journal.'**
+  String get koryXOnlyYouConfirm;
+
+  /// No description provided for @koryXOnlyYouConfirmShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est ta levée : toi seul confirmes'**
+  String get koryXOnlyYouConfirmShort;
+
+  /// No description provided for @koryXOpenAndInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Ouvrir et inviter 1 membre} other{Ouvrir et inviter {count} membres}}'**
+  String koryXOpenAndInvite(int count);
+
+  /// No description provided for @koryXOpenPot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la collecte'**
+  String get koryXOpenPot;
+
+  /// No description provided for @koryXOrganizerCollector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Organisateur · collecteur'**
+  String get koryXOrganizerCollector;
+
+  /// No description provided for @koryXOrganizerSide.
+  ///
+  /// In fr, this message translates to:
+  /// **'vue de l’organisateur'**
+  String get koryXOrganizerSide;
+
+  /// No description provided for @koryXOrganizerView.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · vue de l’organisateur'**
+  String koryXOrganizerView(String title);
+
+  /// No description provided for @koryXOutOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {total}'**
+  String koryXOutOf(String done, String total);
+
+  /// No description provided for @koryXOverdueSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance du {date} dépassée'**
+  String koryXOverdueSince(String date);
+
+  /// No description provided for @koryXPaidOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'À jour : {paid} sur {total}'**
+  String koryXPaidOf(String paid, String total);
+
+  /// No description provided for @koryXParticipants.
+  ///
+  /// In fr, this message translates to:
+  /// **'Participants'**
+  String get koryXParticipants;
+
+  /// No description provided for @koryXPastRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tours passés'**
+  String get koryXPastRounds;
+
+  /// No description provided for @koryXPause.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre en pause'**
+  String get koryXPause;
+
+  /// No description provided for @koryXPauseSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas d’échéance le {date} ; reprise à la suivante'**
+  String koryXPauseSub(String date);
+
+  /// No description provided for @koryXPendingSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kory Plus · {group} · en attente des membres'**
+  String koryXPendingSubtitle(String group);
+
+  /// No description provided for @koryXPeople.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 personne} other{{count} personnes}}'**
+  String koryXPeople(int count);
+
+  /// No description provided for @koryXPeriodBiweekly.
+  ///
+  /// In fr, this message translates to:
+  /// **'chaque quinzaine'**
+  String get koryXPeriodBiweekly;
+
+  /// No description provided for @koryXPeriodCounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'À jour : {up} · à confirmer : {pending} · en retard : {late}'**
+  String koryXPeriodCounts(String up, String pending, String late);
+
+  /// No description provided for @koryXPeriodQuarterly.
+  ///
+  /// In fr, this message translates to:
+  /// **'chaque trimestre'**
+  String get koryXPeriodQuarterly;
+
+  /// No description provided for @koryXPeriodicity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Périodicité'**
+  String get koryXPeriodicity;
+
+  /// No description provided for @koryXPickCollector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis le nouveau collecteur.'**
+  String get koryXPickCollector;
+
+  /// No description provided for @koryXPlannedPerDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total prévu à chaque échéance'**
+  String get koryXPlannedPerDue;
+
+  /// No description provided for @koryXPlannedTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévue · à verser à {name}'**
+  String koryXPlannedTo(String name);
+
+  /// No description provided for @koryXPreviousDues.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéances précédentes'**
+  String get koryXPreviousDues;
+
+  /// No description provided for @koryXReasonRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (obligatoire)'**
+  String get koryXReasonRequired;
+
+  /// No description provided for @koryXRecapNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le membre est prévenu par une notification de « {group} ».} other{Les {count} membres sont prévenus par une notification de « {group} ».}}'**
+  String koryXRecapNotice(int count, String group);
+
+  /// No description provided for @koryXRecapNoticeAlone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ensuite, ajoute les membres par leur numéro, ou partage le lien de la cotisation.'**
+  String get koryXRecapNoticeAlone;
+
+  /// No description provided for @koryXRefShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'réf. {ref}'**
+  String koryXRefShort(String ref);
+
+  /// No description provided for @koryXReferenceLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence à indiquer'**
+  String get koryXReferenceLabel;
+
+  /// No description provided for @koryXRefuse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get koryXRefuse;
+
+  /// No description provided for @koryXRejectNeedsReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'« Pas reçu » demande un motif ; la contribution passe en « Contestée » et la personne est prévenue.'**
+  String get koryXRejectNeedsReason;
+
+  /// No description provided for @koryXRemainingLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à collecter'**
+  String get koryXRemainingLabel;
+
+  /// No description provided for @koryXRemindHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relance-les : chacun reçoit une notification.'**
+  String get koryXRemindHint;
+
+  /// No description provided for @koryXRemindLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancer les retardataires'**
+  String get koryXRemindLate;
+
+  /// No description provided for @koryXRemindMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Tout le monde a répondu} =1{Relancer 1 membre} other{Relancer les {count} membres}}'**
+  String koryXRemindMembers(int count);
+
+  /// No description provided for @koryXRemindTooSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une relance a déjà été envoyée il y a moins de 12 h.'**
+  String get koryXRemindTooSoon;
+
+  /// No description provided for @koryXReminded.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Personne à relancer.} =1{1 personne relancée.} other{{count} personnes relancées.}}'**
+  String koryXReminded(int count);
+
+  /// No description provided for @koryXRemindedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancés le {date} à {time} ; chacun peut couper ses notifications.'**
+  String koryXRemindedAt(String date, String time);
+
+  /// No description provided for @koryXRemoveCapture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la capture'**
+  String get koryXRemoveCapture;
+
+  /// No description provided for @koryXReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport'**
+  String get koryXReport;
+
+  /// No description provided for @koryXReportKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le rapport et le journal restent consultables et exportables par chacun, même si la tontine est dissoute.'**
+  String get koryXReportKept;
+
+  /// No description provided for @koryXReportMeaning.
+  ///
+  /// In fr, this message translates to:
+  /// **'« A cotisé » veut dire « confirmé par le bénéficiaire du tour » : Pokou ne voit jamais l’argent.'**
+  String get koryXReportMeaning;
+
+  /// No description provided for @koryXReportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport de la tontine'**
+  String get koryXReportTitle;
+
+  /// No description provided for @koryXRequestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée.'**
+  String get koryXRequestSent;
+
+  /// No description provided for @koryXRoundCounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmées : {confirmed} · déclarées : {declared} · en retard : {late}'**
+  String koryXRoundCounts(String confirmed, String declared, String late);
+
+  /// No description provided for @koryXRoundOfMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tour {number} sur {total} · {month}'**
+  String koryXRoundOfMonth(String number, String total, String month);
+
+  /// No description provided for @koryXRoundsSpan.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 · en {from}} other{{count} · de {from} à {to}}}'**
+  String koryXRoundsSpan(int count, String from, String to);
+
+  /// No description provided for @koryXSaveAndNotify.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Enregistrer et prévenir le membre} other{Enregistrer et prévenir les {count} membres}}'**
+  String koryXSaveAndNotify(int count);
+
+  /// No description provided for @koryXSavedAndNotified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré. Les membres sont prévenus.'**
+  String get koryXSavedAndNotified;
+
+  /// No description provided for @koryXSeal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fait par Pokou, journalisé, non rejouable · empreinte {seal}'**
+  String koryXSeal(String seal);
+
+  /// No description provided for @koryXSeeJournal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tout le journal'**
+  String get koryXSeeJournal;
+
+  /// No description provided for @koryXSeeReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir le rapport de la tontine'**
+  String get koryXSeeReport;
+
+  /// No description provided for @koryXSendRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get koryXSendRequest;
+
+  /// No description provided for @koryXSendRequestTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande à {name}'**
+  String koryXSendRequestTo(String name);
+
+  /// No description provided for @koryXSentAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé'**
+  String get koryXSentAt;
+
+  /// No description provided for @koryXShareLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager le lien'**
+  String get koryXShareLink;
+
+  /// No description provided for @koryXSmsCaptureAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capture du SMS jointe'**
+  String get koryXSmsCaptureAttached;
+
+  /// No description provided for @koryXSomeoneDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelqu’un a refusé : quand tous les autres auront accepté, tu pourras démarrer sans lui, ou dissoudre.'**
+  String get koryXSomeoneDeclined;
+
+  /// No description provided for @koryXStakeDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} par membre · échéance le {date}'**
+  String koryXStakeDue(String amount, String date);
+
+  /// No description provided for @koryXStakeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cotisation par membre'**
+  String get koryXStakeLabel;
+
+  /// No description provided for @koryXStakePerMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cotisation par membre'**
+  String get koryXStakePerMember;
+
+  /// No description provided for @koryXStartWithout.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Démarrer sans la personne qui a refusé} other{Démarrer sans les {count} personnes qui ont refusé}}'**
+  String koryXStartWithout(int count);
+
+  /// No description provided for @koryXStartsWhenAllAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine démarre quand tous les membres ont accepté l’invitation. Chacun est prévenu, et l’ordre des tours est alors fixé.'**
+  String get koryXStartsWhenAllAccept;
+
+  /// No description provided for @koryXStatusAfter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut après déclaration'**
+  String get koryXStatusAfter;
+
+  /// No description provided for @koryXStepParams.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape 1 sur 3 · paramètres'**
+  String get koryXStepParams;
+
+  /// No description provided for @koryXStopConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus aucune échéance après celle en cours. Ce qui est dû reste dû, et le journal reste consultable.'**
+  String get koryXStopConfirm;
+
+  /// No description provided for @koryXStopCotisation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêter la cotisation'**
+  String get koryXStopCotisation;
+
+  /// No description provided for @koryXSwapCalendarNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le calendrier change pour tous ; c’est noté au journal.'**
+  String get koryXSwapCalendarNotice;
+
+  /// No description provided for @koryXSwapMyMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échanger mon mois'**
+  String get koryXSwapMyMonth;
+
+  /// No description provided for @koryXSwapNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chacun voit ce calendrier. Un échange de mois se fait entre deux membres, avec l’accord de l’administrateur.'**
+  String get koryXSwapNotice;
+
+  /// No description provided for @koryXSwapRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échange de mois entre {a} et {b}'**
+  String koryXSwapRequest(String a, String b);
+
+  /// No description provided for @koryXSwapRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tour {a} contre tour {b}'**
+  String koryXSwapRounds(String a, String b);
+
+  /// No description provided for @koryXSwapStep1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu envoies la demande'**
+  String get koryXSwapStep1;
+
+  /// No description provided for @koryXSwapStep2.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} accepte'**
+  String koryXSwapStep2(String name);
+
+  /// No description provided for @koryXSwapStep3.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name}, l’administrateur, valide'**
+  String koryXSwapStep3(String name);
+
+  /// No description provided for @koryXSwapWaitingAdmin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepté · en attente de l’administrateur'**
+  String get koryXSwapWaitingAdmin;
+
+  /// No description provided for @koryXSwapWaitingMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de la réponse de {name}'**
+  String koryXSwapWaitingMember(String name);
+
+  /// No description provided for @koryXThisRound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce tour'**
+  String get koryXThisRound;
+
+  /// No description provided for @koryXToConfirmCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'À confirmer · {count}'**
+  String koryXToConfirmCount(String count);
+
+  /// No description provided for @koryXTodayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui, {time}'**
+  String koryXTodayAt(String time);
+
+  /// No description provided for @koryXTontineDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine est terminée : tous les tours ont eu lieu.'**
+  String get koryXTontineDone;
+
+  /// No description provided for @koryXTontineInviteFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tontine Kory Plus · invitation de {name}'**
+  String koryXTontineInviteFrom(String name);
+
+  /// No description provided for @koryXTontinePlus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tontine Plus'**
+  String get koryXTontinePlus;
+
+  /// No description provided for @koryXTontineStarts.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine démarre'**
+  String get koryXTontineStarts;
+
+  /// No description provided for @koryXTontineStep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kory Plus · étape {step} sur 3'**
+  String koryXTontineStep(String step);
+
+  /// No description provided for @koryXTontineStepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · étape {step} sur 3'**
+  String koryXTontineStepOf(String title, String step);
+
+  /// No description provided for @koryXTransactionRef.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence de transaction'**
+  String get koryXTransactionRef;
+
+  /// No description provided for @koryXTransactionRefHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Elle figure dans le SMS de confirmation de ton opérateur.'**
+  String get koryXTransactionRefHelp;
+
+  /// No description provided for @koryXUpcoming.
+  ///
+  /// In fr, this message translates to:
+  /// **'À venir'**
+  String get koryXUpcoming;
+
+  /// No description provided for @koryXVisibleToAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visibles de tous'**
+  String get koryXVisibleToAll;
+
+  /// No description provided for @koryXVisibleToAllMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · visible de tous les membres'**
+  String koryXVisibleToAllMembers(String title);
+
+  /// No description provided for @koryXVisibleToCollector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visibles du collecteur seulement'**
+  String get koryXVisibleToCollector;
+
+  /// No description provided for @koryXWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get koryXWaiting;
+
+  /// No description provided for @koryXWhatHappensNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui se passe ensuite'**
+  String get koryXWhatHappensNext;
+
+  /// No description provided for @koryXWhatToChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que veux-tu changer ?'**
+  String get koryXWhatToChange;
+
+  /// No description provided for @koryXWhichJournal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quel journal ouvrir ?'**
+  String get koryXWhichJournal;
+
+  /// No description provided for @koryXWithAnotherMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'avec un autre membre'**
+  String get koryXWithAnotherMember;
+
+  /// No description provided for @koryXWithWhom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec qui ?'**
+  String get koryXWithWhom;
+
+  /// No description provided for @koryXWithdrawRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer ma demande'**
+  String get koryXWithdrawRequest;
+
+  /// No description provided for @koryXYouAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as accepté. La tontine démarre dès que tous auront répondu.'**
+  String get koryXYouAccepted;
+
+  /// No description provided for @koryXYouAnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toi et {name}'**
+  String koryXYouAnd(String name);
+
+  /// No description provided for @koryXYouDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as refusé cette invitation.'**
+  String get koryXYouDeclined;
+
+  /// No description provided for @koryXYouReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu reçois la levée de ce tour'**
+  String get koryXYouReceive;
+
+  /// No description provided for @koryXYourContributions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes cotisations'**
+  String get koryXYourContributions;
+
+  /// No description provided for @koryXYourMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton mois'**
+  String get koryXYourMonth;
+
+  /// No description provided for @koryXUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'À jour'**
+  String get koryXUpToDate;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

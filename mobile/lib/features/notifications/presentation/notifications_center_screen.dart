@@ -11,6 +11,7 @@ import '../../marketplace/presentation/assime_sale_screens.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../data/service_notification.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/skeleton.dart';
 
 final serviceNotificationsRepositoryProvider =
     Provider<ServiceNotificationsRepository>(
@@ -90,7 +91,7 @@ class NotificationsCenterScreen extends ConsumerWidget {
           await ref.read(serviceNotificationsProvider.future);
         },
         child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonList(),
           error: (_, _) => ListView(
             children: [
               Padding(

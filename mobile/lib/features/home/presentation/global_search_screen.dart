@@ -98,7 +98,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: _controller,
               autofocus: true,
               textInputAction: TextInputAction.search,

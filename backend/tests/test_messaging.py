@@ -1533,3 +1533,47 @@ def test_l_expediteur_est_prevenu_que_sa_liste_a_change(client):
     # repousser `message:new` l'afficherait deux fois.
     assert events[sender_id]["type"] == "conversation:updated"
     assert events[sender_id]["contact_user_id"] == recipient_id
+
+
+# ── Accusé de remise au retour du destinataire ───────────────────────────────
+
+def test_un_message_envoye_a_un_absent_est_remis_a_sa_reconnexion(client):
+    """Un message écrit à quelqu'un de hors ligne restait à une coche jusqu'à
+    sa LECTURE. Il est remis dès que son téléphone se reconnecte, et
+    l'expéditeur en est prévenu."""
+    headers_a, user_id_a, token_a = _signup(client, "+22891000901")
+    headers_b, user_id_b, token_b = _signup(client, "+22891000902")
+    client.post("/api/v1/contacts", json={"phone": "+22891000902", "display_name": "Bob"}, headers=headers_a)
+    client.post("/api/v1/contacts", json={"phone": "+22891000901", "display_name": "Alice"}, headers=headers_b)
+
+    sent = client.post(
+        "/api/v1/messages", json={"recipient_id": user_id_b, "content": "tu es là ?"}, headers=headers_a
+    ).json()
+    assert sent["status"] == "SENT"
+
+    with client.websocket_connect(f"/api/v1/ws?token={token_a}") as ws_a:
+        with client.websocket_connect(f"/api/v1/ws?token={token_b}"):
+            event = ws_a.receive_json()
+            assert event["type"] == "message:status"
+            assert event["message"]["id"] == sent["id"]
+            assert event["message"]["status"] == "DELIVERED"
+
+    conversation = client.get(f"/api/v1/messages/{user_id_b}", headers=headers_a).json()
+    assert conversation["items"][0]["status"] == "DELIVERED"
+
+
+def test_la_reconnexion_ne_rétrograde_pas_un_message_lu(client):
+    headers_a, user_id_a, _ = _signup(client, "+22891000903")
+    headers_b, user_id_b, token_b = _signup(client, "+22891000904")
+    client.post("/api/v1/contacts", json={"phone": "+22891000904", "display_name": "Bob"}, headers=headers_a)
+    client.post("/api/v1/contacts", json={"phone": "+22891000903", "display_name": "Alice"}, headers=headers_b)
+    sent = client.post(
+        "/api/v1/messages", json={"recipient_id": user_id_b, "content": "lu"}, headers=headers_a
+    ).json()
+    client.post(f"/api/v1/messages/{sent['id']}/read", headers=headers_b)
+
+    with client.websocket_connect(f"/api/v1/ws?token={token_b}"):
+        pass
+
+    conversation = client.get(f"/api/v1/messages/{user_id_b}", headers=headers_a).json()
+    assert conversation["items"][0]["status"] == "READ"

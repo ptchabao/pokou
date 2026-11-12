@@ -152,7 +152,15 @@ class MessagingController extends StateNotifier<MessagingState> {
     // son horloge se changer en coche sans recharger.
     _outboxSubscription = _store.updates.listen(_onOutboxUpdate);
     _syncSubscription = _store.syncUpdates.listen(_onSyncUpdate);
+    // Retour du réseau : les modifications, réactions et vues arrivées
+    // pendant la coupure ne passent que par le socket — elles étaient
+    // perdues pour l'écran ouvert. On relit la page.
+    _connectionSubscription = _ws.connectionChanges.listen((connected) {
+      if (connected && mounted) unawaited(_loadHistory());
+    });
   }
+
+  StreamSubscription<bool>? _connectionSubscription;
 
   /// Cache mémoire des conversations récentes pour afficher les messages
   /// dès la trame 0 à la réouverture sans clignotement ni temps d'attente.
@@ -638,9 +646,12 @@ class MessagingController extends StateNotifier<MessagingState> {
       );
       if (updated.proofMode && updated.originalContent == null) {
         // Mode preuve : la version d'origine reste lisible de tous.
-        final before = state.messages.where((m) => m.id == messageId).firstOrNull;
+        final before = state.messages
+            .where((m) => m.id == messageId)
+            .firstOrNull;
         final original = before?.originalContent ?? before?.content;
-        if (original != null) updated = updated.copyWith(originalContent: original);
+        if (original != null)
+          updated = updated.copyWith(originalContent: original);
       }
       await _store.saveDirect([updated]);
       if (!mounted) return null;
@@ -829,7 +840,10 @@ class MessagingController extends StateNotifier<MessagingState> {
 
     final text = local.content;
     if (text == null || text.trim().isEmpty) return false;
-    final sent = await _repository.send(recipientId: recipientId, content: text);
+    final sent = await _repository.send(
+      recipientId: recipientId,
+      content: text,
+    );
     await _store.saveDirect([sent]);
     return true;
   }
@@ -938,6 +952,7 @@ class MessagingController extends StateNotifier<MessagingState> {
     _subscription?.cancel();
     _outboxSubscription?.cancel();
     _syncSubscription?.cancel();
+    _connectionSubscription?.cancel();
     super.dispose();
   }
 }

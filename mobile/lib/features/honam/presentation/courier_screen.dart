@@ -17,6 +17,7 @@ import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
 import 'honam_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 final _ridesProvider = FutureProvider.autoDispose<({List<HonamOrder> available, List<HonamOrder> mine})>((ref) {
   return ref.watch(honamRepositoryProvider).rides();
@@ -41,7 +42,7 @@ class CourierScreen extends ConsumerWidget {
       title: l.honamCourierMode,
       subtitle: 'Win Pokou',
       child: courier.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(icon: Icons.cloud_off, title: l.honamFailed, message: l.modulesCheckNetwork),
         data: (status) => status == null
             ? _Application(onSent: refresh)

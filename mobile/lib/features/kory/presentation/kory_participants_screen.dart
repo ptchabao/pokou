@@ -6,7 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../contacts/data/contact_model.dart';
 import '../../contacts/presentation/contacts_controller.dart';
-import '../../modules/shared/module_ui.dart';
+import 'kory_ui.dart';
 import 'kory_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 
@@ -169,7 +169,7 @@ class _KoryParticipantsScreenState
           children: [
             Text(l.koryParticipantsTitle),
             Text(
-              l.koryStepOf(widget.title, '2', '3'),
+              l.koryStepOf('2', widget.title, '3'),
               style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
@@ -178,14 +178,14 @@ class _KoryParticipantsScreenState
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          ModuleCard(
+          KoryCard(
             child: Column(
               children: [
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                        contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _last,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(labelText: l.koryLastName),
@@ -194,7 +194,7 @@ class _KoryParticipantsScreenState
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                        contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _first,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(labelText: l.koryFirstName),
@@ -204,7 +204,7 @@ class _KoryParticipantsScreenState
                 ),
                 const SizedBox(height: 10),
                 TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _phone,
                   keyboardType: TextInputType.phone,
                   inputFormatters: [
@@ -213,7 +213,8 @@ class _KoryParticipantsScreenState
                   decoration: InputDecoration(labelText: l.koryPhoneField),
                 ),
                 const SizedBox(height: 12),
-                ModuleQuietButton(
+                KoryButton(
+                  quiet: true,
                   label: l.koryAddParticipant,
                   icon: Icons.person_add_alt_1_outlined,
                   onPressed: _addByNumber,
@@ -276,7 +277,7 @@ class _KoryParticipantsScreenState
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: ModuleActionButton(
+          child: KoryButton(
             label: l.koryContinueWith(_pending.length),
             busy: _busy,
             onPressed: _busy ? null : _continue,

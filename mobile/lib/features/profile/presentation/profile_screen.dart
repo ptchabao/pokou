@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -166,6 +167,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           .read(profileRepositoryProvider)
           .updateMine(avatarMediaId: uploaded.id);
       if (mounted) setState(() => _avatar = updated.avatar);
+      // L'accueil, le menu Plus et les discussions montrent ma photo depuis
+      // l'état de session : sans cette relecture, ils gardaient l'ancienne
+      // jusqu'au redémarrage de l'application.
+      unawaited(ref.read(authControllerProvider.notifier).reloadProfile());
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -241,6 +246,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _about = updated.about;
         });
       }
+      unawaited(ref.read(authControllerProvider.notifier).reloadProfile());
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

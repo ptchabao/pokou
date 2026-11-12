@@ -59,11 +59,17 @@ class GroupChatState {
     this.initialCacheLoaded = false,
     this.hasOlder = false,
     this.loadingOlder = false,
+    this.closed,
     this.error,
   });
 
   final List<GroupMessage> messages;
   final Group? group;
+
+  /// Le groupe n'est plus le mien pendant que l'écran est ouvert : il a été
+  /// supprimé, ou l'on m'en a retiré. L'écran se ferme en le disant, au
+  /// lieu de rester ouvert sur une conversation où plus rien ne part.
+  final GroupClosed? closed;
 
   /// Voir MessagingState.hasOlder — même manque, même correctif.
   final bool hasOlder;
@@ -89,9 +95,11 @@ class GroupChatState {
     bool? initialCacheLoaded,
     bool? hasOlder,
     bool? loadingOlder,
+    GroupClosed? closed,
     String? error,
   }) {
     return GroupChatState(
+      closed: closed ?? this.closed,
       messages: messages ?? this.messages,
       group: group ?? this.group,
       pendingIds: pendingIds ?? this.pendingIds,
@@ -105,6 +113,8 @@ class GroupChatState {
     );
   }
 }
+
+enum GroupClosed { deleted, removed }
 
 /// Pendant de MessagingController pour un groupe. Même forme : chargement de
 /// l'historique à la construction, abonnement au flux WS partagé, état en
@@ -134,7 +144,15 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     _subscription = _ws.events.listen(_onEvent);
     _outboxSubscription = _store.updates.listen(_onOutboxUpdate);
     _syncSubscription = _store.syncUpdates.listen(_onSyncUpdate);
+    // Retour du réseau : les modifications, réactions et suppressions
+    // arrivées pendant la coupure ne passent que par le socket — elles
+    // étaient perdues pour l'écran ouvert. On relit la page.
+    _connectionSubscription = _ws.connectionChanges.listen((connected) {
+      if (connected && mounted) unawaited(_load());
+    });
   }
+
+  StreamSubscription<bool>? _connectionSubscription;
 
   /// Cache mémoire des conversations de groupe récentes pour afficher les
   /// messages dès la trame 0 à la réouverture sans clignotement ni temps d'attente.
@@ -378,6 +396,21 @@ class GroupChatController extends StateNotifier<GroupChatState> {
       return;
     }
 
+    if (type == 'group:deleted') {
+      if (event['group_id'] != groupId) return;
+      state = state.copyWith(closed: GroupClosed.deleted);
+      return;
+    }
+
+    // Un membre a changé de nom ou de photo : les étiquettes d'auteur et
+    // la liste des membres l'affichent.
+    if (type == 'user:profile_updated') {
+      final userId = event['user_id'];
+      final members = state.group?.members ?? const [];
+      if (members.any((member) => member.userId == userId)) _refreshGroup();
+      return;
+    }
+
     // Nom ou photo changés par un admin, ou rôle modifié : on recharge le
     // détail, qui porte aussi `my_role`/`can_manage` — un membre promu doit
     // voir apparaître les actions d'administration sans rouvrir l'écran.
@@ -397,6 +430,12 @@ class GroupChatController extends StateNotifier<GroupChatState> {
           event['group_id'] as int? ??
           (event['group'] as Map<String, dynamic>?)?['id'] as int?;
       if (eventGroupId != groupId) return;
+      if (type == 'group:member:removed' &&
+          _myUserId != null &&
+          event['user_id'] == _myUserId) {
+        state = state.copyWith(closed: GroupClosed.removed);
+        return;
+      }
       _refreshGroup();
     }
   }
@@ -824,6 +863,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     _subscription?.cancel();
     _outboxSubscription?.cancel();
     _syncSubscription?.cancel();
+    _connectionSubscription?.cancel();
     super.dispose();
   }
 }

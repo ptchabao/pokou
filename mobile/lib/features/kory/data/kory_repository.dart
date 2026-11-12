@@ -35,6 +35,12 @@ class KoryRepository {
     String? period,
     DateTime? dueAt,
     List<int>? rotation,
+    String? beneficiaryName,
+    bool amountsVisible = true,
+    DateTime? endsAt,
+    List<int>? memberIds,
+    int? deputyId,
+    String? drawMode,
   }) async {
     final response = await _api.post(
       '/kory/pots',
@@ -49,6 +55,13 @@ class KoryRepository {
         'period': ?period,
         if (dueAt != null) 'due_at': dueAt.toUtc().toIso8601String(),
         'rotation': ?rotation,
+        if (beneficiaryName != null && beneficiaryName.isNotEmpty)
+          'beneficiary_name': beneficiaryName,
+        'amounts_visible': amountsVisible,
+        if (endsAt != null) 'ends_at': endsAt.toUtc().toIso8601String(),
+        'member_ids': ?memberIds,
+        'deputy_id': ?deputyId,
+        'draw_mode': ?drawMode,
       },
     );
     return KoryPot.fromJson(response as Map<String, dynamic>);
@@ -65,6 +78,7 @@ class KoryRepository {
     String? walletReference,
     String? periodLabel,
     String? note,
+    int? proofMediaId,
   }) async {
     await _api.post(
       '/kory/pots/$potId/entries',
@@ -75,9 +89,78 @@ class KoryRepository {
         if (periodLabel != null && periodLabel.isNotEmpty)
           'period_label': periodLabel,
         if (note != null && note.isNotEmpty) 'note': note,
+        'proof_media_id': ?proofMediaId,
       },
     );
   }
+
+  /// KOR-10 : l'aperçu d'une cagnotte avant de la rejoindre.
+  Future<KoryPreview> preview(String code) async {
+    final response = await _api.get(
+      '/kory/preview/${Uri.encodeComponent(code.trim().toUpperCase())}',
+    );
+    return KoryPreview.fromJson(response as Map<String, dynamic>);
+  }
+
+  Future<KoryPot> _action(
+    int potId,
+    String path, [
+    Map<String, dynamic>? body,
+  ]) async {
+    final response = await _api.post(
+      '/kory/pots/$potId/$path',
+      body: body ?? const {},
+    );
+    return KoryPot.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// KOR-25 : accepter ou refuser l'invitation dans une tontine.
+  Future<KoryPot> acceptTontine(int potId) => _action(potId, 'accept');
+  Future<KoryPot> declineTontine(int potId) => _action(potId, 'decline');
+
+  /// L'administrateur démarre sans ceux qui ont refusé.
+  Future<KoryPot> startTontine(int potId) => _action(potId, 'start');
+
+  /// KOR-8 / 20 : relancer ceux qui n'ont pas répondu ou versé. Renvoie le
+  /// nombre de personnes relancées.
+  Future<int> remind(int potId) async {
+    final response = await _api.post(
+      '/kory/pots/$potId/remind',
+      body: const {},
+    );
+    return (response as Map<String, dynamic>)['reminded'] as int? ?? 0;
+  }
+
+  /// KOR-28 : proposer, accepter, valider ou refuser un échange de mois.
+  Future<KoryPot> requestSwap(int potId, int withUserId, {String? message}) =>
+      _action(potId, 'swaps', {
+        'with_user_id': withUserId,
+        if (message != null && message.trim().isNotEmpty)
+          'message': message.trim(),
+      });
+  Future<KoryPot> acceptSwap(int potId, int swapId) =>
+      _action(potId, 'swaps/$swapId/accept');
+  Future<KoryPot> approveSwap(int potId, int swapId) =>
+      _action(potId, 'swaps/$swapId/approve');
+  Future<KoryPot> refuseSwap(int potId, int swapId) =>
+      _action(potId, 'swaps/$swapId/refuse');
+
+  /// KOR-30 : dissoudre la tontine, avec un motif.
+  Future<KoryPot> dissolve(int potId, String reason) =>
+      _action(potId, 'dissolve', {'reason': reason});
+
+  /// KOR-22 : AMOUNT (avec [amount]), PAUSE, STOP ou COLLECTOR (avec
+  /// [collectorId]).
+  Future<KoryPot> changeCotisation(
+    int potId,
+    String action, {
+    int? amount,
+    int? collectorId,
+  }) => _action(potId, 'cotisation', {
+    'action': action,
+    'amount': ?amount,
+    'collector_id': ?collectorId,
+  });
 
   Future<void> review(
     int potId,

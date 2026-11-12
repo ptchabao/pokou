@@ -15,6 +15,7 @@ import '../shared/module_ui.dart';
 import 'vip_room_controller.dart';
 import 'vip_room_model.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// La couleur du module — pastilles seulement.
 const _violet = Color(0xFF7C3AED);
@@ -91,7 +92,7 @@ class _RoomList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(provider);
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCards(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).vipUnavailable,
@@ -266,7 +267,7 @@ class _VipRoomFeedScreenState extends ConsumerState<VipRoomFeedScreen> {
     return ModuleScaffold(
       title: L.of(context).vipRoom,
       child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonCards(),
         error: (_, _) => ModuleEmptyState(
           icon: Icons.search_off,
           title: L.of(context).vipNotFound,
@@ -434,7 +435,7 @@ class _MyRoomTab extends ConsumerWidget {
     final roomAsync = ref.watch(myVipRoomProvider);
 
     return roomAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCards(),
       error: (_, _) => ModuleEmptyState(
         icon: Icons.cloud_off,
         title: L.of(context).vipRoomUnavailable,

@@ -52,3 +52,4 @@ lib/l10n/untranslated.json
 
 # Journaux d'erreurs du compilateur Kotlin — régénérés à chaque build.
 android/.kotlin/
+.l10n.lock

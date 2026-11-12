@@ -177,3 +177,6 @@ from app.models.backups import (  # noqa: F401
 from app.models.moderation import (  # noqa: F401
     AbuseReport,
 )
+from app.models.banners import (  # noqa: F401
+    HomeBanner,
+)

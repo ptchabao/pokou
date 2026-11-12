@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/deeplink/invite_link_parser.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../modules/shared/module_ui.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
+import 'kory_cotisation_screens.dart';
+import 'kory_home_widgets.dart';
+import 'kory_journal_screen.dart';
+import 'kory_participants_screen.dart';
+import 'kory_pay_screens.dart';
 import 'kory_pledge_screens.dart';
+import 'kory_review_screen.dart';
 import 'kory_screen.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
+import 'kory_tontine_screens.dart';
+import 'kory_ui.dart';
+import 'kory_wallet.dart';
 
-/// Une cagnotte : où envoyer l'argent, ce qui a été confirmé, et le journal.
-///
-/// Le numéro du collecteur est en tête et copiable : c'est vers lui que part
-/// la contribution, depuis le wallet de chacun. Pokou ne propose aucun
-/// bouton « payer » — il n'y a rien à payer à Pokou.
+/// Une collecte, quelle que soit sa nature : l'écran se choisit selon ce que
+/// le serveur décrit — cagnotte (KOR-1), cotisation (KOR-20 / 21), tontine
+/// (KOR-7, 8, 25). C'est l'entrée unique des liens, des notifications et
+/// de la liste.
 class KoryPotScreen extends ConsumerWidget {
   const KoryPotScreen({super.key, required this.potId});
 
@@ -30,661 +34,220 @@ class KoryPotScreen extends ConsumerWidget {
     final l = L.of(context);
     final async = ref.watch(koryPotProvider(potId));
     final pot = async.valueOrNull;
-
-    return ModuleScaffold(
-      title: pot?.title ?? l.koryTitle,
-      subtitle: pot == null
-          ? null
-          : (pot.isTontine
-                ? l.koryKindTontine
-                : pot.isCotisation
-                ? l.koryKindCotisation
-                : l.koryKindCagnotte),
-      actions: [
-        if (pot != null && !pot.isTontine)
-          IconButton(
-            tooltip: l.koryShareCode(pot.joinCode),
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () =>
-                // Le texte ET un lien direct : touché, il ouvre Pokou sur la
-                // cagnotte (et la rejoint) ; sans l'application, il propose
-                // de l'installer.
-                Share.share(
-                  '${l.koryShareText(pot.title, pot.joinCode)}\n'
-                  '$pokouLinkBaseUrl/k/${Uri.encodeComponent(pot.joinCode)}',
+    if (pot == null) {
+      return KoryPage(
+        title: l.koryTitle,
+        loading: async.isLoading,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: KoryHomeMessage(
+              illustration: PokouIllustrations.offline,
+              title: l.koryUnavailable,
+              message: l.modulesCheckNetwork,
+              actions: [
+                KoryHomePillButton(
+                  icon: Icons.refresh,
+                  label: l.actionRetry,
+                  onPressed: () => refreshKory(ref, potId: potId),
                 ),
-          ),
-        if (pot != null && pot.isTontine && pot.isOrganizer && pot.isOpen)
-          IconButton(
-            tooltip: l.koryNextRound,
-            icon: const Icon(Icons.skip_next_outlined),
-            onPressed: () => _nextRound(context, ref, pot),
-          ),
-        if (pot != null &&
-            !pot.isTontine &&
-            (pot.isOrganizer || pot.isCollector) &&
-            pot.isOpen)
-          IconButton(
-            tooltip: l.koryFinishCta,
-            icon: const Icon(Icons.lock_outline),
-            onPressed: () => _close(context, ref, pot),
-          ),
-      ],
-      // Dans une tontine, le bénéficiaire du tour reçoit : il ne mise pas.
-      // Après la clôture, seul celui qui doit encore une part de son
-      // engagement peut déclarer un versement (KOR-16).
-      floatingActionButton:
-          pot != null &&
-              (pot.isOpen || (pot.myPledge?.remaining ?? 0) > 0) &&
-              !(pot.isTontine && pot.isCollector)
-          // Une icône, pas un libellé : le texte débordait du bouton.
-          ? FloatingActionButton(
-              backgroundColor: AppColors.accentPrimary,
-              foregroundColor: Colors.white,
-              tooltip: l.koryDeclareTitle,
-              onPressed: () => _declare(context, ref, pot),
-              child: const Icon(Icons.add_task),
-            )
-          : null,
-      child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => ModuleEmptyState(
-          icon: Icons.cloud_off,
-          title: l.koryUnavailable,
-          message: l.modulesCheckNetwork,
-        ),
-        data: (pot) => RefreshIndicator(
-          onRefresh: () async {
-            refreshKory(ref, potId: potId);
-            await ref.read(koryPotProvider(potId).future);
-          },
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-            children: [
-              _Header(pot: pot),
-              const SizedBox(height: 12),
-              _PayTo(pot: pot),
-              _PledgeEntry(pot: pot, onPay: () => _declare(context, ref, pot)),
-              if (pot.isTontine) ...[
-                ModuleSectionTitle(l.koryRounds),
-                for (final round in pot.rounds) _RoundTile(round: round),
               ],
-              ModuleSectionTitle(l.koryJournal),
-              if (pot.entries.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    l.koryJournalEmpty,
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                )
-              else
-                for (final entry in pot.entries)
-                  _EntryTile(pot: pot, entry: entry),
-            ],
+            ),
           ),
         ),
-      ),
-    );
-  }
-
-  Future<void> _nextRound(
-    BuildContext context,
-    WidgetRef ref,
-    KoryPot pot,
-  ) async {
-    final l = L.of(context);
-    final last =
-        pot.currentRound != null && pot.currentRound == pot.rounds.length;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l.koryNextRound),
-        content: Text(last ? l.koryLastRoundBody : l.koryNextRoundBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(l.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(l.koryNextRound),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !context.mounted) return;
-    await _run(
-      context,
-      ref,
-      () => ref.read(koryRepositoryProvider).nextRound(pot.id),
-    );
-  }
-
-  /// KOR-15 : clôturer OU prolonger — un seul écran pour les deux choix.
-  Future<void> _close(BuildContext context, WidgetRef ref, KoryPot pot) async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => KoryFinishScreen(pot: pot)));
-  }
-
-  Future<void> _declare(
-    BuildContext context,
-    WidgetRef ref,
-    KoryPot pot,
-  ) async {
-    final declared = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      builder: (_) => _DeclareSheet(pot: pot),
-    );
-    if (declared == true && context.mounted) {
-      refreshKory(ref, potId: pot.id);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(L.of(context).koryDeclared)));
+      );
     }
-  }
-
-  Future<void> _run(
-    BuildContext context,
-    WidgetRef ref,
-    Future<void> Function() action,
-  ) async {
-    try {
-      await action();
-      refreshKory(ref, potId: potId);
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(L.of(context).koryActionFailed)));
-    }
+    if (pot.isTontine) return KoryTontineScreen(pot: pot);
+    if (pot.isCotisation) return KoryCotisationScreen(pot: pot);
+    return _CagnotteView(pot: pot);
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.pot});
+/// Partager le lien d'une cagnotte : le texte ET un lien direct, qui ouvre
+/// l'invitation dans Pokou (KOR-10) ou propose d'installer l'application.
+void koryShare(BuildContext context, KoryPot pot) {
+  final l = L.of(context);
+  Share.share(
+    '${l.koryShareText(pot.title, pot.joinCode)}\n'
+    '$pokouLinkBaseUrl/k/${Uri.encodeComponent(pot.joinCode)}',
+  );
+}
+
+/// Peut-on déclarer un versement ? Ouvert, ou clôturé avec un reste à
+/// verser sur son engagement (KOR-16) ; jamais le bénéficiaire d'un tour.
+bool koryCanContribute(KoryPot pot) =>
+    (pot.isOpen || (pot.myPledge?.remaining ?? 0) > 0) &&
+    !(pot.isTontine && pot.isCollector) &&
+    !pot.isPending;
+
+// ── KOR-1 · Cagnotte ─────────────────────────────────────────────────────
+
+class _CagnotteView extends ConsumerWidget {
+  const _CagnotteView({required this.pot});
 
   final KoryPot pot;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final progress = pot.progress;
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    return ModuleCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l.koryTotalConfirmed,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              pot.isOpen
-                  ? KoryStatusPill(
-                      icon: Icons.lock_open,
-                      label: l.koryOpen,
-                      color: AppColors.feedbackSuccess,
-                    )
-                  : KoryStatusPill(
-                      icon: Icons.lock_outline,
-                      label: l.koryClosed,
-                      color: AppColors.textSecondary,
-                    ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            formatFcfa(pot.confirmedTotal),
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-          ),
-          Text(
-            l.koryDeclaredTotal(formatFcfa(pot.declaredTotal)),
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-          ),
-          if (pot.remainingToCollect != null)
-            Text(
-              l.koryRemaining(formatFcfa(pot.remainingToCollect!)),
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-          if (progress != null) ...[
-            const SizedBox(height: 8),
-            ModuleProgressBar(
-              value: progress,
-              color: AppColors.accentPrimary,
-              done: progress >= 1,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${(progress * 100).round()} % · ${l.koryGoal(formatFcfa(pot.goalAmount!))}',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-            ),
-          ],
-          if (pot.isCotisation && pot.amountPerMember != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              l.koryPerMember(
-                formatFcfa(pot.amountPerMember!),
-                pot.period == 'WEEKLY'
-                    ? l.koryPeriodWeekly
-                    : l.koryPeriodMonthly,
-              ),
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-          ],
-          if (pot.dueAt != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              l.koryDue(DateFormat.yMMMd(locale).format(pot.dueAt!.toLocal())),
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-          ],
-          const SizedBox(height: 8),
-          Text(
-            l.koryMyShare(formatFcfa(pot.myConfirmedTotal)),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          if (pot.description != null) ...[
-            const SizedBox(height: 8),
-            Text(pot.description!),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _PayTo extends StatelessWidget {
-  const _PayTo({required this.pot});
-
-  final KoryPot pot;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    if (pot.isCollector) {
-      return _Notice(icon: Icons.info_outline, text: l.koryCollectorIsYou);
-    }
-    final phone = pot.collectorPhone;
-    return ModuleCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l.koryCollector(pot.collectorName ?? phone ?? ''),
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          if (phone != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              l.koryPayTo(phone),
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: phone));
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(l.koryCopied)));
-                },
-                icon: const Icon(Icons.copy, size: 18),
-                label: Text(l.koryCopyPhone),
-              ),
-            ),
-          ],
-          const SizedBox(height: 4),
-          _Notice(icon: Icons.shield_outlined, text: l.koryNoMoney),
-        ],
-      ),
-    );
-  }
-}
-
-class _Notice extends StatelessWidget {
-  const _Notice({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: AppColors.textSecondary),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EntryTile extends ConsumerWidget {
-  const _EntryTile({required this.pot, required this.entry});
-
-  final KoryPot pot;
-  final KoryEntry entry;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final (icon, label, color) = switch (entry.status) {
-      'CONFIRMED' => (
-        Icons.check_circle,
-        l.koryStatusConfirmed,
-        AppColors.feedbackSuccess,
-      ),
-      'REJECTED' => (
-        Icons.cancel_outlined,
-        l.koryStatusRejected,
-        AppColors.feedbackDanger,
-      ),
-      _ => (Icons.schedule, l.koryStatusDeclared, AppColors.feedbackWarning),
-    };
-    final subtitle = [
-      DateFormat.yMMMd(locale).add_Hm().format(entry.declaredAt.toLocal()),
-      if (entry.roundNumber != null) l.koryRoundNumber('${entry.roundNumber}'),
-      if (entry.periodLabel != null) entry.periodLabel!,
-      if (entry.walletReference != null) entry.walletReference!,
+    final wallet = KoryWallet.of(pot.collectorPhone);
+    final toConfirm = pot.declaredTotal - pot.confirmedTotal;
+    final pending = pot.entries.where((e) => e.canReview && e.isPending).length;
+    final manager = pot.isOrganizer || pot.isCollector;
+    final caption = [
+      if (pot.goalAmount != null) l.koryXOnGoalOf(formatFcfa(pot.goalAmount!)),
+      if (pot.dueAt != null) l.koryXClosesOn(koryDay(context, pot.dueAt!)),
     ].join(' · ');
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: ModuleCard(
-        // Ma contribution contestée : toucher ouvre ce que je peux faire
-        // (KOR-5).
-        onTap: entry.isMine && entry.isContested && pot.isOpen
-            ? () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => KoryContestedScreen(pot: pot, entry: entry),
-                ),
-              )
-            : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    entry.isMine ? l.koryYou : (entry.contributorName ?? '—'),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                Text(
-                  formatFcfa(entry.amount),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-            ),
-            if (entry.note != null) ...[
-              const SizedBox(height: 4),
-              Text(entry.note!),
-            ],
-            if (entry.isContested && entry.reviewReason != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                l.koryContestedReason(entry.reviewReason!),
-                style: TextStyle(color: AppColors.feedbackDanger, fontSize: 13),
-              ),
-            ],
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                KoryStatusPill(icon: icon, label: label, color: color),
-                const Spacer(),
-                if (entry.isPending &&
-                    (entry.canReview ||
-                        (pot.isCollector && !pot.isTontine))) ...[
-                  TextButton(
-                    onPressed: () => _review(context, ref, confirm: false),
-                    child: Text(l.koryReject),
-                  ),
-                  const SizedBox(width: 4),
-                  FilledButton(
-                    onPressed: () => _review(context, ref, confirm: true),
-                    child: Text(l.koryConfirm),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _review(
-    BuildContext context,
-    WidgetRef ref, {
-    required bool confirm,
-  }) async {
-    String? reason;
-    if (!confirm) {
-      // KOR-5 : le motif est montré au contributeur.
-      final l = L.of(context);
-      final controller = TextEditingController();
-      reason = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(l.koryRejectReasonTitle),
-          content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-            controller: controller,
-            autofocus: true,
-            maxLength: 280,
-            decoration: InputDecoration(hintText: l.koryRejectReasonHint),
+    return KoryPage(
+      title: pot.title,
+      subtitle: [l.koryKindCagnotte, ?pot.groupName].join(' · '),
+      actions: [
+        if (pot.joinCode.isNotEmpty)
+          IconButton(
+            tooltip: l.koryXShareLink,
+            icon: const Icon(Icons.ios_share),
+            onPressed: () => koryShare(context, pot),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(l.actionCancel),
+        if (manager && pot.isOpen)
+          IconButton(
+            tooltip: l.koryFinishCta,
+            icon: const Icon(Icons.lock_outline),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => KoryFinishScreen(pot: pot)),
             ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, controller.text),
-              child: Text(l.koryReject),
-            ),
-          ],
-        ),
-      );
-      controller.dispose();
-      if (reason == null || !context.mounted) return;
-    }
-    try {
-      await ref
-          .read(koryRepositoryProvider)
-          .review(pot.id, entry.id, confirm: confirm, reason: reason);
-      HapticFeedback.lightImpact();
-      refreshKory(ref, potId: pot.id);
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(L.of(context).koryActionFailed)));
-    }
-  }
-}
-
-class _DeclareSheet extends ConsumerStatefulWidget {
-  const _DeclareSheet({required this.pot});
-
-  final KoryPot pot;
-
-  @override
-  ConsumerState<_DeclareSheet> createState() => _DeclareSheetState();
-}
-
-class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
-  late final _amount = TextEditingController(
-    text: widget.pot.amountPerMember?.toString() ?? '',
-  );
-  final _reference = TextEditingController();
-  final _note = TextEditingController();
-  late final _period = TextEditingController(
-    text: widget.pot.isCotisation
-        ? DateFormat('yyyy-MM').format(DateTime.now())
-        : '',
-  );
-  String? _error;
-  bool _busy = false;
-
-  @override
-  void dispose() {
-    _amount.dispose();
-    _reference.dispose();
-    _note.dispose();
-    _period.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final l = L.of(context);
-    final amount = int.tryParse(_amount.text);
-    if (amount == null || amount < 1) {
-      setState(() => _error = l.koryNeedAmount);
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await ref
-          .read(koryRepositoryProvider)
-          .declare(
-            widget.pot.id,
-            amount: amount,
-            walletReference: _reference.text.trim(),
-            periodLabel: _period.text.trim(),
-            note: _note.text.trim(),
-          );
-      HapticFeedback.lightImpact();
-      if (mounted) Navigator.of(context).pop(true);
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _error = l.koryActionFailed;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 20,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          ),
+      ],
+      footer: koryCanContribute(pot)
+          ? KoryFooter(
+              children: [
+                KoryButton(
+                  icon: Icons.volunteer_activism_outlined,
+                  label: l.koryHomeContribute,
+                  onPressed: () => openKoryContribute(
+                    context,
+                    ref,
+                    pot,
+                    amount: (pot.myPledge?.remaining ?? 0) > 0
+                        ? pot.myPledge!.remaining
+                        : null,
+                  ),
+                ),
+              ],
+            )
+          : null,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          refreshKory(ref, potId: pot.id);
+          await ref.read(koryPotProvider(pot.id).future);
+        },
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            ModuleSheetTitle(l.koryDeclareTitle),
-            const SizedBox(height: 4),
-            Text(
-              'Je m’engage : modifiable pendant 8 h avant de devenir ferme (KOR-12). Pokou ne touche aucun fonds.',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-              controller: _amount,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(labelText: l.koryAmount),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-              controller: _reference,
-              maxLength: 64,
-              decoration: InputDecoration(
-                labelText: l.koryWalletRef,
-                helperText: l.koryWalletRefHelp,
-                helperMaxLines: 2,
+            KoryCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  KoryFigure(
+                    label: l.koryTotalConfirmed,
+                    amount: pot.confirmedTotal,
+                    caption: caption.isEmpty ? null : caption,
+                    trailing: koryOpenPill(l, pot),
+                  ),
+                  if (pot.progress != null) ...[
+                    const SizedBox(height: 10),
+                    KoryProgressBar(value: pot.progress!, muted: !pot.isOpen),
+                  ],
+                ],
               ),
             ),
-            if (widget.pot.isCotisation) ...[
-              const SizedBox(height: 8),
-              TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-                controller: _period,
-                maxLength: 12,
-                decoration: InputDecoration(labelText: l.koryPeriodLabel),
-              ),
-            ],
-            const SizedBox(height: 8),
-            TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-              controller: _note,
-              maxLength: 280,
-              decoration: InputDecoration(labelText: l.koryNote),
-            ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 18,
-                      color: AppColors.feedbackDanger,
+            const SizedBox(height: 10),
+            // Les deux tuiles à la même hauteur, quelle que soit la précision.
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _Tile(
+                      label: l.koryXDeclaredLabel,
+                      value: formatFcfa(pot.declaredTotal),
+                      caption: toConfirm > 0
+                          ? l.koryXOfWhichToConfirm(formatFcfa(toConfirm))
+                          : null,
                     ),
-                    const SizedBox(width: 8),
+                  ),
+                  if (pot.remainingToCollect != null) ...[
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: AppColors.feedbackDanger),
+                      child: _Tile(
+                        label: l.koryXRemainingLabel,
+                        value: formatFcfa(pot.remainingToCollect!),
                       ),
                     ),
                   ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            KoryCard(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: Column(
+                children: [
+                  KoryPersonRow(
+                    name: pot.isCollector
+                        ? l.koryYou
+                        : (pot.collectorName ?? '—'),
+                    subtitle: pot.isCollector
+                        ? l.koryCollectorIsYou
+                        : l.koryXCollectorWallet(wallet?.label ?? '—'),
+                  ),
+                  if (pot.beneficiaryName != null)
+                    KoryLine(l.koryXBeneficiary, pot.beneficiaryName!),
+                  if (pot.description != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          pot.description!,
+                          style: TextStyle(color: AppColors.textPrimary),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (pot.isCollector && pending > 0) ...[
+              const SizedBox(height: 10),
+              KoryActionRow(
+                icon: Icons.hourglass_top,
+                color: AppColors.securityWarning,
+                title: l.koryXToConfirmCount('$pending'),
+                subtitle: l.koryXCheckWalletShort,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => KoryReviewScreen(potId: pot.id),
+                  ),
                 ),
               ),
+            ],
+            KoryPledgeBlock(pot: pot),
+            if (manager && pot.isOpen) ...[
+              const SizedBox(height: 10),
+              KoryActionRow(
+                icon: Icons.group_add_outlined,
+                title: l.koryParticipantsTitle,
+                subtitle: l.koryParticipantsCount(pot.participantsCount),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        KoryParticipantsScreen(potId: pot.id, title: pot.title),
+                  ),
+                ),
+              ),
+            ],
+            KoryJournalPreview(pot: pot),
             const SizedBox(height: 16),
-            ModuleActionButton(
-              label: l.koryDeclare,
-              expanded: true,
-              busy: _busy,
-              onPressed: _busy ? null : _submit,
-            ),
+            KoryNotice(text: l.koryNoMoney),
           ],
         ),
       ),
@@ -692,60 +255,140 @@ class _DeclareSheetState extends ConsumerState<_DeclareSheet> {
   }
 }
 
-/// Un tour de tontine : qui reçoit, quand, et ce qu'il a confirmé.
-class _RoundTile extends StatelessWidget {
-  const _RoundTile({required this.round});
+/// « Ouverte » / « Clôturée » : icône et mot, jamais la couleur seule.
+Widget koryOpenPill(L l, KoryPot pot) => pot.isOpen
+    ? KoryStatusPill(
+        icon: Icons.lock_open,
+        label: l.koryOpen,
+        color: AppColors.feedbackSuccess,
+      )
+    : KoryStatusPill(
+        icon: Icons.lock_outline,
+        label: pot.isDissolved ? l.koryXDissolved : l.koryClosed,
+        color: AppColors.textSecondary,
+      );
 
-  final KoryRound round;
+class _Tile extends StatelessWidget {
+  const _Tile({required this.label, required this.value, this.caption});
+
+  final String label;
+  final String value;
+  final String? caption;
 
   @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final (icon, color) = switch (round.status) {
-      'CURRENT' => (Icons.play_circle_outline, AppColors.accentPrimary),
-      'DONE' => (Icons.check_circle, AppColors.feedbackSuccess),
-      _ => (Icons.schedule, AppColors.textSecondary),
-    };
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: color),
-      title: Text(
-        '${l.koryRoundNumber('${round.number}')} · ${round.beneficiaryName ?? '—'}',
-      ),
-      subtitle: Text(
-        [
-          if (round.dueAt != null)
-            DateFormat.yMMMd(locale).format(round.dueAt!.toLocal()),
-          l.koryRoundConfirmed(
-            formatFcfa(round.confirmedTotal),
-            formatFcfa(round.expectedTotal),
+  Widget build(BuildContext context) => KoryCard(
+    padding: const EdgeInsets.all(14),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
-        ].join(' · '),
-      ),
-      selected: round.status == 'CURRENT',
-    );
-  }
+        ),
+        if (caption != null)
+          Text(
+            caption!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+      ],
+    ),
+  );
 }
 
-/// L'engagement dans l'écran de la cagnotte : s'engager (KOR-12), suivre son
+/// Une ligne qui mène ailleurs : icône, titre, précision, chevron.
+class KoryActionRow extends StatelessWidget {
+  const KoryActionRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+    this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => KoryCard(
+    onTap: onTap,
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    child: Row(
+      children: [
+        Icon(icon, color: color ?? AppColors.accentPrimary),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Icon(Icons.chevron_right, color: AppColors.textMuted),
+      ],
+    ),
+  );
+}
+
+/// L'engagement dans la cagnotte : s'engager (KOR-12), suivre son
 /// engagement (KOR-13 / 14), verser la fin après la clôture (KOR-16) ; pour
 /// le collecteur, clôturer ou prolonger à la date de fin (KOR-15).
-class _PledgeEntry extends StatelessWidget {
-  const _PledgeEntry({required this.pot, required this.onPay});
+class KoryPledgeBlock extends ConsumerWidget {
+  const KoryPledgeBlock({super.key, required this.pot});
 
   final KoryPot pot;
-  final VoidCallback onPay;
 
-  Future<void> _open(BuildContext context, Widget screen) async {
+  Future<void> _open(BuildContext context, WidgetRef ref, Widget screen) async {
     final next = await Navigator.of(
       context,
     ).push<Object?>(MaterialPageRoute(builder: (_) => screen));
-    if (next == KoryNextStep.pay) onPay();
+    if (next == KoryNextStep.pay && context.mounted) {
+      final remaining = pot.myPledge?.remaining ?? 0;
+      await openKoryContribute(
+        context,
+        ref,
+        pot,
+        amount: remaining > 0 ? remaining : null,
+      );
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (pot.isTontine) return const SizedBox.shrink();
     final l = L.of(context);
     final mine = pot.myPledge;
@@ -753,15 +396,14 @@ class _PledgeEntry extends StatelessWidget {
 
     if (pot.isDue && (pot.isCollector || pot.isOrganizer)) {
       children.add(
-        ModuleCallout(
-          tone: CalloutTone.amber,
+        KoryNotice(
+          tone: KoryTone.warning,
           text: l.koryFinishDueNotice,
           children: [
-            const SizedBox(height: 8),
-            ModuleActionButton(
+            const SizedBox(height: 10),
+            KoryButton(
               label: l.koryFinishCta,
-              expanded: false,
-              onPressed: () => _open(context, KoryFinishScreen(pot: pot)),
+              onPressed: () => _open(context, ref, KoryFinishScreen(pot: pot)),
             ),
           ],
         ),
@@ -770,76 +412,150 @@ class _PledgeEntry extends StatelessWidget {
 
     if (!pot.isOpen && mine != null && mine.remaining > 0) {
       children.add(
-        ModuleCard(
-          onTap: () => _open(context, KoryClosedScreen(pot: pot)),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.koryClosedTitle,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      '${l.koryToPay} : ${formatFcfa(mine.remaining)}',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
+        KoryActionRow(
+          icon: Icons.lock_clock_outlined,
+          title: l.koryClosedTitle,
+          subtitle: l.koryPayAmount(formatFcfa(mine.remaining)),
+          onTap: () => _open(context, ref, KoryClosedScreen(pot: pot)),
         ),
       );
-    } else if (pot.isOpen && !pot.isCollector) {
+    } else if (pot.isOpen && !pot.isCollector && !pot.isCotisation) {
       if (mine == null) {
         children.add(
-          ModuleQuietButton(
-            label: l.koryPledgeTitle,
+          KoryButton(
+            quiet: true,
             icon: Icons.handshake_outlined,
-            onPressed: () => _open(context, KoryPledgeScreen(pot: pot)),
+            label: l.koryPledgeTitle,
+            onPressed: () => _open(context, ref, KoryPledgeScreen(pot: pot)),
           ),
         );
       } else {
         children.add(
-          ModuleCard(
-            onTap: () => _open(context, KoryMyPledgeScreen(potId: pot.id)),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.koryMyPledgeTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        '${l.koryMyPledgeTotal(formatFcfa(mine.total))} · '
-                        '${l.koryRemainingToPay} : ${formatFcfa(mine.remaining)}',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right),
-              ],
-            ),
+          KoryActionRow(
+            icon: Icons.handshake_outlined,
+            title: l.koryXMyPledgeAmount(formatFcfa(mine.total)),
+            subtitle: mine.isFirm
+                ? l.koryXFirmRemaining(formatFcfa(mine.remaining))
+                : l.koryXEditableRemaining(formatFcfa(mine.remaining)),
+            onTap: () => _open(context, ref, KoryMyPledgeScreen(potId: pot.id)),
           ),
         );
       }
     }
     if (children.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final c in children) ...[c, const SizedBox(height: 8)],
+          for (final c in children) ...[c, const SizedBox(height: 10)],
         ],
       ),
     );
   }
+}
+
+/// Le journal en bref : les dernières contributions, puis « Voir tout ».
+class KoryJournalPreview extends StatelessWidget {
+  const KoryJournalPreview({super.key, required this.pot, this.limit = 4});
+
+  final KoryPot pot;
+  final int limit;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    void openJournal() => Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => KoryJournalScreen(potId: pot.id)));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KorySection(
+          l.koryJournalTab,
+          trailing: l.koryXContributionsCount(pot.entries.length),
+          onTrailing: openJournal,
+        ),
+        if (pot.entries.isEmpty)
+          Text(
+            l.koryJournalEmpty,
+            style: TextStyle(color: AppColors.textSecondary),
+          )
+        else
+          KoryCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
+              children: [
+                for (final entry in pot.entries.take(limit))
+                  KoryEntryRow(pot: pot, entry: entry),
+              ],
+            ),
+          ),
+        if (pot.entries.isNotEmpty)
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TextButton(
+              onPressed: openJournal,
+              child: Text(l.koryXSeeJournal),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Une contribution : qui, quand, combien, son statut. Ma contribution
+/// contestée s'ouvre sur ce que je peux faire (KOR-5).
+class KoryEntryRow extends StatelessWidget {
+  const KoryEntryRow({super.key, required this.pot, required this.entry});
+
+  final KoryPot pot;
+  final KoryEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final subtitle = [
+      koryRelative(context, entry.declaredAt),
+      if (entry.roundNumber != null) l.koryRoundNumber('${entry.roundNumber}'),
+      if (entry.periodLabel != null) entry.periodLabel!,
+    ].join(' · ');
+    return KoryPersonRow(
+      name: entry.isMine ? l.koryYou : (entry.contributorName ?? '—'),
+      subtitle: subtitle,
+      onTap: entry.isMine && entry.isContested && pot.isOpen
+          ? () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => KoryContestedScreen(pot: pot, entry: entry),
+              ),
+            )
+          : null,
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            entry.amountHidden ? '•••' : formatFcfa(entry.amount),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          const SizedBox(height: 4),
+          koryStatusPill(l, entry.status),
+        ],
+      ),
+    );
+  }
+}
+
+/// « il y a 2 h », ou le jour et l'heure.
+String koryRelative(BuildContext context, DateTime at) {
+  final l = L.of(context);
+  final diff = DateTime.now().difference(at.toLocal());
+  if (diff.inMinutes < 60) {
+    return l.koryXMinutesAgo(diff.inMinutes.clamp(1, 59));
+  }
+  if (diff.inHours < 24) return l.koryXHoursAgo(diff.inHours);
+  return '${koryDay(context, at)} · ${koryTime(at)}';
 }

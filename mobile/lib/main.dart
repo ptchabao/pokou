@@ -18,6 +18,7 @@ import 'core/l10n/app_locales.dart';
 import 'core/settings/app_settings.dart';
 import 'l10n/app_localizations.dart';
 import 'core/sync/outbox_service.dart';
+import 'core/sync/live_refresh.dart';
 import 'core/sync/pokou_sync_engine.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
@@ -114,6 +115,9 @@ class PokouApp extends ConsumerWidget {
     // Global et non local à l'écran : une conversation doit remonter en tête
     // de liste même pendant qu'on regarde un autre onglet.
     ref.watch(discussionsRealtimeProvider);
+    // Socket rouvert au retour au premier plan, journal d'appels, cloche et
+    // identités tenus à jour — voir core/sync/live_refresh.dart.
+    ref.watch(liveRefreshProvider);
     // « En train d'écrire » — global, pour que la liste d'accueil
     // l'affiche sur une conversation qu'on n'a pas ouverte.
     ref.watch(typingProvider);

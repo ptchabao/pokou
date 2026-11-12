@@ -10,6 +10,7 @@ import '../../contacts/presentation/contacts_controller.dart';
 import '../data/broadcast_model.dart';
 import 'broadcast_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/skeleton.dart';
 
 /// Composer une liste — un nom, et des destinataires cochés dans son carnet.
 ///
@@ -141,7 +142,7 @@ class _BroadcastEditorScreenState extends ConsumerState<BroadcastEditorScreen> {
               ),
             Expanded(
               child: contactsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const SkeletonList(),
                 error: (_, _) =>
                     Center(child: Text(L.of(context).bcastContactsUnavailable)),
                 data: (contacts) {
