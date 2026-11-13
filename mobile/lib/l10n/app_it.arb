@@ -2504,5 +2504,17 @@
   "koryXFeePaymentPending": "Pagamento in conferma. La pagina si aggiorna appena viene ricevuto.",
   "koryXFeePaid": "Pagato",
   "koryXFeeYouPaid": "La tua quota è pagata: fai parte della tontina.",
-  "koryXStartsWhenAllPaid": "La tontina parte appena tutti i membri hanno pagato la quota di apertura."
+  "koryXStartsWhenAllPaid": "La tontina parte appena tutti i membri hanno pagato la quota di apertura.",
+  "linkCall": "Chiama",
+  "linkWriteOnPokou": "Scrivi su Pokou",
+  "linkCopy": "Copia",
+  "linkCopied": "Copiato",
+  "linkDial": "Componi questo codice",
+  "linkOpen": "Apri il link",
+  "linkSendEmail": "Scrivi un'e-mail",
+  "linkOpenFailed": "Impossibile aprire questo link su questo telefono.",
+  "koryFrozenTitle": "Raccolta sospesa dal team Pokou",
+  "koryFrozenBody": "Durante la verifica puoi consultarla, ma nulla può cambiare. Motivo: {reason}",
+  "courierStatusRejected": "Candidatura rifiutata",
+  "courierRejectedBody": "Il team Pokou non ha accettato la tua candidatura come corriere. Puoi scrivere al supporto per saperne di più."
 }

@@ -57,9 +57,60 @@ class KoryPotScreen extends ConsumerWidget {
         ),
       );
     }
-    if (pot.isTontine) return KoryTontineScreen(pot: pot);
-    if (pot.isCotisation) return KoryCotisationScreen(pot: pot);
-    return _CagnotteView(pot: pot);
+    final Widget screen = pot.isTontine
+        ? KoryTontineScreen(pot: pot)
+        : pot.isCotisation
+        ? KoryCotisationScreen(pot: pot)
+        : _CagnotteView(pot: pot);
+    if (!pot.isFrozen) return screen;
+    // Suspendue par l'équipe : un bandeau permanent dit pourquoi rien ne
+    // répond plus (le serveur refuse tout geste, en 423).
+    return Column(
+      children: [
+        Expanded(child: screen),
+        Material(
+          color: AppColors.securityWarning.withValues(alpha: 0.14),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.pause_circle_outline,
+                    color: AppColors.securityWarning,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.koryFrozenTitle,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l.koryFrozenBody(pot.frozenReason ?? '—'),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -76,6 +127,7 @@ void koryShare(BuildContext context, KoryPot pot) {
 /// Peut-on déclarer un versement ? Ouvert, ou clôturé avec un reste à
 /// verser sur son engagement (KOR-16) ; jamais le bénéficiaire d'un tour.
 bool koryCanContribute(KoryPot pot) =>
+    !pot.isFrozen &&
     (pot.isOpen || (pot.myPledge?.remaining ?? 0) > 0) &&
     !(pot.isTontine && pot.isCollector) &&
     !pot.isPending;
@@ -419,7 +471,8 @@ class KoryPledgeBlock extends ConsumerWidget {
           onTap: () => _open(context, ref, KoryClosedScreen(pot: pot)),
         ),
       );
-    } else if (pot.isOpen && !pot.isCollector && !pot.isCotisation) {
+      // L'initiateur participe comme les autres : il peut s'engager aussi.
+    } else if (pot.isOpen && !pot.isCotisation) {
       if (mine == null) {
         children.add(
           KoryButton(

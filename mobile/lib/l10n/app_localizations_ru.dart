@@ -9079,4 +9079,44 @@ class LRu extends L {
   @override
   String get koryXStartsWhenAllPaid =>
       'Тонтина начнётся, как только все участники оплатят взнос за открытие.';
+
+  @override
+  String get linkCall => 'Позвонить';
+
+  @override
+  String get linkWriteOnPokou => 'Написать в Pokou';
+
+  @override
+  String get linkCopy => 'Копировать';
+
+  @override
+  String get linkCopied => 'Скопировано';
+
+  @override
+  String get linkDial => 'Набрать этот код';
+
+  @override
+  String get linkOpen => 'Открыть ссылку';
+
+  @override
+  String get linkSendEmail => 'Написать письмо';
+
+  @override
+  String get linkOpenFailed =>
+      'Не удалось открыть эту ссылку на этом телефоне.';
+
+  @override
+  String get koryFrozenTitle => 'Сбор приостановлен командой Pokou';
+
+  @override
+  String koryFrozenBody(String reason) {
+    return 'Пока идёт проверка, сбор можно просматривать, но ничего изменить нельзя. Причина: $reason';
+  }
+
+  @override
+  String get courierStatusRejected => 'Заявка отклонена';
+
+  @override
+  String get courierRejectedBody =>
+      'Команда Pokou не приняла твою заявку курьера. Напиши в поддержку, чтобы узнать подробности.';
 }

@@ -19,9 +19,12 @@ import 'honam_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 import '../../../core/widgets/skeleton.dart';
 
-final _ridesProvider = FutureProvider.autoDispose<({List<HonamOrder> available, List<HonamOrder> mine})>((ref) {
-  return ref.watch(honamRepositoryProvider).rides();
-});
+final _ridesProvider =
+    FutureProvider.autoDispose<
+      ({List<HonamOrder> available, List<HonamOrder> mine})
+    >((ref) {
+      return ref.watch(honamRepositoryProvider).rides();
+    });
 
 /// Le mode coursier Win Pokou (BM-08, COU-8, COU-26) : un mode de l'application, pas une
 /// application à part.
@@ -43,7 +46,11 @@ class CourierScreen extends ConsumerWidget {
       subtitle: 'Win Pokou',
       child: courier.when(
         loading: () => const SkeletonCards(),
-        error: (_, _) => ModuleEmptyState(icon: Icons.cloud_off, title: l.honamFailed, message: l.modulesCheckNetwork),
+        error: (_, _) => ModuleEmptyState(
+          icon: Icons.cloud_off,
+          title: l.honamFailed,
+          message: l.modulesCheckNetwork,
+        ),
         data: (status) => status == null
             ? _Application(onSent: refresh)
             : RefreshIndicator(
@@ -52,16 +59,29 @@ class CourierScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                   children: [
                     _StatusCard(status: status),
-                    if (status.referralCode != null && status.status != 'SUSPENDED')
+                    if (status.referralCode != null &&
+                        status.status != 'SUSPENDED' &&
+                        status.status != 'REJECTED')
                       _Referral(status: status),
                     if (status.launchPeriod)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text(l.honamLaunch, style: const TextStyle(color: AppColors.feedbackInfo)),
+                        child: Text(
+                          l.honamLaunch,
+                          style: const TextStyle(color: AppColors.feedbackInfo),
+                        ),
                       ),
-                    if (!status.launchPeriod && (status.status == 'ENDED' || status.status == 'MEMBER'))
+                    if (!status.launchPeriod &&
+                        (status.status == 'ENDED' || status.status == 'MEMBER'))
                       _Offer(status: status),
-                    if (status.status != 'SUSPENDED' && status.status != 'PENDING') _Rides(onChanged: refresh),
+                    // Ni courses pour un coursier suspendu, en attente ou
+                    // refusé : le serveur les lui refuse aussi.
+                    if (!const {
+                      'SUSPENDED',
+                      'PENDING',
+                      'REJECTED',
+                    }.contains(status.status))
+                      _Rides(onChanged: refresh),
                   ],
                 ),
               ),
@@ -89,6 +109,30 @@ class _StatusCard extends StatelessWidget {
         ),
       );
     }
+    if (status.status == 'REJECTED') {
+      return ModuleCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.cancel_outlined, color: AppColors.feedbackDanger),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.courierStatusRejected,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(l.courierRejectedBody),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     if (status.status == 'SUSPENDED') {
       return ModuleCard(
         child: Row(
@@ -103,11 +147,16 @@ class _StatusCard extends StatelessWidget {
     return ModuleCard(
       child: Row(
         children: [
-          ModuleBadge(icon: Icons.delivery_dining_outlined, color: AppColors.accentPrimary),
+          ModuleBadge(
+            icon: Icons.delivery_dining_outlined,
+            color: AppColors.accentPrimary,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              status.unlimited ? l.honamUnlimited : l.honamRidesLeft('${status.ridesLeft}'),
+              status.unlimited
+                  ? l.honamUnlimited
+                  : l.honamRidesLeft('${status.ridesLeft}'),
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
           ),
@@ -138,19 +187,30 @@ class _Offer extends ConsumerWidget {
                 // Fin d'essai : on parle d'argent APRÈS les premiers gains,
                 // avec le pack qui couvre l'activité réelle.
                 if (status.recommendedPack != null) ...[
-                  Text(l.honamTrialEnded, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    l.honamTrialEnded,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 4),
-                  Text(l.honamRecommendedPack(
-                    status.packs.where((p) => p.code == status.recommendedPack).firstOrNull?.label ??
-                        status.recommendedPack!,
-                  )),
+                  Text(
+                    l.honamRecommendedPack(
+                      status.packs
+                              .where((p) => p.code == status.recommendedPack)
+                              .firstOrNull
+                              ?.label ??
+                          status.recommendedPack!,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                 ],
                 Text(l.honamMembership(formatFcfa(status.membershipPriceHt))),
                 const SizedBox(height: 8),
                 ModuleActionButton(
                   label: l.honamPayMembership,
-                  onPressed: () => openPayment(context, repository.pay('/honam/courier/membership')),
+                  onPressed: () => openPayment(
+                    context,
+                    repository.pay('/honam/courier/membership'),
+                  ),
                 ),
               ],
             ),
@@ -163,16 +223,32 @@ class _Offer extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               selected: pack.code == status.currentPack,
               title: Text(pack.label),
-              subtitle: Text(pack.rides == null ? l.honamUnlimited : l.honamRidesLeft('${pack.rides}')),
+              subtitle: Text(
+                pack.rides == null
+                    ? l.honamUnlimited
+                    : l.honamRidesLeft('${pack.rides}'),
+              ),
               trailing: Text(l.honamPackPrice(formatFcfa(pack.upgradePriceHt))),
               enabled: pack.code != 'QUEEN' || status.queenUnlocked,
               onTap: pack.code == status.currentPack
                   ? null
-                  : () => openPayment(context, repository.pay('/honam/courier/pack', body: {'pack': pack.code})),
+                  : () => openPayment(
+                      context,
+                      repository.pay(
+                        '/honam/courier/pack',
+                        body: {'pack': pack.code},
+                      ),
+                    ),
             ),
           if (!status.queenUnlocked)
-            Text(l.honamQueenLocked, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-          Text(l.honamPriceNote, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            Text(
+              l.honamQueenLocked,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+          Text(
+            l.honamPriceNote,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          ),
         ],
       ],
     );
@@ -204,16 +280,27 @@ class _Rides extends ConsumerWidget {
             ],
           ),
           ModuleSectionTitle(l.honamMyRides),
-          if (data.mine.where((o) => o.status != 'DELIVERED' || !o.courierPaid).isEmpty)
-            Text(l.honamNoRides, style: TextStyle(color: AppColors.textSecondary))
+          if (data.mine
+              .where((o) => o.status != 'DELIVERED' || !o.courierPaid)
+              .isEmpty)
+            Text(
+              l.honamNoRides,
+              style: TextStyle(color: AppColors.textSecondary),
+            )
           else
-            for (final order in data.mine.where((o) => o.status != 'DELIVERED' || !o.courierPaid))
+            for (final order in data.mine.where(
+              (o) => o.status != 'DELIVERED' || !o.courierPaid,
+            ))
               _RideCard(order: order, mine: true, onChanged: onChanged),
           ModuleSectionTitle(l.honamAvailableRides),
           if (data.available.isEmpty)
-            Text(l.honamNoRides, style: TextStyle(color: AppColors.textSecondary))
+            Text(
+              l.honamNoRides,
+              style: TextStyle(color: AppColors.textSecondary),
+            )
           else
-            for (final order in data.available) _RideCard(order: order, mine: false, onChanged: onChanged),
+            for (final order in data.available)
+              _RideCard(order: order, mine: false, onChanged: onChanged),
         ],
       ),
     );
@@ -221,7 +308,11 @@ class _Rides extends ConsumerWidget {
 }
 
 class _RideCard extends ConsumerWidget {
-  const _RideCard({required this.order, required this.mine, required this.onChanged});
+  const _RideCard({
+    required this.order,
+    required this.mine,
+    required this.onChanged,
+  });
 
   final HonamOrder order;
   final bool mine;
@@ -239,7 +330,9 @@ class _RideCard extends ConsumerWidget {
         onChanged();
       } catch (error) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
       }
     }
 
@@ -250,7 +343,7 @@ class _RideCard extends ConsumerWidget {
         builder: (dialogContext) => AlertDialog(
           title: Text(l.honamDeliver),
           content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             autofocus: true,
             keyboardType: TextInputType.number,
@@ -259,7 +352,10 @@ class _RideCard extends ConsumerWidget {
             decoration: InputDecoration(labelText: l.honamEnterCode),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l.actionCancel)),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l.actionCancel),
+            ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, controller.text),
               child: Text(l.honamDeliver),
@@ -268,7 +364,8 @@ class _RideCard extends ConsumerWidget {
         ),
       );
       controller.dispose();
-      if (code != null && code.length == 6) await act('deliver', body: {'code': code});
+      if (code != null && code.length == 6)
+        await act('deliver', body: {'code': code});
     }
 
     final pharmacy = order.pharmacy;
@@ -278,20 +375,32 @@ class _RideCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(pharmacy?.name ?? '', style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text(pharmacy?.address ?? '', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            Text(
+              pharmacy?.name ?? '',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            Text(
+              pharmacy?.address ?? '',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
             const SizedBox(height: 4),
             Row(
               children: [
                 const Icon(Icons.place_outlined, size: 18),
                 const SizedBox(width: 4),
                 Expanded(child: Text(order.deliveryAddress)),
-                Text(formatFcfa(order.deliveryPrice ?? 0), style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  formatFcfa(order.deliveryPrice ?? 0),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ],
             ),
             if (order.originalRequired) ...[
               const SizedBox(height: 4),
-              Text(l.honamOriginal, style: const TextStyle(color: AppColors.feedbackInfo)),
+              Text(
+                l.honamOriginal,
+                style: const TextStyle(color: AppColors.feedbackInfo),
+              ),
             ],
             if (mine &&
                 order.status == 'IN_DELIVERY' &&
@@ -300,7 +409,10 @@ class _RideCard extends ConsumerWidget {
               Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton.icon(
-                  onPressed: () => openInMaps(order.deliveryLatitude!, order.deliveryLongitude!),
+                  onPressed: () => openInMaps(
+                    order.deliveryLatitude!,
+                    order.deliveryLongitude!,
+                  ),
                   icon: const Icon(Icons.navigation_outlined, size: 18),
                   label: Text(l.honamNavigate),
                 ),
@@ -331,11 +443,17 @@ class _RideCard extends ConsumerWidget {
                 ],
               ),
             ] else if (order.status == 'READY')
-              ModuleActionButton(label: l.honamPickup, onPressed: () => act('pickup'))
+              ModuleActionButton(
+                label: l.honamPickup,
+                onPressed: () => act('pickup'),
+              )
             else if (order.status == 'IN_DELIVERY')
               ModuleActionButton(label: l.honamDeliver, onPressed: deliver)
             else if (order.status == 'DELIVERED' && !order.courierPaid)
-              ModuleQuietButton(label: l.honamCoursePaid, onPressed: () => act('paid')),
+              ModuleQuietButton(
+                label: l.honamCoursePaid,
+                onPressed: () => act('paid'),
+              ),
           ],
         ),
       ),
@@ -359,7 +477,8 @@ class CourierIncomingRideScreen extends StatefulWidget {
   final VoidCallback onAccept;
 
   @override
-  State<CourierIncomingRideScreen> createState() => _CourierIncomingRideScreenState();
+  State<CourierIncomingRideScreen> createState() =>
+      _CourierIncomingRideScreenState();
 }
 
 class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
@@ -401,7 +520,10 @@ class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
               // En-tête type appel entrant
               Row(
                 children: [
-                  const Icon(Icons.delivery_dining, color: AppColors.accentPrimary),
+                  const Icon(
+                    Icons.delivery_dining,
+                    color: AppColors.accentPrimary,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     'Nouvelle course · mode coursier',
@@ -413,7 +535,10 @@ class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.feedbackWarning.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -461,16 +586,35 @@ class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.storefront, color: AppColors.feedbackSuccess, size: 20),
+                        const Icon(
+                          Icons.storefront,
+                          color: AppColors.feedbackSuccess,
+                          size: 20,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Retrait en pharmacie', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                              Text(pharmacy?.name ?? 'Pharmacie', style: const TextStyle(fontSize: 15)),
+                              const Text(
+                                'Retrait en pharmacie',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                pharmacy?.name ?? 'Pharmacie',
+                                style: const TextStyle(fontSize: 15),
+                              ),
                               if (pharmacy?.address != null)
-                                Text(pharmacy!.address, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                                Text(
+                                  pharmacy!.address,
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -483,14 +627,27 @@ class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.location_on, color: AppColors.accentPrimary, size: 20),
+                        const Icon(
+                          Icons.location_on,
+                          color: AppColors.accentPrimary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Livraison au patient', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                              Text(widget.order.deliveryAddress, style: const TextStyle(fontSize: 15)),
+                              const Text(
+                                'Livraison au patient',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                widget.order.deliveryAddress,
+                                style: const TextStyle(fontSize: 15),
+                              ),
                             ],
                           ),
                         ),
@@ -511,12 +668,19 @@ class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 18, color: AppColors.accentPrimary),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: AppColors.accentPrimary,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Tu étais dans une autre section : tu y reviens après ta réponse.',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -554,7 +718,6 @@ class _CourierIncomingRideScreenState extends State<CourierIncomingRideScreen> {
     );
   }
 }
-
 
 /// Le coursier navigue avec l'application de cartes de son téléphone :
 /// aucun guidage dans Pokou.
@@ -616,16 +779,23 @@ class _LocationBeaconState extends ConsumerState<_LocationBeacon> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         if (mounted && !_denied) setState(() => _denied = true);
         return;
       }
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
       final repository = ref.read(honamRepositoryProvider);
       for (final id in widget.orderIds) {
-        await repository.sendLocation(id, position.latitude, position.longitude);
+        await repository.sendLocation(
+          id,
+          position.latitude,
+          position.longitude,
+        );
       }
       if (mounted && _denied) setState(() => _denied = false);
     } catch (_) {
@@ -682,7 +852,10 @@ class _Referral extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l.honamReferralTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              l.honamReferralTitle,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 4),
             Text(l.honamReferralBody('${status.referralGiftRides}')),
             const SizedBox(height: 8),
@@ -691,7 +864,11 @@ class _Referral extends StatelessWidget {
                 Expanded(
                   child: SelectableText(
                     code,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 2),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -702,8 +879,10 @@ class _Referral extends StatelessWidget {
               ],
             ),
             if (status.referralsCount > 0)
-              Text(l.honamReferralCount('${status.referralsCount}'),
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              Text(
+                l.honamReferralCount('${status.referralsCount}'),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              ),
           ],
         ),
       ),
@@ -757,20 +936,26 @@ class _ApplicationState extends ConsumerState<_Application> {
     final l = L.of(context);
     setState(() => _busy = true);
     try {
-      await ref.read(honamRepositoryProvider).courierJoin(
-        zones: _zones.text.trim(),
-        walletPhone: _wallet.text.trim(),
-        city: _city,
-        referralCode: _referral.text.trim().toUpperCase(),
-      );
+      await ref
+          .read(honamRepositoryProvider)
+          .courierJoin(
+            zones: _zones.text.trim(),
+            walletPhone: _wallet.text.trim(),
+            city: _city,
+            referralCode: _referral.text.trim().toUpperCase(),
+          );
       widget.onSent();
     } on ApiException catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -785,7 +970,9 @@ class _ApplicationState extends ConsumerState<_Application> {
       if (mounted) setState(() => _waitlisted = city);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L.of(context).honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(L.of(context).honamFailed)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -806,12 +993,18 @@ class _ApplicationState extends ConsumerState<_Application> {
         message: l.honamWaitlistBody,
       );
     }
-    final ready = _rules && _zones.text.trim().length >= 2 && _wallet.text.trim().isNotEmpty &&
+    final ready =
+        _rules &&
+        _zones.text.trim().length >= 2 &&
+        _wallet.text.trim().isNotEmpty &&
         (served.isEmpty || (_city != null && !elsewhere));
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(l.honamCourierJoin, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        Text(
+          l.honamCourierJoin,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 8),
         Text(l.honamCourierJoinBody),
         const SizedBox(height: 16),
@@ -820,8 +1013,12 @@ class _ApplicationState extends ConsumerState<_Application> {
             initialValue: _city,
             decoration: InputDecoration(labelText: l.honamCity),
             items: [
-              for (final city in served) DropdownMenuItem(value: city, child: Text(city)),
-              DropdownMenuItem(value: _otherCity, child: Text(l.honamOtherCity)),
+              for (final city in served)
+                DropdownMenuItem(value: city, child: Text(city)),
+              DropdownMenuItem(
+                value: _otherCity,
+                child: Text(l.honamOtherCity),
+              ),
             ],
             onChanged: (value) => setState(() => _city = value),
           ),
@@ -829,7 +1026,7 @@ class _ApplicationState extends ConsumerState<_Application> {
           const SizedBox(height: 8),
           Text(l.honamNotServed),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _otherCityName,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(labelText: l.honamYourCity),
@@ -839,24 +1036,26 @@ class _ApplicationState extends ConsumerState<_Application> {
             label: l.honamJoinWaitlist,
             icon: Icons.notifications_active_outlined,
             busy: _busy,
-            onPressed: _otherCityName.text.trim().length >= 2 && !_busy ? _joinWaitlist : null,
+            onPressed: _otherCityName.text.trim().length >= 2 && !_busy
+                ? _joinWaitlist
+                : null,
           ),
         ] else ...[
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _zones,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(labelText: l.honamZones),
           ),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _wallet,
             keyboardType: TextInputType.phone,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(labelText: l.honamWallet),
           ),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _referral,
             textCapitalization: TextCapitalization.characters,
             decoration: InputDecoration(labelText: l.honamReferralCodeField),

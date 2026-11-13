@@ -8991,4 +8991,43 @@ class LEn extends L {
   @override
   String get koryXStartsWhenAllPaid =>
       'The savings circle starts as soon as every member has paid the opening fee.';
+
+  @override
+  String get linkCall => 'Call';
+
+  @override
+  String get linkWriteOnPokou => 'Message on Pokou';
+
+  @override
+  String get linkCopy => 'Copy';
+
+  @override
+  String get linkCopied => 'Copied';
+
+  @override
+  String get linkDial => 'Dial this code';
+
+  @override
+  String get linkOpen => 'Open link';
+
+  @override
+  String get linkSendEmail => 'Send an email';
+
+  @override
+  String get linkOpenFailed => 'This link can’t be opened on this phone.';
+
+  @override
+  String get koryFrozenTitle => 'Collection suspended by the Pokou team';
+
+  @override
+  String koryFrozenBody(String reason) {
+    return 'While it is being checked, you can view it but nothing can change. Reason: $reason';
+  }
+
+  @override
+  String get courierStatusRejected => 'Application declined';
+
+  @override
+  String get courierRejectedBody =>
+      'The Pokou team did not accept your courier application. You can contact support to learn more.';
 }

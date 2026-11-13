@@ -64,8 +64,10 @@ export default function AssimePage() {
 
   const [pq, setPq] = React.useState("")
   const [hiddenOnly, setHiddenOnly] = React.useState(false)
-  const products = useApi<{ items: Product[] }>(tab === "products"
-    ? `/admin/marketplace/products?limit=200${pq ? `&q=${encodeURIComponent(pq)}` : ""}${hiddenOnly ? "&only_inactive=true" : ""}` : null)
+  const [ppage, setPpage] = React.useState(1)
+  React.useEffect(() => setPpage(1), [pq, hiddenOnly])
+  const products = useApi<{ items: Product[]; total: number }>(tab === "products"
+    ? `/admin/marketplace/products?limit=50&page=${ppage}${pq ? `&q=${encodeURIComponent(pq)}` : ""}${hiddenOnly ? "&only_inactive=true" : ""}` : null)
   const [productId, setProductId] = React.useState<number | null>(null)
   const product = useApi<ProductDetail>(productId ? `/admin/marketplace/products/${productId}` : null)
   const pd = productId && product.data?.id === productId ? product.data : null
@@ -151,6 +153,7 @@ export default function AssimePage() {
           </div>
           {products.error && <p className="text-sm text-destructive">{products.error}</p>}
           <SimpleTable rows={products.data?.items ?? null} onRowClick={(p) => setProductId(p.id)}
+            page={ppage} total={products.data?.total} size={50} onPage={setPpage}
             empty="Aucune annonce." illustration="assime"
             columns={[
               { header: "Annonce", cell: (p) => <span className="font-medium">{p.name}</span> },

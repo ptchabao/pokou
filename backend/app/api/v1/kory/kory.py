@@ -14,7 +14,7 @@ import secrets
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
@@ -30,7 +30,25 @@ from app.services.kory import cotisation as cotisation_service
 from app.services.events.outbox import record_event
 from app.services.notifications.inbox import notify
 
-router = APIRouter(prefix="/kory", tags=["Pokou Kory"])
+def _not_frozen(request: Request, db: Session = Depends(get_db)) -> None:
+    """Une collecte GELÉE par l'équipe (enquête en cours) se consulte mais
+    ne bouge plus : aucune déclaration, confirmation, adhésion ni réglage
+    tant que l'équipe ne l'a pas dégelée. Vérifié ici une fois pour toutes
+    les routes qui écrivent sur une collecte."""
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return
+    pot_id = request.path_params.get("pot_id")
+    if pot_id is None:
+        return
+    pot = db.get(KoryPot, int(pot_id))
+    if pot is not None and pot.status == "FROZEN":
+        raise HTTPException(
+            status_code=423,
+            detail="Cette collecte est suspendue par l'équipe Pokou le temps d'une vérification",
+        )
+
+
+router = APIRouter(prefix="/kory", tags=["Pokou Kory"], dependencies=[Depends(_not_frozen)])
 
 #: Le flux Kafka de Kory. Clé = la cagnotte : ses évènements restent
 #: ordonnés. Aucune donnée de contact ni référence de transaction n'y entre :
@@ -424,6 +442,18 @@ def _pledge_summary(db: Session, pot: KoryPot, now: datetime) -> dict:
     }
 
 
+def _frozen_reason(db: Session, pot: KoryPot) -> Optional[str]:
+    from app.models import AuditLog
+
+    row = (
+        db.query(AuditLog)
+        .filter(AuditLog.entity_type == "kory_pot", AuditLog.entity_id == pot.id, AuditLog.action == "kory_freeze")
+        .order_by(AuditLog.id.desc())
+        .first()
+    )
+    return (row.changes or {}).get("reason") if row else None
+
+
 def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool = False) -> dict:
     total = _confirmed_total(db, pot.id)
     data = {
@@ -441,6 +471,8 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         "period": pot.period,
         "due_at": pot.due_at.isoformat() if pot.due_at else None,
         "status": pot.status,
+        "frozen": pot.status == "FROZEN",
+        "frozen_reason": _frozen_reason(db, pot) if pot.status == "FROZEN" else None,
         "confirmed_total": total,
         "declared_total": _declared_total(db, pot.id),
         # « Reste à collecter » : vers l'objectif, à partir du confirmé.

@@ -215,7 +215,7 @@ def _pot_summary(db: Session, p: KoryPot, people: dict) -> dict:
 def kory_search(
     q: Optional[str] = Query(None, max_length=80),
     kind: Optional[str] = Query(None, pattern="^(CAGNOTTE|COTISATION|TONTINE)$"),
-    status: Optional[str] = Query(None, pattern="^(OPEN|CLOSED|PENDING)$"),
+    status: Optional[str] = Query(None, pattern="^(OPEN|CLOSED|PENDING|FROZEN)$"),
     contested: bool = False,
     page: int = Query(1, ge=1),
     size: int = Query(25, ge=1, le=100),
@@ -379,6 +379,53 @@ def kory_reopen(
     notify(db, _kory_participants(db, pot), service="kory", title=pot.title,
            body="L'équipe Pokou a rouvert cette collecte.", route=f"kory/{pot.id}")
     _audit(db, user, "kory_reopen", "kory_pot", pot.id, {"reason": reason}, request)
+    db.commit()
+    return kory_detail(pot.id, user, db)
+
+
+@router.post("/kory/pots/{pot_id}/freeze")
+def kory_freeze(
+    pot_id: int, body: ReasonBody, request: Request,
+    user: User = Depends(require_permission("kory.manage")),
+    db: Session = Depends(get_db),
+):
+    """Suspendre une collecte le temps d'une vérification : elle reste
+    lisible, rien n'y bouge (voir kory._not_frozen). Réversible — à la
+    différence de la clôture. Aucun montant n'est touché."""
+    from app.api.v1.kory.kory import _emit
+    pot = _get_pot(db, pot_id)
+    if pot.status in ("CLOSED", "FROZEN") or pot.dissolved_at is not None:
+        raise HTTPException(status_code=409, detail="Seule une collecte en cours se suspend")
+    reason = body.reason.strip()
+    previous = pot.status
+    pot.status = "FROZEN"
+    _emit(db, pot, "kory.pot.frozen_by_team")
+    notify(db, _kory_participants(db, pot), service="kory", title=pot.title,
+           body=f"L'équipe Pokou a suspendu cette collecte le temps d'une vérification. Motif : « {reason} »",
+           route=f"kory/{pot.id}")
+    _audit(db, user, "kory_freeze", "kory_pot", pot.id, {"reason": reason, "from": previous}, request)
+    db.commit()
+    return kory_detail(pot.id, user, db)
+
+
+@router.post("/kory/pots/{pot_id}/unfreeze")
+def kory_unfreeze(
+    pot_id: int, body: ReasonBody, request: Request,
+    user: User = Depends(require_permission("kory.manage")),
+    db: Session = Depends(get_db),
+):
+    pot = _get_pot(db, pot_id)
+    if pot.status != "FROZEN":
+        raise HTTPException(status_code=409, detail="Cette collecte n'est pas suspendue")
+    last = (
+        db.query(AuditLog).filter(AuditLog.entity_type == "kory_pot", AuditLog.entity_id == pot.id,
+                                  AuditLog.action == "kory_freeze")
+        .order_by(AuditLog.id.desc()).first()
+    )
+    pot.status = ((last.changes or {}).get("from") if last else None) or "OPEN"
+    notify(db, _kory_participants(db, pot), service="kory", title=pot.title,
+           body="L'équipe Pokou a levé la suspension de cette collecte.", route=f"kory/{pot.id}")
+    _audit(db, user, "kory_unfreeze", "kory_pot", pot.id, {"reason": body.reason.strip()}, request)
     db.commit()
     return kory_detail(pot.id, user, db)
 

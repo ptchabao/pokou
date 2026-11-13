@@ -19,6 +19,7 @@ import '../../contacts/presentation/contacts_controller.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
 import '../../marketplace/data/product_model.dart';
+import '../../messaging/presentation/message_links.dart';
 import '../../marketplace/presentation/product_detail_screen.dart';
 import '../data/contact_profile_model.dart';
 import 'profile_screen.dart';
@@ -219,7 +220,7 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
             Text(phone, style: TextStyle(color: AppColors.textSecondary)),
             const SizedBox(height: 12),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
@@ -318,8 +319,10 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                     _ProLine(userId: widget.contactUserId),
                     if (profile?.phone != null) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        profile!.phone!,
+                      // Toucher : appeler, écrire, copier. Appui long :
+                      // copier.
+                      CopyablePhone(
+                        phone: profile!.phone!,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.textSecondary,
@@ -965,14 +968,17 @@ class _AttachmentThumbnail extends ConsumerWidget {
   }
 }
 
-
-final _proBadgeProvider = FutureProvider.autoDispose.family<Map<String, dynamic>?, int>((ref, userId) async {
-  try {
-    return await ref.watch(apiClientProvider).get('/certified/profile/$userId') as Map<String, dynamic>;
-  } catch (_) {
-    return null;
-  }
-});
+final _proBadgeProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>?, int>((ref, userId) async {
+      try {
+        return await ref
+                .watch(apiClientProvider)
+                .get('/certified/profile/$userId')
+            as Map<String, dynamic>;
+      } catch (_) {
+        return null;
+      }
+    });
 
 /// Profil Pro (maquette Pro 5) : le nom commercial, puis « Géré par » et
 /// le nom vérifié. Rien pour un profil qui n'est pas Pro.
@@ -984,7 +990,8 @@ class _ProLine extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final badge = ref.watch(_proBadgeProvider(userId)).valueOrNull;
-    if (badge == null || badge['badge'] != 'PRO') return const SizedBox.shrink();
+    if (badge == null || badge['badge'] != 'PRO')
+      return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Column(
@@ -992,7 +999,11 @@ class _ProLine extends ConsumerWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.hexagon, size: 16, color: AppColors.accentPrimary),
+              const Icon(
+                Icons.hexagon,
+                size: 16,
+                color: AppColors.accentPrimary,
+              ),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(

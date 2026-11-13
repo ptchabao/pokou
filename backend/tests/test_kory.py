@@ -386,3 +386,20 @@ def test_participants_de_pokou_et_invites_par_numero(client):
     # À l'inscription, l'invitée devient membre.
     yawa, _ = _signup(client, "+22891000007")
     assert client.get(f"/api/v1/kory/pots/{pot['id']}", headers=yawa).status_code == 200
+
+
+def test_l_initiateur_participe_a_sa_propre_cagnotte(client):
+    """L'initiateur (collecteur) contribue et s'engage comme un membre ; ce
+    qu'il verse lui-même est confirmé d'emblée — personne d'autre ne l'a reçu."""
+    organizer, _ = _signup(client)
+    pot = client.post(
+        "/api/v1/kory/pots", json={"title": "Anniversaire de Papa", "goal_amount": 50000}, headers=organizer
+    ).json()
+
+    entry = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 10000}, headers=organizer)
+    assert entry.status_code == 201, entry.text
+    assert entry.json()["status"] == "CONFIRMED"
+    assert client.get(f"/api/v1/kory/pots/{pot['id']}", headers=organizer).json()["confirmed_total"] == 10000
+
+    pledge = client.put(f"/api/v1/kory/pots/{pot['id']}/pledge", json={"base": 15000}, headers=organizer)
+    assert pledge.status_code in (200, 201), pledge.text

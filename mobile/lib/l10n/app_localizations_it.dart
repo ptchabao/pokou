@@ -9044,4 +9044,44 @@ class LIt extends L {
   @override
   String get koryXStartsWhenAllPaid =>
       'La tontina parte appena tutti i membri hanno pagato la quota di apertura.';
+
+  @override
+  String get linkCall => 'Chiama';
+
+  @override
+  String get linkWriteOnPokou => 'Scrivi su Pokou';
+
+  @override
+  String get linkCopy => 'Copia';
+
+  @override
+  String get linkCopied => 'Copiato';
+
+  @override
+  String get linkDial => 'Componi questo codice';
+
+  @override
+  String get linkOpen => 'Apri il link';
+
+  @override
+  String get linkSendEmail => 'Scrivi un\'e-mail';
+
+  @override
+  String get linkOpenFailed =>
+      'Impossibile aprire questo link su questo telefono.';
+
+  @override
+  String get koryFrozenTitle => 'Raccolta sospesa dal team Pokou';
+
+  @override
+  String koryFrozenBody(String reason) {
+    return 'Durante la verifica puoi consultarla, ma nulla può cambiare. Motivo: $reason';
+  }
+
+  @override
+  String get courierStatusRejected => 'Candidatura rifiutata';
+
+  @override
+  String get courierRejectedBody =>
+      'Il team Pokou non ha accettato la tua candidatura come corriere. Puoi scrivere al supporto per saperne di più.';
 }

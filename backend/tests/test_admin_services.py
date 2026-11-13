@@ -468,3 +468,41 @@ def test_visuel_de_publicite_lisible_par_la_moderation_seulement(client):
     assert client.get(f"/api/v1/media/{media_id}/download-url", headers=ai).status_code == 409
     assert client.get(f"/api/v1/media/{media_id}/download-url",
                       headers={"Authorization": f"Bearer {token}"}).status_code == 404
+
+
+def _app_headers(user_id):
+    from fastapi import Response
+    from app.api.v1.auth.auth import _issue_session
+    with Session() as db:
+        token, _, _ = _issue_session(db, Response(), db.get(User, user_id))
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_suspendre_une_collecte_le_temps_d_une_verification(client):
+    support, _ = _team(UserRole.SUPPORT)
+    admin, _ = _team(UserRole.ADMIN)
+    pot_id, organizer, member = _pot()
+    url = f"{API}/kory/pots/{pot_id}"
+    assert client.post(f"{url}/freeze", json={"reason": "Soupçon"}, headers=support).status_code == 403
+    frozen = client.post(f"{url}/freeze", json={"reason": "Vérification d'identité"}, headers=admin)
+    assert frozen.status_code == 200 and frozen.json()["status"] == "FROZEN"
+    assert frozen.json()["confirmed_total"] == 5000
+    assert any("Vérification d'identité" in b for b in _notified(member))
+    assert client.post(f"{url}/freeze", json={"reason": "encore"}, headers=admin).status_code == 409
+
+    # Côté app : la collecte se lit, rien n'y bouge.
+    member_headers = _app_headers(member)
+    with patch("app.api.v1.kory.kory.module_open", return_value=True):
+        seen = client.get(f"/api/v1/kory/pots/{pot_id}", headers=member_headers)
+        assert seen.status_code == 200
+        assert seen.json()["frozen"] is True and seen.json()["frozen_reason"] == "Vérification d'identité"
+        blocked = client.post(f"/api/v1/kory/pots/{pot_id}/entries", json={"amount": 1000}, headers=member_headers)
+        assert blocked.status_code == 423
+
+    assert client.get(f"{API}/kory/pots/search?status=FROZEN", headers=admin).json()["total"] == 1
+    lifted = client.post(f"{url}/unfreeze", json={"reason": "Vérifié"}, headers=admin)
+    assert lifted.status_code == 200 and lifted.json()["status"] == "OPEN"
+    assert {a.action for a in _audits("kory_freeze") + _audits("kory_unfreeze")} == {"kory_freeze", "kory_unfreeze"}
+    with patch("app.api.v1.kory.kory.module_open", return_value=True):
+        ok = client.post(f"/api/v1/kory/pots/{pot_id}/entries", json={"amount": 1000}, headers=member_headers)
+        assert ok.status_code == 201, ok.text

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/presentation/auth_controller.dart';
 import 'conversation_screen.dart';
+import 'message_links.dart';
 import 'messaging_controller.dart' show messagingRepositoryProvider;
 
 /// Motif reconnaissant un numéro plausible dans du texte libre : un `+`
@@ -70,7 +71,7 @@ class LinkifiedText extends StatefulWidget {
 }
 
 class _LinkifiedTextState extends State<LinkifiedText> {
-  final List<TapGestureRecognizer> _recognizers = [];
+  final List<GestureRecognizer> _recognizers = [];
 
   void _disposeRecognizers() {
     for (final recognizer in _recognizers) {
@@ -89,65 +90,21 @@ class _LinkifiedTextState extends State<LinkifiedText> {
   /// exactement l'ancienne logique de ce widget, extraite pour s'appliquer
   /// aussi bien au texte hors mise en forme qu'à l'intérieur d'un `*gras*`.
   List<InlineSpan> _linkify(String text, TextStyle style) {
+    // Liens, adresses e-mail, codes USSD et numéros : voir message_links.dart,
+    // partagé avec les groupes.
     final spans = <InlineSpan>[];
-    final matches = <({int start, int end, String value, bool isUrl})>[];
-    for (final match in _urlPattern.allMatches(text)) {
-      matches.add((
-        start: match.start,
-        end: match.end,
-        value: match.group(0)!,
-        isUrl: true,
-      ));
-    }
-    for (final match in findPhoneMatches(text)) {
-      if (!matches.any(
-        (item) => item.start < match.end && match.start < item.end,
-      )) {
-        matches.add((
-          start: match.start,
-          end: match.end,
-          value: match.group(0)!,
-          isUrl: false,
-        ));
-      }
-    }
-    matches.sort((left, right) => left.start.compareTo(right.start));
     var lastEnd = 0;
-    for (final match in matches) {
-      if (match.start > lastEnd) {
+    for (final link in findMessageLinks(text)) {
+      if (link.start > lastEnd) {
         // `style:` explicite et non hérité de l'ambiant : cette fonction
         // reçoit aussi un style de mise en forme (*gras*/_italique_/~barré~)
-        // DIFFÉRENT du style de base du message — un enfant TextSpan sans
-        // style hériterait du PARENT du widget, pas de CE style-ci.
+        // DIFFÉRENT du style de base du message.
         spans.add(
-          TextSpan(text: text.substring(lastEnd, match.start), style: style),
+          TextSpan(text: text.substring(lastEnd, link.start), style: style),
         );
       }
-      final raw = match.value;
-      final recognizer = TapGestureRecognizer()
-        ..onTap = () async {
-          if (match.isUrl) {
-            final url = raw.startsWith('www.') ? 'https://$raw' : raw;
-            await launchUrl(
-              Uri.parse(url),
-              mode: LaunchMode.externalApplication,
-            );
-          } else {
-            await handlePhoneTap(context, raw);
-          }
-        };
-      _recognizers.add(recognizer);
-      spans.add(
-        TextSpan(
-          text: raw,
-          style: style.copyWith(
-            decoration: TextDecoration.underline,
-            fontWeight: FontWeight.w700,
-          ),
-          recognizer: recognizer,
-        ),
-      );
-      lastEnd = match.end;
+      spans.add(messageLinkSpan(context, link, style, _recognizers));
+      lastEnd = link.end;
     }
     if (lastEnd < text.length)
       spans.add(TextSpan(text: text.substring(lastEnd), style: style));

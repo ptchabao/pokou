@@ -23,6 +23,8 @@ export const AUDIT_ACTIONS: Record<string, string> = {
   report_warn: "Signalement : avertissement",
   kory_close: "Collecte clôturée",
   kory_reopen: "Collecte rouverte",
+  kory_freeze: "Collecte suspendue (vérification)",
+  kory_unfreeze: "Suspension de collecte levée",
   kory_dissolve: "Tontine dissoute",
   honam_order_cancel: "Commande annulée (litige)",
   pharmacy_create: "Officine créée",

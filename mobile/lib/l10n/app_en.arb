@@ -2504,5 +2504,17 @@
   "koryXFeePaymentPending": "Payment being confirmed. This page updates as soon as it is received.",
   "koryXFeePaid": "Paid",
   "koryXFeeYouPaid": "Your fee is paid: you are in the savings circle.",
-  "koryXStartsWhenAllPaid": "The savings circle starts as soon as every member has paid the opening fee."
+  "koryXStartsWhenAllPaid": "The savings circle starts as soon as every member has paid the opening fee.",
+  "linkCall": "Call",
+  "linkWriteOnPokou": "Message on Pokou",
+  "linkCopy": "Copy",
+  "linkCopied": "Copied",
+  "linkDial": "Dial this code",
+  "linkOpen": "Open link",
+  "linkSendEmail": "Send an email",
+  "linkOpenFailed": "This link can’t be opened on this phone.",
+  "koryFrozenTitle": "Collection suspended by the Pokou team",
+  "koryFrozenBody": "While it is being checked, you can view it but nothing can change. Reason: {reason}",
+  "courierStatusRejected": "Application declined",
+  "courierRejectedBody": "The Pokou team did not accept your courier application. You can contact support to learn more."
 }

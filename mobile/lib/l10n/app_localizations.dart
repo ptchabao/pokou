@@ -15139,6 +15139,78 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture.'**
   String get koryXStartsWhenAllPaid;
+
+  /// No description provided for @linkCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler'**
+  String get linkCall;
+
+  /// No description provided for @linkWriteOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire sur Pokou'**
+  String get linkWriteOnPokou;
+
+  /// No description provided for @linkCopy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get linkCopy;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copié'**
+  String get linkCopied;
+
+  /// No description provided for @linkDial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Composer ce code'**
+  String get linkDial;
+
+  /// No description provided for @linkOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir le lien'**
+  String get linkOpen;
+
+  /// No description provided for @linkSendEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire un e-mail'**
+  String get linkSendEmail;
+
+  /// No description provided for @linkOpenFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d’ouvrir ce lien sur ce téléphone.'**
+  String get linkOpenFailed;
+
+  /// No description provided for @koryFrozenTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecte suspendue par l’équipe Pokou'**
+  String get koryFrozenTitle;
+
+  /// No description provided for @koryFrozenBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le temps d’une vérification, on peut la consulter mais plus rien n’y bouge. Motif : {reason}'**
+  String koryFrozenBody(String reason);
+
+  /// No description provided for @courierStatusRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Candidature refusée'**
+  String get courierStatusRejected;
+
+  /// No description provided for @courierRejectedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.'**
+  String get courierRejectedBody;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

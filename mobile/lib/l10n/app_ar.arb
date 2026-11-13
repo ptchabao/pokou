@@ -2504,5 +2504,17 @@
   "koryXFeePaymentPending": "جارٍ تأكيد الدفع. تُحدَّث الصفحة فور استلامه.",
   "koryXFeePaid": "مدفوع",
   "koryXFeeYouPaid": "تم دفع رسومك: أنت عضو في الجمعية.",
-  "koryXStartsWhenAllPaid": "تبدأ الجمعية بمجرد أن يدفع جميع الأعضاء رسوم الفتح."
+  "koryXStartsWhenAllPaid": "تبدأ الجمعية بمجرد أن يدفع جميع الأعضاء رسوم الفتح.",
+  "linkCall": "اتصال",
+  "linkWriteOnPokou": "راسل على Pokou",
+  "linkCopy": "نسخ",
+  "linkCopied": "تم النسخ",
+  "linkDial": "اطلب هذا الرمز",
+  "linkOpen": "افتح الرابط",
+  "linkSendEmail": "أرسل بريدًا إلكترونيًا",
+  "linkOpenFailed": "تعذّر فتح هذا الرابط على هذا الهاتف.",
+  "koryFrozenTitle": "علّق فريق Pokou هذه الجمعية",
+  "koryFrozenBody": "أثناء التحقق يمكنك الاطلاع عليها لكن لا شيء يتغير. السبب: {reason}",
+  "courierStatusRejected": "تم رفض الطلب",
+  "courierRejectedBody": "لم يقبل فريق Pokou طلبك كعامل توصيل. يمكنك مراسلة الدعم لمعرفة المزيد."
 }

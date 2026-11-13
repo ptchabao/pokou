@@ -41,7 +41,7 @@ type Detail = Pot & {
   fees: { paid: number; total: number }
   team_actions: { action: string; actor: string | null; reason: string | null; at: string }[]
 }
-type Action = "close" | "reopen" | "dissolve"
+type Action = "close" | "reopen" | "dissolve" | "freeze" | "unfreeze"
 
 const KINDS: Record<string, string> = { CAGNOTTE: "Cagnotte", COTISATION: "Cotisation", TONTINE: "Tontine (Kory Plus)" }
 const ENTRY: Record<string, string> = { DECLARED: "À confirmer", CONFIRMED: "Confirmée", REJECTED: "Contestée" }
@@ -52,6 +52,12 @@ const DIALOG: Record<Action, { title: string; description: string; confirm: stri
     confirm: "Clôturer",
   },
   reopen: { title: "Rouvrir cette collecte ?", description: "Les participants sont prévenus.", confirm: "Rouvrir" },
+  freeze: {
+    title: "Suspendre cette collecte ?",
+    description: "Le temps d'une vérification : elle reste lisible, mais plus rien n'y bouge (déclarations, confirmations, adhésions). Réversible. Les participants sont prévenus avec ce motif.",
+    confirm: "Suspendre",
+  },
+  unfreeze: { title: "Lever la suspension ?", description: "La collecte reprend là où elle en était. Les participants sont prévenus.", confirm: "Lever la suspension" },
   dissolve: {
     title: "Dissoudre cette tontine ?",
     description: "Aucun tour ne sera plus appelé ; le tour en cours s'arrête. Ce qui a été versé se règle entre membres : Pokou ne touche jamais l'argent.",
@@ -100,6 +106,7 @@ export default function KoryPage() {
             <SelectItem value="OPEN">Ouvertes</SelectItem>
             <SelectItem value="PENDING">En attente (tontine)</SelectItem>
             <SelectItem value="CLOSED">Clôturées</SelectItem>
+            <SelectItem value="FROZEN">Suspendues</SelectItem>
           </SelectContent>
         </Select>
         <div className="flex items-center gap-2">
@@ -218,6 +225,12 @@ export default function KoryPage() {
                   {d.kind === "TONTINE" && (d.status === "OPEN" || d.status === "PENDING") && (
                     <Button variant="destructive" onClick={() => setActing("dissolve")}>Dissoudre la tontine</Button>
                   )}
+                  {(d.status === "OPEN" || d.status === "PENDING") && !d.dissolved_at && (
+                    <Button variant="outline" onClick={() => setActing("freeze")}>Suspendre (vérification)</Button>
+                  )}
+                  {d.status === "FROZEN" && (
+                    <Button variant="outline" onClick={() => setActing("unfreeze")}>Lever la suspension</Button>
+                  )}
                   {d.kind !== "TONTINE" && d.status !== "CLOSED" && (
                     <Button variant="destructive" onClick={() => setActing("close")}>Clôturer (fraude)</Button>
                   )}
@@ -233,13 +246,14 @@ export default function KoryPage() {
         </SheetContent>
       </Sheet>
       <ReasonDialog open={acting !== null} onOpenChange={(o) => !o && setActing(null)}
-        destructive={acting !== "reopen"}
+        destructive={acting === "close" || acting === "dissolve"}
         title={acting ? DIALOG[acting].title : ""} description={acting ? DIALOG[acting].description : undefined}
         confirm={acting ? DIALOG[acting].confirm : ""}
         onConfirm={async (reason) => {
           if (!acting || !selected) return
           await act(`/admin/kory/pots/${selected}/${acting}`, { body: { reason } },
-            acting === "close" ? "Collecte clôturée" : acting === "reopen" ? "Collecte rouverte" : "Tontine dissoute")
+            ({ close: "Collecte clôturée", reopen: "Collecte rouverte", dissolve: "Tontine dissoute",
+              freeze: "Collecte suspendue", unfreeze: "Suspension levée" } as const)[acting])
           detail.reload(); list.reload()
         }} />
     </ConsoleShell>

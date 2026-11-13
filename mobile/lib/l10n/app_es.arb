@@ -2504,5 +2504,17 @@
   "koryXFeePaymentPending": "Pago en confirmación. La página se actualiza en cuanto se recibe.",
   "koryXFeePaid": "Pagado",
   "koryXFeeYouPaid": "Tus gastos están pagados: formas parte de la tontina.",
-  "koryXStartsWhenAllPaid": "La tontina empieza en cuanto todos los miembros pagan los gastos de apertura."
+  "koryXStartsWhenAllPaid": "La tontina empieza en cuanto todos los miembros pagan los gastos de apertura.",
+  "linkCall": "Llamar",
+  "linkWriteOnPokou": "Escribir en Pokou",
+  "linkCopy": "Copiar",
+  "linkCopied": "Copiado",
+  "linkDial": "Marcar este código",
+  "linkOpen": "Abrir el enlace",
+  "linkSendEmail": "Enviar un correo",
+  "linkOpenFailed": "No se puede abrir este enlace en este teléfono.",
+  "koryFrozenTitle": "Colecta suspendida por el equipo de Pokou",
+  "koryFrozenBody": "Mientras se verifica, puedes consultarla pero nada cambia. Motivo: {reason}",
+  "courierStatusRejected": "Solicitud rechazada",
+  "courierRejectedBody": "El equipo de Pokou no aceptó tu solicitud de repartidor. Puedes escribir al soporte para saber más."
 }

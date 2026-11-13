@@ -9048,4 +9048,43 @@ class LFr extends L {
   @override
   String get koryXStartsWhenAllPaid =>
       'La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture.';
+
+  @override
+  String get linkCall => 'Appeler';
+
+  @override
+  String get linkWriteOnPokou => 'Écrire sur Pokou';
+
+  @override
+  String get linkCopy => 'Copier';
+
+  @override
+  String get linkCopied => 'Copié';
+
+  @override
+  String get linkDial => 'Composer ce code';
+
+  @override
+  String get linkOpen => 'Ouvrir le lien';
+
+  @override
+  String get linkSendEmail => 'Écrire un e-mail';
+
+  @override
+  String get linkOpenFailed => 'Impossible d’ouvrir ce lien sur ce téléphone.';
+
+  @override
+  String get koryFrozenTitle => 'Collecte suspendue par l’équipe Pokou';
+
+  @override
+  String koryFrozenBody(String reason) {
+    return 'Le temps d’une vérification, on peut la consulter mais plus rien n’y bouge. Motif : $reason';
+  }
+
+  @override
+  String get courierStatusRejected => 'Candidature refusée';
+
+  @override
+  String get courierRejectedBody =>
+      'L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.';
 }

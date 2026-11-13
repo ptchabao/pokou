@@ -35,7 +35,7 @@ ROLE_PERMISSIONS = {
         "dashboard.view", "users.view", "users.manage", "team.view",
         "reports.view", "reports.manage", "kory.view", "honam.view",
         "assime.view", "certified.view", "banners.view", "countries.view",
-        "honam.manage",
+        "honam.manage", "audit.view",
     },
     UserRole.AI_OPERATOR: {
         "dashboard.view", "reports.view", "assime.view", "assime.manage",

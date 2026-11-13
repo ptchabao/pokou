@@ -46,7 +46,9 @@ class KoryPot(Base):
     due_at = Column(DateTime, nullable=True)
     #: Code de partage, pour rejoindre sans être membre du groupe.
     join_code = Column(String(12), nullable=False, unique=True, index=True)
-    status = Column(String(8), nullable=False, default="OPEN", index=True)  # OPEN|CLOSED
+    #: OPEN|CLOSED|PENDING (tontine) ; FROZEN : gelée par l'équipe le temps
+    #: d'une vérification — consultable, plus rien n'y bouge.
+    status = Column(String(8), nullable=False, default="OPEN", index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     closed_at = Column(DateTime, nullable=True)
     #: Dernière prolongation de la date de fin par le collecteur (KOR-15).

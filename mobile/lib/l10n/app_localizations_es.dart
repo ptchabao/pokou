@@ -9024,4 +9024,44 @@ class LEs extends L {
   @override
   String get koryXStartsWhenAllPaid =>
       'La tontina empieza en cuanto todos los miembros pagan los gastos de apertura.';
+
+  @override
+  String get linkCall => 'Llamar';
+
+  @override
+  String get linkWriteOnPokou => 'Escribir en Pokou';
+
+  @override
+  String get linkCopy => 'Copiar';
+
+  @override
+  String get linkCopied => 'Copiado';
+
+  @override
+  String get linkDial => 'Marcar este código';
+
+  @override
+  String get linkOpen => 'Abrir el enlace';
+
+  @override
+  String get linkSendEmail => 'Enviar un correo';
+
+  @override
+  String get linkOpenFailed =>
+      'No se puede abrir este enlace en este teléfono.';
+
+  @override
+  String get koryFrozenTitle => 'Colecta suspendida por el equipo de Pokou';
+
+  @override
+  String koryFrozenBody(String reason) {
+    return 'Mientras se verifica, puedes consultarla pero nada cambia. Motivo: $reason';
+  }
+
+  @override
+  String get courierStatusRejected => 'Solicitud rechazada';
+
+  @override
+  String get courierRejectedBody =>
+      'El equipo de Pokou no aceptó tu solicitud de repartidor. Puedes escribir al soporte para saber más.';
 }

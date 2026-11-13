@@ -139,8 +139,12 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
     from app.models.certified import CertifiedProApplication
 
     if db.query(CertifiedProApplication.id).filter(CertifiedProApplication.document_media_id == asset.id).first():
+        # Toute l'équipe qui voit les dossiers certifiés (le Support aussi) :
+        # par permission, et non par rôle, comme le reste de la console.
+        from app.core.permissions import permissions_of
+
         viewer = db.query(User).filter(User.id == user_id).first()
-        return viewer is not None and viewer.role in _TEAM_ROLES
+        return viewer is not None and "certified.view" in permissions_of(viewer)
 
     # ── Avatar de profil, TOUT DE SUITE ───────────────────────────────────
     #

@@ -389,6 +389,7 @@ async def list_products(
     q: Optional[str] = Query(None, max_length=120),
     only_inactive: bool = Query(False),
     limit: int = Query(50, ge=1, le=200),
+    page: int = Query(1, ge=1),
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_permission_claims("assime.view")),
 ):
@@ -398,7 +399,13 @@ async def list_products(
     if q:
         escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         query = query.filter(MarketplaceProduct.name.ilike(f"%{escaped}%", escape="\\"))
-    products = query.order_by(MarketplaceProduct.created_at.desc()).limit(limit).all()
+    total = query.count()
+    products = (
+        query.order_by(MarketplaceProduct.created_at.desc())
+        .offset((page - 1) * limit)
+        .limit(limit)
+        .all()
+    )
 
     sellers = (
         {u.id: u for u in db.query(User).filter(User.id.in_({p.seller_id for p in products}))}
@@ -421,7 +428,10 @@ async def list_products(
                 "created_at": p.created_at.isoformat(),
             }
             for p in products
-        ]
+        ],
+        "total": total,
+        "page": page,
+        "size": limit,
     }
 
 

@@ -35,7 +35,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
 }
 
 const TONES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  OPEN: "destructive", PENDING: "default", ACTIVE: "default", APPROVED: "secondary",
+  OPEN: "destructive", FROZEN: "destructive", PENDING: "default", ACTIVE: "default", APPROVED: "secondary",
   ACTIONED: "secondary", DISMISSED: "outline", REJECTED: "outline", CLOSED: "outline",
   SUSPENDED: "destructive", EXCLUDED: "destructive", NAME_MISMATCH: "destructive", CORRECTION: "default",
   PAID: "default", TRIAL: "secondary", MEMBER: "secondary", CONFIRMED: "secondary", DECLARED: "default",
@@ -43,7 +43,7 @@ const TONES: Record<string, "default" | "secondary" | "destructive" | "outline">
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  OPEN: "Ouvert", PENDING: "En attente", ACTIVE: "Actif", APPROVED: "Approuvé",
+  OPEN: "Ouvert", FROZEN: "Suspendue", PENDING: "En attente", ACTIVE: "Actif", APPROVED: "Approuvé",
   ACTIONED: "Sanctionné", DISMISSED: "Classé", REJECTED: "Refusé", CLOSED: "Clôturé",
   COMPLETED: "Terminé", CANCELLED: "Annulé", DELIVERED: "Livré", PAUSED: "En pause",
   SUSPENDED: "Suspendu", EXCLUDED: "Exclu", SUBMITTED: "Ordonnance envoyée", QUOTED: "Devis envoyé",

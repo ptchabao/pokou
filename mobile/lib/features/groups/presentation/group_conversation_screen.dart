@@ -26,6 +26,7 @@ import '../../../core/providers.dart';
 import '../../kory/presentation/kory_create_screen.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/notifications/active_conversation.dart';
+import '../../messaging/presentation/message_links.dart';
 import '../../messaging/presentation/encryption_banner.dart';
 import '../../messaging/presentation/composer/composer_state.dart';
 import '../../messaging/presentation/composer/mic_button.dart';
@@ -41,7 +42,7 @@ import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, PollData;
 import '../../messaging/presentation/bubble_widgets.dart';
 import '../../messaging/presentation/contact_card_bubble.dart'
-    show ContactCardBubble, findPhoneMatches, handlePhoneTap;
+    show ContactCardBubble;
 import '../../messaging/presentation/location_bubble.dart';
 import '../../messaging/presentation/conversation_screen.dart';
 import '../../messaging/presentation/day_separator.dart';
@@ -2926,7 +2927,7 @@ class _MentionOrPhoneRange {
 }
 
 class _GroupMessageTextState extends State<_GroupMessageText> {
-  final List<TapGestureRecognizer> _recognizers = [];
+  final List<GestureRecognizer> _recognizers = [];
 
   void _disposeRecognizers() {
     for (final recognizer in _recognizers) {
@@ -2966,14 +2967,19 @@ class _GroupMessageTextState extends State<_GroupMessageText> {
     // Étendues des numéros plausibles, hors des étendues déjà prises par une
     // mention (un numéro ne devrait jamais chevaucher un "@Nom", mais la
     // garde évite un rendu incohérent si ça arrivait).
-    for (final match in findPhoneMatches(text)) {
+    // Liens, e-mails, codes USSD et numéros (message_links.dart), hors des
+    // mentions.
+    final links = <int, MessageLink>{};
+    for (final link in findMessageLinks(text)) {
       final overlaps = ranges.any(
-        (r) => match.start < r.end && r.start < match.end,
+        (r) => link.start < r.end && r.start < link.end,
       );
-      if (!overlaps)
+      if (!overlaps) {
         ranges.add(
-          _MentionOrPhoneRange(match.start, match.end, isMention: false),
+          _MentionOrPhoneRange(link.start, link.end, isMention: false),
         );
+        links[link.start] = link;
+      }
     }
     ranges.sort((a, b) => a.start.compareTo(b.start));
 
@@ -2998,17 +3004,12 @@ class _GroupMessageTextState extends State<_GroupMessageText> {
           ),
         );
       } else {
-        final recognizer = TapGestureRecognizer()
-          ..onTap = () => handlePhoneTap(context, raw);
-        _recognizers.add(recognizer);
         spans.add(
-          TextSpan(
-            text: raw,
-            style: widget.style.copyWith(
-              decoration: TextDecoration.underline,
-              fontWeight: FontWeight.w700,
-            ),
-            recognizer: recognizer,
+          messageLinkSpan(
+            context,
+            links[range.start]!,
+            widget.style,
+            _recognizers,
           ),
         );
       }

@@ -4711,5 +4711,24 @@
   "koryXFeePaymentPending": "Paiement en cours de confirmation. La page se met à jour dès qu’il est reçu.",
   "koryXFeePaid": "Payé",
   "koryXFeeYouPaid": "Tes frais sont réglés : tu fais partie de la tontine.",
-  "koryXStartsWhenAllPaid": "La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture."
+  "koryXStartsWhenAllPaid": "La tontine démarre dès que tous les membres ont payé leurs frais d’ouverture.",
+  "linkCall": "Appeler",
+  "linkWriteOnPokou": "Écrire sur Pokou",
+  "linkCopy": "Copier",
+  "linkCopied": "Copié",
+  "linkDial": "Composer ce code",
+  "linkOpen": "Ouvrir le lien",
+  "linkSendEmail": "Écrire un e-mail",
+  "linkOpenFailed": "Impossible d’ouvrir ce lien sur ce téléphone.",
+  "koryFrozenTitle": "Collecte suspendue par l’équipe Pokou",
+  "koryFrozenBody": "Le temps d’une vérification, on peut la consulter mais plus rien n’y bouge. Motif : {reason}",
+  "@koryFrozenBody": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "courierStatusRejected": "Candidature refusée",
+  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus."
 }

@@ -57,6 +57,7 @@ class KoryPot {
     this.members = const [],
     this.swaps = const [],
     this.plusFee,
+    this.frozenReason,
     this.cotisation,
     this.organizerId,
   });
@@ -94,6 +95,9 @@ class KoryPot {
   final DateTime? drawnAt;
   final List<KoryMemberInfo> members;
   final List<KorySwap> swaps;
+
+  /// Le motif d'une suspension par l'équipe (`isFrozen`).
+  final String? frozenReason;
 
   /// Tontine Kory Plus : ses frais d'ouverture, `null` hors tontine.
   final KoryPlusFee? plusFee;
@@ -153,6 +157,9 @@ class KoryPot {
   final List<KoryEntry> entries;
 
   bool get isOpen => status == 'OPEN';
+
+  /// Gelée par l'équipe le temps d'une vérification : lisible, figée.
+  bool get isFrozen => status == 'FROZEN';
   bool get isCotisation => kind == 'COTISATION';
 
   /// Avancement vers l'objectif, borné à 1 : une cagnotte peut le dépasser.
@@ -232,6 +239,7 @@ class KoryPot {
         KorySwap.fromJson(w as Map<String, dynamic>),
     ],
     plusFee: KoryPlusFee.tryParse(json['plus_fee']),
+    frozenReason: json['frozen_reason'] as String?,
     cotisation: json['cotisation'] is Map<String, dynamic>
         ? KoryCotisation.fromJson(json['cotisation'] as Map<String, dynamic>)
         : null,

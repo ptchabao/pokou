@@ -8976,4 +8976,43 @@ class LAr extends L {
   @override
   String get koryXStartsWhenAllPaid =>
       'تبدأ الجمعية بمجرد أن يدفع جميع الأعضاء رسوم الفتح.';
+
+  @override
+  String get linkCall => 'اتصال';
+
+  @override
+  String get linkWriteOnPokou => 'راسل على Pokou';
+
+  @override
+  String get linkCopy => 'نسخ';
+
+  @override
+  String get linkCopied => 'تم النسخ';
+
+  @override
+  String get linkDial => 'اطلب هذا الرمز';
+
+  @override
+  String get linkOpen => 'افتح الرابط';
+
+  @override
+  String get linkSendEmail => 'أرسل بريدًا إلكترونيًا';
+
+  @override
+  String get linkOpenFailed => 'تعذّر فتح هذا الرابط على هذا الهاتف.';
+
+  @override
+  String get koryFrozenTitle => 'علّق فريق Pokou هذه الجمعية';
+
+  @override
+  String koryFrozenBody(String reason) {
+    return 'أثناء التحقق يمكنك الاطلاع عليها لكن لا شيء يتغير. السبب: $reason';
+  }
+
+  @override
+  String get courierStatusRejected => 'تم رفض الطلب';
+
+  @override
+  String get courierRejectedBody =>
+      'لم يقبل فريق Pokou طلبك كعامل توصيل. يمكنك مراسلة الدعم لمعرفة المزيد.';
 }
