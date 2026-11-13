@@ -56,6 +56,7 @@ def _user_json(u: User) -> dict:
         "is_verified": bool(getattr(u, "is_verified", False)),
         "created_at": u.created_at.isoformat() if u.created_at else None,
         "last_seen_at": u.last_seen_at.isoformat() if u.last_seen_at else None,
+        "console_access": bool(u.console_password_hash),
     }
 
 
@@ -223,6 +224,7 @@ def list_users(
     q: Optional[str] = Query(None, max_length=80),
     role: Optional[str] = None,
     status: Optional[str] = Query(None, pattern="^(active|suspended)$"),
+    team: bool = False,
     page: int = Query(1, ge=1),
     size: int = Query(25, ge=1, le=100),
     user: User = Depends(require_permission("users.view")),
@@ -231,7 +233,9 @@ def list_users(
     query = db.query(User)
     if q:
         like = f"%{q.strip()}%"
-        query = query.filter(or_(User.full_name.ilike(like), User.phone.ilike(like)))
+        query = query.filter(or_(User.full_name.ilike(like), User.phone.ilike(like), User.email.ilike(like)))
+    if team:
+        query = query.filter(User.role != UserRole.USER)
     if role:
         try:
             query = query.filter(User.role == UserRole(role))
@@ -256,9 +260,15 @@ def user_detail(
     target = db.get(User, user_id)
     if target is None:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    from app.models import Token
     sub = db.query(CertifiedSubscription).filter(CertifiedSubscription.user_id == user_id).first()
+    now = datetime.utcnow()
     return {
         **_user_json(target),
+        "has_avatar": bool(target.avatar_media_id),
+        "active_sessions": db.query(func.count(Token.id)).filter(
+            Token.user_id == user_id, Token.revoked_at.is_(None),
+            or_(Token.expires_at.is_(None), Token.expires_at > now)).scalar() or 0,
         "stats": {
             "groups": db.query(func.count(GroupMember.id)).filter(GroupMember.user_id == user_id).scalar() or 0,
             "direct_sent": db.query(func.count(DirectMessage.id)).filter(DirectMessage.sender_id == user_id).scalar() or 0,
@@ -273,7 +283,7 @@ def user_detail(
         # reçoit aucune notification (iPhone sans clé APNs, téléphone repris
         # par un autre compte, Firebase absent de l'appareil).
         "devices": [
-            {"platform": d.platform,
+            {"id": d.id, "platform": d.platform,
              "registered_at": (d.updated_at or d.created_at).isoformat() if (d.updated_at or d.created_at) else None}
             for d in db.query(DeviceToken).filter(DeviceToken.user_id == user_id)
             .order_by(DeviceToken.id.desc()).all()
@@ -345,6 +355,8 @@ def set_role(
     target = db.get(User, user_id)
     if target is None:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    if target.id == user.id:
+        raise HTTPException(status_code=409, detail="Tu ne peux pas changer ton propre rôle")
     old = target.role or UserRole.USER
     if old == UserRole.SUPER_ADMIN and new_role != UserRole.SUPER_ADMIN:
         others = db.query(func.count(User.id)).filter(
@@ -388,6 +400,16 @@ def add_member(
     email = body.email.strip().lower()
     target = db.query(User).filter(func.lower(User.email) == email).first()
     created = target is None
+    if not created:
+        # Mêmes garde-fous que PUT /team/{id} : on ne change pas son propre
+        # rôle, et l'équipe garde au moins un super-administrateur.
+        if target.id == user.id and role != (target.role or UserRole.USER):
+            raise HTTPException(status_code=409, detail="Tu ne peux pas changer ton propre rôle")
+        if target.role == UserRole.SUPER_ADMIN and role != UserRole.SUPER_ADMIN:
+            others = db.query(func.count(User.id)).filter(
+                User.role == UserRole.SUPER_ADMIN, User.id != target.id, User.is_active.is_(True)).scalar()
+            if not others:
+                raise HTTPException(status_code=409, detail="Il faut garder au moins un super-administrateur")
     if created:
         target = User(email=email, full_name=body.full_name.strip(), role=role, is_active=True)
         db.add(target)

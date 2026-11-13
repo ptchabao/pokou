@@ -17,13 +17,15 @@ ALL = {
     "users.view", "users.manage",
     "team.view", "team.manage",
     "reports.view", "reports.manage",
-    "kory.view",
+    "kory.view", "kory.manage",
     "honam.view", "honam.manage",
     "assime.view", "assime.manage",
     "certified.view", "certified.manage",
     "modules.manage",
     "banners.view", "banners.manage",
     "audit.view",
+    "countries.view", "countries.manage",
+    "settings.manage",
 }
 
 ROLE_PERMISSIONS = {
@@ -32,15 +34,18 @@ ROLE_PERMISSIONS = {
     UserRole.SUPPORT: {
         "dashboard.view", "users.view", "users.manage", "team.view",
         "reports.view", "reports.manage", "kory.view", "honam.view",
-        "assime.view", "certified.view", "banners.view",
+        "assime.view", "certified.view", "banners.view", "countries.view",
+        "honam.manage",
     },
     UserRole.AI_OPERATOR: {
         "dashboard.view", "reports.view", "assime.view", "assime.manage",
         "certified.view", "team.view",
+        "reports.manage", "certified.manage",
     },
     UserRole.VIEWER: {
-        "dashboard.view", "users.view", "kory.view", "honam.view",
+        "dashboard.view", "users.view", "kory.view", "honam.view", "reports.view",
         "assime.view", "certified.view", "team.view", "banners.view",
+        "countries.view",
     },
     UserRole.USER: set(),
 }

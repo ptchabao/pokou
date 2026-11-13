@@ -210,6 +210,10 @@ def courier_can_accept(db: Session, courier: CourierProfile) -> tuple[bool, Opti
         return False, "Compte coursier suspendu"
     if status == "PENDING":
         return False, "Candidature en cours de vérification"
+    if status == "REJECTED":
+        # Candidature refusée par l'équipe : pas de course, même pendant
+        # la période de lancement.
+        return False, "Candidature non retenue"
     if launch_active(db, courier.country):
         return True, None
     if status == "ENDED":

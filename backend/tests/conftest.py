@@ -42,3 +42,23 @@ for _key in (
 # Twilio Verify : jamais depuis la suite. Les tests qui le couvrent
 # (test_twilio_verify.py) le réactivent avec un Twilio simulé.
 os.environ["TWILIO_VERIFY_ENABLED"] = "false"
+
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _rate_limit_per_test(request, monkeypatch):
+    """Un compteur de débit par test, pour l'application principale.
+
+    Toute la suite parle à l'API depuis la même « source » (testclient) : au
+    fil des fichiers, le plafond de l'authentification (240 requêtes par
+    fenêtre) finissait par refuser les inscriptions d'un test sans rapport,
+    selon l'ordre d'exécution. Chaque test garde son plafond — test_rate_limit
+    vérifie le plafond lui-même, avec sa propre application.
+    """
+    from app.middleware import rate_limit
+
+    original = rate_limit.client_key
+    test_id = request.node.nodeid
+    monkeypatch.setattr(rate_limit, "client_key", lambda req: f"{original(req)}|{test_id}")

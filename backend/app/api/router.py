@@ -14,6 +14,8 @@ from app.api.v1.e2ee_retry import e2ee_retry
 from app.api.v1.notifications import notifications as service_notifications
 from app.api.v1.backup import backup as user_backup
 from app.api.v1.admin import admin as admin_space
+from app.api.v1.admin import admin_config
+from app.api.v1.admin import admin_services
 from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
 from app.api.v1.calls import calls
@@ -59,6 +61,7 @@ for router in (
     service_notifications.router,
     user_backup.router,
     admin_space.router,
+    admin_config.router,
     media.router,
     link_preview.router,
     status.router,
@@ -93,6 +96,10 @@ for router in (
     certified.admin_router,
     honam.router,
     honam.admin_router,
+    # Après les routeurs d'administration des services : leurs chemins
+    # fixes (« /couriers/pending », « /pro/pending ») passent avant les
+    # chemins à identifiant de la console.
+    admin_services.router,
     metrics.router,
 ):
     api_router.include_router(router)

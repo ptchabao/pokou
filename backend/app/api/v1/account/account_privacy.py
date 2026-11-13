@@ -473,7 +473,14 @@ async def delete_my_account(
             status_code=400,
             detail="Le numéro saisi ne correspond pas à celui du compte — la suppression est annulée",
         )
+    return erase_account(db, user)
 
+
+def erase_account(db: Session, user: User) -> dict:
+    """Efface et anonymise un compte selon la règle décrite dans
+    `delete_my_account`. Partagée avec la console d'administration
+    (suppression par l'équipe) : une seule règle, deux portes d'entrée.
+    Valide la transaction en cours."""
     # Le fil avec Baba n'appartient qu'à moi.
     db.query(BabaMessage).filter(BabaMessage.user_id == user.id).delete(synchronize_session=False)
 

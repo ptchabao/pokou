@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 import { ConsoleShell } from "@/components/console-shell"
 import { SimpleTable } from "@/components/simple-table"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -30,6 +31,34 @@ export default function TeamPage() {
   const [secret, setSecret] = React.useState<{ email: string; password: string } | null>(null)
   const [newRole, setNewRole] = React.useState("SUPPORT")
   const manage = can("team.manage")
+  const [editing, setEditing] = React.useState<AdminUser | null>(null)
+  const [editName, setEditName] = React.useState("")
+  const [editEmail, setEditEmail] = React.useState("")
+  const [cutting, setCutting] = React.useState<AdminUser | null>(null)
+  const [busy, setBusy] = React.useState(false)
+  const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+
+  async function saveProfile() {
+    if (!editing) return
+    setBusy(true)
+    try {
+      await api(`/admin/team/${editing.id}/profile`, { method: "PUT", body: { full_name: editName.trim(), email: editEmail.trim() } })
+      toast.success("Membre modifié")
+      setEditing(null)
+      team.reload()
+    } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
+  }
+
+  async function cutAccess() {
+    if (!cutting) return
+    setBusy(true)
+    try {
+      await api(`/admin/team/${cutting.id}/console-access/disable`, { method: "POST" })
+      toast.success("Accès à la console coupé")
+      setCutting(null)
+      team.reload()
+    } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
+  }
 
   async function changeRole(u: AdminUser, role: string) {
     try {
@@ -55,6 +84,7 @@ export default function TeamPage() {
     try {
       const r = await api<{ temporary_password: string }>(`/admin/team/${u.id}/reset-password`, { method: "POST" })
       setSecret({ email: u.email ?? "", password: r.temporary_password })
+      team.reload()
     } catch (e) { toast.error((e as Error).message) }
   }
 
@@ -77,9 +107,24 @@ export default function TeamPage() {
             </Select>
           ) : u.role_label },
           { header: "Compte", cell: (u) => <ActiveBadge active={u.is_active} /> },
+          { header: "Console", cell: (u) => u.console_access
+            ? <Badge variant="secondary">Accès ouvert</Badge>
+            : <Badge variant="outline">Accès coupé</Badge> },
           { header: "Vu le", cell: (u) => when(u.last_seen_at) },
-          { header: "", className: "text-right", cell: (u) => manage && u.id !== me?.id && u.email ? (
-            <Button size="sm" variant="outline" onClick={() => resetPassword(u)}>Nouveau mot de passe</Button>
+          { header: "", className: "text-right", cell: (u) => manage ? (
+            <div className="flex justify-end gap-1">
+              <Button size="sm" variant="ghost" onClick={() => { setEditName(u.full_name ?? ""); setEditEmail(u.email ?? ""); setEditing(u) }}>
+                Modifier
+              </Button>
+              {u.id !== me?.id && u.email && (
+                <Button size="sm" variant="outline" onClick={() => resetPassword(u)}>
+                  {u.console_access ? "Nouveau mot de passe" : "Rétablir l'accès"}
+                </Button>
+              )}
+              {u.id !== me?.id && u.console_access && (
+                <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setCutting(u)}>Couper l&apos;accès</Button>
+              )}
+            </div>
           ) : null },
         ]}
       />
@@ -143,6 +188,45 @@ export default function TeamPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setAdding(false)}>Annuler</Button>
             <Button disabled={!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) || name.trim().length < 2} onClick={add}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={editing !== null} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le membre</DialogTitle>
+            <DialogDescription>L&apos;e-mail sert d&apos;identifiant de connexion à la console.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Nom</Label>
+              <Input id="edit-name" maxLength={120} value={editName} onChange={(e) => setEditName(e.target.value)} />
+              {editName.trim().length > 0 && editName.trim().length < 2 && <p className="text-xs text-destructive">2 caractères au moins.</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-email">E-mail</Label>
+              <Input id="edit-email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+              {editEmail && !emailRe.test(editEmail.trim()) && <p className="text-xs text-destructive">Adresse invalide.</p>}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>Annuler</Button>
+            <Button disabled={busy || editName.trim().length < 2 || !emailRe.test(editEmail.trim())} onClick={saveProfile}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={cutting !== null} onOpenChange={(o) => !o && setCutting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Couper l&apos;accès de {cutting?.full_name ?? cutting?.email} à la console ?</DialogTitle>
+            <DialogDescription>
+              Son mot de passe de console est effacé et ses sessions de console sont fermées. Son compte et son rôle
+              restent en place ; « Rétablir l&apos;accès » lui donnera un nouveau mot de passe provisoire.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCutting(null)}>Annuler</Button>
+            <Button variant="destructive" disabled={busy} onClick={cutAccess}>Couper l&apos;accès</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

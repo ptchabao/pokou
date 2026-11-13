@@ -422,5 +422,15 @@ def pro_review(
     application.review_note = (body.note or "").strip() or None
     application.reviewed_at = datetime.utcnow()
     application.reviewer_id = current_user["user_id"]
+    from app.models import AuditLog
+    from app.services.notifications.inbox import notify
+    db.add(AuditLog(user_id=current_user["user_id"], action="certified_pro_review", entity_type="certified_pro",
+                    entity_id=application.id, changes={"decision": decision, "note": application.review_note}))
+    messages = {
+        "APPROVE": "Ton dossier Pro est validé : tu peux souscrire la formule Pro.",
+        "CORRECTION": f"Ton justificatif Pro est à corriger : {application.review_note}",
+        "REJECT": f"Ton dossier Pro n'a pas été retenu. Motif : « {application.review_note} »",
+    }
+    notify(db, [application.user_id], service="certified", title="Pokou certifié Pro", body=messages[decision])
     db.commit()
     return _pro_json(application)

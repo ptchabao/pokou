@@ -9,5 +9,6 @@ export type AdminUser = {
   is_verified: boolean
   created_at: string | null
   last_seen_at: string | null
+  console_access?: boolean
 }
 export type Paged<T> = { items: T[]; total: number; page?: number; size?: number }

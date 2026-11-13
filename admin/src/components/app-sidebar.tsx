@@ -11,6 +11,8 @@ import {
   IconFlag,
   IconHistory,
   IconKey,
+  IconSettings,
+  IconWorld,
   IconLogout,
   IconPigMoney,
   IconPuzzle,
@@ -54,6 +56,8 @@ export const NAV = [
   ] },
   { group: "Administration", items: [
     { title: "Équipe et rôles", url: "/team/", icon: IconShieldLock, perm: "team.view" },
+    { title: "Pays", url: "/countries/", icon: IconWorld, perm: "countries.view" },
+    { title: "Réglages système", url: "/settings/", icon: IconSettings, perm: "settings.manage" },
     { title: "Journal d'audit", url: "/audit/", icon: IconHistory, perm: "audit.view" },
   ] },
 ]
@@ -125,7 +129,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               </div>
               <button
                 onClick={() => setPasswordOpen(true)}
-                title="Mot de passe de la console"
+                title="Changer mon mot de passe"
+                aria-label="Changer mon mot de passe"
                 className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 <IconKey className="size-4" />

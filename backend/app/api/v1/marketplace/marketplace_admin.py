@@ -325,6 +325,8 @@ async def list_ads(
 class AdDecision(BaseModel):
     approved: bool
     duration_days: int = Field(7, ge=1, le=90)
+    #: Le motif d'un refus, gardé au journal d'audit.
+    reason: Optional[str] = Field(None, max_length=280)
 
 
 @router.put("/ads/{ad_id}")
@@ -374,7 +376,7 @@ async def decide_ad(
         "review",
         "marketplace_ad",
         ad.id,
-        changes={"approved": payload.approved},
+        changes={"approved": payload.approved, "reason": payload.reason},
     )
     return {"id": ad.id, "status": ad.status, "expires_at": ad.expires_at.isoformat() if ad.expires_at else None}
 

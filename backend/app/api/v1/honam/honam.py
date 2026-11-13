@@ -1258,6 +1258,7 @@ _TEAM = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
 
 @admin_router.post("/pharmacies", status_code=201)
 def create_pharmacy(body: PharmacyCreate, current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db)):
+    from app.models import AuditLog
     """Le commercial crée l'officine pendant sa visite (BM-06), puis envoie
     le lien de paiement de l'abonnement."""
     titulaire_phone = normalize_e164(body.titulaire_phone, body.country.upper())
@@ -1273,6 +1274,8 @@ def create_pharmacy(body: PharmacyCreate, current_user: dict = Depends(require_p
     db.add(pharmacy)
     db.flush()
     db.add(PharmacyStaff(pharmacy_id=pharmacy.id, user_id=titulaire.id, role="TITULAIRE"))
+    db.add(AuditLog(user_id=current_user["user_id"], action="pharmacy_create", entity_type="pharmacy",
+                    entity_id=pharmacy.id, changes={"name": pharmacy.name, "country": pharmacy.country}))
     db.commit()
     return {**_pharmacy_json(pharmacy), "status": pharmacy.status}
 
@@ -1283,6 +1286,9 @@ def verify_wallet(pharmacy_id: int, current_user: dict = Depends(require_permiss
     if pharmacy is None:
         raise HTTPException(status_code=404, detail="Officine introuvable")
     pharmacy.wallet_verified = True
+    from app.models import AuditLog
+    db.add(AuditLog(user_id=current_user["user_id"], action="pharmacy_verify_wallet", entity_type="pharmacy",
+                    entity_id=pharmacy.id, changes={"wallet_phone": pharmacy.wallet_phone}))
     db.commit()
     return {"id": pharmacy.id, "wallet_verified": True}
 
@@ -1303,6 +1309,12 @@ def validate_courier(user_id: int, current_user: dict = Depends(require_permissi
     courier.referral_code = courier.referral_code or rules.new_referral_code(db)
     db.flush()
     rules.start_trial(db, courier)
+    from app.models import AuditLog
+    from app.services.notifications.inbox import notify
+    db.add(AuditLog(user_id=current_user["user_id"], action="courier_validate", entity_type="courier",
+                    entity_id=user_id, changes={"status": courier.status}))
+    notify(db, [user_id], service="honam", title="Mode coursier",
+           body="Ta candidature de coursier est acceptée : tes courses d'essai t'attendent.")
     db.commit()
     return {"user_id": user_id, "status": courier.status}
 
@@ -1315,6 +1327,9 @@ def exclude_pharmacy(pharmacy_id: int, body: ReasonBody, current_user: dict = De
         raise HTTPException(status_code=404, detail="Officine introuvable")
     pharmacy.status = "EXCLUDED"
     pharmacy.suspension_reason = body.reason
+    from app.models import AuditLog
+    db.add(AuditLog(user_id=current_user["user_id"], action="pharmacy_exclude", entity_type="pharmacy",
+                    entity_id=pharmacy.id, changes={"reason": body.reason}))
     db.commit()
     return {"id": pharmacy.id, "status": pharmacy.status}
 

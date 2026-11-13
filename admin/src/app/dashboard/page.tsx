@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { IconChevronRight } from "@tabler/icons-react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
 import { ConsoleShell } from "@/components/console-shell"
@@ -23,6 +25,8 @@ type Overview = {
   reports: { open: number }
   activity: { date: string; signups: number; direct: number; group: number }[]
 }
+
+type Queue = { key: string; label: string; count: number; urgent: number; href: string }
 
 const nf = new Intl.NumberFormat("fr-FR")
 
@@ -54,6 +58,7 @@ export default function DashboardPage() {
   const { me } = useAuth()
   const [days, setDays] = React.useState("30")
   const { data, error } = useApi<Overview>(`/admin/overview?days=${days}`)
+  const queues = useApi<{ items: Queue[] }>("/admin/queues")
   const honamTotal = data ? Object.values(data.honam.orders_by_status).reduce((a, b) => a + b, 0) : 0
   return (
     <ConsoleShell title="Tableau de bord" permission="dashboard.view">
@@ -71,6 +76,32 @@ export default function DashboardPage() {
           </p>
         </div>
         <Illustration name={data && data.reports.open > 0 ? "team_work" : "all_clear"} className="hidden h-36 shrink-0 pr-6 sm:block" />
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>À traiter</CardTitle>
+          <CardDescription>Les files d&apos;attente qui demandent une décision de l&apos;équipe</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {queues.error && <p className="text-sm text-destructive">{queues.error}</p>}
+          {!queues.data ? (
+            <p className="text-sm text-muted-foreground">Chargement…</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+              {queues.data.items.map((q) => (
+                <Link key={q.key} href={q.href}
+                  className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm hover:bg-accent">
+                  <span className={q.count ? "font-medium" : "text-muted-foreground"}>{q.label}</span>
+                  <span className="flex items-center gap-2">
+                    {q.urgent > 0 && <Badge variant="destructive">{nf.format(q.urgent)} en retard</Badge>}
+                    <Badge variant={q.count ? "default" : "outline"} className="tabular-nums">{nf.format(q.count)}</Badge>
+                    <IconChevronRight className="size-4 text-muted-foreground" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
       </Card>
       <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         <Stat label="Utilisateurs" value={data ? nf.format(data.users.total) : "…"}

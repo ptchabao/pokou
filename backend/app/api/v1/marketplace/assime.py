@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.rbac import require_admin_role
+from app.core.permissions import require_permission_claims
 from app.core.security import get_current_user
 from app.models import (
     MarketplaceAlert,
@@ -55,6 +55,7 @@ class AlertBody(BaseModel):
 
 class ModerationBody(BaseModel):
     approve: bool
+    reason: Optional[str] = Field(None, max_length=280)
 
 
 def _snapshot(product: MarketplaceProduct) -> dict:
@@ -352,7 +353,7 @@ def boost_report(product_id: int, current_user: dict = Depends(get_current_user)
 
 @admin_router.get("/sponsored-statuses")
 def pending_sponsored_statuses(
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)), db: Session = Depends(get_db),
+    current_user: dict = Depends(require_permission_claims("assime.view")), db: Session = Depends(get_db),
 ):
     rows = db.query(MarketplaceBoost).filter(MarketplaceBoost.status_moderation == "PENDING").order_by(
         MarketplaceBoost.created_at
@@ -369,11 +370,14 @@ def pending_sponsored_statuses(
 @admin_router.put("/sponsored-statuses/{boost_id}")
 def moderate_sponsored_status(
     boost_id: int, body: ModerationBody,
-    current_user: dict = Depends(require_admin_role(_TEAM_ROLES)), db: Session = Depends(get_db),
+    current_user: dict = Depends(require_permission_claims("assime.manage")), db: Session = Depends(get_db),
 ):
     boost = db.query(MarketplaceBoost).filter(MarketplaceBoost.id == boost_id).first()
     if boost is None or boost.status_moderation is None:
         raise HTTPException(status_code=404, detail="Statut sponsorisé introuvable")
     boost.status_moderation = "APPROVED" if body.approve else "REJECTED"
+    from app.models import AuditLog
+    db.add(AuditLog(user_id=current_user["user_id"], action="sponsored_status_review", entity_type="marketplace_boost",
+                    entity_id=boost.id, changes={"approved": body.approve, "reason": body.reason}))
     db.commit()
     return {"boost_id": boost.id, "status_moderation": boost.status_moderation}

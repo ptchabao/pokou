@@ -400,6 +400,19 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
         reviewer = db.query(User).filter(User.id == user_id).first()
         return reviewer is not None and reviewer.role in _TEAM_ROLES
 
+    # Visuel d'une publicité à relire, photo d'une annonce masquée par la
+    # modération : la console d'Assimé doit voir ce qu'elle juge. Réservé à
+    # qui a la permission `assime.view`, et seulement pour ces deux usages.
+    from app.core.permissions import permissions_of
+    from app.models import MarketplaceAd
+
+    is_ad = db.query(MarketplaceAd.id).filter(MarketplaceAd.media_asset_id == asset.id).first() is not None
+    is_listing = is_ad or db.query(MarketplaceProduct.id).filter(MarketplaceProduct.image_media_id == asset.id).first() is not None \
+        or db.query(MarketplaceProductImage.id).filter(MarketplaceProductImage.media_asset_id == asset.id).first() is not None
+    if is_listing:
+        reviewer = db.query(User).filter(User.id == user_id).first()
+        return reviewer is not None and "assime.view" in permissions_of(reviewer)
+
     return False
 
 
