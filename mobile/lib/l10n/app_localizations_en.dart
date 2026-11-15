@@ -9105,4 +9105,115 @@ class LEn extends L {
   String koryMqOnDay(String day) {
     return 'on $day';
   }
+
+  @override
+  String get koryMqLeveeDay => 'Payout day';
+
+  @override
+  String get koryMqDueDay => 'Due day';
+
+  @override
+  String get koryMqDue => 'Due date';
+
+  @override
+  String koryMqEveryWeekday(String weekday) {
+    return 'every $weekday';
+  }
+
+  @override
+  String koryMqDayOfMonth(String day) {
+    return 'on day $day of the month';
+  }
+
+  @override
+  String get koryMqBeneficiary => 'Beneficiary';
+
+  @override
+  String get koryMqGoalOptional => 'Goal (optional)';
+
+  @override
+  String get koryMqAmountPerMember => 'Amount per member';
+
+  @override
+  String get koryMqMembers => 'Members';
+
+  @override
+  String get koryMqRounds => 'Rounds';
+
+  @override
+  String koryMqPlusFeeNotice(String ht, String ttc) {
+    return 'Kory Plus · $ht excl. VAT ($ttc incl. VAT) per member, once, at opening. Contributions go straight to each round’s beneficiary.';
+  }
+
+  @override
+  String get koryMqFreeNoticeDue =>
+      'No fees. Pokou never touches the money: at each due date, everyone pays from their wallet to the collector.';
+
+  @override
+  String koryMqRoundCounts(String confirmed, String declared, String late) {
+    return '$confirmed confirmed · $declared declared · $late late';
+  }
+
+  @override
+  String get koryMqStake => 'Contribution';
+
+  @override
+  String koryMqTtc(String amount) {
+    return '$amount incl. VAT';
+  }
+
+  @override
+  String koryMqFeeHtOnce(String amount) {
+    return '$amount excl. VAT, once, by CashPay';
+  }
+
+  @override
+  String koryMqPayForRemaining(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pay for the $count remaining · $amount incl. VAT',
+      one: 'Pay for the last one · $amount incl. VAT',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryMqPayTtcByCashPay(String amount) {
+    return 'Pay $amount incl. VAT by CashPay';
+  }
+
+  @override
+  String get koryMqStartsWhenAllPaid =>
+      'The tontine starts once everyone has paid their fee and accepted. Fees are non-refundable once the tontine is open.';
+
+  @override
+  String get koryMqAdd => 'Add';
+
+  @override
+  String get koryMqAddMember => 'Add a member';
+
+  @override
+  String get koryMqEveryoneIn =>
+      'Everyone in the chat is already in the tontine.';
+
+  @override
+  String get koryMqOnPokou => 'On Pokou';
+
+  @override
+  String get koryMqRemoveDeputy => 'Remove deputy role';
+
+  @override
+  String get koryMqRemoveMember => 'Remove from the tontine';
+
+  @override
+  String koryMqAndOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count others',
+      one: 'and 1 other',
+    );
+    return '$_temp0';
+  }
 }

@@ -15313,6 +15313,162 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'le {day}'**
   String koryMqOnDay(String day);
+
+  /// No description provided for @koryMqLeveeDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour de la levée'**
+  String get koryMqLeveeDay;
+
+  /// No description provided for @koryMqDueDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour de l’échéance'**
+  String get koryMqDueDay;
+
+  /// No description provided for @koryMqDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance'**
+  String get koryMqDue;
+
+  /// No description provided for @koryMqEveryWeekday.
+  ///
+  /// In fr, this message translates to:
+  /// **'chaque {weekday}'**
+  String koryMqEveryWeekday(String weekday);
+
+  /// No description provided for @koryMqDayOfMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'le {day} du mois'**
+  String koryMqDayOfMonth(String day);
+
+  /// No description provided for @koryMqBeneficiary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéficiaire'**
+  String get koryMqBeneficiary;
+
+  /// No description provided for @koryMqGoalOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif (facultatif)'**
+  String get koryMqGoalOptional;
+
+  /// No description provided for @koryMqAmountPerMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant par membre'**
+  String get koryMqAmountPerMember;
+
+  /// No description provided for @koryMqMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get koryMqMembers;
+
+  /// No description provided for @koryMqRounds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tours'**
+  String get koryMqRounds;
+
+  /// No description provided for @koryMqPlusFeeNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kory Plus · {ht} HT ({ttc} TTC) par membre, une fois, à l’ouverture. Les cotisations vont directement au bénéficiaire de chaque tour.'**
+  String koryMqPlusFeeNotice(String ht, String ttc);
+
+  /// No description provided for @koryMqFreeNoticeDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans frais. Pokou ne touche pas l’argent : à chaque échéance, chacun verse depuis son wallet au collecteur.'**
+  String get koryMqFreeNoticeDue;
+
+  /// No description provided for @koryMqRoundCounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{confirmed} confirmées · {declared} déclarées · {late} en retard'**
+  String koryMqRoundCounts(String confirmed, String declared, String late);
+
+  /// No description provided for @koryMqStake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cotisation'**
+  String get koryMqStake;
+
+  /// No description provided for @koryMqTtc.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC'**
+  String koryMqTtc(String amount);
+
+  /// No description provided for @koryMqFeeHtOnce.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} HT, une fois, par CashPay'**
+  String koryMqFeeHtOnce(String amount);
+
+  /// No description provided for @koryMqPayForRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Payer pour le dernier · {amount} TTC} other{Payer pour les {count} restants · {amount} TTC}}'**
+  String koryMqPayForRemaining(int count, String amount);
+
+  /// No description provided for @koryMqPayTtcByCashPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} TTC par CashPay'**
+  String koryMqPayTtcByCashPay(String amount);
+
+  /// No description provided for @koryMqStartsWhenAllPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine démarre quand tous ont payé leurs frais et accepté. Frais non remboursables une fois la tontine ouverte.'**
+  String get koryMqStartsWhenAllPaid;
+
+  /// No description provided for @koryMqAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get koryMqAdd;
+
+  /// No description provided for @koryMqAddMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un membre'**
+  String get koryMqAddMember;
+
+  /// No description provided for @koryMqEveryoneIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les membres de la discussion sont déjà dans la tontine.'**
+  String get koryMqEveryoneIn;
+
+  /// No description provided for @koryMqOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur Pokou'**
+  String get koryMqOnPokou;
+
+  /// No description provided for @koryMqRemoveDeputy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le rôle de suppléant'**
+  String get koryMqRemoveDeputy;
+
+  /// No description provided for @koryMqRemoveMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de la tontine'**
+  String get koryMqRemoveMember;
+
+  /// No description provided for @koryMqAndOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{et 1 autre} other{et {count} autres}}'**
+  String koryMqAndOthers(int count);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

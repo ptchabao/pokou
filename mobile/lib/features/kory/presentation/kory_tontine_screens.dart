@@ -12,6 +12,7 @@ import 'kory_cotisation_screens.dart';
 import 'kory_create_screen.dart';
 import 'kory_draft.dart';
 import 'kory_export.dart';
+import 'kory_home_widgets.dart';
 import 'kory_journal_screen.dart';
 import 'kory_pay_screens.dart';
 import 'kory_pot_screen.dart';
@@ -62,17 +63,22 @@ Future<void> _run(
   }
 }
 
-/// Kory Plus : ouvrir le paiement des frais d'ouverture. Rien n'est accordé
-/// ici — c'est la confirmation reçue par le serveur qui fait entrer dans la
-/// tontine, et la page se met à jour d'elle-même (kory:updated).
+/// Kory Plus : ouvrir le paiement des frais d'ouverture, par CashPay. Rien
+/// n'est accordé ici — c'est la confirmation reçue par le serveur qui fait
+/// entrer dans la tontine, et la page se met à jour d'elle-même
+/// (kory:updated). [forOthers] : l'administrateur règle aussi ceux qui
+/// n'ont pas encore payé (KOR-8).
 Future<void> _payPlusFee(
   BuildContext context,
   WidgetRef ref,
-  KoryPot pot,
-) async {
+  KoryPot pot, {
+  bool forOthers = false,
+}) async {
   final l = L.of(context);
   try {
-    final url = await ref.read(koryRepositoryProvider).payPlusFee(pot.id);
+    final url = await ref
+        .read(koryRepositoryProvider)
+        .payPlusFee(pot.id, forOthers: forOthers);
     if (!context.mounted) return;
     await openPaymentGateway(
       context,
@@ -85,35 +91,75 @@ Future<void> _payPlusFee(
   }
 }
 
-/// KOR-8 / 25 : le montant des frais. Qui les a réglés se lit juste dessous,
-/// dans la liste des membres.
+/// KOR-8 / 25 : les frais d'ouverture, dans un encadré ambré, avec où en
+/// sont les paiements. [ttcFirst] : le montant TTC en grand (l'invitation,
+/// KOR-25), sinon la phrase « 1 000 FCFA HT (1 180 FCFA TTC) par membre ».
 class _PlusFeeCard extends StatelessWidget {
-  const _PlusFeeCard({required this.fee});
+  const _PlusFeeCard({
+    required this.pot,
+    required this.fee,
+    this.ttcFirst = false,
+  });
 
+  final KoryPot pot;
   final KoryPlusFee fee;
+  final bool ttcFirst;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final invited = pot.members.where((m) => !m.declined).toList();
+    final paid = invited.where((m) => m.feePaid).length;
     return KoryCard(
+      color: AppColors.securityWarning.withValues(
+        alpha: AppColors.isDark ? 0.16 : 0.08,
+      ),
+      borderColor: AppColors.securityWarning.withValues(alpha: 0.25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l.koryXPlusFeeTitle,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+            style: ttcFirst
+                ? TextStyle(fontSize: 13, color: AppColors.textSecondary)
+                : TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            l.koryXPlusFeeBody(
-              formatFcfa(fee.amountHt),
-              formatFcfa(fee.amountTtc),
+          if (ttcFirst) ...[
+            Text(
+              l.koryMqTtc(formatFcfa(fee.amountTtc)),
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
-            style: TextStyle(color: AppColors.textSecondary, height: 1.35),
-          ),
+            Text(
+              l.koryMqFeeHtOnce(formatFcfa(fee.amountHt)),
+              style: TextStyle(color: AppColors.textSecondary, height: 1.35),
+            ),
+          ] else ...[
+            const SizedBox(height: 4),
+            Text(
+              l.koryXPlusFeeBody(
+                formatFcfa(fee.amountHt),
+                formatFcfa(fee.amountTtc),
+              ),
+              style: TextStyle(color: AppColors.textSecondary, height: 1.35),
+            ),
+          ],
+          if (invited.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            KoryProgressBar(value: paid / invited.length),
+            const SizedBox(height: 6),
+            Text(
+              l.koryXPlusFeePaidOf('$paid', '${invited.length}'),
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+          ],
         ],
       ),
     );
@@ -140,6 +186,100 @@ class _KoryTontineMembersScreenState
   late Set<int> _chosen = {..._order};
   int? _deputy;
   String _mode = 'DRAW';
+  bool _expanded = false;
+  bool _busy = false;
+
+  /// La création se fait ici : l'étape 3 (KOR-8) est la tontine elle-même,
+  /// où chacun paie ses frais d'ouverture.
+  Future<void> _create(List<int> chosen) async {
+    final draft = widget.draft;
+    draft.memberIds = chosen;
+    draft.deputyId = chosen.contains(_deputy) ? _deputy : null;
+    draft.drawMode = _mode;
+    setState(() => _busy = true);
+    final potId = await koryCreateFromDraft(context, ref, draft);
+    if (!mounted) return;
+    if (potId == null) {
+      setState(() => _busy = false);
+    } else {
+      Navigator.of(context).pop(potId);
+    }
+  }
+
+  /// « Ajouter » : les membres de la discussion qui ne sont pas encore dans
+  /// la tontine.
+  Future<void> _add() async {
+    final l = L.of(context);
+    final others = [
+      for (final id in _order)
+        if (!_chosen.contains(id) && id != _me(ref)) id,
+    ];
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          children: [
+            KorySection(l.koryMqAddMember),
+            if (others.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  l.koryMqEveryoneIn,
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+            for (final id in others)
+              KoryPersonRow(
+                name: widget.draft.nameOf(id),
+                subtitle: l.koryMqOnPokou,
+                onTap: () => Navigator.pop(sheetContext, id),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked != null) setState(() => _chosen = {..._chosen, picked});
+  }
+
+  /// Toucher un membre : le désigner suppléant, ou le retirer.
+  Future<void> _manage(int id) async {
+    final l = L.of(context);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.verified_user_outlined),
+              title: Text(
+                id == _deputy ? l.koryMqRemoveDeputy : l.koryXMakeDeputy,
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'deputy'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_remove_outlined),
+              title: Text(l.koryMqRemoveMember),
+              onTap: () => Navigator.pop(sheetContext, 'remove'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || action == null) return;
+    setState(() {
+      if (action == 'deputy') {
+        _deputy = _deputy == id ? null : id;
+      } else {
+        _chosen = {..._chosen}..remove(id);
+        if (_deputy == id) _deputy = null;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +291,17 @@ class _KoryTontineMembersScreenState
         if (_chosen.contains(id) || id == me) id,
     ];
     String name(int id) => id == me ? l.koryYou : draft.nameOf(id);
+    // La maquette montre trois membres, puis « et 5 autres » : moi d'abord,
+    // puis le suppléant.
+    final shown = [
+      ?me,
+      if (_deputy != null && chosen.contains(_deputy)) _deputy!,
+      for (final id in chosen)
+        if (id != me && id != _deputy) id,
+    ];
+    final folded = !_expanded && shown.length > 4;
+    final visible = folded ? shown.take(3).toList() : shown;
+    final hidden = folded ? shown.skip(3).toList() : const <int>[];
     return KoryPage(
       title: l.koryXMembersAndOrder,
       subtitle: l.koryXTontineStepOf(draft.title, '2'),
@@ -158,71 +309,46 @@ class _KoryTontineMembersScreenState
         children: [
           KoryButton(
             label: l.koryXContinue,
-            onPressed: chosen.length < 2
-                ? null
-                : () async {
-                    draft.memberIds = chosen;
-                    draft.deputyId = chosen.contains(_deputy) ? _deputy : null;
-                    draft.drawMode = _mode;
-                    final potId = await Navigator.of(context).push<int>(
-                      MaterialPageRoute(
-                        builder: (_) => KoryTontineOpenScreen(draft: draft),
-                      ),
-                    );
-                    if (potId != null && context.mounted) {
-                      Navigator.of(context).pop(potId);
-                    }
-                  },
+            busy: _busy,
+            onPressed: chosen.length < 2 ? null : () => _create(chosen),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          KorySection(l.koryXMembersCount(chosen.length)),
+          KorySection(
+            l.koryXMembersCount(chosen.length),
+            trailing: l.koryMqAdd,
+            onTrailing: _add,
+          ),
           KoryCard(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             child: Column(
               children: [
-                for (final id in _order)
+                for (final id in visible)
                   KoryPersonRow(
                     name: name(id),
                     subtitle: id == me
                         ? l.koryXAdministrator
                         : id == _deputy
                         ? l.koryXDeputy
+                        : l.koryMqOnPokou,
+                    onTap: id == me ? null : () => _manage(id),
+                    trailing: id == _deputy
+                        ? KoryStatusPill(
+                            icon: Icons.verified_user_outlined,
+                            label: l.koryXDeputy,
+                            color: AppColors.accentPrimary,
+                          )
                         : null,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (id != me && _chosen.contains(id))
-                          IconButton(
-                            tooltip: l.koryXMakeDeputy,
-                            icon: Icon(
-                              id == _deputy
-                                  ? Icons.verified_user
-                                  : Icons.verified_user_outlined,
-                              color: id == _deputy
-                                  ? AppColors.accentPrimary
-                                  : AppColors.textMuted,
-                            ),
-                            onPressed: () => setState(
-                              () => _deputy = _deputy == id ? null : id,
-                            ),
-                          ),
-                        Checkbox(
-                          value: id == me || _chosen.contains(id),
-                          onChanged: id == me
-                              ? null
-                              : (v) => setState(() {
-                                  _chosen = {..._chosen};
-                                  v == true
-                                      ? _chosen.add(id)
-                                      : _chosen.remove(id);
-                                }),
-                        ),
-                      ],
-                    ),
+                  ),
+                if (hidden.isNotEmpty)
+                  KoryPersonRow(
+                    name: l.koryMqAndOthers(hidden.length),
+                    subtitle: hidden.map(name).join(', '),
+                    muted: true,
+                    onTap: () => setState(() => _expanded = true),
                   ),
               ],
             ),
@@ -273,10 +399,11 @@ class _KoryTontineMembersScreenState
             ),
           ),
           const SizedBox(height: 4),
-          KoryNotice(
-            text: _deputy == null
+          Text(
+            _deputy == null
                 ? l.koryXNoDeputyNotice
                 : l.koryXDeputyNotice(draft.nameOf(_deputy!)),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -284,103 +411,7 @@ class _KoryTontineMembersScreenState
   }
 }
 
-// ── KOR-8 · Nouvelle tontine, étape 3 : vérifier et inviter ──────────────
-
-class KoryTontineOpenScreen extends ConsumerStatefulWidget {
-  const KoryTontineOpenScreen({super.key, required this.draft});
-
-  final KoryDraft draft;
-
-  @override
-  ConsumerState<KoryTontineOpenScreen> createState() =>
-      _KoryTontineOpenScreenState();
-}
-
-class _KoryTontineOpenScreenState extends ConsumerState<KoryTontineOpenScreen> {
-  bool _busy = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final d = widget.draft;
-    final count = d.memberIds.length;
-    final start = d.dueAt ?? koryAddPeriod(DateTime.now(), d.period, 1);
-    final end = koryAddPeriod(start, d.period, count - 1);
-    return KoryPage(
-      title: l.koryXNewTontine,
-      subtitle: l.koryXTontineStepOf(d.group?.name ?? d.title, '3'),
-      footer: KoryFooter(
-        children: [
-          KoryButton(
-            label: l.koryXOpenAndInvite(count - 1),
-            busy: _busy,
-            onPressed: () async {
-              setState(() => _busy = true);
-              final id = await koryCreateFromDraft(context, ref, d);
-              if (!context.mounted) return;
-              if (id == null) {
-                setState(() => _busy = false);
-              } else {
-                Navigator.of(context).pop(id);
-              }
-            },
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: [
-          Text(
-            d.title,
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          KoryCard(
-            child: Column(
-              children: [
-                KoryLine(
-                  l.koryXStakeLabel,
-                  l.koryXAmountPer(
-                    formatFcfa(d.amount ?? 0),
-                    koryPeriodLabel(l, d.period),
-                  ),
-                ),
-                KoryLine(
-                  l.koryXMembersAndRounds,
-                  l.koryXRoundsSpan(
-                    count,
-                    koryMonth(context, start).toLowerCase(),
-                    koryMonth(context, end).toLowerCase(),
-                  ),
-                ),
-                KoryLine(
-                  l.koryXLeveePerRound,
-                  formatFcfa((d.amount ?? 0) * (count - 1)),
-                ),
-                KoryLine(
-                  l.koryRotation,
-                  d.drawMode == 'DRAW' ? l.koryXDrawLogged : l.koryXFixedOrder,
-                ),
-                if (d.deputyId != null)
-                  KoryLine(l.koryXDeputy, d.nameOf(d.deputyId!)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          KoryNotice(text: l.koryXStartsWhenAllAccept),
-          const SizedBox(height: 10),
-          KoryNotice(text: l.koryTontineNote),
-        ],
-      ),
-    );
-  }
-}
-
+// ── La tontine : en attente (KOR-8, 25), en cours (KOR-7), terminée ─────
 // ── La tontine : en attente (KOR-8, 25), en cours (KOR-7), terminée ─────
 
 class KoryTontineScreen extends ConsumerWidget {
@@ -435,6 +466,9 @@ Widget _memberPill(L l, KoryMemberInfo m, {bool feeDue = false}) {
         );
 }
 
+/// Les membres invités et leur réponse. Kory Plus payant : à droite, le
+/// montant TTC et « Payé » / « En attente » (KOR-8) ; la progression est
+/// alors dans l'encadré des frais.
 class _AcceptedCard extends StatelessWidget {
   const _AcceptedCard({required this.pot});
 
@@ -444,34 +478,29 @@ class _AcceptedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final invited = pot.members.where((m) => !m.declined).toList();
-    final feeDue = pot.plusFee?.isDue ?? false;
-    final accepted = invited
-        .where((m) => feeDue ? m.feePaid : m.accepted)
-        .length;
+    final fee = pot.plusFee;
+    final feeDue = fee?.isDue ?? false;
+    final accepted = invited.where((m) => m.accepted).length;
     return KoryCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            feeDue
-                ? l.koryXPlusFeePaidOf('$accepted', '${invited.length}')
-                : l.koryXAcceptedOf('$accepted', '${invited.length}'),
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+          if (!feeDue) ...[
+            const SizedBox(height: 8),
+            Text(
+              l.koryXAcceptedOf('$accepted', '${invited.length}'),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
+            const SizedBox(height: 8),
+            KoryProgressBar(
               value: invited.isEmpty ? 0 : accepted / invited.length,
-              minHeight: 8,
-              backgroundColor: AppColors.surfaceElevated,
-              color: AppColors.feedbackSuccess,
             ),
-          ),
-          const SizedBox(height: 6),
+            const SizedBox(height: 6),
+          ],
           for (final m in pot.members)
             KoryPersonRow(
               name: m.name ?? '—',
@@ -481,7 +510,22 @@ class _AcceptedCard extends StatelessWidget {
                   ? l.koryXDeputy
                   : null,
               muted: m.declined,
-              trailing: _memberPill(l, m, feeDue: pot.plusFee?.isDue ?? false),
+              trailing: feeDue && !m.declined
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          formatFcfa(fee!.amountTtc),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        _memberPill(l, m, feeDue: true),
+                      ],
+                    )
+                  : _memberPill(l, m),
             ),
         ],
       ),
@@ -489,7 +533,53 @@ class _AcceptedCard extends StatelessWidget {
   }
 }
 
-/// KOR-8 : vue de l'administrateur, tant que tous n'ont pas accepté.
+/// Cotisation, membres et tours, ordre : le résumé d'une tontine en attente.
+class _TontineSummary extends StatelessWidget {
+  const _TontineSummary({required this.pot, this.withAdmin = false});
+
+  final KoryPot pot;
+  final bool withAdmin;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final count = pot.members.where((m) => !m.declined).length;
+    return KoryCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      child: Column(
+        children: [
+          KoryLine(
+            l.koryMqStake,
+            l.koryXAmountPer(
+              formatFcfa(pot.amountPerMember ?? 0),
+              koryPeriodLabel(l, pot.period),
+            ),
+          ),
+          KoryLine(l.koryXMembersAndRounds, _spanText(context, pot, count)),
+          KoryLine(
+            l.koryRotation,
+            pot.drawMode == 'DRAW'
+                ? (withAdmin ? l.koryXDrawAtStart : l.koryXDrawLogged)
+                : l.koryXFixedOrder,
+          ),
+          if (withAdmin)
+            KoryLine(
+              l.koryXAdministrator,
+              pot.deputyName == null
+                  ? (pot.organizerName ?? '—')
+                  : l.koryXAdminWithDeputy(
+                      pot.organizerName ?? '—',
+                      pot.deputyName!,
+                    ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// KOR-8 : ouvrir la tontine — vue de l'administrateur, tant que tous n'ont
+/// pas payé (ou accepté). C'est l'étape 3 de la création.
 class _PendingAdminView extends ConsumerStatefulWidget {
   const _PendingAdminView({required this.pot});
 
@@ -502,21 +592,49 @@ class _PendingAdminView extends ConsumerStatefulWidget {
 class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
   bool _busy = false;
 
+  Future<void> _pay({required bool forOthers}) async {
+    setState(() => _busy = true);
+    await _payPlusFee(context, ref, widget.pot, forOthers: forOthers);
+    if (mounted) setState(() => _busy = false);
+  }
+
+  Future<void> _remind() async {
+    final l = L.of(context);
+    setState(() => _busy = true);
+    try {
+      final n = await ref.read(koryRepositoryProvider).remind(widget.pot.id);
+      refreshKory(ref, potId: widget.pot.id);
+      if (mounted) koryToast(context, l.koryXReminded(n));
+    } catch (_) {
+      if (mounted) koryToast(context, l.koryXRemindTooSoon);
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final pot = widget.pot;
     final repo = ref.read(koryRepositoryProvider);
-    final waiting = pot.members.where((m) => !m.accepted && !m.declined).length;
+    final me = _me(ref);
+    final fee = pot.plusFee;
+    final feeDue = fee != null && fee.isDue;
+    final invited = pot.members.where((m) => !m.declined).toList();
+    // Kory Plus payant : on attend un paiement ; sinon, une réponse.
+    final waiting = invited
+        .where((m) => feeDue ? !(m.feePaid && m.accepted) : !m.accepted)
+        .length;
+    final unpaid = feeDue ? invited.where((m) => !m.feePaid).toList() : [];
+    final othersUnpaid = unpaid.where((m) => m.userId != me).length;
     final declined = pot.members.where((m) => m.declined).length;
     final accepted = pot.members.where((m) => m.accepted).length;
     final canStart = waiting == 0 && declined > 0 && accepted >= 2;
-    final count = pot.members.where((m) => !m.declined).length;
-    final fee = pot.plusFee;
-    final mustPay = fee != null && fee.isDue && !fee.iPaid;
     return KoryPage(
-      title: pot.title,
-      subtitle: l.koryXPendingSubtitle(pot.groupName ?? l.koryKindTontine),
+      title: l.koryXNewTontine,
+      subtitle: [
+        l.koryXKoryPlus,
+        l.koryXTontineStepOf(pot.groupName ?? pot.title, '3'),
+      ].join(' · '),
       actions: [
         IconButton(
           tooltip: l.koryXDissolve,
@@ -530,18 +648,7 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
       ],
       footer: KoryFooter(
         children: [
-          if (mustPay)
-            KoryButton(
-              icon: Icons.account_balance_wallet_outlined,
-              label: l.koryXPayMyFee(formatFcfa(fee.amountTtc)),
-              busy: _busy,
-              onPressed: () async {
-                setState(() => _busy = true);
-                await _payPlusFee(context, ref, pot);
-                if (mounted) setState(() => _busy = false);
-              },
-            )
-          else if (canStart)
+          if (canStart)
             KoryButton(
               label: l.koryXStartWithout(declined),
               busy: _busy,
@@ -556,29 +663,32 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
                 if (mounted) setState(() => _busy = false);
               },
             )
-          else
+          else if (othersUnpaid > 0)
+            // « Payer pour les 3 restants · 3 540 FCFA TTC »
             KoryButton(
-              quiet: true,
-              icon: Icons.notifications_active_outlined,
-              label: l.koryXRemindMembers(waiting),
+              label: l.koryMqPayForRemaining(
+                unpaid.length,
+                formatFcfa(fee!.amountTtc * unpaid.length),
+              ),
               busy: _busy,
-              onPressed: waiting == 0
-                  ? null
-                  : () async {
-                      setState(() => _busy = true);
-                      try {
-                        final n = await repo.remind(pot.id);
-                        refreshKory(ref, potId: pot.id);
-                        if (context.mounted) {
-                          koryToast(context, l.koryXReminded(n));
-                        }
-                      } catch (_) {
-                        if (context.mounted) {
-                          koryToast(context, l.koryXRemindTooSoon);
-                        }
-                      }
-                      if (mounted) setState(() => _busy = false);
-                    },
+              onPressed: () => _pay(forOthers: true),
+            )
+          else if (feeDue && !fee.iPaid)
+            KoryButton(
+              label: l.koryXPayMyFee(formatFcfa(fee.amountTtc)),
+              busy: _busy,
+              onPressed: () => _pay(forOthers: false),
+            ),
+          // Ses seuls frais, quand d'autres restent à payer.
+          if (!canStart && othersUnpaid > 0 && !fee!.iPaid)
+            TextButton(
+              onPressed: _busy ? null : () => _pay(forOthers: false),
+              child: Text(l.koryXPayMyFee(formatFcfa(fee.amountTtc))),
+            ),
+          if (waiting > 0)
+            TextButton(
+              onPressed: _busy ? null : _remind,
+              child: Text(l.koryXRemindMembers(waiting)),
             ),
         ],
       ),
@@ -590,32 +700,10 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            KoryCard(
-              child: Column(
-                children: [
-                  KoryLine(
-                    l.koryXStakeLabel,
-                    l.koryXAmountPer(
-                      formatFcfa(pot.amountPerMember ?? 0),
-                      koryPeriodLabel(l, pot.period),
-                    ),
-                  ),
-                  KoryLine(
-                    l.koryXMembersAndRounds,
-                    _spanText(context, pot, count),
-                  ),
-                  KoryLine(
-                    l.koryRotation,
-                    pot.drawMode == 'DRAW'
-                        ? l.koryXDrawLogged
-                        : l.koryXFixedOrder,
-                  ),
-                ],
-              ),
-            ),
-            if (fee != null && fee.isDue) ...[
+            _TontineSummary(pot: pot),
+            if (feeDue) ...[
               const SizedBox(height: 10),
-              _PlusFeeCard(fee: fee),
+              _PlusFeeCard(pot: pot, fee: fee),
             ],
             const SizedBox(height: 10),
             _AcceptedCard(pot: pot),
@@ -623,8 +711,8 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
             KoryNotice(
               text: declined > 0
                   ? l.koryXSomeoneDeclined
-                  : (fee?.isDue ?? false)
-                  ? l.koryXStartsWhenAllPaid
+                  : feeDue
+                  ? l.koryMqStartsWhenAllPaid
                   : l.koryXStartsWhenAllAccept,
             ),
           ],
@@ -694,11 +782,10 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
     final member = widget.member;
     final fee = pot.plusFee;
     final feeDue = fee != null && fee.isDue;
-    final answered =
-        member == null ||
-        member.declined ||
-        (feeDue ? member.feePaid : member.accepted);
-    final count = pot.members.where((m) => !m.declined).length;
+    // Ses frais peuvent avoir été réglés par l'administrateur : il reste
+    // alors à accepter soi-même.
+    final mustPay = feeDue && member != null && !member.feePaid;
+    final answered = member == null || member.declined || member.accepted;
     return KoryPage(
       title: l.koryXInvitation,
       subtitle: l.koryXTontineInviteFrom(pot.organizerName ?? '—'),
@@ -707,12 +794,11 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
           : KoryFooter(
               children: [
                 KoryButton(
-                  icon: feeDue ? Icons.account_balance_wallet_outlined : null,
-                  label: feeDue
-                      ? l.koryXPayAndJoin(formatFcfa(fee.amountTtc))
+                  label: mustPay
+                      ? l.koryMqPayTtcByCashPay(formatFcfa(fee.amountTtc))
                       : l.koryXAcceptInvite,
                   busy: _busy,
-                  onPressed: feeDue
+                  onPressed: mustPay
                       ? () async {
                           setState(() => _busy = true);
                           await _payPlusFee(context, ref, pot);
@@ -729,68 +815,46 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          Text(
-            pot.title,
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          Text(
-            [l.koryXKoryPlus, ?pot.groupName].join(' · '),
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 14),
           KoryCard(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                KoryLine(
-                  l.koryXStakeLabel,
-                  l.koryXAmountPer(
-                    formatFcfa(pot.amountPerMember ?? 0),
-                    koryPeriodLabel(l, pot.period),
+                Text(
+                  pot.title,
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                KoryLine(
-                  l.koryXMembersAndRounds,
-                  _spanText(context, pot, count),
-                ),
-                KoryLine(
-                  l.koryRotation,
-                  pot.drawMode == 'DRAW'
-                      ? l.koryXDrawAtStart
-                      : l.koryXFixedOrder,
-                ),
-                KoryLine(
-                  l.koryXAdministrator,
-                  pot.deputyName == null
-                      ? (pot.organizerName ?? '—')
-                      : l.koryXAdminWithDeputy(
-                          pot.organizerName ?? '—',
-                          pot.deputyName!,
-                        ),
+                Text(
+                  [l.koryXKoryPlus, ?pot.groupName].join(' · '),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
-          if (feeDue) ...[const SizedBox(height: 10), _PlusFeeCard(fee: fee)],
           const SizedBox(height: 10),
-          _AcceptedCard(pot: pot),
+          _TontineSummary(pot: pot, withAdmin: true),
+          if (feeDue) ...[
+            const SizedBox(height: 10),
+            _PlusFeeCard(pot: pot, fee: fee, ttcFirst: true),
+          ],
           const SizedBox(height: 12),
-          if (feeDue && member != null && member.feePaid)
+          if (feeDue && member != null && member.feePaid && member.accepted)
             KoryNotice(tone: KoryTone.success, text: l.koryXFeeYouPaid)
-          else if (feeDue && member != null && !member.declined)
-            KoryNotice(text: l.koryXStartsWhenAllPaid)
-          else if (member != null && member.accepted)
-            KoryNotice(tone: KoryTone.success, text: l.koryXYouAccepted)
           else if (member != null && member.declined)
             KoryNotice(tone: KoryTone.danger, text: l.koryXYouDeclined)
+          else if (feeDue)
+            KoryNotice(text: l.koryMqStartsWhenAllPaid)
+          else if (member != null && member.accepted)
+            KoryNotice(tone: KoryTone.success, text: l.koryXYouAccepted)
           else
             KoryNotice(text: l.koryXStartsWhenAllAccept),
-          const SizedBox(height: 10),
-          KoryNotice(text: l.koryTontineNote),
         ],
       ),
     );
@@ -798,6 +862,11 @@ class _InvitationViewState extends ConsumerState<_InvitationView> {
 }
 
 // ── KOR-7 · La tontine en cours ──────────────────────────────────────────
+
+void _openReport(BuildContext context, KoryPot pot) =>
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => KoryTontineReportScreen(potId: pot.id)),
+    );
 
 class _TontineView extends ConsumerWidget {
   const _TontineView({required this.pot});
@@ -887,42 +956,6 @@ class _TontineView extends ConsumerWidget {
             ],
           ),
       ],
-      footer: pot.isOpen
-          ? KoryFooter(
-              children: [
-                Row(
-                  children: [
-                    if (contribute && !declaredThisRound) ...[
-                      Expanded(
-                        child: KoryButton(
-                          label: l.koryHomeContribute,
-                          onPressed: () => openKoryContribute(
-                            context,
-                            ref,
-                            pot,
-                            amount: pot.amountPerMember,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                    Expanded(
-                      child: KoryButton(
-                        quiet: true,
-                        label: l.koryXReport,
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                KoryTontineReportScreen(potId: pot.id),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            )
-          : null,
       body: RefreshIndicator(
         onRefresh: () async {
           refreshKory(ref, potId: pot.id);
@@ -939,6 +972,7 @@ class _TontineView extends ConsumerWidget {
               )
             else if (round != null)
               KoryCard(
+                color: AppColors.terracottaTint.withValues(alpha: 0.35),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -973,16 +1007,22 @@ class _TontineView extends ConsumerWidget {
                       ),
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
+                    if (round.expectedTotal > 0) ...[
+                      const SizedBox(height: 10),
+                      KoryProgressBar(
+                        value: round.confirmedTotal / round.expectedTotal,
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Text(
-                      l.koryXRoundCounts(
+                      l.koryMqRoundCounts(
                         '${round.confirmedCount}',
                         '${round.declaredCount}',
                         '${round.lateCount}',
                       ),
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -990,6 +1030,33 @@ class _TontineView extends ConsumerWidget {
               )
             else
               KoryNotice(tone: KoryTone.success, text: l.koryXTontineDone),
+            // « Contribuer » et « Rapport », sous la carte du tour.
+            if (pot.isOpen) ...[
+              const SizedBox(height: 10),
+              if (contribute && !declaredThisRound)
+                KoryButtonPair(
+                  first: KoryButton(
+                    label: l.koryHomeContribute,
+                    onPressed: () => openKoryContribute(
+                      context,
+                      ref,
+                      pot,
+                      amount: pot.amountPerMember,
+                    ),
+                  ),
+                  second: KoryButton(
+                    outlined: true,
+                    label: l.koryXReport,
+                    onPressed: () => _openReport(context, pot),
+                  ),
+                )
+              else
+                KoryButton(
+                  outlined: true,
+                  label: l.koryXReport,
+                  onPressed: () => _openReport(context, pot),
+                ),
+            ],
             if (pendingForMe.isNotEmpty) ...[
               const SizedBox(height: 10),
               KoryActionRow(
@@ -1021,6 +1088,12 @@ class _TontineView extends ConsumerWidget {
                     for (final c in round.contributors)
                       KoryPersonRow(
                         name: c.userId == me ? l.koryYou : (c.name ?? '—'),
+                        // « relance ce matin » sous ceux qui sont en retard.
+                        subtitle: c.status == 'LATE' && pot.remindedAt != null
+                            ? l.koryMqReminded(
+                                koryWhen(context, pot.remindedAt!),
+                              )
+                            : null,
                         trailing: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -1083,39 +1156,40 @@ class _TontineView extends ConsumerWidget {
             ),
             if (myRound != null) ...[
               const SizedBox(height: 12),
-              KoryCard(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                child: Column(
-                  children: [
-                    KoryLine(
-                      l.koryXMyLevee,
-                      myRound.dueAt == null
-                          ? l.koryRoundNumber('${myRound.number}')
-                          : koryMonth(context, myRound.dueAt!).toLowerCase(),
+              KoryRowsCard(
+                children: [
+                  // Ma levée : son tour en cours mène à la confirmation
+                  // (KOR-27), sinon au calendrier des tours (KOR-26).
+                  KoryChevronRow(
+                    label: l.koryXMyLevee,
+                    trailing: myRound.dueAt == null
+                        ? l.koryRoundNumber('${myRound.number}')
+                        : koryMonth(context, myRound.dueAt!).toLowerCase(),
+                    strongTrailing: true,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => myRound.isCurrent
+                            ? KoryReviewScreen(potId: pot.id)
+                            : KoryTontineDrawScreen(potId: pot.id),
+                      ),
                     ),
-                    if (pot.isOpen &&
-                        myRound.status == 'UPCOMING' &&
-                        !swaps.any(
-                          (s) => s.requesterId == me || s.targetId == me,
-                        ))
-                      KoryPersonRow(
-                        name: l.koryXSwapMyMonth,
-                        subtitle: l.koryXWithAnotherMember,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => KoryTontineSwapScreen(pot: pot),
-                          ),
-                        ),
-                        trailing: Icon(
-                          Icons.chevron_right,
-                          color: AppColors.textMuted,
+                  ),
+                  if (pot.isOpen &&
+                      myRound.status == 'UPCOMING' &&
+                      !swaps.any(
+                        (s) => s.requesterId == me || s.targetId == me,
+                      ))
+                    KoryChevronRow(
+                      label: l.koryXSwapMyMonth,
+                      trailing: l.koryXWithAnotherMember,
+                      strongTrailing: true,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => KoryTontineSwapScreen(pot: pot),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ],
             KoryJournalPreview(pot: pot),

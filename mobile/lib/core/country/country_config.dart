@@ -15,7 +15,12 @@ class CountryConfig {
     this.vatRate = 0,
     this.deliveryPrice,
     this.emergencyNumbers = const {},
+    this.koryPlusFeeHt,
   });
+
+  /// Kory Plus : les frais d'ouverture d'une tontine, HT, par membre
+  /// (`null` si le serveur ne les a pas donnés).
+  final int? koryPlusFeeHt;
 
   final String? country;
   final Set<String> modules;
@@ -36,6 +41,7 @@ class CountryConfig {
     currency: json['currency'] as String? ?? 'XOF',
     vatRate: (json['vat_rate'] as num?)?.toDouble() ?? 0,
     deliveryPrice: json['delivery_price'] as int?,
+    koryPlusFeeHt: json['kory_plus_fee_ht'] as int?,
     emergencyNumbers: {
       for (final e in ((json['emergency_numbers'] as Map?) ?? const {}).entries)
         e.key as String: e.value as String,

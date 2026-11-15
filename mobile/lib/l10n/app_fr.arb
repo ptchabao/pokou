@@ -4849,5 +4849,106 @@
         "type": "String"
       }
     }
+  },
+  "koryMqLeveeDay": "Jour de la levée",
+  "koryMqDueDay": "Jour de l’échéance",
+  "koryMqDue": "Échéance",
+  "koryMqEveryWeekday": "chaque {weekday}",
+  "@koryMqEveryWeekday": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqDayOfMonth": "le {day} du mois",
+  "@koryMqDayOfMonth": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqBeneficiary": "Bénéficiaire",
+  "koryMqGoalOptional": "Objectif (facultatif)",
+  "koryMqAmountPerMember": "Montant par membre",
+  "koryMqMembers": "Membres",
+  "koryMqRounds": "Tours",
+  "koryMqPlusFeeNotice": "Kory Plus · {ht} HT ({ttc} TTC) par membre, une fois, à l’ouverture. Les cotisations vont directement au bénéficiaire de chaque tour.",
+  "@koryMqPlusFeeNotice": {
+    "placeholders": {
+      "ht": {
+        "type": "String"
+      },
+      "ttc": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqFreeNoticeDue": "Sans frais. Pokou ne touche pas l’argent : à chaque échéance, chacun verse depuis son wallet au collecteur.",
+  "koryMqRoundCounts": "{confirmed} confirmées · {declared} déclarées · {late} en retard",
+  "@koryMqRoundCounts": {
+    "placeholders": {
+      "confirmed": {
+        "type": "String"
+      },
+      "declared": {
+        "type": "String"
+      },
+      "late": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqStake": "Cotisation",
+  "koryMqTtc": "{amount} TTC",
+  "@koryMqTtc": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqFeeHtOnce": "{amount} HT, une fois, par CashPay",
+  "@koryMqFeeHtOnce": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqPayForRemaining": "{count, plural, =1{Payer pour le dernier · {amount} TTC} other{Payer pour les {count} restants · {amount} TTC}}",
+  "@koryMqPayForRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqPayTtcByCashPay": "Payer {amount} TTC par CashPay",
+  "@koryMqPayTtcByCashPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqStartsWhenAllPaid": "La tontine démarre quand tous ont payé leurs frais et accepté. Frais non remboursables une fois la tontine ouverte.",
+  "koryMqAdd": "Ajouter",
+  "koryMqAddMember": "Ajouter un membre",
+  "koryMqEveryoneIn": "Tous les membres de la discussion sont déjà dans la tontine.",
+  "koryMqOnPokou": "Sur Pokou",
+  "koryMqRemoveDeputy": "Retirer le rôle de suppléant",
+  "koryMqRemoveMember": "Retirer de la tontine",
+  "koryMqAndOthers": "{count, plural, =1{et 1 autre} other{et {count} autres}}",
+  "@koryMqAndOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }
