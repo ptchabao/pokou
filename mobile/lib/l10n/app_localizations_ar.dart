@@ -9136,7 +9136,7 @@ class LAr extends L {
       locale: localeName,
       other: '$count personnes',
       one: '1 personne',
-      zero: 'Personne',
+      zero: 'Aucune personne',
     );
     return '$_temp0';
   }
@@ -9302,6 +9302,9 @@ class LAr extends L {
 
   @override
   String get archivedScreenEmpty => 'Aucune discussion archivée.';
+
+  @override
+  String get newChatNotOnPokou => 'Pas encore sur Pokou';
 
   @override
   String reportGroupNamed(String name) {

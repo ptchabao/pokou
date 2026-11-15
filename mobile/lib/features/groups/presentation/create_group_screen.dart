@@ -228,8 +228,11 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 2),
+                                  // L'état, jamais le numéro.
                                   Text(
-                                    contact.phone,
+                                    contact.about?.trim().isNotEmpty == true
+                                        ? contact.about!
+                                        : L.of(context).contactAvailable,
                                     style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 12,

@@ -244,13 +244,15 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
                   final contact = reachable[index];
                   return _ContactRow(
                     name: contact.displayName,
-                    subtitle: contact.phone,
+                    // L'état, jamais le numéro (Discussions · 5).
+                    subtitle: contact.about?.trim().isNotEmpty == true
+                        ? contact.about!
+                        : L.of(context).contactAvailable,
                     avatar: contact.avatar,
                     onTap: () => _openConversation(
                       userId: contact.contactUserId!,
                       name: contact.displayName,
-                      // Le numéro est déjà là, affiché juste en dessous.
-                      // L'omettre faisait échouer le premier message quand
+                      // Le numéro part sans être affiché. L'omettre faisait échouer le premier message quand
                       // la fiche existe sur le TÉLÉPHONE sans avoir de
                       // contrepartie côté serveur — ce qui est le cas tant
                       // que la synchronisation du carnet n'a pas eu lieu.
@@ -455,7 +457,7 @@ class _InvitableRow extends StatelessWidget {
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
-        entry.phone,
+        L.of(context).newChatNotOnPokou,
         style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
       ),
       trailing: Text(

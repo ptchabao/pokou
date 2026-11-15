@@ -9151,7 +9151,7 @@ class LEn extends L {
       locale: localeName,
       other: '$count people',
       one: '1 person',
-      zero: 'Nobody',
+      zero: 'No one blocked',
     );
     return '$_temp0';
   }
@@ -9317,6 +9317,9 @@ class LEn extends L {
 
   @override
   String get archivedScreenEmpty => 'No archived chats.';
+
+  @override
+  String get newChatNotOnPokou => 'Not on Pokou yet';
 
   @override
   String reportGroupNamed(String name) {

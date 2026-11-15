@@ -2545,7 +2545,7 @@
   "reportSentBlocked": "Report sent, number blocked.",
   "reportFailed": "Report not sent — check your connection.",
   "blockedTitle": "Blocked contacts",
-  "blockedCount": "{count, plural, =0{Nobody} =1{1 person} other{{count} people}}",
+  "blockedCount": "{count, plural, =0{No one blocked} =1{1 person} other{{count} people}}",
   "blockedEmpty": "You haven't blocked anyone.",
   "blockedInfo": "A blocked person can't call or message you. They no longer see your photo, your “last seen” or your statuses. They aren't told.",
   "blockedGroupsNote": "Blocking also applies in shared groups: you no longer get their group calls.",
@@ -2588,6 +2588,7 @@
   "archivedScreenUnarchive": "Unarchive",
   "archivedScreenAddFavorite": "Add to favourites",
   "archivedScreenEmpty": "No archived chats.",
+  "newChatNotOnPokou": "Not on Pokou yet",
   "reportGroupNamed": "Report {name}",
   "groupLeaveLot1Note": "Leaving the group keeps your messages with the other members. Admins are notified."
 }

@@ -15383,7 +15383,7 @@ abstract class L {
   /// No description provided for @blockedCount.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Personne} =1{1 personne} other{{count} personnes}}'**
+  /// **'{count, plural, =0{Aucune personne} =1{1 personne} other{{count} personnes}}'**
   String blockedCount(int count);
 
   /// No description provided for @blockedEmpty.
@@ -15637,6 +15637,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Aucune discussion archivée.'**
   String get archivedScreenEmpty;
+
+  /// No description provided for @newChatNotOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore sur Pokou'**
+  String get newChatNotOnPokou;
 
   /// No description provided for @reportGroupNamed.
   ///
