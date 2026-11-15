@@ -2508,9 +2508,9 @@
   "honamCourierSuspended": "Compte coursier suspendu après 3 défauts de livraison. Contacte le support pour un recours.",
   "honamPriceNote": "Prix hors taxes, TVA du pays en sus.",
   "certTitle": "Pokou certifié",
-  "certPitch": "Nom vérifié et mode preuve · essai d’un mois",
+  "certPitch": "Ton nom vérifié, et la trace de ce qu'on t'écrit.",
   "certHowItWorks": "Ton identité est vérifiée par le nom du titulaire du wallet qui paie.",
-  "certStartTrial": "Essayer {days} jours",
+  "certStartTrial": "{days, select, 30{Commencer l'essai d'un mois} other{Commencer l'essai de {days} jours}}",
   "@certStartTrial": {
     "placeholders": {
       "days": {
@@ -2518,7 +2518,7 @@
       }
     }
   },
-  "certTrialNote": "Pendant l'essai, le mode preuve est disponible ; le badge s'affiche au premier paiement.",
+  "certTrialNote": "Pendant l'essai, le mode preuve est disponible. Le badge s'affiche au premier paiement, qui vérifie ton nom.",
   "certPlanPrice": "{ht} HT · {ttc} TTC",
   "@certPlanPrice": {
     "placeholders": {
@@ -2552,7 +2552,7 @@
   "certMismatchTitle": "Les noms ne correspondent pas",
   "certMismatchBody": "Le nom saisi ne correspond pas à celui du titulaire du wallet qui a payé. Corrige-le tel qu'il figure sur sa pièce d'identité.",
   "proofModeTitle": "Mode preuve",
-  "proofModeOnBanner": "Mode preuve actif : un message supprimé reste visible, barré, pour tous.",
+  "proofModeOnBanner": "Mode preuve actif. Les messages supprimés restent visibles, barrés, pour tous.",
   "proofModeEnable": "Activer le mode preuve",
   "proofModeDisable": "Désactiver le mode preuve",
   "proofModeNeedsCert": "Le mode preuve demande Pokou certifié (essai gratuit disponible).",
@@ -2727,6 +2727,389 @@
     }
   },
   "proProfileNote": "C'est ainsi que les autres voient ton profil Pro.",
+  "actionDone": "Terminé",
+  "badgeProLabel": "Pokou certifié Pro",
+  "certAdvantageNameTitle": "Un nom vérifié",
+  "certAdvantageNameBody": "Ton badge montre que tu es bien toi, grâce au wallet mobile money qui paie.",
+  "certAdvantageProofTitle": "Le mode preuve",
+  "certAdvantageProofBody": "Dans une conversation, les messages supprimés restent visibles, barrés, pour tous.",
+  "certAdvantageExportTitle": "L'export daté",
+  "certAdvantageExportBody": "Garde une conversation en PDF, avec les dates et les heures.",
+  "certFormulaLabel": "Formule",
+  "certMonthlyLabel": "Au mois",
+  "certYearlyLabel": "À l'année",
+  "certMonthsOffered": "{months, plural, =1{Un mois offert} =2{Deux mois offerts} other{{months} mois offerts}}",
+  "@certMonthsOffered": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "certTtcPerMonth": "{amount} TTC par mois",
+  "@certTtcPerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "certTtcPerYear": "{amount} TTC par an",
+  "@certTtcPerYear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "certSeeProOffer": "Professionnel ? Voir Pokou certifié Pro",
+  "certPayNowShowBadge": "Payer maintenant et afficher mon badge",
+  "certPayTitle": "Vérifier et payer",
+  "certNameFieldLabel": "Nom et prénom, comme sur ta pièce d'identité",
+  "certNameFieldHelp": "Pokou le compare au nom du titulaire du wallet, déjà vérifié par ton opérateur. Ce nom s'affichera avec ton badge.",
+  "certPayWith": "Payer avec",
+  "certOwnWallet": "Le wallet de ce numéro",
+  "certOtherWallet": "Un autre wallet",
+  "certOtherWalletHint": "Numéro du wallet",
+  "certVatLabel": "TVA {rate} %",
+  "@certVatLabel": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "certTotalLabel": "Total",
+  "certPaymentNote": "Paiement par CashPay. Facture disponible dans ton compte.",
+  "certVerifyAndPay": "Vérifier et payer {amount}",
+  "@certVerifyAndPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "certMismatchAlertBody": "Le nom du titulaire de ce wallet ne correspond pas à ton nom. Corrige ton nom ou paie depuis ton propre wallet.",
+  "certNameNeverShown": "Le nom du titulaire n'est jamais affiché. Ton essai et le mode preuve continuent en attendant.",
+  "certBadgeActiveTitle": "Ton badge est actif",
+  "certBadgeActiveBody": "Tes contacts voient désormais ton nom vérifié.",
+  "certNameVerifiedBy": "Nom vérifié par {operator}",
+  "@certNameVerifiedBy": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "certNextPaymentLabel": "Prochain paiement",
+  "certDownloadInvoice": "Télécharger la facture",
+  "proofModeActivatesAnywhere": "Le mode preuve s'active dans toutes tes discussions, à deux ou en groupe.",
+  "certTrialEndingTitle": "Ton essai se termine dans {days} jours, le {date}.",
+  "@certTrialEndingTitle": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certIfYouPay": "Si tu paies",
+  "certIfYouPayBadge": "Ton badge s'affiche, ton nom est vérifié par ton wallet",
+  "certIfYouPayProof": "Le mode preuve et l'export daté continuent",
+  "certWithoutPayment": "Sans paiement",
+  "certWithoutPaymentActivate": "Tu ne peux plus activer le mode preuve dans une nouvelle discussion",
+  "certWithoutPaymentTraces": "Ce qui a déjà été enregistré reste visible de tous",
+  "certPayAndShowBadge": "Payer et afficher mon badge",
+  "certLater": "Plus tard",
+  "certPausedScreenTitle": "Badge en pause",
+  "proofLearnMore": "En savoir plus",
+  "proofLearnMoreBody": "Le mode preuve n'est jamais caché : un message système l'annonce et un bandeau reste en haut de la discussion. Un message supprimé par son auteur reste visible, barré, pour tous, avec l'heure de la suppression ; un message modifié garde sa version d'origine. La trace reste chez les autres participants même si quelqu'un supprime la discussion, quitte le groupe ou change de téléphone. Tu peux exporter la discussion en PDF daté.",
+  "proofDirectHeaderSubtitle": "Discussion à deux · mode preuve actif",
+  "proofGroupHeaderSubtitle": "{count} membres · mode preuve actif",
+  "@proofGroupHeaderSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "proofActivateTitle": "Activer le mode preuve ?",
+  "proofActivateGroupBody": "Dans « {name} », un message supprimé par son auteur restera visible, barré, pour les {count} membres, avec l'heure de la suppression.",
+  "@proofActivateGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "proofActivateGroupBodyAll": "Dans « {name} », un message supprimé par son auteur restera visible, barré, pour tous les membres, avec l'heure de la suppression.",
+  "@proofActivateGroupBodyAll": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofActivateDirectBody": "Dans ta discussion avec {name}, un message supprimé par son auteur restera visible, barré, pour vous deux, avec l'heure de la suppression.",
+  "@proofActivateDirectBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofActivateBulletGroupNotice": "Tous les membres sont prévenus : un message dans le groupe et un bandeau permanent.",
+  "proofActivateBulletDirectNotice": "{name} est prévenu : un message dans la discussion et un bandeau permanent.",
+  "@proofActivateBulletDirectNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofActivateBulletFromNow": "Seuls les messages envoyés à partir de maintenant sont concernés.",
+  "proofActivateBulletCanDisable": "Tu pourras le désactiver ; les messages envoyés pendant le mode gardent la règle.",
+  "proofDeactivateTitle": "Désactiver le mode preuve ?",
+  "proofDeactivateBulletNotice": "Les participants sont prévenus par un message dans la discussion.",
+  "proofDeactivateBulletKeepsRule": "Les messages envoyés pendant le mode gardent la règle : leur version d'origine reste visible.",
+  "proofDeactivateBulletReenable": "Tu pourras le réactiver quand tu veux.",
+  "proofKeepMode": "Garder le mode preuve",
+  "proofReservedTitle": "Désactiver le mode preuve",
+  "proofReservedBody": "Dans un groupe, il se désactive par la personne qui l'a activé ou par un administrateur qui a un badge payant, Pokou certifié ou Pro. L'essai ne suffit pas.",
+  "proofReservedYourBadge": "Ton badge",
+  "proofReservedLevelRequired": "Niveau requis",
+  "proofReservedPaidBadge": "Badge payant",
+  "proofReservedTrial": "Essai",
+  "proofReservedNote": "Le paiement vérifie ton nom et affiche ton badge ; tu peux alors désactiver le mode preuve. Les commerçants et associations peuvent choisir Pokou certifié Pro.",
+  "proofDeleteTitle": "Supprimer ce message ?",
+  "proofDeleteWarningTitle": "Le mode preuve est actif.",
+  "proofDeleteForMeOnly": "Supprimer pour moi seulement",
+  "proofBannerBy": "Mode preuve activé par {name}.",
+  "@proofBannerBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofBannerRule": "Les messages supprimés restent visibles, barrés, pour tous.",
+  "proofChooseDiscussion": "Choisis une discussion",
+  "proofChooseDiscussionNote": "Avec ton badge, le mode preuve s'active dans n'importe quelle discussion : à deux ou en groupe, que tu en sois administrateur ou non. Les participants sont toujours prévenus.",
+  "proofSearchDiscussion": "Rechercher une discussion",
+  "proofDirectSubtitle": "Discussion à deux",
+  "proofGroupSubtitle": "Groupe",
+  "proofActivatedFor": "Mode preuve activé dans « {name} »",
+  "@proofActivatedFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proofExportOptionsTitle": "Exporter la discussion",
+  "proofExportPeriodLabel": "Période",
+  "proofExportSinceActivation": "Depuis l'activation du mode preuve",
+  "proofExportAllDiscussion": "Toute la discussion",
+  "proofExportCustomDates": "Choisir des dates",
+  "proofIncludeMedia": "Inclure les photos et les documents",
+  "proofIncludeMediaNote": "Le PDF sera plus lourd",
+  "proofExportContains": "Le PDF contient",
+  "proofExportContainsDates": "Date et heure de chaque message",
+  "proofExportContainsDeleted": "Messages supprimés ou modifiés, avec leur version d'origine",
+  "proofExportContainsHash": "Empreinte d'intégrité du fichier (SHA-256)",
+  "proofExportLegalNote": "Le PDF est créé sur ton téléphone ; Pokou n'en garde aucune copie. Sa valeur juridique est appréciée par le juge.",
+  "proofCreatePdf": "Créer le PDF",
+  "proofReadyTitle": "PDF prêt",
+  "proofReadySubtitle": "{name} · {size} Ko",
+  "@proofReadySubtitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "proofReadyPreviewNote": "Le PDF reprend chaque message avec sa date et son heure, les messages supprimés barrés et les versions d'origine.",
+  "proofIntegrityHash": "Empreinte d'intégrité (SHA-256)",
+  "proofIntegrityNote": "Garde le fichier tel quel : la moindre modification change l'empreinte.",
+  "proOfferTitle": "Pour les commerçants et les organisations",
+  "proOfferAudience": "Commerçants, vendeurs, entreprises, associations",
+  "proOfferPointName": "Ton nom commercial vérifié, avec le badge Pro",
+  "proOfferPointProfile": "Un profil Pro : adresse, horaires, activité",
+  "proOfferPointBadge": "Le badge Pro sur tes statuts, puis sur tes annonces Assimé",
+  "proOfferPointBadgeLot1": "Le badge Pro sur ton profil et sur tes statuts",
+  "proOfferPointProof": "Le mode preuve et l'export daté, comme Pokou certifié",
+  "proPerMonth": "par mois",
+  "proPriceTtcCancel": "{amount} TTC · résiliable à tout moment",
+  "@proPriceTtcCancel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "proHowItWorks": "Comment ça marche",
+  "proStepSendTitle": "Envoie ton justificatif",
+  "proStepSendBody": "RCCM, NIF ou récépissé d'association",
+  "proStepCheckTitle": "Pokou vérifie sous {hours} h",
+  "@proStepCheckTitle": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "proStepCheckBody": "Tu es prévenu dès la décision",
+  "proStepPayTitle": "Tu paies et ton badge s'affiche",
+  "proStepPayBody": "Aucun paiement avant la validation",
+  "proStart": "Commencer",
+  "proStepOf": "Pokou certifié Pro · étape {step} sur 3",
+  "@proStepOf": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "proActivityLabel": "Activité",
+  "proAddressLabel": "Adresse ou repère",
+  "proDocumentLabel": "Justificatif",
+  "proDocRccm": "RCCM",
+  "proDocNif": "NIF",
+  "proDocRecepisse": "Récépissé",
+  "proDocumentSize": "Photo · {size} Mo",
+  "@proDocumentSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "proChange": "Changer",
+  "proDocumentNameNote": "Le nom commercial doit figurer sur le justificatif. Ton nom vérifié reste visible sous le nom commercial : « Géré par… ».",
+  "proPendingTitle": "Vérification en cours",
+  "proPendingBody": "Le support de Pokou vérifie ton justificatif sous {hours} h. Tu reçois une notification dès la décision.",
+  "@proPendingBody": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "proStepSent": "Justificatif envoyé",
+  "proStepSupport": "Vérification par le support",
+  "proAtTheLatest": "Au plus tard le {date}",
+  "@proAtTheLatest": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proStepPayBadge": "Paiement et badge Pro",
+  "proAfterValidation": "Après la validation",
+  "proPendingKeep": "En attendant, tu gardes ton badge Pokou certifié, tes discussions et le mode preuve.",
+  "proNameMismatchTitle": "Le nom ne correspond pas",
+  "proWhatToDo": "Que veux-tu faire ?",
+  "proUseDocumentName": "Utiliser « {name} »",
+  "@proUseDocumentName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proNameOnDocument": "{type, select, NIF{Le nom inscrit sur ton NIF} RECEPISSE{Le nom inscrit sur ton récépissé} other{Le nom inscrit sur ton RCCM}}",
+  "@proNameOnDocument": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "proSendOtherDocument": "Envoyer un autre justificatif",
+  "proNoPaymentTaken": "Aucun paiement n'a été pris. Tu peux renvoyer autant de fois que nécessaire.",
+  "proCorrectAndResend": "Corriger et renvoyer",
+  "proContactSupport": "Contacter le support",
+  "proSupportHint": "Réponds à la notification de la décision : elle arrive au support.",
+  "proGoodNews": "Bonne nouvelle : {name} est vérifiée.",
+  "@proGoodNews": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proDocumentVerifiedBySupport": "{type, select, NIF{NIF vérifié par le support} RECEPISSE{Récépissé vérifié par le support} other{RCCM vérifié par le support}}",
+  "@proDocumentVerifiedBySupport": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "proNameShownAfterPayment": "Ton nom commercial s'affiche dès le paiement",
+  "proReplacesCertified": "Ton badge Pokou certifié s'arrête : le badge Pro le remplace, sans double paiement.",
+  "proPayTtc": "Payer {amount} TTC",
+  "@proPayTtc": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "proProfileTitle": "Profil",
+  "proManagedByVerified": "Géré par {name} · nom vérifié",
+  "@proManagedByVerified": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proDeclaredAddress": "Adresse déclarée",
+  "proHoursLine": "{days}, {open} à {close}",
+  "@proHoursLine": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "open": {
+        "type": "String"
+      },
+      "close": {
+        "type": "String"
+      }
+    }
+  },
+  "proOpenNow": "Ouvert",
+  "proClosedNow": "Fermé",
+  "proSinceDate": "Pokou certifié Pro depuis {date}",
+  "@proSinceDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "contactReport": "Signaler {name}",
+  "@contactReport": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "contactReportReasonHint": "Ce qui ne va pas",
+  "contactReportSend": "Signaler",
+  "contactReportSent": "Signalement envoyé à l'équipe Pokou.",
   "honamCity": "Ville",
   "honamOtherCity": "Une autre ville",
   "honamYourCity": "Ta ville",

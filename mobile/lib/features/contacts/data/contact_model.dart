@@ -11,6 +11,7 @@ class PokouContact {
     required this.isRegistered,
     this.priorityTag,
     this.isVerified = false,
+    this.badge,
   });
 
   final int id;
@@ -27,6 +28,11 @@ class PokouContact {
   /// « puis-je lui acheter quelque chose ? » et se paie (voir
   /// api/app/utils/identity.py).
   final bool isVerified;
+
+  /// La FORME du badge : "PRO" (hexagone) ou "CERTIFIED" (rosette).
+  final String? badge;
+
+  bool get isProBadge => badge == 'PRO';
   final String?
   priorityTag; // BUSINESS | FOURNISSEUR | CLIENT | BOSS | AMI (Mode Bouclier)
 
@@ -44,6 +50,7 @@ class PokouContact {
       isRegistered: json['is_registered'] as bool? ?? false,
       priorityTag: json['priority_tag'] as String?,
       isVerified: json['is_verified'] as bool? ?? false,
+      badge: json['badge'] as String?,
     );
   }
 }

@@ -23,6 +23,7 @@ import '../../messaging/presentation/message_links.dart';
 import '../../marketplace/presentation/product_detail_screen.dart';
 import '../data/contact_profile_model.dart';
 import 'profile_screen.dart';
+import 'pro_profile_view.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
@@ -275,6 +276,31 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
     final profile = _profile;
     final displayName = profile?.displayName ?? widget.contactName;
 
+    // Pokou certifié Pro (maquette Pro 5) : un profil entièrement différent,
+    // centré sur le nom commercial — pas une variante du profil personnel.
+    if (profile != null && profile.isProBadge) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Consumer(
+          builder: (context, ref, _) {
+            final badge = ref
+                .watch(_proBadgeProvider(widget.contactUserId))
+                .valueOrNull;
+            if (badge == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return ProProfileView(
+              userId: widget.contactUserId,
+              badge: badge,
+              profile: profile,
+              onMessage: () => Navigator.of(context).pop(),
+              onCall: ({required video}) => _call(startWithVideo: video),
+            );
+          },
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -312,7 +338,7 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                         ),
                         if (profile?.isVerified == true) ...[
                           const SizedBox(width: 6),
-                          const VerifiedBadge(size: 20),
+                          VerifiedBadge(size: 20, pro: profile?.isProBadge ?? false),
                         ],
                       ],
                     ),

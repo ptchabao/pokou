@@ -61,6 +61,9 @@ import '../../stickers/presentation/sticker_suggestion_bar.dart';
 import '../../stickers/presentation/trailing_emoji.dart';
 import '../../messaging/presentation/call_event_row.dart';
 import '../../messaging/presentation/pending_media_bubble.dart';
+import '../../home/presentation/certified_pay_screen.dart';
+import '../../messaging/presentation/proof_export_screens.dart';
+import '../../messaging/presentation/proof_sheets.dart';
 import '../../messaging/presentation/proof_widgets.dart';
 import '../data/group_model.dart';
 import '../../contacts/presentation/discussions_controller.dart';
@@ -450,8 +453,9 @@ class _GroupConversationScreenState
     }
   }
 
-  /// Supprimer pour tous. En mode preuve, l'auteur est prévenu AVANT que
-  /// le message restera visible, barré : sinon il croirait l'avoir effacé.
+  /// Supprimer pour tous, ou pour soi seulement en mode preuve (maquette 6) :
+  /// l'auteur est prévenu AVANT que le message restera visible, barré, chez
+  /// les autres.
   Future<void> _deleteForEveryone(GroupMessage message) async {
     final proof =
         ref
@@ -459,27 +463,41 @@ class _GroupConversationScreenState
             .group
             ?.proofMode ??
         false;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_l.deleteForAll),
-        content: proof ? Text(_l.deleteProofWarning) : null,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(_l.actionCancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.feedbackDanger,
+    if (proof) {
+      final choice = await showProofDeleteSheet(
+        context,
+        preview: message.content ?? _l.proofExportAttachment,
+        proofActive: true,
+      );
+      if (choice == null || !mounted) return;
+      if (choice == ProofDeleteChoice.forMeOnly) {
+        ref
+            .read(groupChatControllerProvider(widget.groupId).notifier)
+            .hideLocally(message.id);
+        return;
+      }
+    } else {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(_l.deleteForAll),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(_l.actionCancel),
             ),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(_l.actionDelete),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !mounted) return;
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.feedbackDanger,
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(_l.actionDelete),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
     try {
       await ref
           .read(groupChatControllerProvider(widget.groupId).notifier)
@@ -494,6 +512,17 @@ class _GroupConversationScreenState
   }
 
   Future<void> _toggleProofMode(Group group) async {
+    // Maquettes 4 et 10 : la feuille de confirmation vient AVANT l'appel
+    // réseau.
+    final confirmed = group.proofMode
+        ? await showProofDeactivateSheet(context)
+        : await showProofActivationSheet(
+            context,
+            isGroup: true,
+            scopeName: group.name,
+            memberCount: group.memberCount,
+          );
+    if (!confirmed || !mounted) return;
     try {
       await ref
           .read(groupChatControllerProvider(widget.groupId).notifier)
@@ -501,9 +530,7 @@ class _GroupConversationScreenState
     } on ApiException catch (error) {
       if (!mounted) return;
       if (error.statusCode == 403 && group.proofMode) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_l.proofDisableReserved)));
+        await _showDisableReserved();
       } else if (error.statusCode == 403) {
         final open = await showDialog<bool>(
           context: context,
@@ -535,24 +562,69 @@ class _GroupConversationScreenState
     }
   }
 
-  /// L'export daté, partagé comme n'importe quel fichier : la personne
-  /// choisit où il part (avocat, chef de quartier, sauvegarde).
-  Future<void> _exportProof() async {
-    final messenger = ScaffoldMessenger.of(context);
+  /// « 7. Désactivation réservée » : l'essai ne donne pas ce droit à un
+  /// administrateur, qui doit payer le badge pour couper le mode preuve.
+  Future<void> _showDisableReserved() async {
+    final api = ref.read(apiClientProvider);
+    Map<String, dynamic> status;
+    List<Map<String, dynamic>> plans;
     try {
-      final bytes = await ref
-          .read(apiClientProvider)
-          .getBytes('/groups/${widget.groupId}/proof-export');
-      final dir = await getTemporaryDirectory();
-      final stamp = DateFormat('yyyyMMdd-HHmm').format(DateTime.now());
-      final file = File(
-        '${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf',
-      );
-      await file.writeAsBytes(bytes, flush: true);
-      await Share.shareXFiles([XFile(file.path, mimeType: 'application/pdf')]);
+      final results = await Future.wait([api.get('/certified/me'), api.get('/certified/offer')]);
+      status = results[0] as Map<String, dynamic>;
+      plans = (((results[1] as Map<String, dynamic>)['plans'] as List?) ?? const [])
+          .cast<Map<String, dynamic>>();
     } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(_l.honamFailed)));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
+      }
+      return;
     }
+    if (!mounted) return;
+    final plan = plans
+        .where((p) => !(p['code'] as String).startsWith('PRO'))
+        .where((p) => p['code'] == status['plan'])
+        .firstOrNull;
+    final choice = await showProofDisableReservedSheet(
+      context,
+      trialOrBadgeLabel: status['status'] == 'TRIAL' ? _l.proofReservedTrial : _l.proofReservedPaidBadge,
+      plan: plan ?? plans.where((p) => !(p['code'] as String).startsWith('PRO')).firstOrNull,
+    );
+    if (choice == ProofDisableReservedAction.pay && mounted && plan != null) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => CertifiedPayScreen(plan: plan)),
+      );
+    }
+  }
+
+  /// « 8. Exporter la discussion » (maquette 28/68) : la période et les
+  /// médias choisis sur l'écran d'options, avant le PDF du SERVEUR — un
+  /// groupe est chiffré, ce téléphone n'a pas le texte des autres membres.
+  Future<void> _openExportOptions(Group group) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProofExportOptionsScreen(
+          scopeName: group.name,
+          since: group.proofModeSince ?? DateTime.now(),
+          onCreate: (options) async {
+            final params = <String, String>{
+              if (options.period == ProofExportPeriod.all) 'since': '1970-01-01T00:00:00',
+              if (options.period == ProofExportPeriod.custom && options.customFrom != null)
+                'since': options.customFrom!.toUtc().toIso8601String(),
+              if (options.period == ProofExportPeriod.custom && options.customTo != null)
+                'until': options.customTo!.toUtc().toIso8601String(),
+              'include_media': '${options.includeMedia}',
+            };
+            final bytes = await ref.read(apiClientProvider).getBytes(
+                  '/groups/${widget.groupId}/proof-export?${Uri(queryParameters: params).query}',
+                );
+            final dir = await getTemporaryDirectory();
+            final stamp = DateFormat('yyyyMMdd-HHmm').format(DateTime.now());
+            final file = File('${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf');
+            return file.writeAsBytes(bytes, flush: true);
+          },
+        ),
+      ),
+    );
   }
 
   /// Garder un sticker reçu dans un groupe.
@@ -1353,7 +1425,7 @@ class _GroupConversationScreenState
     if (action == 'proof') {
       await _toggleProofMode(group);
     } else if (action == 'proof:export') {
-      await _exportProof();
+      await _openExportOptions(group);
     } else if (action == 'add') {
       await _addMembers(group);
     } else if (action == 'leave') {
@@ -1901,15 +1973,24 @@ class _GroupConversationScreenState
                                     ),
                                     if (group != null)
                                       Text(
-                                        group.members
-                                            .map(
-                                              (member) =>
-                                                  member.userId ==
-                                                      widget.myUserId
-                                                  ? _l.navYou
-                                                  : member.displayName,
-                                            )
-                                            .join(', '),
+                                        group.proofMode
+                                            // « N membres · mode preuve
+                                            // actif » (maquette 5) : dit
+                                            // tout de suite que le groupe est
+                                            // en mode preuve, là où l'œil
+                                            // regarde déjà.
+                                            ? _l.proofGroupHeaderSubtitle(
+                                                '${group.memberCount}',
+                                              )
+                                            : group.members
+                                                  .map(
+                                                    (member) =>
+                                                        member.userId ==
+                                                            widget.myUserId
+                                                        ? _l.navYou
+                                                        : member.displayName,
+                                                  )
+                                                  .join(', '),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -1950,7 +2031,11 @@ class _GroupConversationScreenState
                   ),
                 ),
               ),
-              if (group?.proofMode ?? false) const ProofModeBanner(),
+              if (group?.proofMode ?? false)
+                ProofModeBanner(
+                  activatedBy: group?.proofModeByName,
+                  onLearnMore: () => showProofLearnMoreSheet(context),
+                ),
               _ActiveCallBanner(
                 groupId: widget.groupId,
                 onJoin: _startingCall

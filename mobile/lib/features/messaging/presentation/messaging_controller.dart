@@ -697,6 +697,20 @@ class MessagingController extends StateNotifier<MessagingState> {
     }
   }
 
+  /// « Supprimer pour moi seulement » en mode preuve (maquette 6) : le
+  /// message continue d'exister — gardé chez l'autre, et la trace du mode
+  /// preuve ne bouge pas — mais disparaît de CET écran.
+  ///
+  /// Hypothèse : purement en mémoire, pour la session en cours. Le retenir
+  /// au redémarrage demanderait une colonne dédiée au cache local, qu'aucun
+  /// autre geste de l'application ne possède encore — à ajouter si ce
+  /// besoin se confirme.
+  void hideLocally(String messageId) {
+    state = state.copyWith(
+      messages: state.messages.where((m) => m.id != messageId).toList(),
+    );
+  }
+
   Future<void> deleteMessage(String messageId) async {
     // Un message jamais parti n'existe que localement : rien à demander au
     // serveur, qui répondrait 404.

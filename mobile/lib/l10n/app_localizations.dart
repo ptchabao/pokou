@@ -9708,7 +9708,7 @@ abstract class L {
   /// No description provided for @certPitch.
   ///
   /// In fr, this message translates to:
-  /// **'Nom vérifié et mode preuve · essai d’un mois'**
+  /// **'Ton nom vérifié, et la trace de ce qu\'on t\'écrit.'**
   String get certPitch;
 
   /// No description provided for @certHowItWorks.
@@ -9720,13 +9720,13 @@ abstract class L {
   /// No description provided for @certStartTrial.
   ///
   /// In fr, this message translates to:
-  /// **'Essayer {days} jours'**
+  /// **'{days, select, 30{Commencer l\'essai d\'un mois} other{Commencer l\'essai de {days} jours}}'**
   String certStartTrial(String days);
 
   /// No description provided for @certTrialNote.
   ///
   /// In fr, this message translates to:
-  /// **'Pendant l\'essai, le mode preuve est disponible ; le badge s\'affiche au premier paiement.'**
+  /// **'Pendant l\'essai, le mode preuve est disponible. Le badge s\'affiche au premier paiement, qui vérifie ton nom.'**
   String get certTrialNote;
 
   /// No description provided for @certPlanPrice.
@@ -9786,7 +9786,7 @@ abstract class L {
   /// No description provided for @proofModeOnBanner.
   ///
   /// In fr, this message translates to:
-  /// **'Mode preuve actif : un message supprimé reste visible, barré, pour tous.'**
+  /// **'Mode preuve actif. Les messages supprimés restent visibles, barrés, pour tous.'**
   String get proofModeOnBanner;
 
   /// No description provided for @proofModeEnable.
@@ -10172,6 +10172,954 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'C\'est ainsi que les autres voient ton profil Pro.'**
   String get proProfileNote;
+
+  /// No description provided for @actionDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get actionDone;
+
+  /// No description provided for @badgeProLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié Pro'**
+  String get badgeProLabel;
+
+  /// No description provided for @certAdvantageNameTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un nom vérifié'**
+  String get certAdvantageNameTitle;
+
+  /// No description provided for @certAdvantageNameBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton badge montre que tu es bien toi, grâce au wallet mobile money qui paie.'**
+  String get certAdvantageNameBody;
+
+  /// No description provided for @certAdvantageProofTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve'**
+  String get certAdvantageProofTitle;
+
+  /// No description provided for @certAdvantageProofBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans une conversation, les messages supprimés restent visibles, barrés, pour tous.'**
+  String get certAdvantageProofBody;
+
+  /// No description provided for @certAdvantageExportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'export daté'**
+  String get certAdvantageExportTitle;
+
+  /// No description provided for @certAdvantageExportBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garde une conversation en PDF, avec les dates et les heures.'**
+  String get certAdvantageExportBody;
+
+  /// No description provided for @certFormulaLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Formule'**
+  String get certFormulaLabel;
+
+  /// No description provided for @certMonthlyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au mois'**
+  String get certMonthlyLabel;
+
+  /// No description provided for @certYearlyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'À l\'année'**
+  String get certYearlyLabel;
+
+  /// No description provided for @certMonthsOffered.
+  ///
+  /// In fr, this message translates to:
+  /// **'{months, plural, =1{Un mois offert} =2{Deux mois offerts} other{{months} mois offerts}}'**
+  String certMonthsOffered(int months);
+
+  /// No description provided for @certTtcPerMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC par mois'**
+  String certTtcPerMonth(String amount);
+
+  /// No description provided for @certTtcPerYear.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC par an'**
+  String certTtcPerYear(String amount);
+
+  /// No description provided for @certSeeProOffer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Professionnel ? Voir Pokou certifié Pro'**
+  String get certSeeProOffer;
+
+  /// No description provided for @certPayNowShowBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer maintenant et afficher mon badge'**
+  String get certPayNowShowBadge;
+
+  /// No description provided for @certPayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier et payer'**
+  String get certPayTitle;
+
+  /// No description provided for @certNameFieldLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom et prénom, comme sur ta pièce d\'identité'**
+  String get certNameFieldLabel;
+
+  /// No description provided for @certNameFieldHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou le compare au nom du titulaire du wallet, déjà vérifié par ton opérateur. Ce nom s\'affichera avec ton badge.'**
+  String get certNameFieldHelp;
+
+  /// No description provided for @certPayWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer avec'**
+  String get certPayWith;
+
+  /// No description provided for @certOwnWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le wallet de ce numéro'**
+  String get certOwnWallet;
+
+  /// No description provided for @certOtherWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un autre wallet'**
+  String get certOtherWallet;
+
+  /// No description provided for @certOtherWalletHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro du wallet'**
+  String get certOtherWalletHint;
+
+  /// No description provided for @certVatLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'TVA {rate} %'**
+  String certVatLabel(String rate);
+
+  /// No description provided for @certTotalLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get certTotalLabel;
+
+  /// No description provided for @certPaymentNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement par CashPay. Facture disponible dans ton compte.'**
+  String get certPaymentNote;
+
+  /// No description provided for @certVerifyAndPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier et payer {amount}'**
+  String certVerifyAndPay(String amount);
+
+  /// No description provided for @certMismatchAlertBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom du titulaire de ce wallet ne correspond pas à ton nom. Corrige ton nom ou paie depuis ton propre wallet.'**
+  String get certMismatchAlertBody;
+
+  /// No description provided for @certNameNeverShown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom du titulaire n\'est jamais affiché. Ton essai et le mode preuve continuent en attendant.'**
+  String get certNameNeverShown;
+
+  /// No description provided for @certBadgeActiveTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton badge est actif'**
+  String get certBadgeActiveTitle;
+
+  /// No description provided for @certBadgeActiveBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes contacts voient désormais ton nom vérifié.'**
+  String get certBadgeActiveBody;
+
+  /// No description provided for @certNameVerifiedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom vérifié par {operator}'**
+  String certNameVerifiedBy(String operator);
+
+  /// No description provided for @certNextPaymentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain paiement'**
+  String get certNextPaymentLabel;
+
+  /// No description provided for @certDownloadInvoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger la facture'**
+  String get certDownloadInvoice;
+
+  /// No description provided for @proofModeActivatesAnywhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve s\'active dans toutes tes discussions, à deux ou en groupe.'**
+  String get proofModeActivatesAnywhere;
+
+  /// No description provided for @certTrialEndingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton essai se termine dans {days} jours, le {date}.'**
+  String certTrialEndingTitle(String days, String date);
+
+  /// No description provided for @certIfYouPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si tu paies'**
+  String get certIfYouPay;
+
+  /// No description provided for @certIfYouPayBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton badge s\'affiche, ton nom est vérifié par ton wallet'**
+  String get certIfYouPayBadge;
+
+  /// No description provided for @certIfYouPayProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve et l\'export daté continuent'**
+  String get certIfYouPayProof;
+
+  /// No description provided for @certWithoutPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans paiement'**
+  String get certWithoutPayment;
+
+  /// No description provided for @certWithoutPaymentActivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu ne peux plus activer le mode preuve dans une nouvelle discussion'**
+  String get certWithoutPaymentActivate;
+
+  /// No description provided for @certWithoutPaymentTraces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui a déjà été enregistré reste visible de tous'**
+  String get certWithoutPaymentTraces;
+
+  /// No description provided for @certPayAndShowBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer et afficher mon badge'**
+  String get certPayAndShowBadge;
+
+  /// No description provided for @certLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get certLater;
+
+  /// No description provided for @certPausedScreenTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Badge en pause'**
+  String get certPausedScreenTitle;
+
+  /// No description provided for @proofLearnMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get proofLearnMore;
+
+  /// No description provided for @proofLearnMoreBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve n\'est jamais caché : un message système l\'annonce et un bandeau reste en haut de la discussion. Un message supprimé par son auteur reste visible, barré, pour tous, avec l\'heure de la suppression ; un message modifié garde sa version d\'origine. La trace reste chez les autres participants même si quelqu\'un supprime la discussion, quitte le groupe ou change de téléphone. Tu peux exporter la discussion en PDF daté.'**
+  String get proofLearnMoreBody;
+
+  /// No description provided for @proofDirectHeaderSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion à deux · mode preuve actif'**
+  String get proofDirectHeaderSubtitle;
+
+  /// No description provided for @proofGroupHeaderSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} membres · mode preuve actif'**
+  String proofGroupHeaderSubtitle(String count);
+
+  /// No description provided for @proofActivateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer le mode preuve ?'**
+  String get proofActivateTitle;
+
+  /// No description provided for @proofActivateGroupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans « {name} », un message supprimé par son auteur restera visible, barré, pour les {count} membres, avec l\'heure de la suppression.'**
+  String proofActivateGroupBody(String name, String count);
+
+  /// No description provided for @proofActivateGroupBodyAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans « {name} », un message supprimé par son auteur restera visible, barré, pour tous les membres, avec l\'heure de la suppression.'**
+  String proofActivateGroupBodyAll(String name);
+
+  /// No description provided for @proofActivateDirectBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans ta discussion avec {name}, un message supprimé par son auteur restera visible, barré, pour vous deux, avec l\'heure de la suppression.'**
+  String proofActivateDirectBody(String name);
+
+  /// No description provided for @proofActivateBulletGroupNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les membres sont prévenus : un message dans le groupe et un bandeau permanent.'**
+  String get proofActivateBulletGroupNotice;
+
+  /// No description provided for @proofActivateBulletDirectNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est prévenu : un message dans la discussion et un bandeau permanent.'**
+  String proofActivateBulletDirectNotice(String name);
+
+  /// No description provided for @proofActivateBulletFromNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les messages envoyés à partir de maintenant sont concernés.'**
+  String get proofActivateBulletFromNow;
+
+  /// No description provided for @proofActivateBulletCanDisable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu pourras le désactiver ; les messages envoyés pendant le mode gardent la règle.'**
+  String get proofActivateBulletCanDisable;
+
+  /// No description provided for @proofDeactivateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver le mode preuve ?'**
+  String get proofDeactivateTitle;
+
+  /// No description provided for @proofDeactivateBulletNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les participants sont prévenus par un message dans la discussion.'**
+  String get proofDeactivateBulletNotice;
+
+  /// No description provided for @proofDeactivateBulletKeepsRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les messages envoyés pendant le mode gardent la règle : leur version d\'origine reste visible.'**
+  String get proofDeactivateBulletKeepsRule;
+
+  /// No description provided for @proofDeactivateBulletReenable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu pourras le réactiver quand tu veux.'**
+  String get proofDeactivateBulletReenable;
+
+  /// No description provided for @proofKeepMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder le mode preuve'**
+  String get proofKeepMode;
+
+  /// No description provided for @proofReservedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver le mode preuve'**
+  String get proofReservedTitle;
+
+  /// No description provided for @proofReservedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans un groupe, il se désactive par la personne qui l\'a activé ou par un administrateur qui a un badge payant, Pokou certifié ou Pro. L\'essai ne suffit pas.'**
+  String get proofReservedBody;
+
+  /// No description provided for @proofReservedYourBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton badge'**
+  String get proofReservedYourBadge;
+
+  /// No description provided for @proofReservedLevelRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Niveau requis'**
+  String get proofReservedLevelRequired;
+
+  /// No description provided for @proofReservedPaidBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Badge payant'**
+  String get proofReservedPaidBadge;
+
+  /// No description provided for @proofReservedTrial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essai'**
+  String get proofReservedTrial;
+
+  /// No description provided for @proofReservedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le paiement vérifie ton nom et affiche ton badge ; tu peux alors désactiver le mode preuve. Les commerçants et associations peuvent choisir Pokou certifié Pro.'**
+  String get proofReservedNote;
+
+  /// No description provided for @proofDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce message ?'**
+  String get proofDeleteTitle;
+
+  /// No description provided for @proofDeleteWarningTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve est actif.'**
+  String get proofDeleteWarningTitle;
+
+  /// No description provided for @proofDeleteForMeOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer pour moi seulement'**
+  String get proofDeleteForMeOnly;
+
+  /// No description provided for @proofBannerBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve activé par {name}.'**
+  String proofBannerBy(String name);
+
+  /// No description provided for @proofBannerRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les messages supprimés restent visibles, barrés, pour tous.'**
+  String get proofBannerRule;
+
+  /// No description provided for @proofChooseDiscussion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis une discussion'**
+  String get proofChooseDiscussion;
+
+  /// No description provided for @proofChooseDiscussionNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec ton badge, le mode preuve s\'active dans n\'importe quelle discussion : à deux ou en groupe, que tu en sois administrateur ou non. Les participants sont toujours prévenus.'**
+  String get proofChooseDiscussionNote;
+
+  /// No description provided for @proofSearchDiscussion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une discussion'**
+  String get proofSearchDiscussion;
+
+  /// No description provided for @proofDirectSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion à deux'**
+  String get proofDirectSubtitle;
+
+  /// No description provided for @proofGroupSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe'**
+  String get proofGroupSubtitle;
+
+  /// No description provided for @proofActivatedFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve activé dans « {name} »'**
+  String proofActivatedFor(String name);
+
+  /// No description provided for @proofExportOptionsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter la discussion'**
+  String get proofExportOptionsTitle;
+
+  /// No description provided for @proofExportPeriodLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get proofExportPeriodLabel;
+
+  /// No description provided for @proofExportSinceActivation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis l\'activation du mode preuve'**
+  String get proofExportSinceActivation;
+
+  /// No description provided for @proofExportAllDiscussion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toute la discussion'**
+  String get proofExportAllDiscussion;
+
+  /// No description provided for @proofExportCustomDates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir des dates'**
+  String get proofExportCustomDates;
+
+  /// No description provided for @proofIncludeMedia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inclure les photos et les documents'**
+  String get proofIncludeMedia;
+
+  /// No description provided for @proofIncludeMediaNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le PDF sera plus lourd'**
+  String get proofIncludeMediaNote;
+
+  /// No description provided for @proofExportContains.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le PDF contient'**
+  String get proofExportContains;
+
+  /// No description provided for @proofExportContainsDates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date et heure de chaque message'**
+  String get proofExportContainsDates;
+
+  /// No description provided for @proofExportContainsDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages supprimés ou modifiés, avec leur version d\'origine'**
+  String get proofExportContainsDeleted;
+
+  /// No description provided for @proofExportContainsHash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Empreinte d\'intégrité du fichier (SHA-256)'**
+  String get proofExportContainsHash;
+
+  /// No description provided for @proofExportLegalNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le PDF est créé sur ton téléphone ; Pokou n\'en garde aucune copie. Sa valeur juridique est appréciée par le juge.'**
+  String get proofExportLegalNote;
+
+  /// No description provided for @proofCreatePdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le PDF'**
+  String get proofCreatePdf;
+
+  /// No description provided for @proofReadyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'PDF prêt'**
+  String get proofReadyTitle;
+
+  /// No description provided for @proofReadySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} · {size} Ko'**
+  String proofReadySubtitle(String name, String size);
+
+  /// No description provided for @proofReadyPreviewNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le PDF reprend chaque message avec sa date et son heure, les messages supprimés barrés et les versions d\'origine.'**
+  String get proofReadyPreviewNote;
+
+  /// No description provided for @proofIntegrityHash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Empreinte d\'intégrité (SHA-256)'**
+  String get proofIntegrityHash;
+
+  /// No description provided for @proofIntegrityNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garde le fichier tel quel : la moindre modification change l\'empreinte.'**
+  String get proofIntegrityNote;
+
+  /// No description provided for @proOfferTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour les commerçants et les organisations'**
+  String get proOfferTitle;
+
+  /// No description provided for @proOfferAudience.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commerçants, vendeurs, entreprises, associations'**
+  String get proOfferAudience;
+
+  /// No description provided for @proOfferPointName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton nom commercial vérifié, avec le badge Pro'**
+  String get proOfferPointName;
+
+  /// No description provided for @proOfferPointProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un profil Pro : adresse, horaires, activité'**
+  String get proOfferPointProfile;
+
+  /// No description provided for @proOfferPointBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le badge Pro sur tes statuts, puis sur tes annonces Assimé'**
+  String get proOfferPointBadge;
+
+  /// No description provided for @proOfferPointBadgeLot1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le badge Pro sur ton profil et sur tes statuts'**
+  String get proOfferPointBadgeLot1;
+
+  /// No description provided for @proOfferPointProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve et l\'export daté, comme Pokou certifié'**
+  String get proOfferPointProof;
+
+  /// No description provided for @proPerMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'par mois'**
+  String get proPerMonth;
+
+  /// No description provided for @proPriceTtcCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC · résiliable à tout moment'**
+  String proPriceTtcCancel(String amount);
+
+  /// No description provided for @proHowItWorks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment ça marche'**
+  String get proHowItWorks;
+
+  /// No description provided for @proStepSendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoie ton justificatif'**
+  String get proStepSendTitle;
+
+  /// No description provided for @proStepSendBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'RCCM, NIF ou récépissé d\'association'**
+  String get proStepSendBody;
+
+  /// No description provided for @proStepCheckTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou vérifie sous {hours} h'**
+  String proStepCheckTitle(String hours);
+
+  /// No description provided for @proStepCheckBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu es prévenu dès la décision'**
+  String get proStepCheckBody;
+
+  /// No description provided for @proStepPayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu paies et ton badge s\'affiche'**
+  String get proStepPayTitle;
+
+  /// No description provided for @proStepPayBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement avant la validation'**
+  String get proStepPayBody;
+
+  /// No description provided for @proStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer'**
+  String get proStart;
+
+  /// No description provided for @proStepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié Pro · étape {step} sur 3'**
+  String proStepOf(String step);
+
+  /// No description provided for @proActivityLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activité'**
+  String get proActivityLabel;
+
+  /// No description provided for @proAddressLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse ou repère'**
+  String get proAddressLabel;
+
+  /// No description provided for @proDocumentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Justificatif'**
+  String get proDocumentLabel;
+
+  /// No description provided for @proDocRccm.
+  ///
+  /// In fr, this message translates to:
+  /// **'RCCM'**
+  String get proDocRccm;
+
+  /// No description provided for @proDocNif.
+  ///
+  /// In fr, this message translates to:
+  /// **'NIF'**
+  String get proDocNif;
+
+  /// No description provided for @proDocRecepisse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récépissé'**
+  String get proDocRecepisse;
+
+  /// No description provided for @proDocumentSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo · {size} Mo'**
+  String proDocumentSize(String size);
+
+  /// No description provided for @proChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer'**
+  String get proChange;
+
+  /// No description provided for @proDocumentNameNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom commercial doit figurer sur le justificatif. Ton nom vérifié reste visible sous le nom commercial : « Géré par… ».'**
+  String get proDocumentNameNote;
+
+  /// No description provided for @proPendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification en cours'**
+  String get proPendingTitle;
+
+  /// No description provided for @proPendingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le support de Pokou vérifie ton justificatif sous {hours} h. Tu reçois une notification dès la décision.'**
+  String proPendingBody(String hours);
+
+  /// No description provided for @proStepSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Justificatif envoyé'**
+  String get proStepSent;
+
+  /// No description provided for @proStepSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification par le support'**
+  String get proStepSupport;
+
+  /// No description provided for @proAtTheLatest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au plus tard le {date}'**
+  String proAtTheLatest(String date);
+
+  /// No description provided for @proStepPayBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement et badge Pro'**
+  String get proStepPayBadge;
+
+  /// No description provided for @proAfterValidation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après la validation'**
+  String get proAfterValidation;
+
+  /// No description provided for @proPendingKeep.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attendant, tu gardes ton badge Pokou certifié, tes discussions et le mode preuve.'**
+  String get proPendingKeep;
+
+  /// No description provided for @proNameMismatchTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom ne correspond pas'**
+  String get proNameMismatchTitle;
+
+  /// No description provided for @proWhatToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que veux-tu faire ?'**
+  String get proWhatToDo;
+
+  /// No description provided for @proUseDocumentName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser « {name} »'**
+  String proUseDocumentName(String name);
+
+  /// No description provided for @proNameOnDocument.
+  ///
+  /// In fr, this message translates to:
+  /// **'{type, select, NIF{Le nom inscrit sur ton NIF} RECEPISSE{Le nom inscrit sur ton récépissé} other{Le nom inscrit sur ton RCCM}}'**
+  String proNameOnDocument(String type);
+
+  /// No description provided for @proSendOtherDocument.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer un autre justificatif'**
+  String get proSendOtherDocument;
+
+  /// No description provided for @proNoPaymentTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement n\'a été pris. Tu peux renvoyer autant de fois que nécessaire.'**
+  String get proNoPaymentTaken;
+
+  /// No description provided for @proCorrectAndResend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger et renvoyer'**
+  String get proCorrectAndResend;
+
+  /// No description provided for @proContactSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacter le support'**
+  String get proContactSupport;
+
+  /// No description provided for @proSupportHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponds à la notification de la décision : elle arrive au support.'**
+  String get proSupportHint;
+
+  /// No description provided for @proGoodNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonne nouvelle : {name} est vérifiée.'**
+  String proGoodNews(String name);
+
+  /// No description provided for @proDocumentVerifiedBySupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'{type, select, NIF{NIF vérifié par le support} RECEPISSE{Récépissé vérifié par le support} other{RCCM vérifié par le support}}'**
+  String proDocumentVerifiedBySupport(String type);
+
+  /// No description provided for @proNameShownAfterPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton nom commercial s\'affiche dès le paiement'**
+  String get proNameShownAfterPayment;
+
+  /// No description provided for @proReplacesCertified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton badge Pokou certifié s\'arrête : le badge Pro le remplace, sans double paiement.'**
+  String get proReplacesCertified;
+
+  /// No description provided for @proPayTtc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} TTC'**
+  String proPayTtc(String amount);
+
+  /// No description provided for @proProfileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get proProfileTitle;
+
+  /// No description provided for @proManagedByVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Géré par {name} · nom vérifié'**
+  String proManagedByVerified(String name);
+
+  /// No description provided for @proDeclaredAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse déclarée'**
+  String get proDeclaredAddress;
+
+  /// No description provided for @proHoursLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days}, {open} à {close}'**
+  String proHoursLine(String days, String open, String close);
+
+  /// No description provided for @proOpenNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvert'**
+  String get proOpenNow;
+
+  /// No description provided for @proClosedNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermé'**
+  String get proClosedNow;
+
+  /// No description provided for @proSinceDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié Pro depuis {date}'**
+  String proSinceDate(String date);
+
+  /// No description provided for @contactReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler {name}'**
+  String contactReport(String name);
+
+  /// No description provided for @contactReportReasonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui ne va pas'**
+  String get contactReportReasonHint;
+
+  /// No description provided for @contactReportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler'**
+  String get contactReportSend;
+
+  /// No description provided for @contactReportSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé à l\'équipe Pokou.'**
+  String get contactReportSent;
 
   /// No description provided for @honamCity.
   ///

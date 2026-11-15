@@ -104,6 +104,7 @@ class ConversationSummary {
     required this.unreadCount,
     this.groupCount = 0,
     this.isVerified = false,
+    this.badge,
     this.isBot = false,
   });
 
@@ -128,6 +129,11 @@ class ConversationSummary {
   /// neutre (voir api/app/utils/identity.py). Toujours `false` pour un
   /// groupe ou une communauté : ce ne sont pas des personnes.
   final bool isVerified;
+
+  /// La FORME du badge : "PRO" (hexagone) ou "CERTIFIED" (rosette).
+  final String? badge;
+
+  bool get isProBadge => badge == 'PRO';
 
   /// Le bot d'une entreprise (Pokou Business) — ni « inconnu » à ajouter,
   /// ni conversation chiffrée.
@@ -165,6 +171,7 @@ class ConversationSummary {
       isArchived: json['is_archived'] as bool? ?? false,
       isUnknownContact: json['is_unknown_contact'] as bool? ?? false,
       isVerified: json['is_verified'] as bool? ?? false,
+      badge: json['badge'] as String?,
       isBot: json['is_bot'] as bool? ?? false,
       contactUserId: json['contact_user_id'] as int?,
       lastMessage: lastMessageJson != null

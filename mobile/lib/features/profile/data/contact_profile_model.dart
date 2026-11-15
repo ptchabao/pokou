@@ -20,6 +20,7 @@ class ContactProfile {
     required this.isBlocked,
     this.isContact = true,
     this.isVerified = false,
+    this.badge,
     this.sharedMedia = const [],
     this.sharedDocuments = const [],
     this.sharedLinks = const [],
@@ -42,6 +43,11 @@ class ContactProfile {
   /// numéro : la fiche propose alors de l'enregistrer.
   final bool isContact;
   final bool isVerified;
+
+  /// La FORME du badge : "PRO" (hexagone) ou "CERTIFIED" (rosette).
+  final String? badge;
+
+  bool get isProBadge => badge == 'PRO';
 
   /// Photos et vidéos, du plus récent au plus ancien.
   final List<SharedAttachment> sharedMedia;
@@ -84,6 +90,7 @@ class ContactProfile {
       // Absent d'une ancienne API, qui n'ouvrait la fiche qu'aux contacts.
       isContact: json['is_contact'] as bool? ?? true,
       isVerified: json['is_verified'] as bool? ?? false,
+      badge: json['badge'] as String?,
       sharedMedia: _attachments(json['shared_media']),
       sharedDocuments: _attachments(json['shared_documents']),
       sharedLinks: ((json['shared_links'] as List?) ?? const [])

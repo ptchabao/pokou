@@ -23,6 +23,8 @@ Future<File> exportDirectProof({
   required String myName,
   required int myUserId,
   required DateTime since,
+  DateTime? until,
+  bool includeMedia = true,
   required List<DirectMessage> messages,
   required ProofExportLabels labels,
 }) async {
@@ -30,9 +32,14 @@ Future<File> exportDirectProof({
   final bold = pw.Font.ttf(await rootBundle.load('assets/fonts/Inter-SemiBold.ttf'));
   final stamp = DateFormat('dd/MM/yyyy HH:mm');
   final now = DateTime.now();
+  const mediaTypes = {'IMAGE', 'VIDEO', 'AUDIO', 'DOCUMENT', 'STICKER'};
   final kept = [
     for (final m in messages)
-      if (!m.createdAt.isBefore(since) && (m.payload?['kind']) != 'proof_mode') m,
+      if (!m.createdAt.isBefore(since) &&
+          (until == null || !m.createdAt.isAfter(until)) &&
+          (m.payload?['kind']) != 'proof_mode' &&
+          (includeMedia || !mediaTypes.contains(m.messageType)))
+        m,
   ];
 
   final doc = pw.Document(title: labels.title, author: 'Pokou');

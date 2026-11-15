@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4055,8 +4056,7 @@ class LFr extends L {
       locale: localeName,
       other:
           '$count messages mis en attente par le Mode Bouclier — glisser vers le bas pour les afficher',
-      one:
-          '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
+      one: '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
     );
     return '$_temp0';
   }
@@ -5539,7 +5539,7 @@ class LFr extends L {
   String get certTitle => 'Pokou certifié';
 
   @override
-  String get certPitch => 'Nom vérifié et mode preuve · essai d’un mois';
+  String get certPitch => 'Ton nom vérifié, et la trace de ce qu\'on t\'écrit.';
 
   @override
   String get certHowItWorks =>
@@ -5547,12 +5547,16 @@ class LFr extends L {
 
   @override
   String certStartTrial(String days) {
-    return 'Essayer $days jours';
+    String _temp0 = intl.Intl.selectLogic(days, {
+      '30': 'Commencer l\'essai d\'un mois',
+      'other': 'Commencer l\'essai de $days jours',
+    });
+    return '$_temp0';
   }
 
   @override
   String get certTrialNote =>
-      'Pendant l\'essai, le mode preuve est disponible ; le badge s\'affiche au premier paiement.';
+      'Pendant l\'essai, le mode preuve est disponible. Le badge s\'affiche au premier paiement, qui vérifie ton nom.';
 
   @override
   String certPlanPrice(String ht, String ttc) {
@@ -5590,7 +5594,7 @@ class LFr extends L {
 
   @override
   String get proofModeOnBanner =>
-      'Mode preuve actif : un message supprimé reste visible, barré, pour tous.';
+      'Mode preuve actif. Les messages supprimés restent visibles, barrés, pour tous.';
 
   @override
   String get proofModeEnable => 'Activer le mode preuve';
@@ -5828,6 +5832,600 @@ class LFr extends L {
   @override
   String get proProfileNote =>
       'C\'est ainsi que les autres voient ton profil Pro.';
+
+  @override
+  String get actionDone => 'Terminé';
+
+  @override
+  String get badgeProLabel => 'Pokou certifié Pro';
+
+  @override
+  String get certAdvantageNameTitle => 'Un nom vérifié';
+
+  @override
+  String get certAdvantageNameBody =>
+      'Ton badge montre que tu es bien toi, grâce au wallet mobile money qui paie.';
+
+  @override
+  String get certAdvantageProofTitle => 'Le mode preuve';
+
+  @override
+  String get certAdvantageProofBody =>
+      'Dans une conversation, les messages supprimés restent visibles, barrés, pour tous.';
+
+  @override
+  String get certAdvantageExportTitle => 'L\'export daté';
+
+  @override
+  String get certAdvantageExportBody =>
+      'Garde une conversation en PDF, avec les dates et les heures.';
+
+  @override
+  String get certFormulaLabel => 'Formule';
+
+  @override
+  String get certMonthlyLabel => 'Au mois';
+
+  @override
+  String get certYearlyLabel => 'À l\'année';
+
+  @override
+  String certMonthsOffered(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: '$months mois offerts',
+      two: 'Deux mois offerts',
+      one: 'Un mois offert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certTtcPerMonth(String amount) {
+    return '$amount TTC par mois';
+  }
+
+  @override
+  String certTtcPerYear(String amount) {
+    return '$amount TTC par an';
+  }
+
+  @override
+  String get certSeeProOffer => 'Professionnel ? Voir Pokou certifié Pro';
+
+  @override
+  String get certPayNowShowBadge => 'Payer maintenant et afficher mon badge';
+
+  @override
+  String get certPayTitle => 'Vérifier et payer';
+
+  @override
+  String get certNameFieldLabel =>
+      'Nom et prénom, comme sur ta pièce d\'identité';
+
+  @override
+  String get certNameFieldHelp =>
+      'Pokou le compare au nom du titulaire du wallet, déjà vérifié par ton opérateur. Ce nom s\'affichera avec ton badge.';
+
+  @override
+  String get certPayWith => 'Payer avec';
+
+  @override
+  String get certOwnWallet => 'Le wallet de ce numéro';
+
+  @override
+  String get certOtherWallet => 'Un autre wallet';
+
+  @override
+  String get certOtherWalletHint => 'Numéro du wallet';
+
+  @override
+  String certVatLabel(String rate) {
+    return 'TVA $rate %';
+  }
+
+  @override
+  String get certTotalLabel => 'Total';
+
+  @override
+  String get certPaymentNote =>
+      'Paiement par CashPay. Facture disponible dans ton compte.';
+
+  @override
+  String certVerifyAndPay(String amount) {
+    return 'Vérifier et payer $amount';
+  }
+
+  @override
+  String get certMismatchAlertBody =>
+      'Le nom du titulaire de ce wallet ne correspond pas à ton nom. Corrige ton nom ou paie depuis ton propre wallet.';
+
+  @override
+  String get certNameNeverShown =>
+      'Le nom du titulaire n\'est jamais affiché. Ton essai et le mode preuve continuent en attendant.';
+
+  @override
+  String get certBadgeActiveTitle => 'Ton badge est actif';
+
+  @override
+  String get certBadgeActiveBody =>
+      'Tes contacts voient désormais ton nom vérifié.';
+
+  @override
+  String certNameVerifiedBy(String operator) {
+    return 'Nom vérifié par $operator';
+  }
+
+  @override
+  String get certNextPaymentLabel => 'Prochain paiement';
+
+  @override
+  String get certDownloadInvoice => 'Télécharger la facture';
+
+  @override
+  String get proofModeActivatesAnywhere =>
+      'Le mode preuve s\'active dans toutes tes discussions, à deux ou en groupe.';
+
+  @override
+  String certTrialEndingTitle(String days, String date) {
+    return 'Ton essai se termine dans $days jours, le $date.';
+  }
+
+  @override
+  String get certIfYouPay => 'Si tu paies';
+
+  @override
+  String get certIfYouPayBadge =>
+      'Ton badge s\'affiche, ton nom est vérifié par ton wallet';
+
+  @override
+  String get certIfYouPayProof => 'Le mode preuve et l\'export daté continuent';
+
+  @override
+  String get certWithoutPayment => 'Sans paiement';
+
+  @override
+  String get certWithoutPaymentActivate =>
+      'Tu ne peux plus activer le mode preuve dans une nouvelle discussion';
+
+  @override
+  String get certWithoutPaymentTraces =>
+      'Ce qui a déjà été enregistré reste visible de tous';
+
+  @override
+  String get certPayAndShowBadge => 'Payer et afficher mon badge';
+
+  @override
+  String get certLater => 'Plus tard';
+
+  @override
+  String get certPausedScreenTitle => 'Badge en pause';
+
+  @override
+  String get proofLearnMore => 'En savoir plus';
+
+  @override
+  String get proofLearnMoreBody =>
+      'Le mode preuve n\'est jamais caché : un message système l\'annonce et un bandeau reste en haut de la discussion. Un message supprimé par son auteur reste visible, barré, pour tous, avec l\'heure de la suppression ; un message modifié garde sa version d\'origine. La trace reste chez les autres participants même si quelqu\'un supprime la discussion, quitte le groupe ou change de téléphone. Tu peux exporter la discussion en PDF daté.';
+
+  @override
+  String get proofDirectHeaderSubtitle =>
+      'Discussion à deux · mode preuve actif';
+
+  @override
+  String proofGroupHeaderSubtitle(String count) {
+    return '$count membres · mode preuve actif';
+  }
+
+  @override
+  String get proofActivateTitle => 'Activer le mode preuve ?';
+
+  @override
+  String proofActivateGroupBody(String name, String count) {
+    return 'Dans « $name », un message supprimé par son auteur restera visible, barré, pour les $count membres, avec l\'heure de la suppression.';
+  }
+
+  @override
+  String proofActivateGroupBodyAll(String name) {
+    return 'Dans « $name », un message supprimé par son auteur restera visible, barré, pour tous les membres, avec l\'heure de la suppression.';
+  }
+
+  @override
+  String proofActivateDirectBody(String name) {
+    return 'Dans ta discussion avec $name, un message supprimé par son auteur restera visible, barré, pour vous deux, avec l\'heure de la suppression.';
+  }
+
+  @override
+  String get proofActivateBulletGroupNotice =>
+      'Tous les membres sont prévenus : un message dans le groupe et un bandeau permanent.';
+
+  @override
+  String proofActivateBulletDirectNotice(String name) {
+    return '$name est prévenu : un message dans la discussion et un bandeau permanent.';
+  }
+
+  @override
+  String get proofActivateBulletFromNow =>
+      'Seuls les messages envoyés à partir de maintenant sont concernés.';
+
+  @override
+  String get proofActivateBulletCanDisable =>
+      'Tu pourras le désactiver ; les messages envoyés pendant le mode gardent la règle.';
+
+  @override
+  String get proofDeactivateTitle => 'Désactiver le mode preuve ?';
+
+  @override
+  String get proofDeactivateBulletNotice =>
+      'Les participants sont prévenus par un message dans la discussion.';
+
+  @override
+  String get proofDeactivateBulletKeepsRule =>
+      'Les messages envoyés pendant le mode gardent la règle : leur version d\'origine reste visible.';
+
+  @override
+  String get proofDeactivateBulletReenable =>
+      'Tu pourras le réactiver quand tu veux.';
+
+  @override
+  String get proofKeepMode => 'Garder le mode preuve';
+
+  @override
+  String get proofReservedTitle => 'Désactiver le mode preuve';
+
+  @override
+  String get proofReservedBody =>
+      'Dans un groupe, il se désactive par la personne qui l\'a activé ou par un administrateur qui a un badge payant, Pokou certifié ou Pro. L\'essai ne suffit pas.';
+
+  @override
+  String get proofReservedYourBadge => 'Ton badge';
+
+  @override
+  String get proofReservedLevelRequired => 'Niveau requis';
+
+  @override
+  String get proofReservedPaidBadge => 'Badge payant';
+
+  @override
+  String get proofReservedTrial => 'Essai';
+
+  @override
+  String get proofReservedNote =>
+      'Le paiement vérifie ton nom et affiche ton badge ; tu peux alors désactiver le mode preuve. Les commerçants et associations peuvent choisir Pokou certifié Pro.';
+
+  @override
+  String get proofDeleteTitle => 'Supprimer ce message ?';
+
+  @override
+  String get proofDeleteWarningTitle => 'Le mode preuve est actif.';
+
+  @override
+  String get proofDeleteForMeOnly => 'Supprimer pour moi seulement';
+
+  @override
+  String proofBannerBy(String name) {
+    return 'Mode preuve activé par $name.';
+  }
+
+  @override
+  String get proofBannerRule =>
+      'Les messages supprimés restent visibles, barrés, pour tous.';
+
+  @override
+  String get proofChooseDiscussion => 'Choisis une discussion';
+
+  @override
+  String get proofChooseDiscussionNote =>
+      'Avec ton badge, le mode preuve s\'active dans n\'importe quelle discussion : à deux ou en groupe, que tu en sois administrateur ou non. Les participants sont toujours prévenus.';
+
+  @override
+  String get proofSearchDiscussion => 'Rechercher une discussion';
+
+  @override
+  String get proofDirectSubtitle => 'Discussion à deux';
+
+  @override
+  String get proofGroupSubtitle => 'Groupe';
+
+  @override
+  String proofActivatedFor(String name) {
+    return 'Mode preuve activé dans « $name »';
+  }
+
+  @override
+  String get proofExportOptionsTitle => 'Exporter la discussion';
+
+  @override
+  String get proofExportPeriodLabel => 'Période';
+
+  @override
+  String get proofExportSinceActivation =>
+      'Depuis l\'activation du mode preuve';
+
+  @override
+  String get proofExportAllDiscussion => 'Toute la discussion';
+
+  @override
+  String get proofExportCustomDates => 'Choisir des dates';
+
+  @override
+  String get proofIncludeMedia => 'Inclure les photos et les documents';
+
+  @override
+  String get proofIncludeMediaNote => 'Le PDF sera plus lourd';
+
+  @override
+  String get proofExportContains => 'Le PDF contient';
+
+  @override
+  String get proofExportContainsDates => 'Date et heure de chaque message';
+
+  @override
+  String get proofExportContainsDeleted =>
+      'Messages supprimés ou modifiés, avec leur version d\'origine';
+
+  @override
+  String get proofExportContainsHash =>
+      'Empreinte d\'intégrité du fichier (SHA-256)';
+
+  @override
+  String get proofExportLegalNote =>
+      'Le PDF est créé sur ton téléphone ; Pokou n\'en garde aucune copie. Sa valeur juridique est appréciée par le juge.';
+
+  @override
+  String get proofCreatePdf => 'Créer le PDF';
+
+  @override
+  String get proofReadyTitle => 'PDF prêt';
+
+  @override
+  String proofReadySubtitle(String name, String size) {
+    return '$name · $size Ko';
+  }
+
+  @override
+  String get proofReadyPreviewNote =>
+      'Le PDF reprend chaque message avec sa date et son heure, les messages supprimés barrés et les versions d\'origine.';
+
+  @override
+  String get proofIntegrityHash => 'Empreinte d\'intégrité (SHA-256)';
+
+  @override
+  String get proofIntegrityNote =>
+      'Garde le fichier tel quel : la moindre modification change l\'empreinte.';
+
+  @override
+  String get proOfferTitle => 'Pour les commerçants et les organisations';
+
+  @override
+  String get proOfferAudience =>
+      'Commerçants, vendeurs, entreprises, associations';
+
+  @override
+  String get proOfferPointName =>
+      'Ton nom commercial vérifié, avec le badge Pro';
+
+  @override
+  String get proOfferPointProfile =>
+      'Un profil Pro : adresse, horaires, activité';
+
+  @override
+  String get proOfferPointBadge =>
+      'Le badge Pro sur tes statuts, puis sur tes annonces Assimé';
+
+  @override
+  String get proOfferPointBadgeLot1 =>
+      'Le badge Pro sur ton profil et sur tes statuts';
+
+  @override
+  String get proOfferPointProof =>
+      'Le mode preuve et l\'export daté, comme Pokou certifié';
+
+  @override
+  String get proPerMonth => 'par mois';
+
+  @override
+  String proPriceTtcCancel(String amount) {
+    return '$amount TTC · résiliable à tout moment';
+  }
+
+  @override
+  String get proHowItWorks => 'Comment ça marche';
+
+  @override
+  String get proStepSendTitle => 'Envoie ton justificatif';
+
+  @override
+  String get proStepSendBody => 'RCCM, NIF ou récépissé d\'association';
+
+  @override
+  String proStepCheckTitle(String hours) {
+    return 'Pokou vérifie sous $hours h';
+  }
+
+  @override
+  String get proStepCheckBody => 'Tu es prévenu dès la décision';
+
+  @override
+  String get proStepPayTitle => 'Tu paies et ton badge s\'affiche';
+
+  @override
+  String get proStepPayBody => 'Aucun paiement avant la validation';
+
+  @override
+  String get proStart => 'Commencer';
+
+  @override
+  String proStepOf(String step) {
+    return 'Pokou certifié Pro · étape $step sur 3';
+  }
+
+  @override
+  String get proActivityLabel => 'Activité';
+
+  @override
+  String get proAddressLabel => 'Adresse ou repère';
+
+  @override
+  String get proDocumentLabel => 'Justificatif';
+
+  @override
+  String get proDocRccm => 'RCCM';
+
+  @override
+  String get proDocNif => 'NIF';
+
+  @override
+  String get proDocRecepisse => 'Récépissé';
+
+  @override
+  String proDocumentSize(String size) {
+    return 'Photo · $size Mo';
+  }
+
+  @override
+  String get proChange => 'Changer';
+
+  @override
+  String get proDocumentNameNote =>
+      'Le nom commercial doit figurer sur le justificatif. Ton nom vérifié reste visible sous le nom commercial : « Géré par… ».';
+
+  @override
+  String get proPendingTitle => 'Vérification en cours';
+
+  @override
+  String proPendingBody(String hours) {
+    return 'Le support de Pokou vérifie ton justificatif sous $hours h. Tu reçois une notification dès la décision.';
+  }
+
+  @override
+  String get proStepSent => 'Justificatif envoyé';
+
+  @override
+  String get proStepSupport => 'Vérification par le support';
+
+  @override
+  String proAtTheLatest(String date) {
+    return 'Au plus tard le $date';
+  }
+
+  @override
+  String get proStepPayBadge => 'Paiement et badge Pro';
+
+  @override
+  String get proAfterValidation => 'Après la validation';
+
+  @override
+  String get proPendingKeep =>
+      'En attendant, tu gardes ton badge Pokou certifié, tes discussions et le mode preuve.';
+
+  @override
+  String get proNameMismatchTitle => 'Le nom ne correspond pas';
+
+  @override
+  String get proWhatToDo => 'Que veux-tu faire ?';
+
+  @override
+  String proUseDocumentName(String name) {
+    return 'Utiliser « $name »';
+  }
+
+  @override
+  String proNameOnDocument(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'NIF': 'Le nom inscrit sur ton NIF',
+      'RECEPISSE': 'Le nom inscrit sur ton récépissé',
+      'other': 'Le nom inscrit sur ton RCCM',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get proSendOtherDocument => 'Envoyer un autre justificatif';
+
+  @override
+  String get proNoPaymentTaken =>
+      'Aucun paiement n\'a été pris. Tu peux renvoyer autant de fois que nécessaire.';
+
+  @override
+  String get proCorrectAndResend => 'Corriger et renvoyer';
+
+  @override
+  String get proContactSupport => 'Contacter le support';
+
+  @override
+  String get proSupportHint =>
+      'Réponds à la notification de la décision : elle arrive au support.';
+
+  @override
+  String proGoodNews(String name) {
+    return 'Bonne nouvelle : $name est vérifiée.';
+  }
+
+  @override
+  String proDocumentVerifiedBySupport(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'NIF': 'NIF vérifié par le support',
+      'RECEPISSE': 'Récépissé vérifié par le support',
+      'other': 'RCCM vérifié par le support',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get proNameShownAfterPayment =>
+      'Ton nom commercial s\'affiche dès le paiement';
+
+  @override
+  String get proReplacesCertified =>
+      'Ton badge Pokou certifié s\'arrête : le badge Pro le remplace, sans double paiement.';
+
+  @override
+  String proPayTtc(String amount) {
+    return 'Payer $amount TTC';
+  }
+
+  @override
+  String get proProfileTitle => 'Profil';
+
+  @override
+  String proManagedByVerified(String name) {
+    return 'Géré par $name · nom vérifié';
+  }
+
+  @override
+  String get proDeclaredAddress => 'Adresse déclarée';
+
+  @override
+  String proHoursLine(String days, String open, String close) {
+    return '$days, $open à $close';
+  }
+
+  @override
+  String get proOpenNow => 'Ouvert';
+
+  @override
+  String get proClosedNow => 'Fermé';
+
+  @override
+  String proSinceDate(String date) {
+    return 'Pokou certifié Pro depuis $date';
+  }
+
+  @override
+  String contactReport(String name) {
+    return 'Signaler $name';
+  }
+
+  @override
+  String get contactReportReasonHint => 'Ce qui ne va pas';
+
+  @override
+  String get contactReportSend => 'Signaler';
+
+  @override
+  String get contactReportSent => 'Signalement envoyé à l\'équipe Pokou.';
 
   @override
   String get honamCity => 'Ville';
