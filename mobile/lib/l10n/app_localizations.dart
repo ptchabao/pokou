@@ -16016,6 +16016,48 @@ abstract class L {
   /// **'Contacts sur Pokou'**
   String get newChatOnPokouSection;
 
+  /// No description provided for @viewerReply.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répondre'**
+  String get viewerReply;
+
+  /// No description provided for @viewerForward.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transférer'**
+  String get viewerForward;
+
+  /// No description provided for @viewerSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get viewerSave;
+
+  /// No description provided for @viewerReact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réagir'**
+  String get viewerReact;
+
+  /// No description provided for @viewerSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{place} · {when}'**
+  String viewerSubtitle(String place, String when);
+
+  /// No description provided for @composerSendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à {name}'**
+  String composerSendTo(String name);
+
+  /// No description provided for @composerCompressedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos compressées pour économiser tes données.'**
+  String get composerCompressedNote;
+
   /// No description provided for @groupMembersChosen.
   ///
   /// In fr, this message translates to:

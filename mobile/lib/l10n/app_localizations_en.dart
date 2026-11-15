@@ -9563,6 +9563,32 @@ class LEn extends L {
   String get newChatOnPokouSection => 'Contacts on Pokou';
 
   @override
+  String get viewerReply => 'Reply';
+
+  @override
+  String get viewerForward => 'Forward';
+
+  @override
+  String get viewerSave => 'Save';
+
+  @override
+  String get viewerReact => 'React';
+
+  @override
+  String viewerSubtitle(String place, String when) {
+    return '$place · $when';
+  }
+
+  @override
+  String composerSendTo(String name) {
+    return 'Send to $name';
+  }
+
+  @override
+  String get composerCompressedNote =>
+      'Photos are compressed to save your data.';
+
+  @override
   String groupMembersChosen(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

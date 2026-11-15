@@ -376,9 +376,22 @@ class _AudioMessageBubbleState extends ConsumerState<AudioMessageBubble> {
 /// vocales et les vidéos attendent déjà un tap), donc la seule concernée par
 /// le mode économie de données : voir _startIfAllowed.
 class ImageMessageBubble extends ConsumerStatefulWidget {
-  const ImageMessageBubble({super.key, required this.media});
+  const ImageMessageBubble({
+    super.key,
+    required this.media,
+    this.viewerTitle,
+    this.viewerSubtitle,
+    this.caption,
+    this.viewerActions,
+  });
 
   final MediaMeta media;
+
+  /// Ce que la visionneuse affiche en tête et en bas (Discussions · 25).
+  final String? viewerTitle;
+  final String? viewerSubtitle;
+  final String? caption;
+  final ViewerActions? viewerActions;
 
   @override
   ConsumerState<ImageMessageBubble> createState() => _ImageMessageBubbleState();
@@ -532,8 +545,12 @@ class _ImageMessageBubbleState extends ConsumerState<ImageMessageBubble> {
     return GestureDetector(
       onTap: () => ImageViewer.open(
         context,
+        actions: widget.viewerActions,
         images: [
           ViewerImage(
+            title: widget.viewerTitle,
+            subtitle: widget.viewerSubtitle,
+            caption: widget.caption,
             full: Image.file(file, fit: BoxFit.contain, gaplessPlayback: true),
             // La vignette déjà décodée, en attendant la pleine définition :
             // même fichier, même largeur, donc servie par le cache.

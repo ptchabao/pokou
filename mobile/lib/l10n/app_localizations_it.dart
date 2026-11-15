@@ -9618,6 +9618,32 @@ class LIt extends L {
   String get newChatOnPokouSection => 'Contacts sur Pokou';
 
   @override
+  String get viewerReply => 'Répondre';
+
+  @override
+  String get viewerForward => 'Transférer';
+
+  @override
+  String get viewerSave => 'Enregistrer';
+
+  @override
+  String get viewerReact => 'Réagir';
+
+  @override
+  String viewerSubtitle(String place, String when) {
+    return '$place · $when';
+  }
+
+  @override
+  String composerSendTo(String name) {
+    return 'Envoyer à $name';
+  }
+
+  @override
+  String get composerCompressedNote =>
+      'Photos compressées pour économiser tes données.';
+
+  @override
   String groupMembersChosen(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

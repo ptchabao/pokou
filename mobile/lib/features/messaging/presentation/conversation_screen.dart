@@ -55,6 +55,7 @@ import 'forward_screen.dart';
 import 'poll_composer.dart';
 import 'report_sheet.dart';
 import 'offline_banner.dart';
+import '../../../core/widgets/image_viewer.dart' show ViewerActions;
 import 'unknown_sender_card.dart';
 import '../../presence/presentation/typing_controller.dart';
 import 'conversation_search_screen.dart';
@@ -1854,6 +1855,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                   .contains(message.id),
                                               onSwipeReply: () =>
                                                   _startReply(message),
+                                              onForward: message.isEncrypted
+                                                  ? null
+                                                  : () => openForwardScreen(
+                                                      context,
+                                                      payload:
+                                                          ForwardPayload.fromDirect(
+                                                            message,
+                                                          ),
+                                                      myUserId:
+                                                          widget.myUserId,
+                                                    ),
+                                              onSave: () => _saveMedia(message),
                                               onLongPress: () =>
                                                   _showMessageActions(message),
                                               onRetry: () => ref
@@ -2814,12 +2827,18 @@ class _Bubble extends StatefulWidget {
     required this.onSwipeReply,
     this.onTapReply,
     this.onBotButton,
+    this.onForward,
+    this.onSave,
     this.isPending = false,
     this.isFailed = false,
   });
 
   final DirectMessage message;
   final bool isMine;
+
+  /// Transférer / Enregistrer depuis la visionneuse photo (Discussions · 25).
+  final VoidCallback? onForward;
+  final VoidCallback? onSave;
 
   /// Nom affiché du contact — sert à étiqueter l'auteur d'un message cité
   /// (« Vous » vs le contact) dans le bandeau de réponse.
@@ -2961,7 +2980,21 @@ class _BubbleState extends State<_Bubble> {
         isMine: isMine,
         mediaKey: message.mediaKey,
       ),
-      'IMAGE' => ImageMessageBubble(media: media),
+      'IMAGE' => ImageMessageBubble(
+        media: media,
+        viewerTitle: isMine ? L.of(context).callYou : widget.contactName,
+        viewerSubtitle: L.of(context).viewerSubtitle(
+          widget.contactName,
+          DateFormat.MMMd().add_Hm().format(message.createdAt.toLocal()),
+        ),
+        caption: message.content,
+        viewerActions: ViewerActions(
+          onReply: widget.onSwipeReply,
+          onForward: widget.onForward,
+          onSave: widget.onSave,
+          onReact: widget.onReactionPick,
+        ),
+      ),
       'VIDEO' => VideoMessageBubble(media: media),
       _ => DocumentMessageBubble(media: media, isMine: isMine),
     };
