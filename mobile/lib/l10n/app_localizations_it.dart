@@ -9329,4 +9329,55 @@ class LIt extends L {
 
   @override
   String get koryMqVerifiedByCode => 'vérifié par code';
+
+  @override
+  String koryMqOnPlanned(String amount) {
+    return 'sur $amount prévus';
+  }
+
+  @override
+  String koryMqPeriodCounts(String up, String pending, String late) {
+    return '$up à jour · $pending à confirmer · $late en retard';
+  }
+
+  @override
+  String get koryMqPreviousMonths => 'Mois précédents';
+
+  @override
+  String koryMqAmountMonthlyOn(String amount, String day) {
+    return '$amount, le $day de chaque mois';
+  }
+
+  @override
+  String get koryMqOutsidersAfter => 'Hors du groupe : après création';
+
+  @override
+  String get koryMqAddOutside => 'Ajouter hors du groupe';
+
+  @override
+  String get koryMqConfirms => 'Confirme';
+
+  @override
+  String koryMqAndOtherMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'et $count autres membres',
+      one: 'et 1 autre membre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryMqDueFrom(String day, String date) {
+    return '$day, dès le $date';
+  }
+
+  @override
+  String get koryMqRemindersNotice =>
+      'Rappels à J−2 et le jour J, relance à J+1 si rien n’est déclaré ; chacun peut les couper pour lui.';
+
+  @override
+  String get koryMqChangeCollectorSub =>
+      'Nouveau numéro vérifié par code ; tous prévenus';
 }

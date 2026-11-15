@@ -2571,5 +2571,16 @@
   "koryMqSeeTontine": "See the tontine",
   "koryMqAllPaid": "{count, plural, =1{The member paid their fee. The tontine is open.} other{All {count} members paid their fee. The tontine is open.}}",
   "koryMqAmounts": "Amounts",
-  "koryMqVerifiedByCode": "verified by code"
+  "koryMqVerifiedByCode": "verified by code",
+  "koryMqOnPlanned": "out of {amount} planned",
+  "koryMqPeriodCounts": "{up} up to date · {pending} to confirm · {late} late",
+  "koryMqPreviousMonths": "Previous months",
+  "koryMqAmountMonthlyOn": "{amount}, on day {day} of each month",
+  "koryMqOutsidersAfter": "Outside the group: after creating",
+  "koryMqAddOutside": "Add from outside the group",
+  "koryMqConfirms": "Confirms",
+  "koryMqAndOtherMembers": "{count, plural, =1{and 1 other member} other{and {count} other members}}",
+  "koryMqDueFrom": "{day}, from {date}",
+  "koryMqRemindersNotice": "Reminders 2 days before and on the day, a nudge the day after if nothing is declared; everyone can turn them off for themselves.",
+  "koryMqChangeCollectorSub": "New number verified by code; everyone is notified"
 }
