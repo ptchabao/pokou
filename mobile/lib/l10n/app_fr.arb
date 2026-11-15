@@ -4952,5 +4952,57 @@
     }
   },
   "koryMqRemindersTitle": "Rappels de cette cotisation",
-  "koryMqRemindersSub": "J−2, jour J et relance J+1"
+  "koryMqRemindersSub": "J−2, jour J et relance J+1",
+  "koryMqConfirmedOf": "{done} confirmées sur {total}",
+  "@koryMqConfirmedOf": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqUpToDate": "À jour",
+  "koryMqConfirmedDeclared": "{confirmed} confirmées · {declared} déclarées",
+  "@koryMqConfirmedDeclared": {
+    "placeholders": {
+      "confirmed": {
+        "type": "String"
+      },
+      "declared": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqLateCount": "{count, plural, =1{1 en retard} other{{count} en retard}}",
+  "@koryMqLateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "koryMqHaveContributed": "{done} sur {total} ont cotisé",
+  "@koryMqHaveContributed": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqPlusFeeNotRefunded": "Les frais Kory Plus ne sont pas remboursés.",
+  "koryMqSeeTontine": "Voir la tontine",
+  "koryMqAllPaid": "{count, plural, =1{Le membre a payé ses frais. La tontine est ouverte.} other{Les {count} membres ont payé leurs frais. La tontine est ouverte.}}",
+  "@koryMqAllPaid": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

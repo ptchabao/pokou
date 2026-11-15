@@ -230,8 +230,7 @@ class _KoryJournalScreenState extends ConsumerState<KoryJournalScreen> {
             children: [
               Expanded(
                 child: KoryButton(
-                  quiet: true,
-                  icon: Icons.table_chart_outlined,
+                  outlined: true,
                   label: l.koryXExportCsv,
                   busy: _exporting,
                   onPressed: all.isEmpty
@@ -241,9 +240,8 @@ class _KoryJournalScreenState extends ConsumerState<KoryJournalScreen> {
               ),
               const SizedBox(width: 10),
               Expanded(
+                // Le PDF, l'export qu'on partage, est l'action pleine.
                 child: KoryButton(
-                  quiet: true,
-                  icon: Icons.picture_as_pdf_outlined,
                   label: l.koryXExportPdf,
                   busy: _exporting,
                   onPressed: all.isEmpty ? null : () => _export(pot, all, true),
@@ -287,8 +285,10 @@ class _KoryJournalScreenState extends ConsumerState<KoryJournalScreen> {
                 ),
               )
             else
-              for (final (i, e) in shown.indexed)
-                _EventRow(event: e, last: i == shown.length - 1),
+              // Une liste à icônes, dans une carte, comme la maquette.
+              KoryRowsCard(
+                children: [for (final e in shown) _EventRow(event: e)],
+              ),
             const SizedBox(height: 16),
             KoryNotice(icon: Icons.lock_outline, text: l.koryXJournalLocked),
           ],
@@ -299,58 +299,42 @@ class _KoryJournalScreenState extends ConsumerState<KoryJournalScreen> {
 }
 
 class _EventRow extends StatelessWidget {
-  const _EventRow({required this.event, required this.last});
+  const _EventRow({required this.event});
 
   final KoryJournalEvent event;
-  final bool last;
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (event.kind) {
-      'confirmed' => AppColors.feedbackSuccess,
-      'contested' => AppColors.securityCritical,
-      _ => AppColors.textMuted,
+    final (IconData icon, Color color) = switch (event.kind) {
+      'confirmed' => (Icons.check, AppColors.feedbackSuccess),
+      'contested' => (Icons.warning_amber_rounded, AppColors.securityCritical),
+      _ when event.entry != null => (Icons.history, AppColors.textSecondary),
+      _ => (Icons.event_note_outlined, AppColors.textSecondary),
     };
     final day = koryDay(context, event.at);
-    return IntrinsicHeight(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              const SizedBox(height: 6),
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              if (!last)
-                Expanded(child: Container(width: 2, color: AppColors.border)),
-            ],
-          ),
+          Icon(icon, size: 18, color: color),
           const SizedBox(width: 12),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: last ? 0 : 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.text,
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      height: 1.35,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.text,
+                  style: TextStyle(color: AppColors.textPrimary, height: 1.35),
+                ),
+                Text(
+                  '$day · ${koryTime(event.at)}',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: AppColors.textSecondary,
                   ),
-                  Text(
-                    '$day · ${koryTime(event.at)}',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

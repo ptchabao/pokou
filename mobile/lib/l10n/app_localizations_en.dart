@@ -9223,4 +9223,44 @@ class LEn extends L {
   @override
   String get koryMqRemindersSub =>
       '2 days before, on the day, and a nudge the day after';
+
+  @override
+  String koryMqConfirmedOf(String done, String total) {
+    return '$done confirmed of $total';
+  }
+
+  @override
+  String get koryMqUpToDate => 'Up to date';
+
+  @override
+  String koryMqConfirmedDeclared(String confirmed, String declared) {
+    return '$confirmed confirmed · $declared declared';
+  }
+
+  @override
+  String koryMqLateCount(int count) {
+    return '$count late';
+  }
+
+  @override
+  String koryMqHaveContributed(String done, String total) {
+    return '$done of $total paid';
+  }
+
+  @override
+  String get koryMqPlusFeeNotRefunded => 'Kory Plus fees are not refunded.';
+
+  @override
+  String get koryMqSeeTontine => 'See the tontine';
+
+  @override
+  String koryMqAllPaid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'All $count members paid their fee. The tontine is open.',
+      one: 'The member paid their fee. The tontine is open.',
+    );
+    return '$_temp0';
+  }
 }

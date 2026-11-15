@@ -9311,4 +9311,51 @@ class LRu extends L {
 
   @override
   String get koryMqRemindersSub => 'J−2, jour J et relance J+1';
+
+  @override
+  String koryMqConfirmedOf(String done, String total) {
+    return '$done confirmées sur $total';
+  }
+
+  @override
+  String get koryMqUpToDate => 'À jour';
+
+  @override
+  String koryMqConfirmedDeclared(String confirmed, String declared) {
+    return '$confirmed confirmées · $declared déclarées';
+  }
+
+  @override
+  String koryMqLateCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en retard',
+      one: '1 en retard',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryMqHaveContributed(String done, String total) {
+    return '$done sur $total ont cotisé';
+  }
+
+  @override
+  String get koryMqPlusFeeNotRefunded =>
+      'Les frais Kory Plus ne sont pas remboursés.';
+
+  @override
+  String get koryMqSeeTontine => 'Voir la tontine';
+
+  @override
+  String koryMqAllPaid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Les $count membres ont payé leurs frais. La tontine est ouverte.',
+      one: 'Le membre a payé ses frais. La tontine est ouverte.',
+    );
+    return '$_temp0';
+  }
 }

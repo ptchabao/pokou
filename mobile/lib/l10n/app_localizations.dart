@@ -15481,6 +15481,54 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'J−2, jour J et relance J+1'**
   String get koryMqRemindersSub;
+
+  /// No description provided for @koryMqConfirmedOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} confirmées sur {total}'**
+  String koryMqConfirmedOf(String done, String total);
+
+  /// No description provided for @koryMqUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'À jour'**
+  String get koryMqUpToDate;
+
+  /// No description provided for @koryMqConfirmedDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'{confirmed} confirmées · {declared} déclarées'**
+  String koryMqConfirmedDeclared(String confirmed, String declared);
+
+  /// No description provided for @koryMqLateCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 en retard} other{{count} en retard}}'**
+  String koryMqLateCount(int count);
+
+  /// No description provided for @koryMqHaveContributed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {total} ont cotisé'**
+  String koryMqHaveContributed(String done, String total);
+
+  /// No description provided for @koryMqPlusFeeNotRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les frais Kory Plus ne sont pas remboursés.'**
+  String get koryMqPlusFeeNotRefunded;
+
+  /// No description provided for @koryMqSeeTontine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la tontine'**
+  String get koryMqSeeTontine;
+
+  /// No description provided for @koryMqAllPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le membre a payé ses frais. La tontine est ouverte.} other{Les {count} membres ont payé leurs frais. La tontine est ouverte.}}'**
+  String koryMqAllPaid(int count);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

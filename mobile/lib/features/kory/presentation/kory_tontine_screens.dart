@@ -1315,12 +1315,22 @@ class KoryTontineDrawScreen extends ConsumerWidget {
     return KoryPage(
       title: l.koryXTontineStarts,
       subtitle: '${pot.title} · ${l.koryXKoryPlus}',
+      footer: KoryFooter(
+        children: [
+          KoryButton(
+            label: l.koryMqSeeTontine,
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
           KoryNotice(
             tone: KoryTone.success,
-            text: l.koryXAllAccepted(pot.rounds.length),
+            text: (pot.plusFee?.isDue ?? false)
+                ? l.koryMqAllPaid(pot.rounds.length)
+                : l.koryXAllAccepted(pot.rounds.length),
           ),
           const SizedBox(height: 12),
           if (pot.drawnAt != null)
@@ -1603,102 +1613,191 @@ class _KoryTontineReportScreenState
       subtitle: l.koryXVisibleToAllMembers(pot.title),
       footer: KoryFooter(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: KoryButton(
-                  quiet: true,
-                  icon: Icons.picture_as_pdf_outlined,
-                  label: l.koryXExportPdf,
-                  busy: _exporting,
-                  onPressed: () async {
-                    setState(() => _exporting = true);
-                    try {
-                      await korySharePdf(
-                        title: l.koryXReportTitle,
-                        subtitle: pot.title,
-                        footer: l.koryXReportKept,
-                        lines: [
-                          for (final r in pot.rounds)
-                            KoryExportLine(
-                              r.dueAt,
-                              '${_roundTitle(r)} — ${r.beneficiaryName ?? '—'} — ${_roundLine(r)}',
-                            ),
-                        ],
-                      );
-                    } catch (_) {
-                      if (context.mounted) koryFailed(context);
-                    } finally {
-                      if (mounted) setState(() => _exporting = false);
-                    }
-                  },
-                ),
+          // « Exporter en PDF » plein, puis le journal en lien.
+          KoryButton(
+            label: l.koryXExportPdf,
+            busy: _exporting,
+            onPressed: () async {
+              setState(() => _exporting = true);
+              try {
+                await korySharePdf(
+                  title: l.koryXReportTitle,
+                  subtitle: pot.title,
+                  footer: l.koryXReportKept,
+                  lines: [
+                    for (final r in pot.rounds)
+                      KoryExportLine(
+                        r.dueAt,
+                        '${_roundTitle(r)} — ${r.beneficiaryName ?? '—'} — ${_roundLine(r)}',
+                      ),
+                  ],
+                );
+              } catch (_) {
+                if (context.mounted) koryFailed(context);
+              } finally {
+                if (mounted) setState(() => _exporting = false);
+              }
+            },
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => KoryJournalScreen(potId: pot.id),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: KoryButton(
-                  quiet: true,
-                  icon: Icons.receipt_long_outlined,
-                  label: l.koryJournalTab,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => KoryJournalScreen(potId: pot.id),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
+            child: Text(l.koryJournal),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          KoryNotice(text: l.koryXReportMeaning),
+          Text(
+            l.koryXReportMeaning,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 10),
+          KoryRowsCard(
+            children: [
+              for (final r in pot.rounds)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _roundTitle(r),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              r.beneficiaryId == me
+                                  ? l.koryYou
+                                  : (r.beneficiaryName ?? '—'),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: r.isCancelled
+                                    ? AppColors.textMuted
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Les statuts en pastilles, comme la maquette.
+                      Flexible(child: _roundPills(l, r)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 10),
           KoryCard(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
               children: [
-                for (final r in pot.rounds)
-                  KoryPersonRow(
-                    name: r.beneficiaryId == me
-                        ? l.koryYou
-                        : (r.beneficiaryName ?? '—'),
-                    subtitle: '${_roundTitle(r)}\n${_roundLine(r)}',
-                    muted: r.isCancelled || r.status == 'UPCOMING',
-                    trailing: r.rejectedCount > 0
-                        ? Text(
-                            l.koryXContestedCount(r.rejectedCount),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.securityCritical,
-                            ),
-                          )
-                        : r.lateCount > 0 && !r.isCancelled
-                        ? koryStatusPill(l, 'LATE')
-                        : null,
+                Expanded(
+                  child: Text(
+                    l.koryXYourContributions,
+                    style: TextStyle(color: AppColors.textPrimary),
                   ),
+                ),
+                Text(
+                  l.koryMqConfirmedOf('$mineDone', '${owed.length}'),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (mineDone == owed.length) ...[
+                  const SizedBox(width: 8),
+                  KoryStatusPill(
+                    icon: Icons.check_circle,
+                    label: l.koryMqUpToDate,
+                    color: AppColors.feedbackSuccess,
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: 10),
-          KoryCard(
-            child: KoryLine(
-              l.koryXYourContributions,
-              l.koryXConfirmedOf('$mineDone', '${owed.length}'),
-              valueColor: mineDone == owed.length
-                  ? AppColors.feedbackSuccess
-                  : AppColors.securityWarning,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l.koryXReportKept,
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
+          KoryNotice(text: l.koryXReportKept),
         ],
       ),
+    );
+  }
+
+  /// « 10 sur 10 ont cotisé », « 2 en retard », « 1 contestée », « À venir ».
+  Widget _roundPills(L l, KoryRound r) {
+    final pills = <Widget>[];
+    if (r.isCancelled) {
+      pills.add(
+        KoryStatusPill(
+          icon: Icons.block,
+          label: l.koryXCancelled,
+          color: AppColors.textSecondary,
+        ),
+      );
+    } else if (r.status == 'UPCOMING') {
+      pills.add(koryStatusPill(l, 'DUE'));
+    } else if (r.isCurrent) {
+      pills.add(
+        Text(
+          l.koryMqConfirmedDeclared(
+            '${r.confirmedCount}',
+            '${r.declaredCount}',
+          ),
+          textAlign: TextAlign.end,
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      );
+      if (r.lateCount > 0) {
+        pills.add(
+          KoryStatusPill(
+            icon: Icons.event_busy_outlined,
+            label: l.koryMqLateCount(r.lateCount),
+            color: AppColors.securityCritical,
+          ),
+        );
+      }
+    } else {
+      pills.add(
+        KoryStatusPill(
+          icon: Icons.check_circle,
+          label: l.koryMqHaveContributed(
+            '${r.confirmedCount}',
+            '${r.expectedCount}',
+          ),
+          color: AppColors.feedbackSuccess,
+        ),
+      );
+    }
+    if (r.rejectedCount > 0) {
+      pills.add(
+        KoryStatusPill(
+          icon: Icons.cancel_outlined,
+          label: l.koryXContestedCount(r.rejectedCount),
+          color: AppColors.securityCritical,
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (final (i, p) in pills.indexed) ...[
+          if (i > 0) const SizedBox(height: 4),
+          p,
+        ],
+      ],
     );
   }
 }
@@ -1778,7 +1877,19 @@ class _KoryTontineDissolveScreenState
                     l.koryXPastRounds,
                     l.koryXOutOf('$done', '${pot.rounds.length}'),
                   ),
-                  KoryLine(l.koryXCancelledRounds, '${left.length}'),
+                  // « 5 · de mars à juillet »
+                  KoryLine(
+                    l.koryXCancelledRounds,
+                    left.length > 1 &&
+                            left.first.dueAt != null &&
+                            left.last.dueAt != null
+                        ? l.koryXRoundsSpan(
+                            left.length,
+                            koryMonth(context, left.first.dueAt!).toLowerCase(),
+                            koryMonth(context, left.last.dueAt!).toLowerCase(),
+                          )
+                        : '${left.length}',
+                  ),
                 ],
               ),
             ),
@@ -1793,28 +1904,44 @@ class _KoryTontineDissolveScreenState
             decoration: InputDecoration(labelText: l.koryXReasonRequired),
           ),
           KorySection(l.koryXWhatHappensNext),
-          for (final text in [
-            l.koryXDissolveNotified(members),
-            l.koryXDissolveNoMoreRounds,
-            l.koryXReportKept,
-            l.koryXDissolveSettle,
-          ])
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.circle, size: 6, color: AppColors.textSecondary),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      text,
-                      style: TextStyle(color: AppColors.textPrimary),
+          // Des coches, dans une carte, comme la maquette.
+          KoryCard(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+            child: Column(
+              children: [
+                for (final text in [
+                  l.koryXDissolveNotified(members),
+                  l.koryXDissolveNoMoreRounds,
+                  l.koryXReportKept,
+                  if (pot.plusFee?.isDue ?? false) l.koryMqPlusFeeNotRefunded,
+                  l.koryXDissolveSettle,
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check,
+                          size: 16,
+                          color: AppColors.feedbackSuccess,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            text,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
+          ),
         ],
       ),
     );
