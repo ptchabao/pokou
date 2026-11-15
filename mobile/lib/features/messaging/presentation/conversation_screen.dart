@@ -46,6 +46,7 @@ import '../../calls/presentation/call_controller.dart';
 import '../../calls/presentation/call_screen.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../../marketplace/data/product_model.dart';
+import '../../marketplace/presentation/assime_rate_invitation.dart';
 import '../../profile/presentation/contact_profile_screen.dart';
 import '../data/direct_message_model.dart';
 import 'bubble_widgets.dart';
@@ -1520,6 +1521,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     children: [
                       if (product != null) ...[
                         _PinnedProductCard(product: product),
+                        // Assimé 19 : l'acheteur d'une vente confirmée est
+                        // invité à la noter, ici et nulle part ailleurs.
+                        if (!isSeller)
+                          AssimeRateInvitationCard(productId: product.id),
                         if (isSeller)
                           _OrderActions(
                             currentStatus: _orderStatusFrom(state.messages),

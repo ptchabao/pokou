@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4056,7 +4055,8 @@ class LFr extends L {
       locale: localeName,
       other:
           '$count messages mis en attente par le Mode Bouclier — glisser vers le bas pour les afficher',
-      one: '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
+      one:
+          '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
     );
     return '$_temp0';
   }
@@ -9335,5 +9335,10 @@ class LFr extends L {
   @override
   String assimeSellerListings(int count) {
     return '$count annonces';
+  }
+
+  @override
+  String assimeRateInvite(String seller, String price) {
+    return '$seller a indiqué que tu as acheté cet article pour $price.';
   }
 }

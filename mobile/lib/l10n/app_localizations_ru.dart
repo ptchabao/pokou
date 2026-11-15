@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -9368,5 +9367,10 @@ class LRu extends L {
   @override
   String assimeSellerListings(int count) {
     return '$count annonces';
+  }
+
+  @override
+  String assimeRateInvite(String seller, String price) {
+    return '$seller a indiqué que tu as acheté cet article pour $price.';
   }
 }

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4048,7 +4047,8 @@ class LEs extends L {
       locale: localeName,
       other:
           '$count mensajes retenidos por el Modo Escudo: desliza hacia abajo para verlos',
-      one: '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
+      one:
+          '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
     );
     return '$_temp0';
   }
@@ -9312,5 +9312,10 @@ class LEs extends L {
   @override
   String assimeSellerListings(int count) {
     return '$count annonces';
+  }
+
+  @override
+  String assimeRateInvite(String seller, String price) {
+    return '$seller a indiqué que tu as acheté cet article pour $price.';
   }
 }

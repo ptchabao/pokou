@@ -15649,6 +15649,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{count} annonces'**
   String assimeSellerListings(int count);
+
+  /// No description provided for @assimeRateInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seller} a indiqué que tu as acheté cet article pour {price}.'**
+  String assimeRateInvite(String seller, String price);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

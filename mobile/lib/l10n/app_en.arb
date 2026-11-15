@@ -2589,5 +2589,6 @@
   "assimeReplyHint": "Your reply, visible to everyone",
   "assimeContactSeller": "Contact the seller",
   "assimeNoPaymentNotice": "Pokou takes no payment on Assimé. See the item before paying, in a public place.",
-  "assimeSellerListings": "{count} listings"
+  "assimeSellerListings": "{count} listings",
+  "assimeRateInvite": "{seller} says you bought this item for {price}."
 }
