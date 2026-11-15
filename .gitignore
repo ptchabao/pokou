@@ -12,6 +12,7 @@ __pycache__/
 .ruff_cache/
 backend/.env
 backend/*.db
+backend/*.db-journal
 backend/media_storage/
 backend/firebase-service-account.json
 
