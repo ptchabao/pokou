@@ -53,6 +53,10 @@ class AlertBody(BaseModel):
     max_price: Optional[int] = Field(None, ge=0, le=1_000_000_000)
 
 
+class AlertPatch(BaseModel):
+    paused: bool
+
+
 class ModerationBody(BaseModel):
     approve: bool
     reason: Optional[str] = Field(None, max_length=280)
@@ -72,6 +76,9 @@ def _snapshot(product: MarketplaceProduct) -> dict:
         "seller_id": product.seller_id,
         "seller_name": (product.seller.full_name or "Vendeur") if product.seller else "Vendeur",
         "image_media_id": image.id if image else None,
+        # Assimé 12 : un favori vendu reste, barré, avec « Vendu ».
+        "sold": product.sold_at is not None,
+        "created_at": product.created_at.isoformat() if product.created_at else None,
     }
 
 
@@ -139,6 +146,7 @@ def _alert_json(alert: MarketplaceAlert) -> dict:
         "location": alert.location,
         "max_price": alert.max_price,
         "matches_count": alert.matches_count,
+        "paused": bool(alert.paused),
         "last_matched_at": alert.last_matched_at.isoformat() if alert.last_matched_at else None,
         "created_at": alert.created_at.isoformat(),
     }
@@ -169,6 +177,21 @@ def create_alert(body: AlertBody, current_user: dict = Depends(get_current_user)
         location=(body.location or "").strip() or None, max_price=body.max_price,
     )
     db.add(alert)
+    db.commit()
+    return _alert_json(alert)
+
+
+@router.patch("/alerts/{alert_id}")
+def patch_alert(
+    alert_id: int, body: AlertPatch, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db),
+):
+    """Couper ou rallumer une alerte (Assimé 12) sans la perdre."""
+    alert = db.query(MarketplaceAlert).filter(
+        MarketplaceAlert.id == alert_id, MarketplaceAlert.user_id == current_user["user_id"]
+    ).first()
+    if alert is None:
+        raise HTTPException(status_code=404, detail="Alerte introuvable")
+    alert.paused = body.paused
     db.commit()
     return _alert_json(alert)
 
@@ -208,7 +231,7 @@ def notify_alerts(db: Session, product: MarketplaceProduct) -> int:
             continue
         alert.matches_count += 1
         alert.last_matched_at = now
-        if alert.user_id in notified:
+        if alert.paused or alert.user_id in notified:
             continue
         notified.add(alert.user_id)
         send_push(
@@ -284,6 +307,9 @@ def sponsored_status(
     # Rotation à la minute : chacun des vendeurs payants a son tour.
     boost, product = candidates[int(now.timestamp() // 60) % len(candidates)]
     boost.status_views += 1
+    from app.api.v1.marketplace.marketplace import _add_daily
+
+    _add_daily(boost, "status", now)
     db.commit()
     return {
         "item": {
@@ -309,11 +335,24 @@ def sponsored_contact(boost_id: int, current_user: dict = Depends(get_current_us
     return {"ok": True}
 
 
+@router.post("/boosts/{boost_id}/open")
+def sponsored_open(boost_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Voir l'annonce » depuis le statut sponsorisé (Assimé 15), compté
+    pour le bilan (Assimé 17)."""
+    boost = db.query(MarketplaceBoost).filter(MarketplaceBoost.id == boost_id).first()
+    if boost is None:
+        raise HTTPException(status_code=404, detail="Mise en avant introuvable")
+    if boost.seller_id != current_user["user_id"]:
+        boost.opens = (boost.opens or 0) + 1
+        db.commit()
+    return {"ok": True}
+
+
 @router.get("/{product_id}/why")
 def why_sponsored(product_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     product = _live_product(db, product_id)
     now = datetime.utcnow()
-    boost = db.query(MarketplaceBoost).filter(
+    boost =db.query(MarketplaceBoost).filter(
         MarketplaceBoost.product_id == product.id,
         MarketplaceBoost.starts_at <= now,
         MarketplaceBoost.expires_at > now,
@@ -345,6 +384,16 @@ def boost_report(product_id: int, current_user: dict = Depends(get_current_user)
         "status_views": b.status_views,
         "contacts": b.contacts,
         "status_moderation": b.status_moderation,
+        # Assimé 17 : « Voir l'annonce », messages reçus pendant la mise en
+        # avant contre ceux d'avant, et vues par jour.
+        "opens": b.opens or 0,
+        "messages": max((product.contacts_count or 0) - (b.contacts_before or 0), 0)
+        if b.starts_at <= now else 0,
+        "messages_before": b.contacts_before or 0,
+        "daily": [
+            {"day": day, "results": int(v.get("results", 0)), "status": int(v.get("status", 0))}
+            for day, v in sorted((b.daily or {}).items())
+        ],
     } for b in boosts]}
 
 
