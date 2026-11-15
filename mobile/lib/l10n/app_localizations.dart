@@ -15523,6 +15523,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'C\'est noté : tu seras prévenu dès l\'ouverture dans ta ville.'**
   String get lot1SoonNoted;
+
+  /// No description provided for @welcomeBackBabaLot1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon retour, {name} ! J\'ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes discussions et ton badge te suivent.'**
+  String welcomeBackBabaLot1(String name);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

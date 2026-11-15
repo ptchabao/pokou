@@ -2617,5 +2617,13 @@
   "lot1SoonTitle": "Coming soon: Kory, Honam, Assimé",
   "lot1SoonBody": "Group funds, pharmacy and classified ads are arriving city by city.",
   "lot1SoonNotify": "Notify me",
-  "lot1SoonNoted": "Noted: you'll be told as soon as it opens in your city."
+  "lot1SoonNoted": "Noted: you'll be told as soon as it opens in your city.",
+  "welcomeBackBabaLot1": "Welcome back, {name}! I found your account and your backup. Your groups, your chats and your badge come with you.",
+  "@welcomeBackBabaLot1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

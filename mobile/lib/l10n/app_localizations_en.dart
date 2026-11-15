@@ -9228,4 +9228,9 @@ class LEn extends L {
   @override
   String get lot1SoonNoted =>
       'Noted: you\'ll be told as soon as it opens in your city.';
+
+  @override
+  String welcomeBackBabaLot1(String name) {
+    return 'Welcome back, $name! I found your account and your backup. Your groups, your chats and your badge come with you.';
+  }
 }

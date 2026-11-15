@@ -9281,4 +9281,9 @@ class LIt extends L {
   @override
   String get lot1SoonNoted =>
       'C\'est noté : tu seras prévenu dès l\'ouverture dans ta ville.';
+
+  @override
+  String welcomeBackBabaLot1(String name) {
+    return 'Bon retour, $name ! J\'ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes discussions et ton badge te suivent.';
+  }
 }

@@ -5,7 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/backup/backup_service.dart';
+import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/assistant_orb.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../modules/shared/module_ui.dart';
@@ -453,21 +457,37 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
-          const Center(
-            child: PokouIllustration(PokouIllustrations.backup, height: 150),
-          ),
-          const SizedBox(height: 16),
+          // Maquette Connexion · 2 : pas d'illustration, Baba parle d'abord.
+          // Au Lot 1, il ne cite pas Kory : « tes discussions ».
           ModuleCard(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.auto_awesome, color: AppColors.brandOr),
+                const AssistantOrb(size: 32),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    backup == null
-                        ? l.restoreWelcomeNoBackup
-                        : l.welcomeBackBaba(first),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${l.navBaba} · ${l.onbAiTag}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accentPrimaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        backup == null
+                            ? l.restoreWelcomeNoBackup
+                            : isLot1(
+                                ref.watch(currentCountryConfigProvider).modules,
+                              )
+                            ? l.welcomeBackBabaLot1(first)
+                            : l.welcomeBackBaba(first),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -554,7 +574,10 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
                     if (password == null || !context.mounted) return;
                     // La main est rendue tout de suite (CNX-3) : la
                     // restauration continue, sa carte s'affiche dans
-                    // Discussions.
+                    // Discussions — c'est donc là qu'on arrive (maquette
+                    // Connexion · 3), pas sur l'Accueil.
+                    ref.read(pokouCurrentTabProvider.notifier).state =
+                        PokouTab.discussions;
                     Navigator.of(context).pop();
                     unawaited(
                       startRestore(context, ref, password, from: backup).then((
@@ -599,6 +622,13 @@ class RestoreProgressCard extends ConsumerWidget {
           children: [
             Row(
               children: [
+                // Maquette Connexion · 3 : le nuage de la sauvegarde.
+                Icon(
+                  Icons.cloud_download_outlined,
+                  size: 20,
+                  color: AppColors.accentPrimaryDark,
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     l.restoreCardTitle,

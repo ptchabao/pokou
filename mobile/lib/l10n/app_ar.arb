@@ -2568,5 +2568,6 @@
   "lot1SoonTitle": "Bientôt : Kory, Honam, Assimé",
   "lot1SoonBody": "Cagnottes, pharmacie et petites annonces arrivent ville par ville.",
   "lot1SoonNotify": "Me prévenir",
-  "lot1SoonNoted": "C'est noté : tu seras prévenu dès l'ouverture dans ta ville."
+  "lot1SoonNoted": "C'est noté : tu seras prévenu dès l'ouverture dans ta ville.",
+  "welcomeBackBabaLot1": "Bon retour, {name} ! J'ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes discussions et ton badge te suivent."
 }
