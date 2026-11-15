@@ -6222,13 +6222,13 @@ abstract class L {
   /// No description provided for @audienceOnly.
   ///
   /// In fr, this message translates to:
-  /// **'Uniquement…'**
+  /// **'Seulement avec…'**
   String get audienceOnly;
 
   /// No description provided for @audienceContactsDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes les personnes de ton carnet Pokou'**
+  /// **'Tous les contacts enregistrés sur ton téléphone'**
   String get audienceContactsDesc;
 
   /// No description provided for @audienceNobodyDesc.
@@ -6348,7 +6348,7 @@ abstract class L {
   /// No description provided for @statusFeedTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Actualités'**
+  /// **'Statuts'**
   String get statusFeedTitle;
 
   /// No description provided for @statusFeedUnavailable.
@@ -8010,7 +8010,7 @@ abstract class L {
   /// No description provided for @statusMineTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Mon Actu'**
+  /// **'Mon statut'**
   String get statusMineTitle;
 
   /// No description provided for @statusMineBody.
@@ -12498,7 +12498,7 @@ abstract class L {
   /// No description provided for @discussionsStatusesNews.
   ///
   /// In fr, this message translates to:
-  /// **'STATUTS & NOUVELLES'**
+  /// **'STATUTS'**
   String get discussionsStatusesNews;
 
   /// No description provided for @statusMyStatus.
@@ -15763,6 +15763,60 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.'**
   String get changeNumberInfoLot1;
+
+  /// No description provided for @statusExcludedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun contact exclu} =1{1 contact exclu} other{{count} contacts exclus}}'**
+  String statusExcludedCount(num count);
+
+  /// No description provided for @statusAllowedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Personne pour le moment} =1{1 contact} other{{count} contacts}}'**
+  String statusAllowedCount(num count);
+
+  /// No description provided for @statusRule24h.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un statut disparaît après 24 h'**
+  String get statusRule24h;
+
+  /// No description provided for @statusRuleViewers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toi seul vois qui a vu tes statuts'**
+  String get statusRuleViewers;
+
+  /// No description provided for @statusRuleViewersSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne d\'autre ne voit ce nombre'**
+  String get statusRuleViewersSub;
+
+  /// No description provided for @statusRuleReply.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une réponse arrive en privé'**
+  String get statusRuleReply;
+
+  /// No description provided for @statusRuleReplySub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans votre discussion à deux'**
+  String get statusRuleReplySub;
+
+  /// No description provided for @statusRuleReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout statut peut être signalé'**
+  String get statusRuleReport;
+
+  /// No description provided for @statusProofNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les statuts ne sont pas des messages d\'une discussion : le mode preuve ne les concerne pas.'**
+  String get statusProofNote;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

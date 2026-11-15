@@ -1040,7 +1040,7 @@
   "statusText": "Текст",
   "statusTypeHint": "Введите свой статус…",
   "statusPublish": "Опубликовать",
-  "statusFeedTitle": "Новости",
+  "statusFeedTitle": "Статусы",
   "statusFeedUnavailable": "Статусы недоступны — повторить",
   "statusSection": "Статусы",
   "statusMine": "Я",
@@ -1317,7 +1317,7 @@
   "chatsSearchOrAsk": "Найти или спросить Баба…",
   "convEncryptedHint": "Зашифрованное сообщение…",
   "chatsArchivedSection": "Архив",
-  "statusMineTitle": "Моя новость",
+  "statusMineTitle": "Мой статус",
   "statusMineBody": "Нажмите, чтобы опубликовать (24 ч)",
   "statusMineVisibility": "Видно моим контактам",
   "callLeaveConference": "Покинуть конференцию",
@@ -2609,5 +2609,14 @@
   "statusReportSent": "Statut signalé.",
   "statusForwardMediaUnsupported": "Le transfert d'une photo ou vidéo n'est pas encore possible.",
   "changeNumberHint": "Numéro",
-  "changeNumberInfoLot1": "Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro."
+  "changeNumberInfoLot1": "Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.",
+  "statusExcludedCount": "{count, plural, =0{Aucun contact exclu} =1{1 contact exclu} other{{count} contacts exclus}}",
+  "statusAllowedCount": "{count, plural, =0{Personne pour le moment} =1{1 contact} other{{count} contacts}}",
+  "statusRule24h": "Un statut disparaît après 24 h",
+  "statusRuleViewers": "Toi seul vois qui a vu tes statuts",
+  "statusRuleViewersSub": "Personne d'autre ne voit ce nombre",
+  "statusRuleReply": "Une réponse arrive en privé",
+  "statusRuleReplySub": "Dans votre discussion à deux",
+  "statusRuleReport": "Tout statut peut être signalé",
+  "statusProofNote": "Les statuts ne sont pas des messages d'une discussion : le mode preuve ne les concerne pas."
 }

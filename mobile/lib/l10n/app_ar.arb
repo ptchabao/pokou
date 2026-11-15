@@ -1040,7 +1040,7 @@
   "statusText": "نص",
   "statusTypeHint": "اكتب حالتك…",
   "statusPublish": "نشر",
-  "statusFeedTitle": "المستجدات",
+  "statusFeedTitle": "الحالات",
   "statusFeedUnavailable": "الحالات غير متاحة — أعد المحاولة",
   "statusSection": "الحالات",
   "statusMine": "أنا",
@@ -1317,7 +1317,7 @@
   "chatsSearchOrAsk": "ابحث أو اسأل بابا…",
   "convEncryptedHint": "رسالة مشفّرة…",
   "chatsArchivedSection": "المحادثات المؤرشفة",
-  "statusMineTitle": "جديدي",
+  "statusMineTitle": "حالتي",
   "statusMineBody": "اضغط للنشر (24 ساعة)",
   "statusMineVisibility": "مرئي لجهات اتصالي",
   "callLeaveConference": "مغادرة المكالمة",
@@ -2609,5 +2609,14 @@
   "statusReportSent": "Statut signalé.",
   "statusForwardMediaUnsupported": "Le transfert d'une photo ou vidéo n'est pas encore possible.",
   "changeNumberHint": "Numéro",
-  "changeNumberInfoLot1": "Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro."
+  "changeNumberInfoLot1": "Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.",
+  "statusExcludedCount": "{count, plural, =0{Aucun contact exclu} =1{1 contact exclu} other{{count} contacts exclus}}",
+  "statusAllowedCount": "{count, plural, =0{Personne pour le moment} =1{1 contact} other{{count} contacts}}",
+  "statusRule24h": "Un statut disparaît après 24 h",
+  "statusRuleViewers": "Toi seul vois qui a vu tes statuts",
+  "statusRuleViewersSub": "Personne d'autre ne voit ce nombre",
+  "statusRuleReply": "Une réponse arrive en privé",
+  "statusRuleReplySub": "Dans votre discussion à deux",
+  "statusRuleReport": "Tout statut peut être signalé",
+  "statusProofNote": "Les statuts ne sont pas des messages d'une discussion : le mode preuve ne les concerne pas."
 }

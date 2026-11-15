@@ -3513,10 +3513,10 @@ class LEn extends L {
   String get audienceExcept => 'My contacts except…';
 
   @override
-  String get audienceOnly => 'Only…';
+  String get audienceOnly => 'Only share with…';
 
   @override
-  String get audienceContactsDesc => 'Everyone in your Pokou address book';
+  String get audienceContactsDesc => 'All the contacts saved on your phone';
 
   @override
   String get audienceNobodyDesc => 'Your statuses will be visible to you only';
@@ -3580,7 +3580,7 @@ class LEn extends L {
   String get statusPublish => 'Publish';
 
   @override
-  String get statusFeedTitle => 'Updates';
+  String get statusFeedTitle => 'Statuses';
 
   @override
   String get statusFeedUnavailable => 'Statuses unavailable — retry';
@@ -4524,7 +4524,7 @@ class LEn extends L {
   String get chatsArchivedSection => 'Archived chats';
 
   @override
-  String get statusMineTitle => 'My update';
+  String get statusMineTitle => 'My status';
 
   @override
   String get statusMineBody => 'Tap to post an update (24 h)';
@@ -7184,7 +7184,7 @@ class LEn extends L {
   String get homeKoryNoMoney => 'Pokou never touches the money';
 
   @override
-  String get discussionsStatusesNews => 'STATUSES & NEWS';
+  String get discussionsStatusesNews => 'STATUSES';
 
   @override
   String get statusMyStatus => 'My status';
@@ -9356,4 +9356,50 @@ class LEn extends L {
   @override
   String get changeNumberInfoLot1 =>
       'Your account, your chats and your Pokou certified badge follow you. A code is sent to the new number.';
+
+  @override
+  String statusExcludedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts excluded',
+      one: '1 contact excluded',
+      zero: 'No contact excluded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusAllowedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts',
+      one: '1 contact',
+      zero: 'Nobody yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusRule24h => 'A status disappears after 24 h';
+
+  @override
+  String get statusRuleViewers => 'Only you see who viewed your statuses';
+
+  @override
+  String get statusRuleViewersSub => 'Nobody else sees this number';
+
+  @override
+  String get statusRuleReply => 'A reply arrives privately';
+
+  @override
+  String get statusRuleReplySub => 'In your one-to-one chat';
+
+  @override
+  String get statusRuleReport => 'Any status can be reported';
+
+  @override
+  String get statusProofNote =>
+      'Statuses aren\'t chat messages: proof mode doesn\'t apply to them.';
 }

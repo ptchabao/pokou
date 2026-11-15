@@ -1040,7 +1040,7 @@
   "statusText": "Texto",
   "statusTypeHint": "Escribe tu estado…",
   "statusPublish": "Publicar",
-  "statusFeedTitle": "Novedades",
+  "statusFeedTitle": "Estados",
   "statusFeedUnavailable": "Estados no disponibles: reintentar",
   "statusSection": "Estados",
   "statusMine": "Yo",
@@ -1317,7 +1317,7 @@
   "chatsSearchOrAsk": "Buscar o preguntar a Baba…",
   "convEncryptedHint": "Mensaje cifrado…",
   "chatsArchivedSection": "Chats archivados",
-  "statusMineTitle": "Mi novedad",
+  "statusMineTitle": "Mi estado",
   "statusMineBody": "Toca para publicar una novedad (24 h)",
   "statusMineVisibility": "Visible para mis contactos",
   "callLeaveConference": "Salir de la conferencia",
@@ -2609,5 +2609,14 @@
   "statusReportSent": "Statut signalé.",
   "statusForwardMediaUnsupported": "Le transfert d'une photo ou vidéo n'est pas encore possible.",
   "changeNumberHint": "Numéro",
-  "changeNumberInfoLot1": "Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro."
+  "changeNumberInfoLot1": "Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.",
+  "statusExcludedCount": "{count, plural, =0{Aucun contact exclu} =1{1 contact exclu} other{{count} contacts exclus}}",
+  "statusAllowedCount": "{count, plural, =0{Personne pour le moment} =1{1 contact} other{{count} contacts}}",
+  "statusRule24h": "Un statut disparaît après 24 h",
+  "statusRuleViewers": "Toi seul vois qui a vu tes statuts",
+  "statusRuleViewersSub": "Personne d'autre ne voit ce nombre",
+  "statusRuleReply": "Une réponse arrive en privé",
+  "statusRuleReplySub": "Dans votre discussion à deux",
+  "statusRuleReport": "Tout statut peut être signalé",
+  "statusProofNote": "Les statuts ne sont pas des messages d'une discussion : le mode preuve ne les concerne pas."
 }

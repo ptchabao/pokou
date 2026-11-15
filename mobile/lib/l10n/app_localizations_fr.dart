@@ -3533,10 +3533,11 @@ class LFr extends L {
   String get audienceExcept => 'Mes contacts sauf…';
 
   @override
-  String get audienceOnly => 'Uniquement…';
+  String get audienceOnly => 'Seulement avec…';
 
   @override
-  String get audienceContactsDesc => 'Toutes les personnes de ton carnet Pokou';
+  String get audienceContactsDesc =>
+      'Tous les contacts enregistrés sur ton téléphone';
 
   @override
   String get audienceNobodyDesc => 'Tes statuts ne seront visibles que par toi';
@@ -3602,7 +3603,7 @@ class LFr extends L {
   String get statusPublish => 'Publier';
 
   @override
-  String get statusFeedTitle => 'Actualités';
+  String get statusFeedTitle => 'Statuts';
 
   @override
   String get statusFeedUnavailable => 'Statuts indisponibles — réessayer';
@@ -4553,7 +4554,7 @@ class LFr extends L {
   String get chatsArchivedSection => 'Discussions archivées';
 
   @override
-  String get statusMineTitle => 'Mon Actu';
+  String get statusMineTitle => 'Mon statut';
 
   @override
   String get statusMineBody => 'Touche pour ajouter un statut';
@@ -7236,7 +7237,7 @@ class LFr extends L {
   String get homeKoryNoMoney => 'Pokou ne touche pas l’argent';
 
   @override
-  String get discussionsStatusesNews => 'STATUTS & NOUVELLES';
+  String get discussionsStatusesNews => 'STATUTS';
 
   @override
   String get statusMyStatus => 'Mon statut';
@@ -9417,4 +9418,50 @@ class LFr extends L {
   @override
   String get changeNumberInfoLot1 =>
       'Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.';
+
+  @override
+  String statusExcludedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts exclus',
+      one: '1 contact exclu',
+      zero: 'Aucun contact exclu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusAllowedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts',
+      one: '1 contact',
+      zero: 'Personne pour le moment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusRule24h => 'Un statut disparaît après 24 h';
+
+  @override
+  String get statusRuleViewers => 'Toi seul vois qui a vu tes statuts';
+
+  @override
+  String get statusRuleViewersSub => 'Personne d\'autre ne voit ce nombre';
+
+  @override
+  String get statusRuleReply => 'Une réponse arrive en privé';
+
+  @override
+  String get statusRuleReplySub => 'Dans votre discussion à deux';
+
+  @override
+  String get statusRuleReport => 'Tout statut peut être signalé';
+
+  @override
+  String get statusProofNote =>
+      'Les statuts ne sont pas des messages d\'une discussion : le mode preuve ne les concerne pas.';
 }
