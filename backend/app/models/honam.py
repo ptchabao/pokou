@@ -110,8 +110,18 @@ class HonamOrder(Base):
     refund_requested_at = Column(DateTime, nullable=True)
     refund_reason = Column(String(255), nullable=True)
     refund_confirmed_at = Column(DateTime, nullable=True)
+    #: L'officine dit avoir remboursé (maquette A2) : quand, et la référence
+    #: du transfert. La patiente confirme ensuite (refund_confirmed_at).
+    refund_sent_at = Column(DateTime, nullable=True)
+    refund_reference = Column(String(40), nullable=True)
     #: Le coursier confirme avoir reçu le prix de la course de l'officine.
     courier_paid_at = Column(DateTime, nullable=True)
+    #: L'officine dit avoir payé la course (maquette 4b, « J'ai payé
+    #: Kodjo ») ; le coursier confirme ensuite (courier_paid_at).
+    courier_paid_declared_at = Column(DateTime, nullable=True)
+    #: L'officine a récupéré l'ordonnance originale rapportée par le coursier
+    #: (maquette 4c, « Original reçu »).
+    original_returned_at = Column(DateTime, nullable=True)
     #: Le patient a signalé avoir payé ; l'officine confirme (PAID) ou
     #: répond « paiement non reçu ».
     patient_paid_declared_at = Column(DateTime, nullable=True)

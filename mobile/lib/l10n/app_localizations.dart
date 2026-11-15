@@ -18517,6 +18517,2195 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Nouveau numéro vérifié par code ; tous prévenus'**
   String get koryMqChangeCollectorSub;
+
+  /// No description provided for @offiEntryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espace officine'**
+  String get offiEntryTitle;
+
+  /// No description provided for @offiEntryToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} · {count} à traiter'**
+  String offiEntryToDo(String pharmacy, int count);
+
+  /// No description provided for @offiNotStaffTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune officine sur ce compte'**
+  String get offiNotStaffTitle;
+
+  /// No description provided for @offiNotStaffBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro n’est rattaché à l’équipe d’aucune officine Honam.'**
+  String get offiNotStaffBody;
+
+  /// No description provided for @offiTabOrders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commandes'**
+  String get offiTabOrders;
+
+  /// No description provided for @offiTabHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique'**
+  String get offiTabHistory;
+
+  /// No description provided for @offiTabSubscription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnement'**
+  String get offiTabSubscription;
+
+  /// No description provided for @offiTabAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get offiTabAccount;
+
+  /// No description provided for @offiLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quitter l’espace officine'**
+  String get offiLeave;
+
+  /// No description provided for @offiOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouverte'**
+  String get offiOpen;
+
+  /// No description provided for @offiHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non visible'**
+  String get offiHidden;
+
+  /// No description provided for @offiSuspended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Officine suspendue : {reason}'**
+  String offiSuspended(String reason);
+
+  /// No description provided for @offiWalletNotVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les patients ne vous voient pas encore : votre wallet doit être vérifié par l’équipe Pokou.'**
+  String get offiWalletNotVerified;
+
+  /// No description provided for @offiRenewToShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les patients ne vous voient plus : abonnement ou crédit à renouveler.'**
+  String get offiRenewToShow;
+
+  /// No description provided for @offiPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patiente'**
+  String get offiPatient;
+
+  /// No description provided for @offiAgoNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'à l’instant'**
+  String get offiAgoNow;
+
+  /// No description provided for @offiAgoMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {minutes} min'**
+  String offiAgoMinutes(int minutes);
+
+  /// No description provided for @offiAgoHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {hours} h'**
+  String offiAgoHours(int hours);
+
+  /// No description provided for @offiStepReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçue'**
+  String get offiStepReceived;
+
+  /// No description provided for @offiStepQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis'**
+  String get offiStepQuote;
+
+  /// No description provided for @offiStepPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée'**
+  String get offiStepPaid;
+
+  /// No description provided for @offiStepReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prête'**
+  String get offiStepReady;
+
+  /// No description provided for @offiStepDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée'**
+  String get offiStepDelivered;
+
+  /// No description provided for @offiStepSemantics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape en cours : {step}'**
+  String offiStepSemantics(String step);
+
+  /// No description provided for @offiTimelineQuoted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis envoyé'**
+  String get offiTimelineQuoted;
+
+  /// No description provided for @offiTimelineAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis accepté'**
+  String get offiTimelineAccepted;
+
+  /// No description provided for @offiOrdersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commandes'**
+  String get offiOrdersTitle;
+
+  /// No description provided for @offiSegToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'À traiter · {count}'**
+  String offiSegToDo(int count);
+
+  /// No description provided for @offiSegOngoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours · {count}'**
+  String offiSegOngoing(int count);
+
+  /// No description provided for @offiSegDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrées · {count}'**
+  String offiSegDelivered(int count);
+
+  /// No description provided for @offiEmptyToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à traiter'**
+  String get offiEmptyToDo;
+
+  /// No description provided for @offiEmptyOngoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune commande en cours'**
+  String get offiEmptyOngoing;
+
+  /// No description provided for @offiEmptyDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune commande livrée'**
+  String get offiEmptyDelivered;
+
+  /// No description provided for @offiEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les nouvelles ordonnances arrivent ici dès qu’une patiente vous les envoie.'**
+  String get offiEmptyBody;
+
+  /// No description provided for @offiTagNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle ordonnance'**
+  String get offiTagNew;
+
+  /// No description provided for @offiTagQuoteSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis envoyé'**
+  String get offiTagQuoteSent;
+
+  /// No description provided for @offiTagPaymentToConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement à confirmer'**
+  String get offiTagPaymentToConfirm;
+
+  /// No description provided for @offiTagPaymentAwaited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement attendu'**
+  String get offiTagPaymentAwaited;
+
+  /// No description provided for @offiTagMissingChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choix de la patiente attendu'**
+  String get offiTagMissingChoice;
+
+  /// No description provided for @offiTagReadyToGo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prête à partir'**
+  String get offiTagReadyToGo;
+
+  /// No description provided for @offiTagSearching.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche d’un coursier'**
+  String get offiTagSearching;
+
+  /// No description provided for @offiTagCourierComing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier en route'**
+  String get offiTagCourierComing;
+
+  /// No description provided for @offiTagInDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'En livraison'**
+  String get offiTagInDelivery;
+
+  /// No description provided for @offiTagCourseToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course à payer'**
+  String get offiTagCourseToPay;
+
+  /// No description provided for @offiTagDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée'**
+  String get offiTagDelivered;
+
+  /// No description provided for @offiTagCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get offiTagCancelled;
+
+  /// No description provided for @offiTagRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get offiTagRejected;
+
+  /// No description provided for @offiTagExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expirée'**
+  String get offiTagExpired;
+
+  /// No description provided for @offiTagRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursée'**
+  String get offiTagRefunded;
+
+  /// No description provided for @offiAwaitedOnWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} attendus sur votre wallet'**
+  String offiAwaitedOnWallet(String amount);
+
+  /// No description provided for @offiPaidAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée {amount} à {time}'**
+  String offiPaidAt(String amount, String time);
+
+  /// No description provided for @offiNoCourierYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun coursier pour l’instant'**
+  String get offiNoCourierYet;
+
+  /// No description provided for @offiDeliveredBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée à {time} · {courier}'**
+  String offiDeliveredBy(String time, String courier);
+
+  /// No description provided for @offiMakeQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Établir le devis'**
+  String get offiMakeQuote;
+
+  /// No description provided for @offiCheckPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier le paiement'**
+  String get offiCheckPayment;
+
+  /// No description provided for @offiAskCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander un coursier'**
+  String get offiAskCourier;
+
+  /// No description provided for @offiQuoteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis pour {patient}'**
+  String offiQuoteTitle(String patient);
+
+  /// No description provided for @offiReceivedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'reçue à {time}'**
+  String offiReceivedAt(String time);
+
+  /// No description provided for @offiPrescriptionOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance de {patient}'**
+  String offiPrescriptionOf(String patient);
+
+  /// No description provided for @offiZoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Agrandir'**
+  String get offiZoom;
+
+  /// No description provided for @offiOriginalToCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance originale à récupérer'**
+  String get offiOriginalToCollect;
+
+  /// No description provided for @offiOriginalNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} sera prévenue : « Prépare l’original de ton ordonnance pour le coursier. » Le coursier le rapporte à l’officine.'**
+  String offiOriginalNotice(String patient);
+
+  /// No description provided for @offiProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits'**
+  String get offiProducts;
+
+  /// No description provided for @offiAddProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un produit'**
+  String get offiAddProduct;
+
+  /// No description provided for @offiAddProductTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un produit'**
+  String get offiAddProductTitle;
+
+  /// No description provided for @offiEditProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le produit'**
+  String get offiEditProduct;
+
+  /// No description provided for @offiRemoveProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le produit'**
+  String get offiRemoveProduct;
+
+  /// No description provided for @offiProductName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit'**
+  String get offiProductName;
+
+  /// No description provided for @offiProductNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Amoxicilline 500 mg, 12 gélules'**
+  String get offiProductNameHint;
+
+  /// No description provided for @offiProductQuantity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quantité'**
+  String get offiProductQuantity;
+
+  /// No description provided for @offiProductUnitPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix unitaire'**
+  String get offiProductUnitPrice;
+
+  /// No description provided for @offiAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible'**
+  String get offiAvailable;
+
+  /// No description provided for @offiUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible'**
+  String get offiUnavailable;
+
+  /// No description provided for @offiAvailableHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un produit indisponible reste visible sur le devis, sans être compté.'**
+  String get offiAvailableHint;
+
+  /// No description provided for @offiQuantity.
+  ///
+  /// In fr, this message translates to:
+  /// **'× {count}'**
+  String offiQuantity(int count);
+
+  /// No description provided for @offiSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get offiSave;
+
+  /// No description provided for @offiMedicines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médicaments'**
+  String get offiMedicines;
+
+  /// No description provided for @offiCourseAddedByHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course, ajoutée par Honam'**
+  String get offiCourseAddedByHonam;
+
+  /// No description provided for @offiOriginalReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour de l’original'**
+  String get offiOriginalReturn;
+
+  /// No description provided for @offiTotalToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total à payer'**
+  String get offiTotalToPay;
+
+  /// No description provided for @offiCourseNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le prix de la course est fixé par Honam selon le pays ; vous le reversez au coursier après la livraison.'**
+  String get offiCourseNote;
+
+  /// No description provided for @offiQuoteSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le devis à {patient}'**
+  String offiQuoteSend(String patient);
+
+  /// No description provided for @offiQuoteUpdate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le devis'**
+  String get offiQuoteUpdate;
+
+  /// No description provided for @offiQuoteSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis envoyé à {patient}'**
+  String offiQuoteSent(String patient);
+
+  /// No description provided for @offiQuoteNothingAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun produit disponible : refusez plutôt l’ordonnance.'**
+  String get offiQuoteNothingAvailable;
+
+  /// No description provided for @offiQuoteWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis envoyé : {patient} a jusqu’au {date} pour l’accepter.'**
+  String offiQuoteWaiting(String patient, String date);
+
+  /// No description provided for @offiRejectPrescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser l’ordonnance'**
+  String get offiRejectPrescription;
+
+  /// No description provided for @offiRejectTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser l’ordonnance'**
+  String get offiRejectTitle;
+
+  /// No description provided for @offiPatientReceivedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} · reçue à {time}'**
+  String offiPatientReceivedAt(String patient, String time);
+
+  /// No description provided for @offiReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get offiReason;
+
+  /// No description provided for @offiReasonUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits indisponibles'**
+  String get offiReasonUnavailable;
+
+  /// No description provided for @offiReasonUnavailableHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} verra d’autres officines proches'**
+  String offiReasonUnavailableHint(String patient);
+
+  /// No description provided for @offiReasonIllegible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance illisible ou incomplète'**
+  String get offiReasonIllegible;
+
+  /// No description provided for @offiReasonIllegibleHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une nouvelle photo suffit souvent'**
+  String get offiReasonIllegibleHint;
+
+  /// No description provided for @offiReasonInPerson.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délivrance en personne obligatoire'**
+  String get offiReasonInPerson;
+
+  /// No description provided for @offiReasonInPersonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} pourra la retirer à l’officine'**
+  String offiReasonInPersonHint(String patient);
+
+  /// No description provided for @offiReasonExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance périmée ou douteuse'**
+  String get offiReasonExpired;
+
+  /// No description provided for @offiReasonExpiredHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'À présenter en personne à un pharmacien'**
+  String get offiReasonExpiredHint;
+
+  /// No description provided for @offiReasonOutOfZone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors de votre zone de livraison'**
+  String get offiReasonOutOfZone;
+
+  /// No description provided for @offiReasonOutOfZoneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} verra des officines plus proches'**
+  String offiReasonOutOfZoneHint(String patient);
+
+  /// No description provided for @offiReasonOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre motif'**
+  String get offiReasonOther;
+
+  /// No description provided for @offiReasonOtherHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expliquez-le dans le message'**
+  String get offiReasonOtherHint;
+
+  /// No description provided for @offiMessageFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message pour {patient}'**
+  String offiMessageFor(String patient);
+
+  /// No description provided for @offiRejectMsgUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, nous n’avons pas tous les produits de votre ordonnance aujourd’hui. Honam vous propose des officines proches qui peuvent vous servir.'**
+  String offiRejectMsgUnavailable(String patient);
+
+  /// No description provided for @offiRejectMsgIllegible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, votre ordonnance est illisible ou incomplète sur la photo. Pouvez-vous la renvoyer, bien à plat et nette ?'**
+  String offiRejectMsgIllegible(String patient);
+
+  /// No description provided for @offiRejectMsgInPerson.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, ce traitement doit être délivré en personne. Vous pouvez venir le retirer à l’officine.'**
+  String offiRejectMsgInPerson(String patient);
+
+  /// No description provided for @offiRejectMsgExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, cette ordonnance est périmée ou nous ne pouvons pas la valider à distance. Présentez-la en personne à un pharmacien.'**
+  String offiRejectMsgExpired(String patient);
+
+  /// No description provided for @offiRejectMsgOutOfZone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, votre adresse est hors de notre zone de livraison. Honam vous propose des officines plus proches.'**
+  String offiRejectMsgOutOfZone(String patient);
+
+  /// No description provided for @offiRejectMsgOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, nous ne pouvons pas servir cette ordonnance : '**
+  String offiRejectMsgOther(String patient);
+
+  /// No description provided for @offiAskNewPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plutôt demander une nouvelle photo'**
+  String get offiAskNewPhoto;
+
+  /// No description provided for @offiAskPhotoMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, la photo de votre ordonnance n’est pas lisible. Pouvez-vous en envoyer une nouvelle, bien à plat et nette ?'**
+  String offiAskPhotoMessage(String patient);
+
+  /// No description provided for @offiMessageSentTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message envoyé à {patient}'**
+  String offiMessageSentTo(String patient);
+
+  /// No description provided for @offiRejectAndNotify.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser et prévenir {patient}'**
+  String offiRejectAndNotify(String patient);
+
+  /// No description provided for @offiRejectedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance refusée'**
+  String get offiRejectedTitle;
+
+  /// No description provided for @offiExpiredTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis expiré'**
+  String get offiExpiredTitle;
+
+  /// No description provided for @offiExpiredBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le devis n’a pas été accepté à temps : la commande est close, sans rien à rembourser.'**
+  String get offiExpiredBody;
+
+  /// No description provided for @offiPatientNotifiedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} · prévenue à {time}'**
+  String offiPatientNotifiedAt(String patient, String time);
+
+  /// No description provided for @offiRejectedNothingPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} n’a rien payé : il n’y a rien à rembourser.'**
+  String offiRejectedNothingPaid(String patient);
+
+  /// No description provided for @offiMessageSentToTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message envoyé à {patient}'**
+  String offiMessageSentToTitle(String patient);
+
+  /// No description provided for @offiWhatNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui se passe ensuite'**
+  String get offiWhatNext;
+
+  /// No description provided for @offiNext1.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} reçoit votre message et le motif.'**
+  String offiNext1(String patient);
+
+  /// No description provided for @offiNext2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam lui propose les officines ouvertes les plus proches : elle y renvoie son ordonnance d’un geste.'**
+  String get offiNext2;
+
+  /// No description provided for @offiNext3.
+  ///
+  /// In fr, this message translates to:
+  /// **'La commande passe dans votre historique, avec son motif.'**
+  String get offiNext3;
+
+  /// No description provided for @offiPaymentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement de {patient}'**
+  String offiPaymentTitle(String patient);
+
+  /// No description provided for @offiPaymentPendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement en attente'**
+  String get offiPaymentPendingTitle;
+
+  /// No description provided for @offiQuoteSentAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis envoyé à {time}'**
+  String offiQuoteSentAt(String time);
+
+  /// No description provided for @offiPatientRemindedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} · relancée à {time}'**
+  String offiPatientRemindedAt(String patient, String time);
+
+  /// No description provided for @offiAmountAwaited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant attendu'**
+  String get offiAmountAwaited;
+
+  /// No description provided for @offiOnYourWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur votre wallet · {wallet}'**
+  String offiOnYourWallet(String wallet);
+
+  /// No description provided for @offiPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get offiPending;
+
+  /// No description provided for @offiPatientDeclaredPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} a signalé son paiement à {time}'**
+  String offiPatientDeclaredPaid(String patient, String time);
+
+  /// No description provided for @offiCheckBeforeValidating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez la réception dans votre application Mobile Money ou dans le SMS de l’opérateur avant de valider. L’argent ne passe pas par Pokou.'**
+  String get offiCheckBeforeValidating;
+
+  /// No description provided for @offiFollowUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi'**
+  String get offiFollowUp;
+
+  /// No description provided for @offiOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande'**
+  String get offiOrder;
+
+  /// No description provided for @offiCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course'**
+  String get offiCourse;
+
+  /// No description provided for @offiOtherNumberNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si {patient} a payé sur un autre numéro, seul son opérateur peut récupérer l’argent : il ne passe jamais par Pokou.'**
+  String offiOtherNumberNote(String patient);
+
+  /// No description provided for @offiPaymentReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement reçu, je prépare'**
+  String get offiPaymentReceived;
+
+  /// No description provided for @offiPaymentFinallyReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement reçu finalement'**
+  String get offiPaymentFinallyReceived;
+
+  /// No description provided for @offiNotYetReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore reçu'**
+  String get offiNotYetReceived;
+
+  /// No description provided for @offiConfirmPaymentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement reçu ?'**
+  String get offiConfirmPaymentTitle;
+
+  /// No description provided for @offiConfirmPaymentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez-vous avoir reçu {amount} sur votre wallet ? La commande passe en préparation et 100 FCFA HT sont décomptés de votre crédit.'**
+  String offiConfirmPaymentBody(String amount);
+
+  /// No description provided for @offiConfirmPaymentYes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, reçu'**
+  String get offiConfirmPaymentYes;
+
+  /// No description provided for @offiCancelOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la commande'**
+  String get offiCancelOrder;
+
+  /// No description provided for @offiCancelOrderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la commande ?'**
+  String get offiCancelOrderTitle;
+
+  /// No description provided for @offiCancelOrderYes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la commande'**
+  String get offiCancelOrderYes;
+
+  /// No description provided for @offiCancelUnpaidBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien n’a été reçu : la commande est close sans remboursement, et la patiente est prévenue.'**
+  String get offiCancelUnpaidBody;
+
+  /// No description provided for @offiCancelUnpaidReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non reçu par l’officine'**
+  String get offiCancelUnpaidReason;
+
+  /// No description provided for @offiPaymentMissingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non reçu'**
+  String get offiPaymentMissingTitle;
+
+  /// No description provided for @offiPatientAwaits.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} · {amount} attendus'**
+  String offiPatientAwaits(String patient, String amount);
+
+  /// No description provided for @offiWhatPatientSaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qu’a signalé {patient}'**
+  String offiWhatPatientSaid(String patient);
+
+  /// No description provided for @offiTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure'**
+  String get offiTime;
+
+  /// No description provided for @offiAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get offiAmount;
+
+  /// No description provided for @offiWhatYouSee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que vous constatez'**
+  String get offiWhatYouSee;
+
+  /// No description provided for @offiNothingReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien reçu'**
+  String get offiNothingReceived;
+
+  /// No description provided for @offiNothingReceivedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} doit vérifier le numéro et le montant'**
+  String offiNothingReceivedHint(String patient);
+
+  /// No description provided for @offiDifferentAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant différent reçu'**
+  String get offiDifferentAmount;
+
+  /// No description provided for @offiDifferentAmountHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez-le : {patient} devra payer le reste'**
+  String offiDifferentAmountHint(String patient);
+
+  /// No description provided for @offiAmountReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant reçu'**
+  String get offiAmountReceived;
+
+  /// No description provided for @offiDontPrepareYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne préparez rien tant que l’argent n’apparaît pas sur votre compte. Une capture d’écran ou un SMS transféré ne prouvent pas un paiement.'**
+  String get offiDontPrepareYet;
+
+  /// No description provided for @offiNotifyPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévenir {patient}'**
+  String offiNotifyPatient(String patient);
+
+  /// No description provided for @offiWaitMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendre encore'**
+  String get offiWaitMore;
+
+  /// No description provided for @offiNotReceivedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, l’officine n’a pas reçu vos {amount} sur {wallet}. Vérifiez le numéro et le montant, puis renvoyez la référence du paiement.'**
+  String offiNotReceivedMessage(String patient, String amount, String wallet);
+
+  /// No description provided for @offiDifferentAmountMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, l’officine a reçu {received} au lieu de {expected}. Il reste {rest} à payer pour que nous préparions votre commande.'**
+  String offiDifferentAmountMessage(
+    String patient,
+    String received,
+    String expected,
+    String rest,
+  );
+
+  /// No description provided for @offiPreparationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation de {patient}'**
+  String offiPreparationTitle(String patient);
+
+  /// No description provided for @offiProductsToPrepare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits à préparer'**
+  String get offiProductsToPrepare;
+
+  /// No description provided for @offiMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Manquant'**
+  String get offiMissing;
+
+  /// No description provided for @offiMissingProduct.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produit manquant'**
+  String get offiMissingProduct;
+
+  /// No description provided for @offiMissingReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Manquant : {names}'**
+  String offiMissingReason(String names);
+
+  /// No description provided for @offiHonamProposes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam propose à {patient}'**
+  String offiHonamProposes(String patient);
+
+  /// No description provided for @offiReceiveRest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le reste'**
+  String get offiReceiveRest;
+
+  /// No description provided for @offiReceiveRestHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les autres produits sont livrés'**
+  String get offiReceiveRestHint;
+
+  /// No description provided for @offiCancelAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout annuler'**
+  String get offiCancelAll;
+
+  /// No description provided for @offiCancelAllHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Et commander ailleurs'**
+  String get offiCancelAllHint;
+
+  /// No description provided for @offiRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'remboursés'**
+  String get offiRefunded;
+
+  /// No description provided for @offiWaitingChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente du choix de {patient}'**
+  String offiWaitingChoice(String patient);
+
+  /// No description provided for @offiWaitingChoiceShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choix attendu'**
+  String get offiWaitingChoiceShort;
+
+  /// No description provided for @offiPatientKeeps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçoit le reste'**
+  String get offiPatientKeeps;
+
+  /// No description provided for @offiRefundToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser {amount} à {patient}'**
+  String offiRefundToDo(String amount, String patient);
+
+  /// No description provided for @offiRefundConfirmedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement de {amount} confirmé'**
+  String offiRefundConfirmedShort(String amount);
+
+  /// No description provided for @offiNoCourierYetNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun coursier n’a encore été appelé : il ne l’est qu’une fois la commande prête. Un manque se signale maintenant, pas après.'**
+  String get offiNoCourierYetNote;
+
+  /// No description provided for @offiCancelWholeOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler toute la commande'**
+  String get offiCancelWholeOrder;
+
+  /// No description provided for @offiCancelPaidBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} sera remboursée de {amount} en totalité, sous 2 h, uniquement sur le numéro qui a payé.'**
+  String offiCancelPaidBody(String patient, String amount);
+
+  /// No description provided for @offiCancelPaidReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée par l’officine ; remboursement complet'**
+  String get offiCancelPaidReason;
+
+  /// No description provided for @offiRefundTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser {patient}'**
+  String offiRefundTitle(String patient);
+
+  /// No description provided for @offiCancelledAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée à {time}'**
+  String offiCancelledAt(String time);
+
+  /// No description provided for @offiRequestedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandé à {time}'**
+  String offiRequestedAt(String time);
+
+  /// No description provided for @offiPatientKeepsRest.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} reçoit le reste'**
+  String offiPatientKeepsRest(String patient);
+
+  /// No description provided for @offiPatientCancelsAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} préfère tout annuler'**
+  String offiPatientCancelsAll(String patient);
+
+  /// No description provided for @offiToRefund.
+  ///
+  /// In fr, this message translates to:
+  /// **'À rembourser'**
+  String get offiToRefund;
+
+  /// No description provided for @offiOnTheirNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur son numéro · {phone}'**
+  String offiOnTheirNumber(String phone);
+
+  /// No description provided for @offiTheNumberThatPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le numéro qui vous a payé'**
+  String get offiTheNumberThatPaid;
+
+  /// No description provided for @offiCopyNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier le numéro'**
+  String get offiCopyNumber;
+
+  /// No description provided for @offiRefundOnlyThisNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursez uniquement ce numéro, même si quelqu’un vous en donne un autre.'**
+  String get offiRefundOnlyThisNumber;
+
+  /// No description provided for @offiTransferReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence du transfert'**
+  String get offiTransferReference;
+
+  /// No description provided for @offiTransferReferenceHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Elle figure dans le SMS de confirmation'**
+  String get offiTransferReferenceHint;
+
+  /// No description provided for @offiRefundBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'À faire avant {time}. {patient} doit recevoir {amount} : si des frais s’appliquent, ils sont pour vous.'**
+  String offiRefundBefore(String time, String patient, String amount);
+
+  /// No description provided for @offiIRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai remboursé {patient}'**
+  String offiIRefunded(String patient);
+
+  /// No description provided for @offiWaitingPatientConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de la confirmation de {patient}'**
+  String offiWaitingPatientConfirm(String patient);
+
+  /// No description provided for @offiCancelledTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée'**
+  String get offiCancelledTitle;
+
+  /// No description provided for @offiPatientCancelledAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} · annulée à {time}'**
+  String offiPatientCancelledAt(String patient, String time);
+
+  /// No description provided for @offiRefundConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement confirmé'**
+  String get offiRefundConfirmed;
+
+  /// No description provided for @offiRefundSentTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} envoyés à {patient}'**
+  String offiRefundSentTo(String amount, String patient);
+
+  /// No description provided for @offiRefundSentToAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} envoyés à {patient} à {time}'**
+  String offiRefundSentToAt(String amount, String patient, String time);
+
+  /// No description provided for @offiReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réf. {reference}'**
+  String offiReference(String reference);
+
+  /// No description provided for @offiPatientConfirmedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} a confirmé la réception à {time}'**
+  String offiPatientConfirmedAt(String patient, String time);
+
+  /// No description provided for @offiCancelledNothingPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée avant paiement : rien à rembourser.'**
+  String get offiCancelledNothingPaid;
+
+  /// No description provided for @offiCollectedFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé auprès de {patient}'**
+  String offiCollectedFrom(String patient);
+
+  /// No description provided for @offiRefundedTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé à {patient}'**
+  String offiRefundedTo(String patient);
+
+  /// No description provided for @offiCourseNoCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course, aucun coursier appelé'**
+  String get offiCourseNoCourier;
+
+  /// No description provided for @offiLeftForPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste pour l’officine'**
+  String get offiLeftForPharmacy;
+
+  /// No description provided for @offiWhatHonamKeeps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que retient Honam'**
+  String get offiWhatHonamKeeps;
+
+  /// No description provided for @offiKeptInHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'La commande reste dans votre historique avec son motif : {reason}'**
+  String offiKeptInHistory(String reason);
+
+  /// No description provided for @offiAskCourierTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander un coursier'**
+  String get offiAskCourierTitle;
+
+  /// No description provided for @offiOrderOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande de {patient} · {address}'**
+  String offiOrderOf(String patient, String address);
+
+  /// No description provided for @offiSearching.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche en cours…'**
+  String get offiSearching;
+
+  /// No description provided for @offiSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis {minutes} min {seconds}'**
+  String offiSince(int minutes, int seconds);
+
+  /// No description provided for @offiProposedAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposée à vos coursiers rattachés'**
+  String get offiProposedAttached;
+
+  /// No description provided for @offiProposedAttachedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ils la voient {minutes} min avant les autres'**
+  String offiProposedAttachedHint(int minutes);
+
+  /// No description provided for @offiProposedZone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposée aux coursiers de la zone'**
+  String get offiProposedZone;
+
+  /// No description provided for @offiCourierAccepts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un coursier accepte'**
+  String get offiCourierAccepts;
+
+  /// No description provided for @offiCourierAcceptsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous voyez son nom, et l’écran passe à la livraison'**
+  String get offiCourierAcceptsHint;
+
+  /// No description provided for @offiCoursePaidToCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course payée au coursier'**
+  String get offiCoursePaidToCourier;
+
+  /// No description provided for @offiBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par'**
+  String get offiBy;
+
+  /// No description provided for @offiByYourWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre officine, sur son wallet'**
+  String get offiByYourWallet;
+
+  /// No description provided for @offiSealedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le colis reste fermé, au nom de {patient}. Le coursier ne voit ni l’ordonnance ni les produits.'**
+  String offiSealedNote(String patient);
+
+  /// No description provided for @offiNoCourierTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun coursier disponible'**
+  String get offiNoCourierTitle;
+
+  /// No description provided for @offiNoCourierBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun coursier n’a accepté la course depuis {minutes} minutes.'**
+  String offiNoCourierBody(int minutes);
+
+  /// No description provided for @offiRetrySearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualiser la recherche'**
+  String get offiRetrySearch;
+
+  /// No description provided for @offiProposePickupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer le retrait à l’officine'**
+  String get offiProposePickupTitle;
+
+  /// No description provided for @offiProposePickupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} est prévenue. Si elle accepte de venir, vous lui remboursez la course de {amount}.'**
+  String offiProposePickupBody(String patient, String amount);
+
+  /// No description provided for @offiProposePickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer le retrait'**
+  String get offiProposePickup;
+
+  /// No description provided for @offiPickupMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {patient}, aucun coursier n’est disponible pour le moment. Vous pouvez retirer votre commande à l’officine : nous vous rembourserons alors la course de {amount}.'**
+  String offiPickupMessage(String patient, String amount);
+
+  /// No description provided for @offiInviteCouriers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviter vos livreurs habituels'**
+  String get offiInviteCouriers;
+
+  /// No description provided for @offiBackToOrders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour aux commandes'**
+  String get offiBackToOrders;
+
+  /// No description provided for @offiDeliveryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison de {patient}'**
+  String offiDeliveryTitle(String patient);
+
+  /// No description provided for @offiVerifiedCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier vérifié'**
+  String get offiVerifiedCourier;
+
+  /// No description provided for @offiAcceptedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'A accepté la course à {time}.'**
+  String offiAcceptedAt(String time);
+
+  /// No description provided for @offiWrite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire'**
+  String get offiWrite;
+
+  /// No description provided for @offiHandover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remise du colis'**
+  String get offiHandover;
+
+  /// No description provided for @offiCheckSealed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sachet fermé, au nom de {patient}.'**
+  String offiCheckSealed(String patient);
+
+  /// No description provided for @offiCheckDosage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Posologie notée sur chaque boîte'**
+  String get offiCheckDosage;
+
+  /// No description provided for @offiCheckPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'La personne au comptoir est celle de la photo'**
+  String get offiCheckPhoto;
+
+  /// No description provided for @offiAfterDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après la livraison'**
+  String get offiAfterDelivery;
+
+  /// No description provided for @offiAfterDeliveryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} donne son code à {courier}, qui le saisit dans Honam : la commande se clôt.'**
+  String offiAfterDeliveryBody(String patient, String courier);
+
+  /// No description provided for @offiCourseToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course à payer à {courier}'**
+  String offiCourseToPay(String courier);
+
+  /// No description provided for @offiHandedTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis remis à {courier}'**
+  String offiHandedTo(String courier);
+
+  /// No description provided for @offiFollowDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre la livraison'**
+  String get offiFollowDelivery;
+
+  /// No description provided for @offiReportDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un défaut du coursier'**
+  String get offiReportDefault;
+
+  /// No description provided for @offiHandedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis remis à {courier} à {time}'**
+  String offiHandedAt(String courier, String time);
+
+  /// No description provided for @offiTrackingNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position mise à jour toutes les 15 secondes, visible jusqu’à la saisie du code. Elle n’est pas conservée après la livraison.'**
+  String get offiTrackingNote;
+
+  /// No description provided for @offiDeliveredTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée à {patient}'**
+  String offiDeliveredTo(String patient);
+
+  /// No description provided for @offiCodeEnteredBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code saisi par {courier} à {time}'**
+  String offiCodeEnteredBy(String courier, String time);
+
+  /// No description provided for @offiToSettle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À régler'**
+  String get offiToSettle;
+
+  /// No description provided for @offiPayCourierOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payez {courier} sur son wallet :'**
+  String offiPayCourierOn(String courier);
+
+  /// No description provided for @offiNoFeeOnPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne prélève rien sur ce paiement.'**
+  String get offiNoFeeOnPayment;
+
+  /// No description provided for @offiPaidToCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course reversée à {courier}'**
+  String offiPaidToCourier(String courier);
+
+  /// No description provided for @offiIPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai payé {courier}'**
+  String offiIPaid(String courier);
+
+  /// No description provided for @offiWaitingCourierConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de la confirmation de {courier}'**
+  String offiWaitingCourierConfirm(String courier);
+
+  /// No description provided for @offiOriginal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance originale'**
+  String get offiOriginal;
+
+  /// No description provided for @offiOriginalBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçue'**
+  String get offiOriginalBack;
+
+  /// No description provided for @offiOriginalCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récupérée par {courier} à {time}, à rapporter à son prochain passage.'**
+  String offiOriginalCollected(String courier, String time);
+
+  /// No description provided for @offiOriginalWithCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chez {courier}, à rapporter à son prochain passage.'**
+  String offiOriginalWithCourier(String courier);
+
+  /// No description provided for @offiOriginalReturnedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapportée à l’officine le {date}.'**
+  String offiOriginalReturnedAt(String date);
+
+  /// No description provided for @offiOriginalReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Original reçu'**
+  String get offiOriginalReceived;
+
+  /// No description provided for @offiClosedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande close'**
+  String get offiClosedTitle;
+
+  /// No description provided for @offiPatientDeliveredAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} · livrée à {time}'**
+  String offiPatientDeliveredAt(String patient, String time);
+
+  /// No description provided for @offiCourseSettled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course réglée'**
+  String get offiCourseSettled;
+
+  /// No description provided for @offiCourseSettledBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} payés à {courier} ; {courier} a confirmé la réception à {time}.'**
+  String offiCourseSettledBody(String amount, String courier, String time);
+
+  /// No description provided for @offiReportDeliveryDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un défaut de livraison'**
+  String get offiReportDeliveryDefault;
+
+  /// No description provided for @offiCouriersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos coursiers'**
+  String get offiCouriersTitle;
+
+  /// No description provided for @offiInviteYourCouriers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invitez vos livreurs habituels'**
+  String get offiInviteYourCouriers;
+
+  /// No description provided for @offiInviteYourCouriersBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos courses leur sont proposées en premier, pendant {minutes} min, avant les autres coursiers de la zone. Ils restent libres d’accepter d’autres officines. Ils doivent être coursiers Pokou validés.'**
+  String offiInviteYourCouriersBody(int minutes);
+
+  /// No description provided for @offiNoAttachedCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun coursier rattaché pour l’instant.'**
+  String get offiNoAttachedCourier;
+
+  /// No description provided for @offiDefaults.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} défaut(s)'**
+  String offiDefaults(int count);
+
+  /// No description provided for @offiUnpaidCourses.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} course(s) à payer'**
+  String offiUnpaidCourses(int count);
+
+  /// No description provided for @offiCoursesCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} courses'**
+  String offiCoursesCount(int count);
+
+  /// No description provided for @offiAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattaché'**
+  String get offiAttached;
+
+  /// No description provided for @offiCourierSuspended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suspendu'**
+  String get offiCourierSuspended;
+
+  /// No description provided for @offiShareLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager le lien'**
+  String get offiShareLink;
+
+  /// No description provided for @offiAttachByNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattacher'**
+  String get offiAttachByNumber;
+
+  /// No description provided for @offiAttachHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le numéro d’un coursier Pokou déjà validé.'**
+  String get offiAttachHint;
+
+  /// No description provided for @offiCourierNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro du coursier'**
+  String get offiCourierNumber;
+
+  /// No description provided for @offiAttach.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattacher'**
+  String get offiAttach;
+
+  /// No description provided for @offiCourierAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier rattaché'**
+  String get offiCourierAttached;
+
+  /// No description provided for @offiCouriersNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans coursier rattaché disponible, la course part aux coursiers de la zone, comme d’habitude.'**
+  String get offiCouriersNote;
+
+  /// No description provided for @offiDetachHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appui long sur un coursier pour le retirer.'**
+  String get offiDetachHint;
+
+  /// No description provided for @offiDetachTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {name} ?'**
+  String offiDetachTitle(String name);
+
+  /// No description provided for @offiDetachBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il ne verra plus vos courses en premier.'**
+  String get offiDetachBody;
+
+  /// No description provided for @offiDetach.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get offiDetach;
+
+  /// No description provided for @offiCourierInviteText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre pour {pharmacy} avec Honam : installe Pokou et deviens coursier'**
+  String offiCourierInviteText(String pharmacy);
+
+  /// No description provided for @offiChatSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier vérifié · course de {patient}'**
+  String offiChatSubtitle(String patient);
+
+  /// No description provided for @offiChatNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion liée à la course de {patient} : la patiente, l’officine et le coursier y écrivent. Les numéros restent masqués.'**
+  String offiChatNotice(String patient);
+
+  /// No description provided for @offiQuickReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le colis est prêt'**
+  String get offiQuickReady;
+
+  /// No description provided for @offiQuickWhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où êtes-vous ?'**
+  String get offiQuickWhere;
+
+  /// No description provided for @offiQuickThanks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci'**
+  String get offiQuickThanks;
+
+  /// No description provided for @offiWriteTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {courier}…'**
+  String offiWriteTo(String courier);
+
+  /// No description provided for @offiSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get offiSend;
+
+  /// No description provided for @offiDefectTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un défaut'**
+  String get offiDefectTitle;
+
+  /// No description provided for @offiCourseOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course de {courier} · {date}'**
+  String offiCourseOf(String courier, String date);
+
+  /// No description provided for @offiWhatHappened.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que s’est-il passé ?'**
+  String get offiWhatHappened;
+
+  /// No description provided for @offiDefectNoShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier jamais venu'**
+  String get offiDefectNoShow;
+
+  /// No description provided for @offiDefectLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retard important, sans prévenir'**
+  String get offiDefectLate;
+
+  /// No description provided for @offiDefectDamaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis ouvert ou abîmé'**
+  String get offiDefectDamaged;
+
+  /// No description provided for @offiDefectOriginal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Original de l’ordonnance non rapporté'**
+  String get offiDefectOriginal;
+
+  /// No description provided for @offiDefectBehaviour.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comportement inapproprié'**
+  String get offiDefectBehaviour;
+
+  /// No description provided for @offiDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisions'**
+  String get offiDetails;
+
+  /// No description provided for @offiDefectNoteOngoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le défaut est compté à {courier} et la commande revient à « prête » pour un autre coursier. Au 3e défaut, le compte coursier est suspendu.'**
+  String offiDefectNoteOngoing(String courier);
+
+  /// No description provided for @offiDefectNoteDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le défaut est compté à {courier}. Au 3e défaut, le compte coursier est suspendu.'**
+  String offiDefectNoteDelivered(String courier);
+
+  /// No description provided for @offiSendReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le signalement'**
+  String get offiSendReport;
+
+  /// No description provided for @offiDefaultSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé'**
+  String get offiDefaultSent;
+
+  /// No description provided for @offiHistoryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique'**
+  String get offiHistoryTitle;
+
+  /// No description provided for @offiPreviousMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois précédent'**
+  String get offiPreviousMonth;
+
+  /// No description provided for @offiNextMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois suivant'**
+  String get offiNextMonth;
+
+  /// No description provided for @offiStatDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrées'**
+  String get offiStatDelivered;
+
+  /// No description provided for @offiStatCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé'**
+  String get offiStatCollected;
+
+  /// No description provided for @offiStatCollectedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'médicaments et courses'**
+  String get offiStatCollectedHint;
+
+  /// No description provided for @offiStatCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulées'**
+  String get offiStatCancelled;
+
+  /// No description provided for @offiFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get offiFilterAll;
+
+  /// No description provided for @offiFilterDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrées'**
+  String get offiFilterDelivered;
+
+  /// No description provided for @offiFilterCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulées'**
+  String get offiFilterCancelled;
+
+  /// No description provided for @offiHistoryEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien ce mois-ci'**
+  String get offiHistoryEmpty;
+
+  /// No description provided for @offiHistoryEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les commandes livrées, refusées ou annulées s’affichent ici.'**
+  String get offiHistoryEmptyBody;
+
+  /// No description provided for @offiDeliveredAtShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'livrée à {time}'**
+  String offiDeliveredAtShort(String time);
+
+  /// No description provided for @offiExportMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter le mois en CSV'**
+  String get offiExportMonth;
+
+  /// No description provided for @offiCsvDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get offiCsvDate;
+
+  /// No description provided for @offiCsvOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande'**
+  String get offiCsvOrder;
+
+  /// No description provided for @offiCsvPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patiente'**
+  String get offiCsvPatient;
+
+  /// No description provided for @offiCsvStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get offiCsvStatus;
+
+  /// No description provided for @offiCsvMedicines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médicaments (FCFA)'**
+  String get offiCsvMedicines;
+
+  /// No description provided for @offiCsvCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course (FCFA)'**
+  String get offiCsvCourse;
+
+  /// No description provided for @offiCsvTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé (FCFA)'**
+  String get offiCsvTotal;
+
+  /// No description provided for @offiCsvRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé (FCFA)'**
+  String get offiCsvRefunded;
+
+  /// No description provided for @offiCsvCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier'**
+  String get offiCsvCourier;
+
+  /// No description provided for @offiSubscriptionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnement'**
+  String get offiSubscriptionTitle;
+
+  /// No description provided for @offiPlanWetri.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wétri HONAM'**
+  String get offiPlanWetri;
+
+  /// No description provided for @offiPlanEpe.
+  ///
+  /// In fr, this message translates to:
+  /// **'ÉPÉ HONAM'**
+  String get offiPlanEpe;
+
+  /// No description provided for @offiActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif'**
+  String get offiActive;
+
+  /// No description provided for @offiPerMonthHt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} HT par mois'**
+  String offiPerMonthHt(String amount);
+
+  /// No description provided for @offiTtcWithVat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soit {amount} TTC avec la TVA de {vat} %'**
+  String offiTtcWithVat(String amount, int vat);
+
+  /// No description provided for @offiNextPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain paiement le {date}'**
+  String offiNextPayment(String date);
+
+  /// No description provided for @offiRenewNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renouveler maintenant'**
+  String get offiRenewNow;
+
+  /// No description provided for @offiChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir cette formule'**
+  String get offiChoose;
+
+  /// No description provided for @offiPaidByCashPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement par CashPay : mobile money ou carte'**
+  String get offiPaidByCashPay;
+
+  /// No description provided for @offiFreeMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'{months} mois offerts'**
+  String offiFreeMonths(int months);
+
+  /// No description provided for @offiEpePitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'{price} HT par an au lieu de {instead}, soit {ttc} TTC'**
+  String offiEpePitch(String price, String instead, String ttc);
+
+  /// No description provided for @offiSwitchToYearly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer à l’annuel'**
+  String get offiSwitchToYearly;
+
+  /// No description provided for @offiCreditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit de commandes'**
+  String get offiCreditTitle;
+
+  /// No description provided for @offiCreditSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'100 FCFA HT par commande payée'**
+  String get offiCreditSubtitle;
+
+  /// No description provided for @offiCreditBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit HT'**
+  String get offiCreditBalance;
+
+  /// No description provided for @offiOrdersLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soit {count} commandes payées'**
+  String offiOrdersLeft(int count);
+
+  /// No description provided for @offiCreditLow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit bientôt épuisé'**
+  String get offiCreditLow;
+
+  /// No description provided for @offiBuyCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheter {ht} HT · {ttc} TTC'**
+  String offiBuyCredit(String ht, String ttc);
+
+  /// No description provided for @offiPricesHt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix hors taxes, TVA du pays en sus. Rien n’est accordé avant la confirmation du paiement.'**
+  String get offiPricesHt;
+
+  /// No description provided for @offiPaymentPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement en cours : l’abonnement ou le crédit s’affiche dès sa confirmation.'**
+  String get offiPaymentPending;
+
+  /// No description provided for @offiAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get offiAccountTitle;
+
+  /// No description provided for @offiOpeningHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Horaires'**
+  String get offiOpeningHours;
+
+  /// No description provided for @offiCounterPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du comptoir'**
+  String get offiCounterPhone;
+
+  /// No description provided for @offiReceivingWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wallet de réception'**
+  String get offiReceivingWallet;
+
+  /// No description provided for @offiWalletVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'vérifié'**
+  String get offiWalletVerified;
+
+  /// No description provided for @offiWalletPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'vérification en attente'**
+  String get offiWalletPending;
+
+  /// No description provided for @offiAttachedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} rattaché(s)'**
+  String offiAttachedCount(int count);
+
+  /// No description provided for @offiOnDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Officine de garde'**
+  String get offiOnDuty;
+
+  /// No description provided for @offiOnDutyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les patients voient la mention « De garde » dans l’annuaire.'**
+  String get offiOnDutyHint;
+
+  /// No description provided for @offiTeamNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour changer d’adresse, d’horaires, de wallet ou ajouter un collaborateur, écrivez au support Pokou.'**
+  String get offiTeamNote;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

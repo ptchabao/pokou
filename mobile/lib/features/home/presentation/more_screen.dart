@@ -22,6 +22,7 @@ import '../../honam/presentation/honam_controller.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../modules/presentation/modules_screen.dart';
 import '../../modules/shared/module_ui.dart';
+import '../../officine/presentation/officine_entry.dart';
 import '../../profile/presentation/language_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import '../../settings/presentation/about_screen.dart';
@@ -279,6 +280,9 @@ class MoreScreen extends ConsumerWidget {
 
         // Maquette p.15 (Plus) et p.52 (Réglages du Lot 1) : des groupes sans
         // titre — services, compte, aide — et la valeur courante à droite.
+        // Espace officine : seulement pour l'équipe d'une officine.
+        if (!lot1 && config.has('honam')) const OfficineEntryCard(),
+
         if (!lot1)
           _Section(
             rows: [
