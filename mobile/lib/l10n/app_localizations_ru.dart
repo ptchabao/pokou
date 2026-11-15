@@ -9305,4 +9305,10 @@ class LRu extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get koryMqRemindersTitle => 'Rappels de cette cotisation';
+
+  @override
+  String get koryMqRemindersSub => 'J−2, jour J et relance J+1';
 }

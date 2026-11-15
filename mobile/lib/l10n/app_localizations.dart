@@ -15469,6 +15469,18 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{et 1 autre} other{et {count} autres}}'**
   String koryMqAndOthers(int count);
+
+  /// No description provided for @koryMqRemindersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappels de cette cotisation'**
+  String get koryMqRemindersTitle;
+
+  /// No description provided for @koryMqRemindersSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'J−2, jour J et relance J+1'**
+  String get koryMqRemindersSub;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

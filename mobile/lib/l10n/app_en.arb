@@ -2559,5 +2559,7 @@
   "koryMqOnPokou": "On Pokou",
   "koryMqRemoveDeputy": "Remove deputy role",
   "koryMqRemoveMember": "Remove from the tontine",
-  "koryMqAndOthers": "{count, plural, =1{and 1 other} other{and {count} others}}"
+  "koryMqAndOthers": "{count, plural, =1{and 1 other} other{and {count} others}}",
+  "koryMqRemindersTitle": "Reminders for this contribution",
+  "koryMqRemindersSub": "2 days before, on the day, and a nudge the day after"
 }

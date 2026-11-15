@@ -9216,4 +9216,11 @@ class LEn extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get koryMqRemindersTitle => 'Reminders for this contribution';
+
+  @override
+  String get koryMqRemindersSub =>
+      '2 days before, on the day, and a nudge the day after';
 }

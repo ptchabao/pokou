@@ -2559,5 +2559,7 @@
   "koryMqOnPokou": "Sur Pokou",
   "koryMqRemoveDeputy": "Retirer le rôle de suppléant",
   "koryMqRemoveMember": "Retirer de la tontine",
-  "koryMqAndOthers": "{count, plural, =1{et 1 autre} other{et {count} autres}}"
+  "koryMqAndOthers": "{count, plural, =1{et 1 autre} other{et {count} autres}}",
+  "koryMqRemindersTitle": "Rappels de cette cotisation",
+  "koryMqRemindersSub": "J−2, jour J et relance J+1"
 }
