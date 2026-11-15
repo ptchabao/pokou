@@ -9539,6 +9539,26 @@ class LEs extends L {
   String get groupSettingsProofOff => 'Désactivé';
 
   @override
+  String groupKoryOngoing(String title) {
+    return 'Cagnotte en cours · $title';
+  }
+
+  @override
+  String groupKoryProgress(String collected, String goal) {
+    return '$collected sur $goal FCFA';
+  }
+
+  @override
+  String groupKoryCollected(String collected) {
+    return '$collected FCFA confirmés';
+  }
+
+  @override
+  String groupKoryCloses(String date) {
+    return 'clôture le $date';
+  }
+
+  @override
   String get contactNotifications => 'Notifications';
 
   @override

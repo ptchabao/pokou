@@ -9504,6 +9504,26 @@ class LEn extends L {
   String get groupSettingsProofOff => 'Off';
 
   @override
+  String groupKoryOngoing(String title) {
+    return 'Pot in progress · $title';
+  }
+
+  @override
+  String groupKoryProgress(String collected, String goal) {
+    return '$collected of $goal FCFA';
+  }
+
+  @override
+  String groupKoryCollected(String collected) {
+    return '$collected FCFA confirmed';
+  }
+
+  @override
+  String groupKoryCloses(String date) {
+    return 'closes $date';
+  }
+
+  @override
   String get contactNotifications => 'Notifications';
 
   @override

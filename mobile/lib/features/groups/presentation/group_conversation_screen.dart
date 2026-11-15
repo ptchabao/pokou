@@ -58,6 +58,7 @@ import '../../messaging/presentation/forward_screen.dart';
 import '../../messaging/presentation/offline_banner.dart';
 import '../../messaging/presentation/report_sheet.dart';
 import 'group_info_screen.dart';
+import 'group_kory_banner.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../stickers/data/sticker_models.dart';
 import '../../stickers/presentation/sticker_image.dart';
@@ -1621,6 +1622,7 @@ class _GroupConversationScreenState
                 ),
               ),
               const OfflineBanner(),
+              GroupKoryBanner(groupId: widget.groupId),
               if (group?.proofMode ?? false) const ProofModeBanner(),
               _ActiveCallBanner(
                 groupId: widget.groupId,

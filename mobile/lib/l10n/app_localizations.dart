@@ -15932,6 +15932,30 @@ abstract class L {
   /// **'Désactivé'**
   String get groupSettingsProofOff;
 
+  /// No description provided for @groupKoryOngoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnotte en cours · {title}'**
+  String groupKoryOngoing(String title);
+
+  /// No description provided for @groupKoryProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'{collected} sur {goal} FCFA'**
+  String groupKoryProgress(String collected, String goal);
+
+  /// No description provided for @groupKoryCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{collected} FCFA confirmés'**
+  String groupKoryCollected(String collected);
+
+  /// No description provided for @groupKoryCloses.
+  ///
+  /// In fr, this message translates to:
+  /// **'clôture le {date}'**
+  String groupKoryCloses(String date);
+
   /// No description provided for @contactNotifications.
   ///
   /// In fr, this message translates to:

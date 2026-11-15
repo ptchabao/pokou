@@ -5015,6 +5015,41 @@
   "groupSettingsProof": "Mode preuve",
   "groupSettingsProofOn": "Activé",
   "groupSettingsProofOff": "Désactivé",
+  "groupKoryOngoing": "Cagnotte en cours · {title}",
+  "@groupKoryOngoing": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "groupKoryProgress": "{collected} sur {goal} FCFA",
+  "@groupKoryProgress": {
+    "placeholders": {
+      "collected": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "groupKoryCollected": "{collected} FCFA confirmés",
+  "@groupKoryCollected": {
+    "placeholders": {
+      "collected": {
+        "type": "String"
+      }
+    }
+  },
+  "groupKoryCloses": "clôture le {date}",
+  "@groupKoryCloses": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "contactNotifications": "Notifications",
   "contactNotificationsOn": "Activées",
   "contactNotificationsMuted": "En sourdine",
