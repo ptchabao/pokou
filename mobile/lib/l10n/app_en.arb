@@ -819,7 +819,7 @@
   "marketName": "Name",
   "marketPrice": "Price",
   "marketNoReviewYet": "no reviews yet",
-  "marketSearchHint": "Search for a product…",
+  "marketSearchHint": "Search for an ad",
   "callLogEmpty": "No calls yet.",
   "callLogUnknownUser": "User",
   "callStatusMissed": "Missed",
@@ -1513,7 +1513,7 @@
   "legalUnavailable": "Document unavailable for now.",
   "onbStep": "Step {step} of 3",
   "onbProfileTitle": "Your profile",
-  "onbProfileBody": "This is the name your contacts will see.",
+  "onbProfileBody": "Your first name or a nickname. You can add a photo later, from your profile.",
   "onbDisplayName": "Display name",
   "onbNameRequired": "Enter a name (at least 2 characters).",
   "onbPhotoLater": "You can add a photo later from your profile.",
@@ -1521,9 +1521,9 @@
   "onbTermsTitle": "Before you start",
   "onbAcceptTerms": "I have read and accept the terms of use and the privacy policy.",
   "onbAge": "I am old enough to use Pokou.",
-  "onbOptional": "Optional, can be changed anytime in settings",
-  "onbAnalytics": "Share usage statistics to improve Pokou",
-  "onbMarketing": "Receive news and offers from Pokou",
+  "onbOptional": "Optional",
+  "onbAnalytics": "Usage statistics",
+  "onbMarketing": "Pokou news",
   "onbFinish": "Finish",
   "onbFailed": "Saving failed. Try again.",
   "moreConsents": "Statistics and communications",
@@ -1645,10 +1645,10 @@
   "honamQueenLocked": "Queen Pokou unlocks after a month without delivery failures.",
   "koryDeclaredTotal": "Declared total: {amount}",
   "koryRemaining": "Left to collect: {amount}",
-  "onbBabaWelcome": "I'm Baba, Pokou's assistant. What should we call you?",
-  "onbContactsTitle": "Find your people",
-  "onbContactsBody": "Baba can find which of your contacts are already on Pokou. You can say no: we'll ask again later.",
-  "onbContactsAllow": "Allow",
+  "onbBabaWelcome": "Welcome to Pokou! I'm Baba, the app's assistant. What should your loved ones call you?",
+  "onbContactsTitle": "Find your loved ones",
+  "onbContactsBody": "I can look for which of your contacts are already on Pokou. Their numbers are compared without your address book being kept. You can change your mind in Privacy.",
+  "onbContactsAllow": "Yes, find them",
   "onbLater": "Later",
   "proofModeDirectHint": "Everything written stays provable: a deleted message stays struck through, an edit keeps the original. Only you will be able to turn it off.",
   "proofDisableReservedDirect": "Only the person who turned on proof mode can turn it off.",
@@ -2126,8 +2126,8 @@
   "honamUiExpiredOn": "Quote expired on {date}",
   "honamUiCancelledOn": "Cancelled on {date}",
   "honamUiStepOf": "Step {step} of {total}",
-  "honamUiEmptyTitle": "No order in progress",
-  "honamUiEmptyBody": "Take a photo of your prescription: a nearby pharmacy sends you a quote.",
+  "honamUiEmptyTitle": "No orders",
+  "honamUiEmptyBody": "Take a photo of your prescription: a nearby pharmacy sends you a quote, and a courier delivers.",
   "honamUiEmptyCompleted": "No completed order yet.",
   "honamUiEmptyCancelled": "No cancelled order.",
   "honamUiOrdersError": "Could not load your orders",
@@ -2541,5 +2541,81 @@
   "twoStepRecoveryNote": "Without your PIN, you can still sign back in after 7 days. This delay stops someone who got hold of your number.",
   "homeKoryCardSubtitle": "Group funds",
   "homeHonamCardSubtitle": "Pharmacies",
-  "marketSubtitle": "Classified ads"
+  "marketSubtitle": "Classified ads",
+  "onbAnalyticsSub": "Anonymous, to improve the app",
+  "onbMarketingSub": "By notification or SMS",
+  "onbStart": "Let's go",
+  "onbAiTag": "AI",
+  "onbBabaRole": "Pokou assistant",
+  "onbBabaAiNotice": "Baba is an artificial intelligence. It does not read your other chats and will never ask you for a code received by SMS.",
+  "onbBabaReady": "Your account is ready, {name}! I'm here to help you get started with Pokou.",
+  "@onbBabaReady": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onbFoundCount": "{count, plural, =1{Done! 1 of your contacts is already on Pokou:} other{Done! {count} of your contacts are already on Pokou:}}",
+  "@onbFoundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onbSeeAllFound": "See the {count} contacts",
+  "@onbSeeAllFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onbWrite": "Write",
+  "onbInviteOthers": "For the others, I can prepare an invitation to send by SMS or WhatsApp, if you like.",
+  "onbInviteMine": "Invite my loved ones",
+  "onbGoToChats": "Go to my chats",
+  "emptyChatsTitle": "Your chats will show up here",
+  "emptyChatsBody": "Find the people who already have Pokou, or invite the others by SMS.",
+  "emptyChatsFind": "Find my loved ones",
+  "emptyChatsInviteSms": "Invite by SMS",
+  "emptyKoryTitle": "No group fund yet",
+  "emptyKoryBody": "A birthday, a wedding, a savings circle with colleagues: everyone commits, then pays from their own wallet.",
+  "emptyKoryJoinLink": "Join with a link",
+  "emptyKoryNoMoney": "Pokou never touches the money and takes no commission on group funds.",
+  "emptyHonamNotEmergency": "Honam is not an emergency service. In an emergency, call the emergency services.",
+  "emptyAssimeTitle": "No ads",
+  "emptyAssimeTitleIn": "No ads in {city}",
+  "@emptyAssimeTitleIn": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAssimeBody": "Nobody is selling “{query}” near you right now.",
+  "@emptyAssimeBody": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAssimeAlert": "Create an alert",
+  "emptyAssimeAlertDone": "Alert created: you'll be notified as soon as an ad matches.",
+  "emptyAssimeWholeCountry": "Search all of {country}",
+  "@emptyAssimeWholeCountry": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAssimeEverywhere": "Search everywhere",
+  "emptyAssimeAlertNote": "The alert lets you know as soon as a new ad matches.",
+  "lot1SoonTitle": "Coming soon: Kory, Honam, Assimé",
+  "lot1SoonBody": "Group funds, pharmacy and classified ads are arriving city by city.",
+  "lot1SoonNotify": "Notify me",
+  "lot1SoonNoted": "Noted: you'll be told as soon as it opens in your city."
 }

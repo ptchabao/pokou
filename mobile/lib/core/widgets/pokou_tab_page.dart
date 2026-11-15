@@ -48,7 +48,9 @@ class PokouTabPage extends ConsumerWidget {
     required PokouTab tab,
     required Widget child,
   }) => Navigator.of(context).push<T>(
-    MaterialPageRoute(builder: (_) => PokouTabPage(tab: tab, child: child)),
+    MaterialPageRoute(
+      builder: (_) => PokouTabPage(tab: tab, child: child),
+    ),
   );
 
   @override

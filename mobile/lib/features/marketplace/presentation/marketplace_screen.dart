@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart' show IsoCode;
 
+import '../../../core/country/country_config.dart';
+import '../../auth/presentation/country_names.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_app_bar.dart';
@@ -73,7 +76,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
@@ -439,12 +442,14 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
       return Center(child: Text(L.of(context).marketUnavailable));
     }
     if (state.items.isEmpty) {
-      return Text(
-        ref.watch(marketplaceQueryProvider).trim().isEmpty
-            ? L.of(context).marketNoProduct
-            : L.of(context).marketNoMatch,
-        style: TextStyle(color: AppColors.textSecondary),
-      );
+      final query = ref.watch(marketplaceQueryProvider).trim();
+      if (query.isEmpty) {
+        return Text(
+          L.of(context).marketNoProduct,
+          style: TextStyle(color: AppColors.textSecondary),
+        );
+      }
+      return _NoResult(query: query);
     }
     // Une publicité tous les [_kAdEvery] produits, en rotation. Le marché
     // reste en tête : la première arrive après un premier bloc d'articles,
@@ -1220,7 +1225,7 @@ class _MarketplaceSearchFieldState
   Widget build(BuildContext context) {
     final query = ref.watch(marketplaceQueryProvider);
     return TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+      contextMenuBuilder: pokouContextMenuBuilder,
       controller: _controller,
       onChanged: _onChanged,
       textInputAction: TextInputAction.search,
@@ -1270,10 +1275,113 @@ class _MarketAppBar extends StatelessWidget implements PreferredSizeWidget {
     // Ouvert depuis l'Accueil ou Plus : un retour. En onglet : aucun.
     return PokouAppBar(
       title: L.of(context).marketTitle,
-      // Pas de « En ligne » sous le titre : il parle de la messagerie.
+      // Maquette p.15 : « Petites annonces » sous le titre, à la place du
+      // « En ligne », qui parle de la messagerie.
+      subtitle: L.of(context).marketSubtitle,
       showStatus: false,
       leading: Navigator.of(context).canPop() ? const PokouBackButton() : null,
       actions: actions,
+    );
+  }
+}
+
+/// États vides · 4. Assimé, aucun résultat (maquette p.111) : ce qui n'a pas
+/// été trouvé, et où ; créer une alerte sur cette recherche, ou élargir à
+/// tout le pays.
+class _NoResult extends ConsumerStatefulWidget {
+  const _NoResult({required this.query});
+
+  final String query;
+
+  @override
+  ConsumerState<_NoResult> createState() => _NoResultState();
+}
+
+class _NoResultState extends ConsumerState<_NoResult> {
+  bool _saving = false;
+
+  Future<void> _createAlert() async {
+    final l = L.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _saving = true);
+    try {
+      await ref
+          .read(marketplaceRepositoryProvider)
+          .createAlert(query: widget.query);
+      messenger.showSnackBar(SnackBar(content: Text(l.emptyAssimeAlertDone)));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l.errorNetwork)));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final city = ref.watch(marketplaceLocationProvider).trim();
+    final iso = ref.watch(currentCountryConfigProvider).country;
+    final isoCode = IsoCode.values.where((c) => c.name == iso).firstOrNull;
+    final countryName = isoCode == null
+        ? null
+        : countryNameFor(Localizations.localeOf(context).languageCode, isoCode);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.search, color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            city.isEmpty ? l.emptyAssimeTitle : l.emptyAssimeTitleIn(city),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l.emptyAssimeBody(widget.query),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          ),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: _saving ? null : _createAlert,
+            icon: const Icon(Icons.notifications_none, size: 18),
+            label: Text(l.emptyAssimeAlert),
+          ),
+          if (city.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () {
+                ref.read(marketplaceLocationProvider.notifier).state = '';
+                ref.read(marketplaceProductsProvider.notifier).invalidate();
+              },
+              icon: const Icon(Icons.map_outlined, size: 18),
+              label: Text(
+                countryName == null
+                    ? l.emptyAssimeEverywhere
+                    : l.emptyAssimeWholeCountry(countryName),
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Text(
+            l.emptyAssimeAlertNote,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }

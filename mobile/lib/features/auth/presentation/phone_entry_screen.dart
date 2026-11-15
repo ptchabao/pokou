@@ -348,7 +348,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                           ),
                           Expanded(
                             child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                              contextMenuBuilder: pokouContextMenuBuilder,
                               controller: _phoneController,
                               focusNode: _focusNode,
                               keyboardType: TextInputType.phone,
@@ -541,15 +541,6 @@ class _Service extends StatelessWidget {
 class _LanguagePill extends ConsumerWidget {
   const _LanguagePill();
 
-  static const _nativeNames = {
-    'fr': 'Français',
-    'en': 'English',
-    'es': 'Español',
-    'it': 'Italiano',
-    'ru': 'Русский',
-    'ar': 'العربية',
-  };
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final code = ref.watch(
@@ -557,10 +548,9 @@ class _LanguagePill extends ConsumerWidget {
     );
     // Sans choix explicite, l'app suit le téléphone (voir AppSettings) : on
     // affiche alors la langue réellement rendue, celle de ce `context`.
-    final label =
-        _nativeNames[code] ??
-        _nativeNames[Localizations.localeOf(context).languageCode] ??
-        _nativeNames['fr']!;
+    final label = LanguageScreen.nativeNameOf(
+      code ?? Localizations.localeOf(context).languageCode,
+    );
     return Material(
       color: AppColors.surface,
       shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
@@ -580,11 +570,7 @@ class _LanguagePill extends ConsumerWidget {
                 label,
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
               ),
-              Icon(
-                Icons.expand_more,
-                size: 16,
-                color: AppColors.textMuted,
-              ),
+              Icon(Icons.expand_more, size: 16, color: AppColors.textMuted),
             ],
           ),
         ),

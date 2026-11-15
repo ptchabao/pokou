@@ -29,6 +29,12 @@ class LanguageScreen extends ConsumerWidget {
     (code: 'ar', native: 'العربية'),
   ];
 
+  /// Le nom d'une langue dans sa propre langue (« Français »), pour
+  /// l'afficher comme valeur courante ; le français par défaut.
+  static String nativeNameOf(String? code) =>
+      _languages.where((l) => l.code == code).firstOrNull?.native ??
+      _languages.first.native;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(

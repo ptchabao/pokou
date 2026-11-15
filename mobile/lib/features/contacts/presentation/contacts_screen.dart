@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/providers.dart';
@@ -12,7 +13,6 @@ import '../../../core/widgets/pokou_app_bar.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../home/presentation/pokou_page_header.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/pokou_fab.dart';
 import '../../settings/presentation/backup_screens.dart';
 import '../../status/presentation/status_strip.dart';
 import '../../../core/theme/app_radius.dart';
@@ -31,16 +31,15 @@ import '../../groups/presentation/group_conversation_screen.dart';
 import '../../messaging/presentation/conversation_screen.dart';
 import 'add_contact_screen.dart';
 import 'contacts_controller.dart';
-import '../../broadcasts/presentation/broadcast_lists_screen.dart';
-import '../../modules/presentation/modules_screen.dart';
+import '../../../core/country/country_config.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart' show isLot1;
+import '../../status/presentation/post_status_screen.dart';
 import 'discovery_strip.dart';
 import 'new_chat_screen.dart';
 import '../../status/presentation/status_controller.dart';
 import 'discussions_controller.dart';
 import '../data/conversation_summary.dart';
-import '../../channels/presentation/channel_search_screen.dart';
 import '../../../core/sharing/invite_sharing.dart';
-import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 
 const _kPriorityTags = ['BUSINESS', 'FOURNISSEUR', 'CLIENT', 'BOSS', 'AMI'];
@@ -465,35 +464,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   Widget build(BuildContext context) {
     final discussionsAsync = ref.watch(discussionsProvider);
     final myUserId = ref.watch(authControllerProvider).user?.id;
+    // Lot 1 (maquette p.52) : appareil photo dans l'en-tête, et pas de bande
+    // des statuts — ils ont leur propre onglet.
+    final lot1 = isLot1(
+      ref.watch(currentCountryConfigProvider.select((c) => c.modules)),
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      // Écrire à un numéro sans l'enregistrer d'abord. Le geste manquait
-      // entièrement : on ne pouvait ouvrir une discussion que depuis une
-      // fiche du carnet, donc jamais avec un numéro qu'on vient de lire.
-      // Relevé au-dessus de la barre de navigation, qui est pleine largeur
-      // et collée au bord. Posé à sa hauteur par défaut, le bouton venait
-      // se confondre avec elle et se lisait comme un sixième onglet mal
-      // aligné. La marge se CALCULE — hauteur standard de la barre plus la
-      // zone sûre du bas — au lieu d'être un nombre écrit à la main : la
-      // zone sûre vaut 0 sur un appareil à bouton physique et une trentaine
-      // de points sur un écran à encoche, et une constante serait juste sur
-      // l'un des deux.
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(
-          bottom:
-              MediaQuery.paddingOf(context).bottom +
-              kBottomNavigationBarHeight +
-              8,
-        ),
-        child: PokouFab(
-          onPressed: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const NewChatScreen())),
-          tooltip: L.of(context).newChatTitle,
-          icon: Icons.add_comment_outlined,
-        ),
-      ),
+      // Plus de bouton flottant : le crayon de l'en-tête ouvre « Nouvelle
+      // discussion », comme dans la maquette (écrire à un numéro non
+      // enregistré passe toujours par cet écran).
       body: RefreshIndicator(
         onRefresh: () async {
           await forceContactSync(ref);
@@ -512,44 +493,60 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             // gras, et dessous l'état de la connexion — l'information la
             // plus utile à afficher en permanence sur ce marché. Sans barre
             // ni trait : l'écran commence par son titre.
+            // Maquettes p.14 et p.52 : l'icône et le logotype Pokou en tête,
+            // comme WhatsApp, puis l'appareil photo (Lot 1) et le crayon de
+            // « Nouvelle discussion ». La connexion ne s'affiche plus que
+            // quand elle manque. Modules et listes de diffusion sont passés
+            // dans « Plus » / « Réglages ».
             PokouPageHeader(
               title: L.of(context).navChats,
+              titleWidget: Image.asset(
+                'assets/brand/pokou_logotype_couleur.png',
+                height: 30,
+                alignment: Alignment.centerLeft,
+                fit: BoxFit.contain,
+              ),
               subtitle: (ref.watch(wsOnlineProvider).valueOrNull ?? true)
-                  ? L.of(context).appBarOnline
+                  ? null
                   : L.of(context).appBarOffline,
-              emphasized: !(ref.watch(wsOnlineProvider).valueOrNull ?? true),
+              emphasized: true,
               showBell: false,
+              showAvatar: false,
               actions: [
-                // Les modules AVANT les listes de diffusion : c'est la
-                // porte d'entrée de tout ce que l'application peut
-                // devenir, alors que la diffusion est un outil parmi
-                // d'autres. L'ordre de gauche à droite dit lequel compte.
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const ModulesScreen()),
-                  ),
-                  icon: Icon(
-                    Icons.apps_rounded,
-                    color: AppColors.textSecondary,
-                  ),
-                  tooltip: L.of(context).navModules,
-                ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const BroadcastListsScreen(),
+                if (lot1)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PostStatusScreen(),
+                      ),
                     ),
+                    icon: const Icon(Icons.photo_camera_outlined),
+                    tooltip: L.of(context).navStatus,
                   ),
-                  icon: Icon(
-                    Icons.campaign_outlined,
-                    color: AppColors.textSecondary,
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const NewChatScreen()),
                   ),
-                  tooltip: L.of(context).navBroadcasts,
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: L.of(context).newChatTitle,
                 ),
               ],
             ),
+            if (!lot1)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                child: Text(
+                  L.of(context).navChats,
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
             // Maquette « Discussions » : recherche en pastille blanche et
             // « + » terracotta (nouvelle discussion), PUIS la bande des
             // statuts, puis les filtres.
@@ -597,7 +594,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             ),
             // APP-2 : la bande des statuts (« Mon statut », puis les statuts
             // non vus), comme le cahier et la maquette Terre de Confiance.
-            const StatusStrip(),
+            if (!lot1) const StatusStrip(),
             _ChatFilterRow(
               current: _filter,
               onChanged: (f) => setState(() => _filter = f),
@@ -1013,33 +1010,40 @@ class _ChatsEmptyState extends ConsumerWidget {
   }
 }
 
-/// Personne du carnet n'est encore sur Pokou.
-///
-/// Deux portes, et pas une seule : inviter demande d'attendre une réponse
-/// qui peut ne jamais venir, et un compte qui ne sert à rien le jour de son
-/// installation ne se rouvre pas. Suivre une chaîne donne une raison de
-/// revenir entre-temps.
-class _NoNetworkYet extends StatelessWidget {
+/// États vides · 1. Discussions, premier lancement (maquette p.111) : Baba
+/// est la seule discussion (épinglée au-dessus), et l'écran explique en une
+/// phrase ce qui va arriver ici, avec une action principale — retrouver ses
+/// proches — et une seconde, inviter par SMS.
+class _NoNetworkYet extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
       child: Column(
         children: [
-          const PokouIllustration(
-            PokouIllustrations.discussionsEmpty,
-            height: 170,
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.terracottaTint,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.chat_bubble_outline,
+              size: 30,
+              color: AppColors.accentPrimaryDark,
+            ),
           ),
           const SizedBox(height: 20),
           Text(
-            l.chatsNoNetworkTitle,
+            l.emptyChatsTitle,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(
-            l.chatsNoNetworkBody,
+            l.emptyChatsBody,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.textSecondary,
@@ -1050,21 +1054,36 @@ class _NoNetworkYet extends StatelessWidget {
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () => InviteSharing.share(context),
-              icon: const Icon(Icons.person_add_alt, size: 18),
-              label: Text(l.chatsInviteContacts),
+            child: FilledButton(
+              // Redemande l'accès au carnet s'il a été refusé à
+              // l'inscription, puis relit le répertoire.
+              onPressed: () async {
+                if (await ref
+                    .read(deviceContactsServiceProvider)
+                    .hasPermission()) {
+                  await forceContactSync(ref);
+                }
+              },
+              child: Text(l.emptyChatsFind),
             ),
           ),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ChannelSearchScreen()),
-              ),
-              icon: const Icon(Icons.campaign_outlined, size: 18),
-              label: Text(l.chatsDiscoverChannels),
+            child: OutlinedButton(
+              onPressed: () async {
+                final body = InviteSharing.message(l);
+                final sms = Uri.parse('sms:?body=${Uri.encodeComponent(body)}');
+                // Pas d'application SMS (tablette) : la feuille de partage.
+                var opened = false;
+                try {
+                  opened = await launchUrl(sms);
+                } catch (_) {}
+                if (!opened && context.mounted) {
+                  await InviteSharing.share(context);
+                }
+              },
+              child: Text(l.emptyChatsInviteSms),
             ),
           ),
         ],

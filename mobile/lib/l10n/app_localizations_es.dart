@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4048,7 +4047,8 @@ class LEs extends L {
       locale: localeName,
       other:
           '$count mensajes retenidos por el Modo Escudo: desliza hacia abajo para verlos',
-      one: '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
+      one:
+          '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
     );
     return '$_temp0';
   }
@@ -9131,4 +9131,134 @@ class LEs extends L {
 
   @override
   String get marketSubtitle => 'Petites annonces';
+
+  @override
+  String get onbAnalyticsSub => 'Anonymes, pour améliorer l\'application';
+
+  @override
+  String get onbMarketingSub => 'Par notification ou par SMS';
+
+  @override
+  String get onbStart => 'C\'est parti';
+
+  @override
+  String get onbAiTag => 'IA';
+
+  @override
+  String get onbBabaRole => 'Assistant de Pokou';
+
+  @override
+  String get onbBabaAiNotice =>
+      'Baba est une intelligence artificielle. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.';
+
+  @override
+  String onbBabaReady(String name) {
+    return 'Ton compte est prêt, $name ! Je suis là pour t\'aider à prendre Pokou en main.';
+  }
+
+  @override
+  String onbFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'C\'est fait ! $count de tes contacts sont déjà sur Pokou :',
+      one: 'C\'est fait ! 1 de tes contacts est déjà sur Pokou :',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onbSeeAllFound(int count) {
+    return 'Voir les $count contacts';
+  }
+
+  @override
+  String get onbWrite => 'Écrire';
+
+  @override
+  String get onbInviteOthers =>
+      'Pour les autres, je prépare une invitation à envoyer par SMS ou WhatsApp, si tu veux.';
+
+  @override
+  String get onbInviteMine => 'Inviter mes proches';
+
+  @override
+  String get onbGoToChats => 'Aller à mes discussions';
+
+  @override
+  String get emptyChatsTitle => 'Tes discussions arrivent ici';
+
+  @override
+  String get emptyChatsBody =>
+      'Retrouve les proches qui ont déjà Pokou, ou invite les autres par SMS.';
+
+  @override
+  String get emptyChatsFind => 'Retrouver mes proches';
+
+  @override
+  String get emptyChatsInviteSms => 'Inviter par SMS';
+
+  @override
+  String get emptyKoryTitle => 'Aucune cagnotte pour l\'instant';
+
+  @override
+  String get emptyKoryBody =>
+      'Un anniversaire, un mariage, une tontine entre collègues : chacun s\'engage, puis verse depuis son wallet.';
+
+  @override
+  String get emptyKoryJoinLink => 'Rejoindre avec un lien';
+
+  @override
+  String get emptyKoryNoMoney =>
+      'Pokou ne touche jamais l\'argent et ne prend aucune commission sur les cagnottes.';
+
+  @override
+  String get emptyHonamNotEmergency =>
+      'Honam n\'est pas un service d\'urgence. En cas d\'urgence, appelle les secours.';
+
+  @override
+  String get emptyAssimeTitle => 'Aucune annonce';
+
+  @override
+  String emptyAssimeTitleIn(String city) {
+    return 'Aucune annonce à $city';
+  }
+
+  @override
+  String emptyAssimeBody(String query) {
+    return 'Personne ne vend de « $query » près de chez toi pour l\'instant.';
+  }
+
+  @override
+  String get emptyAssimeAlert => 'Créer une alerte';
+
+  @override
+  String get emptyAssimeAlertDone =>
+      'Alerte créée : tu seras prévenu dès qu\'une annonce correspond.';
+
+  @override
+  String emptyAssimeWholeCountry(String country) {
+    return 'Chercher dans tout le $country';
+  }
+
+  @override
+  String get emptyAssimeEverywhere => 'Chercher partout';
+
+  @override
+  String get emptyAssimeAlertNote =>
+      'L\'alerte te prévient dès qu\'une nouvelle annonce correspond.';
+
+  @override
+  String get lot1SoonTitle => 'Bientôt : Kory, Honam, Assimé';
+
+  @override
+  String get lot1SoonBody =>
+      'Cagnottes, pharmacie et petites annonces arrivent ville par ville.';
+
+  @override
+  String get lot1SoonNotify => 'Me prévenir';
+
+  @override
+  String get lot1SoonNoted =>
+      'C\'est noté : tu seras prévenu dès l\'ouverture dans ta ville.';
 }

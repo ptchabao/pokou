@@ -4,8 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'certified_screen.dart';
 
 import '../../../core/country/country_config.dart';
+import '../../../core/media/media_repository.dart';
+import '../../../core/providers.dart';
+import '../../../core/settings/app_settings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import 'pokou_page_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -18,13 +23,11 @@ import '../../modules/presentation/modules_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../../profile/presentation/language_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
-import '../../profile/presentation/theme_screen.dart';
 import '../../settings/presentation/about_screen.dart';
 import '../../settings/presentation/help_screen.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
-import '../../status/presentation/status_list_screen.dart';
 import '../../../core/widgets/pokou_icon.dart';
 
 /// « Plus » (écran APP-6) ou « Réglages » au lot 1 (écran LOT-4).
@@ -273,75 +276,23 @@ class MoreScreen extends ConsumerWidget {
             ),
           ),
 
-        // Lot 1 : Encart « Bientôt : Kory, Honam, Assimé » (LOT-4 / NAV-12)
-        if (lot1)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: ModuleCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.auto_awesome,
-                        color: AppColors.brandOr,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Bientôt : Kory, Honam, Assimé',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Cagnottes, pharmacie et petites annonces arrivent ville par ville.',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'C’est noté : tu seras prévenu dès l’ouverture dans ta ville.',
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.notifications_active_outlined,
-                      size: 16,
-                    ),
-                    label: const Text('Me prévenir'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        // Section Services (application complète uniquement)
+        // Maquette p.15 (Plus) et p.52 (Réglages du Lot 1) : des groupes sans
+        // titre — services, compte, aide — et la valeur courante à droite.
         if (!lot1)
           _Section(
-            title: l.moreSectionServices,
             rows: [
-              _Row(
-                Icons.donut_large_outlined,
-                l.navStatus,
-                () => push(const StatusListScreen()),
-                leading: PokouIcon(
-                  PokouModuleIcon.statuts,
-                  color: AppColors.textSecondary,
+              if (config.has('assime'))
+                _Row(
+                  Icons.storefront_outlined,
+                  l.homeAssimeTitle,
+                  () => PokouTabPage.push(
+                    context,
+                    tab: PokouTab.more,
+                    child: const MarketplaceScreen(),
+                  ),
+                  subtitle: l.marketSubtitle,
+                  leading: const PokouModuleLogo(PokouModule.assime, size: 28),
                 ),
-              ),
               _Row(
                 Icons.call_outlined,
                 l.navCalls,
@@ -351,65 +302,127 @@ class MoreScreen extends ConsumerWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              _Row(
-                Icons.storefront_outlined,
-                'Assimé',
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
-                ),
-                leading: const PokouModuleLogo(PokouModule.assime, size: 28),
-              ),
-              _Row(
-                Icons.apps_rounded,
-                l.navModules,
-                () => push(const ModulesScreen()),
-              ),
-              _Row(
-                Icons.campaign_outlined,
-                l.navBroadcasts,
-                () => push(const BroadcastListsScreen()),
-              ),
             ],
           ),
 
-        // Section Réglages
         _Section(
-          title: l.moreSectionSettings,
           rows: [
             _Row(
               Icons.lock_outline,
               l.moreAccount,
               () => push(const ProfileScreen()),
             ),
-            _Row(
-              Icons.visibility_outlined,
-              l.privacyTitle,
-              () => push(const PrivacySettingsScreen()),
-            ),
-            _Row(
-              Icons.notifications_outlined,
-              l.profileNotifications,
-              () => push(const NotificationsSettingsScreen()),
-            ),
-            _Row(
-              Icons.storage_outlined,
-              l.storageTitle,
-              () => push(const StorageSettingsScreen()),
-            ),
-            _Row(
-              Icons.palette_outlined,
-              l.profileTheme,
-              () => push(const ThemeScreen()),
-            ),
+            if (lot1) ...[
+              _Row(
+                Icons.shield_outlined,
+                l.privacyTitle,
+                () => push(const PrivacySettingsScreen()),
+              ),
+              _Row(
+                Icons.notifications_outlined,
+                l.profileNotifications,
+                () => push(const NotificationsSettingsScreen()),
+              ),
+              _Row(
+                Icons.cloud_outlined,
+                l.storageTitle,
+                () => push(const StorageSettingsScreen()),
+                value: ref.watch(_cacheSizeProvider).valueOrNull,
+              ),
+            ] else ...[
+              _Row(
+                Icons.notifications_outlined,
+                l.profileNotifications,
+                () => push(const NotificationsSettingsScreen()),
+              ),
+              _Row(
+                Icons.shield_outlined,
+                l.privacyTitle,
+                () => push(const PrivacySettingsScreen()),
+              ),
+            ],
             _Row(
               Icons.language,
               l.profileLanguage,
               () => push(const LanguageScreen()),
+              value: _languageName(context, ref),
             ),
+          ],
+        ),
+
+        _Section(
+          rows: [
             _Row(Icons.help_outline, l.helpTitle, showHelp),
             _Row(Icons.info_outline, l.aboutTitle, showAbout),
           ],
         ),
+
+        // Absents de la maquette, mais sans autre entrée depuis que l'en-tête
+        // des Discussions suit la maquette : gardés ici, en dernier.
+        _Section(
+          rows: [
+            _Row(
+              Icons.campaign_outlined,
+              l.navBroadcasts,
+              () => push(const BroadcastListsScreen()),
+            ),
+            if (!lot1)
+              _Row(
+                Icons.apps_rounded,
+                l.navModules,
+                () => push(const ModulesScreen()),
+              ),
+          ],
+        ),
+
+        // Lot 1 : encart « Bientôt : Kory, Honam, Assimé » EN BAS (maquette
+        // p.52, LOT-4 / NAV-12).
+        if (lot1)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.lot1SoonTitle,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l.lot1SoonBody,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  OutlinedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l.lot1SoonNoted)));
+                    },
+                    child: Text(l.lot1SoonNotify),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -462,7 +475,14 @@ class _Pushed extends StatelessWidget {
 }
 
 class _Row {
-  const _Row(this.icon, this.label, this.onTap, {this.leading});
+  const _Row(
+    this.icon,
+    this.label,
+    this.onTap, {
+    this.leading,
+    this.subtitle,
+    this.value,
+  });
 
   final IconData icon;
 
@@ -470,43 +490,71 @@ class _Row {
   final Widget? leading;
   final String label;
   final VoidCallback onTap;
+
+  /// Sous le libellé (« Petites annonces » sous Assimé).
+  final String? subtitle;
+
+  /// La valeur courante, à droite (« Français », « 1,8 Go »).
+  final String? value;
 }
 
+/// Un groupe de lignes dans une carte, sans titre (maquettes p.15 et p.52).
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.rows});
+  const _Section({required this.rows});
 
-  final String title;
   final List<_Row> rows;
 
   @override
   Widget build(BuildContext context) {
+    if (rows.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ModuleSectionTitle(title),
-          ModuleCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                for (final row in rows)
-                  ListTile(
-                    leading:
-                        row.leading ??
-                        Icon(row.icon, color: AppColors.textSecondary),
-                    title: Text(row.label),
-                    trailing: Icon(
-                      Icons.chevron_right,
-                      color: AppColors.textMuted,
-                    ),
-                    onTap: row.onTap,
-                  ),
-              ],
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: ModuleCard(
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            for (final (i, row) in rows.indexed) ...[
+              if (i > 0) Divider(height: 1, color: AppColors.border),
+              ListTile(
+                leading:
+                    row.leading ??
+                    Icon(row.icon, color: AppColors.textSecondary),
+                title: Text(row.label),
+                subtitle: row.subtitle == null ? null : Text(row.subtitle!),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (row.value != null)
+                      Text(
+                        row.value!,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    Icon(Icons.chevron_right, color: AppColors.textMuted),
+                  ],
+                ),
+                onTap: row.onTap,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
+}
+
+/// La place prise par les médias sur l'appareil (Stockage et données).
+final _cacheSizeProvider = FutureProvider.autoDispose<String>((ref) async {
+  final stats = await ref.watch(mediaRepositoryProvider).cacheStats();
+  return formatBytes(stats.totalBytes);
+});
+
+/// La langue affichée, dans sa propre langue.
+String _languageName(BuildContext context, WidgetRef ref) {
+  final code =
+      ref.watch(appSettingsProvider.select((s) => s.localeCode)) ??
+      Localizations.localeOf(context).languageCode;
+  return LanguageScreen.nativeNameOf(code);
 }

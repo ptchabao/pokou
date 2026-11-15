@@ -133,7 +133,12 @@ class ApiClient {
     } catch (_) {
       // Body wasn't JSON — keep the generic message.
     }
-    throw ApiException(response.statusCode, message, code: code, attemptsLeft: attemptsLeft);
+    throw ApiException(
+      response.statusCode,
+      message,
+      code: code,
+      attemptsLeft: attemptsLeft,
+    );
   }
 
   /// Le jeton d'accès expire au bout de 30 min côté API (voir

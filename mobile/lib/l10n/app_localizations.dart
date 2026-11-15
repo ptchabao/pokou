@@ -5022,7 +5022,7 @@ abstract class L {
   /// No description provided for @marketSearchHint.
   ///
   /// In fr, this message translates to:
-  /// **'Rechercher un produit…'**
+  /// **'Rechercher une annonce'**
   String get marketSearchHint;
 
   /// No description provided for @callLogEmpty.
@@ -9186,7 +9186,7 @@ abstract class L {
   /// No description provided for @onbProfileBody.
   ///
   /// In fr, this message translates to:
-  /// **'C\'est le nom que verront tes contacts.'**
+  /// **'Ton prénom ou un surnom. Tu pourras ajouter une photo plus tard, depuis ton profil.'**
   String get onbProfileBody;
 
   /// No description provided for @onbDisplayName.
@@ -9234,19 +9234,19 @@ abstract class L {
   /// No description provided for @onbOptional.
   ///
   /// In fr, this message translates to:
-  /// **'Facultatif, modifiable à tout moment dans les réglages'**
+  /// **'Facultatif'**
   String get onbOptional;
 
   /// No description provided for @onbAnalytics.
   ///
   /// In fr, this message translates to:
-  /// **'Partager des statistiques d\'usage pour améliorer Pokou'**
+  /// **'Statistiques d\'utilisation'**
   String get onbAnalytics;
 
   /// No description provided for @onbMarketing.
   ///
   /// In fr, this message translates to:
-  /// **'Recevoir les nouvelles et offres de Pokou'**
+  /// **'Nouveautés de Pokou'**
   String get onbMarketing;
 
   /// No description provided for @onbFinish.
@@ -9978,25 +9978,25 @@ abstract class L {
   /// No description provided for @onbBabaWelcome.
   ///
   /// In fr, this message translates to:
-  /// **'Je suis Baba, l\'assistant de Pokou. Comment veux-tu qu\'on t\'appelle ?'**
+  /// **'Bienvenue sur Pokou ! Moi, c\'est Baba, l\'assistant de l\'application. Comment veux-tu que tes proches t\'appellent ?'**
   String get onbBabaWelcome;
 
   /// No description provided for @onbContactsTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Retrouver tes proches'**
+  /// **'Retrouve tes proches'**
   String get onbContactsTitle;
 
   /// No description provided for @onbContactsBody.
   ///
   /// In fr, this message translates to:
-  /// **'Baba peut retrouver ceux de tes contacts qui sont déjà sur Pokou. Tu peux refuser : on te le redemandera plus tard.'**
+  /// **'Je peux chercher lesquels de tes contacts sont déjà sur Pokou. Leurs numéros sont comparés sans que ton carnet d\'adresses soit conservé. Tu pourras changer d\'avis dans Confidentialité.'**
   String get onbContactsBody;
 
   /// No description provided for @onbContactsAllow.
   ///
   /// In fr, this message translates to:
-  /// **'Autoriser'**
+  /// **'Oui, retrouve-les'**
   String get onbContactsAllow;
 
   /// No description provided for @onbLater.
@@ -12864,13 +12864,13 @@ abstract class L {
   /// No description provided for @honamUiEmptyTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune commande en cours'**
+  /// **'Aucune commande'**
   String get honamUiEmptyTitle;
 
   /// No description provided for @honamUiEmptyBody.
   ///
   /// In fr, this message translates to:
-  /// **'Photographie ton ordonnance : une pharmacie proche t\'envoie son devis.'**
+  /// **'Photographie ton ordonnance : une pharmacie proche t\'envoie un devis, et un coursier te livre.'**
   String get honamUiEmptyBody;
 
   /// No description provided for @honamUiEmptyCompleted.
@@ -15319,6 +15319,210 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Petites annonces'**
   String get marketSubtitle;
+
+  /// No description provided for @onbAnalyticsSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Anonymes, pour améliorer l\'application'**
+  String get onbAnalyticsSub;
+
+  /// No description provided for @onbMarketingSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par notification ou par SMS'**
+  String get onbMarketingSub;
+
+  /// No description provided for @onbStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est parti'**
+  String get onbStart;
+
+  /// No description provided for @onbAiTag.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA'**
+  String get onbAiTag;
+
+  /// No description provided for @onbBabaRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistant de Pokou'**
+  String get onbBabaRole;
+
+  /// No description provided for @onbBabaAiNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Baba est une intelligence artificielle. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.'**
+  String get onbBabaAiNotice;
+
+  /// No description provided for @onbBabaReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton compte est prêt, {name} ! Je suis là pour t\'aider à prendre Pokou en main.'**
+  String onbBabaReady(String name);
+
+  /// No description provided for @onbFoundCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{C\'est fait ! 1 de tes contacts est déjà sur Pokou :} other{C\'est fait ! {count} de tes contacts sont déjà sur Pokou :}}'**
+  String onbFoundCount(int count);
+
+  /// No description provided for @onbSeeAllFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les {count} contacts'**
+  String onbSeeAllFound(int count);
+
+  /// No description provided for @onbWrite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire'**
+  String get onbWrite;
+
+  /// No description provided for @onbInviteOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour les autres, je prépare une invitation à envoyer par SMS ou WhatsApp, si tu veux.'**
+  String get onbInviteOthers;
+
+  /// No description provided for @onbInviteMine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviter mes proches'**
+  String get onbInviteMine;
+
+  /// No description provided for @onbGoToChats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller à mes discussions'**
+  String get onbGoToChats;
+
+  /// No description provided for @emptyChatsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes discussions arrivent ici'**
+  String get emptyChatsTitle;
+
+  /// No description provided for @emptyChatsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouve les proches qui ont déjà Pokou, ou invite les autres par SMS.'**
+  String get emptyChatsBody;
+
+  /// No description provided for @emptyChatsFind.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouver mes proches'**
+  String get emptyChatsFind;
+
+  /// No description provided for @emptyChatsInviteSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviter par SMS'**
+  String get emptyChatsInviteSms;
+
+  /// No description provided for @emptyKoryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune cagnotte pour l\'instant'**
+  String get emptyKoryTitle;
+
+  /// No description provided for @emptyKoryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un anniversaire, un mariage, une tontine entre collègues : chacun s\'engage, puis verse depuis son wallet.'**
+  String get emptyKoryBody;
+
+  /// No description provided for @emptyKoryJoinLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejoindre avec un lien'**
+  String get emptyKoryJoinLink;
+
+  /// No description provided for @emptyKoryNoMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne touche jamais l\'argent et ne prend aucune commission sur les cagnottes.'**
+  String get emptyKoryNoMoney;
+
+  /// No description provided for @emptyHonamNotEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam n\'est pas un service d\'urgence. En cas d\'urgence, appelle les secours.'**
+  String get emptyHonamNotEmergency;
+
+  /// No description provided for @emptyAssimeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune annonce'**
+  String get emptyAssimeTitle;
+
+  /// No description provided for @emptyAssimeTitleIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune annonce à {city}'**
+  String emptyAssimeTitleIn(String city);
+
+  /// No description provided for @emptyAssimeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne ne vend de « {query} » près de chez toi pour l\'instant.'**
+  String emptyAssimeBody(String query);
+
+  /// No description provided for @emptyAssimeAlert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer une alerte'**
+  String get emptyAssimeAlert;
+
+  /// No description provided for @emptyAssimeAlertDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte créée : tu seras prévenu dès qu\'une annonce correspond.'**
+  String get emptyAssimeAlertDone;
+
+  /// No description provided for @emptyAssimeWholeCountry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher dans tout le {country}'**
+  String emptyAssimeWholeCountry(String country);
+
+  /// No description provided for @emptyAssimeEverywhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher partout'**
+  String get emptyAssimeEverywhere;
+
+  /// No description provided for @emptyAssimeAlertNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'alerte te prévient dès qu\'une nouvelle annonce correspond.'**
+  String get emptyAssimeAlertNote;
+
+  /// No description provided for @lot1SoonTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt : Kory, Honam, Assimé'**
+  String get lot1SoonTitle;
+
+  /// No description provided for @lot1SoonBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnottes, pharmacie et petites annonces arrivent ville par ville.'**
+  String get lot1SoonBody;
+
+  /// No description provided for @lot1SoonNotify.
+  ///
+  /// In fr, this message translates to:
+  /// **'Me prévenir'**
+  String get lot1SoonNotify;
+
+  /// No description provided for @lot1SoonNoted.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est noté : tu seras prévenu dès l\'ouverture dans ta ville.'**
+  String get lot1SoonNoted;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

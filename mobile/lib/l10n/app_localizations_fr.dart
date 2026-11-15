@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2795,7 +2794,7 @@ class LFr extends L {
   String get marketNoReviewYet => 'pas encore d\'avis';
 
   @override
-  String get marketSearchHint => 'Rechercher un produit…';
+  String get marketSearchHint => 'Rechercher une annonce';
 
   @override
   String get callLogEmpty => 'Aucun appel pour l\'instant.';
@@ -4056,7 +4055,8 @@ class LFr extends L {
       locale: localeName,
       other:
           '$count messages mis en attente par le Mode Bouclier — glisser vers le bas pour les afficher',
-      one: '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
+      one:
+          '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
     );
     return '$_temp0';
   }
@@ -5253,7 +5253,8 @@ class LFr extends L {
   String get onbProfileTitle => 'Ton profil';
 
   @override
-  String get onbProfileBody => 'C\'est le nom que verront tes contacts.';
+  String get onbProfileBody =>
+      'Ton prénom ou un surnom. Tu pourras ajouter une photo plus tard, depuis ton profil.';
 
   @override
   String get onbDisplayName => 'Nom affiché';
@@ -5279,15 +5280,13 @@ class LFr extends L {
   String get onbAge => 'J\'ai l\'âge requis pour utiliser Pokou.';
 
   @override
-  String get onbOptional =>
-      'Facultatif, modifiable à tout moment dans les réglages';
+  String get onbOptional => 'Facultatif';
 
   @override
-  String get onbAnalytics =>
-      'Partager des statistiques d\'usage pour améliorer Pokou';
+  String get onbAnalytics => 'Statistiques d\'utilisation';
 
   @override
-  String get onbMarketing => 'Recevoir les nouvelles et offres de Pokou';
+  String get onbMarketing => 'Nouveautés de Pokou';
 
   @override
   String get onbFinish => 'Terminer';
@@ -5708,17 +5707,17 @@ class LFr extends L {
 
   @override
   String get onbBabaWelcome =>
-      'Je suis Baba, l\'assistant de Pokou. Comment veux-tu qu\'on t\'appelle ?';
+      'Bienvenue sur Pokou ! Moi, c\'est Baba, l\'assistant de l\'application. Comment veux-tu que tes proches t\'appellent ?';
 
   @override
-  String get onbContactsTitle => 'Retrouver tes proches';
+  String get onbContactsTitle => 'Retrouve tes proches';
 
   @override
   String get onbContactsBody =>
-      'Baba peut retrouver ceux de tes contacts qui sont déjà sur Pokou. Tu peux refuser : on te le redemandera plus tard.';
+      'Je peux chercher lesquels de tes contacts sont déjà sur Pokou. Leurs numéros sont comparés sans que ton carnet d\'adresses soit conservé. Tu pourras changer d\'avis dans Confidentialité.';
 
   @override
-  String get onbContactsAllow => 'Autoriser';
+  String get onbContactsAllow => 'Oui, retrouve-les';
 
   @override
   String get onbLater => 'Plus tard';
@@ -7483,11 +7482,11 @@ class LFr extends L {
   }
 
   @override
-  String get honamUiEmptyTitle => 'Aucune commande en cours';
+  String get honamUiEmptyTitle => 'Aucune commande';
 
   @override
   String get honamUiEmptyBody =>
-      'Photographie ton ordonnance : une pharmacie proche t\'envoie son devis.';
+      'Photographie ton ordonnance : une pharmacie proche t\'envoie un devis, et un coursier te livre.';
 
   @override
   String get honamUiEmptyCompleted =>
@@ -9154,4 +9153,134 @@ class LFr extends L {
 
   @override
   String get marketSubtitle => 'Petites annonces';
+
+  @override
+  String get onbAnalyticsSub => 'Anonymes, pour améliorer l\'application';
+
+  @override
+  String get onbMarketingSub => 'Par notification ou par SMS';
+
+  @override
+  String get onbStart => 'C\'est parti';
+
+  @override
+  String get onbAiTag => 'IA';
+
+  @override
+  String get onbBabaRole => 'Assistant de Pokou';
+
+  @override
+  String get onbBabaAiNotice =>
+      'Baba est une intelligence artificielle. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.';
+
+  @override
+  String onbBabaReady(String name) {
+    return 'Ton compte est prêt, $name ! Je suis là pour t\'aider à prendre Pokou en main.';
+  }
+
+  @override
+  String onbFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'C\'est fait ! $count de tes contacts sont déjà sur Pokou :',
+      one: 'C\'est fait ! 1 de tes contacts est déjà sur Pokou :',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onbSeeAllFound(int count) {
+    return 'Voir les $count contacts';
+  }
+
+  @override
+  String get onbWrite => 'Écrire';
+
+  @override
+  String get onbInviteOthers =>
+      'Pour les autres, je prépare une invitation à envoyer par SMS ou WhatsApp, si tu veux.';
+
+  @override
+  String get onbInviteMine => 'Inviter mes proches';
+
+  @override
+  String get onbGoToChats => 'Aller à mes discussions';
+
+  @override
+  String get emptyChatsTitle => 'Tes discussions arrivent ici';
+
+  @override
+  String get emptyChatsBody =>
+      'Retrouve les proches qui ont déjà Pokou, ou invite les autres par SMS.';
+
+  @override
+  String get emptyChatsFind => 'Retrouver mes proches';
+
+  @override
+  String get emptyChatsInviteSms => 'Inviter par SMS';
+
+  @override
+  String get emptyKoryTitle => 'Aucune cagnotte pour l\'instant';
+
+  @override
+  String get emptyKoryBody =>
+      'Un anniversaire, un mariage, une tontine entre collègues : chacun s\'engage, puis verse depuis son wallet.';
+
+  @override
+  String get emptyKoryJoinLink => 'Rejoindre avec un lien';
+
+  @override
+  String get emptyKoryNoMoney =>
+      'Pokou ne touche jamais l\'argent et ne prend aucune commission sur les cagnottes.';
+
+  @override
+  String get emptyHonamNotEmergency =>
+      'Honam n\'est pas un service d\'urgence. En cas d\'urgence, appelle les secours.';
+
+  @override
+  String get emptyAssimeTitle => 'Aucune annonce';
+
+  @override
+  String emptyAssimeTitleIn(String city) {
+    return 'Aucune annonce à $city';
+  }
+
+  @override
+  String emptyAssimeBody(String query) {
+    return 'Personne ne vend de « $query » près de chez toi pour l\'instant.';
+  }
+
+  @override
+  String get emptyAssimeAlert => 'Créer une alerte';
+
+  @override
+  String get emptyAssimeAlertDone =>
+      'Alerte créée : tu seras prévenu dès qu\'une annonce correspond.';
+
+  @override
+  String emptyAssimeWholeCountry(String country) {
+    return 'Chercher dans tout le $country';
+  }
+
+  @override
+  String get emptyAssimeEverywhere => 'Chercher partout';
+
+  @override
+  String get emptyAssimeAlertNote =>
+      'L\'alerte te prévient dès qu\'une nouvelle annonce correspond.';
+
+  @override
+  String get lot1SoonTitle => 'Bientôt : Kory, Honam, Assimé';
+
+  @override
+  String get lot1SoonBody =>
+      'Cagnottes, pharmacie et petites annonces arrivent ville par ville.';
+
+  @override
+  String get lot1SoonNotify => 'Me prévenir';
+
+  @override
+  String get lot1SoonNoted =>
+      'C\'est noté : tu seras prévenu dès l\'ouverture dans ta ville.';
 }

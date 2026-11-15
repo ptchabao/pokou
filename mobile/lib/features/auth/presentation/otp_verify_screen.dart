@@ -436,7 +436,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
             child: SizedBox(
               width: _codeLength * 64,
               child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _codeController,
                 focusNode: _focusNode,
                 keyboardType: TextInputType.number,

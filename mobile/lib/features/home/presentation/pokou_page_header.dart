@@ -25,7 +25,12 @@ class PokouPageHeader extends ConsumerWidget {
     this.actions = const [],
     this.showBell = true,
     this.showAvatar = true,
+    this.titleWidget,
   });
+
+  /// À la place du titre texte — le logotype Pokou en tête des Discussions
+  /// (maquette p.14 et p.52). `title` reste le libellé lu par l'accessibilité.
+  final Widget? titleWidget;
 
   /// Ma photo, qui mène au profil. Masquée là où le profil est déjà la
   /// première chose de l'écran.
@@ -66,19 +71,22 @@ class PokouPageHeader extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 26,
-                      height: 1.2,
-                      letterSpacing: -0.4,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                  if (titleWidget != null)
+                    Semantics(header: true, label: title, child: titleWidget)
+                  else
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 26,
+                        height: 1.2,
+                        letterSpacing: -0.4,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                  ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
                     Text(

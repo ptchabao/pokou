@@ -73,6 +73,9 @@ class _HonamScreenState extends ConsumerState<HonamScreen> {
               emphasized: current.isNotEmpty,
               // Le logo du module (guide des logos, novembre 2026).
               leading: const PokouModuleLogo(PokouModule.honam, size: 40),
+              // Maquette p.14 : ni cloche ni photo dans l'en-tête de Honam.
+              showBell: false,
+              showAvatar: false,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
@@ -227,14 +230,49 @@ class _Orders extends StatelessWidget {
     final l = L.of(context);
     // Rien du tout : pas de pilules pour trier du vide, une scène qui invite.
     if (orders.isEmpty) {
+      // États vides · 3 (maquette p.111) : l'action principale, puis le
+      // rappel que Honam n'est pas un service d'urgence.
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: _FlatNotice(
-          illustration: PokouIllustrations.delivery,
-          title: l.honamUiEmptyTitle,
-          message: l.honamUiEmptyBody,
-          actionLabel: l.honamSend,
-          onAction: onSend,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _FlatNotice(
+              illustration: PokouIllustrations.delivery,
+              title: l.honamUiEmptyTitle,
+              message: l.honamUiEmptyBody,
+              actionLabel: l.honamSend,
+              onAction: onSend,
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l.emptyHonamNotEmergency,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       );
     }

@@ -1239,7 +1239,7 @@
   "marketName": "Nom",
   "marketPrice": "Prix",
   "marketNoReviewYet": "pas encore d'avis",
-  "marketSearchHint": "Rechercher un produit…",
+  "marketSearchHint": "Rechercher une annonce",
   "callLogEmpty": "Aucun appel pour l'instant.",
   "callLogUnknownUser": "Utilisateur",
   "callStatusMissed": "Manqué",
@@ -2366,7 +2366,7 @@
     }
   },
   "onbProfileTitle": "Ton profil",
-  "onbProfileBody": "C'est le nom que verront tes contacts.",
+  "onbProfileBody": "Ton prénom ou un surnom. Tu pourras ajouter une photo plus tard, depuis ton profil.",
   "onbDisplayName": "Nom affiché",
   "onbNameRequired": "Indique un nom (2 caractères au moins).",
   "onbPhotoLater": "Tu pourras ajouter une photo plus tard, depuis ton profil.",
@@ -2374,9 +2374,9 @@
   "onbTermsTitle": "Avant de commencer",
   "onbAcceptTerms": "J'ai lu et j'accepte les conditions d'utilisation et la politique de confidentialité.",
   "onbAge": "J'ai l'âge requis pour utiliser Pokou.",
-  "onbOptional": "Facultatif, modifiable à tout moment dans les réglages",
-  "onbAnalytics": "Partager des statistiques d'usage pour améliorer Pokou",
-  "onbMarketing": "Recevoir les nouvelles et offres de Pokou",
+  "onbOptional": "Facultatif",
+  "onbAnalytics": "Statistiques d'utilisation",
+  "onbMarketing": "Nouveautés de Pokou",
   "onbFinish": "Terminer",
   "onbFailed": "L'enregistrement n'a pas abouti. Réessaie.",
   "moreConsents": "Statistiques et communications",
@@ -2629,10 +2629,10 @@
       }
     }
   },
-  "onbBabaWelcome": "Je suis Baba, l'assistant de Pokou. Comment veux-tu qu'on t'appelle ?",
-  "onbContactsTitle": "Retrouver tes proches",
-  "onbContactsBody": "Baba peut retrouver ceux de tes contacts qui sont déjà sur Pokou. Tu peux refuser : on te le redemandera plus tard.",
-  "onbContactsAllow": "Autoriser",
+  "onbBabaWelcome": "Bienvenue sur Pokou ! Moi, c'est Baba, l'assistant de l'application. Comment veux-tu que tes proches t'appellent ?",
+  "onbContactsTitle": "Retrouve tes proches",
+  "onbContactsBody": "Je peux chercher lesquels de tes contacts sont déjà sur Pokou. Leurs numéros sont comparés sans que ton carnet d'adresses soit conservé. Tu pourras changer d'avis dans Confidentialité.",
+  "onbContactsAllow": "Oui, retrouve-les",
   "onbLater": "Plus tard",
   "proofModeDirectHint": "Tout ce qui s'écrit reste prouvable : un message supprimé reste barré, une modification garde l'original. Seule toi pourras le couper.",
   "proofDisableReservedDirect": "Seule la personne qui a activé le mode preuve peut le désactiver.",
@@ -3435,8 +3435,8 @@
       }
     }
   },
-  "honamUiEmptyTitle": "Aucune commande en cours",
-  "honamUiEmptyBody": "Photographie ton ordonnance : une pharmacie proche t'envoie son devis.",
+  "honamUiEmptyTitle": "Aucune commande",
+  "honamUiEmptyBody": "Photographie ton ordonnance : une pharmacie proche t'envoie un devis, et un coursier te livre.",
   "honamUiEmptyCompleted": "Aucune commande terminée pour l'instant.",
   "honamUiEmptyCancelled": "Aucune commande annulée.",
   "honamUiOrdersError": "Impossible de charger tes commandes",
@@ -4755,5 +4755,81 @@
   "twoStepRecoveryNote": "Sans ton code PIN, la reconnexion reste possible au bout de 7 jours. Ce délai bloque une personne qui aurait récupéré ton numéro.",
   "homeKoryCardSubtitle": "Cagnottes",
   "homeHonamCardSubtitle": "Pharmacies",
-  "marketSubtitle": "Petites annonces"
+  "marketSubtitle": "Petites annonces",
+  "onbAnalyticsSub": "Anonymes, pour améliorer l'application",
+  "onbMarketingSub": "Par notification ou par SMS",
+  "onbStart": "C'est parti",
+  "onbAiTag": "IA",
+  "onbBabaRole": "Assistant de Pokou",
+  "onbBabaAiNotice": "Baba est une intelligence artificielle. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.",
+  "onbBabaReady": "Ton compte est prêt, {name} ! Je suis là pour t'aider à prendre Pokou en main.",
+  "@onbBabaReady": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onbFoundCount": "{count, plural, =1{C'est fait ! 1 de tes contacts est déjà sur Pokou :} other{C'est fait ! {count} de tes contacts sont déjà sur Pokou :}}",
+  "@onbFoundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onbSeeAllFound": "Voir les {count} contacts",
+  "@onbSeeAllFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onbWrite": "Écrire",
+  "onbInviteOthers": "Pour les autres, je prépare une invitation à envoyer par SMS ou WhatsApp, si tu veux.",
+  "onbInviteMine": "Inviter mes proches",
+  "onbGoToChats": "Aller à mes discussions",
+  "emptyChatsTitle": "Tes discussions arrivent ici",
+  "emptyChatsBody": "Retrouve les proches qui ont déjà Pokou, ou invite les autres par SMS.",
+  "emptyChatsFind": "Retrouver mes proches",
+  "emptyChatsInviteSms": "Inviter par SMS",
+  "emptyKoryTitle": "Aucune cagnotte pour l'instant",
+  "emptyKoryBody": "Un anniversaire, un mariage, une tontine entre collègues : chacun s'engage, puis verse depuis son wallet.",
+  "emptyKoryJoinLink": "Rejoindre avec un lien",
+  "emptyKoryNoMoney": "Pokou ne touche jamais l'argent et ne prend aucune commission sur les cagnottes.",
+  "emptyHonamNotEmergency": "Honam n'est pas un service d'urgence. En cas d'urgence, appelle les secours.",
+  "emptyAssimeTitle": "Aucune annonce",
+  "emptyAssimeTitleIn": "Aucune annonce à {city}",
+  "@emptyAssimeTitleIn": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAssimeBody": "Personne ne vend de « {query} » près de chez toi pour l'instant.",
+  "@emptyAssimeBody": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAssimeAlert": "Créer une alerte",
+  "emptyAssimeAlertDone": "Alerte créée : tu seras prévenu dès qu'une annonce correspond.",
+  "emptyAssimeWholeCountry": "Chercher dans tout le {country}",
+  "@emptyAssimeWholeCountry": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAssimeEverywhere": "Chercher partout",
+  "emptyAssimeAlertNote": "L'alerte te prévient dès qu'une nouvelle annonce correspond.",
+  "lot1SoonTitle": "Bientôt : Kory, Honam, Assimé",
+  "lot1SoonBody": "Cagnottes, pharmacie et petites annonces arrivent ville par ville.",
+  "lot1SoonNotify": "Me prévenir",
+  "lot1SoonNoted": "C'est noté : tu seras prévenu dès l'ouverture dans ta ville."
 }

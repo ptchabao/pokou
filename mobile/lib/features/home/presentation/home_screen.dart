@@ -151,7 +151,10 @@ class _AssimeRow extends StatelessWidget {
                 ),
                 Text(
                   l.homeAssimeShort,
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -192,7 +195,9 @@ class _DiscussionsCard extends ConsumerWidget {
               minimumSize: const Size(44, 44),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text(unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll),
+            child: Text(
+              unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll,
+            ),
           ),
         ),
         Padding(

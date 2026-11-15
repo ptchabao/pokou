@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/deeplink/invite_link_parser.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
@@ -85,28 +86,34 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
                 emphasized: toReview > 0,
                 // Le logo du module (guide des logos, novembre 2026).
                 leading: const PokouModuleLogo(PokouModule.kory, size: 38),
+                // Maquette p.14 : ni cloche ni photo dans l'en-tête de Kory.
+                showBell: false,
+                showAvatar: false,
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-                child: KoryHomeHero(
-                  monthTotal: summary.valueOrNull?.monthConfirmedTotal,
-                  monthLoading: summary.isLoading,
-                  activeCount: items == null ? null : open.length,
-                  statsLoading: items == null && pots.isLoading,
-                  collectedTotal: open.fold(
-                    0,
-                    (sum, pot) => sum + pot.confirmedTotal,
+            // Sans cagnotte, l'état vide porte seul les deux actions : le
+            // bandeau les aurait montrées en double (maquette p.111).
+            if (items == null || items.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                  child: KoryHomeHero(
+                    monthTotal: summary.valueOrNull?.monthConfirmedTotal,
+                    monthLoading: summary.isLoading,
+                    activeCount: items == null ? null : open.length,
+                    statsLoading: items == null && pots.isLoading,
+                    collectedTotal: open.fold(
+                      0,
+                      (sum, pot) => sum + pot.confirmedTotal,
+                    ),
+                    onCreate: () => openKoryCreate(context, ref),
+                    onJoin: () => _join(context, ref),
+                    onJournal: items == null || items.isEmpty
+                        ? null
+                        : () => _openJournal(items),
                   ),
-                  onCreate: () => openKoryCreate(context, ref),
-                  onJoin: () => _join(context, ref),
-                  onJournal: items == null || items.isEmpty
-                      ? null
-                      : () => _openJournal(items),
                 ),
               ),
-            ),
             ...pots.when(
               loading: () => const [
                 SliverToBoxAdapter(child: KoryHomeSkeleton()),
@@ -141,11 +148,13 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 120),
                           child: Center(
-                            // Un état vide qui GUIDE : les deux entrées sont là.
+                            // États vides · 2 (maquette p.111) : une phrase,
+                            // l'action principale, l'entrée par lien, et le
+                            // rappel que Pokou ne touche pas l'argent.
                             child: KoryHomeMessage(
                               illustration: PokouIllustrations.kory,
-                              title: l.koryNone,
-                              message: l.koryNoneBody,
+                              title: l.emptyKoryTitle,
+                              message: l.emptyKoryBody,
                               actions: [
                                 KoryHomePillButton(
                                   icon: Icons.add,
@@ -154,9 +163,30 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
                                 ),
                                 KoryHomePillButton(
                                   quiet: true,
-                                  icon: Icons.key_outlined,
-                                  label: l.koryJoinTitle,
+                                  icon: Icons.link,
+                                  label: l.emptyKoryJoinLink,
                                   onPressed: () => _join(context, ref),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        l.emptyKoryNoMoney,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -317,10 +347,17 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
     );
     controller.dispose();
     if (code == null || code.isEmpty || !context.mounted) return;
+    // Un lien de partage collé tel quel (…/kory/join/{code}) vaut son code
+    // (« Rejoindre avec un lien », maquette p.111).
+    final uri = Uri.tryParse(code);
+    final invite = uri != null && uri.hasScheme ? parseInviteLink(uri) : null;
+    final joinCode = invite?.kind == DeepLinkInviteKind.koryJoin
+        ? invite!.code
+        : code;
     // KOR-10 : on voit ce qu'on rejoint AVANT de le rejoindre.
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => KoryInviteScreen(code: code)));
+    ).push(MaterialPageRoute(builder: (_) => KoryInviteScreen(code: joinCode)));
     refreshKory(ref);
   }
 

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2782,7 +2781,7 @@ class LEn extends L {
   String get marketNoReviewYet => 'no reviews yet';
 
   @override
-  String get marketSearchHint => 'Search for a product…';
+  String get marketSearchHint => 'Search for an ad';
 
   @override
   String get callLogEmpty => 'No calls yet.';
@@ -5221,7 +5220,8 @@ class LEn extends L {
   String get onbProfileTitle => 'Your profile';
 
   @override
-  String get onbProfileBody => 'This is the name your contacts will see.';
+  String get onbProfileBody =>
+      'Your first name or a nickname. You can add a photo later, from your profile.';
 
   @override
   String get onbDisplayName => 'Display name';
@@ -5246,13 +5246,13 @@ class LEn extends L {
   String get onbAge => 'I am old enough to use Pokou.';
 
   @override
-  String get onbOptional => 'Optional, can be changed anytime in settings';
+  String get onbOptional => 'Optional';
 
   @override
-  String get onbAnalytics => 'Share usage statistics to improve Pokou';
+  String get onbAnalytics => 'Usage statistics';
 
   @override
-  String get onbMarketing => 'Receive news and offers from Pokou';
+  String get onbMarketing => 'Pokou news';
 
   @override
   String get onbFinish => 'Finish';
@@ -5674,17 +5674,17 @@ class LEn extends L {
 
   @override
   String get onbBabaWelcome =>
-      'I\'m Baba, Pokou\'s assistant. What should we call you?';
+      'Welcome to Pokou! I\'m Baba, the app\'s assistant. What should your loved ones call you?';
 
   @override
-  String get onbContactsTitle => 'Find your people';
+  String get onbContactsTitle => 'Find your loved ones';
 
   @override
   String get onbContactsBody =>
-      'Baba can find which of your contacts are already on Pokou. You can say no: we\'ll ask again later.';
+      'I can look for which of your contacts are already on Pokou. Their numbers are compared without your address book being kept. You can change your mind in Privacy.';
 
   @override
-  String get onbContactsAllow => 'Allow';
+  String get onbContactsAllow => 'Yes, find them';
 
   @override
   String get onbLater => 'Later';
@@ -7432,11 +7432,11 @@ class LEn extends L {
   }
 
   @override
-  String get honamUiEmptyTitle => 'No order in progress';
+  String get honamUiEmptyTitle => 'No orders';
 
   @override
   String get honamUiEmptyBody =>
-      'Take a photo of your prescription: a nearby pharmacy sends you a quote.';
+      'Take a photo of your prescription: a nearby pharmacy sends you a quote, and a courier delivers.';
 
   @override
   String get honamUiEmptyCompleted => 'No completed order yet.';
@@ -9098,4 +9098,134 @@ class LEn extends L {
 
   @override
   String get marketSubtitle => 'Classified ads';
+
+  @override
+  String get onbAnalyticsSub => 'Anonymous, to improve the app';
+
+  @override
+  String get onbMarketingSub => 'By notification or SMS';
+
+  @override
+  String get onbStart => 'Let\'s go';
+
+  @override
+  String get onbAiTag => 'AI';
+
+  @override
+  String get onbBabaRole => 'Pokou assistant';
+
+  @override
+  String get onbBabaAiNotice =>
+      'Baba is an artificial intelligence. It does not read your other chats and will never ask you for a code received by SMS.';
+
+  @override
+  String onbBabaReady(String name) {
+    return 'Your account is ready, $name! I\'m here to help you get started with Pokou.';
+  }
+
+  @override
+  String onbFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Done! $count of your contacts are already on Pokou:',
+      one: 'Done! 1 of your contacts is already on Pokou:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onbSeeAllFound(int count) {
+    return 'See the $count contacts';
+  }
+
+  @override
+  String get onbWrite => 'Write';
+
+  @override
+  String get onbInviteOthers =>
+      'For the others, I can prepare an invitation to send by SMS or WhatsApp, if you like.';
+
+  @override
+  String get onbInviteMine => 'Invite my loved ones';
+
+  @override
+  String get onbGoToChats => 'Go to my chats';
+
+  @override
+  String get emptyChatsTitle => 'Your chats will show up here';
+
+  @override
+  String get emptyChatsBody =>
+      'Find the people who already have Pokou, or invite the others by SMS.';
+
+  @override
+  String get emptyChatsFind => 'Find my loved ones';
+
+  @override
+  String get emptyChatsInviteSms => 'Invite by SMS';
+
+  @override
+  String get emptyKoryTitle => 'No group fund yet';
+
+  @override
+  String get emptyKoryBody =>
+      'A birthday, a wedding, a savings circle with colleagues: everyone commits, then pays from their own wallet.';
+
+  @override
+  String get emptyKoryJoinLink => 'Join with a link';
+
+  @override
+  String get emptyKoryNoMoney =>
+      'Pokou never touches the money and takes no commission on group funds.';
+
+  @override
+  String get emptyHonamNotEmergency =>
+      'Honam is not an emergency service. In an emergency, call the emergency services.';
+
+  @override
+  String get emptyAssimeTitle => 'No ads';
+
+  @override
+  String emptyAssimeTitleIn(String city) {
+    return 'No ads in $city';
+  }
+
+  @override
+  String emptyAssimeBody(String query) {
+    return 'Nobody is selling “$query” near you right now.';
+  }
+
+  @override
+  String get emptyAssimeAlert => 'Create an alert';
+
+  @override
+  String get emptyAssimeAlertDone =>
+      'Alert created: you\'ll be notified as soon as an ad matches.';
+
+  @override
+  String emptyAssimeWholeCountry(String country) {
+    return 'Search all of $country';
+  }
+
+  @override
+  String get emptyAssimeEverywhere => 'Search everywhere';
+
+  @override
+  String get emptyAssimeAlertNote =>
+      'The alert lets you know as soon as a new ad matches.';
+
+  @override
+  String get lot1SoonTitle => 'Coming soon: Kory, Honam, Assimé';
+
+  @override
+  String get lot1SoonBody =>
+      'Group funds, pharmacy and classified ads are arriving city by city.';
+
+  @override
+  String get lot1SoonNotify => 'Notify me';
+
+  @override
+  String get lot1SoonNoted =>
+      'Noted: you\'ll be told as soon as it opens in your city.';
 }
