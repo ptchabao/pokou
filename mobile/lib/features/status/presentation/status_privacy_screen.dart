@@ -11,7 +11,7 @@ import '../../settings/presentation/settings_widgets.dart';
 import '../data/status_model.dart';
 import 'status_controller.dart';
 
-/// Profil > Statuts : qui peut voir les miens.
+/// Qui voit mes statuts (STA-4) : qui peut voir les miens, enregistré au geste.
 ///
 /// L'audience est décidée par l'auteur — ajouter quelqu'un à son carnet ne
 /// donne pas accès à ses statuts (voir status_privacy_service.py côté API).
@@ -51,26 +51,37 @@ class _StatusPrivacyScreenState extends ConsumerState<StatusPrivacyScreen> {
     }
   }
 
+  /// Enregistrement DIRECT, à chaque geste — pas de bouton « Enregistrer »
+  /// (maquette Statuts 4). Un geste pendant un envoi en cours n'est pas
+  /// perdu : on renvoie l'état le plus récent dès que le premier revient.
+  bool _dirty = false;
+
   Future<void> _save() async {
     final audience = _audience;
-    if (audience == null || _saving) return;
+    if (audience == null) return;
+    if (_saving) {
+      _dirty = true;
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
     });
     try {
-      await ref
-          .read(statusRepositoryProvider)
-          .setPrivacy(audience: audience, userIds: _selected.toList());
-      // Le fil dépend de ce réglage pour les statuts des autres… et le mien
-      // pour ce qu'ils voient : on le refait charger.
+      do {
+        _dirty = false;
+        await ref
+            .read(statusRepositoryProvider)
+            .setPrivacy(
+              audience: _audience ?? audience,
+              userIds: (_audience ?? audience).needsList
+                  ? _selected.toList()
+                  : const [],
+            );
+      } while (_dirty && mounted);
+      // Le fil dépend de ce réglage pour ce que les autres voient.
       ref.invalidate(statusFeedProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(L.of(context).statusPrivacySaved)),
-        );
-        Navigator.of(context).maybePop();
-      }
+      ref.invalidate(statusPrivacyProvider);
     } catch (_) {
       if (mounted) {
         setState(() => _error = L.of(context).statusPrivacySaveFailed);
@@ -80,13 +91,43 @@ class _StatusPrivacyScreenState extends ConsumerState<StatusPrivacyScreen> {
     }
   }
 
+  void _choose(StatusAudience? value) {
+    if (value == null || value == _audience) return;
+    setState(() {
+      // « Sauf » et « seulement avec » ne veulent pas dire la même chose
+      // d'une même liste : on ne la transporte pas de l'un à l'autre.
+      if (value.needsList && (_audience?.needsList ?? false)) {
+        _selected = {};
+      }
+      _audience = value;
+    });
+    _save();
+  }
+
+  /// Le sous-titre de chaque option : la description, ou le compte de la
+  /// liste pour l'option en cours (« 2 contacts exclus »).
+  String _subtitleOf(L l, StatusAudience option) {
+    if (option == _audience && option == StatusAudience.except) {
+      return l.statusExcludedCount(_selected.length);
+    }
+    if (option == _audience && option == StatusAudience.only) {
+      return l.statusAllowedCount(_selected.length);
+    }
+    return option == StatusAudience.contacts
+        ? option.descriptionOf(l)
+        : (option == StatusAudience.except
+              ? l.statusExcludedCount(0)
+              : option.descriptionOf(l));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final audience = _audience;
     if (audience == null) {
       return Scaffold(
         backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator()),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -97,111 +138,132 @@ class _StatusPrivacyScreenState extends ConsumerState<StatusPrivacyScreen> {
           .toList(),
       orElse: () => const <PokouContact>[],
     );
+    // « Personne » n'est plus proposé (maquette) ; un compte qui l'avait
+    // choisi le garde et le voit, plutôt qu'aucun bouton coché.
+    final options = [
+      StatusAudience.contacts,
+      StatusAudience.except,
+      StatusAudience.only,
+      if (audience == StatusAudience.nobody) StatusAudience.nobody,
+    ];
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
-        title: Text(
-          L.of(context).statusPrivacyTitle,
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+    return SettingsScaffold(
+      title: l.statusPrivacyTitle,
+      children: [
+        RadioGroup<StatusAudience>(
+          groupValue: audience,
+          onChanged: _choose,
+          child: SettingsCard(
+            children: [
+              for (final option in options)
+                InkWell(
+                  onTap: () => _choose(option),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 6, 16, 6),
+                    child: Row(
+                      children: [
+                        Radio<StatusAudience>(
+                          value: option,
+                          activeColor: AppColors.accentPrimary,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                option.labelOf(l),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              if (option != StatusAudience.only ||
+                                  option == audience)
+                                Text(
+                                  _subtitleOf(l, option),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (_saving && option == audience)
+                          const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: _saving ? null : _save,
-            child: _saving
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.textMuted,
-                    ),
-                  )
-                : Text(
-                    L.of(context).actionSave,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
+        if (audience.needsList) ...[
+          SettingsSectionTitle(
+            audience == StatusAudience.except
+                ? l.statusExcludePeople
+                : l.statusAllowedPeople,
           ),
+          if (contacts.isEmpty)
+            SettingsFootnote(l.statusNoContactToOffer)
+          else
+            SettingsCard(
+              children: [
+                for (final contact in contacts)
+                  _ContactCheck(
+                    contact: contact,
+                    checked: _selected.contains(contact.contactUserId),
+                    onChanged: (checked) {
+                      setState(() {
+                        if (checked) {
+                          _selected.add(contact.contactUserId!);
+                        } else {
+                          _selected.remove(contact.contactUserId);
+                        }
+                      });
+                      _save();
+                    },
+                  ),
+              ],
+            ),
         ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.only(top: 8, bottom: 32),
-          children: [
-            // RadioGroup et non `groupValue` par bouton : Flutter a déprécié
-            // la seconde forme après la 3.32.
-            RadioGroup<StatusAudience>(
-              groupValue: audience,
-              onChanged: (value) => setState(() => _audience = value),
-              child: SettingsCard(
-                children: [
-                  for (final option in StatusAudience.values)
-                    SettingsRow(
-                      label: option.labelOf(L.of(context)),
-                      subtitle: option.descriptionOf(L.of(context)),
-                      trailing: Radio<StatusAudience>(
-                        value: option,
-                        activeColor: AppColors.accentPrimary,
-                      ),
-                      onTap: () => setState(() => _audience = option),
-                    ),
-                ],
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            child: Text(
+              _error!,
+              style: const TextStyle(
+                color: AppColors.semanticError,
+                fontSize: 12,
               ),
             ),
-            if (audience.needsList) ...[
-              SettingsSectionTitle(
-                audience == StatusAudience.except
-                    ? L.of(context).statusExcludePeople
-                    : L.of(context).statusAllowedPeople,
-              ),
-              if (contacts.isEmpty)
-                SettingsFootnote(L.of(context).statusNoContactToOffer)
-              else
-                SettingsCard(
-                  children: [
-                    for (final contact in contacts)
-                      _ContactCheck(
-                        contact: contact,
-                        checked: _selected.contains(contact.contactUserId),
-                        onChanged: (checked) => setState(() {
-                          if (checked) {
-                            _selected.add(contact.contactUserId!);
-                          } else {
-                            _selected.remove(contact.contactUserId);
-                          }
-                        }),
-                      ),
-                  ],
-                ),
-              SettingsFootnote(
-                audience == StatusAudience.except
-                    ? L.of(context).statusExceptFootnote
-                    : L.of(context).statusOnlyFootnote,
-              ),
-            ],
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Text(
-                  _error!,
-                  style: const TextStyle(
-                    color: AppColors.semanticError,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            SettingsFootnote(L.of(context).status24hFootnote),
+          ),
+        const SizedBox(height: 12),
+        // Les quatre règles d'un statut, dites avant qu'on publie.
+        SettingsCard(
+          children: [
+            SettingsRow(icon: Icons.history, label: l.statusRule24h),
+            SettingsRow(
+              icon: Icons.visibility_outlined,
+              label: l.statusRuleViewers,
+              subtitle: l.statusRuleViewersSub,
+            ),
+            SettingsRow(
+              icon: Icons.reply,
+              label: l.statusRuleReply,
+              subtitle: l.statusRuleReplySub,
+            ),
+            SettingsRow(icon: Icons.flag_outlined, label: l.statusRuleReport),
           ],
         ),
-      ),
+        const SizedBox(height: 12),
+        SettingsNote(text: l.statusProofNote),
+      ],
     );
   }
 }

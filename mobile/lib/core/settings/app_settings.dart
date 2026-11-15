@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'dart:convert';
 
@@ -40,7 +41,31 @@ class AppSettings {
     this.localeCode,
     this.phoneCountryIso,
     this.themeMode = ThemeMode.system,
+    this.messagePreview = true,
+    this.reactionNotifications = true,
+    this.callVibrate = true,
+    this.pinReminder = true,
+    this.pinReminderLastAt,
   });
+
+  // ── Réglages · Notifications et Compte et sécurité (maquette 2026-11) ──
+
+  /// « Aperçu du message » : coupé, la notification dit « Nouveau message »
+  /// sans rien déchiffrer — le texte n'apparaît pas sur l'écran verrouillé.
+  final bool messagePreview;
+
+  /// Les réactions à mes messages.
+  final bool reactionNotifications;
+
+  /// « Vibreur » pendant la sonnerie d'un appel entrant.
+  final bool callVibrate;
+
+  /// « Me le redemander de temps en temps » (code PIN du compte) : un
+  /// rappel, au plus une fois par semaine, pour ne pas l'oublier.
+  final bool pinReminder;
+
+  /// Le dernier rappel du code PIN, en ISO 8601.
+  final String? pinReminderLastAt;
 
   final bool messageNotifications;
   final bool groupNotifications;
@@ -119,6 +144,11 @@ class AppSettings {
     String? phoneCountryIso,
     ThemeMode? themeMode,
     bool clearLocale = false,
+    bool? messagePreview,
+    bool? reactionNotifications,
+    bool? callVibrate,
+    bool? pinReminder,
+    String? pinReminderLastAt,
   }) {
     return AppSettings(
       messageNotifications: messageNotifications ?? this.messageNotifications,
@@ -135,6 +165,12 @@ class AppSettings {
       localeCode: clearLocale ? null : (localeCode ?? this.localeCode),
       phoneCountryIso: phoneCountryIso ?? this.phoneCountryIso,
       themeMode: themeMode ?? this.themeMode,
+      messagePreview: messagePreview ?? this.messagePreview,
+      reactionNotifications:
+          reactionNotifications ?? this.reactionNotifications,
+      callVibrate: callVibrate ?? this.callVibrate,
+      pinReminder: pinReminder ?? this.pinReminder,
+      pinReminderLastAt: pinReminderLastAt ?? this.pinReminderLastAt,
     );
   }
 
@@ -150,6 +186,11 @@ class AppSettings {
     'locale_code': localeCode,
     'phone_country_iso': phoneCountryIso,
     'theme_mode': themeMode.name,
+    'message_preview': messagePreview,
+    'reaction_notifications': reactionNotifications,
+    'call_vibrate': callVibrate,
+    'pin_reminder': pinReminder,
+    'pin_reminder_last_at': pinReminderLastAt,
   };
 
   /// Chaque clé absente retombe sur son défaut : un réglage ajouté dans une
@@ -172,6 +213,11 @@ class AppSettings {
     localeCode: json['locale_code'] as String?,
     phoneCountryIso: json['phone_country_iso'] as String?,
     themeMode: _themeModeFrom(json['theme_mode'] as String?),
+    messagePreview: json['message_preview'] as bool? ?? true,
+    reactionNotifications: json['reaction_notifications'] as bool? ?? true,
+    callVibrate: json['call_vibrate'] as bool? ?? true,
+    pinReminder: json['pin_reminder'] as bool? ?? true,
+    pinReminderLastAt: json['pin_reminder_last_at'] as String?,
   );
 
   /// Une valeur inconnue — réglage écrit par une version future, fichier
@@ -245,6 +291,27 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   /// prochaine connexion sur cet appareil.
   Future<void> rememberPhoneCountry(String isoCode) =>
       _persist(state.copyWith(phoneCountryIso: isoCode));
+
+  Future<void> setMessagePreview(bool value) =>
+      _persist(state.copyWith(messagePreview: value));
+  Future<void> setReactionNotifications(bool value) =>
+      _persist(state.copyWith(reactionNotifications: value));
+  /// Recopié aussi côté natif : application fermée, c'est la couche d'appel
+  /// Android qui fait vibrer (RingVibration.kt), sans Flutter.
+  Future<void> setCallVibrate(bool value) async {
+    await _persist(state.copyWith(callVibrate: value));
+    try {
+      await const MethodChannel(
+        'com.pokou.pokou/call',
+      ).invokeMethod<void>('setCallVibrate', value);
+    } catch (_) {
+      // iOS, web, tests : pas de couche native, le réglage Flutter suffit.
+    }
+  }
+  Future<void> setPinReminder(bool value) =>
+      _persist(state.copyWith(pinReminder: value));
+  Future<void> markPinReminded(DateTime at) =>
+      _persist(state.copyWith(pinReminderLastAt: at.toUtc().toIso8601String()));
 
   /// `null` remet la langue du téléphone.
   Future<void> setLocale(String? code) => _persist(

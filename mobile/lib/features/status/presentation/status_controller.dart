@@ -61,6 +61,12 @@ final statusFeedProvider = StreamProvider.autoDispose<List<StatusFeedItem>>((
   );
 });
 
+/// Qui voit MES statuts — lu par l'écran Statuts, le compositeur et
+/// Réglages › Confidentialité, qui affichent tous « Mes contacts › ».
+final statusPrivacyProvider = FutureProvider.autoDispose<StatusPrivacy>(
+  (ref) => ref.watch(statusRepositoryProvider).getPrivacy(),
+);
+
 /// Qui a, en ce moment, au moins un statut que je n'ai pas vu.
 ///
 /// Cette information EXISTAIT déjà — `viewed_by_me` arrive avec chaque

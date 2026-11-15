@@ -236,6 +236,9 @@ def reglages(user: User) -> dict:
         # ici permet à l'écran de tout lire d'un coup.
         "read_receipts": bool(user.read_receipts_enabled),
         "presence_reciprocal": bool(user.presence_visible),
+        # Un appel d'inconnu ne sonne pas, il reste dans le journal (voir
+        # `appel_sonne_chez`).
+        "silence_unknown_calls": bool(user.silence_unknown_calls),
     }
 
 
@@ -267,7 +270,34 @@ def appliquer(db: Session, user: User, modifications: dict) -> dict:
         user.read_receipts_enabled = bool(modifications["read_receipts"])
     if modifications.get("presence_reciprocal") is not None:
         user.presence_visible = bool(modifications["presence_reciprocal"])
+    if modifications.get("silence_unknown_calls") is not None:
+        user.silence_unknown_calls = bool(modifications["silence_unknown_calls"])
 
     db.commit()
     db.refresh(user)
     return reglages(user)
+
+
+def appel_sonne_chez(db: Session, invite: Optional[User], appelant_id: int) -> bool:
+    """Un appel À DEUX de cet appelant doit-il sonner chez cet invité ?
+
+    Non seulement quand l'invité a coupé les appels d'inconnus ET que
+    l'appelant n'est pas dans SON carnet. Le carnet de l'invité seulement,
+    et pas « dans un sens ou dans l'autre » comme `est_dans_les_contacts` :
+    un inconnu qui m'a enregistré reste un inconnu — c'est précisément le
+    démarcheur qui a trouvé mon numéro.
+
+    Un appel de groupe n'est pas concerné : l'appartenance au groupe est la
+    mise en relation, et le groupe a sa propre règle d'invitation.
+    """
+    if invite is None or not invite.silence_unknown_calls:
+        return True
+    return (
+        db.query(Contact.id)
+        .filter(
+            Contact.owner_user_id == invite.id,
+            Contact.contact_user_id == appelant_id,
+        )
+        .first()
+        is not None
+    )

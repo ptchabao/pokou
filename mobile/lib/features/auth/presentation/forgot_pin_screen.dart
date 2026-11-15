@@ -13,10 +13,15 @@ import '../../../l10n/app_localizations.dart';
 /// suppose une adresse vérifiée et un envoi de courriels, qui ne sont pas
 /// encore en place. Elle est affichée, désactivée, pour que l'écran dise
 /// la vérité sur ce qui existe.
+///
+/// Deux portes : la connexion (avec le laissez-passer du code SMS) et
+/// Réglages › Compte et sécurité, où l'on est déjà connecté — sans
+/// laissez-passer, la demande passe alors par la session.
 class ForgotPinScreen extends ConsumerStatefulWidget {
-  const ForgotPinScreen({super.key, required this.verificationToken});
+  const ForgotPinScreen({super.key, this.verificationToken});
 
-  final String verificationToken;
+  /// `null` depuis les réglages : la session authentifie la demande.
+  final String? verificationToken;
 
   @override
   ConsumerState<ForgotPinScreen> createState() => _ForgotPinScreenState();
@@ -35,11 +40,18 @@ class _ForgotPinScreenState extends ConsumerState<ForgotPinScreen> {
       _error = null;
     });
     try {
-      final response = await ref.read(apiClientProvider).post(
-        '/auth/phone/two-step/forgot',
-        body: {'verification_token': widget.verificationToken},
-        authenticated: false,
-      );
+      final token = widget.verificationToken;
+      final response = token == null
+          ? await ref
+                .read(apiClientProvider)
+                .post('/account-privacy/two-step/forgot')
+          : await ref
+                .read(apiClientProvider)
+                .post(
+                  '/auth/phone/two-step/forgot',
+                  body: {'verification_token': token},
+                  authenticated: false,
+                );
       final at = DateTime.parse(
         '${(response as Map<String, dynamic>)['available_at']}Z',
       ).toLocal();

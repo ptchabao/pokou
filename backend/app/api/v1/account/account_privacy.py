@@ -157,6 +157,7 @@ class ReglagesConfidentialite(BaseModel):
     group_invites: Optional[str] = None
     read_receipts: Optional[bool] = None
     presence_reciprocal: Optional[bool] = None
+    silence_unknown_calls: Optional[bool] = None
 
 
 @router.get("/privacy")
@@ -372,6 +373,33 @@ async def disable_two_step(
     return {"enabled": False}
 
 
+@router.post("/two-step/forgot")
+async def forgot_two_step_from_settings(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Code PIN oublié », depuis Compte et sécurité — même délai de 7 jours
+    que depuis la connexion (/auth/phone/two-step/forgot), et même règle :
+    redemander ne relance pas le délai.
+
+    Être connecté ne fait PAS sauter le délai. Un téléphone déverrouillé
+    qu'on a volé est connecté lui aussi ; c'est justement le cas que les
+    7 jours protègent, et le titulaire qui se reconnecte avec son code
+    pendant l'attente annule la demande.
+    """
+    from app.api.v1.auth.auth import _pin_reset_available_at
+
+    user = _load_me(db, current_user)
+    if not user.two_step_pin_hash:
+        raise HTTPException(
+            status_code=409, detail="La vérification en deux étapes n'est pas activée"
+        )
+    if user.two_step_reset_requested_at is None:
+        user.two_step_reset_requested_at = datetime.utcnow()
+        db.commit()
+    return {"available_at": _pin_reset_available_at(user).isoformat()}
+
+
 @router.post("/two-step/verify")
 async def verify_two_step(
     payload: TwoStepVerify,
@@ -383,6 +411,60 @@ async def verify_two_step(
     user = _load_me(db, current_user)
     _check_pin(user, payload.pin)
     return {"verified": True}
+
+
+# ─── Télécharger mes données ──────────────────────────────────────────────────
+
+@router.get("/export")
+async def export_my_data(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Télécharger mes données » (Compte et sécurité) : le profil, le
+    carnet d'adresses et les réglages, en un fichier que l'application
+    enregistre.
+
+    Ce que le serveur SAIT, et rien de plus. Les messages n'y sont pas : ils
+    sont chiffrés de bout en bout, le serveur n'en a que des blocs opaques
+    qui ne diraient rien à leur propriétaire — l'historique lisible vit sur
+    le téléphone et dans sa sauvegarde. Ni le code PIN ni son haché : un
+    fichier exporté se retrouve dans un dossier de téléchargements, et un
+    haché sorti de la base se casse hors ligne.
+    """
+    from app.services.privacy import status_privacy_service
+
+    user = _load_me(db, current_user)
+    contacts = (
+        db.query(Contact)
+        .filter(Contact.owner_user_id == user.id)
+        .order_by(Contact.display_name)
+        .all()
+    )
+    return {
+        "exported_at": datetime.utcnow().isoformat(),
+        "profile": {
+            "phone": user.phone,
+            "email": user.email,
+            "name": user.full_name,
+            "about": user.about,
+            "created_at": user.created_at.isoformat() if user.created_at else None,
+        },
+        "contacts": [
+            {
+                "name": contact.display_name,
+                "phone": contact.phone,
+                "on_pokou": contact.contact_user_id is not None,
+                "blocked": bool(contact.is_blocked),
+            }
+            for contact in contacts
+        ],
+        "settings": {
+            "privacy": privacy_service.reglages(user),
+            "status_audience": status_privacy_service.get_privacy(db, user.id)["mode"],
+            "two_step_enabled": bool(user.two_step_pin_hash),
+            "muted_service_pushes": list(user.muted_service_pushes or []),
+        },
+    }
 
 
 # ─── Suppression du compte ────────────────────────────────────────────────────

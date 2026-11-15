@@ -524,4 +524,27 @@ class MediaRepository {
     }
     return removed;
   }
+
+  /// Stockage et données › une discussion : supprime les fichiers en cache
+  /// de CES médias seulement (toutes leurs variantes, vignettes comprises).
+  /// Ils se retéléchargent à la prochaine ouverture. Renvoie les octets
+  /// libérés.
+  Future<int> clearCachedMedia(Set<int> mediaIds) async {
+    if (mediaIds.isEmpty) return 0;
+    _resolus.clear();
+    final dir = await _repertoire();
+    if (!await dir.exists()) return 0;
+    final pattern = RegExp('^${_cachePrefix}(?:w\\d+_)?(\\d+)');
+    var freed = 0;
+    await for (final entity in dir.list()) {
+      if (entity is! File) continue;
+      final match = pattern.firstMatch(entity.uri.pathSegments.last);
+      if (match == null || !mediaIds.contains(int.parse(match.group(1)!))) {
+        continue;
+      }
+      freed += await entity.length();
+      await entity.delete();
+    }
+    return freed;
+  }
 }

@@ -16,6 +16,7 @@ class PokouStatus {
     required this.viewCount,
     this.contentUnavailable = false,
     this.textStyle = StatusTextStyle.plain,
+    this.likedByMe = false,
   });
 
   final String id;
@@ -31,6 +32,10 @@ class PokouStatus {
 
   /// Le fond et la police d'un statut en texte (voir [StatusTextStyle]).
   final StatusTextStyle textStyle;
+
+  /// J'ai posé un cœur sur CE statut (statut d'un autre). Lu par le fil
+  /// (`liked_by_me`) : l'auteur, lui, les voit tous dans « Vu par ».
+  final bool likedByMe;
 
   factory PokouStatus.fromJson(Map<String, dynamic> json) {
     final mediaJson = json['media'] as Map<String, dynamic>?;
@@ -53,6 +58,7 @@ class PokouStatus {
       viewedByMe: json['viewed_by_me'] as bool? ?? false,
       viewCount: json['view_count'] as int? ?? 0,
       contentUnavailable: json['status_unavailable'] as bool? ?? false,
+      likedByMe: json['liked_by_me'] as bool? ?? false,
     );
   }
 }
@@ -167,6 +173,7 @@ class StatusViewer {
     required this.displayName,
     required this.avatar,
     required this.viewedAt,
+    this.liked = false,
   });
 
   final int viewerId;
@@ -178,6 +185,9 @@ class StatusViewer {
   final MediaMeta? avatar;
   final DateTime viewedAt;
 
+  /// Le cœur que ce spectateur a posé sur le statut.
+  final bool liked;
+
   factory StatusViewer.fromJson(Map<String, dynamic> json) {
     final avatarJson = json['avatar'] as Map<String, dynamic>?;
     return StatusViewer(
@@ -186,6 +196,7 @@ class StatusViewer {
       displayName: json['display_name'] as String? ?? '',
       avatar: avatarJson == null ? null : MediaMeta.fromJson(avatarJson),
       viewedAt: parseServerTime(json['viewed_at'] as String),
+      liked: json['liked'] as bool? ?? false,
     );
   }
 }

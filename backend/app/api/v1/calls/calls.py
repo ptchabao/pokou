@@ -182,6 +182,14 @@ async def _ring(
     caller_verified = est_certifie(caller)
     group_avatar = _serialize_avatar(group.avatar_media) if group else None
     for invitee_id in invitee_ids:
+        # « Couper les appels d'inconnus » : ni WebSocket ni push. Le
+        # participant reste « invité », donc l'appel finit « manqué » et
+        # figure dans le journal de l'invité — on coupe la sonnerie, on ne
+        # cache rien.
+        if group is None and not privacy_service.appel_sonne_chez(
+            db, db.query(User).filter(User.id == invitee_id).first(), caller.id
+        ):
+            continue
         # Le petname que CET invité a posé sur l'appelant l'emporte sur le
         # nom que l'appelant s'est choisi — propre à chaque destinataire,
         # donc résolu DANS la boucle (voir la même priorité dans

@@ -109,6 +109,8 @@ class StatusView(Base):
     status_id = Column(String(36), ForeignKey("statuses.id"), nullable=False, index=True)
     viewer_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     viewed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    #: Le cœur posé sur le statut (« Vu par » : seul l'auteur le voit).
+    liked_at = Column(DateTime, nullable=True)
 
     viewer = relationship("User")
 

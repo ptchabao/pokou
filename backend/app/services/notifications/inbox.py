@@ -9,7 +9,7 @@ from typing import Iterable, Optional
 
 from sqlalchemy.orm import Session
 
-from app.models import ServiceNotification
+from app.models import ServiceNotification, User
 from app.services.notifications.push_service import send_push
 
 
@@ -31,7 +31,18 @@ def notify(
     db.flush()
     if not push:
         return
+    # Réglages · Notifications · Modules : la ligne reste dans le centre,
+    # seul le push se tait pour qui a coupé ce service.
+    muted = {
+        user_id
+        for user_id, prefs in db.query(User.id, User.muted_service_pushes)
+        .filter(User.id.in_(targets))
+        .all()
+        if service in (prefs or [])
+    }
     for user_id in targets:
+        if user_id in muted:
+            continue
         send_push(
             db,
             user_id,

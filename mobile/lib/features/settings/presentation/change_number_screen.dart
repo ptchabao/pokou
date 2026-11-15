@@ -5,6 +5,8 @@ import '../../../core/api/api_exceptions.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/country/country_config.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 
@@ -20,7 +22,10 @@ class ChangeNumberScreen extends ConsumerStatefulWidget {
 }
 
 class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
+  /// Le numéro SANS l'indicatif, saisi à côté de sa case : l'indicatif
+  /// est celui du compte et ne se retape pas.
   final _phone = TextEditingController();
+  String _prefix = '+';
   final _code = TextEditingController();
   String _notify = 'chatted';
   bool _busy = false;
@@ -31,8 +36,14 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
   void initState() {
     super.initState();
     final current = ref.read(authControllerProvider).user?.phone ?? '';
-    final prefix = RegExp(r'^\+\d{3}').firstMatch(current)?.group(0) ?? '+';
-    _phone.text = '$prefix ';
+    _prefix = RegExp(r'^\+\d{3}').firstMatch(current)?.group(0) ?? '+';
+  }
+
+  /// Le numéro complet envoyé à l'API. Un numéro collé AVEC son indicatif
+  /// (« +229… ») garde le sien : changer de pays reste possible.
+  String get _newPhone {
+    final typed = _phone.text.trim();
+    return typed.startsWith('+') ? typed : '$_prefix $typed';
   }
 
   @override
@@ -66,7 +77,7 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
   Future<void> _sendCode() => _run(() async {
     await ref.read(apiClientProvider).post(
       '/account/phone/change/request',
-      body: {'new_phone': _phone.text.trim()},
+      body: {'new_phone': _newPhone},
     );
     if (mounted) setState(() => _codeSent = true);
   });
@@ -76,7 +87,7 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
     await ref.read(apiClientProvider).post(
       '/account/phone/change/confirm',
       body: {
-        'new_phone': _phone.text.trim(),
+        'new_phone': _newPhone,
         'code': _code.text.trim(),
         'notify': _notify,
       },
@@ -93,6 +104,8 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final oldPhone = ref.watch(authControllerProvider).user?.phone;
+    // Lot 1 (messagerie seule) : ni Kory ni encadré de collecte.
+    final lot1 = isLot1(ref.watch(currentCountryConfigProvider).modules);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: Text(l.changeNumberTitle)),
@@ -117,14 +130,44 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 12),
-                        TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-                          controller: _phone,
-                          enabled: !_codeSent && !_busy,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            labelText: l.changeNumberNew,
-                          ),
+                        Text(
+                          l.changeNumberNew,
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                        const SizedBox(height: 6),
+                        // L'indicatif dans sa propre case, le numéro à côté.
+                        Row(
+                          children: [
+                            Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppColors.border),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                _prefix,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextField(
+                                contextMenuBuilder: pokouContextMenuBuilder,
+                                controller: _phone,
+                                enabled: !_codeSent && !_busy,
+                                keyboardType: TextInputType.phone,
+                                decoration: InputDecoration(
+                                  hintText: l.changeNumberHint,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         if (_codeSent) ...[
                           const SizedBox(height: 12),
@@ -179,12 +222,14 @@ class _ChangeNumberScreenState extends ConsumerState<ChangeNumberScreen> {
                   const SizedBox(height: 16),
                   _Card(
                     child: Text(
-                      l.changeNumberInfo,
+                      lot1 ? l.changeNumberInfoLot1 : l.changeNumberInfo,
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _AmberBox(text: l.changeNumberKoryWarning),
+                  if (!lot1) ...[
+                    const SizedBox(height: 12),
+                    _AmberBox(text: l.changeNumberKoryWarning),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     Text(

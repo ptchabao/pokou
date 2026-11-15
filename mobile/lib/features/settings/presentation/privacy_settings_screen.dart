@@ -3,10 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/media/media_repository.dart';
+import '../../../core/providers.dart';
+import '../../status/presentation/status_controller.dart';
+import '../../status/presentation/status_privacy_screen.dart';
 import '../data/privacy_repository.dart';
+import 'blocked_contacts_screen.dart';
 import 'settings_widgets.dart';
+import 'storage_settings_screen.dart';
 
-/// Profil → Confidentialité.
+/// Réglages › Confidentialité (REG-1) : qui peut voir, accusés de lecture,
+/// groupes et inconnus, bloqués, puis le raccourci vers le stockage.
+///
+/// « Présence en ligne », « Informations du profil » et « Visibilité de mon
+/// appartenance » ne sont plus à l'écran (maquette 2026-11) : le serveur
+/// garde leurs règles, la première suit désormais « Vu à ».
 ///
 /// ── Ce que cet écran n'est pas ────────────────────────────────────────
 ///
@@ -96,126 +107,139 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
     );
   }
 
-  List<Widget> _contenu(L l, PrivacySettings r) => [
-    Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-      child: Text(
-        l.privacyIntro,
-        style: TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 13,
-          height: 1.4,
-        ),
+  List<Widget> _contenu(L l, PrivacySettings r) {
+    final statusAudience = ref.watch(statusPrivacyProvider).valueOrNull;
+    final blocked = ref.watch(blockedContactsProvider).valueOrNull;
+    final cache = ref.watch(_cacheSizeProvider).valueOrNull;
+    return [
+      SettingsSectionTitle(l.privacyWhoCanSee),
+      SettingsCard(
+        children: [
+          // « Vu à » règle À LA FOIS la dernière activité et la présence en
+          // ligne : la maquette n'en montre qu'une ligne, et les laisser
+          // diverger sans moyen de les voir serait pire. Le serveur garde
+          // les deux règles ; l'écran les écrit ensemble.
+          _LigneAudience(
+            label: l.privacySeenAt,
+            description: l.privacyLastSeenBody,
+            valeur: r.lastSeen,
+            occupe: _enCours.contains('last_seen'),
+            onChoix: (v) => _enregistrer(
+              'last_seen',
+              (depot) => depot.update(lastSeen: v, online: v),
+            ),
+          ),
+          _LigneAudience(
+            label: l.privacyProfilePhoto,
+            description: l.privacyProfilePhotoBody,
+            valeur: r.profilePhoto,
+            occupe: _enCours.contains('profile_photo'),
+            onChoix: (v) => _enregistrer(
+              'profile_photo',
+              (depot) => depot.update(profilePhoto: v),
+            ),
+          ),
+          SettingsRow(
+            label: l.privacyStatuses,
+            trailing: SettingsValue(
+              statusAudience == null
+                  ? ''
+                  : statusAudience.audience.labelOf(l),
+            ),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const StatusPrivacyScreen()),
+              );
+              ref.invalidate(statusPrivacyProvider);
+            },
+          ),
+        ],
       ),
-    ),
-
-    SettingsSectionTitle(l.privacySectionWhoSees),
-    SettingsCard(
-      children: [
-        _LigneAudience(
-          icone: Icons.schedule,
-          label: l.privacyLastSeen,
-          description: l.privacyLastSeenBody,
-          valeur: r.lastSeen,
-          occupe: _enCours.contains('last_seen'),
-          onChoix: (v) =>
-              _enregistrer('last_seen', (depot) => depot.update(lastSeen: v)),
-        ),
-        _LigneAudience(
-          icone: Icons.circle,
-          label: l.privacyOnline,
-          description: l.privacyOnlineBody,
-          valeur: r.online,
-          occupe: _enCours.contains('online'),
-          onChoix: (v) =>
-              _enregistrer('online', (depot) => depot.update(online: v)),
-        ),
-        _LigneAudience(
-          icone: Icons.account_circle_outlined,
-          label: l.privacyProfilePhoto,
-          description: l.privacyProfilePhotoBody,
-          valeur: r.profilePhoto,
-          occupe: _enCours.contains('profile_photo'),
-          onChoix: (v) => _enregistrer(
-            'profile_photo',
-            (depot) => depot.update(profilePhoto: v),
+      const SizedBox(height: 12),
+      SettingsCard(
+        children: [
+          SettingsRow(
+            label: l.privacyReadReceiptsTitle,
+            // La réciprocité est dite ICI, avant le geste.
+            subtitle: l.privacyReadReceiptsSub,
+            trailing: SettingsSwitch(
+              value: r.readReceipts,
+              semanticLabel: l.privacyReadReceiptsTitle,
+              onChanged: _enCours.contains('read_receipts')
+                  ? (_) {}
+                  : (v) => _enregistrer(
+                      'read_receipts',
+                      (depot) => depot.update(readReceipts: v),
+                    ),
+            ),
           ),
-        ),
-        _LigneAudience(
-          icone: Icons.info_outline,
-          label: l.privacyProfileInfo,
-          description: l.privacyProfileInfoBody,
-          valeur: r.profileInfo,
-          occupe: _enCours.contains('profile_info'),
-          onChoix: (v) => _enregistrer(
-            'profile_info',
-            (depot) => depot.update(profileInfo: v),
-          ),
-        ),
-      ],
-    ),
-
-    SettingsSectionTitle(l.privacySectionMessages),
-    SettingsCard(
-      children: [
-        SettingsRow(
-          icon: Icons.done_all,
-          label: l.privacyReadReceipts,
-          // La réciprocité est dite ICI, avant le geste. La découvrir après
-          // coup — « je ne vois plus les accusés des autres, pourquoi ? » —
-          // donnerait l'impression d'un défaut.
-          subtitle: l.privacyReadReceiptsBody,
-          trailing: SettingsSwitch(
-            value: r.readReceipts,
-            semanticLabel: l.privacyReadReceipts,
-            onChanged: _enCours.contains('read_receipts')
-                ? (_) {}
-                : (v) => _enregistrer(
-                    'read_receipts',
-                    (depot) => depot.update(readReceipts: v),
-                  ),
-          ),
-        ),
-      ],
-    ),
-
-    SettingsSectionTitle(l.privacySectionGroups),
-    SettingsCard(
-      children: [
-        _LigneAudience(
-          icone: Icons.group_add_outlined,
-          label: l.privacyGroupInvites,
-          description: l.privacyGroupInvitesBody,
-          valeur: r.groupInvites,
-          occupe: _enCours.contains('group_invites'),
-          onChoix: (v) => _enregistrer(
-            'group_invites',
-            (depot) => depot.update(groupInvites: v),
-          ),
-        ),
-        _LigneAudience(
-          icone: Icons.groups_outlined,
-          label: l.privacyGroupMembership,
-          description: l.privacyGroupMembershipBody,
-          valeur: r.groupMembership,
-          occupe: _enCours.contains('group_membership'),
-          onChoix: (v) => _enregistrer(
-            'group_membership',
-            (depot) => depot.update(groupMembership: v),
-          ),
-        ),
-      ],
-    ),
-
-    Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-      child: Text(
-        l.privacyStatusesNote,
-        style: TextStyle(color: AppColors.textMuted, fontSize: 12, height: 1.4),
+        ],
       ),
-    ),
-  ];
+      SettingsSectionTitle(l.privacyGroupsAndStrangers),
+      SettingsCard(
+        children: [
+          _LigneAudience(
+            label: l.privacyGroupAdd,
+            subtitle: l.privacyGroupAddSub,
+            description: l.privacyGroupInvitesBody,
+            valeur: r.groupInvites,
+            occupe: _enCours.contains('group_invites'),
+            onChoix: (v) => _enregistrer(
+              'group_invites',
+              (depot) => depot.update(groupInvites: v),
+            ),
+          ),
+          SettingsRow(
+            label: l.privacySilenceUnknown,
+            subtitle: l.privacySilenceUnknownSub,
+            trailing: SettingsSwitch(
+              value: r.silenceUnknownCalls,
+              semanticLabel: l.privacySilenceUnknown,
+              onChanged: _enCours.contains('silence_unknown_calls')
+                  ? (_) {}
+                  : (v) => _enregistrer(
+                      'silence_unknown_calls',
+                      (depot) => depot.update(silenceUnknownCalls: v),
+                    ),
+            ),
+          ),
+          SettingsRow(
+            label: l.privacyBlocked,
+            trailing: SettingsValue(blocked == null ? '' : '${blocked.length}'),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const BlockedContactsScreen()),
+              );
+              ref.invalidate(blockedContactsProvider);
+            },
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      SettingsCard(
+        children: [
+          SettingsRow(
+            label: l.storageTitle,
+            trailing: SettingsValue(cache == null ? '' : formatBytes(cache)),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const StorageSettingsScreen()),
+              );
+              ref.invalidate(_cacheSizeProvider);
+            },
+          ),
+        ],
+      ),
+    ];
+  }
 }
+
+/// La place que Pokou occupe sur ce téléphone, pour la ligne « Stockage et
+/// données ».
+final _cacheSizeProvider = FutureProvider.autoDispose<int>(
+  (ref) async =>
+      (await ref.watch(mediaRepositoryProvider).cacheStats()).totalBytes,
+);
 
 /// Une ligne qui ouvre le choix des trois audiences.
 ///
@@ -224,16 +248,18 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
 /// balayant la page, sans en ouvrir une seule.
 class _LigneAudience extends StatelessWidget {
   const _LigneAudience({
-    required this.icone,
     required this.label,
+    this.subtitle,
     required this.description,
     required this.valeur,
     required this.onChoix,
     required this.occupe,
   });
 
-  final IconData icone;
   final String label;
+
+  /// Sous le libellé, quand la maquette en montre un.
+  final String? subtitle;
   final String description;
   final PrivacyAudience valeur;
   final ValueChanged<PrivacyAudience> onChoix;
@@ -243,28 +269,15 @@ class _LigneAudience extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return SettingsRow(
-      icon: icone,
       label: label,
-      subtitle: description,
+      subtitle: subtitle,
       trailing: occupe
           ? const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  libelleAudience(l, valeur),
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-                Icon(Icons.chevron_right, size: 20, color: AppColors.textMuted),
-              ],
-            ),
+          : SettingsValue(libelleAudience(l, valeur)),
       onTap: occupe ? null : () => _choisir(context, l),
     );
   }

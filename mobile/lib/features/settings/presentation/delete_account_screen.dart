@@ -7,6 +7,8 @@ import '../../../core/providers.dart';
 import '../../../core/security/app_lock.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/country/country_config.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 
@@ -127,6 +129,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   const SizedBox(height: 16),
                   _Card(
                     title: l.deleteAccountRemovedTitle,
+                    icon: Icons.close,
+                    iconColor: AppColors.semanticError,
                     lines: [
                       l.deleteAccountRemovedProfile,
                       l.deleteAccountRemovedChats,
@@ -136,10 +140,16 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   const SizedBox(height: 12),
                   _Card(
                     title: l.deleteAccountKeptTitle,
+                    icon: Icons.info_outline,
+                    iconColor: AppColors.textSecondary,
                     lines: [
                       l.deleteAccountKeptMessages,
                       l.deleteAccountKeptProof,
-                      l.deleteAccountKeptKory,
+                      // Lot 1 : Kory n'est pas ouvert, il n'y a rien à garder.
+                      if (!isLot1(
+                        ref.watch(currentCountryConfigProvider).modules,
+                      ))
+                        l.deleteAccountKeptKory,
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -197,10 +207,19 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 }
 
 class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.lines});
+  const _Card({
+    required this.title,
+    required this.lines,
+    required this.icon,
+    required this.iconColor,
+  });
 
   final String title;
   final List<String> lines;
+
+  /// ✕ pour ce qui disparaît, ⓘ pour ce qui reste.
+  final IconData icon;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -219,9 +238,21 @@ class _Card extends StatelessWidget {
           for (final line in lines)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '• $line',
-                style: TextStyle(color: AppColors.textSecondary),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Icon(icon, size: 15, color: iconColor),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      line,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

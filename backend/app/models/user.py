@@ -3,6 +3,7 @@ from datetime import datetime
 import enum
 
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum as SQLEnum
+from sqlalchemy.types import JSON
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -143,6 +144,15 @@ class User(Base):
         default=PrivacyAudience.CONTACTS,
         nullable=False,
     )
+    #: « Couper les appels d'inconnus » (Réglages · Confidentialité) : un
+    #: appel à deux venu de quelqu'un qui n'est PAS dans mon carnet ne sonne
+    #: pas — ni WebSocket, ni push. Il reste journalisé, donc visible dans
+    #: l'onglet Appels : on coupe la sonnerie, on ne cache pas l'appel.
+    silence_unknown_calls = Column(Boolean, default=False, nullable=False)
+    #: Les services dont je ne veux plus de push (Réglages · Notifications ·
+    #: Modules) — « kory », « honam », « assime ». La ligne du centre de
+    #: notifications reste écrite : seul le push se tait.
+    muted_service_pushes = Column(JSON, nullable=True)
     # Compte vendeur certifié par l'équipe (marketplace) — même motif que
     # Channel.is_verified : posé uniquement par un rôle d'équipe, jamais par
     # le vendeur lui-même (voir routes/marketplace.py::certify_seller).

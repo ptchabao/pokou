@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -3596,7 +3597,7 @@ class LEs extends L {
   String get statusPublish => 'Publicar';
 
   @override
-  String get statusFeedTitle => 'Novedades';
+  String get statusFeedTitle => 'Estados';
 
   @override
   String get statusFeedUnavailable => 'Estados no disponibles: reintentar';
@@ -4047,8 +4048,7 @@ class LEs extends L {
       locale: localeName,
       other:
           '$count mensajes retenidos por el Modo Escudo: desliza hacia abajo para verlos',
-      one:
-          '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
+      one: '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
     );
     return '$_temp0';
   }
@@ -4540,7 +4540,7 @@ class LEs extends L {
   String get chatsArchivedSection => 'Chats archivados';
 
   @override
-  String get statusMineTitle => 'Mi novedad';
+  String get statusMineTitle => 'Mi estado';
 
   @override
   String get statusMineBody => 'Toca para publicar una novedad (24 h)';
@@ -9266,4 +9266,380 @@ class LEs extends L {
   String welcomeBackBabaLot1(String name) {
     return 'Bon retour, $name ! J\'ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes discussions et ton badge te suivent.';
   }
+
+  @override
+  String get notifDirect => 'Discussions à deux';
+
+  @override
+  String get notifPreview => 'Aperçu du message';
+
+  @override
+  String get notifPreviewSub =>
+      'Le texte n\'apparaît pas sur l\'écran verrouillé';
+
+  @override
+  String get notifReactions => 'Réactions';
+
+  @override
+  String get notifRingtone => 'Sonnerie';
+
+  @override
+  String get notifVibrate => 'Vibreur';
+
+  @override
+  String get notifModules => 'Modules';
+
+  @override
+  String get notifModuleKorySub =>
+      'Engagements, rappels de versement, clôtures';
+
+  @override
+  String get notifModuleHonamSub => 'Devis, livraison, code de remise';
+
+  @override
+  String get notifModuleAssimeSub =>
+      'Alertes de recherche, au plus une par jour';
+
+  @override
+  String get notifRingtoneNote =>
+      'La sonnerie de Pokou est la seule proposée pour l\'instant.';
+
+  @override
+  String get accountSecurityTitle => 'Compte et sécurité';
+
+  @override
+  String get accountSecurityWarning =>
+      'Pokou ne te demandera jamais ton code PIN ni le code reçu par SMS, ni par message ni par appel.';
+
+  @override
+  String get accountPinTitle => 'Code PIN';
+
+  @override
+  String get accountPinRowSub => 'Demandé sur un nouveau téléphone';
+
+  @override
+  String get accountPinOn => 'Activé';
+
+  @override
+  String get accountPinOff => 'Désactivé';
+
+  @override
+  String get accountPinUnknown => 'Indisponible';
+
+  @override
+  String get accountPinIntro =>
+      'Choisis un code à 6 chiffres. Il est demandé quand ton numéro se connecte sur un nouveau téléphone.';
+
+  @override
+  String get accountPinCurrent => 'Ton code actuel';
+
+  @override
+  String get accountPinChoose => 'Choisis ton code';
+
+  @override
+  String get accountPinConfirm => 'Confirme ton code';
+
+  @override
+  String get accountPinMismatch =>
+      'Les deux codes ne correspondent pas. Choisis-le à nouveau.';
+
+  @override
+  String get accountPinReminder => 'Me le redemander de temps en temps';
+
+  @override
+  String get accountPinReminderSub => 'Pour ne pas l\'oublier';
+
+  @override
+  String get accountPinNote =>
+      'Ton code PIN protège ton compte si quelqu\'un récupère ta carte SIM. Ne le note pas dans ton téléphone.';
+
+  @override
+  String get accountPinEnable => 'Activer le code PIN';
+
+  @override
+  String get accountPinSave => 'Enregistrer le code PIN';
+
+  @override
+  String get accountPinEnabled => 'Code PIN activé.';
+
+  @override
+  String get accountPinChanged => 'Code PIN modifié.';
+
+  @override
+  String get accountPinChange => 'Modifier le code PIN';
+
+  @override
+  String get accountPinDisable => 'Désactiver le code PIN';
+
+  @override
+  String get accountPinDisableConfirm => 'Désactiver';
+
+  @override
+  String get accountPinDisabled => 'Code PIN désactivé.';
+
+  @override
+  String get accountPinReminderTitle => 'Ton code PIN';
+
+  @override
+  String get accountPinReminderBody =>
+      'Saisis ton code PIN pour vérifier que tu t\'en souviens.';
+
+  @override
+  String get accountPinReminderLater => 'Plus tard';
+
+  @override
+  String get accountPinReminderOk => 'C\'est bien ton code.';
+
+  @override
+  String get accountExport => 'Télécharger mes données';
+
+  @override
+  String get accountExportSub => 'Profil, contacts et réglages, en fichier';
+
+  @override
+  String get accountExportFailed => 'Export impossible — vérifie ta connexion.';
+
+  @override
+  String get privacyWhoCanSee => 'Qui peut voir';
+
+  @override
+  String get privacySeenAt => 'Vu à';
+
+  @override
+  String get privacyStatuses => 'Statuts';
+
+  @override
+  String get privacyReadReceiptsTitle => 'Accusés de lecture';
+
+  @override
+  String get privacyReadReceiptsSub =>
+      'Désactivés, tu ne vois plus ceux des autres';
+
+  @override
+  String get privacyGroupsAndStrangers => 'Groupes et inconnus';
+
+  @override
+  String get privacyGroupAdd => 'Qui peut m\'ajouter aux groupes';
+
+  @override
+  String get privacyGroupAddSub => 'Les autres t\'envoient une invitation';
+
+  @override
+  String get privacySilenceUnknown => 'Couper les appels d\'inconnus';
+
+  @override
+  String get privacySilenceUnknownSub => 'Ils restent dans la liste des appels';
+
+  @override
+  String get privacyBlocked => 'Bloqués';
+
+  @override
+  String get privacyBlockedEmpty => 'Personne n\'est bloqué.';
+
+  @override
+  String get privacyBlockedNote =>
+      'Une personne bloquée ne peut plus t\'écrire ni t\'appeler. Elle n\'en est pas prévenue.';
+
+  @override
+  String get privacyUnblock => 'Débloquer';
+
+  @override
+  String storagePhone(Object size) {
+    return 'Téléphone · $size';
+  }
+
+  @override
+  String storagePokouOnly(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String storageFreeSpace(Object size) {
+    return '$size libres';
+  }
+
+  @override
+  String get storageOthers => 'Autres';
+
+  @override
+  String get storageFreeLabel => 'Libre';
+
+  @override
+  String storageFree(Object size) {
+    return 'Libérer $size';
+  }
+
+  @override
+  String storageFreed(Object size) {
+    return '$size libérés.';
+  }
+
+  @override
+  String get storageFreeBody =>
+      'Les photos, vidéos et documents de cette discussion sont retirés du téléphone. Ils se retéléchargeront si tu les rouvres ; les messages restent.';
+
+  @override
+  String get languageNoteLot1 =>
+      'La langue de l\'application ne change pas celle de tes messages. Le nom Pokou reste le même dans toutes les langues.';
+
+  @override
+  String get helpQCertified => 'Comment payer Pokou certifié ?';
+
+  @override
+  String get helpACertified =>
+      'Dans Réglages, touche « Pokou certifié » et choisis ta formule. Le paiement se fait par Mobile Money, depuis ton wallet : ton identité est vérifiée par le nom de son titulaire. Le badge se résilie à tout moment.';
+
+  @override
+  String get helpQBlock => 'Comment bloquer un inconnu ?';
+
+  @override
+  String get helpABlock =>
+      'Ouvre la discussion, touche son nom en haut, puis « Bloquer ». Il ne peut plus t\'écrire ni t\'appeler, et n\'en est pas prévenu. Dans Réglages › Confidentialité, tu peux aussi couper les appels d\'inconnus.';
+
+  @override
+  String get aboutNameTitle => 'Le sens de notre nom';
+
+  @override
+  String get legalPrivacyPolicy => 'Politique de confidentialité';
+
+  @override
+  String legalUpdatedOn(Object date) {
+    return 'Mise à jour : $date';
+  }
+
+  @override
+  String get legalDownloadPdf => 'Télécharger en PDF';
+
+  @override
+  String get legalPdfFailed => 'PDF impossible à produire pour l\'instant.';
+
+  @override
+  String get termsLot1Messaging =>
+      'Pokou est une messagerie : chacun reste responsable de ce qu\'il envoie.';
+
+  @override
+  String get privacyLot1Numbers =>
+      'Aucun numéro de téléphone n\'est affiché dans les discussions de groupe.';
+
+  @override
+  String get privacyLot1Codes =>
+      'Une demande de code secret est repérée sur ton téléphone, sans que Pokou lise le message.';
+
+  @override
+  String get actionEdit => 'Modifier';
+
+  @override
+  String statusVisibleBy(Object audience) {
+    return 'Visible par : $audience';
+  }
+
+  @override
+  String get statusFeedSubtitle => 'Visibles 24 h, puis ils disparaissent';
+
+  @override
+  String get statusRecent => 'Récents';
+
+  @override
+  String get statusSeen => 'Vus';
+
+  @override
+  String get statusNoneYet => 'Aucun statut pour l\'instant.';
+
+  @override
+  String get statusJustNow => 'À l\'instant';
+
+  @override
+  String statusMinutesAgo(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il y a $count minutes',
+      one: 'Il y a 1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusHoursAgo(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il y a $count heures',
+      one: 'Il y a 1 heure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusYesterdayAt(Object time) {
+    return 'Hier, $time';
+  }
+
+  @override
+  String get statusLikeAction => 'Aimer';
+
+  @override
+  String statusReportBody(Object name) {
+    return 'Signaler le statut de $name à l\'équipe Pokou ?';
+  }
+
+  @override
+  String get statusReportSent => 'Statut signalé.';
+
+  @override
+  String get statusForwardMediaUnsupported =>
+      'Le transfert d\'une photo ou vidéo n\'est pas encore possible.';
+
+  @override
+  String get changeNumberHint => 'Numéro';
+
+  @override
+  String get changeNumberInfoLot1 =>
+      'Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.';
+
+  @override
+  String statusExcludedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts exclus',
+      one: '1 contact exclu',
+      zero: 'Aucun contact exclu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusAllowedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts',
+      one: '1 contact',
+      zero: 'Personne pour le moment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusRule24h => 'Un statut disparaît après 24 h';
+
+  @override
+  String get statusRuleViewers => 'Toi seul vois qui a vu tes statuts';
+
+  @override
+  String get statusRuleViewersSub => 'Personne d\'autre ne voit ce nombre';
+
+  @override
+  String get statusRuleReply => 'Une réponse arrive en privé';
+
+  @override
+  String get statusRuleReplySub => 'Dans votre discussion à deux';
+
+  @override
+  String get statusRuleReport => 'Tout statut peut être signalé';
+
+  @override
+  String get statusProofNote =>
+      'Les statuts ne sont pas des messages d\'une discussion : le mode preuve ne les concerne pas.';
 }

@@ -41,26 +41,28 @@ class AboutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const SizedBox(height: 8),
+          // Le vrai logo : les deux bulles nouées. Fond blanc dans le
+          // fichier, fondu dans celui de l'écran par la multiplication.
           Center(
-            child: Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.accentPrimary,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'P',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 36,
-                  fontWeight: FontWeight.w700,
-                ),
+            child: Image.asset(
+              'assets/brand/pokou_logo.png',
+              width: 96,
+              color: AppColors.background,
+              colorBlendMode: BlendMode.multiply,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: Text(
+              'Pokou',
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: AppColors.accentPrimaryDark,
               ),
             ),
           ),
-          const SizedBox(height: 8),
           Center(
             child: Text(
               l.aboutVersion(_version),
@@ -75,7 +77,7 @@ class AboutScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l.aboutNamesTitle,
+                    lot1 ? l.aboutNameTitle : l.aboutNamesTitle,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 10),
@@ -103,14 +105,19 @@ class AboutScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  const SizedBox(height: 6),
-                  Text(
-                    l.aboutNextNames,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
+                  // Au lot 1 seulement : les autres noms ne sont pas encore
+                  // montrés, la phrase les annonce. Quand ils le sont, elle
+                  // n'a plus rien à dire.
+                  if (lot1) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      l.aboutNextNames,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -125,7 +132,7 @@ class AboutScreen extends StatelessWidget {
                   onTap: () => open(const LegalScreen(name: 'conditions')),
                 ),
                 ListTile(
-                  title: Text(l.legalPrivacy),
+                  title: Text(l.legalPrivacyPolicy),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => open(const LegalScreen(name: 'confidentialite')),
                 ),

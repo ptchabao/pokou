@@ -6222,13 +6222,13 @@ abstract class L {
   /// No description provided for @audienceOnly.
   ///
   /// In fr, this message translates to:
-  /// **'Uniquement…'**
+  /// **'Seulement avec…'**
   String get audienceOnly;
 
   /// No description provided for @audienceContactsDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes les personnes de ton carnet Pokou'**
+  /// **'Tous les contacts enregistrés sur ton téléphone'**
   String get audienceContactsDesc;
 
   /// No description provided for @audienceNobodyDesc.
@@ -6348,7 +6348,7 @@ abstract class L {
   /// No description provided for @statusFeedTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Actualités'**
+  /// **'Statuts'**
   String get statusFeedTitle;
 
   /// No description provided for @statusFeedUnavailable.
@@ -8010,7 +8010,7 @@ abstract class L {
   /// No description provided for @statusMineTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Mon Actu'**
+  /// **'Mon statut'**
   String get statusMineTitle;
 
   /// No description provided for @statusMineBody.
@@ -12498,7 +12498,7 @@ abstract class L {
   /// No description provided for @discussionsStatusesNews.
   ///
   /// In fr, this message translates to:
-  /// **'STATUTS & NOUVELLES'**
+  /// **'STATUTS'**
   String get discussionsStatusesNews;
 
   /// No description provided for @statusMyStatus.
@@ -15529,6 +15529,612 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Bon retour, {name} ! J\'ai retrouvé ton compte et ta sauvegarde. Tes groupes, tes discussions et ton badge te suivent.'**
   String welcomeBackBabaLot1(String name);
+
+  /// No description provided for @notifDirect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussions à deux'**
+  String get notifDirect;
+
+  /// No description provided for @notifPreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu du message'**
+  String get notifPreview;
+
+  /// No description provided for @notifPreviewSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le texte n\'apparaît pas sur l\'écran verrouillé'**
+  String get notifPreviewSub;
+
+  /// No description provided for @notifReactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réactions'**
+  String get notifReactions;
+
+  /// No description provided for @notifRingtone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sonnerie'**
+  String get notifRingtone;
+
+  /// No description provided for @notifVibrate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vibreur'**
+  String get notifVibrate;
+
+  /// No description provided for @notifModules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modules'**
+  String get notifModules;
+
+  /// No description provided for @notifModuleKorySub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Engagements, rappels de versement, clôtures'**
+  String get notifModuleKorySub;
+
+  /// No description provided for @notifModuleHonamSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis, livraison, code de remise'**
+  String get notifModuleHonamSub;
+
+  /// No description provided for @notifModuleAssimeSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alertes de recherche, au plus une par jour'**
+  String get notifModuleAssimeSub;
+
+  /// No description provided for @notifRingtoneNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'La sonnerie de Pokou est la seule proposée pour l\'instant.'**
+  String get notifRingtoneNote;
+
+  /// No description provided for @accountSecurityTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte et sécurité'**
+  String get accountSecurityTitle;
+
+  /// No description provided for @accountSecurityWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne te demandera jamais ton code PIN ni le code reçu par SMS, ni par message ni par appel.'**
+  String get accountSecurityWarning;
+
+  /// No description provided for @accountPinTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN'**
+  String get accountPinTitle;
+
+  /// No description provided for @accountPinRowSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandé sur un nouveau téléphone'**
+  String get accountPinRowSub;
+
+  /// No description provided for @accountPinOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activé'**
+  String get accountPinOn;
+
+  /// No description provided for @accountPinOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivé'**
+  String get accountPinOff;
+
+  /// No description provided for @accountPinUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible'**
+  String get accountPinUnknown;
+
+  /// No description provided for @accountPinIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis un code à 6 chiffres. Il est demandé quand ton numéro se connecte sur un nouveau téléphone.'**
+  String get accountPinIntro;
+
+  /// No description provided for @accountPinCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code actuel'**
+  String get accountPinCurrent;
+
+  /// No description provided for @accountPinChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis ton code'**
+  String get accountPinChoose;
+
+  /// No description provided for @accountPinConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirme ton code'**
+  String get accountPinConfirm;
+
+  /// No description provided for @accountPinMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux codes ne correspondent pas. Choisis-le à nouveau.'**
+  String get accountPinMismatch;
+
+  /// No description provided for @accountPinReminder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Me le redemander de temps en temps'**
+  String get accountPinReminder;
+
+  /// No description provided for @accountPinReminderSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour ne pas l\'oublier'**
+  String get accountPinReminderSub;
+
+  /// No description provided for @accountPinNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code PIN protège ton compte si quelqu\'un récupère ta carte SIM. Ne le note pas dans ton téléphone.'**
+  String get accountPinNote;
+
+  /// No description provided for @accountPinEnable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer le code PIN'**
+  String get accountPinEnable;
+
+  /// No description provided for @accountPinSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le code PIN'**
+  String get accountPinSave;
+
+  /// No description provided for @accountPinEnabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN activé.'**
+  String get accountPinEnabled;
+
+  /// No description provided for @accountPinChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN modifié.'**
+  String get accountPinChanged;
+
+  /// No description provided for @accountPinChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le code PIN'**
+  String get accountPinChange;
+
+  /// No description provided for @accountPinDisable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver le code PIN'**
+  String get accountPinDisable;
+
+  /// No description provided for @accountPinDisableConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver'**
+  String get accountPinDisableConfirm;
+
+  /// No description provided for @accountPinDisabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN désactivé.'**
+  String get accountPinDisabled;
+
+  /// No description provided for @accountPinReminderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code PIN'**
+  String get accountPinReminderTitle;
+
+  /// No description provided for @accountPinReminderBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisis ton code PIN pour vérifier que tu t\'en souviens.'**
+  String get accountPinReminderBody;
+
+  /// No description provided for @accountPinReminderLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get accountPinReminderLater;
+
+  /// No description provided for @accountPinReminderOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est bien ton code.'**
+  String get accountPinReminderOk;
+
+  /// No description provided for @accountExport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger mes données'**
+  String get accountExport;
+
+  /// No description provided for @accountExportSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil, contacts et réglages, en fichier'**
+  String get accountExportSub;
+
+  /// No description provided for @accountExportFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Export impossible — vérifie ta connexion.'**
+  String get accountExportFailed;
+
+  /// No description provided for @privacyWhoCanSee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui peut voir'**
+  String get privacyWhoCanSee;
+
+  /// No description provided for @privacySeenAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vu à'**
+  String get privacySeenAt;
+
+  /// No description provided for @privacyStatuses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statuts'**
+  String get privacyStatuses;
+
+  /// No description provided for @privacyReadReceiptsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accusés de lecture'**
+  String get privacyReadReceiptsTitle;
+
+  /// No description provided for @privacyReadReceiptsSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivés, tu ne vois plus ceux des autres'**
+  String get privacyReadReceiptsSub;
+
+  /// No description provided for @privacyGroupsAndStrangers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes et inconnus'**
+  String get privacyGroupsAndStrangers;
+
+  /// No description provided for @privacyGroupAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui peut m\'ajouter aux groupes'**
+  String get privacyGroupAdd;
+
+  /// No description provided for @privacyGroupAddSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les autres t\'envoient une invitation'**
+  String get privacyGroupAddSub;
+
+  /// No description provided for @privacySilenceUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couper les appels d\'inconnus'**
+  String get privacySilenceUnknown;
+
+  /// No description provided for @privacySilenceUnknownSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ils restent dans la liste des appels'**
+  String get privacySilenceUnknownSub;
+
+  /// No description provided for @privacyBlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloqués'**
+  String get privacyBlocked;
+
+  /// No description provided for @privacyBlockedEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne n\'est bloqué.'**
+  String get privacyBlockedEmpty;
+
+  /// No description provided for @privacyBlockedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une personne bloquée ne peut plus t\'écrire ni t\'appeler. Elle n\'en est pas prévenue.'**
+  String get privacyBlockedNote;
+
+  /// No description provided for @privacyUnblock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquer'**
+  String get privacyUnblock;
+
+  /// No description provided for @storagePhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone · {size}'**
+  String storagePhone(Object size);
+
+  /// No description provided for @storagePokouOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou · {size}'**
+  String storagePokouOnly(Object size);
+
+  /// No description provided for @storageFreeSpace.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} libres'**
+  String storageFreeSpace(Object size);
+
+  /// No description provided for @storageOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres'**
+  String get storageOthers;
+
+  /// No description provided for @storageFreeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libre'**
+  String get storageFreeLabel;
+
+  /// No description provided for @storageFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libérer {size}'**
+  String storageFree(Object size);
+
+  /// No description provided for @storageFreed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} libérés.'**
+  String storageFreed(Object size);
+
+  /// No description provided for @storageFreeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les photos, vidéos et documents de cette discussion sont retirés du téléphone. Ils se retéléchargeront si tu les rouvres ; les messages restent.'**
+  String get storageFreeBody;
+
+  /// No description provided for @languageNoteLot1.
+  ///
+  /// In fr, this message translates to:
+  /// **'La langue de l\'application ne change pas celle de tes messages. Le nom Pokou reste le même dans toutes les langues.'**
+  String get languageNoteLot1;
+
+  /// No description provided for @helpQCertified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment payer Pokou certifié ?'**
+  String get helpQCertified;
+
+  /// No description provided for @helpACertified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans Réglages, touche « Pokou certifié » et choisis ta formule. Le paiement se fait par Mobile Money, depuis ton wallet : ton identité est vérifiée par le nom de son titulaire. Le badge se résilie à tout moment.'**
+  String get helpACertified;
+
+  /// No description provided for @helpQBlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment bloquer un inconnu ?'**
+  String get helpQBlock;
+
+  /// No description provided for @helpABlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvre la discussion, touche son nom en haut, puis « Bloquer ». Il ne peut plus t\'écrire ni t\'appeler, et n\'en est pas prévenu. Dans Réglages › Confidentialité, tu peux aussi couper les appels d\'inconnus.'**
+  String get helpABlock;
+
+  /// No description provided for @aboutNameTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le sens de notre nom'**
+  String get aboutNameTitle;
+
+  /// No description provided for @legalPrivacyPolicy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get legalPrivacyPolicy;
+
+  /// No description provided for @legalUpdatedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise à jour : {date}'**
+  String legalUpdatedOn(Object date);
+
+  /// No description provided for @legalDownloadPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger en PDF'**
+  String get legalDownloadPdf;
+
+  /// No description provided for @legalPdfFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'PDF impossible à produire pour l\'instant.'**
+  String get legalPdfFailed;
+
+  /// No description provided for @termsLot1Messaging.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou est une messagerie : chacun reste responsable de ce qu\'il envoie.'**
+  String get termsLot1Messaging;
+
+  /// No description provided for @privacyLot1Numbers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun numéro de téléphone n\'est affiché dans les discussions de groupe.'**
+  String get privacyLot1Numbers;
+
+  /// No description provided for @privacyLot1Codes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande de code secret est repérée sur ton téléphone, sans que Pokou lise le message.'**
+  String get privacyLot1Codes;
+
+  /// No description provided for @actionEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get actionEdit;
+
+  /// No description provided for @statusVisibleBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible par : {audience}'**
+  String statusVisibleBy(Object audience);
+
+  /// No description provided for @statusFeedSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visibles 24 h, puis ils disparaissent'**
+  String get statusFeedSubtitle;
+
+  /// No description provided for @statusRecent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récents'**
+  String get statusRecent;
+
+  /// No description provided for @statusSeen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vus'**
+  String get statusSeen;
+
+  /// No description provided for @statusNoneYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun statut pour l\'instant.'**
+  String get statusNoneYet;
+
+  /// No description provided for @statusJustNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'À l\'instant'**
+  String get statusJustNow;
+
+  /// No description provided for @statusMinutesAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Il y a 1 minute} other{Il y a {count} minutes}}'**
+  String statusMinutesAgo(num count);
+
+  /// No description provided for @statusHoursAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Il y a 1 heure} other{Il y a {count} heures}}'**
+  String statusHoursAgo(num count);
+
+  /// No description provided for @statusYesterdayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier, {time}'**
+  String statusYesterdayAt(Object time);
+
+  /// No description provided for @statusLikeAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aimer'**
+  String get statusLikeAction;
+
+  /// No description provided for @statusReportBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler le statut de {name} à l\'équipe Pokou ?'**
+  String statusReportBody(Object name);
+
+  /// No description provided for @statusReportSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut signalé.'**
+  String get statusReportSent;
+
+  /// No description provided for @statusForwardMediaUnsupported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le transfert d\'une photo ou vidéo n\'est pas encore possible.'**
+  String get statusForwardMediaUnsupported;
+
+  /// No description provided for @changeNumberHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro'**
+  String get changeNumberHint;
+
+  /// No description provided for @changeNumberInfoLot1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton compte, tes discussions et ton badge Pokou certifié te suivent. Un code est envoyé au nouveau numéro.'**
+  String get changeNumberInfoLot1;
+
+  /// No description provided for @statusExcludedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun contact exclu} =1{1 contact exclu} other{{count} contacts exclus}}'**
+  String statusExcludedCount(num count);
+
+  /// No description provided for @statusAllowedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Personne pour le moment} =1{1 contact} other{{count} contacts}}'**
+  String statusAllowedCount(num count);
+
+  /// No description provided for @statusRule24h.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un statut disparaît après 24 h'**
+  String get statusRule24h;
+
+  /// No description provided for @statusRuleViewers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toi seul vois qui a vu tes statuts'**
+  String get statusRuleViewers;
+
+  /// No description provided for @statusRuleViewersSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne d\'autre ne voit ce nombre'**
+  String get statusRuleViewersSub;
+
+  /// No description provided for @statusRuleReply.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une réponse arrive en privé'**
+  String get statusRuleReply;
+
+  /// No description provided for @statusRuleReplySub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans votre discussion à deux'**
+  String get statusRuleReplySub;
+
+  /// No description provided for @statusRuleReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout statut peut être signalé'**
+  String get statusRuleReport;
+
+  /// No description provided for @statusProofNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les statuts ne sont pas des messages d\'une discussion : le mode preuve ne les concerne pas.'**
+  String get statusProofNote;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

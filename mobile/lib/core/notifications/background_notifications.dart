@@ -80,6 +80,7 @@ Future<void> handleRichPushInBackground(Map<String, dynamic> data) async {
     presentation: presentation,
     withSound: settings.notificationSound,
     fallbackFirst: true,
+    showPreview: settings.messagePreview,
   );
 }
 
