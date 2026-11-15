@@ -108,7 +108,29 @@ class CallEventRow extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  if (onCallBack != null) ...[
+                  // Discussions · 19 — un appel manqué porte un vrai bouton
+                  // « Rappeler » ; les autres gardent le simple pictogramme.
+                  if (onCallBack != null && _manqueParMoi) ...[
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentPrimary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l.callsCallBack,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accentPrimaryDark,
+                        ),
+                      ),
+                    ),
+                  ] else if (onCallBack != null) ...[
                     const SizedBox(width: 8),
                     Icon(
                       Icons.refresh,

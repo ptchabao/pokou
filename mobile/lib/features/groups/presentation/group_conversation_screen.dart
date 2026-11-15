@@ -55,6 +55,7 @@ import '../../messaging/presentation/composer/composer_panel.dart';
 import '../../messaging/presentation/message_appear.dart';
 import '../../messaging/presentation/attach_sheet.dart';
 import '../../messaging/presentation/forward_screen.dart';
+import '../../messaging/presentation/offline_banner.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../stickers/data/sticker_models.dart';
 import '../../stickers/presentation/sticker_image.dart';
@@ -994,6 +995,7 @@ class _GroupConversationScreenState
             otherParticipantIds: token.participantIds,
             startWithVideo: withVideo,
             groupId: widget.groupId,
+            title: widget.groupName,
             joiningExistingCall: token.joinedExisting,
             groupMembers: [
               for (final member in group?.members ?? const <GroupMember>[])
@@ -1751,17 +1753,14 @@ class _GroupConversationScreenState
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
+                                    // Discussions · 1 — « 9 membres », et
+                                    // non la liste des prénoms : elle ne
+                                    // tient pas sur une ligne passé 4.
                                     if (group != null)
                                       Text(
-                                        group.members
-                                            .map(
-                                              (member) =>
-                                                  member.userId ==
-                                                      widget.myUserId
-                                                  ? _l.navYou
-                                                  : member.displayName,
-                                            )
-                                            .join(', '),
+                                        _l.groupInvitationMembers(
+                                          group.members.length,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -1776,14 +1775,7 @@ class _GroupConversationScreenState
                           ),
                         ),
                       ),
-                      _ChatIconButton(
-                        icon: Icons.call_outlined,
-                        onPressed: _startingCall
-                            ? null
-                            : () => _startOrJoinCall(withVideo: false),
-
-                        tooltip: L.of(context).a11yVoiceCall,
-                      ),
+                      // Vidéo puis audio, dans l'ordre de la maquette.
                       _ChatIconButton(
                         icon: Icons.videocam_outlined,
                         onPressed: _startingCall
@@ -1791,6 +1783,14 @@ class _GroupConversationScreenState
                             : () => _startOrJoinCall(withVideo: true),
 
                         tooltip: L.of(context).a11yVideoCall,
+                      ),
+                      _ChatIconButton(
+                        icon: Icons.call_outlined,
+                        onPressed: _startingCall
+                            ? null
+                            : () => _startOrJoinCall(withVideo: false),
+
+                        tooltip: L.of(context).a11yVoiceCall,
                       ),
                       _ChatIconButton(
                         icon: Icons.more_vert,
@@ -1802,6 +1802,7 @@ class _GroupConversationScreenState
                   ),
                 ),
               ),
+              const OfflineBanner(),
               if (group?.proofMode ?? false) const ProofModeBanner(),
               _ActiveCallBanner(
                 groupId: widget.groupId,
@@ -2130,7 +2131,7 @@ class _GroupConversationScreenState
               onContentInserted: (content) =>
                   unawaited(_sendInsertedContent(content)),
               focusNode: _inputFocus,
-              hintText: _l.conversationMessageHint,
+              hintText: _l.composerWriteHint,
               emojiOpen: _emojiOpen,
               enabled: !busy,
               onFieldTap: () {

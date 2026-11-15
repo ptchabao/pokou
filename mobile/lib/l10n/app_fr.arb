@@ -1552,7 +1552,7 @@
   "orderMarkDelivered": "Marquer comme livré",
   "orderBuyerWaiting": "Cet acheteur attend ta réponse.",
   "orderNextStep": "Étape suivante de la commande.",
-  "msgNotSentRetry": "Non envoyé — toucher pour réessayer",
+  "msgNotSentRetry": "Non envoyé · Réessayer",
   "msgPendingSend": "En attente d'envoi",
   "convSearchHint": "Rechercher dans {name}…",
   "@convSearchHint": {
@@ -4900,6 +4900,90 @@
   "archivedScreenUnarchive": "Désarchiver",
   "archivedScreenAddFavorite": "Ajouter aux favoris",
   "archivedScreenEmpty": "Aucune discussion archivée.",
+  "callGroupTitle": "Appel de groupe",
+  "callParticipants": "{count, plural, =1{1 participant} other{{count} participants}}",
+  "@callParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callSpeaking": "{name} parle",
+  "@callSpeaking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callPoorNetwork": "Réseau faible. L'appel continue.",
+  "callPoorNetworkVideoPaused": "Réseau faible. La vidéo de {name} est en pause, l'appel continue en audio.",
+  "@callPoorNetworkVideoPaused": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "callMinimize": "Réduire",
+  "callFlipShort": "Retourner",
+  "callVideoShort": "Vidéo",
+  "callQuit": "Quitter",
+  "callHangUpShort": "Raccrocher",
+  "callIncomingAudioTitle": "Appel audio entrant",
+  "callIncomingVideoTitle": "Appel vidéo entrant",
+  "callIncomingPokouAudio": "Pokou · appel audio",
+  "callIncomingPokouVideo": "Pokou · appel vidéo",
+  "callReplyWithMessage": "Répondre par message",
+  "callReplyCallBack": "Je te rappelle",
+  "callReplyCantTalk": "Je ne peux pas parler",
+  "callReplyWriteMe": "Écris-moi",
+  "callReplyFailed": "Message non envoyé — l'appel a été refusé.",
+  "callDecline": "Refuser",
+  "callAccept": "Accepter",
+  "callsSearchHint": "Rechercher un nom",
+  "callsIncoming": "Entrant",
+  "callsOutgoing": "Sortant",
+  "callsGroupAudio": "Audio de groupe",
+  "callsGroupVideo": "Vidéo de groupe",
+  "callsPeople": "{count, plural, =1{1 personne} other{{count} personnes}}",
+  "@callsPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callsDurationSeconds": "{seconds} s",
+  "@callsDurationSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "callsDurationMinutes": "{minutes} min",
+  "@callsDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "callsDurationMinSec": "{minutes} min {seconds}",
+  "@callsDurationMinSec": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineMessagesWillSend": "Pas de connexion. Tes messages partiront dès le retour du réseau.",
+  "composerWriteHint": "Écrire un message…",
   "newChatNotOnPokou": "Pas encore sur Pokou",
   "reportGroupNamed": "Signaler {name}",
   "@reportGroupNamed": {

@@ -54,6 +54,7 @@ import 'contact_card_bubble.dart';
 import 'forward_screen.dart';
 import 'poll_composer.dart';
 import 'report_sheet.dart';
+import 'offline_banner.dart';
 import 'unknown_sender_card.dart';
 import '../../presence/presentation/typing_controller.dart';
 import 'conversation_search_screen.dart';
@@ -1642,6 +1643,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       // Au-dessus du fil, et non dans un menu : une
                       // alerte de sécurité qu'il faut aller chercher n'est
                       // pas une alerte.
+                      const OfflineBanner(),
                       if (isContactBot)
                         const BotConversationNotice()
                       else
@@ -2306,12 +2308,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               onContentInserted: (content) =>
                   unawaited(_sendInsertedContent(content)),
               focusNode: _inputFocus,
-              // « Message chiffré… » seulement si la conversation l'est
-              // vraiment : l'écrire sur une conversation en clair serait un
-              // mensonge.
-              hintText: _encryption == ConversationEncryption.encrypted
-                  ? _l.convEncryptedHint
-                  : _l.conversationMessageHint,
+              // « Écrire un message… », comme la maquette. L'état du
+              // chiffrement reste écrit sous le nom, dans l'en-tête.
+              hintText: _l.composerWriteHint,
               emojiOpen: _emojiOpen,
               enabled: !busy,
               highlighted: _slashMode,

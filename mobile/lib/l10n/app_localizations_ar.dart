@@ -9304,6 +9304,129 @@ class LAr extends L {
   String get archivedScreenEmpty => 'Aucune discussion archivée.';
 
   @override
+  String get callGroupTitle => 'Appel de groupe';
+
+  @override
+  String callParticipants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callSpeaking(String name) {
+    return '$name parle';
+  }
+
+  @override
+  String get callPoorNetwork => 'Réseau faible. L\'appel continue.';
+
+  @override
+  String callPoorNetworkVideoPaused(String name) {
+    return 'Réseau faible. La vidéo de $name est en pause, l\'appel continue en audio.';
+  }
+
+  @override
+  String get callMinimize => 'Réduire';
+
+  @override
+  String get callFlipShort => 'Retourner';
+
+  @override
+  String get callVideoShort => 'Vidéo';
+
+  @override
+  String get callQuit => 'Quitter';
+
+  @override
+  String get callHangUpShort => 'Raccrocher';
+
+  @override
+  String get callIncomingAudioTitle => 'Appel audio entrant';
+
+  @override
+  String get callIncomingVideoTitle => 'Appel vidéo entrant';
+
+  @override
+  String get callIncomingPokouAudio => 'Pokou · appel audio';
+
+  @override
+  String get callIncomingPokouVideo => 'Pokou · appel vidéo';
+
+  @override
+  String get callReplyWithMessage => 'Répondre par message';
+
+  @override
+  String get callReplyCallBack => 'Je te rappelle';
+
+  @override
+  String get callReplyCantTalk => 'Je ne peux pas parler';
+
+  @override
+  String get callReplyWriteMe => 'Écris-moi';
+
+  @override
+  String get callReplyFailed => 'Message non envoyé — l\'appel a été refusé.';
+
+  @override
+  String get callDecline => 'Refuser';
+
+  @override
+  String get callAccept => 'Accepter';
+
+  @override
+  String get callsSearchHint => 'Rechercher un nom';
+
+  @override
+  String get callsIncoming => 'Entrant';
+
+  @override
+  String get callsOutgoing => 'Sortant';
+
+  @override
+  String get callsGroupAudio => 'Audio de groupe';
+
+  @override
+  String get callsGroupVideo => 'Vidéo de groupe';
+
+  @override
+  String callsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes',
+      one: '1 personne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callsDurationSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String callsDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String callsDurationMinSec(int minutes, String seconds) {
+    return '$minutes min $seconds';
+  }
+
+  @override
+  String get offlineMessagesWillSend =>
+      'Pas de connexion. Tes messages partiront dès le retour du réseau.';
+
+  @override
+  String get composerWriteHint => 'Écrire un message…';
+
+  @override
   String get newChatNotOnPokou => 'Pas encore sur Pokou';
 
   @override

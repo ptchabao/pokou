@@ -5946,7 +5946,7 @@ abstract class L {
   /// No description provided for @msgNotSentRetry.
   ///
   /// In fr, this message translates to:
-  /// **'Non envoyé — toucher pour réessayer'**
+  /// **'Non envoyé · Réessayer'**
   String get msgNotSentRetry;
 
   /// No description provided for @msgPendingSend.
@@ -15637,6 +15637,198 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Aucune discussion archivée.'**
   String get archivedScreenEmpty;
+
+  /// No description provided for @callGroupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel de groupe'**
+  String get callGroupTitle;
+
+  /// No description provided for @callParticipants.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String callParticipants(int count);
+
+  /// No description provided for @callSpeaking.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} parle'**
+  String callSpeaking(String name);
+
+  /// No description provided for @callPoorNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau faible. L\'appel continue.'**
+  String get callPoorNetwork;
+
+  /// No description provided for @callPoorNetworkVideoPaused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau faible. La vidéo de {name} est en pause, l\'appel continue en audio.'**
+  String callPoorNetworkVideoPaused(String name);
+
+  /// No description provided for @callMinimize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduire'**
+  String get callMinimize;
+
+  /// No description provided for @callFlipShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retourner'**
+  String get callFlipShort;
+
+  /// No description provided for @callVideoShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo'**
+  String get callVideoShort;
+
+  /// No description provided for @callQuit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quitter'**
+  String get callQuit;
+
+  /// No description provided for @callHangUpShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Raccrocher'**
+  String get callHangUpShort;
+
+  /// No description provided for @callIncomingAudioTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel audio entrant'**
+  String get callIncomingAudioTitle;
+
+  /// No description provided for @callIncomingVideoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel vidéo entrant'**
+  String get callIncomingVideoTitle;
+
+  /// No description provided for @callIncomingPokouAudio.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou · appel audio'**
+  String get callIncomingPokouAudio;
+
+  /// No description provided for @callIncomingPokouVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou · appel vidéo'**
+  String get callIncomingPokouVideo;
+
+  /// No description provided for @callReplyWithMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répondre par message'**
+  String get callReplyWithMessage;
+
+  /// No description provided for @callReplyCallBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je te rappelle'**
+  String get callReplyCallBack;
+
+  /// No description provided for @callReplyCantTalk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne peux pas parler'**
+  String get callReplyCantTalk;
+
+  /// No description provided for @callReplyWriteMe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écris-moi'**
+  String get callReplyWriteMe;
+
+  /// No description provided for @callReplyFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message non envoyé — l\'appel a été refusé.'**
+  String get callReplyFailed;
+
+  /// No description provided for @callDecline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get callDecline;
+
+  /// No description provided for @callAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get callAccept;
+
+  /// No description provided for @callsSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un nom'**
+  String get callsSearchHint;
+
+  /// No description provided for @callsIncoming.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrant'**
+  String get callsIncoming;
+
+  /// No description provided for @callsOutgoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortant'**
+  String get callsOutgoing;
+
+  /// No description provided for @callsGroupAudio.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audio de groupe'**
+  String get callsGroupAudio;
+
+  /// No description provided for @callsGroupVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo de groupe'**
+  String get callsGroupVideo;
+
+  /// No description provided for @callsPeople.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 personne} other{{count} personnes}}'**
+  String callsPeople(int count);
+
+  /// No description provided for @callsDurationSeconds.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seconds} s'**
+  String callsDurationSeconds(int seconds);
+
+  /// No description provided for @callsDurationMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String callsDurationMinutes(int minutes);
+
+  /// No description provided for @callsDurationMinSec.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min {seconds}'**
+  String callsDurationMinSec(int minutes, String seconds);
+
+  /// No description provided for @offlineMessagesWillSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion. Tes messages partiront dès le retour du réseau.'**
+  String get offlineMessagesWillSend;
+
+  /// No description provided for @composerWriteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire un message…'**
+  String get composerWriteHint;
 
   /// No description provided for @newChatNotOnPokou.
   ///

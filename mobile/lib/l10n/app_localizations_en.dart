@@ -3348,7 +3348,7 @@ class LEn extends L {
   String get orderNextStep => 'Next step of the order.';
 
   @override
-  String get msgNotSentRetry => 'Not sent — tap to retry';
+  String get msgNotSentRetry => 'Not sent · Retry';
 
   @override
   String get msgPendingSend => 'Waiting to be sent';
@@ -9317,6 +9317,129 @@ class LEn extends L {
 
   @override
   String get archivedScreenEmpty => 'No archived chats.';
+
+  @override
+  String get callGroupTitle => 'Group call';
+
+  @override
+  String callParticipants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callSpeaking(String name) {
+    return '$name is speaking';
+  }
+
+  @override
+  String get callPoorNetwork => 'Weak network. The call goes on.';
+
+  @override
+  String callPoorNetworkVideoPaused(String name) {
+    return 'Weak network. $name\'s video is paused, the call continues as audio.';
+  }
+
+  @override
+  String get callMinimize => 'Minimise';
+
+  @override
+  String get callFlipShort => 'Flip';
+
+  @override
+  String get callVideoShort => 'Video';
+
+  @override
+  String get callQuit => 'Leave';
+
+  @override
+  String get callHangUpShort => 'Hang up';
+
+  @override
+  String get callIncomingAudioTitle => 'Incoming voice call';
+
+  @override
+  String get callIncomingVideoTitle => 'Incoming video call';
+
+  @override
+  String get callIncomingPokouAudio => 'Pokou · voice call';
+
+  @override
+  String get callIncomingPokouVideo => 'Pokou · video call';
+
+  @override
+  String get callReplyWithMessage => 'Reply with a message';
+
+  @override
+  String get callReplyCallBack => 'I\'ll call you back';
+
+  @override
+  String get callReplyCantTalk => 'I can\'t talk now';
+
+  @override
+  String get callReplyWriteMe => 'Text me';
+
+  @override
+  String get callReplyFailed => 'Message not sent — the call was declined.';
+
+  @override
+  String get callDecline => 'Decline';
+
+  @override
+  String get callAccept => 'Accept';
+
+  @override
+  String get callsSearchHint => 'Search a name';
+
+  @override
+  String get callsIncoming => 'Incoming';
+
+  @override
+  String get callsOutgoing => 'Outgoing';
+
+  @override
+  String get callsGroupAudio => 'Group voice';
+
+  @override
+  String get callsGroupVideo => 'Group video';
+
+  @override
+  String callsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callsDurationSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String callsDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String callsDurationMinSec(int minutes, String seconds) {
+    return '$minutes min $seconds';
+  }
+
+  @override
+  String get offlineMessagesWillSend =>
+      'No connection. Your messages will go out as soon as the network is back.';
+
+  @override
+  String get composerWriteHint => 'Write a message…';
 
   @override
   String get newChatNotOnPokou => 'Not on Pokou yet';
