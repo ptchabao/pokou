@@ -89,6 +89,15 @@ final marketplaceCategoryProvider = StateProvider<String>((ref) => 'TOUT');
 final marketplaceLocationProvider = StateProvider<String>((ref) => '');
 final marketplaceCertifiedOnlyProvider = StateProvider<bool>((ref) => false);
 
+/// La feuille « Filtres » (Assimé 2) : prix, état, date, tri.
+final marketplaceFiltersProvider = StateProvider<MarketFilters>(
+  (ref) => const MarketFilters(),
+);
+
+/// « 48 annonces » : le total renvoyé par le serveur pour la recherche en
+/// cours, `null` tant qu'il n'a pas répondu.
+final marketplaceTotalProvider = StateProvider<int?>((ref) => null);
+
 final marketplacePositionProvider = FutureProvider.autoDispose<Position?>((
   ref,
 ) async {
@@ -164,6 +173,10 @@ class ProductsPaginationNotifier
       marketplaceCertifiedOnlyProvider,
       (_, _) => _resetAndLoad(),
     );
+    ref.listen<MarketFilters>(
+      marketplaceFiltersProvider,
+      (_, _) => _resetAndLoad(),
+    );
     ref.listen<AsyncValue<Position?>>(
       marketplacePositionProvider,
       (_, _) => _resetAndLoad(),
@@ -183,7 +196,8 @@ class ProductsPaginationNotifier
       ref.read(marketplaceQueryProvider).trim().isEmpty &&
       ref.read(marketplaceCategoryProvider) == 'TOUT' &&
       ref.read(marketplaceLocationProvider).trim().isEmpty &&
-      !ref.read(marketplaceCertifiedOnlyProvider);
+      !ref.read(marketplaceCertifiedOnlyProvider) &&
+      ref.read(marketplaceFiltersProvider).isEmpty;
 
   Future<void> loadInitial() async {
     if (state.isLoading) return;
@@ -219,10 +233,12 @@ class ProductsPaginationNotifier
             latitude: position?.latitude,
             longitude: position?.longitude,
             certifiedOnly: ref.read(marketplaceCertifiedOnlyProvider),
+            filters: ref.read(marketplaceFiltersProvider),
             limit: _pageSize,
             offset: 0,
           );
       final result = PaginatedProducts.fromJson(raw);
+      ref.read(marketplaceTotalProvider.notifier).state = result.total;
       if (cacheable) {
         await store.saveConversations(_catalogueScope, raw['items'] as List);
       }
@@ -265,6 +281,7 @@ class ProductsPaginationNotifier
             latitude: position?.latitude,
             longitude: position?.longitude,
             certifiedOnly: ref.read(marketplaceCertifiedOnlyProvider),
+            filters: ref.read(marketplaceFiltersProvider),
             limit: _pageSize,
             offset: state.nextOffset ?? state.items.length,
           );

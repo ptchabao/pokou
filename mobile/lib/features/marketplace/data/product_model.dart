@@ -191,10 +191,23 @@ class MarketplaceProduct {
     this.isActive = true,
     this.isBoosted = false,
     this.soldAt,
+    this.condition,
+    this.negotiable = false,
+    this.createdAt,
   });
 
   /// ANN-18 : vendue — l'annonce a quitté le marché.
   final DateTime? soldAt;
+
+  /// Assimé 6 : NEW, VERY_GOOD, GOOD, TO_REPAIR — `null` pour une annonce
+  /// publiée avant la maquette.
+  final String? condition;
+
+  /// Assimé 6 : « Prix à débattre ».
+  final bool negotiable;
+
+  /// Date de publication (« Bè · aujourd'hui »).
+  final DateTime? createdAt;
 
   final int id;
   final int sellerId;
@@ -270,6 +283,53 @@ class MarketplaceProduct {
       isActive: json['is_active'] as bool? ?? true,
       soldAt: DateTime.tryParse(json['sold_at'] as String? ?? ''),
       isBoosted: json['is_boosted'] as bool? ?? false,
+      condition: json['condition'] as String?,
+      negotiable: json['negotiable'] as bool? ?? false,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
+    );
+  }
+}
+
+/// Les états d'un article (Assimé 2 et 6), dans l'ordre de la maquette.
+const assimeConditions = ['NEW', 'VERY_GOOD', 'GOOD', 'TO_REPAIR'];
+
+/// Les avis sur un vendeur et leur résumé (Assimé 21).
+class SellerReviews {
+  const SellerReviews({
+    required this.items,
+    required this.rating,
+    required this.reviewCount,
+    required this.histogram,
+    required this.tags,
+  });
+
+  final List<SellerReview> items;
+  final double? rating;
+  final int reviewCount;
+
+  /// Nombre d'avis par note, de 1 à 5.
+  final Map<int, int> histogram;
+
+  /// Points forts les plus cités, du plus fréquent au moins fréquent.
+  final Map<String, int> tags;
+
+  factory SellerReviews.fromJson(Map<String, dynamic> json) {
+    final rating = json['rating'];
+    return SellerReviews(
+      items: (json['items'] as List? ?? const [])
+          .cast<Map<String, dynamic>>()
+          .map(SellerReview.fromJson)
+          .toList(),
+      rating: rating == null ? null : (rating as num).toDouble(),
+      reviewCount: json['review_count'] as int? ?? 0,
+      histogram: {
+        for (final e in ((json['histogram'] as Map?) ?? const {}).entries)
+          int.parse('${e.key}'): (e.value as num).toInt(),
+      },
+      tags: {
+        for (final e in ((json['tags'] as Map?) ?? const {}).entries)
+          '${e.key}': (e.value as num).toInt(),
+      },
     );
   }
 }
@@ -320,6 +380,8 @@ class SellerReview {
     required this.comment,
     required this.createdAt,
     required this.isMine,
+    this.tags = const [],
+    this.sellerReply,
   });
 
   final int id;
@@ -329,6 +391,10 @@ class SellerReview {
   final String? comment;
   final DateTime createdAt;
   final bool isMine;
+  final List<String> tags;
+
+  /// Assimé 21 : la réponse du vendeur, s'il en a donné une.
+  final String? sellerReply;
 
   factory SellerReview.fromJson(Map<String, dynamic> json) => SellerReview(
     id: json['id'] as int,
@@ -338,5 +404,7 @@ class SellerReview {
     comment: json['comment'] as String?,
     createdAt: parseServerTime(json['created_at'] as String),
     isMine: json['is_mine'] as bool? ?? false,
+    tags: (json['tags'] as List? ?? const []).cast<String>(),
+    sellerReply: json['seller_reply'] as String?,
   );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokou/features/marketplace/presentation/assime_publish.dart';
 import 'package:pokou/features/marketplace/presentation/product_editor.dart';
 import 'package:pokou/l10n/app_localizations.dart';
 
@@ -102,13 +103,25 @@ void main() {
         'Pagne wax',
       );
       await tester.enterText(find.widgetWithText(TextField, 'Prix'), '5 000');
-      await tester.tap(find.text('Enregistrer'));
+      // Une nouvelle annonce passe par l'aperçu (Assimé 7) : rien ne part
+      // avant l'engagement sur les produits interdits.
+      await tester.tap(find.text('Voir l’aperçu'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AssimePreviewScreen), findsOneWidget);
+      await tester.tap(find.text('Publier l’annonce'));
+      await tester.pumpAndSettle();
+      expect(attempts, 0);
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+      await tester.tap(find.text('Publier l’annonce'));
       await tester.pumpAndSettle();
       expect(attempts, 1);
+      expect(find.textContaining('Rien n\'est perdu'), findsOneWidget);
+      // Le refus laisse l'aperçu ouvert ; au retour, la saisie est intacte.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pumpAndSettle();
       expect(find.byType(ProductEditor), findsOneWidget);
       expect(find.text('Pagne wax'), findsOneWidget);
-      expect(find.textContaining('Rien n\'est perdu'), findsOneWidget);
-      expect(find.text('Enregistrer'), findsOneWidget);
     },
   );
 

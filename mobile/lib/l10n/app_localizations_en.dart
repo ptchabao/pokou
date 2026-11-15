@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -9030,4 +9031,252 @@ class LEn extends L {
   @override
   String get courierRejectedBody =>
       'The Pokou team did not accept your courier application. You can contact support to learn more.';
+
+  @override
+  String get assimeFilters => 'Filters';
+
+  @override
+  String assimeFiltersCount(int count) {
+    return 'Filters · $count';
+  }
+
+  @override
+  String get assimeFiltersClear => 'Clear';
+
+  @override
+  String get assimeFilterCategory => 'Category';
+
+  @override
+  String get assimeFilterPrice => 'Price';
+
+  @override
+  String get assimeFilterMin => 'Minimum';
+
+  @override
+  String get assimeFilterMax => 'Maximum';
+
+  @override
+  String get assimeFilterCondition => 'Condition';
+
+  @override
+  String get assimeConditionNew => 'New';
+
+  @override
+  String get assimeConditionVeryGood => 'Very good condition';
+
+  @override
+  String get assimeConditionGood => 'Good condition';
+
+  @override
+  String get assimeConditionToRepair => 'Needs repair';
+
+  @override
+  String get assimeFilterPublished => 'Posted';
+
+  @override
+  String get assimeFilterPublishedAny => 'Any time';
+
+  @override
+  String assimeFilterPublishedDays(int days) {
+    return 'Less than $days days ago';
+  }
+
+  @override
+  String get assimeFilterCertified => 'Certified sellers only';
+
+  @override
+  String get assimeFilterCertifiedSub => 'Pokou certified or Pro badge';
+
+  @override
+  String get assimeFilterApply => 'See listings';
+
+  @override
+  String assimeResultsCount(int count) {
+    return '$count listings';
+  }
+
+  @override
+  String get assimeSortRecent => 'Most recent';
+
+  @override
+  String get assimeSortPriceAsc => 'Price: low to high';
+
+  @override
+  String get assimeSortPriceDesc => 'Price: high to low';
+
+  @override
+  String get assimeReportListing => 'Report this listing';
+
+  @override
+  String get assimeReportScam => 'Scam or payment asked in advance';
+
+  @override
+  String get assimeReportForbidden => 'Prohibited item';
+
+  @override
+  String get assimeReportForbiddenSub => 'Medicine, weapon, protected animal…';
+
+  @override
+  String get assimeReportCounterfeit => 'Counterfeit';
+
+  @override
+  String get assimeReportMisleading => 'Misleading or already sold';
+
+  @override
+  String get assimeReportOther => 'Other';
+
+  @override
+  String get assimeReportNote =>
+      'The seller is not told about your report. A listing reported several times is hidden until it is reviewed.';
+
+  @override
+  String get assimeReportSend => 'Send report';
+
+  @override
+  String get assimeReportSent =>
+      'Thanks, your report has been sent to the Pokou team.';
+
+  @override
+  String get assimeShareTitle => 'Share this listing';
+
+  @override
+  String get assimeShareChat => 'A chat';
+
+  @override
+  String get assimeShareCopy => 'Copy link';
+
+  @override
+  String get assimeShareOther => 'Other apps';
+
+  @override
+  String get assimeShareCopied => 'Copied';
+
+  @override
+  String assimeShareSent(String name) {
+    return 'Listing sent to $name';
+  }
+
+  @override
+  String get assimeShareNote =>
+      'Outside Pokou, the link only opens a limited preview: photo, title, price and area. To write to the seller, you need Pokou.';
+
+  @override
+  String assimeShareText(String name, String price, String link) {
+    return '$name · $price on Assimé, Pokou\'s classifieds: $link';
+  }
+
+  @override
+  String get assimeShareNoContact => 'No contacts on Pokou yet.';
+
+  @override
+  String get assimePreviewTitle => 'Preview';
+
+  @override
+  String assimePublishStep(int step) {
+    return 'Post a listing · step $step of 3';
+  }
+
+  @override
+  String get assimePreviewWhat => 'What buyers will see.';
+
+  @override
+  String get assimePreviewExpiry =>
+      'Online for 30 days, then the listing expires; you can renew it.';
+
+  @override
+  String get assimePreviewPledge =>
+      'My listing contains no medicine, weapon, counterfeit or protected animal.';
+
+  @override
+  String get assimePreviewBoost => 'Promote';
+
+  @override
+  String get assimePreviewBoostSub =>
+      'From 600 FCFA for 3 days, at the top of results. You choose after posting.';
+
+  @override
+  String get assimePublishListing => 'Post the listing';
+
+  @override
+  String get assimeSeePreview => 'See preview';
+
+  @override
+  String get assimeNegotiable => 'Price negotiable';
+
+  @override
+  String get assimeNegotiableSub => 'The price shows “negotiable”';
+
+  @override
+  String get assimeNegotiableTag => 'negotiable';
+
+  @override
+  String get assimeForbiddenTitle => 'Medicines are not sold on Assimé';
+
+  @override
+  String get assimeForbiddenBody =>
+      'For a medicine, use Honam: a pharmacy sends you a quote and a courier delivers it.';
+
+  @override
+  String get assimeGoHonam => 'Go to Honam';
+
+  @override
+  String get assimeAlsoForbidden => 'Also prohibited on Assimé';
+
+  @override
+  String get assimeForbiddenWeapons => 'Weapons and ammunition';
+
+  @override
+  String get assimeForbiddenCounterfeit => 'Counterfeits';
+
+  @override
+  String get assimeForbiddenAnimals => 'Protected animals';
+
+  @override
+  String get assimeChangeItem => 'Change item';
+
+  @override
+  String assimeReviewsTitle(String name) {
+    return 'Reviews of $name';
+  }
+
+  @override
+  String assimeReviewsCount(int count) {
+    return '$count rated sales';
+  }
+
+  @override
+  String assimeReviewReplyFrom(String name) {
+    return 'Reply from $name: ';
+  }
+
+  @override
+  String get assimeReportReview => 'Report a review';
+
+  @override
+  String get assimeReviewReported => 'Review reported to the Pokou team.';
+
+  @override
+  String get assimeSeeReviews => 'See reviews';
+
+  @override
+  String get assimeNoReviews =>
+      'No reviews yet. Only the buyer of a sale confirmed by the seller can rate.';
+
+  @override
+  String get assimeReplyAction => 'Reply';
+
+  @override
+  String get assimeReplyHint => 'Your reply, visible to everyone';
+
+  @override
+  String get assimeContactSeller => 'Contact the seller';
+
+  @override
+  String get assimeNoPaymentNotice =>
+      'Pokou takes no payment on Assimé. See the item before paying, in a public place.';
+
+  @override
+  String assimeSellerListings(int count) {
+    return '$count listings';
+  }
 }

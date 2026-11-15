@@ -9,11 +9,15 @@ class PaginatedProducts {
     required this.items,
     required this.hasMore,
     this.nextOffset,
+    this.total,
   });
 
   final List<MarketplaceProduct> items;
   final bool hasMore;
   final int? nextOffset;
+
+  /// Assimé 1 : « 48 annonces » — `null` sur un serveur plus ancien.
+  final int? total;
 
   factory PaginatedProducts.fromJson(Map<String, dynamic> json) =>
       PaginatedProducts(
@@ -23,7 +27,53 @@ class PaginatedProducts {
             .toList(),
         hasMore: json['has_more'] as bool? ?? false,
         nextOffset: json['next_offset'] as int?,
+        total: json['total'] as int?,
       );
+}
+
+/// Les critères de la feuille « Filtres » (Assimé 2). La catégorie et
+/// « Vendeurs certifiés » gardent leurs propres providers, partagés avec
+/// la barre de puces.
+class MarketFilters {
+  const MarketFilters({
+    this.minPrice,
+    this.maxPrice,
+    this.conditions = const {},
+    this.publishedDays,
+    this.sort = 'recent',
+  });
+
+  final int? minPrice;
+  final int? maxPrice;
+  final Set<String> conditions;
+  final int? publishedDays;
+
+  /// recent | price_asc | price_desc
+  final String sort;
+
+  /// Le nombre de critères posés, pour la puce « Filtres · 2 ».
+  int get count =>
+      (minPrice != null || maxPrice != null ? 1 : 0) +
+      (conditions.isEmpty ? 0 : 1) +
+      (publishedDays != null ? 1 : 0);
+
+  bool get isEmpty => count == 0 && sort == 'recent';
+
+  MarketFilters copyWith({String? sort}) => MarketFilters(
+    minPrice: minPrice,
+    maxPrice: maxPrice,
+    conditions: conditions,
+    publishedDays: publishedDays,
+    sort: sort ?? this.sort,
+  );
+
+  List<String> get queryParams => [
+    if (minPrice != null) 'min_price=$minPrice',
+    if (maxPrice != null) 'max_price=$maxPrice',
+    if (conditions.isNotEmpty) 'condition=${conditions.join(',')}',
+    if (publishedDays != null) 'published_days=$publishedDays',
+    if (sort != 'recent') 'sort=$sort',
+  ];
 }
 
 class MarketplaceRepository {
@@ -40,6 +90,7 @@ class MarketplaceRepository {
     double? latitude,
     double? longitude,
     bool certifiedOnly = false,
+    MarketFilters filters = const MarketFilters(),
     int limit = 20,
     int offset = 0,
   }) async => PaginatedProducts.fromJson(
@@ -51,6 +102,7 @@ class MarketplaceRepository {
       latitude: latitude,
       longitude: longitude,
       certifiedOnly: certifiedOnly,
+      filters: filters,
       limit: limit,
       offset: offset,
     ),
@@ -66,10 +118,12 @@ class MarketplaceRepository {
     double? latitude,
     double? longitude,
     bool certifiedOnly = false,
+    MarketFilters filters = const MarketFilters(),
     int limit = 20,
     int offset = 0,
   }) async {
     final params = <String>[
+      ...filters.queryParams,
       if (sellerId != null) 'seller_id=$sellerId',
       if (query != null && query.trim().isNotEmpty)
         'q=${Uri.encodeQueryComponent(query.trim())}',
@@ -127,10 +181,14 @@ class MarketplaceRepository {
     required String currency,
     int? imageMediaId,
     List<int>? galleryMediaIds,
+    String? condition,
+    bool negotiable = false,
   }) async {
     final response = await _api.post(
       '/marketplace',
       body: {
+        'condition': ?condition,
+        'negotiable': negotiable,
         'name': name,
         'description': description,
         'category': category,
@@ -167,10 +225,14 @@ class MarketplaceRepository {
     required String currency,
     int? imageMediaId,
     List<int>? galleryMediaIds,
+    String? condition,
+    bool negotiable = false,
   }) async {
     final response = await _api.patch(
       '/marketplace/$id',
       body: {
+        'condition': ?condition,
+        'negotiable': negotiable,
         'name': name,
         'description': description,
         'category': category,
@@ -281,6 +343,26 @@ class MarketplaceRepository {
         .map(SellerReview.fromJson)
         .toList();
   }
+
+  /// Les avis et leur résumé : histogramme, points forts (Assimé 21).
+  Future<SellerReviews> sellerReviewsFull(int sellerId) async =>
+      SellerReviews.fromJson(
+        await _api.get('/marketplace/sellers/$sellerId/reviews')
+            as Map<String, dynamic>,
+      );
+
+  /// Le vendeur répond à un avis sur lui.
+  Future<void> replyToReview(int reviewId, String reply) =>
+      _api.put('/marketplace/reviews/$reviewId/reply', body: {'reply': reply});
+
+  /// « Signaler un avis » (Assimé 21).
+  Future<void> reportReview(int reviewId) =>
+      _api.post('/marketplace/reviews/$reviewId/report');
+
+  /// Signaler une annonce (Assimé 11) : scam, forbidden, counterfeit,
+  /// misleading ou other.
+  Future<void> reportProduct(int productId, String reason) =>
+      _api.post('/marketplace/$productId/report', body: {'reason': reason});
 
   /// Pose OU remplace mon avis (PUT côté API : un seul avis par personne).
   Future<SellerReview> reviewSeller({

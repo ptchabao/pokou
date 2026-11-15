@@ -46,6 +46,7 @@ class _Catalogue extends Fake implements MarketplaceRepository {
     double? latitude,
     double? longitude,
     bool certifiedOnly = false,
+    MarketFilters filters = const MarketFilters(),
     int limit = 20,
     int offset = 0,
   }) async {

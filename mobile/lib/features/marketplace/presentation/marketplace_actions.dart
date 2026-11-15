@@ -101,6 +101,8 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
                 currency: result.currency,
                 imageMediaId: result.imageMediaId,
                 galleryMediaIds: result.galleryMediaIds,
+                condition: result.condition,
+                negotiable: result.negotiable,
               );
             } else {
               await repo.update(
@@ -115,6 +117,8 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
                 currency: result.currency,
                 imageMediaId: result.imageMediaId,
                 galleryMediaIds: result.galleryMediaIds,
+                condition: result.condition,
+                negotiable: result.negotiable,
               );
             }
           },

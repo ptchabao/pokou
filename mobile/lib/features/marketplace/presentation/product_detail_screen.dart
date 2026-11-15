@@ -1,4 +1,7 @@
 import 'assime_extras.dart';
+import 'assime_reviews.dart';
+import 'assime_sheets.dart';
+import '../../modules/shared/module_ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -17,7 +20,6 @@ import '../../../core/widgets/image_viewer.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../../core/widgets/pokou_icon.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Fiche détaillée d'un produit — la tuile de la liste ne menait nulle part.
 ///
@@ -44,7 +46,6 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   SellerProfile? _seller;
-  List<SellerReview>? _reviews;
   bool _contacting = false;
   bool _favorite = false;
 
@@ -129,13 +130,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     try {
       final repository = ref.read(marketplaceRepositoryProvider);
       final seller = await repository.sellerProfile(_product.sellerId);
-      final reviews = await repository.sellerReviews(_product.sellerId);
-      if (mounted) {
-        setState(() {
-          _seller = seller;
-          _reviews = reviews;
-        });
-      }
+      if (mounted) setState(() => _seller = seller);
     } catch (_) {
       // Best-effort : la fiche produit reste lisible sans la réputation du
       // vendeur, ce serait dommage de tout masquer pour ça.
@@ -211,117 +206,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
   }
 
-  Future<void> _rateSeller() async {
-    final mine = _reviews?.where((review) => review.isMine).firstOrNull;
-    var rating = mine?.rating ?? 5;
-    final commentController = TextEditingController(text: mine?.comment ?? '');
-
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (builderContext, setSheetState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(builderContext).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                mine == null
-                    ? L.of(context).productRateSeller
-                    : L.of(context).productEditReview,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                L.of(context).productReviewScope,
-                style: TextStyle(color: AppColors.textMuted, fontSize: 11),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var star = 1; star <= 5; star++)
-                    IconButton(
-                      onPressed: () => setSheetState(() => rating = star),
-                      icon: Icon(
-                        star <= rating ? Icons.star : Icons.star_border,
-                        color: AppColors.accentPrimary,
-                      ),
-
-                      tooltip: L.of(context).a11yRate,
-                    ),
-                ],
-              ),
-              TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-                controller: commentController,
-                maxLines: 3,
-                maxLength: 1000,
-                decoration: InputDecoration(
-                  hintText: L.of(context).productReviewHint,
-                ),
-              ),
-              const SizedBox(height: 8),
-              FilledButton(
-                onPressed: () => Navigator.pop(sheetContext, true),
-                child: Text(L.of(context).actionSave),
-              ),
-              if (mine != null)
-                TextButton(
-                  onPressed: () => Navigator.pop(sheetContext, false),
-                  child: Text(
-                    L.of(context).productDeleteReview,
-                    style: const TextStyle(color: AppColors.semanticError),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-    final comment = commentController.text.trim();
-    commentController.dispose();
-    if (confirmed == null) return;
-
-    try {
-      final repository = ref.read(marketplaceRepositoryProvider);
-      if (confirmed) {
-        await repository.reviewSeller(
-          sellerId: _product.sellerId,
-          rating: rating,
-          comment: comment.isEmpty ? null : comment,
-        );
-      } else {
-        await repository.deleteMyReview(_product.sellerId);
-      }
-      await _loadSeller();
-      ref.invalidate(marketplaceProductsProvider);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          // 403 côté API si on tente de se noter soi-même.
-          SnackBar(content: Text(L.of(context).productReviewFailed)),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final images = _images;
     final seller = _seller;
-    final reviews = _reviews ?? const <SellerReview>[];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -347,6 +235,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
             )
           else ...[
+            IconButton(
+              tooltip: L.of(context).assimeShareTitle,
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => showShareListing(context, ref, _product),
+            ),
+            IconButton(
+              tooltip: L.of(context).assimeReportListing,
+              icon: const Icon(Icons.outlined_flag),
+              onPressed: () => showReportListing(context, ref, _product.id),
+            ),
             if (_product.isBoosted)
               IconButton(
                 tooltip: L.of(context).assimeWhyTitle,
@@ -380,7 +278,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         label: Text(
                           _contacting
                               ? L.of(context).productOpening
-                              : L.of(context).productDiscuss,
+                              : L.of(context).assimeContactSeller,
                         ),
                       ),
                     ),
@@ -445,19 +343,37 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ],
             const SizedBox(height: 16),
           ],
+          // Assimé 3 : le prix d'abord, puis le titre, puis « état · lieu ».
           Text(
-            _product.name,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${_product.price} ${_product.currency}',
+            [
+              '${_product.price} ${_product.currency}',
+              if (_product.negotiable) L.of(context).assimeNegotiableTag,
+            ].join(' · '),
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.accentPrimaryDark,
+              fontFamily: 'Outfit',
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
             ),
           ),
+          const SizedBox(height: 2),
+          Text(
+            _product.name,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          if (_product.condition != null ||
+              (_product.location ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              [
+                if (_product.condition != null)
+                  assimeConditionLabel(L.of(context), _product.condition!),
+                if ((_product.location ?? '').trim().isNotEmpty)
+                  _product.location!.trim(),
+              ].join(' · '),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+          ],
           if (_product.description != null &&
               _product.description!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -474,17 +390,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             rating: seller?.rating ?? _product.sellerRating,
             reviewCount: seller?.reviewCount ?? _product.sellerReviewCount,
             productCount: seller?.productCount,
-            onRate: _isMine ? null : _rateSeller,
-          ),
-          if (reviews.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(
-              L.of(context).productReviews,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            // « Noter ce vendeur » a quitté la fiche : pas de vente
+            // confirmée, pas de note (Assimé 101). Les avis s'ouvrent ici.
+            onReviews: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => SellerReviewsScreen(
+                  sellerId: _product.sellerId,
+                  sellerName: seller?.sellerName ?? _product.sellerName,
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            for (final review in reviews) _ReviewTile(review: review),
-          ],
+          ),
+          const SizedBox(height: 12),
+          ModuleCallout(
+            tone: CalloutTone.beige,
+            text: L.of(context).assimeNoPaymentNotice,
+          ),
         ],
       ),
     );
@@ -499,7 +420,7 @@ class _SellerCard extends StatelessWidget {
     required this.rating,
     required this.reviewCount,
     required this.productCount,
-    required this.onRate,
+    required this.onReviews,
   });
 
   final String name;
@@ -508,16 +429,13 @@ class _SellerCard extends StatelessWidget {
   final double? rating;
   final int reviewCount;
   final int? productCount;
-  final VoidCallback? onRate;
+  final VoidCallback onReviews;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ModuleCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.card,
-      ),
+      onTap: onReviews,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -609,64 +527,16 @@ class _SellerCard extends StatelessWidget {
               style: TextStyle(color: AppColors.textMuted, fontSize: 11),
             ),
           ],
-          if (onRate != null) ...[
+          if (reviewCount > 0) ...[
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
-                onPressed: onRate,
+                onPressed: onReviews,
                 icon: const Icon(Icons.star_border, size: 16),
-                label: Text(L.of(context).productRateSeller),
+                label: Text(L.of(context).assimeSeeReviews),
               ),
             ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ReviewTile extends StatelessWidget {
-  const _ReviewTile({required this.review});
-
-  final SellerReview review;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.card,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  review.isMine
-                      ? L.of(context).productReviewMine
-                      : review.authorName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              for (var star = 1; star <= 5; star++)
-                Icon(
-                  star <= review.rating ? Icons.star : Icons.star_border,
-                  size: 13,
-                  color: AppColors.accentPrimary,
-                ),
-            ],
-          ),
-          if (review.comment != null && review.comment!.trim().isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(review.comment!, style: const TextStyle(fontSize: 13)),
           ],
         ],
       ),

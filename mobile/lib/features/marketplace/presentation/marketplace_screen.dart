@@ -1,4 +1,5 @@
 import 'assime_extras.dart';
+import 'assime_sheets.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -312,14 +313,16 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const CreateAdScreen()),
-                ),
+                // Une ANNONCE (Assimé 5 à 7), pas une publicité payante :
+                // ce bouton ouvrait l'écran des campagnes publicitaires.
+                onPressed: () => editProduct(context, ref),
                 icon: const Icon(Icons.add),
-                label: const Text('Publier une annonce'),
+                label: Text(L.of(context).marketAddProduct),
               ),
             ),
             const SizedBox(height: 10),
+            const _FiltersRow(),
+            const SizedBox(height: 8),
             SizedBox(
               height: 38,
               child: ListView.separated(
@@ -1247,6 +1250,88 @@ class _MarketplaceSearchFieldState
           borderSide: BorderSide(color: AppColors.border),
         ),
       ),
+    );
+  }
+}
+
+/// Assimé 1 : « Filtres · 2 » (ouvre la feuille Assimé 2), « 48 annonces »
+/// et le tri « Plus récentes ».
+class _FiltersRow extends ConsumerWidget {
+  const _FiltersRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final filters = ref.watch(marketplaceFiltersProvider);
+    final total = ref.watch(marketplaceTotalProvider);
+    final count =
+        filters.count +
+        (ref.watch(marketplaceCategoryProvider) == 'TOUT' ? 0 : 1) +
+        (ref.watch(marketplaceCertifiedOnlyProvider) ? 1 : 0);
+    final sorts = {
+      'recent': l.assimeSortRecent,
+      'price_asc': l.assimeSortPriceAsc,
+      'price_desc': l.assimeSortPriceDesc,
+    };
+    return Row(
+      children: [
+        ActionChip(
+          avatar: Icon(
+            Icons.tune,
+            size: 16,
+            color: count > 0 ? Colors.white : AppColors.textSecondary,
+          ),
+          label: Text(count > 0 ? l.assimeFiltersCount(count) : l.assimeFilters),
+          backgroundColor: count > 0
+              ? AppColors.accentPrimary
+              : AppColors.surfaceElevated,
+          side: BorderSide(
+            color: count > 0 ? AppColors.accentPrimary : AppColors.border,
+          ),
+          shape: const StadiumBorder(),
+          labelStyle: TextStyle(
+            color: count > 0 ? Colors.white : AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+          onPressed: () => showAssimeFilters(context),
+        ),
+        const SizedBox(width: 10),
+        if (total != null)
+          Expanded(
+            child: Text(
+              l.assimeResultsCount(total),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+          )
+        else
+          const Spacer(),
+        PopupMenuButton<String>(
+          initialValue: filters.sort,
+          onSelected: (value) =>
+              ref.read(marketplaceFiltersProvider.notifier).state = filters
+                  .copyWith(sort: value),
+          itemBuilder: (_) => [
+            for (final entry in sorts.entries)
+              PopupMenuItem(value: entry.key, child: Text(entry.value)),
+          ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.swap_vert, size: 16, color: AppColors.accentPrimary),
+              const SizedBox(width: 2),
+              Text(
+                sorts[filters.sort]!,
+                style: TextStyle(
+                  color: AppColors.accentPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

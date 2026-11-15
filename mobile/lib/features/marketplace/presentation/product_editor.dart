@@ -11,6 +11,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/product_model.dart';
+import 'assime_publish.dart';
+import 'assime_sheets.dart';
 import 'marketplace_controller.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/api/api_exceptions.dart';
@@ -38,7 +40,13 @@ class ProductDraft {
     required this.currency,
     required this.imageMediaId,
     required this.galleryMediaIds,
+    this.condition,
+    this.negotiable = false,
   });
+
+  /// Assimé 6 : l'état et « Prix à débattre ».
+  final String? condition;
+  final bool negotiable;
 
   final String name;
   final String description;
@@ -84,6 +92,8 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
 
   bool _uploading = false;
   bool _saving = false;
+  String? _condition;
+  bool _negotiable = false;
 
   /// Les CODES envoyés au serveur (« XOF », « TELEPHONES »), tenus à part
   /// des champs affichés : un `DropdownMenu` écrit dans son contrôleur le
@@ -126,6 +136,8 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
     _latitude = product?.latitude;
     _longitude = product?.longitude;
     _mainImage = product?.image;
+    _condition = product?.condition;
+    _negotiable = product?.negotiable ?? false;
     if (product != null) _gallery.addAll(product.gallery);
   }
 
@@ -355,10 +367,29 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
       currency: _currencyCode,
       imageMediaId: _mainImage?.id,
       galleryMediaIds: [for (final media in _gallery) media.id],
+      condition: _condition,
+      negotiable: _negotiable,
     );
     final submit = widget.onSubmit;
     if (submit == null) {
       Navigator.pop(context, draft);
+      return;
+    }
+    if (widget.product == null) {
+      // Une nouvelle annonce passe par l'aperçu (Assimé 7), qui publie
+      // lui-même et ouvre « Produit interdit » si le serveur refuse.
+      final published = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => AssimePreviewScreen(
+            draft: draft,
+            cover: _mainImage ?? (_gallery.isEmpty ? null : _gallery.first),
+            onPublish: submit,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _saving = false);
+      if (published == true) Navigator.pop(context, draft);
       return;
     }
     try {
@@ -455,6 +486,32 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: L.of(context).marketPrice),
           ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _negotiable,
+            onChanged: (v) => setState(() => _negotiable = v),
+            title: Text(L.of(context).assimeNegotiable),
+            subtitle: Text(L.of(context).assimeNegotiableSub),
+          ),
+          Text(
+            L.of(context).assimeFilterCondition,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final condition in assimeConditions)
+                AssimeChoiceChip(
+                  label: assimeConditionLabel(L.of(context), condition),
+                  selected: _condition == condition,
+                  onSelected: (on) =>
+                      setState(() => _condition = on ? condition : null),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
           // ── La devise se CHOISIT ──────────────────────────────────
           //
           // C'était un champ de texte libre. « XOF », « FCFA », « fcfa » et
@@ -557,6 +614,8 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
                 : Text(
                     _uploading
                         ? L.of(context).marketUploadingPhoto
+                        : widget.product == null && widget.onSubmit != null
+                        ? L.of(context).assimeSeePreview
                         : L.of(context).actionSave,
                   ),
           ),
