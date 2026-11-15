@@ -9064,4 +9064,300 @@ class LEs extends L {
   @override
   String get courierRejectedBody =>
       'El equipo de Pokou no aceptó tu solicitud de repartidor. Puedes escribir al soporte para saber más.';
+
+  @override
+  String get forwardTitle => 'Transférer à…';
+
+  @override
+  String get forwardLimit => 'Jusqu\'à 5 discussions';
+
+  @override
+  String get forwardSearch => 'Rechercher';
+
+  @override
+  String get forwardRecent => 'Récentes';
+
+  @override
+  String get forwardContacts => 'Contacts';
+
+  @override
+  String get forwardGroup => 'Groupe';
+
+  @override
+  String get forwardNote =>
+      'Le message porte la mention « Transféré ». Envoyé plus de 5 fois, il devient « Transféré plusieurs fois ».';
+
+  @override
+  String forwardSendTo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Envoyer à $count discussions',
+      one: 'Envoyer à 1 discussion',
+      zero: 'Choisis jusqu\'à 5 discussions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forwardMaxReached => '5 discussions au maximum.';
+
+  @override
+  String forwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Transféré à $count discussions.',
+      one: 'Transféré à 1 discussion.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forwardPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Transfert impossible vers $count discussions.',
+      one: 'Transfert impossible vers 1 discussion.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forwardedLabel => 'Transféré';
+
+  @override
+  String get forwardedManyLabel => 'Transféré plusieurs fois';
+
+  @override
+  String get contactAvailable => 'Disponible';
+
+  @override
+  String reportTitle(String name) {
+    return 'Signaler $name';
+  }
+
+  @override
+  String get reportGroup => 'Signaler le groupe';
+
+  @override
+  String get reportReasonScam => 'Arnaque ou demande d\'argent';
+
+  @override
+  String get reportReasonImpersonation => 'Se fait passer pour quelqu\'un';
+
+  @override
+  String get reportReasonSpam => 'Spam ou publicité';
+
+  @override
+  String get reportReasonShocking => 'Contenu choquant';
+
+  @override
+  String get reportReasonOther => 'Autre';
+
+  @override
+  String get reportNote =>
+      'Les 5 derniers messages de cette discussion sont envoyés au support de Pokou avec ton signalement. Il ne voit rien d\'autre.';
+
+  @override
+  String get reportAlsoBlock => 'Bloquer aussi ce numéro';
+
+  @override
+  String get reportSend => 'Envoyer le signalement';
+
+  @override
+  String get reportSent => 'Signalement envoyé. Merci.';
+
+  @override
+  String get reportSentBlocked => 'Signalement envoyé, numéro bloqué.';
+
+  @override
+  String get reportFailed => 'Signalement non envoyé — vérifie ta connexion.';
+
+  @override
+  String get blockedTitle => 'Contacts bloqués';
+
+  @override
+  String blockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes',
+      one: '1 personne',
+      zero: 'Personne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get blockedEmpty => 'Tu n\'as bloqué personne.';
+
+  @override
+  String get blockedInfo =>
+      'Une personne bloquée ne peut ni t\'appeler ni t\'écrire. Elle ne voit plus ta photo, ton « Vu à » ni tes statuts. Elle n\'est pas prévenue.';
+
+  @override
+  String get blockedGroupsNote =>
+      'Le blocage vaut aussi dans les groupes en commun : tu ne reçois plus ses appels de groupe.';
+
+  @override
+  String get blockedAdd => 'Bloquer un contact';
+
+  @override
+  String get blockedUnblock => 'Débloquer';
+
+  @override
+  String blockedUnblocked(String name) {
+    return '$name est débloqué.';
+  }
+
+  @override
+  String blockedOn(String date) {
+    return 'Bloqué le $date';
+  }
+
+  @override
+  String blockedOnAfterReport(String date) {
+    return 'Bloqué le $date · après un signalement';
+  }
+
+  @override
+  String get unknownSenderTitle => 'Ce numéro n\'est pas dans tes contacts';
+
+  @override
+  String get unknownSenderBody =>
+      'Le nom affiché est choisi par l\'expéditeur : il n\'est pas vérifié. Pokou ne te demandera jamais ton code secret ni de l\'argent.';
+
+  @override
+  String get unknownSenderSubtitle => 'Pas dans tes contacts';
+
+  @override
+  String get unknownSenderBlock => 'Bloquer';
+
+  @override
+  String get unknownSenderReport => 'Signaler';
+
+  @override
+  String get unknownSenderAdd => 'Ajouter';
+
+  @override
+  String get secretCodeAlertTitle => 'Ce message demande un code secret.';
+
+  @override
+  String get secretCodeAlertBody => 'Ne le donne jamais, même à un agent.';
+
+  @override
+  String convEditWindow(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Pendant $minutes minutes après l\'envoi',
+      one: 'Pendant 1 minute après l\'envoi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get messageInfoTitle => 'Infos du message';
+
+  @override
+  String messageInfoSentAt(String time) {
+    return 'Envoyé $time';
+  }
+
+  @override
+  String messageInfoDeliveredAt(String time) {
+    return 'Distribué $time';
+  }
+
+  @override
+  String messageInfoReadAt(String time) {
+    return 'Lu $time';
+  }
+
+  @override
+  String get messageInfoSentOnly => 'Envoyé';
+
+  @override
+  String attachTo(String name) {
+    return 'Joindre à $name';
+  }
+
+  @override
+  String get attachGallery => 'Galerie';
+
+  @override
+  String get attachCamera => 'Caméra';
+
+  @override
+  String get attachPoll => 'Sondage';
+
+  @override
+  String get attachKory => 'Cagnotte Kory';
+
+  @override
+  String get attachKoryGroupsOnly =>
+      'La cagnotte se crée seulement dans un groupe.';
+
+  @override
+  String get chatsMenuDirectChat => 'Discussion à deux';
+
+  @override
+  String get chatsMenuGroupChat => 'Groupe';
+
+  @override
+  String get chatsPinHint => 'Trois discussions épinglées au maximum';
+
+  @override
+  String get chatsAddFavorite => 'Ajouter aux favoris';
+
+  @override
+  String get chatsRemoveFavorite => 'Retirer des favoris';
+
+  @override
+  String get chatsFavoriteHint => 'Retrouve-la dans le filtre « Favoris »';
+
+  @override
+  String get chatsArchiveHint => 'Elle quitte la liste sans être supprimée';
+
+  @override
+  String get archivedScreenTitle => 'Archivées';
+
+  @override
+  String archivedScreenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count discussions',
+      one: '1 discussion',
+      zero: 'Aucune discussion',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get archivedScreenNote =>
+      'Une discussion archivée reste ici quand un message arrive. Son contenu et le mode preuve ne changent pas.';
+
+  @override
+  String get archivedScreenHelpTitle => 'Appui long sur une discussion';
+
+  @override
+  String get archivedScreenUnarchive => 'Désarchiver';
+
+  @override
+  String get archivedScreenAddFavorite => 'Ajouter aux favoris';
+
+  @override
+  String get archivedScreenEmpty => 'Aucune discussion archivée.';
+
+  @override
+  String reportGroupNamed(String name) {
+    return 'Signaler $name';
+  }
+
+  @override
+  String get groupLeaveLot1Note =>
+      'En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus.';
 }

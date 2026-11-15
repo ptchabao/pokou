@@ -48,8 +48,13 @@ import '../../contacts/presentation/contacts_controller.dart';
 import '../../marketplace/data/product_model.dart';
 import '../../profile/presentation/contact_profile_screen.dart';
 import '../data/direct_message_model.dart';
+import 'attach_sheet.dart';
 import 'bubble_widgets.dart';
 import 'contact_card_bubble.dart';
+import 'forward_screen.dart';
+import 'poll_composer.dart';
+import 'report_sheet.dart';
+import 'unknown_sender_card.dart';
 import '../../presence/presentation/typing_controller.dart';
 import 'conversation_search_screen.dart';
 import 'bot_widgets.dart';
@@ -130,6 +135,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _hasText = false;
   bool _slashMode = false;
   DirectMessage? _replyingTo;
+
+  /// Le message qu'on est en train de MODIFIER — non nul tant que le
+  /// bandeau d'édition remplace la zone de saisie habituelle (Discussions ·
+  /// 13). Exclusif avec `_replyingTo` : on ne fait pas les deux à la fois.
+  DirectMessage? _editingMessage;
 
   /// Le mode preuve de la discussion, le même pour les deux côtés.
   DirectProofMode _proof = DirectProofMode.off;
@@ -733,6 +743,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   Future<void> _send() async {
+    // Le bouton d'envoi devient « confirmer » pendant une modification.
+    if (_editingMessage != null) {
+      await _confirmEdit();
+      return;
+    }
     final text = _inputController.text;
     if (text.trim().isEmpty) return;
     // Le message part : on n'écrit plus. Le dire tout de suite évite le
@@ -767,7 +782,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   void _startReply(DirectMessage message) {
-    setState(() => _replyingTo = message);
+    setState(() {
+      _replyingTo = message;
+      _editingMessage = null;
+    });
     FocusScope.of(context).requestFocus();
   }
 
@@ -967,95 +985,88 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     );
   }
 
-  Future<void> _pickVideo(ImageSource source) async {
-    if (source == ImageSource.camera &&
-        !await _ensurePermission(Permission.camera))
-      return;
-    final picked = await ImagePicker().pickVideo(
-      source: source,
-      maxDuration: const Duration(minutes: 5),
+  /// Discussions · 2 — « Joindre à {nom} » : Galerie / Caméra / Document /
+  /// Sondage, comme la maquette. La « Galerie » couvre photos ET vidéos
+  /// (un seul sélecteur, voir `_pickGalleryMedia`) ; le GIF reste accessible
+  /// depuis le panneau emoji, qui ne fait pas partie de cette feuille.
+  Future<void> _showAttachmentSheet() async {
+    final choice = await showAttachSheet(
+      context,
+      targetName: widget.contactName,
+      offerPoll: true,
     );
-    if (picked == null) return;
-    final bytes = await picked.readAsBytes();
-    await _sendMediaFile(
-      path: picked.path,
-      bytes: bytes,
-      filename: picked.name,
-      mimeType: lookupMimeType(picked.name) ?? 'video/mp4',
-      messageType: 'VIDEO',
-    );
+    switch (choice) {
+      case AttachChoice.document:
+        await _pickAndSendDocument();
+      case AttachChoice.gallery:
+        await _pickGalleryMedia();
+      case AttachChoice.camera:
+        await _pickImage(ImageSource.camera);
+      case AttachChoice.poll:
+        await _createPoll();
+      case AttachChoice.kory:
+      case null:
+        break;
+    }
   }
 
-  Future<void> _showAttachmentSheet() async {
-    final choice = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.insert_drive_file,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachDocument),
-              onTap: () => Navigator.pop(sheetContext, 'document'),
-            ),
-            ListTile(
-              leading: Icon(Icons.photo, color: AppColors.accentPrimaryDark),
-              title: Text(_l.convAttachGallery),
-              onTap: () => Navigator.pop(sheetContext, 'photo_gallery'),
-            ),
-            ListTile(
-              leading: Icon(Icons.videocam, color: AppColors.accentPrimaryDark),
-              title: Text(_l.convAttachVideo),
-              onTap: () => Navigator.pop(sheetContext, 'video_gallery'),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.gif_box_outlined,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachGif),
-              onTap: () => Navigator.pop(sheetContext, 'gif'),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.camera_alt,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachCamera),
-              onTap: () => Navigator.pop(sheetContext, 'camera'),
-            ),
-            // DIS-2 : dire pourquoi la photo arrive plus légère.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: Text(
-                _l.attachCompressNote,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-              ),
-            ),
-          ],
+  /// Un seul sélecteur pour la galerie : image ou vidéo, selon ce que la
+  /// personne choisit — la maquette n'a qu'une pastille « Galerie ».
+  Future<void> _pickGalleryMedia() async {
+    final picked = await ImagePicker().pickMedia(
+      imageQuality: ref.read(appSettingsProvider).imageUploadQuality,
+    );
+    if (picked == null || !mounted) return;
+    final mime = lookupMimeType(picked.path) ?? '';
+    if (mime.startsWith('video/')) {
+      final bytes = await picked.readAsBytes();
+      await _sendMediaFile(
+        path: picked.path,
+        bytes: bytes,
+        filename: picked.name,
+        mimeType: mime,
+        messageType: 'VIDEO',
+      );
+      return;
+    }
+    final prepared = await Navigator.of(context).push<PreparedMedia>(
+      MaterialPageRoute(
+        builder: (_) => MediaComposerScreen(
+          file: File(picked.path),
+          recipientName: widget.contactName,
         ),
       ),
     );
+    if (prepared == null) return;
+    await _sendMediaFile(
+      path: prepared.file.path,
+      bytes: await prepared.file.readAsBytes(),
+      filename: picked.name,
+      mimeType: lookupMimeType(picked.name) ?? 'image/jpeg',
+      messageType: 'IMAGE',
+      caption: prepared.caption,
+      viewOnce: prepared.viewOnce,
+    );
+  }
 
-    switch (choice) {
-      case 'document':
-        await _pickAndSendDocument();
-      case 'photo_gallery':
-        await _pickImage(ImageSource.gallery);
-      case 'gif':
-        await _pickAndSendGif();
-      case 'video_gallery':
-        await _pickVideo(ImageSource.gallery);
-      case 'camera':
-        await _pickImage(ImageSource.camera);
+  /// Discussions · 20 — un sondage dans une discussion à deux.
+  Future<void> _createPoll() async {
+    final draft = await showPollComposer(context);
+    if (draft == null || !mounted) return;
+    final failure = await ref
+        .read(messagingControllerProvider(_key).notifier)
+        .createPoll(
+          question: draft.question,
+          options: draft.options,
+          allowsMultiple: draft.allowsMultiple,
+        );
+    if (failure != null && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure)));
+      return;
     }
+    _scrollToBottom();
   }
 
   /// Le doigt vient de se poser sur le micro.
@@ -1110,6 +1121,90 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         ),
       ),
     );
+  }
+
+  /// Discussions · 15 — « Bloquer » sur la carte d'un inconnu. La ligne de
+  /// contact nécessaire est créée côté serveur (voir
+  /// conversations.py::_contact_for_block) : pas besoin de l'ajouter
+  /// d'abord.
+  Future<void> _blockUnknownSender() async {
+    try {
+      await ref
+          .read(conversationsRepositoryProvider)
+          .setBlocked(contactUserId: widget.contactUserId, blocked: true);
+      if (!mounted) return;
+      ref.invalidate(discussionsProvider);
+      Navigator.of(context).maybePop();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l.contactActionFailed)));
+      }
+    }
+  }
+
+  Future<void> _reportUnknownSender() async {
+    final recent = await recentDirectForReport(
+      ref,
+      myUserId: widget.myUserId,
+      contactUserId: widget.contactUserId,
+      contactName: widget.contactName,
+    );
+    if (!mounted) return;
+    await showReportSheet(
+      context,
+      ref,
+      title: _l.reportTitle(widget.contactName),
+      contactUserId: widget.contactUserId,
+      recentMessages: recent,
+    );
+  }
+
+  Future<void> _saveUnknownSenderToContacts() async {
+    final l = L.of(context);
+    final controller = TextEditingController(text: widget.contactName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.addContactTitle),
+        content: TextField(
+          contextMenuBuilder: pokouContextMenuBuilder,
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(labelText: l.addContactName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(l.addContactAction),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    final phone = widget.contactPhone;
+    final trimmed = name?.trim();
+    if (trimmed == null || trimmed.isEmpty || phone == null || !mounted) return;
+    try {
+      await ref
+          .read(contactsRepositoryProvider)
+          .add(phone: phone, displayName: trimmed);
+      if (!mounted) return;
+      ref.invalidate(contactsProvider);
+      ref.invalidate(discussionsProvider);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.contactActionFailed)));
+      }
+    }
   }
 
   Future<void> _startCall({required bool startWithVideo}) async {
@@ -1349,6 +1444,24 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           orElse: () => false,
         );
 
+    // Discussions · 15 — ce numéro n'est pas (encore) dans le carnet : pas
+    // de ligne Contact à régler (épingler/archiver), et le premier message
+    // mérite un avertissement avant toute réponse.
+    final isUnknownSender = ref
+        .watch(discussionsProvider)
+        .maybeWhen(
+          data: (discussions) {
+            for (final d in discussions) {
+              if (d.kind == 'contact' &&
+                  d.contactUserId == widget.contactUserId) {
+                return d.isUnknownContact;
+              }
+            }
+            return false;
+          },
+          orElse: () => false,
+        );
+
     ref.listen(messagingControllerProvider(_key), (previous, next) {
       // L'autre vient d'activer ou de couper le mode preuve : on relit qui
       // peut le désactiver.
@@ -1537,6 +1650,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           peerName: widget.contactName,
                           onAcceptIdentity: _acceptIdentity,
                         ),
+                      // Discussions · 15 — avant même la première réponse :
+                      // ce numéro choisit lui-même le nom qu'il affiche.
+                      if (isUnknownSender && !isContactBot)
+                        UnknownSenderCard(
+                          onBlock: _blockUnknownSender,
+                          onReport: _reportUnknownSender,
+                          onAdd: _saveUnknownSenderToContacts,
+                        ),
                       if (proofOn) const ProofModeBanner(),
                       Expanded(
                         child: !state.initialCacheLoaded
@@ -1705,6 +1826,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                             ),
                                           ),
                                         ),
+                                      // Discussions · 15 — repéré SUR CE
+                                      // TÉLÉPHONE, après déchiffrement :
+                                      // Pokou ne lit jamais le message.
+                                      if (isUnknownSender &&
+                                          message.senderId != widget.myUserId &&
+                                          asksForSecretCode(message.content))
+                                        const SecretCodeAlert(),
                                     ],
                                   );
                                 },
@@ -1744,7 +1872,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (_replyingTo != null)
+                            if (_editingMessage != null)
+                              _EditingBar(
+                                message: _editingMessage!,
+                                onClose: _cancelEditing,
+                              )
+                            else if (_replyingTo != null)
                               _ReplyingToBar(
                                 message: _replyingTo!,
                                 onClose: () =>
@@ -1826,44 +1959,50 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   /// téléphone décalée, message envoyé il y a juste trois minutes), et
   /// laisser le texte revenir en silence à sa version d'avant est
   /// incompréhensible pour qui vient de taper une correction.
-  Future<void> _editMessage(DirectMessage message) async {
-    final controller = TextEditingController(text: message.content ?? '');
-    final edited = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_l.convEditTitle),
-        content: TextField(
-          contextMenuBuilder: pokouContextMenuBuilder,
-          controller: controller,
-          autofocus: true,
-          maxLines: 5,
-          minLines: 1,
-          decoration: InputDecoration(hintText: _l.convEditHint),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(_l.actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: Text(_l.actionSave),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (edited == null || !mounted) return;
-    if (edited.trim() == (message.content ?? '').trim()) return;
+  /// Discussions · 13 — un bandeau au-dessus de la saisie, pas une boîte de
+  /// dialogue : le champ se remplit du texte d'origine, et le bouton
+  /// d'envoi devient une coche tant qu'on modifie.
+  void _startEditing(DirectMessage message) {
+    setState(() {
+      _editingMessage = message;
+      _replyingTo = null;
+      _inputController.text = message.content ?? '';
+      _inputController.selection = TextSelection.collapsed(
+        offset: _inputController.text.length,
+      );
+    });
+    FocusScope.of(context).requestFocus(_inputFocus);
+  }
 
+  void _cancelEditing() {
+    setState(() {
+      _editingMessage = null;
+      _inputController.clear();
+    });
+  }
+
+  /// Confirme la modification en cours — appelée par le bouton coche, à la
+  /// place de `_send()` tant que `_editingMessage` n'est pas nul.
+  Future<void> _confirmEdit() async {
+    final message = _editingMessage;
+    if (message == null) return;
+    final edited = _inputController.text;
+    if (edited.trim().isEmpty) return;
+    if (edited.trim() == (message.content ?? '').trim()) {
+      _cancelEditing();
+      return;
+    }
     final failure = await ref
         .read(messagingControllerProvider(_key).notifier)
         .editMessage(message.id, edited);
-    if (failure != null && mounted) {
+    if (!mounted) return;
+    if (failure != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(failure)));
+      return;
     }
+    _cancelEditing();
   }
 
   /// Sort un média du stockage privé de Pokou.
@@ -1908,6 +2047,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     messenger.showSnackBar(SnackBar(content: Text(texte)));
   }
 
+  /// Discussions · 3 — Options du message, posées sur la bulle (maquette) :
+  /// Répondre, Transférer, Copier, Modifier (avec sa fenêtre), Infos du
+  /// message (Distribué · Lu), Supprimer.
+  ///
+  /// « Sélectionner le texte » et « Partager » restent proposés bien
+  /// qu'absents de la maquette : ce sont les seuls moyens de copier un mot,
+  /// un numéro ou une adresse au milieu d'un message (voir
+  /// message_text_actions.dart), et de l'envoyer hors de Pokou. Les retirer
+  /// supprimerait une capacité réelle sans rien y substituer.
   Future<void> _showMessageActions(DirectMessage message) async {
     final controller = ref.read(messagingControllerProvider(_key).notifier);
     final action = await showModalBottomSheet<String>(
@@ -1929,22 +2077,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               },
             ),
             const Divider(height: 1),
-            // « Répondre » EN PREMIER, et il manquait.
-            //
-            // Le geste existait — glisser vers la droite — mais il n'était
-            // écrit nulle part. Quelqu'un qui ne l'a pas découvert par
-            // hasard n'avait aucun moyen de citer un message, y compris le
-            // sien. Un geste sans équivalent dans un menu est une
-            // fonctionnalité réservée à ceux qui la connaissent déjà.
-            //
-            // Aucune restriction d'expéditeur : citer son propre message
-            // sert à revenir sur ce qu'on a dit, et c'est un usage courant
-            // dans une conversation de travail.
+            // « Répondre » EN PREMIER — voir Discussions · 3.
             ListTile(
               leading: const Icon(Icons.reply),
               title: Text(_l.conversationReply),
               onTap: () => Navigator.pop(sheetContext, 'reply'),
             ),
+            // Un message resté chiffré n'a rien à transférer : on ne le lit
+            // pas soi-même.
+            if (!message.isEncrypted)
+              ListTile(
+                leading: const Icon(Icons.forward),
+                title: Text(_l.conversationForward),
+                onTap: () => Navigator.pop(sheetContext, 'forward'),
+              ),
             // Copier, sélectionner, partager : seulement s'il y a un texte
             // lisible (pas un média sans légende, ni un message supprimé ou
             // pas encore déchiffré).
@@ -1960,26 +2106,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 close: () => Navigator.pop(sheetContext),
               ),
             // « Enregistrer sur le téléphone » — seulement pour un média.
-            //
-            // Un fichier reçu vivait UNIQUEMENT dans le cache de
-            // l'application, c'est-à-dire le répertoire temporaire : Android
-            // le vide quand l'espace manque, sans prévenir. On pouvait
-            // ouvrir et partager une photo reçue ; on ne pouvait pas la
-            // garder.
-            // Un sticker, lui, se GARDE — dans ses stickers, pas dans la
-            // galerie. C'est le geste qu'on attend en touchant celui que
-            // quelqu'un vient d'envoyer.
+            // Absent de la maquette simplifiée, gardé : c'est le seul moyen
+            // de garder une photo reçue au-delà du cache temporaire.
             if (message.messageType == 'STICKER' && message.media != null)
               ListTile(
                 leading: const Icon(Icons.add_reaction_outlined),
                 title: Text(_l.stickerSaveToMine),
                 onTap: () => Navigator.pop(sheetContext, 'save_sticker'),
               ),
-            //
-            // SAUF un sticker : il ne se télécharge pas dans la galerie.
-            // Il appartient à un pack, pas à la conversation — le proposer
-            // reviendrait à remplir les photos de l'utilisateur de
-            // vignettes de 50 Ko qu'il n'a jamais demandé à garder.
             if (message.media != null &&
                 message.messageType != 'STICKER' &&
                 !message.isEncrypted)
@@ -1988,24 +2122,28 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 title: Text(_l.mediaSaveToPhone),
                 onTap: () => Navigator.pop(sheetContext, 'save'),
               ),
-            // Un message resté chiffré n'a rien à transférer : on ne le lit
-            // pas soi-même.
-            if (!message.isEncrypted)
-              ListTile(
-                leading: const Icon(Icons.forward),
-                title: Text(_l.conversationForward),
-                onTap: () => Navigator.pop(sheetContext, 'forward'),
-              ),
             // « Modifier » n'apparaît que tant que c'est possible : proposer
             // un geste que le serveur refusera est pire que ne pas le
-            // proposer du tout. La fenêtre est courte par conception — elle
-            // couvre la faute de frappe qu'on voit juste après l'envoi, pas
-            // la réécriture après coup d'un engagement que l'autre a déjà lu.
+            // proposer du tout.
             if (controller.canEdit(message))
-              ListTile(
-                leading: const Icon(Icons.edit_outlined),
-                title: Text(_l.conversationEdit),
+              MessageActionTile(
+                icon: Icons.edit_outlined,
+                label: _l.conversationEdit,
+                subtitle: _l.convEditWindow(
+                  MessagingController.editWindow.inMinutes,
+                ),
                 onTap: () => Navigator.pop(sheetContext, 'edit'),
+              ),
+            // Infos du message : Distribué · Lu, quand on en sait quelque
+            // chose (les deux restent nuls pour un message chiffré non
+            // encore remis, ou en groupe — pas d'accusé par membre, voir
+            // GroupMessage).
+            if (message.senderId == widget.myUserId)
+              MessageActionTile(
+                icon: Icons.info_outline,
+                label: _l.messageInfoTitle,
+                subtitle: _messageInfoSubtitle(message),
+                onTap: () => Navigator.pop(sheetContext, 'info'),
               ),
             if (message.senderId == widget.myUserId)
               ListTile(
@@ -2018,91 +2156,105 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       ),
     );
     if (!mounted || action == null) return;
-    if (action == 'reply') {
-      _startReply(message);
-      return;
-    }
-    if (action == 'save') {
-      await _saveMedia(message);
-      return;
-    }
-    if (action == 'save_sticker') {
-      await _saveSticker(message.media!.id);
-      return;
-    }
-    if (action == 'edit') {
-      await _editMessage(message);
-      return;
-    }
-    if (action == 'delete') {
-      // Mode preuve : l'auteur est prévenu AVANT que le message restera,
-      // barré, chez l'autre (maquette 6).
-      if (message.proofMode && !PokouMessageStore.isLocalId(message.id)) {
-        final ok = await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: Text(_l.deleteForAll),
-            content: Text(_l.deleteProofWarning),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: Text(_l.actionCancel),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.feedbackDanger,
-                ),
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: Text(_l.actionDelete),
-              ),
-            ],
-          ),
+    switch (action) {
+      case 'reply':
+        _startReply(message);
+      case 'save':
+        await _saveMedia(message);
+      case 'save_sticker':
+        await _saveSticker(message.media!.id);
+      case 'edit':
+        _startEditing(message);
+      case 'info':
+        _showMessageInfo(message);
+      case 'delete':
+        await _deleteMessage(message);
+      case 'forward':
+        await openForwardScreen(
+          context,
+          payload: ForwardPayload.fromDirect(message),
+          myUserId: widget.myUserId,
         );
-        if (ok != true || !mounted) return;
-      }
-      await ref
-          .read(messagingControllerProvider(_key).notifier)
-          .deleteMessage(message.id);
-      return;
     }
-    final contacts = await ref.read(contactsProvider.future);
-    if (!mounted) return;
-    final target = await showModalBottomSheet<int>(
+  }
+
+  Future<void> _deleteMessage(DirectMessage message) async {
+    // Mode preuve : l'auteur est prévenu AVANT que le message restera,
+    // barré, chez l'autre (maquette 6).
+    if (message.proofMode && !PokouMessageStore.isLocalId(message.id)) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(_l.deleteForAll),
+          content: Text(_l.deleteProofWarning),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(_l.actionCancel),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.feedbackDanger,
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(_l.actionDelete),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+    await ref
+        .read(messagingControllerProvider(_key).notifier)
+        .deleteMessage(message.id);
+  }
+
+  /// « Distribué 16:04 · Lu 16:04 » — ou juste « Envoyé », sans rien
+  /// inventer tant que le serveur n'a pas confirmé la suite.
+  String _messageInfoSubtitle(DirectMessage message) {
+    final hm = DateFormat.Hm();
+    if (message.readAt != null) {
+      return _l.messageInfoReadAt(hm.format(message.readAt!.toLocal()));
+    }
+    if (message.deliveredAt != null) {
+      return _l.messageInfoDeliveredAt(hm.format(message.deliveredAt!.toLocal()));
+    }
+    return _l.messageInfoSentOnly;
+  }
+
+  void _showMessageInfo(DirectMessage message) {
+    final hm = DateFormat.Hm();
+    showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            for (final contact in contacts.where(
-              (contact) =>
-                  contact.isRegistered &&
-                  contact.contactUserId != widget.contactUserId,
-            ))
-              ListTile(
-                title: Text(contact.displayName),
-                onTap: () => Navigator.pop(sheetContext, contact.contactUserId),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _l.messageInfoTitle,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
               ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                _l.messageInfoSentAt(hm.format(message.createdAt.toLocal())),
+              ),
+              if (message.deliveredAt != null)
+                Text(
+                  _l.messageInfoDeliveredAt(
+                    hm.format(message.deliveredAt!.toLocal()),
+                  ),
+                ),
+              if (message.readAt != null)
+                Text(_l.messageInfoReadAt(hm.format(message.readAt!.toLocal()))),
+            ],
+          ),
         ),
       ),
     );
-    if (target != null && mounted) {
-      final ok = await ref
-          .read(messagingControllerProvider(_key).notifier)
-          .forwardMessage(message.id, target);
-      // La copie transférée vit dans l'autre conversation : sans ce retour,
-      // rien ne bouge à l'écran et le transfert semble avoir échoué.
-      if (!mounted) return;
-      final name = contacts
-          .firstWhere((contact) => contact.contactUserId == target)
-          .displayName;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ok ? _l.convForwarded(name) : _l.convForwardFailed),
-        ),
-      );
-    }
   }
 
   /// Retient la hauteur du clavier tant qu'il est visible.
@@ -2194,6 +2346,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           onRecordStart: _beginRecording,
           onStateChanged: (next) => setState(() => _composer = next),
           onRelease: (action) => unawaited(_finishRecording(action)),
+          // Une coche tant qu'on modifie un message déjà envoyé : confirmer
+          // une correction, ce n'est pas envoyer un nouveau message.
+          sendIcon: _editingMessage != null
+              ? Icons.check_rounded
+              : Icons.send_rounded,
           busyChild: busy
               ? const Padding(
                   padding: EdgeInsets.all(14),
@@ -2476,6 +2633,67 @@ class _AvatarRing extends StatelessWidget {
 }
 
 /// Bouton "A" (Baba) — ouvre l'assistant général épinglé (monitorId 0)
+/// Discussions · 13 — le bandeau d'édition, au-dessus de la saisie, à la
+/// place de la boîte de dialogue d'avant : « Modifier le message » et un
+/// aperçu du texte d'origine, pour qu'on ne perde pas de vue ce qu'on est en
+/// train de corriger pendant qu'on tape la nouvelle version juste dessous.
+class _EditingBar extends StatelessWidget {
+  const _EditingBar({required this.message, required this.onClose});
+
+  final DirectMessage message;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.edit_outlined,
+            size: 16,
+            color: AppColors.chatActionGreen,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  L.of(context).convEditTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
+                  ),
+                ),
+                Text(
+                  message.content ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onClose,
+            icon: const Icon(Icons.close, size: 18),
+            visualDensity: VisualDensity.compact,
+            tooltip: L.of(context).actionClose,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ReplyingToBar extends StatelessWidget {
   const _ReplyingToBar({required this.message, required this.onClose});
 
@@ -3030,7 +3248,16 @@ class _BubbleState extends State<_Bubble> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: [?_replyBanner(), _content()],
+                  children: [
+                    ForwardedLabel(
+                      score: message.forwardScore,
+                      color: isMine
+                          ? AppColors.chatBubbleSentBorder
+                          : AppColors.textMuted,
+                    ),
+                    ?_replyBanner(),
+                    _content(),
+                  ],
                 ),
               ),
               if (!isMine &&

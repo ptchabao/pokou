@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exceptions.dart';
+import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
+import '../../messaging/presentation/report_sheet.dart';
 import '../data/group_model.dart';
 import 'group_controller.dart';
 
@@ -81,6 +84,69 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// « Quitter le groupe » — même confirmation que depuis le ⋮ de la
+  /// conversation (voir group_conversation_screen.dart::_leave), rejointe
+  /// ici parce que cet écran n'a pas le contrôleur de la conversation.
+  Future<void> _confirmLeave(Group group) async {
+    final l = L.of(context);
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    if (myUserId == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.groupLeaveTitle),
+        content: Text(l.groupLeaveBody(group.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              l.groupLeaveAction,
+              style: const TextStyle(color: AppColors.semanticError),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref
+          .read(groupRepositoryProvider)
+          .removeMember(groupId: widget.groupId, userId: myUserId);
+      if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.groupLeaveFailed)));
+      }
+    }
+  }
+
+  /// Discussions · 26 — « Signaler le groupe », avec les 5 derniers
+  /// messages déchiffrés par CET appareil, réservé aux membres (le serveur
+  /// vérifie l'appartenance).
+  Future<void> _reportGroup(Group group) async {
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    if (myUserId == null) return;
+    final recent = await recentGroupForReport(
+      ref,
+      groupId: widget.groupId,
+      myUserId: myUserId,
+    );
+    if (!mounted) return;
+    await showReportSheet(
+      context,
+      ref,
+      title: L.of(context).reportGroupNamed(group.name),
+      groupId: widget.groupId,
+      recentMessages: recent,
+    );
   }
 
   Future<void> _decide(String requestId, bool approve) async {
@@ -215,9 +281,35 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                           ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+                  _Card(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.logout),
+                        title: Text(l.groupLeave),
+                        onTap: () => _confirmLeave(group),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.flag_outlined,
+                          color: AppColors.semanticError,
+                        ),
+                        title: Text(
+                          l.reportGroup,
+                          style: const TextStyle(color: AppColors.semanticError),
+                        ),
+                        onTap: () => _reportGroup(group),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
+                  // La cagnotte n'existe que là où Kory est ouvert : en Lot
+                  // 1, la note ne mentionne jamais Kory (aucune mention de
+                  // Kory n'est montrée dans ce pays).
                   Text(
-                    l.groupLeaveKoryNote,
+                    ref.watch(currentCountryConfigProvider).has('kory')
+                        ? l.groupLeaveKoryNote
+                        : l.groupLeaveLot1Note,
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,

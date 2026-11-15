@@ -697,6 +697,31 @@ class MessagingController extends StateNotifier<MessagingState> {
     }
   }
 
+  /// Discussions · 20 — un sondage dans une discussion à deux. Même forme
+  /// que `sendOrderUpdate` : le message créé côté serveur s'ajoute au fil.
+  Future<String?> createPoll({
+    required String question,
+    required List<String> options,
+    required bool allowsMultiple,
+  }) async {
+    try {
+      final message = await _repository.createPoll(
+        recipientId: _key.contactUserId,
+        question: question,
+        options: options,
+        allowsMultiple: allowsMultiple,
+      );
+      await _store.saveDirect([message]);
+      if (!mounted) return null;
+      state = state.copyWith(messages: [...state.messages, message]);
+      return null;
+    } on ApiException catch (exc) {
+      return exc.message;
+    } catch (_) {
+      return _l.convAttachmentFailed;
+    }
+  }
+
   Future<void> deleteMessage(String messageId) async {
     // Un message jamais parti n'existe que localement : rien à demander au
     // serveur, qui répondrait 404.
@@ -766,87 +791,10 @@ class MessagingController extends StateNotifier<MessagingState> {
     }
   }
 
-  /// Transfère vers un AUTRE contact : la copie créée appartient à la
-  /// conversation du destinataire, pas à celle affichée ici — on ne l'ajoute
-  /// donc pas à `state.messages` (elle y apparaîtrait comme un message envoyé
-  /// au contact courant, ce qui est faux). Le destinataire la reçoit en direct
-  /// via l'événement WS `message:new` que le backend lui pousse.
-  Future<bool> forwardMessage(String messageId, int recipientId) async {
-    try {
-      await _repository.forward(messageId: messageId, recipientId: recipientId);
-      return true;
-    } on ApiException catch (exc) {
-      // 409 : message chiffré de bout en bout. Le serveur ne détient que le
-      // chiffré, scellé pour le destinataire d'ORIGINE ; c'est l'appareil,
-      // qui a le clair, qui le renvoie.
-      if (exc.statusCode == 409) {
-        // Son propre try : une exception levée dans une clause `on` ne
-        // serait pas rattrapée par le `catch` voisin, et remonterait jusqu'à
-        // l'écran sans message.
-        try {
-          if (await _forwardFromDevice(messageId, recipientId)) return true;
-        } catch (_) {
-          // Destinataire dont l'identité a changé, hors ligne, fichier
-          // illisible : le transfert n'a pas eu lieu, on le dit.
-        }
-      }
-    } catch (_) {
-      // Voir ci-dessous.
-    }
-    state = state.copyWith(error: _l.convForwardFailedMsg);
-    return false;
-  }
-
-  /// Renvoie un message chiffré à [recipientId] depuis ce qu'on en a ici.
-  ///
-  /// Un texte repart scellé pour lui. Un fichier repart du fichier déchiffré
-  /// local, par le même chemin qu'un envoi ordinaire (MediaSender) : clé
-  /// neuve, chiffré si le destinataire sait l'ouvrir, et la bulle attend
-  /// dans sa conversation tant que le réseau manque.
-  Future<bool> _forwardFromDevice(String messageId, int recipientId) async {
-    final local = state.messages.where((m) => m.id == messageId).firstOrNull;
-    if (local == null || local.isEncrypted) return false;
-
-    final media = local.media;
-    if (local.mediaAssetId != null && media != null) {
-      final file = await _media.resolveLocalFile(
-        media.id,
-        extension: mediaExtension(media),
-      );
-      final copy = DirectMessage(
-        id: _store.newLocalId(),
-        senderId: _key.myUserId,
-        recipientId: recipientId,
-        messageType: local.messageType,
-        content: local.content,
-        mediaAssetId: null,
-        media: null,
-        status: DirectMessageStatus.sent,
-        createdAt: DateTime.now(),
-        pendingMedia: PendingMedia(
-          path: file.path,
-          filename: media.originalFilename ?? file.uri.pathSegments.last,
-          mimeType: media.mimeType,
-          caption: local.content,
-        ),
-      );
-      await _store.saveDirect([copy], pending: true);
-      await _sender.envoyer(copy);
-      // Parti, ou resté en file faute de réseau (il repartira) : dans les
-      // deux cas le geste est gardé. Seul un refus définitif est un échec.
-      final failed = await _store.isDirectFailed(copy.id);
-      return !failed;
-    }
-
-    final text = local.content;
-    if (text == null || text.trim().isEmpty) return false;
-    final sent = await _repository.send(
-      recipientId: recipientId,
-      content: text,
-    );
-    await _store.saveDirect([sent]);
-    return true;
-  }
+  // Transférer vit maintenant dans forward_screen.dart::MessageForwarder,
+  // qui gère aussi les destinations MULTIPLES (Discussions · 23, jusqu'à 5
+  // discussions) — un cas que cette méthode à une seule cible ne couvrait
+  // pas. Le repli « message chiffré, renvoi depuis l'appareil » y a suivi.
 
   /// Envoyer une pièce jointe — la bulle apparaît AVANT le téléversement.
   ///

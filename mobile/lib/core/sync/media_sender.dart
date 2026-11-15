@@ -96,6 +96,7 @@ class MediaSender {
           caption: fichier.caption,
           viewOnce: enAttente.viewOnce,
           mediaKey: mediaKey,
+          forwardScore: enAttente.forwardScore,
         );
         await _store.confirmDirect(enAttente.id, envoye);
       },
@@ -123,6 +124,7 @@ class MediaSender {
           mediaAssetId: mediaId,
           mediaKey: mediaKey,
           caption: fichier.caption,
+          forwardScore: enAttente.forwardScore,
         );
         await _store.confirmGroup(enAttente.id, envoye);
       },

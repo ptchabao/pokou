@@ -19,8 +19,9 @@ import '../../contacts/presentation/contacts_controller.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
 import '../../marketplace/data/product_model.dart';
-import '../../messaging/presentation/message_links.dart';
 import '../../marketplace/presentation/product_detail_screen.dart';
+import '../../messaging/presentation/conversation_search_screen.dart';
+import '../../messaging/presentation/report_sheet.dart';
 import '../data/contact_profile_model.dart';
 import 'profile_screen.dart';
 import '../../../core/widgets/identity_avatar.dart';
@@ -182,6 +183,31 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
     }
   }
 
+  /// Discussions · 16 — « Signaler {nom} », avec les 5 derniers messages
+  /// relus du cache local.
+  Future<void> _report() async {
+    final profile = _profile;
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    if (profile == null || myUserId == null) return;
+    final recent = await recentDirectForReport(
+      ref,
+      myUserId: myUserId,
+      contactUserId: widget.contactUserId,
+      contactName: profile.displayName,
+    );
+    if (!mounted) return;
+    final outcome = await showReportSheet(
+      context,
+      ref,
+      title: L.of(context).reportTitle(profile.displayName),
+      contactUserId: widget.contactUserId,
+      recentMessages: recent,
+    );
+    if (outcome?.blocked == true && mounted) {
+      setState(() => _profile = _copyWithBlocked(profile, true));
+    }
+  }
+
   ContactProfile _copyWithBlocked(ContactProfile profile, bool blocked) {
     return ContactProfile(
       userId: profile.userId,
@@ -317,12 +343,16 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                       ],
                     ),
                     _ProLine(userId: widget.contactUserId),
-                    if (profile?.phone != null) ...[
+                    if (profile != null) ...[
                       const SizedBox(height: 2),
-                      // Toucher : appeler, écrire, copier. Appui long :
-                      // copier.
-                      CopyablePhone(
-                        phone: profile!.phone!,
+                      // Discussions · 7 — un état, jamais le numéro (règle
+                      // « aucun numéro affiché »). Le carnet tient le
+                      // numéro ailleurs (fiche de contact du téléphone) ;
+                      // ici, ce que la personne montre d'elle.
+                      Text(
+                        profile.about?.trim().isNotEmpty == true
+                            ? profile.about!
+                            : L.of(context).contactAvailable,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.textSecondary,
@@ -362,6 +392,19 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                             label: L.of(context).mediaVideo,
                             onTap: () => _call(startWithVideo: true),
                           ),
+                          const SizedBox(width: 24),
+                          _CircleAction(
+                            icon: Icons.search,
+                            label: L.of(context).actionSearch,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ConversationSearchScreen(
+                                  contactUserId: widget.contactUserId,
+                                  contactName: displayName,
+                                ),
+                              ),
+                            ),
+                          ),
                           if (!profile.isContact && profile.phone != null) ...[
                             const SizedBox(width: 24),
                             _CircleAction(
@@ -399,18 +442,40 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                           sellerName: profile.displayName,
                         ),
                       ],
-                      // Le blocage s'inscrit sur MA ligne de carnet
-                      // (routes/conversations.py::set_blocked) : sans
-                      // elle, le bouton n'aboutirait qu'à une erreur.
-                      if (profile.isContact) ...[
-                        const SizedBox(height: 16),
-                        _BlockRow(
-                          name: profile.displayName,
-                          isBlocked: profile.isBlocked,
-                          busy: _togglingBlock,
-                          onToggle: _toggleBlock,
+                      // Discussions · 7 — « Bloquer » toujours disponible :
+                      // le serveur crée la ligne nécessaire pour un inconnu
+                      // (conversations.py::_contact_for_block).
+                      const SizedBox(height: 16),
+                      _BlockRow(
+                        name: profile.displayName,
+                        isBlocked: profile.isBlocked,
+                        busy: _togglingBlock,
+                        onToggle: _toggleBlock,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: AppRadius.card,
                         ),
-                      ],
+                        child: ListTile(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: AppRadius.card,
+                          ),
+                          leading: const Icon(
+                            Icons.flag_outlined,
+                            color: AppColors.semanticError,
+                          ),
+                          title: Text(
+                            L.of(context).reportTitle(profile.displayName),
+                            style: const TextStyle(
+                              color: AppColors.semanticError,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onTap: _report,
+                        ),
+                      ),
                     ],
                   ],
                 ),

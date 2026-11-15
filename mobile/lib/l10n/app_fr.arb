@@ -4730,5 +4730,183 @@
     }
   },
   "courierStatusRejected": "Candidature refusée",
-  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus."
+  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.",
+  "forwardTitle": "Transférer à…",
+  "forwardLimit": "Jusqu'à 5 discussions",
+  "forwardSearch": "Rechercher",
+  "forwardRecent": "Récentes",
+  "forwardContacts": "Contacts",
+  "forwardGroup": "Groupe",
+  "forwardNote": "Le message porte la mention « Transféré ». Envoyé plus de 5 fois, il devient « Transféré plusieurs fois ».",
+  "forwardSendTo": "{count, plural, =0{Choisis jusqu'à 5 discussions} =1{Envoyer à 1 discussion} other{Envoyer à {count} discussions}}",
+  "@forwardSendTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardMaxReached": "5 discussions au maximum.",
+  "forwardDone": "{count, plural, =1{Transféré à 1 discussion.} other{Transféré à {count} discussions.}}",
+  "@forwardDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardPartial": "{count, plural, =1{Transfert impossible vers 1 discussion.} other{Transfert impossible vers {count} discussions.}}",
+  "@forwardPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardedLabel": "Transféré",
+  "forwardedManyLabel": "Transféré plusieurs fois",
+  "contactAvailable": "Disponible",
+  "reportTitle": "Signaler {name}",
+  "@reportTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportGroup": "Signaler le groupe",
+  "reportReasonScam": "Arnaque ou demande d'argent",
+  "reportReasonImpersonation": "Se fait passer pour quelqu'un",
+  "reportReasonSpam": "Spam ou publicité",
+  "reportReasonShocking": "Contenu choquant",
+  "reportReasonOther": "Autre",
+  "reportNote": "Les 5 derniers messages de cette discussion sont envoyés au support de Pokou avec ton signalement. Il ne voit rien d'autre.",
+  "reportAlsoBlock": "Bloquer aussi ce numéro",
+  "reportSend": "Envoyer le signalement",
+  "reportSent": "Signalement envoyé. Merci.",
+  "reportSentBlocked": "Signalement envoyé, numéro bloqué.",
+  "reportFailed": "Signalement non envoyé — vérifie ta connexion.",
+  "blockedTitle": "Contacts bloqués",
+  "blockedCount": "{count, plural, =0{Personne} =1{1 personne} other{{count} personnes}}",
+  "@blockedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "blockedEmpty": "Tu n'as bloqué personne.",
+  "blockedInfo": "Une personne bloquée ne peut ni t'appeler ni t'écrire. Elle ne voit plus ta photo, ton « Vu à » ni tes statuts. Elle n'est pas prévenue.",
+  "blockedGroupsNote": "Le blocage vaut aussi dans les groupes en commun : tu ne reçois plus ses appels de groupe.",
+  "blockedAdd": "Bloquer un contact",
+  "blockedUnblock": "Débloquer",
+  "blockedUnblocked": "{name} est débloqué.",
+  "@blockedUnblocked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "blockedOn": "Bloqué le {date}",
+  "@blockedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "blockedOnAfterReport": "Bloqué le {date} · après un signalement",
+  "@blockedOnAfterReport": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownSenderTitle": "Ce numéro n'est pas dans tes contacts",
+  "unknownSenderBody": "Le nom affiché est choisi par l'expéditeur : il n'est pas vérifié. Pokou ne te demandera jamais ton code secret ni de l'argent.",
+  "unknownSenderSubtitle": "Pas dans tes contacts",
+  "unknownSenderBlock": "Bloquer",
+  "unknownSenderReport": "Signaler",
+  "unknownSenderAdd": "Ajouter",
+  "secretCodeAlertTitle": "Ce message demande un code secret.",
+  "secretCodeAlertBody": "Ne le donne jamais, même à un agent.",
+  "convEditWindow": "{minutes, plural, =1{Pendant 1 minute après l'envoi} other{Pendant {minutes} minutes après l'envoi}}",
+  "@convEditWindow": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "messageInfoTitle": "Infos du message",
+  "messageInfoSentAt": "Envoyé {time}",
+  "@messageInfoSentAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "messageInfoDeliveredAt": "Distribué {time}",
+  "@messageInfoDeliveredAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "messageInfoReadAt": "Lu {time}",
+  "@messageInfoReadAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "messageInfoSentOnly": "Envoyé",
+  "attachTo": "Joindre à {name}",
+  "@attachTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "attachGallery": "Galerie",
+  "attachCamera": "Caméra",
+  "attachPoll": "Sondage",
+  "attachKory": "Cagnotte Kory",
+  "attachKoryGroupsOnly": "La cagnotte se crée seulement dans un groupe.",
+  "chatsMenuDirectChat": "Discussion à deux",
+  "chatsMenuGroupChat": "Groupe",
+  "chatsPinHint": "Trois discussions épinglées au maximum",
+  "chatsAddFavorite": "Ajouter aux favoris",
+  "chatsRemoveFavorite": "Retirer des favoris",
+  "chatsFavoriteHint": "Retrouve-la dans le filtre « Favoris »",
+  "chatsArchiveHint": "Elle quitte la liste sans être supprimée",
+  "archivedScreenTitle": "Archivées",
+  "archivedScreenCount": "{count, plural, =0{Aucune discussion} =1{1 discussion} other{{count} discussions}}",
+  "@archivedScreenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "archivedScreenNote": "Une discussion archivée reste ici quand un message arrive. Son contenu et le mode preuve ne changent pas.",
+  "archivedScreenHelpTitle": "Appui long sur une discussion",
+  "archivedScreenUnarchive": "Désarchiver",
+  "archivedScreenAddFavorite": "Ajouter aux favoris",
+  "archivedScreenEmpty": "Aucune discussion archivée.",
+  "reportGroupNamed": "Signaler {name}",
+  "@reportGroupNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupLeaveLot1Note": "En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus."
 }

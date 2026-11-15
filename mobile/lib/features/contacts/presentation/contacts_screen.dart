@@ -62,11 +62,6 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   /// disparue, et c'est la panne la plus difficile à décrire au support.
   ChatFilter _filter = ChatFilter.all;
 
-  /// La liste montre-t-elle les archivées ? Replié par défaut, et remis à
-  /// plat à chaque ouverture de l'onglet — on n'atterrit jamais dans les
-  /// archives sans l'avoir demandé.
-  bool _showArchived = false;
-
   @override
   void initState() {
     super.initState();
@@ -157,6 +152,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
     final id = discussion.id;
     if (id == null) return;
+    final l = L.of(context);
     final action = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: AppColors.surface,
@@ -165,28 +161,56 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: Icon(
-                discussion.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+            // Discussions · 11 — en-tête : le nom, et le type de fil.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      discussion.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      discussion.kind == 'contact'
+                          ? l.chatsMenuDirectChat
+                          : l.chatsMenuGroupChat,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              title: Text(
-                discussion.isPinned
-                    ? L.of(context).chatsUnpin
-                    : L.of(context).chatsPin,
-              ),
+            ),
+            _ChatMenuRow(
+              icon: discussion.isPinned
+                  ? Icons.push_pin
+                  : Icons.push_pin_outlined,
+              title: discussion.isPinned ? l.chatsUnpin : l.chatsPin,
+              subtitle: discussion.isPinned ? null : l.chatsPinHint,
               onTap: () => Navigator.pop(sheetContext, 'pin'),
             ),
-            ListTile(
-              leading: Icon(
-                discussion.isArchived
-                    ? Icons.unarchive_outlined
-                    : Icons.archive_outlined,
-              ),
-              title: Text(
-                discussion.isArchived
-                    ? L.of(context).chatsUnarchive
-                    : L.of(context).chatsArchive,
-              ),
+            _ChatMenuRow(
+              icon: discussion.isFavorite ? Icons.star : Icons.star_border,
+              title: discussion.isFavorite
+                  ? l.chatsRemoveFavorite
+                  : l.chatsAddFavorite,
+              subtitle: discussion.isFavorite ? null : l.chatsFavoriteHint,
+              onTap: () => Navigator.pop(sheetContext, 'favorite'),
+            ),
+            _ChatMenuRow(
+              icon: discussion.isArchived
+                  ? Icons.unarchive_outlined
+                  : Icons.archive_outlined,
+              title: discussion.isArchived ? l.chatsUnarchive : l.chatsArchive,
+              subtitle: discussion.isArchived ? null : l.chatsArchiveHint,
               onTap: () => Navigator.pop(sheetContext, 'archive'),
             ),
             ListTile(
@@ -195,18 +219,14 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                     ? Icons.notifications_off
                     : Icons.notifications_off_outlined,
               ),
-              title: Text(
-                discussion.isMuted
-                    ? L.of(context).chatsUnmute
-                    : L.of(context).chatsMute,
-              ),
+              title: Text(discussion.isMuted ? l.chatsUnmute : l.chatsMute),
               onTap: () => Navigator.pop(sheetContext, 'mute'),
             ),
             if (discussion.kind == 'contact') ...[
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.label_outline),
-                title: Text(L.of(context).contactsTag),
+                title: Text(l.contactsTag),
                 onTap: () => Navigator.pop(sheetContext, 'tag'),
               ),
               ListTile(
@@ -215,12 +235,18 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                   color: AppColors.semanticError,
                 ),
                 title: Text(
-                  L.of(context).chatsBlock,
+                  l.chatsBlock,
                   style: const TextStyle(color: AppColors.semanticError),
                 ),
                 onTap: () => Navigator.pop(sheetContext, 'block'),
               ),
             ],
+            const SizedBox(height: 4),
+            TextButton(
+              onPressed: () => Navigator.pop(sheetContext),
+              child: Text(l.actionCancel),
+            ),
+            const SizedBox(height: 4),
           ],
         ),
       ),
@@ -245,6 +271,21 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             discussion.kind,
             id,
             fields: {'is_pinned': !discussion.isPinned},
+          ),
+        );
+      case 'favorite':
+        await _applyConversationAction(
+          () => ref
+              .read(conversationsRepositoryProvider)
+              .setFavorite(
+                kind: discussion.kind,
+                id: id,
+                favorite: !discussion.isFavorite,
+              ),
+          whenQueued: () => _showQueued(
+            discussion.kind,
+            id,
+            fields: {'is_favorite': !discussion.isFavorite},
           ),
         );
       case 'archive':
@@ -688,7 +729,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     // compte, comme dans toutes les messageries.
     final archivees =
         ref.watch(archivedDiscussionsProvider).valueOrNull ?? const [];
-    final filtrees = _filter.apply(_showArchived ? archivees : allDiscussions);
+    final filtrees = _filter.apply(allDiscussions);
     final discussions = _query.isEmpty
         ? filtrees
         : filtrees.where((d) => d.name.toLowerCase().contains(_query)).toList();
@@ -716,8 +757,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         if (archivees.isNotEmpty)
           _ArchivedRow(
             count: archivees.length,
-            open: _showArchived,
-            onTap: () => setState(() => _showArchived = !_showArchived),
+            // Discussions · 12 — un écran dédié, pas un dépli sur place :
+            // la note et l'encadré d'aide ont besoin de leur propre place.
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ArchivedDiscussionsScreen()),
+            ),
           ),
         // Terre de Confiance : les fils dans UNE carte blanche, séparés par
         // un filet. À plat : un filet autour, pas d'ombre dessous.
@@ -1627,7 +1671,10 @@ enum ChatFilter {
       switch (this) {
         ChatFilter.all => items,
         ChatFilter.unread => items.where((d) => d.unreadCount > 0).toList(),
-        ChatFilter.favorites => items.where((d) => d.isPinned).toList(),
+        // De vrais favoris (Discussions · 11), et non plus les épinglées :
+        // deux gestes distincts, qui ne tenaient jusqu'ici qu'à une seule
+        // colonne (`is_pinned`).
+        ChatFilter.favorites => items.where((d) => d.isFavorite).toList(),
         // Les communautés comptent comme des groupes : pour qui filtre, la
         // distinction entre « groupe » et « communauté » n'existe pas — il
         // cherche ce qui n'est pas une conversation à deux.
@@ -1676,6 +1723,39 @@ class _ChatFilterRow extends ConsumerWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Une ligne de la feuille d'actions d'une discussion (Discussions · 11) :
+/// icône, libellé, et sous-titre facultatif qui dit ce que le geste fait
+/// VRAIMENT — « Trois discussions épinglées au maximum », « Elle quitte la
+/// liste sans être supprimée ».
+class _ChatMenuRow extends StatelessWidget {
+  const _ChatMenuRow({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+      onTap: onTap,
     );
   }
 }
@@ -1763,21 +1843,15 @@ class _FilterChip extends StatelessWidget {
 /// est à droite, dans une pastille — c'est la seule information utile avant
 /// de l'ouvrir.
 class _ArchivedRow extends StatelessWidget {
-  const _ArchivedRow({
-    required this.count,
-    required this.open,
-    required this.onTap,
-  });
+  const _ArchivedRow({required this.count, required this.onTap});
 
   final int count;
-  final bool open;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      expanded: open,
       child: InkWell(
         borderRadius: AppRadius.chip,
         onTap: onTap,
@@ -1792,7 +1866,7 @@ class _ArchivedRow extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                open ? Icons.unarchive_outlined : Icons.archive_outlined,
+                Icons.archive_outlined,
                 size: 21,
                 color: AppColors.accentPrimaryDark,
               ),
@@ -1826,10 +1900,254 @@ class _ArchivedRow extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 6),
+              Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Discussions · 12 — « Archivées · N discussions », avec la note qui
+/// explique ce qu'archiver change (et surtout ce que ça ne change pas), et
+/// un encadré qui annonce les deux gestes de l'appui long.
+class ArchivedDiscussionsScreen extends ConsumerWidget {
+  const ArchivedDiscussionsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final myUserId = ref.watch(authControllerProvider).user?.id;
+    final archivedAsync = ref.watch(archivedDiscussionsProvider);
+    final count = archivedAsync.valueOrNull?.length;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.archivedScreenTitle,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            if (count != null)
+              Text(
+                l.archivedScreenCount(count),
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => ref.refresh(archivedDiscussionsProvider.future),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _InfoCard(text: l.archivedScreenNote),
+              const SizedBox(height: 14),
+              archivedAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: Text(
+                      error is ApiException ? error.message : l.chatsConnectFailed,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ),
+                data: (items) => items.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          l.archivedScreenEmpty,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                      )
+                    : Container(
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: AppRadius.card,
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Column(
+                          children: [
+                            for (final discussion in items)
+                              _DiscussionTile(
+                                discussion: discussion,
+                                myUserId: myUserId,
+                                onLongPress: () => _openArchivedMenu(
+                                  context,
+                                  ref,
+                                  discussion,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 14),
+              _HelpCard(
+                title: l.archivedScreenHelpTitle,
+                rows: [
+                  (Icons.unarchive_outlined, l.archivedScreenUnarchive),
+                  (Icons.star_border, l.archivedScreenAddFavorite),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Les deux gestes que l'encadré annonce, vraiment appliqués à l'appui
+  /// long — l'encadré n'est pas qu'un mode d'emploi statique.
+  Future<void> _openArchivedMenu(
+    BuildContext context,
+    WidgetRef ref,
+    ConversationSummary discussion,
+  ) async {
+    final id = discussion.id;
+    if (id == null) return;
+    final l = L.of(context);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.unarchive_outlined),
+              title: Text(l.archivedScreenUnarchive),
+              onTap: () => Navigator.pop(sheetContext, 'unarchive'),
+            ),
+            ListTile(
+              leading: Icon(
+                discussion.isFavorite ? Icons.star : Icons.star_border,
+              ),
+              title: Text(
+                discussion.isFavorite
+                    ? l.chatsRemoveFavorite
+                    : l.archivedScreenAddFavorite,
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'favorite'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null) return;
+    final repository = ref.read(conversationsRepositoryProvider);
+    try {
+      if (action == 'unarchive') {
+        await repository.setArchived(
+          kind: discussion.kind,
+          id: id,
+          archived: false,
+        );
+      } else {
+        await repository.setFavorite(
+          kind: discussion.kind,
+          id: id,
+          favorite: !discussion.isFavorite,
+        );
+      }
+      ref.invalidate(archivedDiscussionsProvider);
+      ref.invalidate(discussionsProvider);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.chatsActionFailed)));
+      }
+    }
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.info_outline, size: 16, color: AppColors.accentPrimaryDark),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.4,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _HelpCard extends StatelessWidget {
+  const _HelpCard({required this.title, required this.rows});
+
+  final String title;
+  final List<(IconData, String)> rows;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: AppColors.surfaceElevated,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+        const SizedBox(height: 8),
+        for (final (icon, label) in rows)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                Icon(icon, size: 16, color: AppColors.accentPrimaryDark),
+                const SizedBox(width: 8),
+                Text(label, style: const TextStyle(fontSize: 13)),
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
 }

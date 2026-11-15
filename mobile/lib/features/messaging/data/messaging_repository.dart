@@ -327,6 +327,7 @@ class MessagingRepository {
     required String content,
     String? recipientPhone,
     String? replyToId,
+    int forwardScore = 0,
   }) async {
     // Si Pokou ne peut pas garantir le chiffrement, Pokou n'envoie pas le
     // message — voir _sealOrRefuse, qui lève plutôt que de dégrader.
@@ -345,6 +346,8 @@ class MessagingRepository {
         'envelope': ?(sealed is SealEncrypted ? sealed.envelope : null),
         'recipient_phone': ?recipientPhone,
         'reply_to_id': ?replyToId,
+        // Transfert fait depuis l'appareil : « Transféré » sur la bulle.
+        if (forwardScore > 0) 'forward_score': forwardScore,
       },
     );
 
@@ -371,6 +374,7 @@ class MessagingRepository {
     String? caption,
     bool viewOnce = false,
     MediaKey? mediaKey,
+    int forwardScore = 0,
   }) async {
     if (mediaKey != null) {
       final sealed = await _sealOrRefuse(recipientId, mediaKey.seal());
@@ -390,6 +394,7 @@ class MessagingRepository {
           'ciphertext': sealed.ciphertext,
           'envelope': sealed.envelope,
           if (viewOnce) 'view_once': true,
+          if (forwardScore > 0) 'forward_score': forwardScore,
         },
       );
       final saved = DirectMessage.fromJson(response as Map<String, dynamic>);
@@ -415,6 +420,7 @@ class MessagingRepository {
         // (voir VIEW_ONCE_TYPES dans routes/messages.py) : c'est lui qui
         // fait foi, l'écran ne fait que proposer.
         if (viewOnce) 'view_once': true,
+        if (forwardScore > 0) 'forward_score': forwardScore,
       },
     );
     return DirectMessage.fromJson(response as Map<String, dynamic>);
@@ -480,6 +486,27 @@ class MessagingRepository {
         'recipient_id': recipientId,
         'product_id': productId,
         'status': status,
+      },
+    );
+    return DirectMessage.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Un sondage dans une discussion à deux (POST /polls). Le sondage et le
+  /// message qui le porte sont créés ensemble côté serveur.
+  Future<DirectMessage> createPoll({
+    required int recipientId,
+    required String question,
+    required List<String> options,
+    required bool allowsMultiple,
+  }) async {
+    final response = await _api.post(
+      '/polls',
+      body: {
+        'kind': 'contact',
+        'target_id': recipientId,
+        'question': question,
+        'options': options,
+        'allows_multiple': allowsMultiple,
       },
     );
     return DirectMessage.fromJson(response as Map<String, dynamic>);

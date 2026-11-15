@@ -234,6 +234,9 @@ class DirectMessage {
     this.proofMode = false,
     this.deletedAt,
     this.originalContent,
+    this.deliveredAt,
+    this.readAt,
+    this.forwardScore = 0,
   });
 
   final String id;
@@ -329,6 +332,16 @@ class DirectMessage {
   /// PokouMessageStore._keepProofTrace).
   final String? originalContent;
 
+  /// Accusés du serveur, pour « Infos du message » (Distribué · Lu).
+  final DateTime? deliveredAt;
+  final DateTime? readAt;
+
+  /// 0 pour un message d'origine, sinon le nombre de transferts de proche
+  /// en proche : « Transféré », puis « Transféré plusieurs fois » à partir
+  /// de 5 (voir api DirectMessage.forward_score).
+  final int forwardScore;
+
+  bool get isForwarded => forwardScore > 0;
   bool get isMedia => mediaAssetId != null;
   bool get isEdited => editedAt != null;
 
@@ -393,6 +406,13 @@ class DirectMessage {
           ? parseServerTime(json['deleted_at'] as String)
           : null,
       originalContent: json['original_content'] as String?,
+      deliveredAt: json['delivered_at'] != null
+          ? parseServerTime(json['delivered_at'] as String)
+          : null,
+      readAt: json['read_at'] != null
+          ? parseServerTime(json['read_at'] as String)
+          : null,
+      forwardScore: json['forward_score'] as int? ?? 0,
       mediaKey: fromCache && json['encryption'] == null
           ? _remember(
               json['media_asset_id'] as int?,
@@ -450,6 +470,9 @@ class DirectMessage {
     'proof_mode': proofMode,
     'deleted_at': deletedAt?.toUtc().toIso8601String(),
     'original_content': originalContent,
+    'delivered_at': deliveredAt?.toUtc().toIso8601String(),
+    'read_at': readAt?.toUtc().toIso8601String(),
+    'forward_score': forwardScore,
     // Cache LOCAL seulement — voir `pendingMedia`.
     if (pendingMedia != null) 'pending_media': pendingMedia!.toJson(),
     // Cache LOCAL seulement — voir `mediaKey`.
@@ -502,6 +525,9 @@ class DirectMessage {
       proofMode: proofMode,
       deletedAt: deletedAt ?? this.deletedAt,
       originalContent: originalContent ?? this.originalContent,
+      deliveredAt: deliveredAt,
+      readAt: readAt,
+      forwardScore: forwardScore,
     );
   }
 

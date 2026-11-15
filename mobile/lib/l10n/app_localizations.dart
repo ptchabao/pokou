@@ -15211,6 +15211,444 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.'**
   String get courierRejectedBody;
+
+  /// No description provided for @forwardTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transférer à…'**
+  String get forwardTitle;
+
+  /// No description provided for @forwardLimit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu\'à 5 discussions'**
+  String get forwardLimit;
+
+  /// No description provided for @forwardSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher'**
+  String get forwardSearch;
+
+  /// No description provided for @forwardRecent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récentes'**
+  String get forwardRecent;
+
+  /// No description provided for @forwardContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts'**
+  String get forwardContacts;
+
+  /// No description provided for @forwardGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe'**
+  String get forwardGroup;
+
+  /// No description provided for @forwardNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le message porte la mention « Transféré ». Envoyé plus de 5 fois, il devient « Transféré plusieurs fois ».'**
+  String get forwardNote;
+
+  /// No description provided for @forwardSendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Choisis jusqu\'à 5 discussions} =1{Envoyer à 1 discussion} other{Envoyer à {count} discussions}}'**
+  String forwardSendTo(int count);
+
+  /// No description provided for @forwardMaxReached.
+  ///
+  /// In fr, this message translates to:
+  /// **'5 discussions au maximum.'**
+  String get forwardMaxReached;
+
+  /// No description provided for @forwardDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Transféré à 1 discussion.} other{Transféré à {count} discussions.}}'**
+  String forwardDone(int count);
+
+  /// No description provided for @forwardPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Transfert impossible vers 1 discussion.} other{Transfert impossible vers {count} discussions.}}'**
+  String forwardPartial(int count);
+
+  /// No description provided for @forwardedLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transféré'**
+  String get forwardedLabel;
+
+  /// No description provided for @forwardedManyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transféré plusieurs fois'**
+  String get forwardedManyLabel;
+
+  /// No description provided for @contactAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible'**
+  String get contactAvailable;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler {name}'**
+  String reportTitle(String name);
+
+  /// No description provided for @reportGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler le groupe'**
+  String get reportGroup;
+
+  /// No description provided for @reportReasonScam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arnaque ou demande d\'argent'**
+  String get reportReasonScam;
+
+  /// No description provided for @reportReasonImpersonation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se fait passer pour quelqu\'un'**
+  String get reportReasonImpersonation;
+
+  /// No description provided for @reportReasonSpam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Spam ou publicité'**
+  String get reportReasonSpam;
+
+  /// No description provided for @reportReasonShocking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu choquant'**
+  String get reportReasonShocking;
+
+  /// No description provided for @reportReasonOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get reportReasonOther;
+
+  /// No description provided for @reportNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les 5 derniers messages de cette discussion sont envoyés au support de Pokou avec ton signalement. Il ne voit rien d\'autre.'**
+  String get reportNote;
+
+  /// No description provided for @reportAlsoBlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer aussi ce numéro'**
+  String get reportAlsoBlock;
+
+  /// No description provided for @reportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le signalement'**
+  String get reportSend;
+
+  /// No description provided for @reportSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé. Merci.'**
+  String get reportSent;
+
+  /// No description provided for @reportSentBlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé, numéro bloqué.'**
+  String get reportSentBlocked;
+
+  /// No description provided for @reportFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement non envoyé — vérifie ta connexion.'**
+  String get reportFailed;
+
+  /// No description provided for @blockedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts bloqués'**
+  String get blockedTitle;
+
+  /// No description provided for @blockedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Personne} =1{1 personne} other{{count} personnes}}'**
+  String blockedCount(int count);
+
+  /// No description provided for @blockedEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu n\'as bloqué personne.'**
+  String get blockedEmpty;
+
+  /// No description provided for @blockedInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une personne bloquée ne peut ni t\'appeler ni t\'écrire. Elle ne voit plus ta photo, ton « Vu à » ni tes statuts. Elle n\'est pas prévenue.'**
+  String get blockedInfo;
+
+  /// No description provided for @blockedGroupsNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le blocage vaut aussi dans les groupes en commun : tu ne reçois plus ses appels de groupe.'**
+  String get blockedGroupsNote;
+
+  /// No description provided for @blockedAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer un contact'**
+  String get blockedAdd;
+
+  /// No description provided for @blockedUnblock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquer'**
+  String get blockedUnblock;
+
+  /// No description provided for @blockedUnblocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est débloqué.'**
+  String blockedUnblocked(String name);
+
+  /// No description provided for @blockedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloqué le {date}'**
+  String blockedOn(String date);
+
+  /// No description provided for @blockedOnAfterReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloqué le {date} · après un signalement'**
+  String blockedOnAfterReport(String date);
+
+  /// No description provided for @unknownSenderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro n\'est pas dans tes contacts'**
+  String get unknownSenderTitle;
+
+  /// No description provided for @unknownSenderBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom affiché est choisi par l\'expéditeur : il n\'est pas vérifié. Pokou ne te demandera jamais ton code secret ni de l\'argent.'**
+  String get unknownSenderBody;
+
+  /// No description provided for @unknownSenderSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas dans tes contacts'**
+  String get unknownSenderSubtitle;
+
+  /// No description provided for @unknownSenderBlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer'**
+  String get unknownSenderBlock;
+
+  /// No description provided for @unknownSenderReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler'**
+  String get unknownSenderReport;
+
+  /// No description provided for @unknownSenderAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get unknownSenderAdd;
+
+  /// No description provided for @secretCodeAlertTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce message demande un code secret.'**
+  String get secretCodeAlertTitle;
+
+  /// No description provided for @secretCodeAlertBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne le donne jamais, même à un agent.'**
+  String get secretCodeAlertBody;
+
+  /// No description provided for @convEditWindow.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes, plural, =1{Pendant 1 minute après l\'envoi} other{Pendant {minutes} minutes après l\'envoi}}'**
+  String convEditWindow(int minutes);
+
+  /// No description provided for @messageInfoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Infos du message'**
+  String get messageInfoTitle;
+
+  /// No description provided for @messageInfoSentAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé {time}'**
+  String messageInfoSentAt(String time);
+
+  /// No description provided for @messageInfoDeliveredAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Distribué {time}'**
+  String messageInfoDeliveredAt(String time);
+
+  /// No description provided for @messageInfoReadAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu {time}'**
+  String messageInfoReadAt(String time);
+
+  /// No description provided for @messageInfoSentOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé'**
+  String get messageInfoSentOnly;
+
+  /// No description provided for @attachTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre à {name}'**
+  String attachTo(String name);
+
+  /// No description provided for @attachGallery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Galerie'**
+  String get attachGallery;
+
+  /// No description provided for @attachCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra'**
+  String get attachCamera;
+
+  /// No description provided for @attachPoll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sondage'**
+  String get attachPoll;
+
+  /// No description provided for @attachKory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnotte Kory'**
+  String get attachKory;
+
+  /// No description provided for @attachKoryGroupsOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'La cagnotte se crée seulement dans un groupe.'**
+  String get attachKoryGroupsOnly;
+
+  /// No description provided for @chatsMenuDirectChat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion à deux'**
+  String get chatsMenuDirectChat;
+
+  /// No description provided for @chatsMenuGroupChat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe'**
+  String get chatsMenuGroupChat;
+
+  /// No description provided for @chatsPinHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trois discussions épinglées au maximum'**
+  String get chatsPinHint;
+
+  /// No description provided for @chatsAddFavorite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter aux favoris'**
+  String get chatsAddFavorite;
+
+  /// No description provided for @chatsRemoveFavorite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer des favoris'**
+  String get chatsRemoveFavorite;
+
+  /// No description provided for @chatsFavoriteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouve-la dans le filtre « Favoris »'**
+  String get chatsFavoriteHint;
+
+  /// No description provided for @chatsArchiveHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Elle quitte la liste sans être supprimée'**
+  String get chatsArchiveHint;
+
+  /// No description provided for @archivedScreenTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archivées'**
+  String get archivedScreenTitle;
+
+  /// No description provided for @archivedScreenCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune discussion} =1{1 discussion} other{{count} discussions}}'**
+  String archivedScreenCount(int count);
+
+  /// No description provided for @archivedScreenNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une discussion archivée reste ici quand un message arrive. Son contenu et le mode preuve ne changent pas.'**
+  String get archivedScreenNote;
+
+  /// No description provided for @archivedScreenHelpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appui long sur une discussion'**
+  String get archivedScreenHelpTitle;
+
+  /// No description provided for @archivedScreenUnarchive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désarchiver'**
+  String get archivedScreenUnarchive;
+
+  /// No description provided for @archivedScreenAddFavorite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter aux favoris'**
+  String get archivedScreenAddFavorite;
+
+  /// No description provided for @archivedScreenEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune discussion archivée.'**
+  String get archivedScreenEmpty;
+
+  /// No description provided for @reportGroupNamed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler {name}'**
+  String reportGroupNamed(String name);
+
+  /// No description provided for @groupLeaveLot1Note.
+  ///
+  /// In fr, this message translates to:
+  /// **'En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus.'**
+  String get groupLeaveLot1Note;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

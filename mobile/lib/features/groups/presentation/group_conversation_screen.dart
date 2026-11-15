@@ -53,6 +53,8 @@ import '../../messaging/presentation/poll_bubble.dart';
 import '../../messaging/presentation/composer/composer_input.dart';
 import '../../messaging/presentation/composer/composer_panel.dart';
 import '../../messaging/presentation/message_appear.dart';
+import '../../messaging/presentation/attach_sheet.dart';
+import '../../messaging/presentation/forward_screen.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../stickers/data/sticker_models.dart';
 import '../../stickers/presentation/sticker_image.dart';
@@ -347,6 +349,21 @@ class _GroupConversationScreenState
                 _inputFocus.requestFocus();
               },
             ),
+            // Un message resté chiffré n'a rien à transférer : on ne le lit
+            // pas soi-même (voir Discussions · 3, audit « en groupe aussi »).
+            if (!message.isEncrypted)
+              ListTile(
+                leading: const Icon(Icons.forward),
+                title: Text(_l.conversationForward),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  openForwardScreen(
+                    context,
+                    payload: ForwardPayload.fromGroup(message),
+                    myUserId: widget.myUserId,
+                  );
+                },
+              ),
             if (copyableText(
                   message.content,
                   deleted: message.deletedAt != null,
@@ -381,7 +398,10 @@ class _GroupConversationScreenState
                   Icons.delete_outline,
                   color: AppColors.feedbackDanger,
                 ),
-                title: Text(_l.deleteForAll),
+                // « Supprimer », comme la maquette — le sort du message
+                // (gardé barré en mode preuve, effacé sinon) ne change pas :
+                // seul le libellé est repris.
+                title: Text(_l.actionDelete),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   _deleteForEveryone(message);
@@ -842,232 +862,64 @@ class _GroupConversationScreenState
     );
   }
 
-  Future<void> _pickVideo(ImageSource source) async {
-    final picked = await ImagePicker().pickVideo(
-      source: source,
-      maxDuration: const Duration(minutes: 5),
+  /// Discussions · 2 — « Joindre à {nom} » : Galerie / Caméra / Document,
+  /// et « Cagnotte Kory » seulement dans un pays où Kory est ouvert (jamais
+  /// en Lot 1). La maquette propose aussi « Sondage » dans un groupe, mais
+  /// le serveur refuse encore les sondages de groupe (409) tant qu'ils ne
+  /// sont pas chiffrés comme le reste des messages : l'entrée resterait un
+  /// bouton qui échoue à chaque fois, donc elle n'est pas montrée ici (voir
+  /// GroupRepository.createPoll). Elle existe déjà côté discussion à deux.
+  Future<void> _showAttachmentSheet() async {
+    final hasKory = ref.read(currentCountryConfigProvider).has('kory');
+    final choice = await showAttachSheet(
+      context,
+      targetName: widget.groupName,
+      offerKory: hasKory,
     );
-    if (picked == null) return;
+    switch (choice) {
+      case AttachChoice.document:
+        await _pickAndSendDocument();
+      case AttachChoice.gallery:
+        await _pickGalleryMedia();
+      case AttachChoice.camera:
+        await _pickImage(ImageSource.camera);
+      case AttachChoice.kory:
+        if (mounted) await openKoryCreate(context, ref, groupId: widget.groupId);
+      case AttachChoice.poll:
+      case null:
+        break;
+    }
+  }
+
+  /// Un seul sélecteur pour la galerie : image ou vidéo — voir
+  /// conversation_screen.dart::_pickGalleryMedia, même logique.
+  Future<void> _pickGalleryMedia() async {
+    final picked = await ImagePicker().pickMedia(
+      imageQuality: ref.read(appSettingsProvider).imageUploadQuality,
+    );
+    if (picked == null || !mounted) return;
+    final mime = lookupMimeType(picked.path) ?? '';
+    if (mime.startsWith('video/')) {
+      final bytes = await picked.readAsBytes();
+      await _sendMediaFile(
+        path: picked.path,
+        bytes: bytes,
+        filename: picked.name,
+        mimeType: mime,
+        messageType: 'VIDEO',
+      );
+      return;
+    }
     final bytes = await picked.readAsBytes();
     await _sendMediaFile(
       path: picked.path,
       bytes: bytes,
       filename: picked.name,
-      mimeType: lookupMimeType(picked.name) ?? 'video/mp4',
-      messageType: 'VIDEO',
+      mimeType: lookupMimeType(picked.name) ?? 'image/jpeg',
+      messageType: 'IMAGE',
     );
   }
 
-  Future<void> _showAttachmentSheet() async {
-    final choice = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.insert_drive_file,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachDocument),
-              onTap: () => Navigator.pop(sheetContext, 'document'),
-            ),
-            ListTile(
-              leading: Icon(Icons.photo, color: AppColors.accentPrimaryDark),
-              title: Text(_l.convAttachGallery),
-              onTap: () => Navigator.pop(sheetContext, 'photo_gallery'),
-            ),
-            ListTile(
-              leading: Icon(Icons.videocam, color: AppColors.accentPrimaryDark),
-              title: Text(_l.convAttachVideo),
-              onTap: () => Navigator.pop(sheetContext, 'video_gallery'),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.camera_alt,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachCamera),
-              onTap: () => Navigator.pop(sheetContext, 'camera'),
-            ),
-            // Pas de sondage dans les groupes pour l'instant : depuis le
-            // chiffrement de bout en bout, le serveur ne peut plus tenir
-            // les votes en clair et refuse leur création (409). L'entrée
-            // restait proposée — on remplissait le sondage, puis il
-            // échouait. Elle reviendra avec des sondages chiffrés.
-            // Une cagnotte se crée DEPUIS le groupe, déjà rattachée à lui
-            // (NAV-03) — seulement là où Kory est ouvert.
-            if (ref.read(currentCountryConfigProvider).has('kory'))
-              ListTile(
-                leading: Icon(
-                  Icons.savings_outlined,
-                  color: AppColors.accentPrimaryDark,
-                ),
-                title: Text(_l.koryCreate),
-                onTap: () => Navigator.pop(sheetContext, 'kory'),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    switch (choice) {
-      case 'document':
-        await _pickAndSendDocument();
-      case 'photo_gallery':
-        await _pickImage(ImageSource.gallery);
-      case 'video_gallery':
-        await _pickVideo(ImageSource.gallery);
-      case 'camera':
-        await _pickImage(ImageSource.camera);
-      case 'poll':
-        await _createGroupPoll();
-      case 'kory':
-        if (mounted)
-          await openKoryCreate(context, ref, groupId: widget.groupId);
-    }
-  }
-
-  Future<void> _createGroupPoll() async {
-    final questionController = TextEditingController();
-    final optionControllers = [
-      TextEditingController(),
-      TextEditingController(),
-    ];
-    var allowsMultiple = false;
-
-    final poll =
-        await showDialog<
-          ({String question, List<String> options, bool allowsMultiple})
-        >(
-          context: context,
-          builder: (dialogContext) => StatefulBuilder(
-            builder: (context, setDialogState) => AlertDialog(
-              title: Text(_l.pollOne),
-              content: SizedBox(
-                width: 420,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        contextMenuBuilder: pokouContextMenuBuilder,
-                        controller: questionController,
-                        autofocus: true,
-                        maxLength: 500,
-                        decoration: InputDecoration(
-                          labelText: _l.pollQuestion,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      for (
-                        var index = 0;
-                        index < optionControllers.length;
-                        index++
-                      )
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: TextField(
-                            contextMenuBuilder: pokouContextMenuBuilder,
-                            controller: optionControllers[index],
-                            maxLength: 100,
-                            decoration: InputDecoration(
-                              labelText: _l.pollAnswerN(index + 1),
-                              border: const OutlineInputBorder(),
-                              counterText: '',
-                              suffixIcon: optionControllers.length > 2
-                                  ? IconButton(
-                                      tooltip: _l.actionDelete,
-                                      onPressed: () {
-                                        setDialogState(() {
-                                          optionControllers
-                                              .removeAt(index)
-                                              .dispose();
-                                        });
-                                      },
-                                      icon: const Icon(Icons.close_rounded),
-                                    )
-                                  : null,
-                            ),
-                          ),
-                        ),
-                      if (optionControllers.length < 12)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () => setDialogState(
-                              () => optionControllers.add(
-                                TextEditingController(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.add_rounded),
-                            label: Text(_l.pollAddAnswer),
-                          ),
-                        ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(_l.pollMultiple),
-                        value: allowsMultiple,
-                        onChanged: (value) =>
-                            setDialogState(() => allowsMultiple = value),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(_l.actionCancel),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final question = questionController.text.trim();
-                    final options = optionControllers
-                        .map((controller) => controller.text.trim())
-                        .where((option) => option.isNotEmpty)
-                        .toList();
-                    if (question.isEmpty || options.length < 2) return;
-                    Navigator.pop(dialogContext, (
-                      question: question,
-                      options: options,
-                      allowsMultiple: allowsMultiple,
-                    ));
-                  },
-                  child: Text(_l.pollOne),
-                ),
-              ],
-            ),
-          ),
-        );
-
-    questionController.dispose();
-    for (final controller in optionControllers) {
-      controller.dispose();
-    }
-    if (poll == null || !mounted) return;
-
-    try {
-      await ref
-          .read(groupChatControllerProvider(widget.groupId).notifier)
-          .createPoll(
-            question: poll.question,
-            options: poll.options,
-            allowsMultiple: poll.allowsMultiple,
-          );
-      _scrollToBottom();
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_l.convAttachmentFailed)));
-      }
-    }
-  }
 
   Future<void> _beginRecording() async {
     if (!await _ensurePermission(Permission.microphone)) {
@@ -2847,7 +2699,16 @@ class _GroupBubbleState extends State<_GroupBubble> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: [?_replyBanner(), _content()],
+              children: [
+                ForwardedLabel(
+                  score: message.forwardScore,
+                  color: isMine
+                      ? AppColors.chatBubbleSentBorder
+                      : AppColors.textMuted,
+                ),
+                ?_replyBanner(),
+                _content(),
+              ],
             ),
           );
 
