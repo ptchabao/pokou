@@ -3,14 +3,14 @@ après signalement), mention « Transféré », signalement d'un groupe avec les
 5 derniers messages.
 
 Revision ID: 0024_messagerie_maquette
-Revises: 0023_kory_plus_fee
+Revises: 0024_statuts_reglages
 """
 from alembic import op
 import sqlalchemy as sa
 
 
 revision = "0024_messagerie_maquette"
-down_revision = "0023_kory_plus_fee"
+down_revision = "0024_statuts_reglages"
 branch_labels = None
 depends_on = None
 

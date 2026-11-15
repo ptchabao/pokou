@@ -1,14 +1,14 @@
 """Pokou certifié : forme du badge, opérateur du wallet, détails du profil Pro.
 
 Revision ID: 0024_certified_pro_details
-Revises: 0023_kory_plus_fee
+Revises: 0024_messagerie_maquette
 """
 from alembic import op
 import sqlalchemy as sa
 
 
 revision = "0024_certified_pro_details"
-down_revision = "0023_kory_plus_fee"
+down_revision = "0024_messagerie_maquette"
 branch_labels = None
 depends_on = None
 
