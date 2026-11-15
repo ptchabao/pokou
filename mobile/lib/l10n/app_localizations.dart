@@ -16016,6 +16016,66 @@ abstract class L {
   /// **'Contacts sur Pokou'**
   String get newChatOnPokouSection;
 
+  /// No description provided for @searchScopeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get searchScopeAll;
+
+  /// No description provided for @searchScopeChats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussions'**
+  String get searchScopeChats;
+
+  /// No description provided for @searchScopeMessages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages'**
+  String get searchScopeMessages;
+
+  /// No description provided for @searchScopePhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos'**
+  String get searchScopePhotos;
+
+  /// No description provided for @searchScopeLinks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liens'**
+  String get searchScopeLinks;
+
+  /// No description provided for @searchChatsSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussions'**
+  String get searchChatsSection;
+
+  /// No description provided for @searchMessagesSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages · {count}'**
+  String searchMessagesSection(int count);
+
+  /// No description provided for @searchPhotosSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos · {count}'**
+  String searchPhotosSection(int count);
+
+  /// No description provided for @searchLinksSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liens · {count}'**
+  String searchLinksSection(int count);
+
+  /// No description provided for @searchLastMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier message : {text}'**
+  String searchLastMessage(String text);
+
   /// No description provided for @viewerReply.
   ///
   /// In fr, this message translates to:

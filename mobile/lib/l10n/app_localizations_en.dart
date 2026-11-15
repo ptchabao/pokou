@@ -9563,6 +9563,44 @@ class LEn extends L {
   String get newChatOnPokouSection => 'Contacts on Pokou';
 
   @override
+  String get searchScopeAll => 'All';
+
+  @override
+  String get searchScopeChats => 'Chats';
+
+  @override
+  String get searchScopeMessages => 'Messages';
+
+  @override
+  String get searchScopePhotos => 'Photos';
+
+  @override
+  String get searchScopeLinks => 'Links';
+
+  @override
+  String get searchChatsSection => 'Chats';
+
+  @override
+  String searchMessagesSection(int count) {
+    return 'Messages · $count';
+  }
+
+  @override
+  String searchPhotosSection(int count) {
+    return 'Photos · $count';
+  }
+
+  @override
+  String searchLinksSection(int count) {
+    return 'Links · $count';
+  }
+
+  @override
+  String searchLastMessage(String text) {
+    return 'Last message: $text';
+  }
+
+  @override
   String get viewerReply => 'Reply';
 
   @override

@@ -5067,6 +5067,44 @@
   "newChatInviteRow": "Inviter sur Pokou",
   "newChatInviteRowHint": "Partager un lien d'invitation",
   "newChatOnPokouSection": "Contacts sur Pokou",
+  "searchScopeAll": "Tout",
+  "searchScopeChats": "Discussions",
+  "searchScopeMessages": "Messages",
+  "searchScopePhotos": "Photos",
+  "searchScopeLinks": "Liens",
+  "searchChatsSection": "Discussions",
+  "searchMessagesSection": "Messages · {count}",
+  "@searchMessagesSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchPhotosSection": "Photos · {count}",
+  "@searchPhotosSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchLinksSection": "Liens · {count}",
+  "@searchLinksSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchLastMessage": "Dernier message : {text}",
+  "@searchLastMessage": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "viewerReply": "Répondre",
   "viewerForward": "Transférer",
   "viewerSave": "Enregistrer",

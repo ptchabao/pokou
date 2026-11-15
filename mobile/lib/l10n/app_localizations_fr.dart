@@ -9621,6 +9621,44 @@ class LFr extends L {
   String get newChatOnPokouSection => 'Contacts sur Pokou';
 
   @override
+  String get searchScopeAll => 'Tout';
+
+  @override
+  String get searchScopeChats => 'Discussions';
+
+  @override
+  String get searchScopeMessages => 'Messages';
+
+  @override
+  String get searchScopePhotos => 'Photos';
+
+  @override
+  String get searchScopeLinks => 'Liens';
+
+  @override
+  String get searchChatsSection => 'Discussions';
+
+  @override
+  String searchMessagesSection(int count) {
+    return 'Messages · $count';
+  }
+
+  @override
+  String searchPhotosSection(int count) {
+    return 'Photos · $count';
+  }
+
+  @override
+  String searchLinksSection(int count) {
+    return 'Liens · $count';
+  }
+
+  @override
+  String searchLastMessage(String text) {
+    return 'Dernier message : $text';
+  }
+
+  @override
   String get viewerReply => 'Répondre';
 
   @override
