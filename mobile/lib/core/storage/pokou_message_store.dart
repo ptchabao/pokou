@@ -1117,6 +1117,47 @@ class PokouMessageStore {
     await batch.commit(noResult: true);
   }
 
+  /// Discussions · 22 — chercher dans les messages GARDÉS SUR CET APPAREIL.
+  ///
+  /// Ici et non sur le serveur : les messages chiffrés de bout en bout n'y
+  /// sont lisibles nulle part ailleurs. Le cache local (lui-même chiffré)
+  /// les tient déjà en clair. Le `LIKE` dégrossit, le filtre Dart tranche
+  /// (insensible à la casse, sur le texte seulement — pas sur le JSON).
+  Future<({List<DirectMessage> direct, List<GroupMessage> group})> searchLocal(
+    String query, {
+    int limit = 80,
+  }) async {
+    final needle = query.trim().toLowerCase();
+    if (needle.isEmpty) {
+      return (direct: <DirectMessage>[], group: <GroupMessage>[]);
+    }
+    final db = await _database;
+    final like = '%${needle.replaceAll('%', r'\%').replaceAll('_', r'\_')}%';
+    bool matches(String? content) =>
+        content != null && content.toLowerCase().contains(needle);
+    final direct = <DirectMessage>[
+      for (final row in await db.query(
+        'direct_messages',
+        where: "payload LIKE ? ESCAPE '\\' AND pending = 0",
+        whereArgs: [like],
+        orderBy: 'created_at DESC',
+        limit: limit,
+      ))
+        DirectMessage.fromJson(_payloadOf(row), fromCache: true),
+    ].where((m) => !m.isEncrypted && matches(m.content)).toList();
+    final group = <GroupMessage>[
+      for (final row in await db.query(
+        'group_messages',
+        where: "payload LIKE ? ESCAPE '\\' AND pending = 0",
+        whereArgs: [like],
+        orderBy: 'created_at DESC',
+        limit: limit,
+      ))
+        GroupMessage.fromJson(_payloadOf(row)),
+    ].where((m) => !m.isEncrypted && matches(m.content)).toList();
+    return (direct: direct, group: group);
+  }
+
   Future<CachedGroupConversation> groupConversation(int groupId) async {
     final db = await _database;
     final rows = await db.query(

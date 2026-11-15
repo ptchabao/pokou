@@ -451,9 +451,14 @@ def reset_member_password(
 # ── Signalements ────────────────────────────────────────────────────────
 
 def _report_json(db: Session, r: AbuseReport) -> dict:
-    target = db.get(User, r.target_user_id)
+    target = db.get(User, r.target_user_id) if r.target_user_id else None
     reporter = db.get(User, r.reporter_id) if r.reporter_id else None
+    # Signalement d'un groupe : pas de compte visé, le groupe à la place.
+    group = db.get(Group, r.group_id) if r.group_id else None
     return {
+        "group": {"id": group.id, "name": group.name} if group else None,
+        # Les 5 derniers messages, joints par l'appareil de qui signale.
+        "recent_messages": r.recent_messages or [],
         "id": r.id,
         "status": r.status,
         "reason": r.reason,
@@ -464,7 +469,8 @@ def _report_json(db: Session, r: AbuseReport) -> dict:
         "target": _user_json(target) if target else None,
         "reporter": _user_json(reporter) if reporter else None,
         "target_reports": db.query(func.count(AbuseReport.id)).filter(
-            AbuseReport.target_user_id == r.target_user_id).scalar() or 0,
+            AbuseReport.target_user_id == r.target_user_id).scalar() or 0
+        if r.target_user_id else 0,
     }
 
 
@@ -501,7 +507,7 @@ def resolve_report(
     if body.action == "suspend":
         if "users.manage" not in permissions_of(user):
             raise HTTPException(status_code=403, detail="Permission refusée")
-        target = db.get(User, r.target_user_id)
+        target = db.get(User, r.target_user_id) if r.target_user_id else None
         if target is not None and target.id != user.id:
             # Même règle que /users/{id}/suspend : un membre de l'équipe ne
             # se suspend que par un super-administrateur.

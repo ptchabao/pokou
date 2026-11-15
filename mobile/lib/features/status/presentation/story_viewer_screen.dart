@@ -17,6 +17,7 @@ import 'status_controller.dart';
 import 'status_time.dart';
 import 'status_viewers_sheet.dart';
 import '../../messaging/presentation/messaging_controller.dart';
+import '../../messaging/presentation/status_reply.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/status_halo.dart';
 import '../data/status_text_style.dart';
@@ -74,6 +75,18 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     super.dispose();
   }
 
+  /// La légende citée : le texte du statut, ou son type.
+  String _replyCaption(L l) {
+    final status = widget.item.statuses[_index];
+    final text = status.textContent?.trim() ?? '';
+    if (text.isNotEmpty) return text;
+    return switch (status.contentType) {
+      'IMAGE' => l.mediaPhoto,
+      'VIDEO' => l.mediaVideo,
+      _ => l.mediaMessage,
+    };
+  }
+
   /// STA-2 / STA-7 (MSG-15) : la réponse part EN PRIVÉ, dans la discussion
   /// à deux avec l'auteur — chiffrée comme tout message direct.
   Future<void> _sendReply() async {
@@ -86,7 +99,13 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
           .read(messagingRepositoryProvider)
           .send(
             recipientId: widget.item.userId,
-            content: '${l.statusReplyQuote}\n$text',
+            // La citation du statut voyage DANS le message chiffré (voir
+            // messaging/presentation/status_reply.dart) : la discussion
+            // l'affiche en carte « {Nom} · Statut ».
+            content: encodeStatusReply(
+              caption: _replyCaption(l),
+              text: text,
+            ),
           );
       if (!mounted) return;
       _reply.clear();

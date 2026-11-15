@@ -229,6 +229,7 @@ class GroupRepository {
     required Map<String, dynamic> body,
     String? replyToId,
     int? mediaAssetId,
+    int forwardScore = 0,
   }) async {
     await _ensureSenderKeyDistributed(group, senderId);
     final ciphertext = await _senderKeys.encrypt(
@@ -246,6 +247,8 @@ class GroupRepository {
         'encryption': 'sender-key-v1',
         'ciphertext': ciphertext,
         'crypto_epoch': group.cryptoEpoch,
+        // Transfert : seul ce compte voyage en clair, pas le contenu.
+        if (forwardScore > 0) 'forward_score': forwardScore,
       },
     );
     final serverMessage = GroupMessage.fromJson(
@@ -658,12 +661,14 @@ class GroupRepository {
     required String messageType,
     String? replyToId,
     MessageReplyPreview? replyTo,
+    int forwardScore = 0,
   }) async {
     return _sendEncrypted(
       group: group,
       senderId: senderId,
       messageType: messageType,
       replyToId: replyToId,
+      forwardScore: forwardScore,
       body: {
         'content': content,
         if (replyTo != null) 'reply_to': replyTo.toJson(),
@@ -689,12 +694,14 @@ class GroupRepository {
     required int mediaAssetId,
     MediaKey? mediaKey,
     String? caption,
+    int forwardScore = 0,
   }) async {
     return _sendEncrypted(
       group: group,
       senderId: senderId,
       messageType: messageType,
       mediaAssetId: mediaAssetId,
+      forwardScore: forwardScore,
       body: {
         'content': caption,
         if (mediaKey != null)

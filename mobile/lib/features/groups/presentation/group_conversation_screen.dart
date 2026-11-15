@@ -53,6 +53,13 @@ import '../../messaging/presentation/poll_bubble.dart';
 import '../../messaging/presentation/composer/composer_input.dart';
 import '../../messaging/presentation/composer/composer_panel.dart';
 import '../../messaging/presentation/message_appear.dart';
+import '../../messaging/presentation/attach_sheet.dart';
+import '../../messaging/presentation/forward_screen.dart';
+import '../../messaging/presentation/offline_banner.dart';
+import '../../messaging/presentation/report_sheet.dart';
+import 'group_info_screen.dart';
+import 'group_kory_banner.dart';
+import 'mention_picker.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../stickers/data/sticker_models.dart';
 import '../../stickers/presentation/sticker_image.dart';
@@ -347,6 +354,21 @@ class _GroupConversationScreenState
                 _inputFocus.requestFocus();
               },
             ),
+            // Un message resté chiffré n'a rien à transférer : on ne le lit
+            // pas soi-même (voir Discussions · 3, audit « en groupe aussi »).
+            if (!message.isEncrypted)
+              ListTile(
+                leading: const Icon(Icons.forward),
+                title: Text(_l.conversationForward),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  openForwardScreen(
+                    context,
+                    payload: ForwardPayload.fromGroup(message),
+                    myUserId: widget.myUserId,
+                  );
+                },
+              ),
             if (copyableText(
                   message.content,
                   deleted: message.deletedAt != null,
@@ -381,7 +403,10 @@ class _GroupConversationScreenState
                   Icons.delete_outline,
                   color: AppColors.feedbackDanger,
                 ),
-                title: Text(_l.deleteForAll),
+                // « Supprimer », comme la maquette — le sort du message
+                // (gardé barré en mode preuve, effacé sinon) ne change pas :
+                // seul le libellé est repris.
+                title: Text(_l.actionDelete),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   _deleteForEveryone(message);
@@ -578,7 +603,13 @@ class _GroupConversationScreenState
     }
   }
 
+  /// Ce qui suit le « @ » en cours de frappe — le sélecteur « Mentionner »
+  /// s'ouvre tant qu'il n'est pas nul.
+  String? _mentionQuery;
+
   void _onInputChanged() {
+    final mention = mentionQueryAt(_inputController.value);
+    if (mention != _mentionQuery) setState(() => _mentionQuery = mention);
     final hasText = _inputController.text.trim().isNotEmpty;
     final next = _composerMachine.onTextChanged(
       _composer,
@@ -842,232 +873,64 @@ class _GroupConversationScreenState
     );
   }
 
-  Future<void> _pickVideo(ImageSource source) async {
-    final picked = await ImagePicker().pickVideo(
-      source: source,
-      maxDuration: const Duration(minutes: 5),
+  /// Discussions · 2 — « Joindre à {nom} » : Galerie / Caméra / Document,
+  /// et « Cagnotte Kory » seulement dans un pays où Kory est ouvert (jamais
+  /// en Lot 1). La maquette propose aussi « Sondage » dans un groupe, mais
+  /// le serveur refuse encore les sondages de groupe (409) tant qu'ils ne
+  /// sont pas chiffrés comme le reste des messages : l'entrée resterait un
+  /// bouton qui échoue à chaque fois, donc elle n'est pas montrée ici (voir
+  /// GroupRepository.createPoll). Elle existe déjà côté discussion à deux.
+  Future<void> _showAttachmentSheet() async {
+    final hasKory = ref.read(currentCountryConfigProvider).has('kory');
+    final choice = await showAttachSheet(
+      context,
+      targetName: widget.groupName,
+      offerKory: hasKory,
     );
-    if (picked == null) return;
+    switch (choice) {
+      case AttachChoice.document:
+        await _pickAndSendDocument();
+      case AttachChoice.gallery:
+        await _pickGalleryMedia();
+      case AttachChoice.camera:
+        await _pickImage(ImageSource.camera);
+      case AttachChoice.kory:
+        if (mounted) await openKoryCreate(context, ref, groupId: widget.groupId);
+      case AttachChoice.poll:
+      case null:
+        break;
+    }
+  }
+
+  /// Un seul sélecteur pour la galerie : image ou vidéo — voir
+  /// conversation_screen.dart::_pickGalleryMedia, même logique.
+  Future<void> _pickGalleryMedia() async {
+    final picked = await ImagePicker().pickMedia(
+      imageQuality: ref.read(appSettingsProvider).imageUploadQuality,
+    );
+    if (picked == null || !mounted) return;
+    final mime = lookupMimeType(picked.path) ?? '';
+    if (mime.startsWith('video/')) {
+      final bytes = await picked.readAsBytes();
+      await _sendMediaFile(
+        path: picked.path,
+        bytes: bytes,
+        filename: picked.name,
+        mimeType: mime,
+        messageType: 'VIDEO',
+      );
+      return;
+    }
     final bytes = await picked.readAsBytes();
     await _sendMediaFile(
       path: picked.path,
       bytes: bytes,
       filename: picked.name,
-      mimeType: lookupMimeType(picked.name) ?? 'video/mp4',
-      messageType: 'VIDEO',
+      mimeType: lookupMimeType(picked.name) ?? 'image/jpeg',
+      messageType: 'IMAGE',
     );
   }
 
-  Future<void> _showAttachmentSheet() async {
-    final choice = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.insert_drive_file,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachDocument),
-              onTap: () => Navigator.pop(sheetContext, 'document'),
-            ),
-            ListTile(
-              leading: Icon(Icons.photo, color: AppColors.accentPrimaryDark),
-              title: Text(_l.convAttachGallery),
-              onTap: () => Navigator.pop(sheetContext, 'photo_gallery'),
-            ),
-            ListTile(
-              leading: Icon(Icons.videocam, color: AppColors.accentPrimaryDark),
-              title: Text(_l.convAttachVideo),
-              onTap: () => Navigator.pop(sheetContext, 'video_gallery'),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.camera_alt,
-                color: AppColors.accentPrimaryDark,
-              ),
-              title: Text(_l.convAttachCamera),
-              onTap: () => Navigator.pop(sheetContext, 'camera'),
-            ),
-            // Pas de sondage dans les groupes pour l'instant : depuis le
-            // chiffrement de bout en bout, le serveur ne peut plus tenir
-            // les votes en clair et refuse leur création (409). L'entrée
-            // restait proposée — on remplissait le sondage, puis il
-            // échouait. Elle reviendra avec des sondages chiffrés.
-            // Une cagnotte se crée DEPUIS le groupe, déjà rattachée à lui
-            // (NAV-03) — seulement là où Kory est ouvert.
-            if (ref.read(currentCountryConfigProvider).has('kory'))
-              ListTile(
-                leading: Icon(
-                  Icons.savings_outlined,
-                  color: AppColors.accentPrimaryDark,
-                ),
-                title: Text(_l.koryCreate),
-                onTap: () => Navigator.pop(sheetContext, 'kory'),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    switch (choice) {
-      case 'document':
-        await _pickAndSendDocument();
-      case 'photo_gallery':
-        await _pickImage(ImageSource.gallery);
-      case 'video_gallery':
-        await _pickVideo(ImageSource.gallery);
-      case 'camera':
-        await _pickImage(ImageSource.camera);
-      case 'poll':
-        await _createGroupPoll();
-      case 'kory':
-        if (mounted)
-          await openKoryCreate(context, ref, groupId: widget.groupId);
-    }
-  }
-
-  Future<void> _createGroupPoll() async {
-    final questionController = TextEditingController();
-    final optionControllers = [
-      TextEditingController(),
-      TextEditingController(),
-    ];
-    var allowsMultiple = false;
-
-    final poll =
-        await showDialog<
-          ({String question, List<String> options, bool allowsMultiple})
-        >(
-          context: context,
-          builder: (dialogContext) => StatefulBuilder(
-            builder: (context, setDialogState) => AlertDialog(
-              title: Text(_l.pollOne),
-              content: SizedBox(
-                width: 420,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        contextMenuBuilder: pokouContextMenuBuilder,
-                        controller: questionController,
-                        autofocus: true,
-                        maxLength: 500,
-                        decoration: InputDecoration(
-                          labelText: _l.pollQuestion,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      for (
-                        var index = 0;
-                        index < optionControllers.length;
-                        index++
-                      )
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: TextField(
-                            contextMenuBuilder: pokouContextMenuBuilder,
-                            controller: optionControllers[index],
-                            maxLength: 100,
-                            decoration: InputDecoration(
-                              labelText: _l.pollAnswerN(index + 1),
-                              border: const OutlineInputBorder(),
-                              counterText: '',
-                              suffixIcon: optionControllers.length > 2
-                                  ? IconButton(
-                                      tooltip: _l.actionDelete,
-                                      onPressed: () {
-                                        setDialogState(() {
-                                          optionControllers
-                                              .removeAt(index)
-                                              .dispose();
-                                        });
-                                      },
-                                      icon: const Icon(Icons.close_rounded),
-                                    )
-                                  : null,
-                            ),
-                          ),
-                        ),
-                      if (optionControllers.length < 12)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () => setDialogState(
-                              () => optionControllers.add(
-                                TextEditingController(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.add_rounded),
-                            label: Text(_l.pollAddAnswer),
-                          ),
-                        ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(_l.pollMultiple),
-                        value: allowsMultiple,
-                        onChanged: (value) =>
-                            setDialogState(() => allowsMultiple = value),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(_l.actionCancel),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final question = questionController.text.trim();
-                    final options = optionControllers
-                        .map((controller) => controller.text.trim())
-                        .where((option) => option.isNotEmpty)
-                        .toList();
-                    if (question.isEmpty || options.length < 2) return;
-                    Navigator.pop(dialogContext, (
-                      question: question,
-                      options: options,
-                      allowsMultiple: allowsMultiple,
-                    ));
-                  },
-                  child: Text(_l.pollOne),
-                ),
-              ],
-            ),
-          ),
-        );
-
-    questionController.dispose();
-    for (final controller in optionControllers) {
-      controller.dispose();
-    }
-    if (poll == null || !mounted) return;
-
-    try {
-      await ref
-          .read(groupChatControllerProvider(widget.groupId).notifier)
-          .createPoll(
-            question: poll.question,
-            options: poll.options,
-            allowsMultiple: poll.allowsMultiple,
-          );
-      _scrollToBottom();
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_l.convAttachmentFailed)));
-      }
-    }
-  }
 
   Future<void> _beginRecording() async {
     if (!await _ensurePermission(Permission.microphone)) {
@@ -1142,6 +1005,7 @@ class _GroupConversationScreenState
             otherParticipantIds: token.participantIds,
             startWithVideo: withVideo,
             groupId: widget.groupId,
+            title: widget.groupName,
             joiningExistingCall: token.joinedExisting,
             groupMembers: [
               for (final member in group?.members ?? const <GroupMember>[])
@@ -1176,181 +1040,32 @@ class _GroupConversationScreenState
 
   Future<void> _showGroupSheet(Group? group) async {
     if (group == null) return;
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      isScrollControlled: true,
-      builder: (sheetContext) => SafeArea(
-        child: DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.6,
-          maxChildSize: 0.9,
-          builder: (_, scrollController) => ListView(
-            controller: scrollController,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-                child: Text(
-                  group.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                child: Text(
-                  '${group.memberCount} participant${group.memberCount > 1 ? 's' : ''}',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              // Administration réservée aux admins — le serveur tranche
-              // (`can_manage`), le client ne devine pas les droits.
-              // Le mode preuve : tout titulaire du badge, admin ou non.
-              const Divider(height: 1),
-              ListTile(
-                leading: Icon(
-                  Icons.gavel_outlined,
-                  color: AppColors.accentPrimaryDark,
-                ),
-                title: Text(
-                  group.proofMode ? _l.proofModeDisable : _l.proofModeEnable,
-                ),
-                subtitle: group.proofMode ? null : Text(_l.proofModeOnBanner),
-                onTap: () => Navigator.pop(sheetContext, 'proof'),
-              ),
-              if (group.proofMode)
-                ListTile(
-                  leading: Icon(
-                    Icons.picture_as_pdf_outlined,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  title: Text(_l.proofExport),
-                  onTap: () => Navigator.pop(sheetContext, 'proof:export'),
-                ),
-              // Nom et photo : administrateurs, ou tous les membres si le
-              // groupe l'autorise (DIS-26).
-              if (group.canEditInfo) ...[
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(
-                    Icons.edit_outlined,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  title: Text(_l.groupEditName),
-                  onTap: () => Navigator.pop(sheetContext, 'rename'),
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.photo_camera_outlined,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  title: Text(
-                    group.avatarMediaId == null
-                        ? _l.groupAddPhoto
-                        : _l.groupChangePhoto,
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'photo'),
-                ),
-                if (group.avatarMediaId != null)
-                  ListTile(
-                    leading: Icon(
-                      Icons.hide_image_outlined,
-                      color: AppColors.textMuted,
-                    ),
-                    title: Text(_l.groupRemovePhoto),
-                    onTap: () => Navigator.pop(sheetContext, 'photo:clear'),
-                  ),
-              ],
-              if (group.canManage) ...[
-                ListTile(
-                  leading: Icon(Icons.tune, color: AppColors.accentPrimaryDark),
-                  title: Text(_l.groupManageTitle),
-                  subtitle: Text(
-                    _l.groupManageSubtitle,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'manage'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.link, color: AppColors.accentPrimaryDark),
-                  title: Text(_l.groupInviteLink),
-                  subtitle: Text(
-                    group.inviteCode == null
-                        ? _l.groupNoLink
-                        : _l.groupLinkActive,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'invite'),
-                ),
-              ],
-              const Divider(height: 1),
-              for (final member in group.members)
-                ListTile(
-                  leading: Icon(
-                    Icons.person_outline,
-                    color: AppColors.textMuted,
-                  ),
-                  title: Text(
-                    member.userId == widget.myUserId
-                        ? _l.navYou
-                        : member.displayName,
-                  ),
-                  subtitle: member.canManage
-                      ? Text(member.isOwner ? _l.groupCreator : _l.groupAdmin)
-                      : null,
-                  trailing: _memberActions(group, member, sheetContext),
-                  // Toucher un membre ouvre une discussion à deux avec lui.
-                  onTap: member.userId == widget.myUserId
-                      ? null
-                      : () =>
-                            Navigator.pop(sheetContext, 'dm:${member.userId}'),
-                ),
-              const Divider(height: 1),
-              ListTile(
-                leading: Icon(
-                  Icons.person_add_alt,
-                  color: AppColors.accentPrimaryDark,
-                ),
-                title: Text(_l.groupAddMembers),
-                onTap: () => Navigator.pop(sheetContext, 'add'),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.logout,
-                  color: AppColors.semanticError,
-                ),
-                title: Text(
-                  _l.groupLeave,
-                  style: TextStyle(color: AppColors.semanticError),
-                ),
-                onTap: () => Navigator.pop(sheetContext, 'leave'),
-              ),
-              if (group.isOwnedBy(widget.myUserId))
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete_forever_outlined,
-                    color: AppColors.semanticError,
-                  ),
-                  title: Text(
-                    _l.groupDelete,
-                    style: TextStyle(color: AppColors.semanticError),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'delete'),
-                ),
-            ],
-          ),
-        ),
+    // Discussions · 8 — un écran « Infos du groupe », qui rend le geste
+    // choisi ; les méthodes qui l'exécutent restent celles de cet écran.
+    final action = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => GroupInfoScreen(group: group, myUserId: widget.myUserId),
       ),
     );
 
     if (!mounted || action == null) return;
-    if (action == 'proof') {
+    if (action == 'call:audio' || action == 'call:video') {
+      await _startOrJoinCall(withVideo: action == 'call:video');
+    } else if (action == 'report') {
+      final recent = await recentGroupForReport(
+        ref,
+        groupId: widget.groupId,
+        myUserId: widget.myUserId,
+      );
+      if (!mounted) return;
+      await showReportSheet(
+        context,
+        ref,
+        title: _l.reportGroupNamed(group.name),
+        groupId: widget.groupId,
+        recentMessages: recent,
+      );
+    } else if (action == 'proof') {
       await _toggleProofMode(group);
     } else if (action == 'proof:export') {
       await _exportProof();
@@ -1375,7 +1090,9 @@ class _GroupConversationScreenState
         );
       }
     } else if (action == 'manage') {
-      await Navigator.of(context).push(
+      // « Gérer le groupe » peut rendre la main avec un geste qui vit ici
+      // (lien d'invitation, mode preuve).
+      final next = await Navigator.of(context).push<String>(
         MaterialPageRoute(
           builder: (_) => GroupSettingsScreen(groupId: widget.groupId),
         ),
@@ -1385,6 +1102,9 @@ class _GroupConversationScreenState
             .read(groupChatControllerProvider(widget.groupId).notifier)
             .refreshGroup();
       }
+      if (!mounted) return;
+      if (next == 'invite') await _manageInviteLink(group);
+      if (next == 'proof') await _toggleProofMode(group);
     } else if (action == 'rename') {
       await _renameGroup(group);
     } else if (action == 'photo') {
@@ -1409,46 +1129,6 @@ class _GroupConversationScreenState
             .setMemberRole(userId: userId, role: parts[2]);
       }
     }
-  }
-
-  /// Boutons par membre : nommer/révoquer un admin (créateur seulement) et
-  /// retirer (créateur et admins). Le créateur n'est ni rétrogradable ni
-  /// évinçable — sinon le groupe se retrouverait sans personne pour le gérer.
-  Widget? _memberActions(
-    Group group,
-    GroupMember member,
-    BuildContext sheetContext,
-  ) {
-    if (member.userId == widget.myUserId || member.isOwner) return null;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (group.isOwner)
-          IconButton(
-            icon: Icon(
-              member.isAdmin
-                  ? Icons.remove_moderator_outlined
-                  : Icons.add_moderator_outlined,
-              size: 20,
-            ),
-            tooltip: member.isAdmin
-                ? _l.groupDemoteAdmin
-                : _l.groupPromoteAdmin,
-            onPressed: () => Navigator.pop(
-              sheetContext,
-              'role:${member.userId}:${member.isAdmin ? 'MEMBER' : 'ADMIN'}',
-            ),
-          ),
-        if (group.canManage)
-          IconButton(
-            icon: const Icon(Icons.person_remove_outlined, size: 20),
-            tooltip: _l.marketRemove,
-            onPressed: () =>
-                Navigator.pop(sheetContext, 'remove:${member.userId}'),
-          ),
-      ],
-    );
   }
 
   Future<void> _renameGroup(Group group) async {
@@ -1899,17 +1579,14 @@ class _GroupConversationScreenState
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
+                                    // Discussions · 1 — « 9 membres », et
+                                    // non la liste des prénoms : elle ne
+                                    // tient pas sur une ligne passé 4.
                                     if (group != null)
                                       Text(
-                                        group.members
-                                            .map(
-                                              (member) =>
-                                                  member.userId ==
-                                                      widget.myUserId
-                                                  ? _l.navYou
-                                                  : member.displayName,
-                                            )
-                                            .join(', '),
+                                        _l.groupInvitationMembers(
+                                          group.members.length,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -1924,14 +1601,7 @@ class _GroupConversationScreenState
                           ),
                         ),
                       ),
-                      _ChatIconButton(
-                        icon: Icons.call_outlined,
-                        onPressed: _startingCall
-                            ? null
-                            : () => _startOrJoinCall(withVideo: false),
-
-                        tooltip: L.of(context).a11yVoiceCall,
-                      ),
+                      // Vidéo puis audio, dans l'ordre de la maquette.
                       _ChatIconButton(
                         icon: Icons.videocam_outlined,
                         onPressed: _startingCall
@@ -1939,6 +1609,14 @@ class _GroupConversationScreenState
                             : () => _startOrJoinCall(withVideo: true),
 
                         tooltip: L.of(context).a11yVideoCall,
+                      ),
+                      _ChatIconButton(
+                        icon: Icons.call_outlined,
+                        onPressed: _startingCall
+                            ? null
+                            : () => _startOrJoinCall(withVideo: false),
+
+                        tooltip: L.of(context).a11yVoiceCall,
                       ),
                       _ChatIconButton(
                         icon: Icons.more_vert,
@@ -1950,6 +1628,8 @@ class _GroupConversationScreenState
                   ),
                 ),
               ),
+              const OfflineBanner(),
+              GroupKoryBanner(groupId: widget.groupId),
               if (group?.proofMode ?? false) const ProofModeBanner(),
               _ActiveCallBanner(
                 groupId: widget.groupId,
@@ -2176,6 +1856,17 @@ class _GroupConversationScreenState
                           ),
                         ),
                       ),
+                    if (_mentionQuery != null && state.group != null)
+                      MentionPicker(
+                        query: _mentionQuery!,
+                        members: state.group!.members,
+                        myUserId: widget.myUserId,
+                        onPick: (member) => _inputController.value =
+                            insertMention(
+                              _inputController.value,
+                              member.displayName,
+                            ),
+                      ),
                     if (_replyingTo case final replyingTo?)
                       _GroupReplyComposerPreview(
                         message: replyingTo,
@@ -2278,7 +1969,7 @@ class _GroupConversationScreenState
               onContentInserted: (content) =>
                   unawaited(_sendInsertedContent(content)),
               focusNode: _inputFocus,
-              hintText: _l.conversationMessageHint,
+              hintText: _l.composerWriteHint,
               emojiOpen: _emojiOpen,
               enabled: !busy,
               onFieldTap: () {
@@ -2847,7 +2538,16 @@ class _GroupBubbleState extends State<_GroupBubble> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: [?_replyBanner(), _content()],
+              children: [
+                ForwardedLabel(
+                  score: message.forwardScore,
+                  color: isMine
+                      ? AppColors.chatBubbleSentBorder
+                      : AppColors.textMuted,
+                ),
+                ?_replyBanner(),
+                _content(),
+              ],
             ),
           );
 

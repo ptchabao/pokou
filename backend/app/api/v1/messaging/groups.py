@@ -91,6 +91,9 @@ class GroupMessageCreate(BaseModel):
     # Les identifiants des personnes citées par @, et non le texte « @Bob » :
     # le nom affiché change (renommage, contact), le user_id non.
     mention_user_ids: List[int] = Field(default_factory=list)
+    #: Transfert : compte de transferts du message d'origine + 1, annoncé
+    #: par l'appareil (le serveur ne lit pas le chiffré).
+    forward_score: int = Field(0, ge=0, le=1000)
 
 
 class GroupMessageEdit(BaseModel):
@@ -309,6 +312,7 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
         "reply_to": _serialize_reply_preview(message.reply_to),
         "reactions": _serialize_reactions(message, viewer_id),
         "mentions": _serialize_mentions(message),
+        "forward_score": message.forward_score or 0,
         # Comme messages.py::_serialize : sans ces deux clés, un sondage ou une
         # position de groupe perdait sa charge utile dès que la conversation
         # était relue via GET /groups/{id}/messages (seul l'événement WebSocket
@@ -1525,6 +1529,7 @@ async def send_group_message(
         crypto_epoch=payload.crypto_epoch,
         media_asset_id=media_asset.id if media_asset else None,
         reply_to_id=payload.reply_to_id,
+        forward_score=payload.forward_score,
         # Échéance figée à l'envoi, jamais recalculée à la lecture : c'est ce
         # qui fait qu'un changement de réglage plus tard n'efface pas le passé
         # et ne prolonge pas ce qui devait disparaître.

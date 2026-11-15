@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
+import '../../contacts/presentation/contacts_controller.dart';
 import '../data/direct_message_model.dart';
 import 'messaging_controller.dart' show messagingRepositoryProvider;
 
@@ -59,8 +62,56 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
     }
   }
 
+  /// « Voir les votes » : qui a choisi quoi, quand le sondage le montre.
+  /// Les noms viennent du carnet de CET appareil ; un votant absent du
+  /// carnet reste « Un membre » — jamais son numéro.
+  Future<void> _showVoters() async {
+    final l = L.of(context);
+    final poll = widget.poll;
+    final myId = ref.read(authControllerProvider).user?.id;
+    final contacts = ref.read(contactsProvider).valueOrNull ?? const [];
+    String nameOf(int userId) {
+      if (userId == myId) return l.callYou;
+      for (final c in contacts) {
+        if (c.contactUserId == userId) return c.displayName;
+      }
+      return l.pollVoterUnknown;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              poll.question,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            ),
+            for (final option in poll.options) ...[
+              const SizedBox(height: 14),
+              Text(
+                '${option.text} · ${option.voteCount}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              for (final id in option.voterIds)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 8),
+                  child: Text(nameOf(id)),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final poll = widget.poll;
     final totalVoters = poll.totalVoters == 0 ? 1 : poll.totalVoters;
     final textColor = AppColors.chatTextReceived;
@@ -72,21 +123,21 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Discussions · 20 — « Sondage · un seul choix », puis la question.
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.bar_chart, size: 16, color: mutedColor),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  poll.question,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+              Icon(Icons.bar_chart, size: 14, color: mutedColor),
+              const SizedBox(width: 4),
+              Text(
+                poll.allowsMultiple ? l.pollKindMultiple : l.pollKindSingle,
+                style: TextStyle(fontSize: 11, color: mutedColor),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            poll.question,
+            style: TextStyle(color: textColor, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           for (final option in poll.options) ...[
@@ -98,11 +149,29 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
             ),
             const SizedBox(height: 6),
           ],
-          Text(
-            poll.allowsMultiple
-                ? '${poll.totalVoters} vote(s) · choix multiple'
-                : '${poll.totalVoters} vote(s)',
-            style: TextStyle(fontSize: 11, color: mutedColor),
+          // « 8 votes · Voir les votes » — le lien seulement quand le
+          // sondage montre ses votants et qu'il y en a.
+          Row(
+            children: [
+              Text(
+                l.pollVotes(poll.totalVoters),
+                style: TextStyle(fontSize: 11, color: mutedColor),
+              ),
+              if (poll.revealsVoters && poll.totalVoters > 0) ...[
+                Text(' · ', style: TextStyle(fontSize: 11, color: mutedColor)),
+                InkWell(
+                  onTap: _showVoters,
+                  child: Text(
+                    l.pollSeeVotes,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accentPrimaryDark,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),

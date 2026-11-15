@@ -121,6 +121,11 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
           .toList(),
       orElse: () => const <PokouContact>[],
     );
+    // « 46 contacts sur Pokou » : le total, filtre ou non.
+    final onPokouCount = contactsAsync.maybeWhen(
+      data: (contacts) => contacts.where((c) => c.contactUserId != null).length,
+      orElse: () => null,
+    );
     final invitable = invitableAsync.maybeWhen(
       data: (entries) =>
           entries.where((e) => _matches(e.name, e.phone)).toList(),
@@ -145,12 +150,25 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
                   children: [
                     PokouBackButton(),
                     SizedBox(width: 4),
-                    Text(
-                      L.of(context).newChatTitle,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          L.of(context).newChatTitle,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (onPokouCount != null)
+                          Text(
+                            L.of(context).newChatOnPokouCount(onPokouCount),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -174,7 +192,7 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
                       horizontal: 12,
                       vertical: 11,
                     ),
-                    hintText: L.of(context).newChatSearchHint,
+                    hintText: L.of(context).callsSearchHint,
                     hintStyle: const TextStyle(fontSize: 14),
                     suffixIcon: _filter.isEmpty
                         ? null
@@ -200,12 +218,23 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
                     _CreateRow(
                       icon: Icons.group_add_outlined,
                       label: L.of(context).newChatNewGroup,
+                      subtitle: L.of(context).newChatNewGroupHint,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => CreateGroupScreen(myUserId: me.id),
                         ),
                       ),
                     ),
+                    // Discussions · 5 — « Inviter sur Pokou » : la feuille
+                    // de partage du système, avec le lien d'invitation.
+                    _CreateRow(
+                      icon: Icons.ios_share,
+                      label: L.of(context).newChatInviteRow,
+                      subtitle: L.of(context).newChatInviteRowHint,
+                      onTap: () => InviteSharing.share(context),
+                    ),
+                    // Absents de la maquette, gardés : c'est la seule porte
+                    // vers une communauté et vers un lien reçu.
                     _CreateRow(
                       icon: Icons.groups_outlined,
                       label: L.of(context).newChatNewCommunity,
@@ -234,7 +263,7 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
             else if (reachable.isNotEmpty) ...[
               SliverToBoxAdapter(
                 child: _SectionLabel(
-                  L.of(context).newChatOnPokou,
+                  L.of(context).newChatOnPokouSection,
                   count: reachable.length,
                 ),
               ),
@@ -244,13 +273,15 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
                   final contact = reachable[index];
                   return _ContactRow(
                     name: contact.displayName,
-                    subtitle: contact.phone,
+                    // L'état, jamais le numéro (Discussions · 5).
+                    subtitle: contact.about?.trim().isNotEmpty == true
+                        ? contact.about!
+                        : L.of(context).contactAvailable,
                     avatar: contact.avatar,
                     onTap: () => _openConversation(
                       userId: contact.contactUserId!,
                       name: contact.displayName,
-                      // Le numéro est déjà là, affiché juste en dessous.
-                      // L'omettre faisait échouer le premier message quand
+                      // Le numéro part sans être affiché. L'omettre faisait échouer le premier message quand
                       // la fiche existe sur le TÉLÉPHONE sans avoir de
                       // contrepartie côté serveur — ce qui est le cas tant
                       // que la synchronisation du carnet n'a pas eu lieu.
@@ -267,7 +298,7 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
             else if (invitable.isNotEmpty) ...[
               SliverToBoxAdapter(
                 child: _SectionLabel(
-                  L.of(context).newChatInvite,
+                  L.of(context).newChatInviteRow,
                   count: invitable.length,
                 ),
               ),
@@ -310,10 +341,12 @@ class _CreateRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.subtitle,
   });
 
   final IconData icon;
   final String label;
+  final String? subtitle;
   final VoidCallback onTap;
 
   @override
@@ -334,9 +367,27 @@ class _CreateRow extends StatelessWidget {
               child: Icon(icon, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),
@@ -455,16 +506,17 @@ class _InvitableRow extends StatelessWidget {
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
-        entry.phone,
+        L.of(context).newChatNotOnPokou,
         style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
       ),
-      trailing: Text(
-        L.of(context).newChatInviteAction,
-        style: TextStyle(
-          color: AppColors.accentPrimaryDark,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
+      // Un bouton cerclé, comme la maquette : l'action se voit.
+      trailing: OutlinedButton(
+        onPressed: onInvite,
+        style: OutlinedButton.styleFrom(
+          shape: const StadiumBorder(),
+          visualDensity: VisualDensity.compact,
         ),
+        child: Text(L.of(context).newChatInviteAction),
       ),
     );
   }

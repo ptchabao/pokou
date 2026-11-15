@@ -260,3 +260,82 @@ class EditedLabel extends StatelessWidget {
     );
   }
 }
+
+/// « ↪ Transféré » en tête d'une bulle transférée — « Transféré plusieurs
+/// fois » à partir de 5 transferts de proche en proche, comme chez
+/// WhatsApp : c'est le signal qui freine une rumeur en chaîne.
+class ForwardedLabel extends StatelessWidget {
+  const ForwardedLabel({super.key, required this.score, required this.color});
+
+  /// `forward_score` du message (0 = message d'origine, rien n'est dessiné).
+  final int score;
+  final Color color;
+
+  /// Le seuil de « plusieurs fois ».
+  static const manyTimes = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    if (score <= 0) return const SizedBox.shrink();
+    final l = L.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            score >= manyTimes ? Icons.fast_forward_rounded : Icons.forward,
+            size: 13,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            score >= manyTimes ? l.forwardedManyLabel : l.forwardedLabel,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Une ligne du menu d'un message (Discussions · 3) : icône, libellé, et
+/// une précision facultative dessous — la fenêtre de modification sous
+/// « Modifier », les accusés sous « Infos du message ». Partagée par la
+/// discussion à deux et le groupe.
+class MessageActionTile extends StatelessWidget {
+  const MessageActionTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
+    this.destructive = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = destructive ? AppColors.semanticError : null;
+    return ListTile(
+      leading: Icon(icon, color: color),
+      title: Text(label, style: TextStyle(color: color)),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+      onTap: onTap,
+    );
+  }
+}

@@ -144,18 +144,29 @@ class _MediaComposerScreenState extends State<MediaComposerScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Discussions · 24 — « ✕ Envoyer à {nom} », et l'outil de
+            // retouche à droite.
             Row(
               children: [
                 IconButton(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-
-                  tooltip: L.of(context).a11yBack,
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: L.of(context).actionClose,
                 ),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    L.of(context).composerSendTo(widget.recipientName),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 IconButton(
                   onPressed: _busy ? null : _edit,
-                  icon: const Icon(Icons.crop_rotate, color: Colors.white),
+                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
                   tooltip: L.of(context).composerCropRotate,
                 ),
               ],
@@ -196,8 +207,12 @@ class _MediaComposerScreenState extends State<MediaComposerScreen> {
                             border: InputBorder.none,
                           ),
                         ),
+                        // La compression, dite au moment d'envoyer. Pas
+                        // d'option « HD » : la photo est compressée dès
+                        // qu'on la choisit (image_picker), avant cet écran,
+                        // et l'original n'est plus disponible ici.
                         Text(
-                          L.of(context).composerTo(widget.recipientName),
+                          L.of(context).composerCompressedNote,
                           style: TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 12,

@@ -1,5 +1,7 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../core/sync/queued_mutation.dart';
+import '../../../core/time/server_time.dart';
 import 'conversation_summary.dart';
 
 /// Écran d'accueil — liste unifiée des contacts et groupes, triée par le
@@ -56,6 +58,13 @@ class ConversationsRepository {
     required bool archived,
   }) => _setting('archive', kind, id, {'archived': archived});
 
+  /// Favori : seulement MA liste, comme l'épingle (filtre « Favoris »).
+  Future<bool> setFavorite({
+    required String kind,
+    required int id,
+    required bool favorite,
+  }) => _setting('favorite', kind, id, {'favorite': favorite});
+
   Future<bool> mute({
     required String kind,
     required int id,
@@ -82,4 +91,93 @@ class ConversationsRepository {
       body: {'contact_user_id': contactUserId, 'blocked': blocked},
     );
   }
+
+  /// Les personnes que j'ai bloquées — écran « Contacts bloqués ».
+  Future<List<BlockedContact>> listBlocked() async {
+    final response = await _api.get('/conversations/blocked');
+    return (response['items'] as List)
+        .cast<Map<String, dynamic>>()
+        .map(BlockedContact.fromJson)
+        .toList();
+  }
+
+  /// Signale une personne ([contactUserId]) ou un groupe ([groupId]).
+  ///
+  /// [recentMessages] : les 5 derniers messages de la discussion, tels que
+  /// CET appareil les a déchiffrés — le serveur ne peut pas les lire seul.
+  /// La feuille « Signaler » prévient que c'est tout ce qui part.
+  Future<void> report({
+    int? contactUserId,
+    int? groupId,
+    required String reason,
+    bool alsoBlock = false,
+    List<ReportedMessage> recentMessages = const [],
+  }) {
+    return _api.post(
+      '/conversations/report',
+      body: {
+        'contact_user_id': ?contactUserId,
+        'group_id': ?groupId,
+        'reason': reason,
+        if (alsoBlock) 'also_block': true,
+        'recent_messages': [
+          for (final message in recentMessages.take(5)) message.toJson(),
+        ],
+      },
+    );
+  }
+}
+
+/// Une ligne de « Contacts bloqués ». Un inconnu n'a pas de nom de carnet :
+/// le serveur envoie alors son numéro MASQUÉ (« +228 9• •• •• 41 »), jamais
+/// le numéro en clair.
+class BlockedContact {
+  const BlockedContact({
+    required this.contactUserId,
+    required this.displayName,
+    required this.isUnknownContact,
+    required this.blockedAt,
+    required this.afterReport,
+    this.avatar,
+  });
+
+  final int contactUserId;
+  final String displayName;
+  final bool isUnknownContact;
+  final DateTime? blockedAt;
+  final bool afterReport;
+  final MediaMeta? avatar;
+
+  factory BlockedContact.fromJson(Map<String, dynamic> json) {
+    final avatarJson = json['avatar'] as Map<String, dynamic>?;
+    return BlockedContact(
+      contactUserId: json['contact_user_id'] as int,
+      displayName: json['display_name'] as String? ?? '',
+      isUnknownContact: json['is_unknown_contact'] as bool? ?? false,
+      blockedAt: json['blocked_at'] != null
+          ? parseServerTime(json['blocked_at'] as String)
+          : null,
+      afterReport: json['after_report'] as bool? ?? false,
+      avatar: avatarJson != null ? MediaMeta.fromJson(avatarJson) : null,
+    );
+  }
+}
+
+/// Un message joint à un signalement.
+class ReportedMessage {
+  const ReportedMessage({
+    required this.sender,
+    required this.text,
+    required this.sentAt,
+  });
+
+  final String sender;
+  final String text;
+  final DateTime sentAt;
+
+  Map<String, dynamic> toJson() => {
+    'sender': sender.length > 120 ? sender.substring(0, 120) : sender,
+    'text': text.length > 1000 ? text.substring(0, 1000) : text,
+    'sent_at': sentAt.toUtc().toIso8601String(),
+  };
 }

@@ -13,6 +13,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../contacts/data/contact_model.dart';
 import '../../contacts/presentation/contacts_controller.dart';
+import '../../messaging/presentation/messaging_controller.dart';
 import '../data/call_repository.dart';
 import 'call_controller.dart';
 import 'call_screen.dart';
@@ -167,6 +168,23 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     }
   }
 
+  /// Discussions · 17 — « Répondre par message » : on refuse l'appel et la
+  /// phrase choisie part en message à l'appelant, comme chez WhatsApp. Si
+  /// l'envoi échoue (réseau, chiffrement impossible), l'appel est refusé
+  /// quand même et on le dit.
+  Future<void> _replyWithMessage(String text) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final failed = L.of(context).callReplyFailed;
+    unawaited(_decline());
+    try {
+      await ref
+          .read(messagingRepositoryProvider)
+          .send(recipientId: widget.fromUserId, content: text);
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(failed)));
+    }
+  }
+
   Future<void> _accept() async {
     // Idem : coupée avant même de savoir si la connexion à l'appel va
     // réussir — une fois qu'on a décroché, on ne veut plus l'entendre.
@@ -298,198 +316,262 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
     final isGroup = widget.groupId != null || widget.callType == 'group';
     final displayName = widget.groupName ?? callerName;
 
+    final l = L.of(context);
     return Scaffold(
-      backgroundColor: AppColors.accentPrimaryDark,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(),
-            if (widget.groupName != null)
-              // Appel de groupe : la photo du GROUPE, et en médaillon celle
-              // de la personne qui appelle.
-              SizedBox(
-                width: 112,
-                height: 104,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: 8,
-                      top: 0,
-                      child: widget.groupAvatar != null
-                          ? ContactAvatar(
-                              avatar: widget.groupAvatar,
-                              displayName: widget.groupName!,
-                              size: 96,
-                              fallbackBackgroundColor: Colors.white24,
-                            )
-                          : Container(
-                              width: 96,
-                              height: 96,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white24,
+      backgroundColor: _incomingBottom,
+      body: DecoratedBox(
+        // Le même dégradé brun que l'écran d'appel (Discussions · 17).
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_incomingTop, _incomingBottom],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 24),
+              Text(
+                widget.isVideo
+                    ? l.callIncomingVideoTitle
+                    : l.callIncomingAudioTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              if (widget.groupName != null)
+                // Appel de groupe : la photo du GROUPE, et en médaillon celle
+                // de la personne qui appelle.
+                SizedBox(
+                  width: 112,
+                  height: 104,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        left: 8,
+                        top: 0,
+                        child: widget.groupAvatar != null
+                            ? ContactAvatar(
+                                avatar: widget.groupAvatar,
+                                displayName: widget.groupName!,
+                                size: 96,
+                                fallbackBackgroundColor: Colors.white24,
+                              )
+                            : Container(
+                                width: 96,
+                                height: 96,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white24,
+                                ),
+                                child: const Icon(
+                                  Icons.groups,
+                                  size: 44,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.groups,
-                                size: 44,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.accentPrimaryDark,
-                        ),
-                        child: ContactAvatar(
-                          avatar: widget.callerAvatar ?? contact?.avatar,
-                          displayName: callerName,
-                          size: 40,
-                          fallbackBackgroundColor: Colors.white24,
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.accentPrimaryDark,
+                          ),
+                          child: ContactAvatar(
+                            avatar: widget.callerAvatar ?? contact?.avatar,
+                            displayName: callerName,
+                            size: 40,
+                            fallbackBackgroundColor: Colors.white24,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                )
+              else
+                ContactAvatar(
+                  avatar: widget.callerAvatar ?? contact?.avatar,
+                  displayName: displayName,
+                  size: 96,
+                  fallbackBackgroundColor: Colors.white24,
                 ),
-              )
-            else
-              ContactAvatar(
-                avatar: widget.callerAvatar ?? contact?.avatar,
-                displayName: displayName,
-                size: 96,
-                fallbackBackgroundColor: Colors.white24,
-              ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
+              const SizedBox(height: 20),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-                // Sur le nom de l'APPELANT seulement : sous un nom de
-                // groupe, le ✓ dirait que le groupe est certifié.
-                if (callerVerified && widget.groupName == null) ...[
-                  const SizedBox(width: 6),
-                  const VerifiedBadge(size: 20),
-                ],
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isGroup
-                  ? (widget.groupName != null
-                        // Dans un groupe, savoir QUI appelle compte autant que
-                        // le nom du groupe affiché juste au-dessus.
-                        ? L.of(context).callIncomingFrom(callerName)
-                        : L.of(context).callIncomingGroup)
-                  : L.of(context).callIncoming,
-              style: const TextStyle(color: Colors.white70),
-            ),
-            if (_busy) ...[
-              const SizedBox(height: 16),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 32),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white12,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  L.of(context).callWaitingNotice,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-            const Spacer(),
-            if (_responding)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 52),
-                child: CircularProgressIndicator(color: Colors.white),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 40,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _ResponseButton(
-                      icon: Icons.call_end,
-                      color: Colors.black,
-                      onTap: _decline,
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _ResponseButton(
-                          icon: _busy ? Icons.phone_forwarded : Icons.call,
-                          color: AppColors.accentPrimary,
-                          onTap: _accept,
-                        ),
-                        if (_busy) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            L.of(context).callEndAndAccept,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                  // Sur le nom de l'APPELANT seulement : sous un nom de
+                  // groupe, le ✓ dirait que le groupe est certifié.
+                  if (callerVerified && widget.groupName == null) ...[
+                    const SizedBox(width: 6),
+                    const VerifiedBadge(size: 20),
                   ],
-                ),
+                ],
               ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                isGroup
+                    ? (widget.groupName != null
+                          // Dans un groupe, savoir QUI appelle compte autant que
+                          // le nom du groupe affiché juste au-dessus.
+                          ? L.of(context).callIncomingFrom(callerName)
+                          : L.of(context).callIncomingGroup)
+                    : (widget.isVideo
+                          ? l.callIncomingPokouVideo
+                          : l.callIncomingPokouAudio),
+                style: const TextStyle(color: Colors.white70),
+              ),
+              if (_busy) ...[
+                const SizedBox(height: 16),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    L.of(context).callWaitingNotice,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+              const Spacer(),
+              if (!_responding) ...[
+                Text(
+                  l.callReplyWithMessage,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final text in [
+                        l.callReplyCallBack,
+                        l.callReplyCantTalk,
+                        l.callReplyWriteMe,
+                      ])
+                        ActionChip(
+                          label: Text(text),
+                          labelStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                          backgroundColor: Colors.transparent,
+                          side: const BorderSide(color: Colors.white38),
+                          shape: const StadiumBorder(),
+                          onPressed: () => _replyWithMessage(text),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+              if (_responding)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 52),
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(40, 20, 40, 32),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ResponseButton(
+                        icon: Icons.call_end,
+                        color: AppColors.semanticError,
+                        label: l.callDecline,
+                        onTap: _decline,
+                      ),
+                      _ResponseButton(
+                        icon: _busy ? Icons.phone_forwarded : Icons.call,
+                        color: _acceptGreen,
+                        label: _busy ? l.callEndAndAccept : l.callAccept,
+                        onTap: _accept,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+const _incomingTop = Color(0xFF7A3B1E);
+const _incomingBottom = Color(0xFF2A1610);
+
+/// Le vert d'« Accepter » : la seule couleur qui dise « décrocher » partout.
+const _acceptGreen = Color(0xFF2E7D4F);
+
 class _ResponseButton extends StatelessWidget {
   const _ResponseButton({
     required this.icon,
     required this.color,
+    required this.label,
     required this.onTap,
   });
 
   final IconData icon;
   final Color color;
+  final String label;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-        child: Icon(icon, color: Colors.white, size: 28),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 110,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 12.5),
+          ),
+        ),
+      ],
     );
   }
 }

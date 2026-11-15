@@ -27,6 +27,7 @@ class ComposerActionButton extends StatefulWidget {
     required this.onStateChanged,
     required this.onRelease,
     this.busyChild,
+    this.sendIcon = Icons.send_rounded,
   });
 
   final ComposerState state;
@@ -53,6 +54,11 @@ class ComposerActionButton extends StatefulWidget {
 
   /// Remplace l'icône pendant un envoi en cours.
   final Widget? busyChild;
+
+  /// L'icône du bouton quand il y a du texte — l'avion d'envoi par défaut,
+  /// une coche pendant qu'on MODIFIE un message déjà envoyé (Discussions ·
+  /// 13) : le geste confirme une correction, il n'envoie rien de nouveau.
+  final IconData sendIcon;
 
   @override
   State<ComposerActionButton> createState() => _ComposerActionButtonState();
@@ -200,7 +206,7 @@ class _ComposerActionButtonState extends State<ComposerActionButton>
                       child: ScaleTransition(scale: animation, child: child),
                     ),
                     child: Icon(
-                      showSend ? Icons.send_rounded : Icons.mic,
+                      showSend ? widget.sendIcon : Icons.mic,
                       key: ValueKey(showSend),
                       color: Colors.white,
                     ),

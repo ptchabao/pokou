@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Une photo de la visionneuse.
 class ViewerImage {
-  const ViewerImage({required this.full, this.preview, this.heroTag});
+  const ViewerImage({
+    required this.full,
+    this.preview,
+    this.heroTag,
+    this.title,
+    this.subtitle,
+    this.caption,
+  });
+
+  /// Discussions · 25 — l'auteur en tête (« Séna K. »), puis la
+  /// conversation et l'heure (« Famille Koffi · aujourd'hui, 15:10 »).
+  final String? title;
+  final String? subtitle;
+
+  /// La légende, posée sous la photo.
+  final String? caption;
 
   /// L'image en pleine définition, ajustée à l'écran (`BoxFit.contain`).
   final Widget full;
@@ -37,12 +54,38 @@ class ViewerImage {
 ///   suit le doigt en rétrécissant, le noir s'éclaircit, et elle retourne
 ///   dans sa vignette ;
 /// - plusieurs photos se parcourent en glissant latéralement.
+/// Les gestes de la barre du bas (Discussions · 25) : Répondre,
+/// Transférer, Enregistrer, Réagir. Absente quand rien n'est fourni — la
+/// fiche produit, par exemple, n'a rien de tout cela.
+class ViewerActions {
+  const ViewerActions({
+    this.onReply,
+    this.onForward,
+    this.onSave,
+    this.onReact,
+    this.onShare,
+  });
+
+  final VoidCallback? onReply;
+  final VoidCallback? onForward;
+  final VoidCallback? onSave;
+
+  /// Reçoit l'émoji choisi dans la barre rapide.
+  final ValueChanged<String>? onReact;
+  final VoidCallback? onShare;
+}
+
 class ImageViewer extends StatefulWidget {
-  const ImageViewer({super.key, required this.images, this.initialIndex = 0})
-    : assert(images.length > 0);
+  const ImageViewer({
+    super.key,
+    required this.images,
+    this.initialIndex = 0,
+    this.actions,
+  }) : assert(images.length > 0);
 
   final List<ViewerImage> images;
   final int initialIndex;
+  final ViewerActions? actions;
 
   /// Ouvre la visionneuse par-dessus l'écran courant.
   ///
@@ -53,6 +96,7 @@ class ImageViewer extends StatefulWidget {
     BuildContext context, {
     required List<ViewerImage> images,
     int initialIndex = 0,
+    ViewerActions? actions,
   }) {
     return Navigator.of(context).push(
       PageRouteBuilder<void>(
@@ -60,8 +104,11 @@ class ImageViewer extends StatefulWidget {
         barrierColor: null,
         transitionDuration: const Duration(milliseconds: 260),
         reverseTransitionDuration: const Duration(milliseconds: 220),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            ImageViewer(images: images, initialIndex: initialIndex),
+        pageBuilder: (context, animation, secondaryAnimation) => ImageViewer(
+          images: images,
+          initialIndex: initialIndex,
+          actions: actions,
+        ),
         // Le fondu porte sur le noir et la barre du haut, dans la page —
         // la photo, elle, est portée par son Hero.
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
@@ -185,7 +232,9 @@ class _ImageViewerState extends State<ImageViewer>
     _dragBack
       ..removeListener(step)
       ..addListener(step)
-      ..forward(from: 0).whenCompleteOrCancel(() => _dragBack.removeListener(step));
+      ..forward(
+        from: 0,
+      ).whenCompleteOrCancel(() => _dragBack.removeListener(step));
   }
 
   void _onPageChanged(int index) {
@@ -239,19 +288,125 @@ class _ImageViewerState extends State<ImageViewer>
             ),
           ),
           _chrome(route),
+          _bottom(route),
         ],
       ),
     );
+  }
+
+  /// La légende et la barre d'actions, en bas.
+  Widget _bottom(Animation<double> route) {
+    final image = widget.images[_index];
+    final actions = widget.actions;
+    final caption = image.caption?.trim() ?? '';
+    if (actions == null && caption.isEmpty) return const SizedBox.shrink();
+    final l = L.of(context);
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: FadeTransition(
+        opacity: route,
+        child: AnimatedOpacity(
+          opacity: _chromeVisible && _drag == 0 ? 1 : 0,
+          duration: const Duration(milliseconds: 150),
+          child: Container(
+            color: Colors.black.withValues(alpha: 0.45),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (caption.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                      child: Text(
+                        caption,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  if (actions != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          if (actions.onReply != null)
+                            _ViewerAction(
+                              icon: Icons.chat_bubble_outline,
+                              label: l.viewerReply,
+                              onTap: () {
+                                Navigator.of(context).maybePop();
+                                actions.onReply!();
+                              },
+                            ),
+                          if (actions.onForward != null)
+                            _ViewerAction(
+                              icon: Icons.forward,
+                              label: l.viewerForward,
+                              onTap: () {
+                                Navigator.of(context).maybePop();
+                                actions.onForward!();
+                              },
+                            ),
+                          if (actions.onSave != null)
+                            _ViewerAction(
+                              icon: Icons.download_outlined,
+                              label: l.viewerSave,
+                              onTap: actions.onSave!,
+                            ),
+                          if (actions.onReact != null)
+                            _ViewerAction(
+                              icon: Icons.favorite_border,
+                              label: l.viewerReact,
+                              onTap: () => _pickReaction(actions.onReact!),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// La barre rapide de réactions, la même que sur une bulle.
+  Future<void> _pickReaction(ValueChanged<String> onReact) async {
+    const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+    final emoji = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for (final e in emojis)
+                IconButton(
+                  onPressed: () => Navigator.pop(sheetContext, e),
+                  tooltip: e,
+                  icon: Text(e, style: const TextStyle(fontSize: 26)),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (emoji != null) onReact(emoji);
   }
 
   Widget _page(int index) {
     final image = widget.images[index];
     final content = Stack(
       fit: StackFit.expand,
-      children: [
-        if (image.preview != null) image.preview!,
-        image.full,
-      ],
+      children: [if (image.preview != null) image.preview!, image.full],
     );
     final current = index == _index;
     return InteractiveViewer(
@@ -289,13 +444,48 @@ class _ImageViewerState extends State<ImageViewer>
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                 ),
-                if (count > 1)
+                // Discussions · 25 — qui l'a envoyée, où et quand.
+                if (widget.images[_index].title != null)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.images[_index].title!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (widget.images[_index].subtitle != null)
+                          Text(
+                            widget.images[_index].subtitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    ),
+                  )
+                else if (count > 1)
                   Text(
                     '${_index + 1} / $count',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
+                  ),
+                if (widget.images[_index].title == null) const Spacer(),
+                if (widget.actions?.onShare != null)
+                  IconButton(
+                    onPressed: widget.actions!.onShare,
+                    icon: const Icon(Icons.share_outlined, color: Colors.white),
+                    tooltip: L.of(context).actionShare,
                   ),
               ],
             ),
@@ -304,4 +494,36 @@ class _ImageViewerState extends State<ImageViewer>
       ),
     );
   }
+}
+
+class _ViewerAction extends StatelessWidget {
+  const _ViewerAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 22),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 11.5),
+          ),
+        ],
+      ),
+    ),
+  );
 }

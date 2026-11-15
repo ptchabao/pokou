@@ -32,42 +32,57 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
   /// disparu.
   CallFilter _filter = CallFilter.all;
 
+  /// La loupe de l'en-tête (Discussions · 21) : un champ qui filtre par nom.
+  bool _searching = false;
+  String _query = '';
+
   @override
   Widget build(BuildContext context) {
     final logAsync = ref.watch(callLogProvider);
+    final missedCount = CallFilter.missed
+        .apply(logAsync.valueOrNull ?? const [])
+        .length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       // La barre verte remplace le titre posé à même le canevas : elle donne
       // à l'application un bord haut identifiable d'un coup d'œil, y compris
       // en plein soleil où les nuances pâles disparaissent.
-      appBar: PokouAppBar(title: L.of(context).navCalls),
+      appBar: PokouAppBar(
+        title: L.of(context).navCalls,
+        actions: [
+          IconButton(
+            onPressed: () => setState(() {
+              _searching = !_searching;
+              if (!_searching) _query = '';
+            }),
+            icon: Icon(_searching ? Icons.close : Icons.search),
+            tooltip: L.of(context).actionSearch,
+          ),
+        ],
+      ),
       body: SafeArea(
         top: false,
         child: Column(
           children: [
-            _CallFilters(
-              current: _filter,
-              onChanged: (f) => setState(() => _filter = f),
-            ),
-            // « RÉCENTS » en capitales espacées : un repère de section, pas
-            // un titre. La maquette met à sa droite « Historique chiffré
-            // local » — je ne l'ai pas repris, le journal n'est pas chiffré
-            // et l'écrire serait faux.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 2, 20, 6),
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  L.of(context).callsRecentSection,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8,
-                    color: AppColors.textMuted,
+            if (_searching)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: TextField(
+                  autofocus: true,
+                  onChanged: (value) =>
+                      setState(() => _query = value.trim().toLowerCase()),
+                  decoration: InputDecoration(
+                    hintText: L.of(context).callsSearchHint,
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    isDense: true,
                   ),
                 ),
               ),
+            _CallFilters(
+              current: _filter,
+              missedCount: missedCount,
+              onChanged: (f) => setState(() => _filter = f),
             ),
             Expanded(
               child: RefreshIndicator(
@@ -88,7 +103,17 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
                     ],
                   ),
                   data: (allEntries) {
-                    final entries = _filter.apply(allEntries);
+                    final entries = _filter
+                        .apply(allEntries)
+                        .where(
+                          (e) =>
+                              _query.isEmpty ||
+                              _CallLogTile.titleOf(
+                                e,
+                                L.of(context),
+                              ).toLowerCase().contains(_query),
+                        )
+                        .toList();
                     if (entries.isEmpty) {
                       return ListView(
                         children: [
@@ -109,12 +134,27 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
                     // Un filet ne les sépare plus assez : à trois lignes, la
                     // frontière entre deux entrées devient ambiguë, et on
                     // rappelle le mauvais correspondant.
-                    return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                      itemCount: entries.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) =>
-                          _CallLogTile(entry: entries[index]),
+                    // Rangés par jour : « AUJOURD'HUI », « HIER », puis la
+                    // date (Discussions · 21).
+                    final l = L.of(context);
+                    final children = <Widget>[];
+                    String? currentDay;
+                    for (final entry in entries) {
+                      final day = _dayLabel(entry.createdAt, l, context);
+                      if (day != currentDay) {
+                        currentDay = day;
+                        children.add(_DaySection(day));
+                      }
+                      children.add(
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _CallLogTile(entry: entry),
+                        ),
+                      );
+                    }
+                    return ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+                      children: children,
                     );
                   },
                 ),
@@ -132,7 +172,9 @@ class _CallLogTile extends ConsumerWidget {
 
   final CallLogEntry entry;
 
-  String _titleOf(L l) {
+  String _titleOf(L l) => titleOf(entry, l);
+
+  static String titleOf(CallLogEntry entry, L l) {
     // Un appel de groupe s'intitule par son groupe : énumérer 8 participants
     // ne dit pas de quel appel il s'agit.
     final groupName = entry.groupName;
@@ -163,10 +205,21 @@ class _CallLogTile extends ConsumerWidget {
         }
         final minutes = duration ~/ 60;
         final seconds = duration % 60;
-        return (
-          '${minutes}m${seconds.toString().padLeft(2, '0')}s',
-          AppColors.textSecondary,
-        );
+        final length = minutes == 0
+            ? l.callsDurationSeconds(seconds)
+            : seconds == 0
+            ? l.callsDurationMinutes(minutes)
+            : l.callsDurationMinSec(
+                minutes,
+                seconds.toString().padLeft(2, '0'),
+              );
+        final kind = entry.callType != '1:1'
+            ? (entry.isVideo ? l.callsGroupVideo : l.callsGroupAudio)
+            : (incoming ? l.callsIncoming : l.callsOutgoing);
+        final people = entry.callType != '1:1'
+            ? ' · ${l.callsPeople(entry.others.length + 1)}'
+            : '';
+        return ('$kind$people · $length', AppColors.textSecondary);
       case 'ongoing':
         return (l.callStatusOngoing, AppColors.securityVerified);
       default:
@@ -181,33 +234,9 @@ class _CallLogTile extends ConsumerWidget {
     final otherIds = entry.others.map((o) => o.id).toList();
     if (otherIds.isEmpty) return;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          entry.isVideo
-              ? L.of(context).callVideoTitle
-              : L.of(context).callAudioTitle,
-        ),
-        content: Text(
-          L.of(context).callRedialQuestion(_titleOf(L.of(context))),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(L.of(context).actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(L.of(context).productCallAction),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    if (!context.mounted) return;
-
+    // Rappel en UN geste, sans confirmation (Discussions · 21) : la ligne
+    // touchée dit déjà qui et comment — audio ou vidéo, comme l'appel
+    // d'origine.
     try {
       final token = await ref
           .read(callRepositoryProvider)
@@ -326,27 +355,25 @@ class _CallLogTile extends ConsumerWidget {
                     children: [
                       Icon(directionIcon, size: 14, color: statusColor),
                       const SizedBox(width: 4),
-                      Text(
-                        statusText,
-                        style: TextStyle(color: statusColor, fontSize: 13),
-                      ),
-                      Text(
-                        ' · ',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 13,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('d/M, HH:mm').format(entry.createdAt),
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 13,
+                      Flexible(
+                        child: Text(
+                          statusText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: statusColor, fontSize: 13),
                         ),
                       ),
                     ],
                   ),
                 ],
+              ),
+            ),
+            // L'heure à droite : le jour est déjà dans la section.
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Text(
+                DateFormat.Hm().format(entry.createdAt.toLocal()),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12),
               ),
             ),
             _CallAction(
@@ -447,9 +474,16 @@ enum CallFilter {
 }
 
 class _CallFilters extends StatelessWidget {
-  const _CallFilters({required this.current, required this.onChanged});
+  const _CallFilters({
+    required this.current,
+    required this.missedCount,
+    required this.onChanged,
+  });
 
   final CallFilter current;
+
+  /// « Manqués · N » : combien d'appels attendent un rappel.
+  final int missedCount;
   final ValueChanged<CallFilter> onChanged;
 
   @override
@@ -463,7 +497,9 @@ class _CallFilters extends StatelessWidget {
         children: [
           for (final f in CallFilter.values) ...[
             _Chip(
-              label: f.labelOf(l),
+              label: f == CallFilter.missed && missedCount > 0
+                  ? '${f.labelOf(l)} · $missedCount'
+                  : f.labelOf(l),
               selected: f == current,
               onTap: () => onChanged(f),
             ),
@@ -580,4 +616,38 @@ class _AvatarWithDirection extends StatelessWidget {
       ),
     );
   }
+}
+
+/// « Aujourd'hui », « Hier », ou la date — en capitales dans la section.
+String _dayLabel(DateTime at, L l, BuildContext context) {
+  final local = at.toLocal();
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(local.year, local.month, local.day);
+  final diff = today.difference(day).inDays;
+  if (diff == 0) return l.dayToday;
+  if (diff == 1) return l.dayYesterday;
+  return DateFormat.yMMMd(
+    Localizations.localeOf(context).toLanguageTag(),
+  ).format(local);
+}
+
+class _DaySection extends StatelessWidget {
+  const _DaySection(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
+    child: Text(
+      label.toUpperCase(),
+      style: TextStyle(
+        fontSize: 10.5,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.8,
+        color: AppColors.textMuted,
+      ),
+    ),
+  );
 }

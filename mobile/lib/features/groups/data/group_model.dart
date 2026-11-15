@@ -292,7 +292,13 @@ class GroupMessage {
     this.pendingMedia,
     this.deletedAt,
     this.originalContent,
+    this.forwardScore = 0,
   });
+
+  /// Transfert : 0 pour un message d'origine, sinon le nombre de transferts
+  /// (voir DirectMessage.forwardScore).
+  final int forwardScore;
+  bool get isForwarded => forwardScore > 0;
 
   /// La première version d'un message modifié en mode preuve : elle reste
   /// visible de tous.
@@ -389,6 +395,7 @@ class GroupMessage {
     if (pendingMedia != null) 'pending_media': pendingMedia!.toJson(),
     'payload': payload,
     'poll': poll?.toJson(),
+    'forward_score': forwardScore,
   };
 
   factory GroupMessage.fromJson(Map<String, dynamic> json) {
@@ -440,6 +447,7 @@ class GroupMessage {
       payload: json['payload'] as Map<String, dynamic>?,
       poll: pollJson != null ? PollData.fromJson(pollJson) : null,
       pendingMedia: enAttente == null ? null : PendingMedia.fromJson(enAttente),
+      forwardScore: json['forward_score'] as int? ?? 0,
     );
   }
 
@@ -487,6 +495,7 @@ class GroupMessage {
       poll: poll ?? this.poll,
       deletedAt: deletedAt ?? this.deletedAt,
       originalContent: originalContent,
+      forwardScore: forwardScore,
     );
   }
 

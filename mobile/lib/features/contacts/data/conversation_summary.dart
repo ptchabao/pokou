@@ -98,6 +98,7 @@ class ConversationSummary {
     required this.isPinned,
     required this.isMuted,
     required this.isArchived,
+    this.isFavorite = false,
     required this.isUnknownContact,
     required this.contactUserId,
     required this.lastMessage,
@@ -118,6 +119,10 @@ class ConversationSummary {
   final bool isPinned;
   final bool isMuted;
   final bool isArchived;
+
+  /// Dans le filtre « Favoris » — un choix de MA liste, que les autres ne
+  /// voient pas.
+  final bool isFavorite;
 
   /// Personne qui m'a écrit sans figurer dans mon carnet — façon WhatsApp,
   /// elle apparaît quand même. Le client ne doit pas proposer les actions
@@ -163,6 +168,7 @@ class ConversationSummary {
       isPinned: json['is_pinned'] as bool? ?? false,
       isMuted: json['is_muted'] as bool? ?? false,
       isArchived: json['is_archived'] as bool? ?? false,
+      isFavorite: json['is_favorite'] as bool? ?? false,
       isUnknownContact: json['is_unknown_contact'] as bool? ?? false,
       isVerified: json['is_verified'] as bool? ?? false,
       isBot: json['is_bot'] as bool? ?? false,

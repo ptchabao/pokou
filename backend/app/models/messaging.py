@@ -122,6 +122,11 @@ class DirectMessage(Base):
     #: Version d'origine d'un message EN CLAIR modifié en mode preuve. Pour
     #: un message chiffré, elle reste sur les téléphones, jamais ici.
     original_content = Column(Text, nullable=True)
+    #: Transfert : 0 pour un message d'origine, sinon le nombre de
+    #: transferts de proche en proche. Un nombre et non un booléen : au-delà
+    #: de 5, la bulle dit « Transféré plusieurs fois ». Le message chiffré se
+    #: transfère depuis l'appareil, qui annonce lui-même ce compte.
+    forward_score = Column(Integer, default=0, nullable=False)
 
     sender = relationship("User", foreign_keys=[sender_id])
     recipient = relationship("User", foreign_keys=[recipient_id])

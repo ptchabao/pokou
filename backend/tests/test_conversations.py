@@ -365,13 +365,185 @@ def test_reporting_does_not_block_unless_asked(client, caplog):
         headers=headers_a,
     )
     assert unknown.status_code == 200
-    # Mais le blocage, lui, exige la ligne de contact où l'inscrire.
-    refused = client.post(
+    # Un compte inexistant n'est pas « bloqué », sans que la réponse en dise
+    # plus long.
+    ghost = client.post(
         "/api/v1/conversations/report",
         json={"contact_user_id": 999999, "reason": "Inconnu", "also_block": True},
         headers=headers_a,
     )
-    assert refused.status_code == 403
+    assert ghost.status_code == 200
+    assert ghost.json()["blocked"] is False
+
+
+# ─── Maquette : inconnu, signalement, favoris, transfert ─────────────────────
+
+def _stranger_writes(client, phone_a, phone_b, content="Envoyez votre code secret"):
+    """B écrit à A sans que A l'ait dans son carnet."""
+    headers_a, user_a = _signup(client, phone_a)
+    headers_b, user_b = _signup(client, phone_b)
+    client.post("/api/v1/contacts", json={"phone": phone_a, "display_name": "A"}, headers=headers_b)
+    _send_direct(client, headers_b, user_a, content)
+    return headers_a, user_a, headers_b, user_b
+
+
+def test_un_inconnu_se_bloque_sans_entrer_dans_le_carnet(client):
+    headers_a, _, _, user_b = _stranger_writes(client, "+22889500301", "+22889500302")
+
+    blocked = client.put(
+        "/api/v1/conversations/block",
+        json={"contact_user_id": user_b, "blocked": True},
+        headers=headers_a,
+    )
+    assert blocked.status_code == 200, blocked.text
+    assert not any(row.get("contact_user_id") == user_b for row in _list(client, headers_a)["items"])
+    # Pas un contact pour autant.
+    assert client.get("/api/v1/contacts", headers=headers_a).json()["items"] == []
+
+    listing = client.get("/api/v1/conversations/blocked", headers=headers_a).json()
+    entry = listing["items"][0]
+    assert entry["is_unknown_contact"] is True
+    # Numéro masqué, jamais en clair.
+    assert entry["display_name"] == "+228 8• •• •• 02"
+    assert "phone" not in entry
+    assert entry["blocked_at"] is not None
+    assert entry["after_report"] is False
+
+    # Débloquer le rend à l'état d'inconnu : la ligne disparaît.
+    client.put(
+        "/api/v1/conversations/block",
+        json={"contact_user_id": user_b, "blocked": False},
+        headers=headers_a,
+    )
+    assert client.get("/api/v1/conversations/blocked", headers=headers_a).json()["total"] == 0
+    stranger = next(
+        row for row in _list(client, headers_a)["items"] if row.get("contact_user_id") == user_b
+    )
+    assert stranger["is_unknown_contact"] is True
+
+
+def test_signaler_un_inconnu_avec_ses_derniers_messages_et_le_bloquer(client):
+    from app.models import AbuseReport
+
+    headers_a, user_a, _, user_b = _stranger_writes(client, "+22889500303", "+22889500304")
+    messages = [{"sender": "~ Agent", "text": f"message {i}", "sent_at": "2026-11-15T11:52:00"} for i in range(5)]
+    response = client.post(
+        "/api/v1/conversations/report",
+        json={
+            "contact_user_id": user_b,
+            "reason": "Arnaque ou demande d'argent",
+            "also_block": True,
+            "recent_messages": messages,
+        },
+        headers=headers_a,
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["blocked"] is True
+    entry = client.get("/api/v1/conversations/blocked", headers=headers_a).json()["items"][0]
+    assert entry["after_report"] is True
+
+    session = TestingSessionLocal()
+    try:
+        report = session.query(AbuseReport).one()
+        assert report.target_user_id == user_b
+        assert [m["text"] for m in report.recent_messages] == [m["text"] for m in messages]
+    finally:
+        session.close()
+
+    # Six messages, c'est un de trop : « les 5 derniers, rien d'autre ».
+    too_many = client.post(
+        "/api/v1/conversations/report",
+        json={"contact_user_id": user_b, "reason": "Spam", "recent_messages": messages + messages[:1]},
+        headers=headers_a,
+    )
+    assert too_many.status_code == 422
+
+
+def test_signaler_un_groupe_est_reserve_a_ses_membres(client):
+    from app.models import AbuseReport
+
+    headers_a, _ = _signup(client, "+22889500305")
+    headers_b, _ = _signup(client, "+22889500306")
+    group = _create_group(client, headers_a)
+
+    outsider = client.post(
+        "/api/v1/conversations/report",
+        json={"group_id": group["id"], "reason": "Spam ou publicité"},
+        headers=headers_b,
+    )
+    assert outsider.status_code == 403
+
+    both = client.post(
+        "/api/v1/conversations/report",
+        json={"group_id": group["id"], "contact_user_id": 1, "reason": "Spam"},
+        headers=headers_a,
+    )
+    assert both.status_code == 400
+
+    member = client.post(
+        "/api/v1/conversations/report",
+        json={"group_id": group["id"], "reason": "Spam ou publicité"},
+        headers=headers_a,
+    )
+    assert member.status_code == 200, member.text
+    session = TestingSessionLocal()
+    try:
+        report = session.query(AbuseReport).one()
+        assert report.group_id == group["id"]
+        assert report.target_user_id is None
+    finally:
+        session.close()
+
+
+def test_favoris_d_une_discussion_et_d_un_groupe(client):
+    headers_a, _ = _signup(client, "+22889500307")
+    _, user_b = _signup(client, "+22889500308")
+    contact = _add_contact(client, headers_a, "+22889500308", "Kofi")
+    _send_direct(client, headers_a, user_b)
+    group = _create_group(client, headers_a)
+
+    for kind, conversation_id in (("contact", contact["id"]), ("group", group["id"])):
+        response = client.put(
+            "/api/v1/conversations/favorite",
+            json={"kind": kind, "id": conversation_id, "favorite": True},
+            headers=headers_a,
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["is_favorite"] is True
+        assert _entry(_list(client, headers_a), kind, conversation_id)["is_favorite"] is True
+
+    client.put(
+        "/api/v1/conversations/favorite",
+        json={"kind": "contact", "id": contact["id"], "favorite": False},
+        headers=headers_a,
+    )
+    assert _entry(_list(client, headers_a), "contact", contact["id"])["is_favorite"] is False
+
+
+def test_un_message_transfere_porte_son_compte_de_transferts(client):
+    headers_a, user_a = _signup(client, "+22889500309")
+    headers_b, user_b = _signup(client, "+22889500310")
+    _, user_c = _signup(client, "+22889500311")
+    _add_contact(client, headers_a, "+22889500310", "B")
+    _add_contact(client, headers_a, "+22889500311", "C")
+
+    original = _send_direct(client, headers_a, user_b, "À faire suivre")
+    assert original["forward_score"] == 0
+    forwarded = client.post(
+        f"/api/v1/messages/{original['id']}/forward",
+        json={"recipient_id": user_c},
+        headers=headers_a,
+    )
+    assert forwarded.status_code == 200, forwarded.text
+    assert forwarded.json()["forward_score"] == 1
+
+    # Transfert fait par l'appareil (message chiffré) : il annonce le compte.
+    from_device = client.post(
+        "/api/v1/messages",
+        json={"recipient_id": user_c, "content": "copie", "forward_score": 6},
+        headers=headers_a,
+    )
+    assert from_device.json()["forward_score"] == 6
 
 
 # ─── Liste unifiée ────────────────────────────────────────────────────────────

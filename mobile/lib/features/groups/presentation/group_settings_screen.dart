@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exceptions.dart';
+import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
+import '../../messaging/presentation/report_sheet.dart';
 import '../data/group_model.dart';
 import 'group_controller.dart';
 
@@ -83,6 +86,110 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
     }
   }
 
+  /// « Quitter le groupe » — même confirmation que depuis le ⋮ de la
+  /// conversation (voir group_conversation_screen.dart::_leave), rejointe
+  /// ici parce que cet écran n'a pas le contrôleur de la conversation.
+  Future<void> _confirmLeave(Group group) async {
+    final l = L.of(context);
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    if (myUserId == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l.groupLeaveTitle),
+        content: Text(l.groupLeaveBody(group.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              l.groupLeaveAction,
+              style: const TextStyle(color: AppColors.semanticError),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref
+          .read(groupRepositoryProvider)
+          .removeMember(groupId: widget.groupId, userId: myUserId);
+      if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.groupLeaveFailed)));
+      }
+    }
+  }
+
+  /// Discussions · 26 — « Signaler le groupe », avec les 5 derniers
+  /// messages déchiffrés par CET appareil, réservé aux membres (le serveur
+  /// vérifie l'appartenance).
+  Future<void> _reportGroup(Group group) async {
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    if (myUserId == null) return;
+    final recent = await recentGroupForReport(
+      ref,
+      groupId: widget.groupId,
+      myUserId: myUserId,
+    );
+    if (!mounted) return;
+    await showReportSheet(
+      context,
+      ref,
+      title: L.of(context).reportGroupNamed(group.name),
+      groupId: widget.groupId,
+      recentMessages: recent,
+    );
+  }
+
+  /// « Edem K., toi » : les administrateurs, moi compris.
+  String _adminNames(Group group, L l) {
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    return group.members
+        .where((m) => m.canManage)
+        .map((m) => m.userId == myUserId ? l.groupSettingsMe : m.displayName)
+        .join(', ');
+  }
+
+  Future<void> _showAdmins(Group group) async {
+    final l = L.of(context);
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l.groupSettingsAdmins,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            for (final m in group.members.where((m) => m.canManage))
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: Text(m.userId == myUserId ? l.navYou : m.displayName),
+                subtitle: Text(m.isOwner ? l.groupCreator : l.groupAdmin),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _decide(String requestId, bool approve) async {
     try {
       await ref
@@ -154,6 +261,71 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  // Discussions · 26 — « Membres » : administrateurs, lien
+                  // d'invitation, mode preuve. Le lien et le mode preuve
+                  // s'ouvrent depuis la conversation, qui a déjà leurs
+                  // feuilles : cet écran lui rend la main avec le geste.
+                  _Section(l.groupSettingsMembers),
+                  _Card(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.workspace_premium_outlined),
+                        title: Text(l.groupSettingsAdmins),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 140),
+                              child: Text(
+                                _adminNames(group, l),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () => _showAdmins(group),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.link),
+                        title: Text(l.groupInviteLink),
+                        subtitle: Text(
+                          group.inviteCode == null
+                              ? l.groupNoLink
+                              : l.groupInfoInviteHint,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.of(context).pop('invite'),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.history_toggle_off),
+                        title: Text(l.groupSettingsProof),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              group.proofMode
+                                  ? l.groupSettingsProofOn
+                                  : l.groupSettingsProofOff,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () => Navigator.of(context).pop('proof'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   _Section(l.groupDisappearing),
                   _Card(
                     children: [
@@ -215,9 +387,35 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                           ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+                  _Card(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.logout),
+                        title: Text(l.groupLeave),
+                        onTap: () => _confirmLeave(group),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.flag_outlined,
+                          color: AppColors.semanticError,
+                        ),
+                        title: Text(
+                          l.reportGroup,
+                          style: const TextStyle(color: AppColors.semanticError),
+                        ),
+                        onTap: () => _reportGroup(group),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
+                  // La cagnotte n'existe que là où Kory est ouvert : en Lot
+                  // 1, la note ne mentionne jamais Kory (aucune mention de
+                  // Kory n'est montrée dans ce pays).
                   Text(
-                    l.groupLeaveKoryNote,
+                    ref.watch(currentCountryConfigProvider).has('kory')
+                        ? l.groupLeaveKoryNote
+                        : l.groupLeaveLot1Note,
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,

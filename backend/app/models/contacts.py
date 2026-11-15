@@ -43,6 +43,17 @@ class Contact(Base):
     # Messages éphémères : durée de vie en secondes des nouveaux messages de
     # cette conversation. Nul = pas d'expiration.
     disappearing_seconds = Column(Integer, nullable=True)
+    # Favori : retrouvée dans le filtre « Favoris » de la liste. Comme
+    # l'épingle, ça ne change que MA liste.
+    is_favorite = Column(Boolean, default=False, nullable=False)
+    # Date du blocage, et s'il a suivi un signalement : l'écran « Contacts
+    # bloqués » les affiche (« Bloqué le 28 oct. · après un signalement »).
+    blocked_at = Column(DateTime, nullable=True)
+    blocked_after_report = Column(Boolean, default=False, nullable=False)
+    # Ligne créée UNIQUEMENT pour bloquer un inconnu qui m'a écrit : le
+    # blocage vit sur la ligne Contact, il en faut donc une. Elle n'est pas
+    # un contact pour autant — absente du carnet, supprimée au déblocage.
+    added_by_block = Column(Boolean, default=False, nullable=False)
 
     owner = relationship("User", foreign_keys=[owner_user_id])
     contact_user = relationship("User", foreign_keys=[contact_user_id])
