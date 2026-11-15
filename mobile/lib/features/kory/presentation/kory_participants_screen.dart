@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../contacts/data/contact_model.dart';
 import '../../contacts/presentation/contacts_controller.dart';
+import '../data/kory_model.dart';
+import 'kory_screen.dart';
 import 'kory_ui.dart';
 import 'kory_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
@@ -161,6 +163,17 @@ class _KoryParticipantsScreenState
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final pot = ref.watch(koryPotProvider(widget.potId)).valueOrNull;
+    // Les participants déjà là ; le collecteur en tête, même sans ligne
+    // de participant côté serveur.
+    final existing = [
+      if (pot != null &&
+          pot.collectorName != null &&
+          !pot.participants.any((p) => p.isCollector))
+        KoryParticipantInfo(name: pot.collectorName!, isCollector: true),
+      ...?pot?.participants.where((p) => p.isCollector),
+      ...?pot?.participants.where((p) => !p.isCollector),
+    ];
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -227,7 +240,7 @@ class _KoryParticipantsScreenState
             children: [
               Expanded(
                 child: Text(
-                  l.koryAddedCount('${_pending.length}'),
+                  l.koryAddedCount('${existing.length + _pending.length}'),
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -240,36 +253,48 @@ class _KoryParticipantsScreenState
               ),
             ],
           ),
-          for (final p in _pending)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor: AppColors.terracottaTint,
-                foregroundColor: AppColors.onTerracottaTint,
-                child: Text(p.name.isEmpty ? '?' : p.name[0].toUpperCase()),
-              ),
-              title: Text(p.name),
-              subtitle: Text(p.onPokou ? l.koryOnPokou : _mask(p.phone!)),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!p.onPokou)
-                    Chip(
-                      label: Text(l.koryInvitedChip),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  IconButton(
-                    tooltip: l.koryRemoveParticipant(p.name),
-                    icon: const Icon(Icons.close),
-                    onPressed: () => setState(() => _pending.remove(p)),
+          // Ceux qui sont déjà là (la collectrice d'abord), puis les ajouts.
+          KoryCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
+              children: [
+                for (final p in existing)
+                  KoryPersonRow(
+                    name: p.name,
+                    subtitle: p.onPokou ? l.koryOnPokou : p.phoneMasked,
+                    trailing: p.isCollector
+                        ? KoryStatusPill(
+                            icon: Icons.account_balance_wallet_outlined,
+                            label: l.koryXCollectorLabel,
+                            color: AppColors.feedbackSuccess,
+                          )
+                        : p.onPokou
+                        ? null
+                        : _invitedPill(l),
                   ),
-                ],
-              ),
+                for (final p in _pending)
+                  KoryPersonRow(
+                    name: p.name,
+                    subtitle: p.onPokou ? l.koryOnPokou : _mask(p.phone!),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!p.onPokou) _invitedPill(l),
+                        IconButton(
+                          tooltip: l.koryRemoveParticipant(p.name),
+                          icon: const Icon(Icons.close),
+                          onPressed: () => setState(() => _pending.remove(p)),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
+          ),
           const SizedBox(height: 12),
           Text(
             l.koryInviteNote,
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -278,7 +303,7 @@ class _KoryParticipantsScreenState
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: KoryButton(
-            label: l.koryContinueWith(_pending.length),
+            label: l.koryContinueWith(existing.length + _pending.length),
             busy: _busy,
             onPressed: _busy ? null : _continue,
           ),
@@ -286,4 +311,10 @@ class _KoryParticipantsScreenState
       ),
     );
   }
+
+  Widget _invitedPill(L l) => KoryStatusPill(
+    icon: Icons.sms_outlined,
+    label: l.koryInvitedChip,
+    color: AppColors.securityWarning,
+  );
 }

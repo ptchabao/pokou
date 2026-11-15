@@ -11082,4 +11082,101 @@ class LEn extends L {
   @override
   String get koryMqRemindersSub =>
       '2 days before, on the day, and a nudge the day after';
+
+  @override
+  String koryMqConfirmedOf(String done, String total) {
+    return '$done confirmed of $total';
+  }
+
+  @override
+  String get koryMqUpToDate => 'Up to date';
+
+  @override
+  String koryMqConfirmedDeclared(String confirmed, String declared) {
+    return '$confirmed confirmed · $declared declared';
+  }
+
+  @override
+  String koryMqLateCount(int count) {
+    return '$count late';
+  }
+
+  @override
+  String koryMqHaveContributed(String done, String total) {
+    return '$done of $total paid';
+  }
+
+  @override
+  String get koryMqPlusFeeNotRefunded => 'Kory Plus fees are not refunded.';
+
+  @override
+  String get koryMqSeeTontine => 'See the tontine';
+
+  @override
+  String koryMqAllPaid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'All $count members paid their fee. The tontine is open.',
+      one: 'The member paid their fee. The tontine is open.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryMqAmounts => 'Amounts';
+
+  @override
+  String get koryMqVerifiedByCode => 'verified by code';
+
+  @override
+  String koryMqOnPlanned(String amount) {
+    return 'out of $amount planned';
+  }
+
+  @override
+  String koryMqPeriodCounts(String up, String pending, String late) {
+    return '$up up to date · $pending to confirm · $late late';
+  }
+
+  @override
+  String get koryMqPreviousMonths => 'Previous months';
+
+  @override
+  String koryMqAmountMonthlyOn(String amount, String day) {
+    return '$amount, on day $day of each month';
+  }
+
+  @override
+  String get koryMqOutsidersAfter => 'Outside the group: after creating';
+
+  @override
+  String get koryMqAddOutside => 'Add from outside the group';
+
+  @override
+  String get koryMqConfirms => 'Confirms';
+
+  @override
+  String koryMqAndOtherMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count other members',
+      one: 'and 1 other member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryMqDueFrom(String day, String date) {
+    return '$day, from $date';
+  }
+
+  @override
+  String get koryMqRemindersNotice =>
+      'Reminders 2 days before and on the day, a nudge the day after if nothing is declared; everyone can turn them off for themselves.';
+
+  @override
+  String get koryMqChangeCollectorSub =>
+      'New number verified by code; everyone is notified';
 }

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/pokou_icon.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
 import 'kory_pledge_screens.dart';
 import 'kory_pot_screen.dart';
 import 'kory_ui.dart';
+import 'kory_wallet.dart';
 
 final koryPreviewProvider = FutureProvider.autoDispose
     .family<KoryPreview, String>(
@@ -106,25 +108,56 @@ class _KoryInviteScreenState extends ConsumerState<KoryInviteScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          Text(
-            preview.title,
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          Text(
-            [kind, ?preview.groupName].join(' · '),
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 16),
+          // La carte de la collecte : le cauri, le titre, puis ses lignes.
           KoryCard(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.terracottaTint,
+                        shape: BoxShape.circle,
+                      ),
+                      child: PokouIcon(
+                        PokouModuleIcon.kory,
+                        size: 20,
+                        color: AppColors.onTerracottaTint,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            preview.title,
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            [kind, ?preview.groupName].join(' · '),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(height: 24, color: AppColors.border),
                 if (preview.beneficiaryName != null)
-                  KoryLine(l.koryXBeneficiary, preview.beneficiaryName!),
+                  KoryLine(l.koryMqBeneficiary, preview.beneficiaryName!),
                 if (preview.goalAmount != null)
                   KoryLine(l.koryXGoalLabel, formatFcfa(preview.goalAmount!)),
                 if (preview.amountPerMember != null && period != null)
@@ -147,7 +180,7 @@ class _KoryInviteScreenState extends ConsumerState<KoryInviteScreen> {
                   l.koryXIncludingYou(preview.participantsCount),
                 ),
                 KoryLine(
-                  l.koryXAmountsLabel,
+                  l.koryMqAmounts,
                   preview.amountsVisible
                       ? l.koryXVisibleToAll
                       : l.koryXVisibleToCollector,
@@ -155,12 +188,29 @@ class _KoryInviteScreenState extends ConsumerState<KoryInviteScreen> {
               ],
             ),
           ),
-          KorySection(l.koryXCollectorLabel),
+          const SizedBox(height: 10),
           KoryCard(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: KoryPersonRow(
-              name: preview.collectorName ?? '—',
-              subtitle: preview.collectorPhoneMasked,
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.koryXCollectorLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                KoryPersonRow(
+                  name: preview.collectorName ?? '—',
+                  // « Flooz · 96 •• •• 21 · vérifié par code »
+                  subtitle: [
+                    ?(KoryWallet.of(preview.collectorPhoneMasked)?.label),
+                    l.koryMqVerifiedByCode,
+                  ].join(' · '),
+                  trailing: const KoryVerifiedPill(),
+                ),
+              ],
             ),
           ),
           if (preview.description != null) ...[
@@ -170,7 +220,7 @@ class _KoryInviteScreenState extends ConsumerState<KoryInviteScreen> {
               style: TextStyle(color: AppColors.textPrimary),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           KoryNotice(text: l.koryXJoinNotice),
         ],
       ),

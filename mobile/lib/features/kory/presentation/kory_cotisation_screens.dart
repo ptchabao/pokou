@@ -102,25 +102,41 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
             onPressed: () => koryShare(context, pot),
           ),
       ],
-      footer:
-          pot.isOpen &&
+      // La maquette : « Journal » à contour, puis « Modifier ou arrêter la
+      // cotisation » en lien ; « Contribuer » d'abord si je cotise aussi.
+      footer: KoryFooter(
+        children: [
+          if (pot.isOpen &&
               block?.isMember == true &&
               mine != null &&
-              !pot.isCollector
-          ? KoryFooter(
-              children: [
-                KoryButton(
-                  label: l.koryXContributeAmount(formatFcfa(mine.amount)),
-                  onPressed: () => openKoryContribute(
-                    context,
-                    ref,
-                    pot,
-                    amount: mine.amount,
-                  ),
+              !pot.isCollector) ...[
+            KoryButton(
+              label: l.koryXContributeAmount(formatFcfa(mine.amount)),
+              onPressed: () =>
+                  openKoryContribute(context, ref, pot, amount: mine.amount),
+            ),
+            const SizedBox(height: 8),
+          ],
+          KoryButton(
+            outlined: true,
+            label: l.koryJournalTab,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => KoryJournalScreen(potId: pot.id),
+              ),
+            ),
+          ),
+          if (pot.isOpen && pot.isAdmin)
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => KoryCotisationEditScreen(pot: pot),
                 ),
-              ],
-            )
-          : null,
+              ),
+              child: Text(l.koryXEditCotisation),
+            ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           refreshKory(ref, potId: pot.id);
@@ -131,19 +147,37 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
           children: [
             if (current != null)
               KoryCard(
+                color: AppColors.terracottaTint.withValues(alpha: 0.35),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    KoryFigure(
-                      label: l.koryXDueOn(
+                    Text(
+                      l.koryXDueOn(
                         koryMonth(context, current.dueAt),
                         koryDay(context, current.dueAt),
                       ),
-                      amount: current.confirmedTotal,
-                      caption: l.koryXConfirmedOnPlanned(
-                        formatFcfa(current.expectedTotal),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
                       ),
-                      trailing: koryOpenPill(l, pot),
+                    ),
+                    Text(
+                      l.koryMqAmountConfirmed(
+                        formatFcfa(current.confirmedTotal),
+                      ),
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      l.koryMqOnPlanned(formatFcfa(current.expectedTotal)),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     _Progress(
@@ -153,12 +187,15 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l.koryXPeriodCounts(
+                      l.koryMqPeriodCounts(
                         '${current.upToDateCount}',
                         '${current.toConfirmCount}',
                         '${current.lateCount}',
                       ),
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -175,20 +212,23 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
               for (final entry in pending)
                 KoryReviewTile(key: ValueKey(entry.id), pot: pot, entry: entry),
             if (current != null && current.lateCount > 0) ...[
-              KorySection(l.koryXLateCount('${current.lateCount}')),
+              const SizedBox(height: 10),
+              // « En retard · 3 … Komi T., Abla G., Séna K. »
               KoryCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      current.late.map((m) => m.name ?? '—').join(', '),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                child: KoryLine(
+                  l.koryXLateCount('${current.lateCount}'),
+                  current.late.map((m) => m.name ?? '—').join(', '),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
                       pot.remindedAt == null
                           ? l.koryXRemindHint
                           : l.koryXRemindedAt(
@@ -200,20 +240,20 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    KoryButton(
-                      quiet: true,
-                      icon: Icons.notifications_active_outlined,
-                      label: l.koryXRemindLate,
-                      busy: _reminding,
-                      onPressed: pot.isOpen ? _remind : null,
-                    ),
-                  ],
-                ),
+                  ),
+                  TextButton(
+                    onPressed: pot.isOpen && !_reminding ? _remind : null,
+                    child: Text(l.koryXRemindLate),
+                  ),
+                ],
               ),
             ],
             if (block != null && block.history.isNotEmpty) ...[
-              KorySection(l.koryXPreviousDues),
+              KorySection(
+                pot.period == 'MONTHLY'
+                    ? l.koryMqPreviousMonths
+                    : l.koryXPreviousDues,
+              ),
               KoryCard(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -274,18 +314,8 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
-            KoryActionRow(
-              icon: Icons.receipt_long_outlined,
-              title: l.koryJournal,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => KoryJournalScreen(potId: pot.id),
-                ),
-              ),
-            ),
             if (pot.isOpen && pot.isAdmin) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               KoryActionRow(
                 icon: Icons.group_add_outlined,
                 title: l.koryXMembersCount(block?.membersCount ?? 0),
@@ -294,16 +324,6 @@ class _OrganizerViewState extends ConsumerState<_OrganizerView> {
                   MaterialPageRoute(
                     builder: (_) =>
                         KoryParticipantsScreen(potId: pot.id, title: pot.title),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              KoryActionRow(
-                icon: Icons.tune,
-                title: l.koryXEditCotisation,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => KoryCotisationEditScreen(pot: pot),
                   ),
                 ),
               ),
@@ -353,21 +373,25 @@ class _MemberView extends ConsumerWidget {
     return KoryPage(
       title: pot.title,
       subtitle: [l.koryKindCotisation, ?pot.groupName].join(' · '),
-      footer: pot.isOpen && next != null
-          ? KoryFooter(
-              children: [
-                KoryButton(
-                  label: l.koryXContributeAmount(formatFcfa(next.amount)),
-                  onPressed: () => openKoryContribute(
-                    context,
-                    ref,
-                    pot,
-                    amount: next.amount,
-                  ),
-                ),
-              ],
-            )
-          : null,
+      // « Contribuer », puis « Journal de la cotisation » en lien dessous.
+      footer: KoryFooter(
+        children: [
+          if (pot.isOpen && next != null)
+            KoryButton(
+              label: l.koryXContributeAmount(formatFcfa(next.amount)),
+              onPressed: () =>
+                  openKoryContribute(context, ref, pot, amount: next.amount),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => KoryJournalScreen(potId: pot.id),
+              ),
+            ),
+            child: Text(l.koryXCotisationJournal),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           refreshKory(ref, potId: pot.id);
@@ -403,10 +427,16 @@ class _MemberView extends ConsumerWidget {
                   if (pot.amountPerMember != null)
                     KoryLine(
                       l.koryXAmountLabel,
-                      l.koryPerMember(
-                        formatFcfa(pot.amountPerMember!),
-                        koryPeriodLabel(l, pot.period),
-                      ),
+                      // « 5 000 FCFA, le 10 de chaque mois »
+                      pot.period == 'MONTHLY' && pot.dueAt != null
+                          ? l.koryMqAmountMonthlyOn(
+                              formatFcfa(pot.amountPerMember!),
+                              '${pot.dueAt!.toLocal().day}',
+                            )
+                          : l.koryPerMember(
+                              formatFcfa(pot.amountPerMember!),
+                              koryPeriodLabel(l, pot.period),
+                            ),
                     ),
                   KoryLine(
                     l.koryXMembersLabel,
@@ -432,16 +462,6 @@ class _MemberView extends ConsumerWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
-            KoryActionRow(
-              icon: Icons.receipt_long_outlined,
-              title: l.koryXCotisationJournal,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => KoryJournalScreen(potId: pot.id),
-                ),
-              ),
-            ),
             for (final entry in pot.entries)
               if (entry.isMine && entry.isContested && pot.isOpen) ...[
                 const SizedBox(height: 10),
@@ -705,12 +725,16 @@ class _KoryCotisationEditScreenState
                 : l.koryXLastDueOn(koryDay(context, current.dueAt)),
             onTap: () => setState(() => _action = 'STOP'),
           ),
-          KoryChoice(
-            selected: _action == 'COLLECTOR',
+          // « Changer de collecteur » : une ligne à chevron à part ; le
+          // choix du nouveau collecteur s'ouvre dessous.
+          KoryActionRow(
+            icon: Icons.swap_horiz,
             title: l.koryXChangeCollector,
-            subtitle: l.koryXChangeCollectorSub,
+            subtitle: l.koryMqChangeCollectorSub,
             onTap: () => setState(() => _action = 'COLLECTOR'),
-            child: Column(
+          ),
+          if (_action == 'COLLECTOR')
+            Column(
               children: [
                 for (final m
                     in block?.members ?? const <KoryContributorState>[])
@@ -729,8 +753,7 @@ class _KoryCotisationEditScreenState
                     ),
               ],
             ),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           KoryNotice(
             text: l.koryXEditNotice(
               count,
@@ -760,6 +783,8 @@ class KoryCotisationMembersScreen extends ConsumerStatefulWidget {
 class _KoryCotisationMembersScreenState
     extends ConsumerState<KoryCotisationMembersScreen> {
   bool _everyone = true;
+  bool _expanded = false;
+  bool _outsiders = false;
   late Set<int> _chosen = {
     for (final m in widget.draft.group?.members ?? const []) m.userId,
   };
@@ -774,6 +799,16 @@ class _KoryCotisationMembersScreenState
     final members = group.members;
     final chosen = _everyone ? {for (final m in members) m.userId} : _chosen;
     final count = chosen.length;
+    // Moi, le co-organisateur, puis les autres ; repli « et N autres
+    // membres » au-delà de quatre lignes, sauf quand on choisit.
+    final ordered = [
+      ...members.where((m) => m.userId == me),
+      ...members.where((m) => m.userId == _deputy && m.userId != me),
+      ...members.where((m) => m.userId != me && m.userId != _deputy),
+    ];
+    final fold = _everyone && !_expanded && ordered.length > 5;
+    final visible = fold ? ordered.take(4).toList() : ordered;
+    final hidden = fold ? ordered.length - 4 : 0;
     return KoryPage(
       title: l.koryXMembersTitle,
       subtitle: l.koryStepOf('2', draft.title, '3'),
@@ -791,9 +826,20 @@ class _KoryCotisationMembersScreenState
                         builder: (_) => KoryCotisationRecapScreen(draft: draft),
                       ),
                     );
-                    if (potId != null && context.mounted) {
-                      Navigator.of(context).pop(potId);
+                    if (potId == null || !context.mounted) return;
+                    // « Ajouter hors du groupe » : par leur numéro, une fois
+                    // la cotisation créée (il faut son lien pour inviter).
+                    if (_outsiders) {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => KoryParticipantsScreen(
+                            potId: potId,
+                            title: draft.title,
+                          ),
+                        ),
+                      );
                     }
+                    if (context.mounted) Navigator.of(context).pop(potId);
                   },
           ),
         ],
@@ -813,19 +859,23 @@ class _KoryCotisationMembersScreenState
             subtitle: l.koryXChooseMembersSub,
             onTap: () => setState(() => _everyone = false),
           ),
-          KorySection(l.koryXConcernedMembers(count)),
+          KorySection(
+            l.koryXConcernedMembers(count),
+            trailing: _outsiders ? l.koryMqOutsidersAfter : l.koryMqAddOutside,
+            onTrailing: () => setState(() => _outsiders = !_outsiders),
+          ),
           KoryCard(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             child: Column(
               children: [
-                for (final m in members)
+                for (final m in visible)
                   KoryPersonRow(
                     name: m.userId == me ? l.koryYou : m.displayName,
                     subtitle: m.userId == me
                         ? l.koryXOrganizerCollector
                         : m.userId == _deputy
                         ? l.koryXCoOrganizer
-                        : null,
+                        : l.koryMqOnPokou,
                     onTap: _everyone
                         ? null
                         : () => setState(() {
@@ -838,6 +888,13 @@ class _KoryCotisationMembersScreenState
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // « Confirme » : ceux qui confirment les réceptions.
+                        if (m.userId == me || m.userId == _deputy)
+                          KoryStatusPill(
+                            icon: Icons.fact_check_outlined,
+                            label: l.koryMqConfirms,
+                            color: AppColors.accentPrimary,
+                          ),
                         if (m.userId != me && chosen.contains(m.userId))
                           IconButton(
                             tooltip: l.koryXMakeCoOrganizer,
@@ -867,6 +924,16 @@ class _KoryCotisationMembersScreenState
                                 }),
                         ),
                       ],
+                    ),
+                  ),
+                if (hidden > 0)
+                  KoryPersonRow(
+                    name: l.koryMqAndOtherMembers(hidden),
+                    muted: true,
+                    onTap: () => setState(() => _expanded = true),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textMuted,
                     ),
                   ),
               ],
@@ -953,7 +1020,16 @@ class _KoryCotisationRecapScreenState
           KoryCard(
             child: Column(
               children: [
-                KoryLine(l.koryXFirstDue, koryDate(context, first)),
+                // « le 5 du mois, dès le 5 déc. »
+                KoryLine(
+                  l.koryMqDue,
+                  draft.period == 'MONTHLY' || draft.period == 'QUARTERLY'
+                      ? l.koryMqDueFrom(
+                          l.koryMqDayOfMonth('${first.day}'),
+                          koryDay(context, first),
+                        )
+                      : koryDate(context, first),
+                ),
                 KoryLine(
                   l.koryXEnd,
                   draft.endsAt == null
@@ -994,9 +1070,13 @@ class _KoryCotisationRecapScreenState
           ),
           const SizedBox(height: 12),
           KoryNotice(
-            text: draft.group == null
-                ? l.koryXRecapNoticeAlone
-                : l.koryXRecapNotice(members, draft.group!.name),
+            text: [
+              // Les rappels J−2, jour J et J+1 partent du serveur.
+              l.koryMqRemindersNotice,
+              draft.group == null
+                  ? l.koryXRecapNoticeAlone
+                  : l.koryXRecapNotice(members, draft.group!.name),
+            ].join(' '),
           ),
         ],
       ),

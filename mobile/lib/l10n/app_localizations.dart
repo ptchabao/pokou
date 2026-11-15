@@ -18391,6 +18391,132 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'J−2, jour J et relance J+1'**
   String get koryMqRemindersSub;
+
+  /// No description provided for @koryMqConfirmedOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} confirmées sur {total}'**
+  String koryMqConfirmedOf(String done, String total);
+
+  /// No description provided for @koryMqUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'À jour'**
+  String get koryMqUpToDate;
+
+  /// No description provided for @koryMqConfirmedDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'{confirmed} confirmées · {declared} déclarées'**
+  String koryMqConfirmedDeclared(String confirmed, String declared);
+
+  /// No description provided for @koryMqLateCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 en retard} other{{count} en retard}}'**
+  String koryMqLateCount(int count);
+
+  /// No description provided for @koryMqHaveContributed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {total} ont cotisé'**
+  String koryMqHaveContributed(String done, String total);
+
+  /// No description provided for @koryMqPlusFeeNotRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les frais Kory Plus ne sont pas remboursés.'**
+  String get koryMqPlusFeeNotRefunded;
+
+  /// No description provided for @koryMqSeeTontine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la tontine'**
+  String get koryMqSeeTontine;
+
+  /// No description provided for @koryMqAllPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le membre a payé ses frais. La tontine est ouverte.} other{Les {count} membres ont payé leurs frais. La tontine est ouverte.}}'**
+  String koryMqAllPaid(int count);
+
+  /// No description provided for @koryMqAmounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants'**
+  String get koryMqAmounts;
+
+  /// No description provided for @koryMqVerifiedByCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'vérifié par code'**
+  String get koryMqVerifiedByCode;
+
+  /// No description provided for @koryMqOnPlanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {amount} prévus'**
+  String koryMqOnPlanned(String amount);
+
+  /// No description provided for @koryMqPeriodCounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{up} à jour · {pending} à confirmer · {late} en retard'**
+  String koryMqPeriodCounts(String up, String pending, String late);
+
+  /// No description provided for @koryMqPreviousMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois précédents'**
+  String get koryMqPreviousMonths;
+
+  /// No description provided for @koryMqAmountMonthlyOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount}, le {day} de chaque mois'**
+  String koryMqAmountMonthlyOn(String amount, String day);
+
+  /// No description provided for @koryMqOutsidersAfter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors du groupe : après création'**
+  String get koryMqOutsidersAfter;
+
+  /// No description provided for @koryMqAddOutside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter hors du groupe'**
+  String get koryMqAddOutside;
+
+  /// No description provided for @koryMqConfirms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirme'**
+  String get koryMqConfirms;
+
+  /// No description provided for @koryMqAndOtherMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{et 1 autre membre} other{et {count} autres membres}}'**
+  String koryMqAndOtherMembers(int count);
+
+  /// No description provided for @koryMqDueFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'{day}, dès le {date}'**
+  String koryMqDueFrom(String day, String date);
+
+  /// No description provided for @koryMqRemindersNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappels à J−2 et le jour J, relance à J+1 si rien n’est déclaré ; chacun peut les couper pour lui.'**
+  String get koryMqRemindersNotice;
+
+  /// No description provided for @koryMqChangeCollectorSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau numéro vérifié par code ; tous prévenus'**
+  String get koryMqChangeCollectorSub;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
