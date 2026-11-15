@@ -55,6 +55,7 @@ import 'forward_screen.dart';
 import 'poll_composer.dart';
 import 'report_sheet.dart';
 import 'offline_banner.dart';
+import 'status_reply.dart';
 import '../../../core/widgets/image_viewer.dart' show ViewerActions;
 import 'unknown_sender_card.dart';
 import '../../presence/presentation/typing_controller.dart';
@@ -1774,6 +1775,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         DaySeparator(
                                           instant: message.createdAt,
                                         ),
+                                      // Ma réponse à son statut : dire
+                                      // qu'elle est arrivée ici, en privé.
+                                      if (message.senderId ==
+                                              widget.myUserId &&
+                                          decodeStatusReply(
+                                                message.content,
+                                                _l,
+                                              ) !=
+                                              null)
+                                        StatusReplyNotice(
+                                          authorName: widget.contactName,
+                                        ),
                                       if (_orderOf(message) != null)
                                         _OrderStatusBubble(
                                           label:
@@ -3103,6 +3116,25 @@ class _BubbleState extends State<_Bubble> {
       // la carte de visite — même geste, même fonction (voir
       // contact_card_bubble.dart::handlePhoneTap).
       final content = message.content ?? '';
+      // Fiche Statuts · 7 — une réponse à un statut : la carte-vignette
+      // « {Nom} · Statut » et la légende citée, puis la réponse.
+      final statusReply = decodeStatusReply(content, L.of(context));
+      if (statusReply != null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            StatusReplyCard(
+              title: isMine
+                  ? L.of(context).statusReplyCardTitle(widget.contactName)
+                  : L.of(context).statusReplyCardMine,
+              caption: statusReply.caption,
+              isMine: isMine,
+            ),
+            LinkifiedText(text: statusReply.text, style: textStyle),
+          ],
+        );
+      }
       // Un message fait seulement d'emoji s'affiche en grand (WhatsApp).
       final emojis = emojiOnlyCount(content);
       if (emojis != null) {

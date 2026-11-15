@@ -9621,6 +9621,19 @@ class LIt extends L {
   String get mentionPickerTitle => 'Mentionner';
 
   @override
+  String statusReplyCardTitle(String name) {
+    return '$name · Statut';
+  }
+
+  @override
+  String get statusReplyCardMine => 'Ton statut';
+
+  @override
+  String statusReplyNotice(String name) {
+    return 'Ta réponse au statut de $name est arrivée ici, en privé. Les autres contacts ne la voient pas.';
+  }
+
+  @override
   String get proofEditNote =>
       'Le mode preuve est actif. La version d\'origine de ton message restera visible pour vous deux, avec l\'heure de la modification.';
 

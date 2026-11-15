@@ -9566,6 +9566,19 @@ class LEn extends L {
   String get mentionPickerTitle => 'Mention';
 
   @override
+  String statusReplyCardTitle(String name) {
+    return '$name · Status';
+  }
+
+  @override
+  String get statusReplyCardMine => 'Your status';
+
+  @override
+  String statusReplyNotice(String name) {
+    return 'Your reply to $name\'s status arrived here, in private. Other contacts don\'t see it.';
+  }
+
+  @override
   String get proofEditNote =>
       'Proof mode is on. The original version of your message will stay visible to both of you, with the time of the edit.';
 

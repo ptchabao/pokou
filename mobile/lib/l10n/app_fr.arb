@@ -5068,6 +5068,23 @@
   "newChatInviteRowHint": "Partager un lien d'invitation",
   "newChatOnPokouSection": "Contacts sur Pokou",
   "mentionPickerTitle": "Mentionner",
+  "statusReplyCardTitle": "{name} · Statut",
+  "@statusReplyCardTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "statusReplyCardMine": "Ton statut",
+  "statusReplyNotice": "Ta réponse au statut de {name} est arrivée ici, en privé. Les autres contacts ne la voient pas.",
+  "@statusReplyNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "proofEditNote": "Le mode preuve est actif. La version d'origine de ton message restera visible pour vous deux, avec l'heure de la modification.",
   "pollKindSingle": "Sondage · un seul choix",
   "pollKindMultiple": "Sondage · plusieurs choix",

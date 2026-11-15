@@ -16022,6 +16022,24 @@ abstract class L {
   /// **'Mentionner'**
   String get mentionPickerTitle;
 
+  /// No description provided for @statusReplyCardTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} · Statut'**
+  String statusReplyCardTitle(String name);
+
+  /// No description provided for @statusReplyCardMine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton statut'**
+  String get statusReplyCardMine;
+
+  /// No description provided for @statusReplyNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta réponse au statut de {name} est arrivée ici, en privé. Les autres contacts ne la voient pas.'**
+  String statusReplyNotice(String name);
+
   /// No description provided for @proofEditNote.
   ///
   /// In fr, this message translates to:
