@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -7,8 +8,18 @@ import '../../../l10n/app_localizations.dart';
 // deux : bandeau permanent, message système, message gardé.
 
 /// Le mode preuve est actif : toute la discussion le sait, en permanence.
+///
+/// [onLearnMore] affiche le lien « En savoir plus » (maquette 5/5b), qui
+/// ouvre une explication complète — voir `showProofLearnMoreSheet` dans
+/// proof_sheets.dart.
 class ProofModeBanner extends StatelessWidget {
-  const ProofModeBanner({super.key});
+  const ProofModeBanner({super.key, this.onLearnMore, this.activatedBy});
+
+  final VoidCallback? onLearnMore;
+
+  /// « Mode preuve activé par Afi. » (maquette 5) — qui l'a activé est aussi
+  /// qui peut le couper.
+  final String? activatedBy;
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +32,33 @@ class ProofModeBanner extends StatelessWidget {
           const Icon(Icons.gavel_outlined, size: 18, color: AppColors.feedbackInfo),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              L.of(context).proofModeOnBanner,
-              style: const TextStyle(fontSize: 13, color: AppColors.feedbackInfo),
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 13, color: AppColors.feedbackInfo),
+                children: [
+                  if (activatedBy != null) ...[
+                    TextSpan(
+                      text: L.of(context).proofBannerBy(activatedBy!),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    TextSpan(text: ' ${L.of(context).proofBannerRule}'),
+                  ] else
+                    TextSpan(text: L.of(context).proofModeOnBanner),
+                  if (onLearnMore != null) ...[
+                    const TextSpan(text: '  '),
+                    TextSpan(
+                      text: L.of(context).proofLearnMore,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: onLearnMore == null
+                          ? null
+                          : (TapGestureRecognizer()..onTap = onLearnMore),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],

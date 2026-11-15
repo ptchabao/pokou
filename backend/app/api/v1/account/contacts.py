@@ -10,7 +10,7 @@ from app.core.database import get_db
 from app.models import Contact, User
 from app.api.v1.account.profile import _serialize_avatar
 from app.services.auth.otp_service import normalize_phone, OTPInvalidError
-from app.utils.identity import est_certifie, nom_affiche
+from app.utils.identity import est_certifie, forme_du_badge, nom_affiche
 from app.core.security import get_current_user
 
 router = APIRouter(prefix="/contacts", tags=["Pokou contacts"])
@@ -57,6 +57,7 @@ def _serialize(contact: Contact) -> dict:
         # Le ✓ vient d'UNE fonction pour toute l'API (voir utils/identity.py)
         # plutôt que d'une lecture de colonne recopiée route par route.
         "is_verified": est_certifie(registered_user) if registered_user else False,
+        "badge": forme_du_badge(registered_user) if registered_user else None,
         "priority_tag": contact.priority_tag,
         "created_at": contact.created_at.isoformat(),
     }

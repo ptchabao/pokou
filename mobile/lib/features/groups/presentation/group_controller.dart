@@ -493,6 +493,15 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     );
   }
 
+  /// « Supprimer pour moi seulement » en mode preuve (maquette 6) : disparaît
+  /// de cet écran, mais reste chez les autres membres — voir
+  /// MessagingController.hideLocally, même hypothèse (en mémoire seulement).
+  void hideLocally(String messageId) {
+    state = state.copyWith(
+      messages: state.messages.where((m) => m.id != messageId).toList(),
+    );
+  }
+
   Future<void> setProofMode(bool enabled) async {
     state = state.copyWith(
       group: await _repository.setProofMode(groupId, enabled: enabled),

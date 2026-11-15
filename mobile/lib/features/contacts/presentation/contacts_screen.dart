@@ -1019,6 +1019,7 @@ class _ChatsEmptyState extends ConsumerWidget {
                   title: VerifiedName(
                     name: contact.displayName,
                     isVerified: contact.isVerified,
+                    isPro: contact.isProBadge,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   // Un tap, une conversation. Pas de feuille intermédiaire,
@@ -1325,6 +1326,7 @@ class _DiscussionTile extends ConsumerWidget {
                             child: VerifiedName(
                               name: discussion.displayName,
                               isVerified: discussion.isVerified,
+                              isPro: discussion.isProBadge,
                               isBot: discussion.isBot,
                               maxLines: 1,
                               // Outfit 15,5/700.

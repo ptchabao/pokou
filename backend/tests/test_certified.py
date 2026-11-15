@@ -1,5 +1,6 @@
 """Pokou certifié et mode preuve."""
 import re
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -120,6 +121,119 @@ def test_noms_differents_sans_jamais_reveler_le_titulaire(client):
     assert still.status_code == 422 and "AMEGAN" not in still.text.upper()
     resolved = client.post("/api/v1/certified/resolve-name", json={"full_name": "Kossi Amégan"}, headers=headers).json()
     assert resolved["status"] == "ACTIVE" and resolved["badge_visible"] is True
+
+
+def _pay_declared(client, headers, declared, payer_name, operator=None):
+    """Le parcours « Vérifier et payer » : le nom saisi part avec la
+    commande, le webhook renvoie le titulaire du wallet et son opérateur."""
+    payment = client.post(
+        "/api/v1/certified/subscribe",
+        json={"plan": "PARTICULIER_MONTHLY", "full_name": declared},
+        headers=headers,
+    ).json()
+    with TestingSessionLocal() as db:
+        reference = db.query(MarketplacePayment).get(payment["payment_id"]).provider_reference
+        attach_payer_name(db, reference, payer_name, operator)
+        db.commit()
+    confirm_payment(TestingSessionLocal(), reference)
+
+
+def test_le_nom_saisi_devient_le_nom_affiche_une_fois_verifie(client):
+    headers, _ = _signup(client, "+22890200020", "Afi")
+    _pay_declared(client, headers, "Afi Koffi", "KOFFI AFI", "Mixx by Yas")
+    status = client.get("/api/v1/certified/me", headers=headers).json()
+    assert status["status"] == "ACTIVE" and status["badge_visible"] is True
+    assert status["profile_name"] == "Afi Koffi"
+    # Écran « Badge actif » : l'opérateur qui a vérifié, le prochain paiement.
+    assert status["wallet_operator"] == "Mixx by Yas"
+    assert status["plan_price_ttc"] == 590 and status["current_period_end"] is not None
+    # La forme du badge accompagne `is_verified` : la rosette.
+    profile = client.get("/api/v1/users/me/profile", headers=headers).json()
+    assert profile["is_verified"] is True and profile["badge"] == "CERTIFIED"
+
+
+def test_nom_saisi_different_ne_remplace_pas_le_nom(client):
+    headers, _ = _signup(client, "+22890200021", "Afi")
+    _pay_declared(client, headers, "Afi K.", "KOFFI AFI")
+    status = client.get("/api/v1/certified/me", headers=headers).json()
+    assert status["status"] == "NAME_MISMATCH" and status["profile_name"] == "Afi"
+    assert "KOFFI" not in str(status).upper()
+
+
+def test_payer_avec_un_autre_wallet(client, stub_mobile_money):
+    headers, _ = _signup(client, "+22890200023", "Afi")
+    bad = client.post("/api/v1/certified/subscribe",
+                      json={"plan": "PARTICULIER_MONTHLY", "wallet_phone": "12"}, headers=headers)
+    assert bad.status_code == 422
+    ok = client.post("/api/v1/certified/subscribe",
+                     json={"plan": "PARTICULIER_MONTHLY", "wallet_phone": "99 00 00 12"}, headers=headers)
+    assert ok.status_code == 200
+    # La commande CashPay part au nom du wallet choisi, pas du compte.
+    assert stub_mobile_money.create_order.call_args.kwargs["client_phone"] == "+22899000012"
+
+
+def test_facture_du_dernier_paiement(client):
+    headers, _ = _signup(client, "+22890200022", "Kossi Amégan")
+    assert client.get("/api/v1/certified/me", headers=headers).json()["invoice_available"] is False
+    assert client.get("/api/v1/certified/invoice", headers=headers).status_code == 404
+    _pay(client, headers, "AMEGAN KOSSI")
+    assert client.get("/api/v1/certified/me", headers=headers).json()["invoice_available"] is True
+    invoice = client.get("/api/v1/certified/invoice", headers=headers)
+    assert invoice.status_code == 200
+    assert invoice.headers["content-type"] == "application/pdf"
+    assert invoice.content.startswith(b"%PDF")
+
+
+def test_le_groupe_dit_qui_a_active_le_mode_preuve(client):
+    admin, member, group_id = _group_with_member(client)
+    client.post("/api/v1/certified/trial", headers=member)
+    group = client.post(f"/api/v1/groups/{group_id}/proof-mode", json={"enabled": True}, headers=member).json()
+    member_id = client.get("/api/v1/auth/me", headers=member).json()["id"]
+    assert group["proof_mode_by"] == member_id and group["proof_mode_by_name"] == "Membre"
+    seen = client.get(f"/api/v1/groups/{group_id}", headers=admin).json()
+    assert seen["proof_mode_by_name"] == "Membre" and seen["proof_mode_since"] is not None
+    off = client.post(f"/api/v1/groups/{group_id}/proof-mode", json={"enabled": False}, headers=member).json()
+    assert off["proof_mode_by"] is None and off["proof_mode_by_name"] is None
+
+
+def test_export_options_periode_et_inclure_les_medias(client):
+    admin, member, group_id = _group_with_member(client)
+    client.post("/api/v1/certified/trial", headers=admin)
+    client.post(f"/api/v1/groups/{group_id}/proof-mode", json={"enabled": True}, headers=admin)
+    admin_id = _admin_id(client, admin)
+    _send_encrypted(client, group_id, member, admin_id, "Texte")
+    epoch = client.get(f"/api/v1/groups/{group_id}", headers=member).json()["crypto_epoch"]
+    client.post(
+        f"/api/v1/groups/{group_id}/messages",
+        json={
+            "message_type": "IMAGE", "media_asset_id": _upload(client, member),
+            "encryption": "sender-key-v1", "ciphertext": "photo", "crypto_epoch": epoch,
+        },
+        headers=member,
+    )
+
+    full = client.get(f"/api/v1/groups/{group_id}/proof-export", headers=admin)
+    assert full.status_code == 200 and full.content.startswith(b"%PDF")
+
+    # « Toute la discussion » : depuis une date antérieure à l'activation.
+    earlier = (datetime.utcnow() - timedelta(days=1)).isoformat()
+    wide = client.get(f"/api/v1/groups/{group_id}/proof-export", params={"since": earlier}, headers=admin)
+    assert wide.status_code == 200
+
+    # Sans les médias : la requête réussit, et le message IMAGE est exclu.
+    no_media = client.get(
+        f"/api/v1/groups/{group_id}/proof-export", params={"include_media": False}, headers=admin
+    )
+    assert no_media.status_code == 200 and no_media.content.startswith(b"%PDF")
+    from app.api.v1.messaging.groups import _MEDIA_TYPES
+    assert "IMAGE" in _MEDIA_TYPES
+
+
+def _upload(client, headers, name="piece.jpg"):
+    return client.post(
+        "/api/v1/media/upload", data={"message_type": "IMAGE"},
+        files={"file": (name, b"\xff\xd8\xff\xfake", "image/jpeg")}, headers=headers,
+    ).json()["id"]
 
 
 def _group_with_member(client):

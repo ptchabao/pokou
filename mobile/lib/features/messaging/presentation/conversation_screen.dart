@@ -12,7 +12,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/widgets/skeleton.dart';
@@ -72,6 +71,8 @@ import '../../../core/widgets/identity_avatar.dart';
 import 'call_event_row.dart';
 import 'pending_media_bubble.dart';
 import 'proof_export.dart';
+import 'proof_export_screens.dart';
+import 'proof_sheets.dart';
 import 'proof_widgets.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../home/presentation/certified_screen.dart';
@@ -1269,7 +1270,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  /// Activer ou couper le mode preuve (maquettes 4b, 7 et 10).
+  /// Activer ou couper le mode preuve (maquettes 4b, 7 et 10) : la
+  /// confirmation (feuille d'activation ou de désactivation) a déjà eu lieu
+  /// dans `_openProofMenu` — ici, l'appel au serveur et ses erreurs.
   Future<void> _toggleProof(bool proofOn) async {
     try {
       final proof = await ref
@@ -1323,33 +1326,42 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  /// L'export daté, produit sur ce téléphone à partir de ce qu'il a gardé.
-  Future<void> _exportProof(List<DirectMessage> messages) async {
-    final messenger = ScaffoldMessenger.of(context);
+  /// « 8. Exporter la discussion » : la période et le choix des médias,
+  /// avant de produire le PDF sur ce téléphone (maquette 9, PDF prêt).
+  Future<void> _openExportOptions(List<DirectMessage> messages) async {
     final l = _l;
-    try {
-      final file = await exportDirectProof(
-        contactName: widget.contactName,
-        myName:
-            ref.read(authControllerProvider).user?.fullName ?? l.proofExportMe,
-        myUserId: widget.myUserId,
-        since: _proof.since ?? messages.first.createdAt,
-        messages: [for (final m in messages) _patches[m.id] ?? m],
-        labels: ProofExportLabels(
-          title: l.proofExportTitle,
-          between: l.proofExportBetween,
-          period: l.proofExportPeriod,
-          footer: (page, pages) => l.proofExportFooter('$page', '$pages'),
-          attachment: l.proofExportAttachment,
-          original: l.proofOriginal,
-          edited: l.proofExportEdited,
-          deleted: l.proofExportDeleted,
+    final since = _proof.since ?? messages.first.createdAt;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProofExportOptionsScreen(
+          scopeName: widget.contactName,
+          since: since,
+          onCreate: (options) => exportDirectProof(
+            contactName: widget.contactName,
+            myName: ref.read(authControllerProvider).user?.fullName ?? l.proofExportMe,
+            myUserId: widget.myUserId,
+            since: options.period == ProofExportPeriod.custom
+                ? options.customFrom!
+                : options.period == ProofExportPeriod.all
+                    ? messages.first.createdAt
+                    : since,
+            until: options.period == ProofExportPeriod.custom ? options.customTo : null,
+            includeMedia: options.includeMedia,
+            messages: [for (final m in messages) _patches[m.id] ?? m],
+            labels: ProofExportLabels(
+              title: l.proofExportTitle,
+              between: l.proofExportBetween,
+              period: l.proofExportPeriod,
+              footer: (page, pages) => l.proofExportFooter('$page', '$pages'),
+              attachment: l.proofExportAttachment,
+              original: l.proofOriginal,
+              edited: l.proofExportEdited,
+              deleted: l.proofExportDeleted,
+            ),
+          ),
         ),
-      );
-      await Share.shareXFiles([XFile(file.path, mimeType: 'application/pdf')]);
-    } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(l.honamFailed)));
-    }
+      ),
+    );
   }
 
   Future<void> _openProofMenu(
@@ -1416,8 +1428,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (action == 'search') await _openSearch();
     if (action == 'block') await _confirmBlockFromMenu();
     if (action == 'report') await _reportUnknownSender();
-    if (action == 'toggle') await _toggleProof(proofOn);
-    if (action == 'export') await _exportProof(messages);
+    if (action == 'toggle') {
+      // Maquettes 4b et 10 : la feuille de confirmation vient AVANT l'appel
+      // réseau, jamais après.
+      final confirmed = proofOn
+          ? await showProofDeactivateSheet(context)
+          : await showProofActivationSheet(
+              context,
+              isGroup: false,
+              scopeName: widget.contactName,
+            );
+      if (confirmed && mounted) await _toggleProof(proofOn);
+    }
+    if (action == 'export') await _openExportOptions(messages);
   }
 
   /// L'état affiché : le dernier message système fait foi s'il est plus
@@ -1481,6 +1504,31 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   if (d.kind == 'contact' &&
                       d.contactUserId == widget.contactUserId) {
                     return d.isVerified;
+                  }
+                }
+                return false;
+              },
+              orElse: () => false,
+            );
+    final isContactPro =
+        ref
+            .watch(contactsProvider)
+            .maybeWhen(
+              data: (contacts) {
+                for (final c in contacts) {
+                  if (c.contactUserId == widget.contactUserId) return c.isProBadge;
+                }
+                return false;
+              },
+              orElse: () => false,
+            ) ||
+        ref
+            .watch(discussionsProvider)
+            .maybeWhen(
+              data: (discussions) {
+                for (final d in discussions) {
+                  if (d.kind == 'contact' && d.contactUserId == widget.contactUserId) {
+                    return d.isProBadge;
                   }
                 }
                 return false;
@@ -1609,7 +1657,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         ),
                                         if (isContactVerified) ...[
                                           const SizedBox(width: 5),
-                                          const VerifiedBadge(size: 15),
+                                          VerifiedBadge(size: 15, pro: isContactPro),
                                         ],
                                         if (isContactBot) ...[
                                           const SizedBox(width: 5),
@@ -1617,13 +1665,28 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         ],
                                       ],
                                     ),
-                                    // L'état du chiffrement, sous le nom.
-                                    // Discret quand tout va bien, mais
-                                    // TOUJOURS là : c'est ce qui rend la
-                                    // garantie vérifiable par celui qui
-                                    // écrit, au lieu d'être une promesse
-                                    // faite ailleurs.
-                                    EncryptionHeaderLabel(state: _encryption),
+                                    // « Discussion à deux · mode preuve
+                                    // actif » (maquette 5b) : prend la place
+                                    // de la ligne de chiffrement tant que le
+                                    // mode preuve est actif — les deux
+                                    // disent une garantie de la discussion,
+                                    // une seule à la fois suffit sous le nom.
+                                    if (proofOn)
+                                      Text(
+                                        _l.proofDirectHeaderSubtitle,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      )
+                                    else
+                                      // L'état du chiffrement, sous le nom.
+                                      // Discret quand tout va bien, mais
+                                      // TOUJOURS là : c'est ce qui rend la
+                                      // garantie vérifiable par celui qui
+                                      // écrit, au lieu d'être une promesse
+                                      // faite ailleurs.
+                                      EncryptionHeaderLabel(state: _encryption),
                                     // « écrit… » sous le nom, à la place
                                     // qu'occupe le « vu à » dans les autres
                                     // messageries. Il n'apparaît que
@@ -1718,7 +1781,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           onReport: _reportUnknownSender,
                           onAdd: _saveUnknownSenderToContacts,
                         ),
-                      if (proofOn) const ProofModeBanner(),
+                      if (proofOn)
+                        ProofModeBanner(
+                          // À deux, qui peut couper est qui l'a activé.
+                          activatedBy: _proof.enabled
+                              ? (_proof.canDisable
+                                    ? (ref.read(authControllerProvider).user?.fullName ?? _l.proofExportMe)
+                                    : widget.contactName)
+                              : null,
+                          onLearnMore: () => showProofLearnMoreSheet(context),
+                        ),
                       Expanded(
                         child: !state.initialCacheLoaded
                             // L'attente a la forme d'une conversation — et seulement
@@ -2290,30 +2362,21 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   Future<void> _deleteMessage(DirectMessage message) async {
-    // Mode preuve : l'auteur est prévenu AVANT que le message restera,
-    // barré, chez l'autre (maquette 6).
+    // Mode preuve : l'auteur choisit entre « pour tous » (gardé, barré,
+    // chez l'autre) et « pour moi seulement » (maquette 6).
     if (message.proofMode && !PokouMessageStore.isLocalId(message.id)) {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(_l.deleteForAll),
-          content: Text(_l.deleteProofWarning),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(_l.actionCancel),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.feedbackDanger,
-              ),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(_l.actionDelete),
-            ),
-          ],
-        ),
+      final choice = await showProofDeleteSheet(
+        context,
+        preview: message.content ?? _l.proofExportAttachment,
+        proofActive: true,
       );
-      if (ok != true || !mounted) return;
+      if (choice == null || !mounted) return;
+      if (choice == ProofDeleteChoice.forMeOnly) {
+        ref
+            .read(messagingControllerProvider(_key).notifier)
+            .hideLocally(message.id);
+        return;
+      }
     }
     await ref
         .read(messagingControllerProvider(_key).notifier)

@@ -205,10 +205,82 @@ def test_pro_justificatif_puis_validation_puis_paiement(client):
         db.commit()
     _confirm(payment["payment_id"])
     profile = client.get(f"/api/v1/certified/profile/{pro_id}", headers=stranger).json()
-    assert profile == {
+    assert {key: profile[key] for key in ("user_id", "badge", "display_name", "managed_by", "activity")} == {
         "user_id": pro_id, "badge": "PRO", "display_name": "Boutique Amégan",
         "managed_by": "Kossi Amégan", "activity": "Couture",
     }
+
+
+def test_pro_adresse_justificatif_nom_du_rccm_et_horaires(client):
+    """Maquettes Pro 2, 4, 5 et 6 : l'adresse et le type de justificatif ;
+    « Utiliser le nom du RCCM » renvoie le même justificatif sous un autre
+    nom ; le profil Pro dit depuis quand, et ses horaires."""
+    pro, pro_id, _ = _signup(client, "Mensah Dodji")
+    team_id = _signup(client, "Support")[1]
+    team = _make_admin(team_id)
+    stranger, _, _ = _signup(client, "Curieux")
+
+    refused = client.post("/api/v1/certified/pro/apply", json={
+        "business_name": "Boutique Mensah", "activity": "Tissus", "document_type": "PASSEPORT",
+        "document_media_id": _upload(client, pro),
+    }, headers=pro)
+    assert refused.status_code == 422
+    # Pas de justificatif du tout : refusé, même au premier envoi.
+    assert client.post("/api/v1/certified/pro/apply", json={
+        "business_name": "Boutique Mensah", "activity": "Tissus",
+    }, headers=pro).status_code == 422
+
+    document = _upload(client, pro, "RCCM_Boutique_Mensah.jpg")
+    sent = client.post("/api/v1/certified/pro/apply", json={
+        "business_name": "Boutique Mensah", "activity": "Commerce · tissus et pagnes",
+        "address": "Marché de Bè, allée 4, Lomé", "document_type": "rccm", "document_media_id": document,
+    }, headers=pro).json()
+    assert sent["address"] == "Marché de Bè, allée 4, Lomé" and sent["document_type"] == "RCCM"
+
+    application_id = client.get("/api/v1/admin/certified/pro/pending", headers=team).json()["items"][0]["id"]
+    client.post(f"/api/v1/admin/certified/pro/{application_id}/review", json={
+        "decision": "CORRECTION", "note": "« Boutique Mensah » ne figure pas sur le RCCM envoyé.",
+        "document_name": "Ets Mensah et Fils",
+    }, headers=team)
+    corrected = client.get("/api/v1/certified/pro/me", headers=pro).json()
+    assert corrected["document_name"] == "Ets Mensah et Fils" and corrected["has_document"] is True
+
+    # « Utiliser « Ets Mensah et Fils » » : sans nouveau justificatif.
+    again = client.post("/api/v1/certified/pro/apply", json={
+        "business_name": "Ets Mensah et Fils", "activity": "Commerce · tissus et pagnes",
+        "address": "Marché de Bè, allée 4, Lomé",
+    }, headers=pro).json()
+    assert again["status"] == "PENDING" and again["document_name"] is None
+    with TestingSessionLocal() as db:
+        from app.models import CertifiedProApplication
+        assert db.query(CertifiedProApplication).get(application_id).document_media_id == document
+
+    # Les horaires ne s'ouvrent qu'après la validation.
+    hours = {"hours": {"days": [1, 2, 3, 4, 5, 6], "open": "07:00", "close": "18:00"}}
+    assert client.patch("/api/v1/certified/pro/details", json=hours, headers=pro).status_code == 409
+    client.post(f"/api/v1/admin/certified/pro/{application_id}/review", json={"decision": "APPROVE"}, headers=team)
+    assert client.patch("/api/v1/certified/pro/details", json={
+        "hours": {"days": [0], "open": "07:00", "close": "18:00"},
+    }, headers=pro).status_code == 422
+    assert client.patch("/api/v1/certified/pro/details", json=hours, headers=pro).json()["hours"] == hours["hours"]
+
+    payment = client.post("/api/v1/certified/subscribe", json={"plan": "PRO_MONTHLY"}, headers=pro).json()
+    with TestingSessionLocal() as db:
+        db_payment = db.query(MarketplacePayment).get(payment["payment_id"])
+        db_payment.metadata_json = {**db_payment.metadata_json, "payer_name": "DODJI MENSAH"}
+        db.commit()
+    _confirm(payment["payment_id"])
+
+    profile = client.get(f"/api/v1/certified/profile/{pro_id}", headers=stranger).json()
+    assert profile["badge"] == "PRO" and profile["display_name"] == "Ets Mensah et Fils"
+    assert profile["address"] == "Marché de Bè, allée 4, Lomé" and profile["hours"] == hours["hours"]
+    assert profile["document_type"] == "RCCM" and profile["pro_since"] is not None
+    assert profile["seller_review_count"] == 0
+    # Le justificatif, lui, ne sort jamais.
+    assert "document_media_id" not in profile
+    # La forme du badge accompagne le nom partout : l'hexagone.
+    seen = client.get("/api/v1/users/me/profile", headers=pro).json()
+    assert seen["is_verified"] is True and seen["badge"] == "PRO"
 
 
 def test_officine_abonnee_a_le_badge_pro(client):

@@ -7,7 +7,7 @@ pièce, il compare.
 """
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String
 
 from app.core.database import Base
 
@@ -28,6 +28,10 @@ class CertifiedSubscription(Base):
     #: Le nom du titulaire, tel que la passerelle le renvoie. Jamais modifié
     #: par la personne : c'est la référence.
     wallet_holder_name = Column(String(160), nullable=True)
+    #: L'opérateur du wallet qui a payé (« Mixx by Yas », « Flooz »), tel
+    #: que la passerelle le renvoie : c'est lui qui a vérifié le nom
+    #: (maquette « 3. Badge actif » : « Nom vérifié par … »).
+    wallet_operator = Column(String(60), nullable=True)
     first_paid_at = Column(DateTime, nullable=True)
     #: Vrai si c'est CET abonnement qui a allumé `User.is_verified`. Une
     #: expiration ne retire que ce qu'elle a posé : une certification
@@ -52,9 +56,23 @@ class CertifiedProApplication(Base):
     business_name = Column(String(160), nullable=False)
     activity = Column(String(120), nullable=False)
     city = Column(String(80), nullable=True)
+    #: « Adresse ou repère » (maquette Pro 2), affichée sur le profil Pro
+    #: comme « Adresse déclarée ».
+    address = Column(String(200), nullable=True)
     #: Registre de commerce, carte professionnelle, patente… Visible du seul
     #: support, jamais affiché sur le profil.
     document_media_id = Column(Integer, ForeignKey("media_assets.id", ondelete="SET NULL"), nullable=True)
+    #: RCCM | NIF | RECEPISSE : le profil dit « RCCM vérifié par le support ».
+    document_type = Column(String(12), nullable=True)
+    #: Le nom tel qu'il figure sur le justificatif, relevé par le support
+    #: quand il diffère du nom commercial (maquette Pro 4 : « Utiliser
+    #: « Ets Mensah et Fils » »). Jamais rempli par la personne.
+    document_name = Column(String(160), nullable=True)
+    #: Les horaires d'ouverture du profil Pro (maquette Pro 5), en JSON :
+    #: {"days": [1..7], "open": "07:00", "close": "18:00"} (1 = lundi).
+    hours = Column(JSON, nullable=True)
+    #: Le premier paiement de la formule Pro : « Pokou certifié Pro depuis… ».
+    pro_since = Column(DateTime, nullable=True)
     #: PENDING (en vérification) | CORRECTION (justificatif à corriger)
     #: | APPROVED (payable) | REJECTED
     status = Column(String(12), nullable=False, default="PENDING", index=True)

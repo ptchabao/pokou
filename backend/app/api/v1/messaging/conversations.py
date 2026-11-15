@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
 from app.models import Community, Contact, DirectMessage, Group, GroupMember, GroupMessage, MediaAsset, MessageStatus, User
-from app.utils.identity import est_certifie, nom_affiche
+from app.utils.identity import est_certifie, forme_du_badge, nom_affiche
 from app.core.security import get_current_user
 
 router = APIRouter(prefix="/conversations", tags=["Pokou conversations"])
@@ -891,6 +891,7 @@ async def list_conversations(
                 contact.contact_user.avatar_media if contact.contact_user else None
             ),
             "is_verified": est_certifie(contact.contact_user) if contact.contact_user else False,
+            "badge": forme_du_badge(contact.contact_user) if contact.contact_user else None,
             "is_bot": bool(contact.contact_user.is_bot) if contact.contact_user else False,
             "is_pinned": bool(contact.is_pinned),
             "is_favorite": bool(contact.is_favorite),
@@ -912,6 +913,7 @@ async def list_conversations(
         payload = {
             "kind": "contact",
             "is_verified": est_certifie(stranger),
+            "badge": forme_du_badge(stranger),
             # Un bot n'est pas « un inconnu qui vous écrit » : l'application
             # ne propose ni de l'ajouter ni de le signaler comme tel.
             "is_bot": bool(stranger.is_bot),

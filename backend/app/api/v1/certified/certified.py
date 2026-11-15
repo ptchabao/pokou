@@ -31,8 +31,12 @@ from app.core.database import get_db
 from app.core.permissions import require_permission_claims
 from app.core.rbac import require_admin_role
 from app.core.security import get_current_user
-from app.models import CertifiedProApplication, CertifiedSubscription, MediaAsset, Pharmacy, PharmacyStaff, User, UserRole
+from app.models import (
+    CertifiedProApplication, CertifiedSubscription, MarketplacePayment, MediaAsset, Pharmacy, PharmacyStaff, User,
+    UserRole,
+)
 from app.services.events.outbox import record_event
+from app.utils.phone import normalize_e164
 
 router = APIRouter(prefix="/certified", tags=["Pokou certifié"])
 admin_router = APIRouter(prefix="/admin/certified", tags=["Admin Pokou certifié"])
@@ -54,18 +58,52 @@ PLANS = {
 
 class SubscribeBody(BaseModel):
     plan: str
+    #: « Nom et prénom, comme sur ta pièce d'identité » (maquette 2). Comparé
+    #: au nom du titulaire du wallet à la confirmation ; s'il correspond, il
+    #: devient le nom affiché avec le badge. Absent : le nom du profil.
+    full_name: Optional[str] = Field(None, min_length=2, max_length=160)
+    #: « Payer avec » : le wallet qui paie, s'il n'est pas le numéro du
+    #: compte. C'est son titulaire qui vérifie le nom (maquette 2b : « paie
+    #: depuis ton propre wallet »).
+    wallet_phone: Optional[str] = Field(None, max_length=32)
+
+
+#: Les justificatifs acceptés (maquette Pro 2) : registre du commerce,
+#: numéro d'identification fiscale, récépissé d'association.
+PRO_DOCUMENT_TYPES = {"RCCM", "NIF", "RECEPISSE"}
 
 
 class ProApplicationBody(BaseModel):
     business_name: str = Field(..., min_length=2, max_length=160)
     activity: str = Field(..., min_length=2, max_length=120)
     city: Optional[str] = Field(None, max_length=80)
-    document_media_id: int
+    address: Optional[str] = Field(None, max_length=200)
+    document_type: Optional[str] = Field(None, max_length=12)
+    #: Facultatif au RENVOI d'un dossier à corriger : « Utiliser le nom du
+    #: RCCM » garde le justificatif déjà envoyé (maquette Pro 4).
+    document_media_id: Optional[int] = None
+
+
+class ProHours(BaseModel):
+    #: 1 = lundi … 7 = dimanche.
+    days: list[int] = Field(..., min_length=1, max_length=7)
+    open: str = Field(..., pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    close: str = Field(..., pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+
+
+class ProDetailsBody(BaseModel):
+    """Ce que le profil Pro montre en plus du nom : l'adresse et les horaires
+    (maquette Pro 5). Modifiables après la validation, sans nouveau dossier."""
+    address: Optional[str] = Field(None, max_length=200)
+    hours: Optional[ProHours] = None
 
 
 class ProReviewBody(BaseModel):
     decision: str  # APPROVE|CORRECTION|REJECT
     note: Optional[str] = Field(None, max_length=500)
+    #: Le nom lu sur le justificatif, quand il diffère du nom commercial :
+    #: la personne peut alors le reprendre d'un geste (maquette Pro 4).
+    document_name: Optional[str] = Field(None, max_length=160)
 
 
 class ResolveNameBody(BaseModel):
@@ -137,9 +175,13 @@ def _apply_badge(user: User, sub: CertifiedSubscription) -> None:
             user.is_verified = True
             user.verified_at = datetime.utcnow()
             sub.badge_granted = True
+        # La forme suit la formule : le Pro remplace la rosette par
+        # l'hexagone, sans second badge (maquette Pro 6).
+        user.is_pro_badge = sub.plan in PRO_PLANS
     elif sub.badge_granted:
         user.is_verified = False
         user.verified_at = None
+        user.is_pro_badge = False
         sub.badge_granted = False
 
 
@@ -168,7 +210,26 @@ def _status_json(db: Session, user: User, sub: Optional[CertifiedSubscription]) 
         # mode preuve d'un groupe en tant qu'administrateur.
         "paid": bool(sub and sub.first_paid_at and sub.status in ("ACTIVE", "NAME_MISMATCH")),
         "trial_available": sub is None,
+        # Écran « 3. Badge actif » : qui a vérifié le nom, et le montant du
+        # prochain paiement (sa date est `current_period_end`).
+        "wallet_operator": sub.wallet_operator if sub else None,
+        "plan_price_ttc": _ttc(db, user, PLANS[sub.plan]["price_ht"])[1] if sub and sub.plan in PLANS else None,
+        "invoice_available": _last_payment(db, user.id) is not None,
     }
+
+
+def _last_payment(db: Session, user_id: int) -> Optional[MarketplacePayment]:
+    """Le dernier paiement confirmé de Pokou certifié : celui de la facture."""
+    return (
+        db.query(MarketplacePayment)
+        .filter(
+            MarketplacePayment.user_id == user_id,
+            MarketplacePayment.kind == PAYMENT_KIND,
+            MarketplacePayment.status == "CONFIRMED",
+        )
+        .order_by(MarketplacePayment.confirmed_at.desc(), MarketplacePayment.id.desc())
+        .first()
+    )
 
 
 @router.get("/offer")
@@ -188,6 +249,37 @@ def offer(current_user: dict = Depends(get_current_user), db: Session = Depends(
 def my_status(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = _user(db, current_user["user_id"])
     return _status_json(db, user, _subscription(db, user.id))
+
+
+@router.get("/invoice")
+def invoice(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """La facture du dernier paiement (maquette « 3. Badge actif » :
+    « Télécharger la facture »), en PDF : HT, TVA du pays et TTC."""
+    from fastapi.responses import Response as RawResponse
+
+    from app.services.certified.invoice import render_invoice
+
+    user = _user(db, current_user["user_id"])
+    payment = _last_payment(db, user.id)
+    if payment is None:
+        raise HTTPException(status_code=404, detail="Aucun paiement à facturer")
+    metadata = payment.metadata_json or {}
+    plan = PLANS.get(metadata.get("plan"), {})
+    price_ht = int(metadata.get("price_ht") or plan.get("price_ht") or payment.amount)
+    rate, _ = _ttc(db, user, price_ht)
+    pdf = render_invoice(
+        number=f"PC-{payment.id:06d}",
+        issued_at=payment.confirmed_at or payment.created_at,
+        customer=user.full_name or user.phone,
+        label=f"Pokou certifié — {plan.get('label', metadata.get('plan', ''))}",
+        price_ht=price_ht,
+        vat_rate=rate,
+        total_ttc=payment.amount,
+        currency=payment.currency,
+        reference=payment.provider_reference,
+    )
+    return RawResponse(pdf, media_type="application/pdf",
+                       headers={"Content-Disposition": f'attachment; filename="facture-PC-{payment.id:06d}.pdf"'})
 
 
 @router.post("/trial")
@@ -217,10 +309,18 @@ def subscribe(body: SubscribeBody, current_user: dict = Depends(get_current_user
         if application is None or application.status != "APPROVED":
             raise HTTPException(status_code=409, detail="La formule Pro se paie après la validation du justificatif")
     _, ttc = _ttc(db, user, plan["price_ht"])
+    metadata = {"plan": body.plan, "price_ht": plan["price_ht"]}
+    if body.full_name and body.full_name.strip():
+        metadata["declared_name"] = body.full_name.strip()
+    wallet_phone = None
+    if body.wallet_phone and body.wallet_phone.strip():
+        wallet_phone = normalize_e164(body.wallet_phone, country_of_phone(user.phone) or "TG")
+        if wallet_phone is None:
+            raise HTTPException(status_code=422, detail="Numéro de wallet invalide")
     payment = open_payment(
         db, user.id, kind=PAYMENT_KIND, amount=ttc,
         description=f"Pokou certifié — {plan['label']}",
-        metadata={"plan": body.plan, "price_ht": plan["price_ht"]},
+        metadata=metadata, client_phone=wallet_phone,
     )
     db.commit()
     return payment_json(payment)
@@ -269,7 +369,21 @@ def apply_confirmed_payment(db: Session, payment) -> dict | None:
     wallet_name = metadata.get("payer_name")
     if wallet_name:
         sub.wallet_holder_name = wallet_name
-    sub.status = "ACTIVE" if names_match(user.full_name if user else None, sub.wallet_holder_name) else "NAME_MISMATCH"
+    if metadata.get("payer_operator"):
+        sub.wallet_operator = metadata["payer_operator"]
+    # Le nom saisi à l'écran « Vérifier et payer » l'emporte sur celui du
+    # profil, et ne devient le nom affiché qu'une fois vérifié.
+    declared = metadata.get("declared_name") or (user.full_name if user else None)
+    if names_match(declared, sub.wallet_holder_name):
+        sub.status = "ACTIVE"
+        if user is not None and declared:
+            user.full_name = declared
+    else:
+        sub.status = "NAME_MISMATCH"
+    if sub.plan in PRO_PLANS:
+        application = _pro_application(db, payment.user_id)
+        if application is not None and application.pro_since is None:
+            application.pro_since = now
     if user is not None:
         _apply_badge(user, sub)
     db.flush()
@@ -297,10 +411,18 @@ def _pro_json(application: Optional[CertifiedProApplication]) -> dict:
         "business_name": application.business_name,
         "activity": application.activity,
         "city": application.city,
+        "address": application.address,
+        "document_type": application.document_type,
+        # Le nom lu sur le justificatif : « Utiliser « Ets Mensah et Fils » »
+        # (maquette Pro 4). Le justificatif lui-même ne sort jamais.
+        "document_name": application.document_name,
+        "has_document": application.document_media_id is not None,
+        "hours": application.hours,
         "review_note": application.review_note,
         "submitted_at": application.submitted_at.isoformat(),
         "review_due_at": application.review_due_at.isoformat(),
         "reviewed_at": application.reviewed_at.isoformat() if application.reviewed_at else None,
+        "pro_since": application.pro_since.isoformat() if application.pro_since else None,
         "review_hours": PRO_REVIEW_HOURS,
     }
 
@@ -315,12 +437,24 @@ def pro_status(current_user: dict = Depends(get_current_user), db: Session = Dep
 def pro_apply(body: ProApplicationBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     """Envoyer (ou renvoyer, après « justificatif à corriger ») le dossier."""
     user = _user(db, current_user["user_id"])
-    media = db.query(MediaAsset).filter(MediaAsset.id == body.document_media_id, MediaAsset.uploader_id == user.id).first()
-    if media is None:
-        raise HTTPException(status_code=404, detail="Justificatif introuvable")
+    document_type = (body.document_type or "").strip().upper() or None
+    if document_type is not None and document_type not in PRO_DOCUMENT_TYPES:
+        raise HTTPException(status_code=422, detail="Justificatif inconnu : RCCM, NIF ou récépissé")
     application = _pro_application(db, user.id)
     if application is not None and application.status in ("PENDING", "APPROVED"):
         raise HTTPException(status_code=409, detail="Un dossier est déjà en cours ou validé")
+    if body.document_media_id is not None:
+        media = db.query(MediaAsset).filter(
+            MediaAsset.id == body.document_media_id, MediaAsset.uploader_id == user.id
+        ).first()
+        if media is None:
+            raise HTTPException(status_code=404, detail="Justificatif introuvable")
+        document_id = media.id
+    elif application is not None and application.document_media_id is not None:
+        # Renvoi d'un dossier à corriger : le même justificatif, un autre nom.
+        document_id = application.document_media_id
+    else:
+        raise HTTPException(status_code=422, detail="Le justificatif est obligatoire")
     now = datetime.utcnow()
     if application is None:
         application = CertifiedProApplication(user_id=user.id)
@@ -328,7 +462,10 @@ def pro_apply(body: ProApplicationBody, current_user: dict = Depends(get_current
     application.business_name = body.business_name.strip()
     application.activity = body.activity.strip()
     application.city = (body.city or "").strip() or None
-    application.document_media_id = media.id
+    application.address = (body.address or "").strip() or None
+    application.document_type = document_type or application.document_type
+    application.document_media_id = document_id
+    application.document_name = None
     application.status = "PENDING"
     application.review_note = None
     application.submitted_at = now
@@ -369,8 +506,43 @@ def public_badge(db: Session, user: User) -> dict:
         return {
             "badge": "PRO", "display_name": application.business_name,
             "managed_by": user.full_name, "activity": application.activity,
+            # Maquette Pro 5 : « Adresse déclarée », horaires et « Ouvert »,
+            # « Pokou certifié Pro depuis… · RCCM vérifié par le support ».
+            "address": application.address, "hours": application.hours,
+            "pro_since": application.pro_since.isoformat() if application.pro_since else None,
+            "document_type": application.document_type,
+            **_seller_rating(db, user.id),
         }
     return {"badge": "CERTIFIED" if user.is_verified else None, "display_name": user.full_name, "managed_by": None, "activity": None}
+
+
+def _seller_rating(db: Session, user_id: int) -> dict:
+    """La note des acheteurs d'Assimé, pour le profil Pro (hors lot 1)."""
+    from app.api.v1.marketplace.marketplace import _rating_summary
+
+    rating = _rating_summary(db, [user_id]).get(user_id) or {}
+    return {"seller_rating": rating.get("rating"), "seller_review_count": rating.get("count", 0)}
+
+
+@router.patch("/pro/details")
+def pro_details(body: ProDetailsBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """L'adresse et les horaires du profil Pro, une fois le dossier validé."""
+    user = _user(db, current_user["user_id"])
+    application = _pro_application(db, user.id)
+    if application is None or application.status != "APPROVED":
+        raise HTTPException(status_code=409, detail="Le profil Pro s'ouvre après la validation du justificatif")
+    fields = body.model_dump(exclude_unset=True)
+    if "address" in fields:
+        application.address = (body.address or "").strip() or None
+    if "hours" in fields:
+        if body.hours is not None and any(day < 1 or day > 7 for day in body.hours.days):
+            raise HTTPException(status_code=422, detail="Jours de 1 (lundi) à 7 (dimanche)")
+        application.hours = (
+            {"days": sorted(set(body.hours.days)), "open": body.hours.open, "close": body.hours.close}
+            if body.hours is not None else None
+        )
+    db.commit()
+    return _pro_json(application)
 
 
 @router.get("/profile/{user_id}")
@@ -398,6 +570,7 @@ def pro_pending(current_user: dict = Depends(require_permission_claims("certifie
     return {"items": [{
         "id": a.id, "user_id": a.user_id, "verified_name": names.get(a.user_id),
         "business_name": a.business_name, "activity": a.activity, "city": a.city,
+        "address": a.address, "document_type": a.document_type,
         "document_media_id": a.document_media_id,
         "review_due_at": a.review_due_at.isoformat(), "overdue": a.review_due_at < now,
     } for a in rows]}
@@ -420,6 +593,8 @@ def pro_review(
         raise HTTPException(status_code=422, detail="Dites à la personne ce qui ne va pas")
     application.status = statuses[decision]
     application.review_note = (body.note or "").strip() or None
+    if decision == "CORRECTION":
+        application.document_name = (body.document_name or "").strip() or None
     application.reviewed_at = datetime.utcnow()
     application.reviewer_id = current_user["user_id"]
     from app.models import AuditLog

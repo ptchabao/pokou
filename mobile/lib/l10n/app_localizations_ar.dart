@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -5515,8 +5514,7 @@ class LAr extends L {
   String get certTitle => 'Pokou موثَّق';
 
   @override
-  String get certPitch =>
-      'تثبت الشارة أن اسمك هو اسمك حقًا. يُبقي وضع الإثبات رسائل المجموعة المحذوفة ظاهرة ومشطوبة.';
+  String get certPitch => 'اسمك الموثّق، وأثر ما يُكتب لك.';
 
   @override
   String get certHowItWorks =>
@@ -5524,12 +5522,16 @@ class LAr extends L {
 
   @override
   String certStartTrial(String days) {
-    return 'جرّب $days يومًا';
+    String _temp0 = intl.Intl.selectLogic(days, {
+      '30': 'ابدأ تجربة شهر',
+      'other': 'ابدأ تجربة $days يوماً',
+    });
+    return '$_temp0';
   }
 
   @override
   String get certTrialNote =>
-      'أثناء التجربة يتوفر وضع الإثبات؛ تظهر الشارة عند أول دفعة.';
+      'خلال التجربة يتوفر وضع الإثبات. تظهر الشارة عند أول دفعة تتحقّق من اسمك.';
 
   @override
   String certPlanPrice(String ht, String ttc) {
@@ -5567,7 +5569,7 @@ class LAr extends L {
 
   @override
   String get proofModeOnBanner =>
-      'وضع الإثبات مفعّل: تبقى الرسالة المحذوفة ظاهرة ومشطوبة للجميع.';
+      'وضع الإثبات مفعّل. تبقى الرسائل المحذوفة ظاهرة، مشطوبة، للجميع.';
 
   @override
   String get proofModeEnable => 'تفعيل وضع الإثبات';
@@ -5800,6 +5802,584 @@ class LAr extends L {
 
   @override
   String get proProfileNote => 'هكذا يرى الآخرون ملفك Pro.';
+
+  @override
+  String get actionDone => 'تم';
+
+  @override
+  String get badgeProLabel => 'Pokou موثّق برو';
+
+  @override
+  String get certAdvantageNameTitle => 'اسم موثّق';
+
+  @override
+  String get certAdvantageNameBody =>
+      'تُظهر شارتك أنك أنت فعلاً، بفضل محفظة الهاتف التي تدفع.';
+
+  @override
+  String get certAdvantageProofTitle => 'وضع الإثبات';
+
+  @override
+  String get certAdvantageProofBody =>
+      'في المحادثة، تبقى الرسائل المحذوفة ظاهرة، مشطوبة، للجميع.';
+
+  @override
+  String get certAdvantageExportTitle => 'التصدير المؤرَّخ';
+
+  @override
+  String get certAdvantageExportBody =>
+      'احفظ محادثة بصيغة PDF مع التواريخ والأوقات.';
+
+  @override
+  String get certFormulaLabel => 'الخطة';
+
+  @override
+  String get certMonthlyLabel => 'شهرياً';
+
+  @override
+  String get certYearlyLabel => 'سنوياً';
+
+  @override
+  String certMonthsOffered(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: '$months أشهر مجانية',
+      two: 'شهران مجانيان',
+      one: 'شهر مجاني',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certTtcPerMonth(String amount) {
+    return '$amount شاملة الضريبة شهرياً';
+  }
+
+  @override
+  String certTtcPerYear(String amount) {
+    return '$amount شاملة الضريبة سنوياً';
+  }
+
+  @override
+  String get certSeeProOffer => 'محترف؟ اطّلع على Pokou موثّق برو';
+
+  @override
+  String get certPayNowShowBadge => 'ادفع الآن واعرض شارتي';
+
+  @override
+  String get certPayTitle => 'التحقق والدفع';
+
+  @override
+  String get certNameFieldLabel => 'الاسم واللقب كما في بطاقة هويتك';
+
+  @override
+  String get certNameFieldHelp =>
+      'يقارنه Pokou باسم صاحب المحفظة الذي تحقّق منه مشغّلك. سيظهر هذا الاسم مع شارتك.';
+
+  @override
+  String get certPayWith => 'الدفع بواسطة';
+
+  @override
+  String get certOwnWallet => 'محفظة هذا الرقم';
+
+  @override
+  String get certOtherWallet => 'محفظة أخرى';
+
+  @override
+  String get certOtherWalletHint => 'رقم المحفظة';
+
+  @override
+  String certVatLabel(String rate) {
+    return 'الضريبة $rate %';
+  }
+
+  @override
+  String get certTotalLabel => 'المجموع';
+
+  @override
+  String get certPaymentNote => 'الدفع عبر CashPay. الفاتورة متاحة في حسابك.';
+
+  @override
+  String certVerifyAndPay(String amount) {
+    return 'تحقّق وادفع $amount';
+  }
+
+  @override
+  String get certMismatchAlertBody =>
+      'اسم صاحب هذه المحفظة لا يطابق اسمك. صحّح اسمك أو ادفع من محفظتك.';
+
+  @override
+  String get certNameNeverShown =>
+      'لا يُعرض اسم صاحب المحفظة أبداً. تستمر تجربتك ووضع الإثبات في الأثناء.';
+
+  @override
+  String get certBadgeActiveTitle => 'شارتك مفعّلة';
+
+  @override
+  String get certBadgeActiveBody => 'يرى جهات اتصالك الآن اسمك الموثّق.';
+
+  @override
+  String certNameVerifiedBy(String operator) {
+    return 'اسم تحقّق منه $operator';
+  }
+
+  @override
+  String get certNextPaymentLabel => 'الدفعة القادمة';
+
+  @override
+  String get certDownloadInvoice => 'تنزيل الفاتورة';
+
+  @override
+  String get proofModeActivatesAnywhere =>
+      'يُفعَّل وضع الإثبات في كل محادثاتك، الثنائية أو الجماعية.';
+
+  @override
+  String certTrialEndingTitle(String days, String date) {
+    return 'تنتهي تجربتك بعد $days أيام، في $date.';
+  }
+
+  @override
+  String get certIfYouPay => 'إذا دفعت';
+
+  @override
+  String get certIfYouPayBadge => 'تظهر شارتك ويُتحقّق من اسمك عبر محفظتك';
+
+  @override
+  String get certIfYouPayProof => 'يستمر وضع الإثبات والتصدير المؤرَّخ';
+
+  @override
+  String get certWithoutPayment => 'دون دفع';
+
+  @override
+  String get certWithoutPaymentActivate =>
+      'لن تتمكّن من تفعيل وضع الإثبات في محادثة جديدة';
+
+  @override
+  String get certWithoutPaymentTraces => 'ما سُجّل يبقى ظاهراً للجميع';
+
+  @override
+  String get certPayAndShowBadge => 'ادفع واعرض شارتي';
+
+  @override
+  String get certLater => 'لاحقاً';
+
+  @override
+  String get certPausedScreenTitle => 'الشارة متوقفة';
+
+  @override
+  String get proofLearnMore => 'اعرف المزيد';
+
+  @override
+  String get proofLearnMoreBody =>
+      'وضع الإثبات لا يُخفى أبداً: رسالة نظام تعلنه وشريط يبقى في الأعلى. تبقى الرسالة التي يحذفها كاتبها ظاهرة، مشطوبة، للجميع مع وقت الحذف، وتحتفظ الرسالة المعدّلة بنسختها الأصلية. يبقى الأثر لدى بقية المشاركين حتى لو حذف أحدهم المحادثة أو غادر المجموعة أو غيّر هاتفه. يمكنك تصدير المحادثة في ملف PDF مؤرَّخ.';
+
+  @override
+  String get proofDirectHeaderSubtitle => 'محادثة ثنائية · وضع الإثبات مفعّل';
+
+  @override
+  String proofGroupHeaderSubtitle(String count) {
+    return '$count أعضاء · وضع الإثبات مفعّل';
+  }
+
+  @override
+  String get proofActivateTitle => 'تفعيل وضع الإثبات؟';
+
+  @override
+  String proofActivateGroupBody(String name, String count) {
+    return 'في «$name» ستبقى الرسالة التي يحذفها كاتبها ظاهرة، مشطوبة، للأعضاء الـ$count مع وقت الحذف.';
+  }
+
+  @override
+  String proofActivateGroupBodyAll(String name) {
+    return 'في «$name» ستبقى الرسالة التي يحذفها كاتبها ظاهرة، مشطوبة، لجميع الأعضاء مع وقت الحذف.';
+  }
+
+  @override
+  String proofActivateDirectBody(String name) {
+    return 'في محادثتك مع $name ستبقى الرسالة التي يحذفها كاتبها ظاهرة، مشطوبة، لكليكما مع وقت الحذف.';
+  }
+
+  @override
+  String get proofActivateBulletGroupNotice =>
+      'يُبلَّغ جميع الأعضاء: رسالة في المجموعة وشريط دائم.';
+
+  @override
+  String proofActivateBulletDirectNotice(String name) {
+    return 'يُبلَّغ $name: رسالة في المحادثة وشريط دائم.';
+  }
+
+  @override
+  String get proofActivateBulletFromNow =>
+      'لا يشمل إلا الرسائل المرسلة من الآن.';
+
+  @override
+  String get proofActivateBulletCanDisable =>
+      'يمكنك إيقافه؛ وتحتفظ الرسائل المرسلة خلاله بالقاعدة.';
+
+  @override
+  String get proofDeactivateTitle => 'إيقاف وضع الإثبات؟';
+
+  @override
+  String get proofDeactivateBulletNotice =>
+      'يُبلَّغ المشاركون برسالة في المحادثة.';
+
+  @override
+  String get proofDeactivateBulletKeepsRule =>
+      'تحتفظ الرسائل المرسلة خلاله بالقاعدة: تبقى نسختها الأصلية ظاهرة.';
+
+  @override
+  String get proofDeactivateBulletReenable => 'يمكنك إعادة تفعيله متى شئت.';
+
+  @override
+  String get proofKeepMode => 'الإبقاء على وضع الإثبات';
+
+  @override
+  String get proofReservedTitle => 'إيقاف وضع الإثبات';
+
+  @override
+  String get proofReservedBody =>
+      'في المجموعة يوقفه من فعّله أو مشرف لديه شارة مدفوعة، Pokou موثّق أو برو. التجربة لا تكفي.';
+
+  @override
+  String get proofReservedYourBadge => 'شارتك';
+
+  @override
+  String get proofReservedLevelRequired => 'المستوى المطلوب';
+
+  @override
+  String get proofReservedPaidBadge => 'شارة مدفوعة';
+
+  @override
+  String get proofReservedTrial => 'تجربة';
+
+  @override
+  String get proofReservedNote =>
+      'يتحقّق الدفع من اسمك ويعرض شارتك، فيمكنك عندها إيقاف وضع الإثبات. يمكن للتجار والجمعيات اختيار Pokou موثّق برو.';
+
+  @override
+  String get proofDeleteTitle => 'حذف هذه الرسالة؟';
+
+  @override
+  String get proofDeleteWarningTitle => 'وضع الإثبات مفعّل.';
+
+  @override
+  String get proofDeleteForMeOnly => 'الحذف لي فقط';
+
+  @override
+  String proofBannerBy(String name) {
+    return 'فعّل $name وضع الإثبات.';
+  }
+
+  @override
+  String get proofBannerRule => 'تبقى الرسائل المحذوفة ظاهرة، مشطوبة، للجميع.';
+
+  @override
+  String get proofChooseDiscussion => 'اختر محادثة';
+
+  @override
+  String get proofChooseDiscussionNote =>
+      'مع شارتك، يُفعَّل وضع الإثبات في أي محادثة، ثنائية أو جماعية، سواء كنت مشرفاً أم لا. يُبلَّغ المشاركون دائماً.';
+
+  @override
+  String get proofSearchDiscussion => 'ابحث عن محادثة';
+
+  @override
+  String get proofDirectSubtitle => 'محادثة ثنائية';
+
+  @override
+  String get proofGroupSubtitle => 'مجموعة';
+
+  @override
+  String proofActivatedFor(String name) {
+    return 'فُعّل وضع الإثبات في «$name»';
+  }
+
+  @override
+  String get proofExportOptionsTitle => 'تصدير المحادثة';
+
+  @override
+  String get proofExportPeriodLabel => 'الفترة';
+
+  @override
+  String get proofExportSinceActivation => 'منذ تفعيل وضع الإثبات';
+
+  @override
+  String get proofExportAllDiscussion => 'المحادثة كاملة';
+
+  @override
+  String get proofExportCustomDates => 'اختيار تواريخ';
+
+  @override
+  String get proofIncludeMedia => 'تضمين الصور والمستندات';
+
+  @override
+  String get proofIncludeMediaNote => 'سيكون ملف PDF أكبر حجماً';
+
+  @override
+  String get proofExportContains => 'يحتوي ملف PDF على';
+
+  @override
+  String get proofExportContainsDates => 'تاريخ ووقت كل رسالة';
+
+  @override
+  String get proofExportContainsDeleted =>
+      'الرسائل المحذوفة أو المعدّلة مع نسختها الأصلية';
+
+  @override
+  String get proofExportContainsHash => 'بصمة سلامة الملف (SHA-256)';
+
+  @override
+  String get proofExportLegalNote =>
+      'يُنشأ ملف PDF على هاتفك ولا يحتفظ Pokou بأي نسخة. يقدّر القاضي قيمته القانونية.';
+
+  @override
+  String get proofCreatePdf => 'إنشاء ملف PDF';
+
+  @override
+  String get proofReadyTitle => 'ملف PDF جاهز';
+
+  @override
+  String proofReadySubtitle(String name, String size) {
+    return '$name · $size ك.ب';
+  }
+
+  @override
+  String get proofReadyPreviewNote =>
+      'يتضمن ملف PDF كل رسالة بتاريخها ووقتها، والمحذوفة مشطوبة، والنسخ الأصلية.';
+
+  @override
+  String get proofIntegrityHash => 'بصمة السلامة (SHA-256)';
+
+  @override
+  String get proofIntegrityNote =>
+      'احتفظ بالملف كما هو: أدنى تعديل يغيّر البصمة.';
+
+  @override
+  String get proOfferTitle => 'للتجار والمنظمات';
+
+  @override
+  String get proOfferAudience => 'تجار، باعة، شركات، جمعيات';
+
+  @override
+  String get proOfferPointName => 'اسمك التجاري موثّقاً مع شارة برو';
+
+  @override
+  String get proOfferPointProfile => 'ملف برو: العنوان، المواعيد، النشاط';
+
+  @override
+  String get proOfferPointBadge =>
+      'شارة برو على حالاتك ثم على إعلاناتك في Assimé';
+
+  @override
+  String get proOfferPointBadgeLot1 => 'شارة برو على ملفك وحالاتك';
+
+  @override
+  String get proOfferPointProof =>
+      'وضع الإثبات والتصدير المؤرَّخ، مثل Pokou موثّق';
+
+  @override
+  String get proPerMonth => 'شهرياً';
+
+  @override
+  String proPriceTtcCancel(String amount) {
+    return '$amount شاملة الضريبة · يمكن الإلغاء في أي وقت';
+  }
+
+  @override
+  String get proHowItWorks => 'كيف يعمل';
+
+  @override
+  String get proStepSendTitle => 'أرسل وثيقتك';
+
+  @override
+  String get proStepSendBody => 'RCCM أو NIF أو وصل جمعية';
+
+  @override
+  String proStepCheckTitle(String hours) {
+    return 'يتحقّق Pokou خلال $hours س';
+  }
+
+  @override
+  String get proStepCheckBody => 'تُبلَّغ فور صدور القرار';
+
+  @override
+  String get proStepPayTitle => 'تدفع فتظهر شارتك';
+
+  @override
+  String get proStepPayBody => 'لا دفع قبل الموافقة';
+
+  @override
+  String get proStart => 'ابدأ';
+
+  @override
+  String proStepOf(String step) {
+    return 'Pokou موثّق برو · الخطوة $step من 3';
+  }
+
+  @override
+  String get proActivityLabel => 'النشاط';
+
+  @override
+  String get proAddressLabel => 'العنوان أو معلم';
+
+  @override
+  String get proDocumentLabel => 'الوثيقة';
+
+  @override
+  String get proDocRccm => 'RCCM';
+
+  @override
+  String get proDocNif => 'NIF';
+
+  @override
+  String get proDocRecepisse => 'وصل';
+
+  @override
+  String proDocumentSize(String size) {
+    return 'صورة · $size م.ب';
+  }
+
+  @override
+  String get proChange => 'تغيير';
+
+  @override
+  String get proDocumentNameNote =>
+      'يجب أن يظهر الاسم التجاري في الوثيقة. يبقى اسمك الموثّق ظاهراً تحته: «يديره…».';
+
+  @override
+  String get proPendingTitle => 'التحقق جارٍ';
+
+  @override
+  String proPendingBody(String hours) {
+    return 'يتحقّق دعم Pokou من وثيقتك خلال $hours س. يصلك إشعار فور صدور القرار.';
+  }
+
+  @override
+  String get proStepSent => 'أُرسلت الوثيقة';
+
+  @override
+  String get proStepSupport => 'تحقق الدعم';
+
+  @override
+  String proAtTheLatest(String date) {
+    return 'في موعد أقصاه $date';
+  }
+
+  @override
+  String get proStepPayBadge => 'الدفع وشارة برو';
+
+  @override
+  String get proAfterValidation => 'بعد الموافقة';
+
+  @override
+  String get proPendingKeep =>
+      'في الأثناء تحتفظ بشارة Pokou موثّق ومحادثاتك ووضع الإثبات.';
+
+  @override
+  String get proNameMismatchTitle => 'الاسم غير مطابق';
+
+  @override
+  String get proWhatToDo => 'ماذا تريد أن تفعل؟';
+
+  @override
+  String proUseDocumentName(String name) {
+    return 'استخدام «$name»';
+  }
+
+  @override
+  String proNameOnDocument(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'NIF': 'الاسم المسجّل في NIF',
+      'RECEPISSE': 'الاسم المسجّل في وصلك',
+      'other': 'الاسم المسجّل في RCCM',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get proSendOtherDocument => 'إرسال وثيقة أخرى';
+
+  @override
+  String get proNoPaymentTaken =>
+      'لم يُقتطع أي مبلغ. يمكنك إعادة الإرسال كلما لزم.';
+
+  @override
+  String get proCorrectAndResend => 'التصحيح وإعادة الإرسال';
+
+  @override
+  String get proContactSupport => 'التواصل مع الدعم';
+
+  @override
+  String get proSupportHint => 'ردّ على إشعار القرار، فهو يصل إلى الدعم.';
+
+  @override
+  String proGoodNews(String name) {
+    return 'خبر سار: تم التحقق من $name.';
+  }
+
+  @override
+  String proDocumentVerifiedBySupport(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'NIF': 'NIF تحقّق منه الدعم',
+      'RECEPISSE': 'وصل تحقّق منه الدعم',
+      'other': 'RCCM تحقّق منه الدعم',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get proNameShownAfterPayment => 'يظهر اسمك التجاري فور الدفع';
+
+  @override
+  String get proReplacesCertified =>
+      'تتوقف شارة Pokou موثّق: تحلّ محلها شارة برو دون دفع مزدوج.';
+
+  @override
+  String proPayTtc(String amount) {
+    return 'ادفع $amount شاملة الضريبة';
+  }
+
+  @override
+  String get proProfileTitle => 'الملف';
+
+  @override
+  String proManagedByVerified(String name) {
+    return 'يديره $name · اسم موثّق';
+  }
+
+  @override
+  String get proDeclaredAddress => 'العنوان المصرّح به';
+
+  @override
+  String proHoursLine(String days, String open, String close) {
+    return '$days، من $open إلى $close';
+  }
+
+  @override
+  String get proOpenNow => 'مفتوح';
+
+  @override
+  String get proClosedNow => 'مغلق';
+
+  @override
+  String proSinceDate(String date) {
+    return 'Pokou موثّق برو منذ $date';
+  }
+
+  @override
+  String contactReport(String name) {
+    return 'الإبلاغ عن $name';
+  }
+
+  @override
+  String get contactReportReasonHint => 'ما المشكلة';
+
+  @override
+  String get contactReportSend => 'إبلاغ';
+
+  @override
+  String get contactReportSent => 'أُرسل البلاغ إلى فريق Pokou.';
 
   @override
   String get honamCity => 'المدينة';

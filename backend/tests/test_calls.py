@@ -235,7 +235,7 @@ def test_starting_a_call_logs_it_for_both_sides(client):
     # Le nom du carnet de A (« Bob ») : le journal nomme comme les
     # discussions — voir utils/identity.py::nom_affiche.
     assert log_a[0]["others"] == [
-        {"id": user_id_b, "display_name": "Bob", "avatar": None, "is_verified": False}
+        {"id": user_id_b, "display_name": "Bob", "avatar": None, "is_verified": False, "badge": None}
     ]
 
     log_b = client.get("/api/v1/calls/log", headers=headers_b).json()["items"]

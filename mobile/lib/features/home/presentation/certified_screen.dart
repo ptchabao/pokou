@@ -4,15 +4,15 @@ import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/verified_badge.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
-import '../../honam/presentation/honam_controller.dart' show openPayment;
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
-import '../../kory/presentation/kory_screen.dart' show KoryStatusPill;
 import '../../modules/shared/module_ui.dart';
+import 'certified_pay_screen.dart';
 import 'certified_pro_screen.dart';
+import 'certified_status_screens.dart';
 import '../../../core/time/server_time.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
 import '../../../core/widgets/skeleton.dart';
 
 final _certifiedProvider =
@@ -30,8 +30,14 @@ final _certifiedProvider =
       );
     });
 
-/// Pokou certifié (section 9.5) : l'offre, l'essai, le paiement, et l'écran
-/// « noms différents » quand le wallet n'est pas au nom affiché.
+/// Pokou certifié (section 9.5) : l'offre, l'essai, et chacun des écrans
+/// qu'un abonnement traverse — « Badge actif », « Noms différents », « Fin
+/// de l'essai », « Badge en pause » — selon l'état renvoyé par le serveur.
+///
+/// Un ROUTEUR, volontairement : les maquettes traitent chaque état comme un
+/// écran séparé, et les mélanger dans une seule liste qui s'allonge ou se
+/// raccourcit (comme le faisait l'ancienne version) cache le fait que
+/// « Badge en pause » n'a RIEN à voir avec l'offre qui s'affiche en dessous.
 class CertifiedScreen extends ConsumerWidget {
   const CertifiedScreen({super.key});
 
@@ -39,277 +45,95 @@ class CertifiedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     final data = ref.watch(_certifiedProvider);
-    final api = ref.read(apiClientProvider);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    String date(String? iso) => iso == null
-        ? ''
-        : DateFormat.yMMMd(locale).format(parseServerTime(iso));
 
-    Future<void> post(String path, [Map<String, dynamic>? body]) async {
-      try {
-        await api.post(path, body: body ?? const {});
-        ref.invalidate(_certifiedProvider);
-        await ref.read(authControllerProvider.notifier).reloadProfile();
-      } catch (_) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
-      }
-    }
-
-    return ModuleScaffold(
-      title: l.certTitle,
-      child: data.when(
-        loading: () => const SkeletonCards(),
-        error: (_, _) => ModuleEmptyState(
+    return data.when(
+      loading: () => ModuleScaffold(title: l.certTitle, child: const SkeletonCards()),
+      error: (_, _) => ModuleScaffold(
+        title: l.certTitle,
+        child: ModuleEmptyState(
           icon: Icons.cloud_off,
           title: l.honamFailed,
           message: l.modulesCheckNetwork,
         ),
-        data: (data) {
-          final status = data.status;
-          final state = status['status'] as String;
-          // La formule Pro a son propre parcours : justificatif d'abord,
-          // paiement après validation (maquettes Pro).
-          final plans = [
-            for (final plan
-                in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
-              if (!(plan['code'] as String).startsWith('PRO')) plan,
-          ];
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_certifiedProvider),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-              children: [
-                ModuleCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.verified,
-                            color: AppColors.feedbackInfo,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l.certTitle,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          if (status['badge_visible'] == true)
-                            KoryStatusPill(
-                              icon: Icons.check_circle,
-                              label: l.certActive,
-                              color: AppColors.feedbackSuccess,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(l.certPitch),
-                      const SizedBox(height: 8),
-                      Text(
-                        l.certHowItWorks,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (state == 'TRIAL')
-                        Text(
-                          l.certTrialUntil(
-                            date(status['trial_ends_at'] as String?),
-                          ),
-                        ),
-                      if (state == 'ACTIVE')
-                        Text(
-                          l.certActiveUntil(
-                            date(status['current_period_end'] as String?),
-                          ),
-                        ),
-                      if (state == 'EXPIRED')
-                        Text(
-                          l.certExpired,
-                          style: const TextStyle(
-                            color: AppColors.feedbackDanger,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                // CRT-5 · Badge en pause : expliquer sans inquiéter, et
-                // réafficher le badge en un paiement.
-                if (state == 'PAUSED') ...[
-                  const SizedBox(height: 12),
-                  _BadgePaused(
-                    status: status,
-                    plans: plans,
-                    date: date,
-                    onPay: (code) => openPayment(
-                      context,
-                      api
-                          .post('/certified/subscribe', body: {'plan': code})
-                          .then(
-                            (json) =>
-                                (json as Map<String, dynamic>)['payment_url']
-                                    as String?,
-                          ),
-                    ),
-                  ),
-                ],
-                if (state == 'NAME_MISMATCH') ...[
-                  const SizedBox(height: 12),
-                  _NameMismatch(
-                    onResolved: () {
-                      ref.invalidate(_certifiedProvider);
-                      ref.read(authControllerProvider.notifier).reloadProfile();
-                    },
-                  ),
-                ],
-                if (status['trial_available'] == true) ...[
-                  const SizedBox(height: 12),
-                  ModuleActionButton(
-                    label: l.certStartTrial('${data.offer['trial_days']}'),
-                    onPressed: () => post('/certified/trial'),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l.certTrialNote,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-                for (final plan in plans)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: ModuleCard(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  plan['label'] as String,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  l.certPlanPrice(
-                                    formatFcfa(plan['price_ht'] as int),
-                                    formatFcfa(plan['price_ttc'] as int),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ModuleActionButton(
-                            label: l.certSubscribe,
-                            expanded: false,
-                            onPressed: () => openPayment(
-                              context,
-                              api
-                                  .post(
-                                    '/certified/subscribe',
-                                    body: {'plan': plan['code']},
-                                  )
-                                  .then(
-                                    (json) =>
-                                        (json
-                                                as Map<
-                                                  String,
-                                                  dynamic
-                                                >)['payment_url']
-                                            as String?,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 8),
-                Text(
-                  l.honamPriceNote,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ModuleCard(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons.hexagon_outlined,
-                      color: AppColors.accentPrimary,
-                    ),
-                    title: Text(l.proTitle),
-                    subtitle: Text(l.proTeaser),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const CertifiedProScreen(),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
+      data: (data) {
+        final status = data.status;
+        final state = status['status'] as String;
+        // La formule Pro a son propre parcours : justificatif d'abord,
+        // paiement après validation (maquettes Pro).
+        final plans = [
+          for (final plan in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
+            if (!(plan['code'] as String).startsWith('PRO')) plan,
+        ];
+        void refresh() {
+          ref.invalidate(_certifiedProvider);
+          ref.read(authControllerProvider.notifier).reloadProfile();
+        }
+
+        if (state == 'PAUSED') {
+          return _BadgePausedScreen(status: status, plans: plans, onChanged: refresh);
+        }
+        if (state == 'NAME_MISMATCH') {
+          final plan = plans.where((p) => p['code'] == status['plan']).firstOrNull ?? plans.firstOrNull;
+          return CertifiedPayScreen(
+            plan: plan ?? const {'code': 'PARTICULIER_MONTHLY', 'label': ''},
+            nameMismatch: true,
+            onResolved: refresh,
+          );
+        }
+        if (state == 'ACTIVE') {
+          return CertifiedBadgeActiveScreen(status: status);
+        }
+        if (state == 'TRIAL') {
+          final trialEnd = parseServerTime(status['trial_ends_at'] as String);
+          if (trialEnd.difference(DateTime.now()).inDays <= 3) {
+            return CertifiedTrialEndingScreen(status: status, plans: plans);
+          }
+        }
+        return _OfferScreen(
+          status: status,
+          offer: data.offer,
+          plans: plans,
+          onTrialStarted: refresh,
+        );
+      },
     );
   }
 }
 
-/// « Noms différents » (maquette 2b) : on demande de corriger le nom saisi,
-/// sans jamais montrer celui du titulaire du wallet.
-class _NameMismatch extends ConsumerStatefulWidget {
-  const _NameMismatch({required this.onResolved});
+/// « 1. Offre » (maquette 25/66) : l'accroche, les trois avantages, la
+/// formule, puis l'essai ou le paiement direct.
+class _OfferScreen extends ConsumerStatefulWidget {
+  const _OfferScreen({
+    required this.status,
+    required this.offer,
+    required this.plans,
+    required this.onTrialStarted,
+  });
 
-  final VoidCallback onResolved;
+  final Map<String, dynamic> status;
+  final Map<String, dynamic> offer;
+  final List<Map<String, dynamic>> plans;
+  final VoidCallback onTrialStarted;
 
   @override
-  ConsumerState<_NameMismatch> createState() => _NameMismatchState();
+  ConsumerState<_OfferScreen> createState() => _OfferScreenState();
 }
 
-class _NameMismatchState extends ConsumerState<_NameMismatch> {
-  final _name = TextEditingController();
-  String? _error;
+class _OfferScreenState extends ConsumerState<_OfferScreen> {
+  late String _planCode = widget.plans.first['code'] as String;
   bool _busy = false;
 
-  @override
-  void dispose() {
-    _name.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
+  Future<void> _startTrial() async {
     final l = L.of(context);
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
+    setState(() => _busy = true);
     try {
-      await ref
-          .read(apiClientProvider)
-          .post(
-            '/certified/resolve-name',
-            body: {'full_name': _name.text.trim()},
-          );
-      widget.onResolved();
+      await ref.read(apiClientProvider).post('/certified/trial');
+      widget.onTrialStarted();
     } catch (_) {
-      if (mounted) setState(() => _error = l.certStillMismatch);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -318,35 +142,212 @@ class _NameMismatchState extends ConsumerState<_NameMismatch> {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    return ModuleCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final plan = widget.plans.firstWhere((p) => p['code'] == _planCode, orElse: () => widget.plans.first);
+    final yearly = widget.plans.where((p) => p['code'].toString().contains('YEARLY')).firstOrNull;
+    final monthly = widget.plans.where((p) => p['code'].toString().contains('MONTHLY')).firstOrNull;
+
+    return ModuleScaffold(
+      title: l.certTitle,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
-          Text(
-            l.certMismatchTitle,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const VerifiedBadge(size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l.certPitch,
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(l.certMismatchBody),
-          TextField(
-            contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _name,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              labelText: l.certCorrectName,
-              errorText: _error,
+          const SizedBox(height: 18),
+          _advantage(Icons.person_outline, l.certAdvantageNameTitle, l.certAdvantageNameBody),
+          _advantage(Icons.schedule, l.certAdvantageProofTitle, l.certAdvantageProofBody),
+          _advantage(Icons.description_outlined, l.certAdvantageExportTitle, l.certAdvantageExportBody),
+          const SizedBox(height: 10),
+          ModuleSectionTitle(l.certFormulaLabel),
+          if (monthly != null)
+            _planChoice(monthly, l.certMonthlyLabel)
+          else
+            const SizedBox.shrink(),
+          if (yearly != null)
+            _planChoice(
+              yearly,
+              l.certYearlyLabel,
+              // « Deux mois offerts » se DÉDUIT des deux prix de l'API.
+              badge: monthly == null
+                  ? null
+                  : switch (((monthly['price_ht'] as int) * 12 - (yearly['price_ht'] as int)) ~/
+                        (monthly['price_ht'] as int)) {
+                      final months when months > 0 => l.certMonthsOffered(months),
+                      _ => null,
+                    },
+            ),
+          const SizedBox(height: 10),
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CertifiedProScreen()),
+              ),
+              child: Text(l.certSeeProOffer),
             ),
           ),
-          const SizedBox(height: 8),
-          ModuleActionButton(
-            label: l.certRetryName,
-            busy: _busy,
-            onPressed: _busy ? null : _submit,
+          const SizedBox(height: 24),
+          if (widget.status['trial_available'] == true) ...[
+            Text(
+              l.certTrialNote,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 10),
+            ModuleActionButton(
+              label: l.certStartTrial('${widget.offer['trial_days']}'),
+              busy: _busy,
+              onPressed: _busy ? null : _startTrial,
+            ),
+            const SizedBox(height: 6),
+          ] else if (widget.status['status'] == 'EXPIRED') ...[
+            Text(
+              l.certExpired,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.feedbackDanger),
+            ),
+            const SizedBox(height: 10),
+          ],
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => CertifiedPayScreen(plan: plan)),
+              ),
+              child: Text(l.certPayNowShowBadge),
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _advantage(IconData icon, String title, String body) => Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 22, color: AppColors.accentPrimary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(body, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _planChoice(Map<String, dynamic> p, String title, {String? badge}) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: ModuleCard(
+          onTap: () => setState(() => _planCode = p['code'] as String),
+          child: Row(
+            children: [
+              Radio<String>(
+                value: p['code'] as String,
+                groupValue: _planCode,
+                onChanged: (v) => setState(() => _planCode = v!),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        if (badge != null) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.terracottaTint,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(badge, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text('${formatFcfa(p['price_ht'] as int)} HT'),
+                    Text(
+                      l10nTtcLine(context, p),
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+}
+
+/// « 5. Badge en pause » (maquette 105) : un écran DÉDIÉ, sans la liste des
+/// formules ni la carte Pro en dessous — sinon la personne croit devoir
+/// re-choisir une formule alors qu'elle en a déjà une.
+class _BadgePausedScreen extends StatelessWidget {
+  const _BadgePausedScreen({required this.status, required this.plans, required this.onChanged});
+
+  final Map<String, dynamic> status;
+  final List<Map<String, dynamic>> plans;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    String date(String? iso) =>
+        iso == null ? '' : DateFormat.yMMMd(locale).format(parseServerTime(iso));
+
+    return ModuleScaffold(
+      title: l.certPausedScreenTitle,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        children: [
+          const Icon(Icons.warning_amber_rounded, size: 40, color: AppColors.feedbackWarning),
+          const SizedBox(height: 14),
+          _BadgePaused(
+            status: status,
+            plans: plans,
+            date: date,
+            onPay: (code) async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CertifiedPayScreen(
+                    plan: plans.firstWhere((p) => p['code'] == code),
+                  ),
+                ),
+              );
+              onChanged();
+            },
+            onChangePlan: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// « 590 FCFA TTC par mois » / « 5 900 FCFA TTC par an » sous le prix HT
+/// d'une formule (maquette 25).
+String l10nTtcLine(BuildContext context, Map<String, dynamic> plan) {
+  final l = L.of(context);
+  final ttc = formatFcfa(plan['price_ttc'] as int);
+  return (plan['days'] as int? ?? 30) >= 365 ? l.certTtcPerYear(ttc) : l.certTtcPerMonth(ttc);
 }
 
 class _BadgePaused extends StatelessWidget {
@@ -355,12 +356,17 @@ class _BadgePaused extends StatelessWidget {
     required this.plans,
     required this.date,
     required this.onPay,
+    this.onChangePlan,
   });
 
   final Map<String, dynamic> status;
   final List<Map<String, dynamic>> plans;
   final String Function(String?) date;
   final void Function(String planCode) onPay;
+
+  /// « Changer de formule » (maquette 105) : ramène à l'offre, où les deux
+  /// formules redeviennent choisissables.
+  final VoidCallback? onChangePlan;
 
   @override
   Widget build(BuildContext context) {
@@ -417,9 +423,12 @@ class _BadgePaused extends StatelessWidget {
             onPressed: () => onPay(plan['code'] as String),
           ),
           Center(
-            child: Text(
-              l.certChangePlan,
-              style: TextStyle(color: AppColors.textSecondary),
+            child: TextButton(
+              onPressed: onChangePlan,
+              child: Text(
+                l.certChangePlan,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
           ),
         ],

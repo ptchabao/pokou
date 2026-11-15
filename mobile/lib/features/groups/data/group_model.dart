@@ -84,6 +84,8 @@ class Group {
     this.communityId,
     this.isAnnouncement = false,
     this.proofMode = false,
+    this.proofModeByName,
+    this.proofModeSince,
     this.cryptoEpoch = 1,
     this.adminsOnlyMessages = false,
     this.disappearingSeconds,
@@ -115,6 +117,14 @@ class Group {
   /// Mode preuve (Pokou certifié) : un message supprimé reste visible,
   /// barré, pour tous, et plus rien ne se modifie.
   final bool proofMode;
+
+  /// Le nom de qui a activé le mode preuve (« Mode preuve activé par Afi »,
+  /// maquette 5) ; `null` quand le mode est coupé.
+  final String? proofModeByName;
+
+  /// Depuis quand le mode preuve est actif — période par défaut de l'export
+  /// daté (maquette 8).
+  final DateTime? proofModeSince;
   final int cryptoEpoch;
   final String? communityName;
   final int? avatarMediaId;
@@ -185,6 +195,10 @@ class Group {
       communityId: json['community_id'] as int?,
       isAnnouncement: json['is_announcement'] as bool? ?? false,
       proofMode: json['proof_mode'] as bool? ?? false,
+      proofModeByName: json['proof_mode_by_name'] as String?,
+      proofModeSince: json['proof_mode_since'] != null
+          ? parseServerTime(json['proof_mode_since'] as String)
+          : null,
       cryptoEpoch: json['crypto_epoch'] as int? ?? 1,
       adminsOnlyMessages: json['admins_only_messages'] as bool? ?? false,
       disappearingSeconds: json['disappearing_seconds'] as int?,
