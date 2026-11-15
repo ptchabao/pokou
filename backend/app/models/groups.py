@@ -183,6 +183,8 @@ class GroupMember(Base):
     is_pinned = Column(Boolean, default=False, nullable=False)
     pinned_at = Column(DateTime, nullable=True)
     muted_until = Column(DateTime, nullable=True)
+    # Favori : voir Contact.is_favorite.
+    is_favorite = Column(Boolean, default=False, nullable=False)
 
     group = relationship("Group", back_populates="members")
     user = relationship("User")
@@ -319,6 +321,9 @@ class GroupMessage(Base):
     original_content = Column(Text, nullable=True)
     poll_id = Column(String(36), ForeignKey("polls.id", ondelete="CASCADE"), nullable=True)
     payload = Column(JSON, nullable=True)
+    # Transfert : 0 = message d'origine, n = transféré n fois de proche en
+    # proche. Voir DirectMessage.forward_score.
+    forward_score = Column(Integer, default=0, nullable=False)
 
     group = relationship("Group")
     sender = relationship("User", foreign_keys=[sender_id])

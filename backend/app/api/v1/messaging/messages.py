@@ -66,6 +66,9 @@ class MessageCreate(BaseModel):
     media_asset_id: Optional[int] = None
     reply_to_id: Optional[str] = None
     view_once: bool = False
+    #: Transfert fait depuis l'appareil (message chiffré) : le compte de
+    #: transferts du message d'origine + 1. Voir DirectMessage.forward_score.
+    forward_score: int = Field(0, ge=0, le=1000)
 
 
 class MessageForward(BaseModel):
@@ -212,6 +215,7 @@ def _serialize(message: DirectMessage, viewer_id: Optional[int] = None) -> dict:
         "proof_mode": bool(message.proof_mode),
         "deleted_at": message.deleted_at.isoformat() if message.deleted_at else None,
         "original_content": message.original_content,
+        "forward_score": message.forward_score or 0,
     }
 
 
@@ -701,6 +705,7 @@ async def send_message(
         media_asset_id=media_asset.id if media_asset else None,
         reply_to_id=payload.reply_to_id,
         view_once=payload.view_once,
+        forward_score=payload.forward_score,
         expires_at=expires_at,
         proof_mode=proof_mode_row(db, sender_id, payload.recipient_id) is not None,
     )
@@ -1265,6 +1270,8 @@ async def forward_message(
         message_type=source.message_type,
         content=source.content,
         media_asset_id=source.media_asset_id,
+        # « Transféré », puis « Transféré plusieurs fois » au-delà de 5.
+        forward_score=(source.forward_score or 0) + 1,
         expires_at=(
             datetime.utcnow() + timedelta(seconds=contact.disappearing_seconds)
             if contact and contact.disappearing_seconds

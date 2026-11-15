@@ -67,6 +67,10 @@ class ArchiveRequest(ConversationRef):
     archived: bool
 
 
+class FavoriteRequest(ConversationRef):
+    favorite: bool
+
+
 class MuteRequest(ConversationRef):
     """`duration_seconds` est obligatoire mais peut valoir `null` (= réactiver
     le son). Obligatoire et non optionnel à défaut : un champ oublié ne doit
@@ -81,9 +85,28 @@ class BlockRequest(BaseModel):
     blocked: bool
 
 
+class ReportedMessage(BaseModel):
+    """Un message joint au signalement, tel que l'appareil l'a déchiffré.
+    Le serveur ne peut pas les lire lui-même (chiffrement de bout en bout) :
+    c'est la personne qui signale qui les transmet, en connaissance de cause
+    (la feuille « Signaler » le dit)."""
+    sender: str = Field("", max_length=120)
+    text: str = Field("", max_length=1000)
+    sent_at: Optional[str] = Field(None, max_length=40)
+
+
+#: « Les 5 derniers messages de cette discussion », rien d'autre.
+MAX_REPORTED_MESSAGES = 5
+
+
 class ReportRequest(BaseModel):
-    contact_user_id: int
+    """Une personne (`contact_user_id`) OU un groupe (`group_id`)."""
+    contact_user_id: Optional[int] = None
+    group_id: Optional[int] = None
     reason: str = Field(..., min_length=1, max_length=500)
+    recent_messages: List[ReportedMessage] = Field(
+        default_factory=list, max_length=MAX_REPORTED_MESSAGES
+    )
     # Deux gestes distincts : on peut signaler un abus sans se couper de la
     # personne (un litige commercial en cours, par exemple), et l'immense
     # majorité des signalements s'accompagne quand même d'un blocage — d'où
@@ -124,6 +147,7 @@ def _settings_payload(kind: str, conversation_id: int, row: Any) -> dict:
         "is_archived": bool(row.is_archived),
         "muted_until": row.muted_until.isoformat() if row.muted_until else None,
         "is_muted": _is_muted(row.muted_until),
+        "is_favorite": bool(row.is_favorite),
     }
     if kind == "contact":
         payload["is_blocked"] = bool(row.is_blocked)
@@ -177,6 +201,67 @@ def _resolve_target(db: Session, ref: ConversationRef, user_id: int) -> Any:
     if ref.kind == "contact":
         return _require_own_contact(db, ref.id, user_id)
     return _require_membership(db, ref.id, user_id)
+
+
+def _contact_for_block(db: Session, owner_id: int, contact_user_id: int) -> Contact:
+    """La ligne Contact où inscrire un blocage — créée pour un inconnu.
+
+    Le premier message d'un inconnu propose « Bloquer » (maquette, écran
+    15) : exiger qu'il soit d'abord dans le carnet rendait le geste
+    impossible là où il compte le plus. La ligne créée porte
+    `added_by_block` : elle n'apparaît pas dans le carnet et disparaît au
+    déblocage. 404 pour un compte inexistant."""
+    contact = db.query(Contact).filter(
+        Contact.owner_user_id == owner_id, Contact.contact_user_id == contact_user_id
+    ).first()
+    if contact is not None:
+        return contact
+    target = db.query(User).filter(User.id == contact_user_id).first()
+    if target is None:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    contact = Contact(
+        owner_user_id=owner_id,
+        phone=target.phone,
+        display_name=target.full_name or target.phone,
+        contact_user_id=target.id,
+        added_by_block=True,
+    )
+    db.add(contact)
+    db.flush()
+    return contact
+
+
+def _apply_block(
+    db: Session, contact: Contact, blocked: bool, after_report: bool = False
+) -> Optional[Contact]:
+    """Pose ou lève le blocage. Débloquer un inconnu supprime la ligne créée
+    pour le bloquer : il redevient un inconnu, pas un contact. Rend la ligne,
+    ou None si elle a été supprimée."""
+    if not blocked and contact.added_by_block:
+        db.delete(contact)
+        return None
+    if blocked and not contact.is_blocked:
+        contact.blocked_at = datetime.utcnow()
+        contact.blocked_after_report = after_report
+    if not blocked:
+        contact.blocked_at = None
+        contact.blocked_after_report = False
+    contact.is_blocked = blocked
+    return contact
+
+
+def masked_phone(phone: Optional[str]) -> Optional[str]:
+    """« +228 9• •• •• 41 » : de quoi reconnaître un numéro qu'on a soi-même
+    bloqué, sans l'afficher en entier — la messagerie n'affiche aucun numéro
+    en clair. Indicatif à 3 chiffres (Afrique de l'Ouest), puis le premier
+    chiffre et les deux derniers."""
+    if not phone:
+        return None
+    digits = phone.lstrip("+")
+    if len(digits) < 7:
+        return "•• ••"
+    country, rest = digits[:3], digits[3:]
+    return f"+{country} {rest[0]}• •• •• {rest[-2:]}"
 
 
 def _require_contact_by_user(db: Session, owner_id: int, contact_user_id: int) -> Contact:
@@ -289,6 +374,24 @@ async def set_archived(
     return _settings_payload(payload.kind, payload.id, row)
 
 
+# ─── Favoris ──────────────────────────────────────────────────────────────────
+
+@router.put("/favorite")
+async def set_favorite(
+    payload: FavoriteRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Ajoute ou retire des favoris : la conversation se retrouve dans le
+    filtre « Favoris » de la liste. Sans limite, à la différence de
+    l'épingle — un favori ne prend pas de place en haut de la liste."""
+    row = _resolve_target(db, payload, current_user["user_id"])
+    row.is_favorite = payload.favorite
+    db.commit()
+    db.refresh(row)
+    return _settings_payload(payload.kind, payload.id, row)
+
+
 # ─── Sourdine ─────────────────────────────────────────────────────────────────
 
 @router.put("/mute")
@@ -334,11 +437,18 @@ async def set_blocked(
     if payload.contact_user_id == user_id:
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas vous bloquer vous-même")
 
-    contact = _require_contact_by_user(db, user_id, payload.contact_user_id)
-    contact.is_blocked = payload.blocked
+    if payload.blocked:
+        contact = _contact_for_block(db, user_id, payload.contact_user_id)
+    else:
+        contact = _require_contact_by_user(db, user_id, payload.contact_user_id)
+    contact_id = contact.id
+    kept = _apply_block(db, contact, payload.blocked)
     db.commit()
-    db.refresh(contact)
-    return _settings_payload("contact", contact.id, contact)
+    if kept is None:
+        # Inconnu débloqué : la ligne créée pour le bloquer n'existe plus.
+        return {"kind": "contact", "id": contact_id, "is_blocked": False}
+    db.refresh(kept)
+    return _settings_payload("contact", kept.id, kept)
 
 
 @router.get("/blocked")
@@ -355,18 +465,28 @@ async def list_blocked(
         db.query(Contact)
         .options(joinedload(Contact.contact_user).joinedload(User.avatar_media))
         .filter(Contact.owner_user_id == user_id, Contact.is_blocked.is_(True))
-        .order_by(Contact.display_name)
+        .order_by(Contact.blocked_at.desc(), Contact.display_name)
         .all()
     )
     items = [
         {
             "contact_id": contact.id,
             "contact_user_id": contact.contact_user_id,
-            "display_name": nom_affiche(contact.contact_user, contact.display_name),
-            "phone": contact.phone,
-            "avatar": _serialize_media(
-                contact.contact_user.avatar_media if contact.contact_user else None
+            # Un inconnu n'a pas de nom de carnet : son numéro MASQUÉ, jamais
+            # en clair (maquette, écran 27). Le numéro complet ne sort plus.
+            "display_name": (
+                masked_phone(contact.phone)
+                if contact.added_by_block
+                else nom_affiche(contact.contact_user, contact.display_name)
             ),
+            "is_unknown_contact": bool(contact.added_by_block),
+            "avatar": _serialize_media(
+                contact.contact_user.avatar_media
+                if contact.contact_user and not contact.added_by_block
+                else None
+            ),
+            "blocked_at": contact.blocked_at.isoformat() if contact.blocked_at else None,
+            "after_report": bool(contact.blocked_after_report),
         }
         for contact in contacts
     ]
@@ -392,18 +512,42 @@ async def report_conversation(
     préalable (on signale souvent quelqu'un qu'on n'a pas dans son carnet —
     c'est même le cas le plus fréquent).
     """
+    from app.models import AbuseReport
+
     user_id = current_user["user_id"]
+    if (payload.contact_user_id is None) == (payload.group_id is None):
+        raise HTTPException(
+            status_code=400, detail="Signalez une personne ou un groupe, pas les deux"
+        )
+    # Les 5 derniers messages, déchiffrés par l'appareil de qui signale.
+    recent = [m.model_dump() for m in payload.recent_messages] or None
+
+    # ── Un groupe ─────────────────────────────────────────────────────────
+    # Réservé à ses membres : eux seuls en voient les messages. Le geste ne
+    # fait pas quitter le groupe — « Quitter » est une action à part.
+    if payload.group_id is not None:
+        _require_membership(db, payload.group_id, user_id)
+        logger.warning(
+            "Pokou: signalement du groupe %s par l'utilisateur %s — motif: %s",
+            payload.group_id, user_id, payload.reason,
+        )
+        db.add(AbuseReport(
+            reporter_id=user_id,
+            group_id=payload.group_id,
+            reason=(payload.reason or "")[:280] or None,
+            recent_messages=recent,
+        ))
+        db.commit()
+        return {
+            "reported": True,
+            "group_id": payload.group_id,
+            "blocked": False,
+            "message": "Votre signalement a été transmis à notre équipe.",
+        }
+
+    # ── Une personne ──────────────────────────────────────────────────────
     if payload.contact_user_id == user_id:
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas vous signaler vous-même")
-
-    # Le blocage, lui, exige la ligne de contact : il est vérifié AVANT de
-    # journaliser, pour ne pas laisser derrière soi un signalement enregistré
-    # dans une requête qui a fini en erreur.
-    contact = (
-        _require_contact_by_user(db, user_id, payload.contact_user_id)
-        if payload.also_block
-        else None
-    )
 
     target_exists = db.query(User.id).filter(User.id == payload.contact_user_id).first() is not None
     logger.warning(
@@ -416,18 +560,22 @@ async def report_conversation(
         payload.reason,
     )
 
+    # Bloquer marche aussi pour un inconnu (la ligne est créée, voir
+    # _contact_for_block). Un compte inexistant n'est simplement pas bloqué :
+    # répondre autrement ferait de la route un oracle d'existence.
+    contact = None
     if target_exists:
+        if payload.also_block:
+            contact = _contact_for_block(db, user_id, payload.contact_user_id)
+            _apply_block(db, contact, True, after_report=True)
         # File de modération de l'espace d'administration.
-        from app.models import AbuseReport
-
         db.add(AbuseReport(
             reporter_id=user_id,
             target_user_id=payload.contact_user_id,
             reason=(payload.reason or "")[:280] or None,
             blocked=1 if contact is not None else 0,
+            recent_messages=recent,
         ))
-    if contact is not None:
-        contact.is_blocked = True
     db.commit()
 
     return {
@@ -745,6 +893,7 @@ async def list_conversations(
             "is_verified": est_certifie(contact.contact_user) if contact.contact_user else False,
             "is_bot": bool(contact.contact_user.is_bot) if contact.contact_user else False,
             "is_pinned": bool(contact.is_pinned),
+            "is_favorite": bool(contact.is_favorite),
             "is_muted": _is_muted(contact.muted_until),
             "muted_until": contact.muted_until.isoformat() if contact.muted_until else None,
             "is_archived": bool(contact.is_archived),
@@ -860,6 +1009,7 @@ async def list_conversations(
             "community_name": group.community.name if group.community else None,
             "avatar": _serialize_media(group.avatar_media),
             "is_pinned": bool(membership.is_pinned),
+            "is_favorite": bool(membership.is_favorite),
             "is_muted": _is_muted(membership.muted_until),
             "muted_until": membership.muted_until.isoformat() if membership.muted_until else None,
             "is_archived": bool(membership.is_archived),

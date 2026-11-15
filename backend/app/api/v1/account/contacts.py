@@ -69,7 +69,11 @@ async def list_contacts(
 ):
     contacts = (
         db.query(Contact)
-        .filter(Contact.owner_user_id == current_user["user_id"])
+        .filter(
+            Contact.owner_user_id == current_user["user_id"],
+            # Ligne posée seulement pour bloquer un inconnu : pas un contact.
+            Contact.added_by_block.is_(False),
+        )
         .order_by(Contact.display_name)
         .all()
     )
@@ -132,6 +136,14 @@ async def add_contact(
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas vous ajouter vous-même")
 
     existing = db.query(Contact).filter(Contact.owner_user_id == user_id, Contact.phone == phone).first()
+    if existing and existing.added_by_block:
+        # Un inconnu bloqué qu'on ajoute au carnet : la ligne devient un vrai
+        # contact (toujours bloqué — débloquer reste un geste explicite).
+        existing.added_by_block = False
+        existing.display_name = payload.display_name
+        db.commit()
+        db.refresh(existing)
+        return _serialize(existing)
     if existing:
         raise HTTPException(status_code=409, detail="Ce numéro est déjà dans vos contacts")
 
@@ -197,6 +209,8 @@ async def sync_device_contacts(
         if contact:
             contact.display_name = device_name
             contact.contact_user_id = matched_user.id
+            # Dans le répertoire du téléphone : un vrai contact désormais.
+            contact.added_by_block = False
         else:
             contact = Contact(
                 owner_user_id=user_id,

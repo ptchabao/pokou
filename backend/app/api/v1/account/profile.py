@@ -357,9 +357,12 @@ async def get_user_profile(
     # c'est ce qui permet à la fiche d'afficher « Bloquer » ou « Débloquer »
     # sans un second appel.
     profile["is_blocked"] = bool(is_contact and is_contact.is_blocked)
-    profile["contact_display_name"] = is_contact.display_name if is_contact else None
+    # Une ligne posée seulement pour bloquer un inconnu n'en fait pas un
+    # contact (voir conversations.py::_contact_for_block).
+    in_book = is_contact is not None and not is_contact.added_by_block
+    profile["contact_display_name"] = is_contact.display_name if in_book else None
     # Absent de MON carnet : la fiche propose de l'y ajouter.
-    profile["is_contact"] = is_contact is not None
+    profile["is_contact"] = in_book
     return profile
 
 
