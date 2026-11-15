@@ -1943,6 +1943,33 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Discussions · 14 — en mode preuve, dire AVANT
+                            // de confirmer que l'original restera visible.
+                            if (_editingMessage?.proofMode == true)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.history_toggle_off,
+                                      size: 15,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        _l.proofEditNote,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          height: 1.35,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             if (_editingMessage != null)
                               _EditingBar(
                                 message: _editingMessage!,

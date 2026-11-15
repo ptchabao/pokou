@@ -59,6 +59,7 @@ import '../../messaging/presentation/offline_banner.dart';
 import '../../messaging/presentation/report_sheet.dart';
 import 'group_info_screen.dart';
 import 'group_kory_banner.dart';
+import 'mention_picker.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../stickers/data/sticker_models.dart';
 import '../../stickers/presentation/sticker_image.dart';
@@ -602,7 +603,13 @@ class _GroupConversationScreenState
     }
   }
 
+  /// Ce qui suit le « @ » en cours de frappe — le sélecteur « Mentionner »
+  /// s'ouvre tant qu'il n'est pas nul.
+  String? _mentionQuery;
+
   void _onInputChanged() {
+    final mention = mentionQueryAt(_inputController.value);
+    if (mention != _mentionQuery) setState(() => _mentionQuery = mention);
     final hasText = _inputController.text.trim().isNotEmpty;
     final next = _composerMachine.onTextChanged(
       _composer,
@@ -1848,6 +1855,17 @@ class _GroupConversationScreenState
                             progress: _composer.lockProgress,
                           ),
                         ),
+                      ),
+                    if (_mentionQuery != null && state.group != null)
+                      MentionPicker(
+                        query: _mentionQuery!,
+                        members: state.group!.members,
+                        myUserId: widget.myUserId,
+                        onPick: (member) => _inputController.value =
+                            insertMention(
+                              _inputController.value,
+                              member.displayName,
+                            ),
                       ),
                     if (_replyingTo case final replyingTo?)
                       _GroupReplyComposerPreview(

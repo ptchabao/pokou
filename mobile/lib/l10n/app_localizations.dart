@@ -16016,6 +16016,48 @@ abstract class L {
   /// **'Contacts sur Pokou'**
   String get newChatOnPokouSection;
 
+  /// No description provided for @mentionPickerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mentionner'**
+  String get mentionPickerTitle;
+
+  /// No description provided for @proofEditNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode preuve est actif. La version d\'origine de ton message restera visible pour vous deux, avec l\'heure de la modification.'**
+  String get proofEditNote;
+
+  /// No description provided for @pollKindSingle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sondage · un seul choix'**
+  String get pollKindSingle;
+
+  /// No description provided for @pollKindMultiple.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sondage · plusieurs choix'**
+  String get pollKindMultiple;
+
+  /// No description provided for @pollVotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun vote} =1{1 vote} other{{count} votes}}'**
+  String pollVotes(int count);
+
+  /// No description provided for @pollSeeVotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les votes'**
+  String get pollSeeVotes;
+
+  /// No description provided for @pollVoterUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un membre'**
+  String get pollVoterUnknown;
+
   /// No description provided for @searchScopeAll.
   ///
   /// In fr, this message translates to:

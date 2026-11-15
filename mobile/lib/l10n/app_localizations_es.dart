@@ -9598,6 +9598,37 @@ class LEs extends L {
   String get newChatOnPokouSection => 'Contacts sur Pokou';
 
   @override
+  String get mentionPickerTitle => 'Mentionner';
+
+  @override
+  String get proofEditNote =>
+      'Le mode preuve est actif. La version d\'origine de ton message restera visible pour vous deux, avec l\'heure de la modification.';
+
+  @override
+  String get pollKindSingle => 'Sondage · un seul choix';
+
+  @override
+  String get pollKindMultiple => 'Sondage · plusieurs choix';
+
+  @override
+  String pollVotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '1 vote',
+      zero: 'Aucun vote',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollSeeVotes => 'Voir les votes';
+
+  @override
+  String get pollVoterUnknown => 'Un membre';
+
+  @override
   String get searchScopeAll => 'Tout';
 
   @override

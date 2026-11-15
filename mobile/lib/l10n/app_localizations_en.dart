@@ -9563,6 +9563,37 @@ class LEn extends L {
   String get newChatOnPokouSection => 'Contacts on Pokou';
 
   @override
+  String get mentionPickerTitle => 'Mention';
+
+  @override
+  String get proofEditNote =>
+      'Proof mode is on. The original version of your message will stay visible to both of you, with the time of the edit.';
+
+  @override
+  String get pollKindSingle => 'Poll · single choice';
+
+  @override
+  String get pollKindMultiple => 'Poll · multiple choice';
+
+  @override
+  String pollVotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '1 vote',
+      zero: 'No votes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollSeeVotes => 'See votes';
+
+  @override
+  String get pollVoterUnknown => 'A member';
+
+  @override
   String get searchScopeAll => 'All';
 
   @override

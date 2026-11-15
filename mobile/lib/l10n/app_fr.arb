@@ -5067,6 +5067,20 @@
   "newChatInviteRow": "Inviter sur Pokou",
   "newChatInviteRowHint": "Partager un lien d'invitation",
   "newChatOnPokouSection": "Contacts sur Pokou",
+  "mentionPickerTitle": "Mentionner",
+  "proofEditNote": "Le mode preuve est actif. La version d'origine de ton message restera visible pour vous deux, avec l'heure de la modification.",
+  "pollKindSingle": "Sondage · un seul choix",
+  "pollKindMultiple": "Sondage · plusieurs choix",
+  "pollVotes": "{count, plural, =0{Aucun vote} =1{1 vote} other{{count} votes}}",
+  "@pollVotes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pollSeeVotes": "Voir les votes",
+  "pollVoterUnknown": "Un membre",
   "searchScopeAll": "Tout",
   "searchScopeChats": "Discussions",
   "searchScopeMessages": "Messages",
