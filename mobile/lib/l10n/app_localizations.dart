@@ -15817,6 +15817,1716 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'hier, {time}'**
   String honamPYesterdayAt(String time);
+
+  /// No description provided for @courierAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get courierAccept;
+
+  /// No description provided for @courierAcceptConditions.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’accepte les conditions coursier'**
+  String get courierAcceptConditions;
+
+  /// No description provided for @courierAccident.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accident ou panne'**
+  String get courierAccident;
+
+  /// No description provided for @courierAccidentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’officine est prévenue et la course est réattribuée'**
+  String get courierAccidentBody;
+
+  /// No description provided for @courierAddZone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un quartier'**
+  String get courierAddZone;
+
+  /// No description provided for @courierAddressNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse introuvable'**
+  String get courierAddressNotFound;
+
+  /// No description provided for @courierAddressNotFoundBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est prévenu(e) et peut te guider par message'**
+  String courierAddressNotFoundBody(String name);
+
+  /// No description provided for @courierAfterHandover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après la remise : la course est décomptée de ton essai ou de ton pack, et {pharmacy} te paie {amount} sur ton wallet. Tu confirmes la réception dans le mode coursier.'**
+  String courierAfterHandover(String pharmacy, String amount);
+
+  /// No description provided for @courierAfternoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après-midi'**
+  String get courierAfternoon;
+
+  /// No description provided for @courierAlreadyValidated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà validé'**
+  String get courierAlreadyValidated;
+
+  /// No description provided for @courierAnswerIn30.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponds dans 30 secondes'**
+  String get courierAnswerIn30;
+
+  /// No description provided for @courierApplicationOpen30.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta candidature reste ouverte 30 jours.'**
+  String get courierApplicationOpen30;
+
+  /// No description provided for @courierAskCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande le code à {name} : il s’affiche dans son application. Saisis-le quand tu lui remets le colis.'**
+  String courierAskCode(String name);
+
+  /// No description provided for @courierAtTheLatest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au plus tard {when}'**
+  String courierAtTheLatest(String when);
+
+  /// No description provided for @courierAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible'**
+  String get courierAvailable;
+
+  /// No description provided for @courierAvailableBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les courses t’arrivent, même quand tu discutes'**
+  String get courierAvailableBody;
+
+  /// No description provided for @courierAwaitingPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée · paiement de l’officine en attente'**
+  String get courierAwaitingPayment;
+
+  /// No description provided for @courierBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'le verso'**
+  String get courierBack;
+
+  /// No description provided for @courierBackToPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à Pokou'**
+  String get courierBackToPokou;
+
+  /// No description provided for @courierBackWhereYouWere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu étais dans une autre section : tu y reviens après ta réponse.'**
+  String get courierBackWhereYouWere;
+
+  /// No description provided for @courierBecome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je deviens coursier'**
+  String get courierBecome;
+
+  /// No description provided for @courierBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'avant {when}'**
+  String courierBefore(String when);
+
+  /// No description provided for @courierBirthDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de naissance'**
+  String get courierBirthDate;
+
+  /// No description provided for @courierCallAgain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappeler {name}, numéro masqué'**
+  String courierCallAgain(String name);
+
+  /// No description provided for @courierCallPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler {name}'**
+  String courierCallPatient(String name);
+
+  /// No description provided for @courierCallRelayed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel relayé par Pokou, numéro masqué'**
+  String get courierCallRelayed;
+
+  /// No description provided for @courierChooseDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date'**
+  String get courierChooseDate;
+
+  /// No description provided for @courierChoosePack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir {pack}'**
+  String courierChoosePack(String pack);
+
+  /// No description provided for @courierChooseYourPack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis ton pack pour continuer à livrer'**
+  String get courierChooseYourPack;
+
+  /// No description provided for @courierCodeRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code est refusé'**
+  String get courierCodeRefused;
+
+  /// No description provided for @courierCodeRefusedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie les chiffres avec {name}, puis réessaie'**
+  String courierCodeRefusedBody(String name);
+
+  /// No description provided for @courierContactSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacter le support'**
+  String get courierContactSupport;
+
+  /// No description provided for @courierContest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contestation'**
+  String get courierContest;
+
+  /// No description provided for @courierContestDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contester ce défaut'**
+  String get courierContestDefault;
+
+  /// No description provided for @courierContestHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui s’est passé, en quelques mots'**
+  String get courierContestHint;
+
+  /// No description provided for @courierContestHow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si tu contestes, le support compare l’heure de retrait, ta position pendant la course et les appels passés par Pokou.'**
+  String get courierContestHow;
+
+  /// No description provided for @courierContestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contestation envoyée au support'**
+  String get courierContestSent;
+
+  /// No description provided for @courierContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get courierContinue;
+
+  /// No description provided for @courierCopyLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier mon lien'**
+  String get courierCopyLink;
+
+  /// No description provided for @courierCouldNotVerify.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le support n’a pas pu vérifier ton identité.'**
+  String get courierCouldNotVerify;
+
+  /// No description provided for @courierCountOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} sur {total}'**
+  String courierCountOf(int count, int total);
+
+  /// No description provided for @courierDefaultLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} a signalé un défaut sur la course du {when}.'**
+  String courierDefaultLead(String pharmacy, String when);
+
+  /// No description provided for @courierDefaultTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défaut signalé'**
+  String get courierDefaultTitle;
+
+  /// No description provided for @courierDefaults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défauts'**
+  String get courierDefaults;
+
+  /// No description provided for @courierDefaultsInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défauts en cours'**
+  String get courierDefaultsInProgress;
+
+  /// No description provided for @courierDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis remis : la course est validée.'**
+  String get courierDelivered;
+
+  /// No description provided for @courierDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison'**
+  String get courierDelivery;
+
+  /// No description provided for @courierDeliveryAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison : {address}'**
+  String courierDeliveryAt(String address);
+
+  /// No description provided for @courierDeliveryTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison à {name}'**
+  String courierDeliveryTo(String name);
+
+  /// No description provided for @courierDocCni.
+  ///
+  /// In fr, this message translates to:
+  /// **'CNI'**
+  String get courierDocCni;
+
+  /// No description provided for @courierDocPassport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passeport'**
+  String get courierDocPassport;
+
+  /// No description provided for @courierDocVoter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte d’électeur'**
+  String get courierDocVoter;
+
+  /// No description provided for @courierDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get courierDone;
+
+  /// No description provided for @courierEarned.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} gagnés'**
+  String courierEarned(String amount);
+
+  /// No description provided for @courierEarningsNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque officine te paie la course sur ton wallet {wallet}. Un paiement en retard se signale depuis la course.'**
+  String courierEarningsNote(String wallet);
+
+  /// No description provided for @courierEarningsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes courses et gains'**
+  String get courierEarningsTitle;
+
+  /// No description provided for @courierEnterCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir le code'**
+  String get courierEnterCode;
+
+  /// No description provided for @courierEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soir'**
+  String get courierEvening;
+
+  /// No description provided for @courierFirstDeliveryDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Première livraison faite'**
+  String get courierFirstDeliveryDone;
+
+  /// No description provided for @courierFiveAttempts.
+  ///
+  /// In fr, this message translates to:
+  /// **'5 essais au maximum. Chaque essai est enregistré.'**
+  String get courierFiveAttempts;
+
+  /// No description provided for @courierFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gratuit'**
+  String get courierFree;
+
+  /// No description provided for @courierFri.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ven.'**
+  String get courierFri;
+
+  /// No description provided for @courierFriendActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier actif'**
+  String get courierFriendActive;
+
+  /// No description provided for @courierFriendApplying.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscription en cours'**
+  String get courierFriendApplying;
+
+  /// No description provided for @courierFriendDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non retenu'**
+  String get courierFriendDeclined;
+
+  /// No description provided for @courierFriendMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Salut ! Je livre pour Honam avec Pokou : payé à chaque course, près de chez toi, quand tu veux. Rejoins-moi avec mon code {code}.'**
+  String courierFriendMessage(String code);
+
+  /// No description provided for @courierFriendNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu reçois des courses offertes quand ton ami termine sa première livraison. L’invitation est réservée aux 18 ans et plus, dans une ville où Honam est ouvert.'**
+  String get courierFriendNotice;
+
+  /// No description provided for @courierFromPerMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC par mois'**
+  String courierFromPerMonth(String amount);
+
+  /// No description provided for @courierFront.
+  ///
+  /// In fr, this message translates to:
+  /// **'le recto'**
+  String get courierFront;
+
+  /// No description provided for @courierGains.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains'**
+  String get courierGains;
+
+  /// No description provided for @courierGiftNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu reçois {count} courses offertes quand ton filleul termine sa première livraison.'**
+  String courierGiftNotice(int count);
+
+  /// No description provided for @courierGoOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer indisponible'**
+  String get courierGoOffline;
+
+  /// No description provided for @courierGoOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer disponible'**
+  String get courierGoOnline;
+
+  /// No description provided for @courierGoToMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer en mode coursier'**
+  String get courierGoToMode;
+
+  /// No description provided for @courierHandoverCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de remise'**
+  String get courierHandoverCode;
+
+  /// No description provided for @courierHonamOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam ouvert'**
+  String get courierHonamOpen;
+
+  /// No description provided for @courierHowDoYouDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment livres-tu ?'**
+  String get courierHowDoYouDeliver;
+
+  /// No description provided for @courierHowMuch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien je peux gagner ?'**
+  String get courierHowMuch;
+
+  /// No description provided for @courierHt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} HT'**
+  String courierHt(String amount);
+
+  /// No description provided for @courierIdDocument.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pièce d’identité'**
+  String get courierIdDocument;
+
+  /// No description provided for @courierIdNameNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom de ta pièce doit être celui du titulaire de ton wallet.'**
+  String get courierIdNameNotice;
+
+  /// No description provided for @courierIdPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta pièce sert seulement à vérifier ton identité. Elle est chiffrée et supprimée 30 jours après la décision.'**
+  String get courierIdPrivacy;
+
+  /// No description provided for @courierInviteMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre pour Honam avec moi : payé à chaque course, près de chez toi. Mon code : {code} — {link}'**
+  String courierInviteMessage(String code, String link);
+
+  /// No description provided for @courierInviteSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} courses offertes après sa première livraison'**
+  String courierInviteSubtitle(int count);
+
+  /// No description provided for @courierInviteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invite un coursier'**
+  String get courierInviteTitle;
+
+  /// No description provided for @courierInvitedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invité par {name}'**
+  String courierInvitedBy(String name);
+
+  /// No description provided for @courierInviterCodeApplied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier vérifié · code {code} appliqué'**
+  String courierInviterCodeApplied(String code);
+
+  /// No description provided for @courierInviterGets.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} t’a recommandé : il reçoit {count} courses offertes quand tu termines ta première livraison.'**
+  String courierInviterGets(String name, int count);
+
+  /// No description provided for @courierItemBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verso de la pièce illisible'**
+  String get courierItemBack;
+
+  /// No description provided for @courierItemFront.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recto de la pièce illisible'**
+  String get courierItemFront;
+
+  /// No description provided for @courierItemSelfie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Selfie'**
+  String get courierItemSelfie;
+
+  /// No description provided for @courierItemWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wallet'**
+  String get courierItemWallet;
+
+  /// No description provided for @courierItinerary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Itinéraire'**
+  String get courierItinerary;
+
+  /// No description provided for @courierKmAfterPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'{km} km après le retrait'**
+  String courierKmAfterPickup(String km);
+
+  /// No description provided for @courierKmFromYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'à {km} km de toi'**
+  String courierKmFromYou(String km);
+
+  /// No description provided for @courierLaunchCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pendant le lancement : sans adhésion ni pack, puis Win Pokou'**
+  String get courierLaunchCaption;
+
+  /// No description provided for @courierLaunchLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si Honam vient d’ouvrir dans ta ville'**
+  String get courierLaunchLine;
+
+  /// No description provided for @courierLetGo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laisser passer cette course'**
+  String get courierLetGo;
+
+  /// No description provided for @courierMembershipAndPack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adhésion et pack {pack}, TTC'**
+  String courierMembershipAndPack(String pack);
+
+  /// No description provided for @courierMembershipAndPackOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adhésion et pack de {month}'**
+  String courierMembershipAndPackOf(String month);
+
+  /// No description provided for @courierMembershipAndPackTtc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adhésion et pack : {amount} TTC par mois'**
+  String courierMembershipAndPackTtc(String amount);
+
+  /// No description provided for @courierMembershipFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’adhésion se paie d’abord ; le pack se choisit ensuite, dans le même écran.'**
+  String get courierMembershipFirst;
+
+  /// No description provided for @courierMembershipLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adhésion Win Pokou'**
+  String get courierMembershipLine;
+
+  /// No description provided for @courierMinutesOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min sur {total}'**
+  String courierMinutesOf(int minutes, int total);
+
+  /// No description provided for @courierMon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lun.'**
+  String get courierMon;
+
+  /// No description provided for @courierMonthEarnings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains du mois'**
+  String get courierMonthEarnings;
+
+  /// No description provided for @courierMoreRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses en plus ce mois-ci'**
+  String get courierMoreRides;
+
+  /// No description provided for @courierMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Matin'**
+  String get courierMorning;
+
+  /// No description provided for @courierNeedAge.
+  ///
+  /// In fr, this message translates to:
+  /// **'18 ans ou plus, une pièce d’identité'**
+  String get courierNeedAge;
+
+  /// No description provided for @courierNeedPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un smartphone et un wallet mobile money'**
+  String get courierNeedPhone;
+
+  /// No description provided for @courierNeedVehicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une moto, un vélo, ou tes pieds pour les courses proches'**
+  String get courierNeedVehicle;
+
+  /// No description provided for @courierNetForYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Net pour toi'**
+  String get courierNetForYou;
+
+  /// No description provided for @courierNewRide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle course'**
+  String get courierNewRide;
+
+  /// No description provided for @courierNewRideMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle course · mode coursier'**
+  String get courierNewRideMode;
+
+  /// No description provided for @courierNewRideNearby.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle course près de toi'**
+  String get courierNewRideNearby;
+
+  /// No description provided for @courierNoAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} ne répond pas'**
+  String courierNoAnswer(String name);
+
+  /// No description provided for @courierNoAnswerBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou l’appelle et le prévient. Attends 10 minutes sur place.'**
+  String get courierNoAnswerBody;
+
+  /// No description provided for @courierNoAnswerReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans réponse à 10 min, tu rapportes le colis fermé à {pharmacy}. Ce n’est pas un défaut pour toi.'**
+  String courierNoAnswerReturn(String pharmacy);
+
+  /// No description provided for @courierNoReferrals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne encore : partage ton lien.'**
+  String get courierNoReferrals;
+
+  /// No description provided for @courierNoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Midi'**
+  String get courierNoon;
+
+  /// No description provided for @courierNotNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas maintenant'**
+  String get courierNotNow;
+
+  /// No description provided for @courierNotYetBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune officine de {city} n’a encore rejoint Honam : il n’y aurait pas de courses pour toi. On te prévient dès qu’elles arrivent.'**
+  String courierNotYetBody(String city);
+
+  /// No description provided for @courierNotYetIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam n’est pas encore à {city}'**
+  String courierNotYetIn(String city);
+
+  /// No description provided for @courierNotifyMe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Me prévenir'**
+  String get courierNotifyMe;
+
+  /// No description provided for @courierOfferCityOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'{city} · Honam est ouvert'**
+  String courierOfferCityOpen(String city);
+
+  /// No description provided for @courierOfferTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre pour Honam'**
+  String get courierOfferTitle;
+
+  /// No description provided for @courierOriginalToReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Original à rapporter'**
+  String get courierOriginalToReturn;
+
+  /// No description provided for @courierPackDifference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Différence {from} → {to}'**
+  String courierPackDifference(String from, String to);
+
+  /// No description provided for @courierPackExhausted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton pack {pack} est épuisé'**
+  String courierPackExhausted(String pack);
+
+  /// No description provided for @courierPackExhaustedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette course te rapporte {amount}. Passe à {pack} en payant seulement la différence et accepte-la.'**
+  String courierPackExhaustedBody(String amount, String pack);
+
+  /// No description provided for @courierPackExhaustedNoNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as le plus grand pack : attends le mois prochain ou laisse passer cette course.'**
+  String get courierPackExhaustedNoNext;
+
+  /// No description provided for @courierPackForYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le pack qui te convient'**
+  String get courierPackForYou;
+
+  /// No description provided for @courierPackLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pack} : {left} courses restantes sur {total}'**
+  String courierPackLeft(String pack, int left, int total);
+
+  /// No description provided for @courierPackLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pack {pack}'**
+  String courierPackLine(String pack);
+
+  /// No description provided for @courierPackRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pack} · {count} courses'**
+  String courierPackRides(String pack, int count);
+
+  /// No description provided for @courierPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée'**
+  String get courierPaid;
+
+  /// No description provided for @courierPaidByPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'versés par l’officine sur ton wallet, quand tu veux, près de chez toi'**
+  String get courierPaidByPharmacy;
+
+  /// No description provided for @courierPaidByPharmacyShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'payés par l’officine sur ton wallet'**
+  String get courierPaidByPharmacyShort;
+
+  /// No description provided for @courierPaidOnYourWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée par l’officine sur ton wallet.'**
+  String get courierPaidOnYourWallet;
+
+  /// No description provided for @courierPaidRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{aucune course payée} =1{1 course payée} other{{count} courses payées}}'**
+  String courierPaidRides(int count);
+
+  /// No description provided for @courierPayByCashPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} par CashPay'**
+  String courierPayByCashPay(String amount);
+
+  /// No description provided for @courierPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get courierPending;
+
+  /// No description provided for @courierPeopleWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'personnes attendent Honam à {city}, coursiers et patients'**
+  String courierPeopleWaiting(String city);
+
+  /// No description provided for @courierPerRide.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} par course'**
+  String courierPerRide(String amount);
+
+  /// No description provided for @courierPharmacyWrote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qu’a écrit l’officine'**
+  String get courierPharmacyWrote;
+
+  /// No description provided for @courierPickedUpAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis retiré {when}'**
+  String courierPickedUpAt(String when);
+
+  /// No description provided for @courierPickupAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait : {pharmacy}'**
+  String courierPickupAt(String pharmacy);
+
+  /// No description provided for @courierPlusRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'+{count} courses'**
+  String courierPlusRides(int count);
+
+  /// No description provided for @courierPositionShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta position est partagée avec {name} et l’officine jusqu’à la remise.'**
+  String courierPositionShared(String name);
+
+  /// No description provided for @courierProblem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un problème ?'**
+  String get courierProblem;
+
+  /// No description provided for @courierProblemDuringRide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un problème pendant la course ?'**
+  String get courierProblemDuringRide;
+
+  /// No description provided for @courierProposeToFriend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer à un ami'**
+  String get courierProposeToFriend;
+
+  /// No description provided for @courierProposedFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposée d’abord à toi : {pharmacy} t’a invité'**
+  String courierProposedFirst(String pharmacy);
+
+  /// No description provided for @courierQueenUnlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloqué : aucun défaut le mois dernier'**
+  String get courierQueenUnlocked;
+
+  /// No description provided for @courierQuestionOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Question {index} sur {total}'**
+  String courierQuestionOf(int index, int total);
+
+  /// No description provided for @courierQuiz1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le patient veut te payer la course en espèces. Que fais-tu ?'**
+  String get courierQuiz1;
+
+  /// No description provided for @courierQuiz1Right.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je refuse : l’officine me paie'**
+  String get courierQuiz1Right;
+
+  /// No description provided for @courierQuiz1Wrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’accepte, c’est plus simple'**
+  String get courierQuiz1Wrong;
+
+  /// No description provided for @courierQuiz2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le patient te demande d’ouvrir le colis. Que fais-tu ?'**
+  String get courierQuiz2;
+
+  /// No description provided for @courierQuiz2Right.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le colis reste fermé : il l’ouvre après la remise'**
+  String get courierQuiz2Right;
+
+  /// No description provided for @courierQuiz2Wrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je l’ouvre devant lui'**
+  String get courierQuiz2Wrong;
+
+  /// No description provided for @courierQuiz3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le patient ne retrouve pas son code. Que fais-tu ?'**
+  String get courierQuiz3;
+
+  /// No description provided for @courierQuiz3Right.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne remets rien sans le code : il le retrouve dans son application'**
+  String get courierQuiz3Right;
+
+  /// No description provided for @courierQuiz3Wrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je remets le colis quand même'**
+  String get courierQuiz3Wrong;
+
+  /// No description provided for @courierQuizPassed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quiz réussi : tu connais les règles d’or.'**
+  String get courierQuizPassed;
+
+  /// No description provided for @courierQuizRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce n’est pas la bonne réponse : relis les règles et réessaie.'**
+  String get courierQuizRetry;
+
+  /// No description provided for @courierRecommended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommandé'**
+  String get courierRecommended;
+
+  /// No description provided for @courierReminder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappel : le colis reste fermé, tu n’encaisses rien du patient, et c’est le patient qui te donne le code de remise.'**
+  String get courierReminder;
+
+  /// No description provided for @courierRequestReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander un réexamen'**
+  String get courierRequestReview;
+
+  /// No description provided for @courierResendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code'**
+  String get courierResendCode;
+
+  /// No description provided for @courierRetake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre : {item}'**
+  String courierRetake(String item);
+
+  /// No description provided for @courierReturnParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapporter le colis à l’officine'**
+  String get courierReturnParcel;
+
+  /// No description provided for @courierReviewNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu peux demander un réexamen au support. Pendant ce temps, tes discussions, Kory et tes commandes Honam restent accessibles.'**
+  String get courierReviewNotice;
+
+  /// No description provided for @courierReviewRequested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réexamen demandé'**
+  String get courierReviewRequested;
+
+  /// No description provided for @courierRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses'**
+  String get courierRides;
+
+  /// No description provided for @courierRidesAndDefaults.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rides} courses livrées · {defaults} défaut(s)'**
+  String courierRidesAndDefaults(int rides, int defaults);
+
+  /// No description provided for @courierRidesLeftOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{left} courses restantes sur {total}'**
+  String courierRidesLeftOf(int left, int total);
+
+  /// No description provided for @courierRidesPerMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} courses par mois'**
+  String courierRidesPerMonth(int count);
+
+  /// No description provided for @courierRule1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le colis reste fermé'**
+  String get courierRule1;
+
+  /// No description provided for @courierRule1Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu ne vois ni l’ordonnance ni les produits.'**
+  String get courierRule1Body;
+
+  /// No description provided for @courierRule2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu n’encaisses rien du patient'**
+  String get courierRule2;
+
+  /// No description provided for @courierRule2Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’officine te paie la course sur ton wallet.'**
+  String get courierRule2Body;
+
+  /// No description provided for @courierRule3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code vient du patient'**
+  String get courierRule3;
+
+  /// No description provided for @courierRule3Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il s’affiche dans son application, à la remise.'**
+  String get courierRule3Body;
+
+  /// No description provided for @courierRule4.
+  ///
+  /// In fr, this message translates to:
+  /// **'3 défauts, compte suspendu'**
+  String get courierRule4;
+
+  /// No description provided for @courierRule4Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec un recours possible auprès du support.'**
+  String get courierRule4Body;
+
+  /// No description provided for @courierRulesAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles d’or acceptées'**
+  String get courierRulesAccepted;
+
+  /// No description provided for @courierSat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sam.'**
+  String get courierSat;
+
+  /// No description provided for @courierSeeAllPacks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tous les packs'**
+  String get courierSeeAllPacks;
+
+  /// No description provided for @courierSeeDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir le défaut'**
+  String get courierSeeDefault;
+
+  /// No description provided for @courierSelfieDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Selfie pris'**
+  String get courierSelfieDone;
+
+  /// No description provided for @courierSendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le code par SMS'**
+  String get courierSendCode;
+
+  /// No description provided for @courierSendInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer l’invitation'**
+  String get courierSendInvite;
+
+  /// No description provided for @courierSentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le support vérifie ton identité sous 48 h. Tu reçois une notification dès que ton mode coursier est activé.'**
+  String get courierSentBody;
+
+  /// No description provided for @courierSentStep1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscription envoyée'**
+  String get courierSentStep1;
+
+  /// No description provided for @courierSentStep2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification de l’identité'**
+  String get courierSentStep2;
+
+  /// No description provided for @courierSentStep3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode coursier activé'**
+  String get courierSentStep3;
+
+  /// No description provided for @courierSentStep3Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu passes « Disponible » quand tu veux'**
+  String get courierSentStep3Body;
+
+  /// No description provided for @courierShareLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager mon lien'**
+  String get courierShareLink;
+
+  /// No description provided for @courierShoot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier {side}'**
+  String courierShoot(String side);
+
+  /// No description provided for @courierShotDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{side} · pris'**
+  String courierShotDone(String side);
+
+  /// No description provided for @courierShowOrShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'À montrer, ou à partager en lien'**
+  String get courierShowOrShare;
+
+  /// No description provided for @courierSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get courierSkip;
+
+  /// No description provided for @courierSlots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créneaux'**
+  String get courierSlots;
+
+  /// No description provided for @courierSmsCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code reçu par SMS'**
+  String get courierSmsCode;
+
+  /// No description provided for @courierStepBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de commencer'**
+  String get courierStepBefore;
+
+  /// No description provided for @courierStepIdentity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton identité'**
+  String get courierStepIdentity;
+
+  /// No description provided for @courierStepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devenir coursier · étape {step} sur {total}'**
+  String courierStepOf(int step, int total);
+
+  /// No description provided for @courierStepRules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les règles d’or'**
+  String get courierStepRules;
+
+  /// No description provided for @courierStepSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Candidature envoyée'**
+  String get courierStepSent;
+
+  /// No description provided for @courierStepWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où recevoir tes gains'**
+  String get courierStepWallet;
+
+  /// No description provided for @courierStepZones.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes zones et tes créneaux'**
+  String get courierStepZones;
+
+  /// No description provided for @courierSun.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dim.'**
+  String get courierSun;
+
+  /// No description provided for @courierSuspendedLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as reçu {count} défauts confirmés. Tu ne reçois plus de courses.'**
+  String courierSuspendedLead(int count);
+
+  /// No description provided for @courierSuspendedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte coursier suspendu'**
+  String get courierSuspendedTitle;
+
+  /// No description provided for @courierSuspensionScope.
+  ///
+  /// In fr, this message translates to:
+  /// **'La suspension ne touche que le mode coursier, pas ton compte Pokou.'**
+  String get courierSuspensionScope;
+
+  /// No description provided for @courierSwitchTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer à {pack} · {amount}'**
+  String courierSwitchTo(String pack, String amount);
+
+  /// No description provided for @courierTakeSelfie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre un selfie'**
+  String get courierTakeSelfie;
+
+  /// No description provided for @courierThePatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'le patient'**
+  String get courierThePatient;
+
+  /// No description provided for @courierThenWinPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ensuite, Win Pokou'**
+  String get courierThenWinPokou;
+
+  /// No description provided for @courierThenWinPokouCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus un pack de courses, au choix'**
+  String get courierThenWinPokouCaption;
+
+  /// No description provided for @courierThirdDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au 3e défaut confirmé, ton compte coursier est suspendu.'**
+  String get courierThirdDefault;
+
+  /// No description provided for @courierThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mois-ci avec Pokou'**
+  String get courierThisMonth;
+
+  /// No description provided for @courierThu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeu.'**
+  String get courierThu;
+
+  /// No description provided for @courierToComplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Candidature à compléter'**
+  String get courierToComplete;
+
+  /// No description provided for @courierToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer'**
+  String get courierToPay;
+
+  /// No description provided for @courierToRedo.
+  ///
+  /// In fr, this message translates to:
+  /// **'À reprendre'**
+  String get courierToRedo;
+
+  /// No description provided for @courierTooYoung.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mode coursier n’est pas accessible avant 18 ans.'**
+  String get courierTooYoung;
+
+  /// No description provided for @courierTransportBikeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vélo'**
+  String get courierTransportBikeTitle;
+
+  /// No description provided for @courierTransportMotoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto'**
+  String get courierTransportMotoTitle;
+
+  /// No description provided for @courierTransportNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les courses proposées tiennent compte de ton moyen de transport. Le mode coursier n’est pas accessible avant 18 ans.'**
+  String get courierTransportNote;
+
+  /// No description provided for @courierTransportWalkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À pied'**
+  String get courierTransportWalkTitle;
+
+  /// No description provided for @courierTrial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essai'**
+  String get courierTrial;
+
+  /// No description provided for @courierTrialCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès la validation, sur un mois'**
+  String get courierTrialCaption;
+
+  /// No description provided for @courierTrialEndTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton essai est terminé'**
+  String get courierTrialEndTitle;
+
+  /// No description provided for @courierTrialLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essai : {left} courses restantes sur {total}'**
+  String courierTrialLeft(int left, int total);
+
+  /// No description provided for @courierTrialLeftAfter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il te restera {count} courses d’essai.'**
+  String courierTrialLeftAfter(int count);
+
+  /// No description provided for @courierTrialOffered.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} courses d’essai offertes'**
+  String courierTrialOffered(int count);
+
+  /// No description provided for @courierTrialOfferedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans adhésion ni pack, sur un mois. Tes premières courses portent sur des commandes de moins de 15 000 FCFA.'**
+  String get courierTrialOfferedBody;
+
+  /// No description provided for @courierTrialRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} courses offertes'**
+  String courierTrialRides(int count);
+
+  /// No description provided for @courierTrialWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès l’activation, {count} courses d’essai t’attendent, sans adhésion ni pack.'**
+  String courierTrialWaiting(int count);
+
+  /// No description provided for @courierTtc.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC'**
+  String courierTtc(String amount);
+
+  /// No description provided for @courierTue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mar.'**
+  String get courierTue;
+
+  /// No description provided for @courierUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible'**
+  String get courierUnavailable;
+
+  /// No description provided for @courierUnavailableBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu ne reçois pas de courses. Passe « Disponible » quand tu veux livrer.'**
+  String get courierUnavailableBody;
+
+  /// No description provided for @courierUnderstood.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai compris'**
+  String get courierUnderstood;
+
+  /// No description provided for @courierUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'jusqu’au {when}'**
+  String courierUntil(String when);
+
+  /// No description provided for @courierUpToKm.
+  ///
+  /// In fr, this message translates to:
+  /// **'jusqu’à {km} km'**
+  String courierUpToKm(String km);
+
+  /// No description provided for @courierValidateHandover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider la remise'**
+  String get courierValidateHandover;
+
+  /// No description provided for @courierWaitingOnSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attente sur place'**
+  String get courierWaitingOnSite;
+
+  /// No description provided for @courierWaitlistHelps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces inscriptions aident Pokou à choisir les prochaines villes.'**
+  String get courierWaitlistHelps;
+
+  /// No description provided for @courierWaitlistJoined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu seras prévenu'**
+  String get courierWaitlistJoined;
+
+  /// No description provided for @courierWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wallet'**
+  String get courierWallet;
+
+  /// No description provided for @courierWalletLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wallet {wallet}'**
+  String courierWalletLabel(String wallet);
+
+  /// No description provided for @courierWalletNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les officines te paient directement sur ce wallet après chaque livraison. Pokou ne touche jamais cet argent.'**
+  String get courierWalletNotice;
+
+  /// No description provided for @courierWalletNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro du wallet'**
+  String get courierWalletNumber;
+
+  /// No description provided for @courierWalletVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro vérifié par SMS.'**
+  String get courierWalletVerified;
+
+  /// No description provided for @courierWed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mer.'**
+  String get courierWed;
+
+  /// No description provided for @courierWelcomeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton identité est vérifiée, {name}. Ton mode coursier est activé.'**
+  String courierWelcomeBody(String name);
+
+  /// No description provided for @courierWelcomeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bienvenue chez les coursiers'**
+  String get courierWelcomeTitle;
+
+  /// No description provided for @courierWhatItCosts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que ça coûte'**
+  String get courierWhatItCosts;
+
+  /// No description provided for @courierWhenAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand es-tu souvent disponible ?'**
+  String get courierWhenAvailable;
+
+  /// No description provided for @courierWriteToPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {name}'**
+  String courierWriteToPatient(String name);
+
+  /// No description provided for @courierYouEarn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu gagnes'**
+  String get courierYouEarn;
+
+  /// No description provided for @courierYouNeed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il te faut'**
+  String get courierYouNeed;
+
+  /// No description provided for @courierYourCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code'**
+  String get courierYourCode;
+
+  /// No description provided for @courierYourCodeIs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code : {code}'**
+  String courierYourCodeIs(String code);
+
+  /// No description provided for @courierYourMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton message, modifiable'**
+  String get courierYourMessage;
+
+  /// No description provided for @courierYourReferrals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes filleuls'**
+  String get courierYourReferrals;
+
+  /// No description provided for @courierZones.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zones'**
+  String get courierZones;
+
+  /// No description provided for @courierZonesAndSlots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zones et créneaux'**
+  String get courierZonesAndSlots;
+
+  /// No description provided for @courierZonesNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces choix servent à te proposer des courses. Tu restes libre : seul le bouton « Disponible » compte.'**
+  String get courierZonesNotice;
+
+  /// No description provided for @courierZonesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quartiers où tu livres'**
+  String get courierZonesTitle;
+
+  /// No description provided for @courierRideReleased.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course est rendue à l’officine, qui la réattribue. Ce n’est pas un défaut.'**
+  String get courierRideReleased;
+
+  /// No description provided for @courierParcelReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis à rapporter fermé à l’officine. Ce n’est pas un défaut.'**
+  String get courierParcelReturned;
+
+  /// No description provided for @courierBecomeHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devenir coursier Honam'**
+  String get courierBecomeHonam;
+
+  /// No description provided for @courierOfferSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé à chaque course, près de chez toi'**
+  String get courierOfferSubtitle;
+
+  /// No description provided for @courierLaunchShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période de lancement · sans pack'**
+  String get courierLaunchShort;
+
+  /// No description provided for @courierTrialRidesLeftShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 course d’essai restante} other{{count} courses d’essai restantes}}'**
+  String courierTrialRidesLeftShort(int count);
+
+  /// No description provided for @courierBannerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gagne de l’argent en livrant près de chez toi'**
+  String get courierBannerTitle;
+
+  /// No description provided for @courierDiscover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découvrir'**
+  String get courierDiscover;
+
+  /// No description provided for @courierAfterDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée par {who}. Toi aussi, tu peux livrer pour Honam quand tu veux.'**
+  String courierAfterDelivery(String who);
+
+  /// No description provided for @courierLearnMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get courierLearnMore;
+
+  /// No description provided for @courierDontPropose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne plus me proposer'**
+  String get courierDontPropose;
+
+  /// No description provided for @courierByAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} {when}'**
+  String courierByAt(String name, String when);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

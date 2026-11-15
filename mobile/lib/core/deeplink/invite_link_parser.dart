@@ -10,6 +10,9 @@ enum DeepLinkInviteKind {
   koryPot,
   koryJoin,
   honamOrder,
+
+  /// Invitation à devenir coursier Honam : /honam/coursier/{code}.
+  honamCourier,
 }
 
 /// Le domaine des liens PARTAGÉS (`/g/`, `/k/`, `/c/`…). Réglable au build
@@ -85,6 +88,14 @@ PendingInvite? parseInviteLink(Uri uri) {
     final code = segments[2].trim();
     if (code.isEmpty) return null;
     return PendingInvite(kind: DeepLinkInviteKind.koryJoin, code: code);
+  }
+  // Invitation d'un coursier à un ami : /honam/coursier/{code}.
+  if (segments.length == 3 &&
+      segments[0] == 'honam' &&
+      segments[1] == 'coursier') {
+    final code = segments[2].trim();
+    if (code.isEmpty) return null;
+    return PendingInvite(kind: DeepLinkInviteKind.honamCourier, code: code);
   }
   final isKoryPot =
       (segments.length == 2 && segments[0] == 'kory') ||

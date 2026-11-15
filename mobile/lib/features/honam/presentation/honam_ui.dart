@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -396,6 +397,151 @@ Widget honamOrderPill(L l, HonamOrder order) {
     label,
     background: color.withValues(alpha: AppColors.isDark ? 0.22 : 0.12),
     ink: AppColors.isDark ? AppColors.textPrimary : color,
+  );
+}
+
+/// Un code en cases (code SMS du wallet, code de remise) : un champ
+/// invisible sous des cases qui montrent chaque chiffre.
+class HonamCodeBoxes extends StatefulWidget {
+  const HonamCodeBoxes({
+    super.key,
+    required this.controller,
+    this.length = 6,
+    this.onCompleted,
+    this.autofocus = false,
+  });
+
+  final TextEditingController controller;
+  final int length;
+  final ValueChanged<String>? onCompleted;
+  final bool autofocus;
+
+  @override
+  State<HonamCodeBoxes> createState() => _HonamCodeBoxesState();
+}
+
+class _HonamCodeBoxesState extends State<HonamCodeBoxes> {
+  final _focus = FocusNode();
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = widget.controller.text;
+    return GestureDetector(
+      onTap: () => _focus.requestFocus(),
+      child: Stack(
+        children: [
+          Opacity(
+            opacity: 0,
+            child: TextField(
+              controller: widget.controller,
+              focusNode: _focus,
+              autofocus: widget.autofocus,
+              keyboardType: TextInputType.number,
+              maxLength: widget.length,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                setState(() {});
+                if (value.length == widget.length) {
+                  widget.onCompleted?.call(value);
+                }
+              },
+            ),
+          ),
+          Row(
+            children: [
+              for (var i = 0; i < widget.length; i++) ...[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 0.85,
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          width: i < text.length ? 2 : 1,
+                          color: i < text.length
+                              ? AppColors.accentPrimaryDark
+                              : AppColors.border,
+                        ),
+                      ),
+                      child: Text(
+                        i < text.length ? text[i] : '',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// La barre d'un écran à étapes (« étape 2 sur 6 »).
+class HonamWizardBar extends StatelessWidget {
+  const HonamWizardBar({super.key, required this.step, required this.total});
+
+  final int step;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var i = 1; i <= total; i++) ...[
+        if (i > 1) const SizedBox(width: 5),
+        Expanded(
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: i <= step
+                  ? AppColors.accentPrimaryDark
+                  : AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
+}
+
+/// Une pastille ronde à icône, en tête d'un écran d'état (validé,
+/// attention, interdit).
+class HonamRoundIcon extends StatelessWidget {
+  const HonamRoundIcon({super.key, required this.icon, required this.color});
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: AlignmentDirectional.centerStart,
+    child: Container(
+      width: 52,
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: AppColors.isDark ? 0.24 : 0.14),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color),
+    ),
   );
 }
 

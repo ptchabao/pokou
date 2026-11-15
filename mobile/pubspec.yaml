@@ -134,6 +134,7 @@ dependencies:
   # Export daté du mode preuve à deux, produit SUR l'appareil : le serveur
   # n'a pas le texte des messages chiffrés (voir proof_export.dart).
   pdf: ^3.13.1
+  barcode: ^2.2.9          # QR du lien de parrainage coursier (déjà tiré par pdf)
   google_sign_in: ^6.2.2
   flutter_svg: ^2.3.2
 

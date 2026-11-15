@@ -14,6 +14,7 @@ import '../../features/communities/presentation/community_controller.dart';
 import '../../features/communities/presentation/community_detail_screen.dart';
 import '../../features/groups/presentation/group_controller.dart';
 import '../../features/groups/presentation/group_conversation_screen.dart';
+import '../../features/honam/presentation/courier_join_screen.dart';
 import '../../features/honam/presentation/honam_order_screen.dart';
 import '../../features/kory/presentation/kory_controller.dart';
 import '../../features/kory/presentation/kory_pot_screen.dart';
@@ -121,6 +122,14 @@ class DeepLinkService {
         if (orderId == null) return;
         rootNavigatorKey.currentState?.push(
           MaterialPageRoute(builder: (_) => HonamOrderScreen(orderId: orderId)),
+        );
+        return;
+      }
+      if (invite.kind == DeepLinkInviteKind.honamCourier) {
+        rootNavigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => CourierOfferScreen(referralCode: invite.code),
+          ),
         );
         return;
       }

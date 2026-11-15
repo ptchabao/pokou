@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../home/presentation/pokou_page_header.dart';
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 import '../data/honam_models.dart';
+import 'courier_join_screen.dart' show CourierOfferPrompt;
 import 'honam_controller.dart';
 import 'honam_order_screen.dart';
 import 'honam_orders_screen.dart';
@@ -83,6 +84,11 @@ class _HonamScreenState extends ConsumerState<HonamScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
               child: _SendHero(onSend: _openSend),
+            ),
+            // Maquette Coursiers 0 : le bandeau de l'offre coursier.
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: CourierOfferPrompt(),
             ),
             if (async.hasValue)
               for (final order in current)

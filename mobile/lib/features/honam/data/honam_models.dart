@@ -316,7 +316,66 @@ class CourierStatus {
     this.referralsCount = 0,
     this.referralGiftRides = 0,
     this.recommendedPack,
+    this.available = false,
+    this.vatRate = 0,
+    this.transport,
+    this.zonesList = const [],
+    this.days = const [],
+    this.moments = const [],
+    this.walletPhone,
+    this.walletVerified = false,
+    this.incompleteItem,
+    this.incompleteReason,
+    this.appliedAt,
+    this.validatedAt,
+    this.welcomed = false,
+    this.trialRides = 5,
+    this.trialEndsAt,
+    this.packUntil,
+    this.packRides,
+    this.defaultsCount = 0,
+    this.maxDefaults = 3,
+    this.reviewRequested = false,
+    this.invitedByPharmacy,
+    this.city,
+    this.monthEarnings = 0,
+    this.monthPaidRides = 0,
+    this.originalsToReturn = const [],
+    this.unacknowledgedDefault,
   });
+
+  /// Disponible : il reçoit les courses (maquettes Coursiers 8, 26, 27).
+  final bool available;
+  final double vatRate;
+  final String? transport;
+  final List<String> zonesList;
+  final List<String> days;
+  final List<String> moments;
+  final String? walletPhone;
+  final bool walletVerified;
+
+  /// Candidature à compléter (maquette Coursiers 18).
+  final String? incompleteItem;
+  final String? incompleteReason;
+  final DateTime? appliedAt;
+  final DateTime? validatedAt;
+  final bool welcomed;
+  final int trialRides;
+  final DateTime? trialEndsAt;
+  final DateTime? packUntil;
+  final int? packRides;
+  final int defaultsCount;
+  final int maxDefaults;
+  final bool reviewRequested;
+  final String? invitedByPharmacy;
+  final String? city;
+
+  /// Les gains du mois en cours : le prix des courses livrées.
+  final int monthEarnings;
+  final int monthPaidRides;
+  final List<({int orderId, String? pharmacy, DateTime? dueAt})>
+  originalsToReturn;
+  final CourierDefault? unacknowledgedDefault;
 
   /// Parrainage (maquette Coursiers 15) : le code à partager, posé à la
   /// validation de la candidature.
@@ -354,7 +413,207 @@ class CourierStatus {
       for (final pack in (json['packs'] as List? ?? const []))
         CourierPack.fromJson(pack as Map<String, dynamic>),
     ],
+    available: json['available'] as bool? ?? false,
+    vatRate: (json['vat_rate'] as num?)?.toDouble() ?? 0,
+    transport: json['transport'] as String?,
+    zonesList: _strings(json['zones_list']),
+    days: _strings(json['days']),
+    moments: _strings(json['moments']),
+    walletPhone: json['wallet_phone'] as String?,
+    walletVerified: json['wallet_verified'] as bool? ?? false,
+    incompleteItem: json['incomplete_item'] as String?,
+    incompleteReason: json['incomplete_reason'] as String?,
+    appliedAt: tryParseServerTime(json['applied_at']),
+    validatedAt: tryParseServerTime(json['validated_at']),
+    welcomed: json['welcomed'] as bool? ?? false,
+    trialRides: json['trial_rides'] as int? ?? 5,
+    trialEndsAt: tryParseServerTime(json['trial_ends_at']),
+    packUntil: tryParseServerTime(json['pack_until']),
+    packRides: json['pack_rides'] as int?,
+    defaultsCount: json['defaults_count'] as int? ?? 0,
+    maxDefaults: json['max_defaults'] as int? ?? 3,
+    reviewRequested: json['review_requested_at'] != null,
+    invitedByPharmacy: json['invited_by_pharmacy'] as String?,
+    city: json['city'] as String?,
+    monthEarnings: (json['month'] as Map?)?['earnings'] as int? ?? 0,
+    monthPaidRides: (json['month'] as Map?)?['paid_rides'] as int? ?? 0,
+    originalsToReturn: [
+      for (final o in (json['originals_to_return'] as List? ?? const []))
+        (
+          orderId: (o as Map)['order_id'] as int,
+          pharmacy: o['pharmacy_name'] as String?,
+          dueAt: tryParseServerTime(o['due_at']),
+        ),
+    ],
+    unacknowledgedDefault: json['unacknowledged_default'] == null
+        ? null
+        : CourierDefault.fromJson(
+            json['unacknowledged_default'] as Map<String, dynamic>,
+          ),
   );
+}
+
+List<String> _strings(Object? raw) => [
+  for (final item in (raw as List? ?? const [])) item as String,
+];
+
+/// Un défaut de livraison signalé par une officine (maquettes Coursiers 20
+/// et 21) : daté, motivé, contestable 48 heures.
+class CourierDefault {
+  const CourierDefault({
+    required this.id,
+    required this.reason,
+    required this.status,
+    required this.createdAt,
+    this.pharmacyName,
+    this.orderDate,
+    this.contestUntil,
+    this.canContest = false,
+  });
+
+  final int id;
+  final String reason;
+  final String status; // CONFIRMED | CONTESTED | CANCELLED
+  final DateTime createdAt;
+  final String? pharmacyName;
+  final DateTime? orderDate;
+  final DateTime? contestUntil;
+  final bool canContest;
+
+  factory CourierDefault.fromJson(Map<String, dynamic> json) => CourierDefault(
+    id: json['id'] as int,
+    reason: json['reason'] as String? ?? '',
+    status: json['status'] as String? ?? 'CONFIRMED',
+    createdAt: tryParseServerTime(json['created_at']) ?? DateTime.now(),
+    pharmacyName: json['pharmacy_name'] as String?,
+    orderDate: tryParseServerTime(json['order_date']),
+    contestUntil: tryParseServerTime(json['contest_until']),
+    canContest: json['can_contest'] as bool? ?? false,
+  );
+}
+
+/// L'offre « Livre pour Honam » (maquettes Coursiers 1 et 25).
+class CourierOffer {
+  const CourierOffer({
+    required this.honamOpen,
+    required this.servedCities,
+    required this.trialRides,
+    required this.membershipPriceTtc,
+    required this.packs,
+    required this.giftRides,
+    this.deliveryPrice,
+    this.launchPeriod = false,
+    this.inviterName,
+    this.inviterCode,
+    this.transports = const {},
+    this.dismissed = false,
+  });
+
+  /// « Ne plus me proposer » : l'offre ne s'affiche plus d'elle-même.
+  final bool dismissed;
+
+  final bool honamOpen;
+  final List<String> servedCities;
+  final int? deliveryPrice;
+  final bool launchPeriod;
+  final int trialRides;
+  final int membershipPriceTtc;
+  final List<({String code, String label, int? rides, int priceTtc})> packs;
+  final int giftRides;
+  final String? inviterName;
+  final String? inviterCode;
+
+  /// La portée des courses par moyen de transport, en km.
+  final Map<String, double> transports;
+
+  factory CourierOffer.fromJson(Map<String, dynamic> json) => CourierOffer(
+    honamOpen: json['honam_open'] as bool? ?? false,
+    servedCities: _strings(json['served_cities']),
+    deliveryPrice: json['delivery_price'] as int?,
+    launchPeriod: json['launch_period'] as bool? ?? false,
+    trialRides: json['trial_rides'] as int? ?? 5,
+    membershipPriceTtc: json['membership_price_ttc'] as int? ?? 0,
+    giftRides: json['referral_gift_rides'] as int? ?? 0,
+    packs: [
+      for (final p in (json['packs'] as List? ?? const []))
+        (
+          code: (p as Map)['code'] as String,
+          label: p['label'] as String,
+          rides: p['rides'] as int?,
+          priceTtc: p['price_ttc'] as int? ?? 0,
+        ),
+    ],
+    inviterName: (json['inviter'] as Map?)?['name'] as String?,
+    inviterCode: (json['inviter'] as Map?)?['code'] as String?,
+    dismissed: json['dismissed'] as bool? ?? false,
+    transports: {
+      for (final e in ((json['transports'] as Map?) ?? const {}).entries)
+        e.key as String: (e.value as num).toDouble(),
+    },
+  );
+}
+
+/// « Mes courses et gains » (maquette Coursiers 22), pour un mois.
+class CourierEarnings {
+  const CourierEarnings({
+    required this.month,
+    required this.months,
+    required this.rides,
+    required this.earnings,
+    required this.defaults,
+    required this.maxDefaults,
+    required this.items,
+    this.currentPack,
+    this.ridesLeft = 0,
+    this.packRides,
+    this.walletPhone,
+  });
+
+  final String month;
+  final List<String> months;
+  final int rides;
+  final int earnings;
+  final int defaults;
+  final int maxDefaults;
+  final String? currentPack;
+  final int ridesLeft;
+  final int? packRides;
+  final String? walletPhone;
+  final List<
+    ({
+      String? pharmacy,
+      String address,
+      DateTime deliveredAt,
+      int amount,
+      bool paid,
+    })
+  >
+  items;
+
+  factory CourierEarnings.fromJson(Map<String, dynamic> json) =>
+      CourierEarnings(
+        month: json['month'] as String,
+        months: _strings(json['months']),
+        rides: json['rides'] as int? ?? 0,
+        earnings: json['earnings'] as int? ?? 0,
+        defaults: json['defaults'] as int? ?? 0,
+        maxDefaults: json['max_defaults'] as int? ?? 3,
+        currentPack: json['current_pack'] as String?,
+        ridesLeft: json['rides_left'] as int? ?? 0,
+        packRides: json['pack_rides'] as int?,
+        walletPhone: json['wallet_phone'] as String?,
+        items: [
+          for (final i in (json['items'] as List? ?? const []))
+            (
+              pharmacy: (i as Map)['pharmacy_name'] as String?,
+              address: i['delivery_address'] as String? ?? '',
+              deliveredAt:
+                  tryParseServerTime(i['delivered_at']) ?? DateTime.now(),
+              amount: i['amount'] as int? ?? 0,
+              paid: i['paid'] as bool? ?? false,
+            ),
+        ],
+      );
 }
 
 /// Où en est la course, vu du patient ou de l'officine. La même chose sert

@@ -5091,5 +5091,869 @@
         "type": "String"
       }
     }
+  },
+  "courierAccept": "Accepter",
+  "courierAcceptConditions": "J’accepte les conditions coursier",
+  "courierAccident": "Accident ou panne",
+  "courierAccidentBody": "L’officine est prévenue et la course est réattribuée",
+  "courierAddZone": "Ajouter un quartier",
+  "courierAddressNotFound": "Adresse introuvable",
+  "courierAddressNotFoundBody": "{name} est prévenu(e) et peut te guider par message",
+  "@courierAddressNotFoundBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierAfterHandover": "Après la remise : la course est décomptée de ton essai ou de ton pack, et {pharmacy} te paie {amount} sur ton wallet. Tu confirmes la réception dans le mode coursier.",
+  "@courierAfterHandover": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierAfternoon": "Après-midi",
+  "courierAlreadyValidated": "Déjà validé",
+  "courierAnswerIn30": "Réponds dans 30 secondes",
+  "courierApplicationOpen30": "Ta candidature reste ouverte 30 jours.",
+  "courierAskCode": "Demande le code à {name} : il s’affiche dans son application. Saisis-le quand tu lui remets le colis.",
+  "@courierAskCode": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierAtTheLatest": "Au plus tard {when}",
+  "@courierAtTheLatest": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "courierAvailable": "Disponible",
+  "courierAvailableBody": "Les courses t’arrivent, même quand tu discutes",
+  "courierAwaitingPayment": "Livrée · paiement de l’officine en attente",
+  "courierBack": "le verso",
+  "courierBackToPokou": "Retour à Pokou",
+  "courierBackWhereYouWere": "Tu étais dans une autre section : tu y reviens après ta réponse.",
+  "courierBecome": "Je deviens coursier",
+  "courierBefore": "avant {when}",
+  "@courierBefore": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "courierBirthDate": "Date de naissance",
+  "courierCallAgain": "Rappeler {name}, numéro masqué",
+  "@courierCallAgain": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierCallPatient": "Appeler {name}",
+  "@courierCallPatient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierCallRelayed": "Appel relayé par Pokou, numéro masqué",
+  "courierChooseDate": "Choisir la date",
+  "courierChoosePack": "Choisir {pack}",
+  "@courierChoosePack": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "courierChooseYourPack": "Choisis ton pack pour continuer à livrer",
+  "courierCodeRefused": "Le code est refusé",
+  "courierCodeRefusedBody": "Vérifie les chiffres avec {name}, puis réessaie",
+  "@courierCodeRefusedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierContactSupport": "Contacter le support",
+  "courierContest": "Contestation",
+  "courierContestDefault": "Contester ce défaut",
+  "courierContestHint": "Ce qui s’est passé, en quelques mots",
+  "courierContestHow": "Si tu contestes, le support compare l’heure de retrait, ta position pendant la course et les appels passés par Pokou.",
+  "courierContestSent": "Contestation envoyée au support",
+  "courierContinue": "Continuer",
+  "courierCopyLink": "Copier mon lien",
+  "courierCouldNotVerify": "Le support n’a pas pu vérifier ton identité.",
+  "courierCountOf": "{count} sur {total}",
+  "@courierCountOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierDefaultLead": "{pharmacy} a signalé un défaut sur la course du {when}.",
+  "@courierDefaultLead": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "courierDefaultTitle": "Défaut signalé",
+  "courierDefaults": "Défauts",
+  "courierDefaultsInProgress": "Défauts en cours",
+  "courierDelivered": "Colis remis : la course est validée.",
+  "courierDelivery": "Livraison",
+  "courierDeliveryAt": "Livraison : {address}",
+  "@courierDeliveryAt": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "courierDeliveryTo": "Livraison à {name}",
+  "@courierDeliveryTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierDocCni": "CNI",
+  "courierDocPassport": "Passeport",
+  "courierDocVoter": "Carte d’électeur",
+  "courierDone": "Terminé",
+  "courierEarned": "{amount} gagnés",
+  "@courierEarned": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierEarningsNote": "Chaque officine te paie la course sur ton wallet {wallet}. Un paiement en retard se signale depuis la course.",
+  "@courierEarningsNote": {
+    "placeholders": {
+      "wallet": {
+        "type": "String"
+      }
+    }
+  },
+  "courierEarningsTitle": "Mes courses et gains",
+  "courierEnterCode": "Saisir le code",
+  "courierEvening": "Soir",
+  "courierFirstDeliveryDone": "Première livraison faite",
+  "courierFiveAttempts": "5 essais au maximum. Chaque essai est enregistré.",
+  "courierFree": "Gratuit",
+  "courierFri": "Ven.",
+  "courierFriendActive": "Coursier actif",
+  "courierFriendApplying": "Inscription en cours",
+  "courierFriendDeclined": "Non retenu",
+  "courierFriendMessage": "Salut ! Je livre pour Honam avec Pokou : payé à chaque course, près de chez toi, quand tu veux. Rejoins-moi avec mon code {code}.",
+  "@courierFriendMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierFriendNotice": "Tu reçois des courses offertes quand ton ami termine sa première livraison. L’invitation est réservée aux 18 ans et plus, dans une ville où Honam est ouvert.",
+  "courierFromPerMonth": "{amount} TTC par mois",
+  "@courierFromPerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierFront": "le recto",
+  "courierGains": "Gains",
+  "courierGiftNotice": "Tu reçois {count} courses offertes quand ton filleul termine sa première livraison.",
+  "@courierGiftNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierGoOffline": "Passer indisponible",
+  "courierGoOnline": "Passer disponible",
+  "courierGoToMode": "Passer en mode coursier",
+  "courierHandoverCode": "Code de remise",
+  "courierHonamOpen": "Honam ouvert",
+  "courierHowDoYouDeliver": "Comment livres-tu ?",
+  "courierHowMuch": "Combien je peux gagner ?",
+  "courierHt": "{amount} HT",
+  "@courierHt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierIdDocument": "Pièce d’identité",
+  "courierIdNameNotice": "Le nom de ta pièce doit être celui du titulaire de ton wallet.",
+  "courierIdPrivacy": "Ta pièce sert seulement à vérifier ton identité. Elle est chiffrée et supprimée 30 jours après la décision.",
+  "courierInviteMessage": "Livre pour Honam avec moi : payé à chaque course, près de chez toi. Mon code : {code} — {link}",
+  "@courierInviteMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteSubtitle": "{count} courses offertes après sa première livraison",
+  "@courierInviteSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierInviteTitle": "Invite un coursier",
+  "courierInvitedBy": "Invité par {name}",
+  "@courierInvitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviterCodeApplied": "Coursier vérifié · code {code} appliqué",
+  "@courierInviterCodeApplied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviterGets": "{name} t’a recommandé : il reçoit {count} courses offertes quand tu termines ta première livraison.",
+  "@courierInviterGets": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierItemBack": "Verso de la pièce illisible",
+  "courierItemFront": "Recto de la pièce illisible",
+  "courierItemSelfie": "Selfie",
+  "courierItemWallet": "Wallet",
+  "courierItinerary": "Itinéraire",
+  "courierKmAfterPickup": "{km} km après le retrait",
+  "@courierKmAfterPickup": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "courierKmFromYou": "à {km} km de toi",
+  "@courierKmFromYou": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "courierLaunchCaption": "Pendant le lancement : sans adhésion ni pack, puis Win Pokou",
+  "courierLaunchLine": "Si Honam vient d’ouvrir dans ta ville",
+  "courierLetGo": "Laisser passer cette course",
+  "courierMembershipAndPack": "Adhésion et pack {pack}, TTC",
+  "@courierMembershipAndPack": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "courierMembershipAndPackOf": "Adhésion et pack de {month}",
+  "@courierMembershipAndPackOf": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "courierMembershipAndPackTtc": "Adhésion et pack : {amount} TTC par mois",
+  "@courierMembershipAndPackTtc": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierMembershipFirst": "L’adhésion se paie d’abord ; le pack se choisit ensuite, dans le même écran.",
+  "courierMembershipLine": "Adhésion Win Pokou",
+  "courierMinutesOf": "{minutes} min sur {total}",
+  "@courierMinutesOf": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierMon": "Lun.",
+  "courierMonthEarnings": "Gains du mois",
+  "courierMoreRides": "Courses en plus ce mois-ci",
+  "courierMorning": "Matin",
+  "courierNeedAge": "18 ans ou plus, une pièce d’identité",
+  "courierNeedPhone": "Un smartphone et un wallet mobile money",
+  "courierNeedVehicle": "Une moto, un vélo, ou tes pieds pour les courses proches",
+  "courierNetForYou": "Net pour toi",
+  "courierNewRide": "Nouvelle course",
+  "courierNewRideMode": "Nouvelle course · mode coursier",
+  "courierNewRideNearby": "Nouvelle course près de toi",
+  "courierNoAnswer": "{name} ne répond pas",
+  "@courierNoAnswer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierNoAnswerBody": "Pokou l’appelle et le prévient. Attends 10 minutes sur place.",
+  "courierNoAnswerReturn": "Sans réponse à 10 min, tu rapportes le colis fermé à {pharmacy}. Ce n’est pas un défaut pour toi.",
+  "@courierNoAnswerReturn": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "courierNoReferrals": "Personne encore : partage ton lien.",
+  "courierNoon": "Midi",
+  "courierNotNow": "Pas maintenant",
+  "courierNotYetBody": "Aucune officine de {city} n’a encore rejoint Honam : il n’y aurait pas de courses pour toi. On te prévient dès qu’elles arrivent.",
+  "@courierNotYetBody": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "courierNotYetIn": "Honam n’est pas encore à {city}",
+  "@courierNotYetIn": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "courierNotifyMe": "Me prévenir",
+  "courierOfferCityOpen": "{city} · Honam est ouvert",
+  "@courierOfferCityOpen": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "courierOfferTitle": "Livre pour Honam",
+  "courierOriginalToReturn": "Original à rapporter",
+  "courierPackDifference": "Différence {from} → {to}",
+  "@courierPackDifference": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackExhausted": "Ton pack {pack} est épuisé",
+  "@courierPackExhausted": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackExhaustedBody": "Cette course te rapporte {amount}. Passe à {pack} en payant seulement la différence et accepte-la.",
+  "@courierPackExhaustedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackExhaustedNoNext": "Tu as le plus grand pack : attends le mois prochain ou laisse passer cette course.",
+  "courierPackForYou": "Le pack qui te convient",
+  "courierPackLeft": "{pack} : {left} courses restantes sur {total}",
+  "@courierPackLeft": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      },
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierPackLine": "Pack {pack}",
+  "@courierPackLine": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackRides": "{pack} · {count} courses",
+  "@courierPackRides": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierPaid": "Payée",
+  "courierPaidByPharmacy": "versés par l’officine sur ton wallet, quand tu veux, près de chez toi",
+  "courierPaidByPharmacyShort": "payés par l’officine sur ton wallet",
+  "courierPaidOnYourWallet": "Payée par l’officine sur ton wallet.",
+  "courierPaidRides": "{count, plural, =0{aucune course payée} =1{1 course payée} other{{count} courses payées}}",
+  "@courierPaidRides": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierPayByCashPay": "Payer {amount} par CashPay",
+  "@courierPayByCashPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPending": "En attente",
+  "courierPeopleWaiting": "personnes attendent Honam à {city}, coursiers et patients",
+  "@courierPeopleWaiting": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPerRide": "{amount} par course",
+  "@courierPerRide": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPharmacyWrote": "Ce qu’a écrit l’officine",
+  "courierPickedUpAt": "Colis retiré {when}",
+  "@courierPickedUpAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPickupAt": "Retrait : {pharmacy}",
+  "@courierPickupAt": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPlusRides": "+{count} courses",
+  "@courierPlusRides": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierPositionShared": "Ta position est partagée avec {name} et l’officine jusqu’à la remise.",
+  "@courierPositionShared": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierProblem": "Un problème ?",
+  "courierProblemDuringRide": "Un problème pendant la course ?",
+  "courierProposeToFriend": "Proposer à un ami",
+  "courierProposedFirst": "Proposée d’abord à toi : {pharmacy} t’a invité",
+  "@courierProposedFirst": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "courierQueenUnlocked": "Débloqué : aucun défaut le mois dernier",
+  "courierQuestionOf": "Question {index} sur {total}",
+  "@courierQuestionOf": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierQuiz1": "Le patient veut te payer la course en espèces. Que fais-tu ?",
+  "courierQuiz1Right": "Je refuse : l’officine me paie",
+  "courierQuiz1Wrong": "J’accepte, c’est plus simple",
+  "courierQuiz2": "Le patient te demande d’ouvrir le colis. Que fais-tu ?",
+  "courierQuiz2Right": "Le colis reste fermé : il l’ouvre après la remise",
+  "courierQuiz2Wrong": "Je l’ouvre devant lui",
+  "courierQuiz3": "Le patient ne retrouve pas son code. Que fais-tu ?",
+  "courierQuiz3Right": "Je ne remets rien sans le code : il le retrouve dans son application",
+  "courierQuiz3Wrong": "Je remets le colis quand même",
+  "courierQuizPassed": "Quiz réussi : tu connais les règles d’or.",
+  "courierQuizRetry": "Ce n’est pas la bonne réponse : relis les règles et réessaie.",
+  "courierRecommended": "Recommandé",
+  "courierReminder": "Rappel : le colis reste fermé, tu n’encaisses rien du patient, et c’est le patient qui te donne le code de remise.",
+  "courierRequestReview": "Demander un réexamen",
+  "courierResendCode": "Renvoyer le code",
+  "courierRetake": "Reprendre : {item}",
+  "@courierRetake": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "courierReturnParcel": "Rapporter le colis à l’officine",
+  "courierReviewNotice": "Tu peux demander un réexamen au support. Pendant ce temps, tes discussions, Kory et tes commandes Honam restent accessibles.",
+  "courierReviewRequested": "Réexamen demandé",
+  "courierRides": "Courses",
+  "courierRidesAndDefaults": "{rides} courses livrées · {defaults} défaut(s)",
+  "@courierRidesAndDefaults": {
+    "placeholders": {
+      "rides": {
+        "type": "int"
+      },
+      "defaults": {
+        "type": "int"
+      }
+    }
+  },
+  "courierRidesLeftOf": "{left} courses restantes sur {total}",
+  "@courierRidesLeftOf": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierRidesPerMonth": "{count} courses par mois",
+  "@courierRidesPerMonth": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierRule1": "Le colis reste fermé",
+  "courierRule1Body": "Tu ne vois ni l’ordonnance ni les produits.",
+  "courierRule2": "Tu n’encaisses rien du patient",
+  "courierRule2Body": "L’officine te paie la course sur ton wallet.",
+  "courierRule3": "Le code vient du patient",
+  "courierRule3Body": "Il s’affiche dans son application, à la remise.",
+  "courierRule4": "3 défauts, compte suspendu",
+  "courierRule4Body": "Avec un recours possible auprès du support.",
+  "courierRulesAccepted": "Règles d’or acceptées",
+  "courierSat": "Sam.",
+  "courierSeeAllPacks": "Voir tous les packs",
+  "courierSeeDefault": "Voir le défaut",
+  "courierSelfieDone": "Selfie pris",
+  "courierSendCode": "Recevoir le code par SMS",
+  "courierSendInvite": "Envoyer l’invitation",
+  "courierSentBody": "Le support vérifie ton identité sous 48 h. Tu reçois une notification dès que ton mode coursier est activé.",
+  "courierSentStep1": "Inscription envoyée",
+  "courierSentStep2": "Vérification de l’identité",
+  "courierSentStep3": "Mode coursier activé",
+  "courierSentStep3Body": "Tu passes « Disponible » quand tu veux",
+  "courierShareLink": "Partager mon lien",
+  "courierShoot": "Photographier {side}",
+  "@courierShoot": {
+    "placeholders": {
+      "side": {
+        "type": "String"
+      }
+    }
+  },
+  "courierShotDone": "{side} · pris",
+  "@courierShotDone": {
+    "placeholders": {
+      "side": {
+        "type": "String"
+      }
+    }
+  },
+  "courierShowOrShare": "À montrer, ou à partager en lien",
+  "courierSkip": "Passer",
+  "courierSlots": "Créneaux",
+  "courierSmsCode": "Code reçu par SMS",
+  "courierStepBefore": "Avant de commencer",
+  "courierStepIdentity": "Ton identité",
+  "courierStepOf": "Devenir coursier · étape {step} sur {total}",
+  "@courierStepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierStepRules": "Les règles d’or",
+  "courierStepSent": "Candidature envoyée",
+  "courierStepWallet": "Où recevoir tes gains",
+  "courierStepZones": "Tes zones et tes créneaux",
+  "courierSun": "Dim.",
+  "courierSuspendedLead": "Tu as reçu {count} défauts confirmés. Tu ne reçois plus de courses.",
+  "@courierSuspendedLead": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierSuspendedTitle": "Compte coursier suspendu",
+  "courierSuspensionScope": "La suspension ne touche que le mode coursier, pas ton compte Pokou.",
+  "courierSwitchTo": "Passer à {pack} · {amount}",
+  "@courierSwitchTo": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierTakeSelfie": "Prendre un selfie",
+  "courierThePatient": "le patient",
+  "courierThenWinPokou": "Ensuite, Win Pokou",
+  "courierThenWinPokouCaption": "Plus un pack de courses, au choix",
+  "courierThirdDefault": "Au 3e défaut confirmé, ton compte coursier est suspendu.",
+  "courierThisMonth": "Ce mois-ci avec Pokou",
+  "courierThu": "Jeu.",
+  "courierToComplete": "Candidature à compléter",
+  "courierToPay": "À payer",
+  "courierToRedo": "À reprendre",
+  "courierTooYoung": "Le mode coursier n’est pas accessible avant 18 ans.",
+  "courierTransportBikeTitle": "Vélo",
+  "courierTransportMotoTitle": "Moto",
+  "courierTransportNote": "Les courses proposées tiennent compte de ton moyen de transport. Le mode coursier n’est pas accessible avant 18 ans.",
+  "courierTransportWalkTitle": "À pied",
+  "courierTrial": "Essai",
+  "courierTrialCaption": "Dès la validation, sur un mois",
+  "courierTrialEndTitle": "Ton essai est terminé",
+  "courierTrialLeft": "Essai : {left} courses restantes sur {total}",
+  "@courierTrialLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "courierTrialLeftAfter": "Il te restera {count} courses d’essai.",
+  "@courierTrialLeftAfter": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierTrialOffered": "{count} courses d’essai offertes",
+  "@courierTrialOffered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierTrialOfferedBody": "Sans adhésion ni pack, sur un mois. Tes premières courses portent sur des commandes de moins de 15 000 FCFA.",
+  "courierTrialRides": "{count} courses offertes",
+  "@courierTrialRides": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierTrialWaiting": "Dès l’activation, {count} courses d’essai t’attendent, sans adhésion ni pack.",
+  "@courierTrialWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierTtc": "{amount} TTC",
+  "@courierTtc": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierTue": "Mar.",
+  "courierUnavailable": "Indisponible",
+  "courierUnavailableBody": "Tu ne reçois pas de courses. Passe « Disponible » quand tu veux livrer.",
+  "courierUnderstood": "J’ai compris",
+  "courierUntil": "jusqu’au {when}",
+  "@courierUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "courierUpToKm": "jusqu’à {km} km",
+  "@courierUpToKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "courierValidateHandover": "Valider la remise",
+  "courierWaitingOnSite": "Attente sur place",
+  "courierWaitlistHelps": "Ces inscriptions aident Pokou à choisir les prochaines villes.",
+  "courierWaitlistJoined": "Tu seras prévenu",
+  "courierWallet": "Wallet",
+  "courierWalletLabel": "Wallet {wallet}",
+  "@courierWalletLabel": {
+    "placeholders": {
+      "wallet": {
+        "type": "String"
+      }
+    }
+  },
+  "courierWalletNotice": "Les officines te paient directement sur ce wallet après chaque livraison. Pokou ne touche jamais cet argent.",
+  "courierWalletNumber": "Numéro du wallet",
+  "courierWalletVerified": "Numéro vérifié par SMS.",
+  "courierWed": "Mer.",
+  "courierWelcomeBody": "Ton identité est vérifiée, {name}. Ton mode coursier est activé.",
+  "@courierWelcomeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierWelcomeTitle": "Bienvenue chez les coursiers",
+  "courierWhatItCosts": "Ce que ça coûte",
+  "courierWhenAvailable": "Quand es-tu souvent disponible ?",
+  "courierWriteToPatient": "Écrire à {name}",
+  "@courierWriteToPatient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierYouEarn": "Tu gagnes",
+  "courierYouNeed": "Il te faut",
+  "courierYourCode": "Ton code",
+  "courierYourCodeIs": "Ton code : {code}",
+  "@courierYourCodeIs": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierYourMessage": "Ton message, modifiable",
+  "courierYourReferrals": "Tes filleuls",
+  "courierZones": "Zones",
+  "courierZonesAndSlots": "Zones et créneaux",
+  "courierZonesNotice": "Ces choix servent à te proposer des courses. Tu restes libre : seul le bouton « Disponible » compte.",
+  "courierZonesTitle": "Quartiers où tu livres",
+  "courierRideReleased": "La course est rendue à l’officine, qui la réattribue. Ce n’est pas un défaut.",
+  "courierParcelReturned": "Colis à rapporter fermé à l’officine. Ce n’est pas un défaut.",
+  "courierBecomeHonam": "Devenir coursier Honam",
+  "courierOfferSubtitle": "Payé à chaque course, près de chez toi",
+  "courierLaunchShort": "Période de lancement · sans pack",
+  "courierTrialRidesLeftShort": "{count, plural, =1{1 course d’essai restante} other{{count} courses d’essai restantes}}",
+  "@courierTrialRidesLeftShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierBannerTitle": "Gagne de l’argent en livrant près de chez toi",
+  "courierDiscover": "Découvrir",
+  "courierAfterDelivery": "Livrée par {who}. Toi aussi, tu peux livrer pour Honam quand tu veux.",
+  "@courierAfterDelivery": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "courierLearnMore": "En savoir plus",
+  "courierDontPropose": "Ne plus me proposer",
+  "courierByAt": "{name} {when}",
+  "@courierByAt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
   }
 }

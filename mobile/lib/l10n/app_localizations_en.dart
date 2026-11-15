@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -9418,5 +9417,1061 @@ class LEn extends L {
   @override
   String honamPYesterdayAt(String time) {
     return 'yesterday, $time';
+  }
+
+  @override
+  String get courierAccept => 'Accept';
+
+  @override
+  String get courierAcceptConditions => 'I accept the courier terms';
+
+  @override
+  String get courierAccident => 'Accident or breakdown';
+
+  @override
+  String get courierAccidentBody =>
+      'The pharmacy is told and the ride is reassigned';
+
+  @override
+  String get courierAddZone => 'Add a neighbourhood';
+
+  @override
+  String get courierAddressNotFound => 'Address not found';
+
+  @override
+  String courierAddressNotFoundBody(String name) {
+    return '$name is told and can guide you by message';
+  }
+
+  @override
+  String courierAfterHandover(String pharmacy, String amount) {
+    return 'After the handover: the ride is counted from your trial or pack, and $pharmacy pays you $amount on your wallet. You confirm receipt in courier mode.';
+  }
+
+  @override
+  String get courierAfternoon => 'Afternoon';
+
+  @override
+  String get courierAlreadyValidated => 'Already approved';
+
+  @override
+  String get courierAnswerIn30 => 'Answer within 30 seconds';
+
+  @override
+  String get courierApplicationOpen30 =>
+      'Your application stays open for 30 days.';
+
+  @override
+  String courierAskCode(String name) {
+    return 'Ask $name for the code: it shows in their app. Enter it when you hand over the parcel.';
+  }
+
+  @override
+  String courierAtTheLatest(String when) {
+    return 'At the latest $when';
+  }
+
+  @override
+  String get courierAvailable => 'Available';
+
+  @override
+  String get courierAvailableBody => 'Rides reach you, even while you chat';
+
+  @override
+  String get courierAwaitingPayment =>
+      'Delivered · awaiting the pharmacy’s payment';
+
+  @override
+  String get courierBack => 'the back';
+
+  @override
+  String get courierBackToPokou => 'Back to Pokou';
+
+  @override
+  String get courierBackWhereYouWere =>
+      'You were elsewhere in the app: you go back there after answering.';
+
+  @override
+  String get courierBecome => 'I become a courier';
+
+  @override
+  String courierBefore(String when) {
+    return 'before $when';
+  }
+
+  @override
+  String get courierBirthDate => 'Date of birth';
+
+  @override
+  String courierCallAgain(String name) {
+    return 'Call $name again, number hidden';
+  }
+
+  @override
+  String courierCallPatient(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String get courierCallRelayed => 'Call relayed by Pokou, number hidden';
+
+  @override
+  String get courierChooseDate => 'Choose the date';
+
+  @override
+  String courierChoosePack(String pack) {
+    return 'Choose $pack';
+  }
+
+  @override
+  String get courierChooseYourPack => 'Choose your pack to keep delivering';
+
+  @override
+  String get courierCodeRefused => 'The code is refused';
+
+  @override
+  String courierCodeRefusedBody(String name) {
+    return 'Check the digits with $name, then try again';
+  }
+
+  @override
+  String get courierContactSupport => 'Contact support';
+
+  @override
+  String get courierContest => 'Dispute';
+
+  @override
+  String get courierContestDefault => 'Dispute this fault';
+
+  @override
+  String get courierContestHint => 'What happened, in a few words';
+
+  @override
+  String get courierContestHow =>
+      'If you dispute, support compares the pickup time, your position during the ride and the calls made through Pokou.';
+
+  @override
+  String get courierContestSent => 'Dispute sent to support';
+
+  @override
+  String get courierContinue => 'Continue';
+
+  @override
+  String get courierCopyLink => 'Copy my link';
+
+  @override
+  String get courierCouldNotVerify => 'Support could not verify your identity.';
+
+  @override
+  String courierCountOf(int count, int total) {
+    return '$count of $total';
+  }
+
+  @override
+  String courierDefaultLead(String pharmacy, String when) {
+    return '$pharmacy reported a fault on the ride of $when.';
+  }
+
+  @override
+  String get courierDefaultTitle => 'Fault reported';
+
+  @override
+  String get courierDefaults => 'Faults';
+
+  @override
+  String get courierDefaultsInProgress => 'Current faults';
+
+  @override
+  String get courierDelivered => 'Parcel handed over: the ride is confirmed.';
+
+  @override
+  String get courierDelivery => 'Delivery';
+
+  @override
+  String courierDeliveryAt(String address) {
+    return 'Delivery: $address';
+  }
+
+  @override
+  String courierDeliveryTo(String name) {
+    return 'Delivery to $name';
+  }
+
+  @override
+  String get courierDocCni => 'ID card';
+
+  @override
+  String get courierDocPassport => 'Passport';
+
+  @override
+  String get courierDocVoter => 'Voter card';
+
+  @override
+  String get courierDone => 'Done';
+
+  @override
+  String courierEarned(String amount) {
+    return '$amount earned';
+  }
+
+  @override
+  String courierEarningsNote(String wallet) {
+    return 'Each pharmacy pays you the ride on your wallet $wallet. A late payment is reported from the ride.';
+  }
+
+  @override
+  String get courierEarningsTitle => 'My rides and earnings';
+
+  @override
+  String get courierEnterCode => 'Enter the code';
+
+  @override
+  String get courierEvening => 'Evening';
+
+  @override
+  String get courierFirstDeliveryDone => 'First delivery done';
+
+  @override
+  String get courierFiveAttempts =>
+      '5 attempts at most. Each attempt is recorded.';
+
+  @override
+  String get courierFree => 'Free';
+
+  @override
+  String get courierFri => 'Fri';
+
+  @override
+  String get courierFriendActive => 'Active courier';
+
+  @override
+  String get courierFriendApplying => 'Signing up';
+
+  @override
+  String get courierFriendDeclined => 'Not accepted';
+
+  @override
+  String courierFriendMessage(String code) {
+    return 'Hi! I deliver for Honam with Pokou: paid for every ride, near you, whenever you want. Join me with my code $code.';
+  }
+
+  @override
+  String get courierFriendNotice =>
+      'You get free rides when your friend completes their first delivery. The invitation is for people aged 18 and over, in a city where Honam is open.';
+
+  @override
+  String courierFromPerMonth(String amount) {
+    return '$amount incl. VAT per month';
+  }
+
+  @override
+  String get courierFront => 'the front';
+
+  @override
+  String get courierGains => 'Earnings';
+
+  @override
+  String courierGiftNotice(int count) {
+    return 'You get $count free rides when your referral completes their first delivery.';
+  }
+
+  @override
+  String get courierGoOffline => 'Go unavailable';
+
+  @override
+  String get courierGoOnline => 'Go available';
+
+  @override
+  String get courierGoToMode => 'Switch to courier mode';
+
+  @override
+  String get courierHandoverCode => 'Handover code';
+
+  @override
+  String get courierHonamOpen => 'Honam open';
+
+  @override
+  String get courierHowDoYouDeliver => 'How do you deliver?';
+
+  @override
+  String get courierHowMuch => 'How much can I earn?';
+
+  @override
+  String courierHt(String amount) {
+    return '$amount excl. VAT';
+  }
+
+  @override
+  String get courierIdDocument => 'Identity document';
+
+  @override
+  String get courierIdNameNotice =>
+      'The name on your document must match the owner of your wallet.';
+
+  @override
+  String get courierIdPrivacy =>
+      'Your document is only used to verify your identity. It is encrypted and deleted 30 days after the decision.';
+
+  @override
+  String courierInviteMessage(String code, String link) {
+    return 'Deliver for Honam with me: paid for every ride, near you. My code: $code — $link';
+  }
+
+  @override
+  String courierInviteSubtitle(int count) {
+    return '$count free rides after their first delivery';
+  }
+
+  @override
+  String get courierInviteTitle => 'Invite a courier';
+
+  @override
+  String courierInvitedBy(String name) {
+    return 'Invited by $name';
+  }
+
+  @override
+  String courierInviterCodeApplied(String code) {
+    return 'Verified courier · code $code applied';
+  }
+
+  @override
+  String courierInviterGets(String name, int count) {
+    return '$name recommended you: they get $count free rides when you complete your first delivery.';
+  }
+
+  @override
+  String get courierItemBack => 'Back of the document unreadable';
+
+  @override
+  String get courierItemFront => 'Front of the document unreadable';
+
+  @override
+  String get courierItemSelfie => 'Selfie';
+
+  @override
+  String get courierItemWallet => 'Wallet';
+
+  @override
+  String get courierItinerary => 'Directions';
+
+  @override
+  String courierKmAfterPickup(String km) {
+    return '$km km after pickup';
+  }
+
+  @override
+  String courierKmFromYou(String km) {
+    return '$km km from you';
+  }
+
+  @override
+  String get courierLaunchCaption =>
+      'During the launch: no membership or pack, then Win Pokou';
+
+  @override
+  String get courierLaunchLine => 'If Honam just opened in your city';
+
+  @override
+  String get courierLetGo => 'Let this ride go';
+
+  @override
+  String courierMembershipAndPack(String pack) {
+    return 'Membership and $pack pack, incl. VAT';
+  }
+
+  @override
+  String courierMembershipAndPackOf(String month) {
+    return 'Membership and pack for $month';
+  }
+
+  @override
+  String courierMembershipAndPackTtc(String amount) {
+    return 'Membership and pack: $amount incl. VAT per month';
+  }
+
+  @override
+  String get courierMembershipFirst =>
+      'Membership is paid first; the pack is chosen next, on the same screen.';
+
+  @override
+  String get courierMembershipLine => 'Win Pokou membership';
+
+  @override
+  String courierMinutesOf(int minutes, int total) {
+    return '$minutes min of $total';
+  }
+
+  @override
+  String get courierMon => 'Mon';
+
+  @override
+  String get courierMonthEarnings => 'This month’s earnings';
+
+  @override
+  String get courierMoreRides => 'Extra rides this month';
+
+  @override
+  String get courierMorning => 'Morning';
+
+  @override
+  String get courierNeedAge => '18 or older, an identity document';
+
+  @override
+  String get courierNeedPhone => 'A smartphone and a mobile money wallet';
+
+  @override
+  String get courierNeedVehicle =>
+      'A motorbike, a bicycle, or your feet for nearby rides';
+
+  @override
+  String get courierNetForYou => 'Net for you';
+
+  @override
+  String get courierNewRide => 'New ride';
+
+  @override
+  String get courierNewRideMode => 'New ride · courier mode';
+
+  @override
+  String get courierNewRideNearby => 'New ride near you';
+
+  @override
+  String courierNoAnswer(String name) {
+    return '$name is not answering';
+  }
+
+  @override
+  String get courierNoAnswerBody =>
+      'Pokou calls and warns them. Wait 10 minutes on site.';
+
+  @override
+  String courierNoAnswerReturn(String pharmacy) {
+    return 'With no answer after 10 min, you take the closed parcel back to $pharmacy. It is not a fault for you.';
+  }
+
+  @override
+  String get courierNoReferrals => 'Nobody yet: share your link.';
+
+  @override
+  String get courierNoon => 'Noon';
+
+  @override
+  String get courierNotNow => 'Not now';
+
+  @override
+  String courierNotYetBody(String city) {
+    return 'No pharmacy in $city has joined Honam yet: there would be no rides for you. We’ll tell you as soon as they arrive.';
+  }
+
+  @override
+  String courierNotYetIn(String city) {
+    return 'Honam is not in $city yet';
+  }
+
+  @override
+  String get courierNotifyMe => 'Notify me';
+
+  @override
+  String courierOfferCityOpen(String city) {
+    return '$city · Honam is open';
+  }
+
+  @override
+  String get courierOfferTitle => 'Deliver for Honam';
+
+  @override
+  String get courierOriginalToReturn => 'Original to return';
+
+  @override
+  String courierPackDifference(String from, String to) {
+    return 'Difference $from → $to';
+  }
+
+  @override
+  String courierPackExhausted(String pack) {
+    return 'Your $pack pack is used up';
+  }
+
+  @override
+  String courierPackExhaustedBody(String amount, String pack) {
+    return 'This ride earns you $amount. Switch to $pack by paying only the difference and accept it.';
+  }
+
+  @override
+  String get courierPackExhaustedNoNext =>
+      'You have the largest pack: wait for next month or let this ride go.';
+
+  @override
+  String get courierPackForYou => 'The pack that suits you';
+
+  @override
+  String courierPackLeft(String pack, int left, int total) {
+    return '$pack: $left rides left of $total';
+  }
+
+  @override
+  String courierPackLine(String pack) {
+    return '$pack pack';
+  }
+
+  @override
+  String courierPackRides(String pack, int count) {
+    return '$pack · $count rides';
+  }
+
+  @override
+  String get courierPaid => 'Paid';
+
+  @override
+  String get courierPaidByPharmacy =>
+      'paid by the pharmacy to your wallet, whenever you want, near you';
+
+  @override
+  String get courierPaidByPharmacyShort =>
+      'paid by the pharmacy to your wallet';
+
+  @override
+  String get courierPaidOnYourWallet => 'Paid by the pharmacy to your wallet.';
+
+  @override
+  String courierPaidRides(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paid rides',
+      one: '1 paid ride',
+      zero: 'no paid ride',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierPayByCashPay(String amount) {
+    return 'Pay $amount with CashPay';
+  }
+
+  @override
+  String get courierPending => 'Pending';
+
+  @override
+  String courierPeopleWaiting(String city) {
+    return 'people are waiting for Honam in $city, couriers and patients';
+  }
+
+  @override
+  String courierPerRide(String amount) {
+    return '$amount per ride';
+  }
+
+  @override
+  String get courierPharmacyWrote => 'What the pharmacy wrote';
+
+  @override
+  String courierPickedUpAt(String when) {
+    return 'Parcel picked up $when';
+  }
+
+  @override
+  String courierPickupAt(String pharmacy) {
+    return 'Pickup: $pharmacy';
+  }
+
+  @override
+  String courierPlusRides(int count) {
+    return '+$count rides';
+  }
+
+  @override
+  String courierPositionShared(String name) {
+    return 'Your position is shared with $name and the pharmacy until handover.';
+  }
+
+  @override
+  String get courierProblem => 'A problem?';
+
+  @override
+  String get courierProblemDuringRide => 'A problem during the ride?';
+
+  @override
+  String get courierProposeToFriend => 'Suggest to a friend';
+
+  @override
+  String courierProposedFirst(String pharmacy) {
+    return 'Offered to you first: $pharmacy invited you';
+  }
+
+  @override
+  String get courierQueenUnlocked => 'Unlocked: no fault last month';
+
+  @override
+  String courierQuestionOf(int index, int total) {
+    return 'Question $index of $total';
+  }
+
+  @override
+  String get courierQuiz1 =>
+      'The patient wants to pay you the ride in cash. What do you do?';
+
+  @override
+  String get courierQuiz1Right => 'I refuse: the pharmacy pays me';
+
+  @override
+  String get courierQuiz1Wrong => 'I accept, it’s simpler';
+
+  @override
+  String get courierQuiz2 =>
+      'The patient asks you to open the parcel. What do you do?';
+
+  @override
+  String get courierQuiz2Right =>
+      'The parcel stays closed: they open it after handover';
+
+  @override
+  String get courierQuiz2Wrong => 'I open it in front of them';
+
+  @override
+  String get courierQuiz3 =>
+      'The patient can’t find their code. What do you do?';
+
+  @override
+  String get courierQuiz3Right =>
+      'I hand over nothing without the code: they find it in their app';
+
+  @override
+  String get courierQuiz3Wrong => 'I hand over the parcel anyway';
+
+  @override
+  String get courierQuizPassed => 'Quiz passed: you know the golden rules.';
+
+  @override
+  String get courierQuizRetry =>
+      'That’s not the right answer: read the rules again and retry.';
+
+  @override
+  String get courierRecommended => 'Recommended';
+
+  @override
+  String get courierReminder =>
+      'Reminder: the parcel stays closed, you collect nothing from the patient, and the patient gives you the handover code.';
+
+  @override
+  String get courierRequestReview => 'Request a review';
+
+  @override
+  String get courierResendCode => 'Resend the code';
+
+  @override
+  String courierRetake(String item) {
+    return 'Retake: $item';
+  }
+
+  @override
+  String get courierReturnParcel => 'Take the parcel back to the pharmacy';
+
+  @override
+  String get courierReviewNotice =>
+      'You can ask support for a review. Meanwhile, your chats, Kory and your Honam orders remain available.';
+
+  @override
+  String get courierReviewRequested => 'Review requested';
+
+  @override
+  String get courierRides => 'Rides';
+
+  @override
+  String courierRidesAndDefaults(int rides, int defaults) {
+    return '$rides rides delivered · $defaults fault(s)';
+  }
+
+  @override
+  String courierRidesLeftOf(int left, int total) {
+    return '$left rides left of $total';
+  }
+
+  @override
+  String courierRidesPerMonth(int count) {
+    return '$count rides per month';
+  }
+
+  @override
+  String get courierRule1 => 'The parcel stays closed';
+
+  @override
+  String get courierRule1Body =>
+      'You see neither the prescription nor the products.';
+
+  @override
+  String get courierRule2 => 'You collect nothing from the patient';
+
+  @override
+  String get courierRule2Body =>
+      'The pharmacy pays you the ride on your wallet.';
+
+  @override
+  String get courierRule3 => 'The code comes from the patient';
+
+  @override
+  String get courierRule3Body => 'It shows in their app, at handover.';
+
+  @override
+  String get courierRule4 => '3 faults, account suspended';
+
+  @override
+  String get courierRule4Body => 'With a possible appeal to support.';
+
+  @override
+  String get courierRulesAccepted => 'Golden rules accepted';
+
+  @override
+  String get courierSat => 'Sat';
+
+  @override
+  String get courierSeeAllPacks => 'See all packs';
+
+  @override
+  String get courierSeeDefault => 'See the fault';
+
+  @override
+  String get courierSelfieDone => 'Selfie taken';
+
+  @override
+  String get courierSendCode => 'Get the code by SMS';
+
+  @override
+  String get courierSendInvite => 'Send the invitation';
+
+  @override
+  String get courierSentBody =>
+      'Support checks your identity within 48 hours. You get a notification as soon as your courier mode is on.';
+
+  @override
+  String get courierSentStep1 => 'Sign-up sent';
+
+  @override
+  String get courierSentStep2 => 'Identity check';
+
+  @override
+  String get courierSentStep3 => 'Courier mode on';
+
+  @override
+  String get courierSentStep3Body => 'You go “Available” whenever you want';
+
+  @override
+  String get courierShareLink => 'Share my link';
+
+  @override
+  String courierShoot(String side) {
+    return 'Photograph $side';
+  }
+
+  @override
+  String courierShotDone(String side) {
+    return '$side · taken';
+  }
+
+  @override
+  String get courierShowOrShare => 'To show, or to share as a link';
+
+  @override
+  String get courierSkip => 'Skip';
+
+  @override
+  String get courierSlots => 'Time slots';
+
+  @override
+  String get courierSmsCode => 'Code received by SMS';
+
+  @override
+  String get courierStepBefore => 'Before you start';
+
+  @override
+  String get courierStepIdentity => 'Your identity';
+
+  @override
+  String courierStepOf(int step, int total) {
+    return 'Become a courier · step $step of $total';
+  }
+
+  @override
+  String get courierStepRules => 'The golden rules';
+
+  @override
+  String get courierStepSent => 'Application sent';
+
+  @override
+  String get courierStepWallet => 'Where to receive your earnings';
+
+  @override
+  String get courierStepZones => 'Your areas and time slots';
+
+  @override
+  String get courierSun => 'Sun';
+
+  @override
+  String courierSuspendedLead(int count) {
+    return 'You received $count confirmed faults. You no longer receive rides.';
+  }
+
+  @override
+  String get courierSuspendedTitle => 'Courier account suspended';
+
+  @override
+  String get courierSuspensionScope =>
+      'The suspension only affects courier mode, not your Pokou account.';
+
+  @override
+  String courierSwitchTo(String pack, String amount) {
+    return 'Switch to $pack · $amount';
+  }
+
+  @override
+  String get courierTakeSelfie => 'Take a selfie';
+
+  @override
+  String get courierThePatient => 'the patient';
+
+  @override
+  String get courierThenWinPokou => 'Then, Win Pokou';
+
+  @override
+  String get courierThenWinPokouCaption =>
+      'Plus a pack of rides, of your choice';
+
+  @override
+  String get courierThirdDefault =>
+      'At the 3rd confirmed fault, your courier account is suspended.';
+
+  @override
+  String get courierThisMonth => 'This month with Pokou';
+
+  @override
+  String get courierThu => 'Thu';
+
+  @override
+  String get courierToComplete => 'Application to complete';
+
+  @override
+  String get courierToPay => 'To pay';
+
+  @override
+  String get courierToRedo => 'To redo';
+
+  @override
+  String get courierTooYoung => 'Courier mode is not available under 18.';
+
+  @override
+  String get courierTransportBikeTitle => 'Bicycle';
+
+  @override
+  String get courierTransportMotoTitle => 'Motorbike';
+
+  @override
+  String get courierTransportNote =>
+      'The rides offered take your means of transport into account. Courier mode is not available under 18.';
+
+  @override
+  String get courierTransportWalkTitle => 'On foot';
+
+  @override
+  String get courierTrial => 'Trial';
+
+  @override
+  String get courierTrialCaption => 'From approval, over one month';
+
+  @override
+  String get courierTrialEndTitle => 'Your trial is over';
+
+  @override
+  String courierTrialLeft(int left, int total) {
+    return 'Trial: $left rides left of $total';
+  }
+
+  @override
+  String courierTrialLeftAfter(int count) {
+    return 'You will have $count trial rides left.';
+  }
+
+  @override
+  String courierTrialOffered(int count) {
+    return '$count free trial rides';
+  }
+
+  @override
+  String get courierTrialOfferedBody =>
+      'No membership or pack, over one month. Your first rides are for orders under 15,000 FCFA.';
+
+  @override
+  String courierTrialRides(int count) {
+    return '$count free rides';
+  }
+
+  @override
+  String courierTrialWaiting(int count) {
+    return 'Once activated, $count trial rides await you, with no membership or pack.';
+  }
+
+  @override
+  String courierTtc(String amount) {
+    return '$amount incl. VAT';
+  }
+
+  @override
+  String get courierTue => 'Tue';
+
+  @override
+  String get courierUnavailable => 'Unavailable';
+
+  @override
+  String get courierUnavailableBody =>
+      'You don’t receive rides. Go “Available” when you want to deliver.';
+
+  @override
+  String get courierUnderstood => 'Understood';
+
+  @override
+  String courierUntil(String when) {
+    return 'until $when';
+  }
+
+  @override
+  String courierUpToKm(String km) {
+    return 'up to $km km';
+  }
+
+  @override
+  String get courierValidateHandover => 'Confirm handover';
+
+  @override
+  String get courierWaitingOnSite => 'Waiting on site';
+
+  @override
+  String get courierWaitlistHelps =>
+      'These sign-ups help Pokou choose the next cities.';
+
+  @override
+  String get courierWaitlistJoined => 'You’ll be notified';
+
+  @override
+  String get courierWallet => 'Wallet';
+
+  @override
+  String courierWalletLabel(String wallet) {
+    return 'Wallet $wallet';
+  }
+
+  @override
+  String get courierWalletNotice =>
+      'Pharmacies pay you directly on this wallet after each delivery. Pokou never touches this money.';
+
+  @override
+  String get courierWalletNumber => 'Wallet number';
+
+  @override
+  String get courierWalletVerified => 'Number verified by SMS.';
+
+  @override
+  String get courierWed => 'Wed';
+
+  @override
+  String courierWelcomeBody(String name) {
+    return 'Your identity is verified, $name. Your courier mode is on.';
+  }
+
+  @override
+  String get courierWelcomeTitle => 'Welcome to the couriers';
+
+  @override
+  String get courierWhatItCosts => 'What it costs';
+
+  @override
+  String get courierWhenAvailable => 'When are you often available?';
+
+  @override
+  String courierWriteToPatient(String name) {
+    return 'Write to $name';
+  }
+
+  @override
+  String get courierYouEarn => 'You earn';
+
+  @override
+  String get courierYouNeed => 'You need';
+
+  @override
+  String get courierYourCode => 'Your code';
+
+  @override
+  String courierYourCodeIs(String code) {
+    return 'Your code: $code';
+  }
+
+  @override
+  String get courierYourMessage => 'Your message, editable';
+
+  @override
+  String get courierYourReferrals => 'Your referrals';
+
+  @override
+  String get courierZones => 'Areas';
+
+  @override
+  String get courierZonesAndSlots => 'Areas and time slots';
+
+  @override
+  String get courierZonesNotice =>
+      'These choices are used to offer you rides. You stay free: only the “Available” button counts.';
+
+  @override
+  String get courierZonesTitle => 'Neighbourhoods where you deliver';
+
+  @override
+  String get courierRideReleased =>
+      'The ride goes back to the pharmacy, which reassigns it. It is not a fault.';
+
+  @override
+  String get courierParcelReturned =>
+      'Take the closed parcel back to the pharmacy. It is not a fault.';
+
+  @override
+  String get courierBecomeHonam => 'Become a Honam courier';
+
+  @override
+  String get courierOfferSubtitle => 'Paid for every ride, near you';
+
+  @override
+  String get courierLaunchShort => 'Launch period · no pack';
+
+  @override
+  String courierTrialRidesLeftShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trial rides left',
+      one: '1 trial ride left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierBannerTitle => 'Earn money delivering near you';
+
+  @override
+  String get courierDiscover => 'Discover';
+
+  @override
+  String courierAfterDelivery(String who) {
+    return 'Delivered by $who. You too can deliver for Honam whenever you want.';
+  }
+
+  @override
+  String get courierLearnMore => 'Learn more';
+
+  @override
+  String get courierDontPropose => 'Don’t suggest again';
+
+  @override
+  String courierByAt(String name, String when) {
+    return '$name $when';
   }
 }

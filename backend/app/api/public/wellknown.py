@@ -183,6 +183,7 @@ async def apple_app_site_association():
                         "/honam/order/*",
                         "/kory/pots/*",
                         "/honam/orders/*",
+                        "/honam/coursier/*",
                     ],
                 }
             ],

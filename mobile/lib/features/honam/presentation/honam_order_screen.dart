@@ -15,6 +15,7 @@ import '../../kory/presentation/kory_ui.dart';
 import '../../kory/presentation/kory_wallet.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
+import 'courier_join_screen.dart' show CourierOfferPrompt;
 import 'honam_controller.dart';
 import 'honam_order_messages.dart';
 import 'honam_pay_screen.dart';
@@ -398,6 +399,18 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
                 : Icons.info_outline,
             text: honamStatusPhrase(context, order),
           ),
+          // Maquette Coursiers 0 : l'encart après une livraison reçue.
+          if (order.status == 'DELIVERED' && order.courierName != null) ...[
+            const SizedBox(height: 12),
+            CourierOfferPrompt(
+              deliveredBy: order.deliveredAt == null
+                  ? order.courierName!
+                  : l.courierByAt(
+                      order.courierName!,
+                      honamWhen(context, order.deliveredAt!),
+                    ),
+            ),
+          ],
           ...refund,
           if (order.quoteItems.isNotEmpty) ...[
             const SizedBox(height: 12),
