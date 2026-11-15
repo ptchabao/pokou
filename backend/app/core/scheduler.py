@@ -60,6 +60,7 @@ class Scheduler:
             asyncio.create_task(self._business_loop()),
             asyncio.create_task(self._pharmacy_subscription_reminders_loop()),
             asyncio.create_task(self._status_purge_loop()),
+            asyncio.create_task(self._kory_reminders_loop()),
         ]
 
     async def stop(self):
@@ -169,6 +170,28 @@ class Scheduler:
         db = SessionLocal()
         try:
             return send_due_subscription_reminders(db)
+        finally:
+            db.close()
+
+    async def _kory_reminders_loop(self):
+        """Kory : rappels J−2, jour J et J+1 des cotisations (KOR-21), une
+        fois par échéance et par étape — vérifiés toutes les 15 minutes."""
+        await self._sleep_interval(120)
+        while not self.stop_event.is_set():
+            try:
+                sent = await asyncio.to_thread(self._send_kory_reminders)
+                if sent:
+                    logger.info("[KORY] rappels de cotisation envoyés : %d", sent)
+            except Exception as exc:
+                logger.error("Kory reminders error: %s", str(exc), exc_info=True)
+            await self._sleep_interval(900)
+
+    def _send_kory_reminders(self) -> int:
+        from app.services.kory.cotisation import send_due_reminders
+
+        db = SessionLocal()
+        try:
+            return send_due_reminders(db)
         finally:
             db.close()
 

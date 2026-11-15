@@ -15095,7 +15095,7 @@ abstract class L {
   /// No description provided for @koryXPlusFeeBody.
   ///
   /// In fr, this message translates to:
-  /// **'{ht} HT ({ttc} TTC) par membre, une seule fois, par Mobile Money.'**
+  /// **'{ht} HT ({ttc} TTC) par membre, une fois, par CashPay.'**
   String koryXPlusFeeBody(String ht, String ttc);
 
   /// No description provided for @koryXPlusFeePaidOf.

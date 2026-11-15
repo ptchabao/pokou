@@ -2497,7 +2497,7 @@
   "koryXYourMonth": "Your month",
   "koryXUpToDate": "Up to date",
   "koryXPlusFeeTitle": "Kory Plus opening fee",
-  "koryXPlusFeeBody": "{ht} excl. VAT ({ttc} incl. VAT) per member, once, by Mobile Money.",
+  "koryXPlusFeeBody": "{ht} excl. VAT ({ttc} incl. VAT) per member, once, by CashPay.",
   "koryXPlusFeePaidOf": "{paid} of {total} members have paid",
   "koryXPayAndJoin": "Pay {amount} and join",
   "koryXPayMyFee": "Pay my fee · {amount}",

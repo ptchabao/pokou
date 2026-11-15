@@ -9016,7 +9016,7 @@ class LFr extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht HT ($ttc TTC) par membre, une seule fois, par Mobile Money.';
+    return '$ht HT ($ttc TTC) par membre, une fois, par CashPay.';
   }
 
   @override

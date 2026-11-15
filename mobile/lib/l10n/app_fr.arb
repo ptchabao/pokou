@@ -4670,7 +4670,7 @@
   "koryXYourMonth": "Ton mois",
   "koryXUpToDate": "À jour",
   "koryXPlusFeeTitle": "Frais d’ouverture Kory Plus",
-  "koryXPlusFeeBody": "{ht} HT ({ttc} TTC) par membre, une seule fois, par Mobile Money.",
+  "koryXPlusFeeBody": "{ht} HT ({ttc} TTC) par membre, une fois, par CashPay.",
   "@koryXPlusFeeBody": {
     "placeholders": {
       "ht": {

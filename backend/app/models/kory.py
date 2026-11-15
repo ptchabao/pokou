@@ -86,6 +86,9 @@ class KoryPot(Base):
     #: Dernière relance envoyée par l'organisateur (KOR-8 / 20) : une par
     #: tranche de 12 h, pour ne pas harceler.
     reminded_at = Column(DateTime, nullable=True)
+    #: Cotisation (KOR-21) : le dernier rappel automatique envoyé, sous la
+    #: forme « 2026-12:J-2 » — un seul par échéance et par étape.
+    auto_reminder_key = Column(String(24), nullable=True)
 
 
 class KoryMember(Base):
@@ -120,6 +123,9 @@ class KoryMember(Base):
     #: Tontine (KOR-24) : la place voulue par l'administrateur quand il fixe
     #: l'ordre lui-même.
     position = Column(Integer, nullable=True)
+    #: Cotisation (KOR-21) : le membre a coupé les rappels J−2, jour J et
+    #: J+1 de cette cotisation. La relance de l'organisateur passe toujours.
+    reminders_muted = Column(Boolean, nullable=False, default=False, server_default="0")
 
 
 class KoryEntry(Base):

@@ -8959,7 +8959,7 @@ class LEn extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht excl. VAT ($ttc incl. VAT) per member, once, by Mobile Money.';
+    return '$ht excl. VAT ($ttc incl. VAT) per member, once, by CashPay.';
   }
 
   @override

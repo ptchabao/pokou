@@ -8945,7 +8945,7 @@ class LAr extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht دون ضريبة ($ttc مع الضريبة) لكل عضو، مرة واحدة، عبر الدفع بالهاتف.';
+    return '$ht دون ضريبة ($ttc مع الضريبة) لكل عضو، مرة واحدة، عبر CashPay.';
   }
 
   @override

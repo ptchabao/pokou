@@ -9012,7 +9012,7 @@ class LIt extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht IVA esclusa ($ttc IVA inclusa) per membro, una sola volta, tramite Mobile Money.';
+    return '$ht IVA esclusa ($ttc IVA inclusa) per membro, una sola volta, tramite CashPay.';
   }
 
   @override

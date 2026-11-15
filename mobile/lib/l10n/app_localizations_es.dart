@@ -8992,7 +8992,7 @@ class LEs extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht sin IVA ($ttc con IVA) por miembro, una sola vez, por Mobile Money.';
+    return '$ht sin IVA ($ttc con IVA) por miembro, una sola vez, por CashPay.';
   }
 
   @override

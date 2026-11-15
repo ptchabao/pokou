@@ -2497,7 +2497,7 @@
   "koryXYourMonth": "شهرك",
   "koryXUpToDate": "ملتزمون",
   "koryXPlusFeeTitle": "رسوم فتح Kory Plus",
-  "koryXPlusFeeBody": "{ht} دون ضريبة ({ttc} مع الضريبة) لكل عضو، مرة واحدة، عبر الدفع بالهاتف.",
+  "koryXPlusFeeBody": "{ht} دون ضريبة ({ttc} مع الضريبة) لكل عضو، مرة واحدة، عبر CashPay.",
   "koryXPlusFeePaidOf": "دفع {paid} من أصل {total} أعضاء",
   "koryXPayAndJoin": "ادفع {amount} وانضم",
   "koryXPayMyFee": "ادفع رسومي · {amount}",

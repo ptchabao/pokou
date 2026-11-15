@@ -9048,7 +9048,7 @@ class LRu extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht без НДС ($ttc с НДС) с участника, один раз, через Mobile Money.';
+    return '$ht без НДС ($ttc с НДС) с участника, один раз, через CashPay.';
   }
 
   @override

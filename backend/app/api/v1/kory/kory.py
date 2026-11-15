@@ -547,6 +547,8 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         data["cotisation"] = cotisation_service.summary(
             db, pot, viewer_id, now, lambda uid: _name(db, uid)
         )
+        # KOR-21 : l'interrupteur « Rappels de cette cotisation ».
+        data["cotisation"]["my_reminders"] = viewer_id not in cotisation_service.muted_member_ids(db, pot)
     if with_entries:
         entries = (
             db.query(KoryEntry)
@@ -1348,11 +1350,27 @@ def _maybe_start(db: Session, pot: KoryPot) -> None:
         _start_tontine(db, pot)
 
 
+class FeeBody(BaseModel):
+    #: KOR-8 : l'administrateur règle aussi les frais de ceux qui n'ont pas
+    #: encore payé (« Payer pour les 3 restants »).
+    for_others: bool = False
+
+
 @router.post("/pots/{pot_id}/fee")
-def pay_plus_fee(pot_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    """KOR-8 / 25 : régler ses frais Kory Plus par Mobile Money. Le paiement
-    confirmé vaut acceptation de l'invitation ; le dernier démarre la
-    tontine."""
+def pay_plus_fee(
+    pot_id: int,
+    body: Optional[FeeBody] = None,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-8 / 25 : régler ses frais Kory Plus par CashPay (Mobile Money ou
+    carte). Le paiement confirmé vaut acceptation de l'invitation ; le
+    dernier démarre la tontine.
+
+    Avec `for_others`, l'administrateur paie en une fois pour tous ceux qui
+    n'ont pas encore réglé (lui compris s'il ne l'a pas fait). Leurs frais
+    sont réglés, mais chacun accepte encore lui-même d'entrer : payer pour
+    quelqu'un ne l'engage pas à sa place."""
     from app.api.v1.modules.common import open_payment, payment_json
 
     me = _me(current_user)
@@ -1362,11 +1380,34 @@ def pay_plus_fee(pot_id: int, current_user: dict = Depends(get_current_user), db
         raise HTTPException(status_code=403, detail="Vous n'êtes pas invité dans cette tontine")
     if pot.status != "PENDING":
         raise HTTPException(status_code=409, detail="Cette tontine a déjà démarré")
-    if member.fee_paid_at is not None:
-        raise HTTPException(status_code=409, detail="Tes frais Kory Plus sont déjà réglés")
     fee = _plus_fee(db, pot)
     if fee["amount_ht"] == 0:
         raise HTTPException(status_code=409, detail="Cette tontine n'a pas de frais d'ouverture")
+    if body is not None and body.for_others:
+        if not _is_admin(pot, me):
+            raise HTTPException(status_code=403, detail="Seul l'administrateur paie pour les autres")
+        unpaid = db.query(KoryMember).filter(
+            KoryMember.pot_id == pot.id,
+            KoryMember.declined_at.is_(None),
+            KoryMember.fee_paid_at.is_(None),
+        ).order_by(KoryMember.id).all()
+        if not unpaid:
+            raise HTTPException(status_code=409, detail="Tous les frais sont déjà réglés")
+        payment = open_payment(
+            db, me, kind="KORY_PLUS_FEE", amount=fee["amount_ttc"] * len(unpaid),
+            description=f"Kory Plus — ouverture de « {pot.title} » pour {len(unpaid)} membres",
+            metadata={
+                "pot_id": pot.id,
+                "member_ids": [m.id for m in unpaid],
+                "amount_ht": fee["amount_ht"] * len(unpaid),
+            },
+        )
+        for m in unpaid:
+            m.fee_payment_id = payment.id
+        db.commit()
+        return payment_json(payment)
+    if member.fee_paid_at is not None:
+        raise HTTPException(status_code=409, detail="Tes frais Kory Plus sont déjà réglés")
     payment = open_payment(
         db, me, kind="KORY_PLUS_FEE", amount=fee["amount_ttc"],
         description=f"Kory Plus — ouverture de « {pot.title} »",
@@ -1382,19 +1423,34 @@ def apply_confirmed_payment(db: Session, payment) -> dict | None:
     if payment.kind != "KORY_PLUS_FEE":
         return None
     metadata = payment.metadata_json or {}
-    member = db.query(KoryMember).filter(KoryMember.id == metadata.get("member_id")).first()
-    if member is None or member.user_id != payment.user_id:
+    ids = metadata.get("member_ids") or [metadata.get("member_id")]
+    members = db.query(KoryMember).filter(KoryMember.id.in_([i for i in ids if i])).all()
+    pot_id = metadata.get("pot_id")
+    # Un paiement ne vaut que pour les membres de SA tontine.
+    members = [m for m in members if m.pot_id == pot_id]
+    if not members:
         return None
-    pot = db.get(KoryPot, member.pot_id)
+    pot = db.get(KoryPot, pot_id)
+    if "member_ids" in metadata and (pot is None or not _is_admin(pot, payment.user_id)):
+        return None
+    if "member_ids" not in metadata and members[0].user_id != payment.user_id:
+        return None
     now = datetime.utcnow()
-    member.fee_paid_at = member.fee_paid_at or now
-    if member.declined_at is None:
-        member.accepted_at = member.accepted_at or now
+    for member in members:
+        member.fee_paid_at = member.fee_paid_at or now
+        # Payer vaut accepter — pour soi seulement.
+        if member.user_id == payment.user_id and member.declined_at is None:
+            member.accepted_at = member.accepted_at or now
     db.flush()
     if pot is not None:
-        _emit(db, pot, "kory.tontine.fee_paid", user_id=member.user_id)
+        for member in members:
+            _emit(db, pot, "kory.tontine.fee_paid", user_id=member.user_id, paid_by=payment.user_id)
+        others = [m.user_id for m in members if m.user_id != payment.user_id]
+        if others:
+            payer = _name(db, payment.user_id) or "L'administrateur"
+            _notify(db, pot, others, f"{payer} a réglé tes frais Kory Plus. Il te reste à accepter l'invitation.")
         _maybe_start(db, pot)
-    return {"pot_id": member.pot_id, "fee_paid": True}
+    return {"pot_id": pot_id, "fee_paid": True}
 
 
 @router.post("/pots/{pot_id}/accept")
@@ -1514,6 +1570,36 @@ def remind(pot_id: int, current_user: dict = Depends(get_current_user), db: Sess
         _emit(db, pot, "kory.reminded", count=len(targets))
     db.commit()
     return {"reminded": len(targets), "reminded_at": pot.reminded_at.isoformat() if pot.reminded_at else None}
+
+
+class RemindersBody(BaseModel):
+    enabled: bool
+
+
+@router.put("/pots/{pot_id}/reminders")
+def set_reminders(
+    pot_id: int,
+    body: RemindersBody,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """KOR-21 : « Rappels de cette cotisation » — chacun coupe ou remet les
+    rappels J−2, jour J et J+1 qui le concernent."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    if pot.kind != "COTISATION":
+        raise HTTPException(status_code=409, detail="Seule une cotisation a des rappels")
+    if me not in cotisation_service.member_ids(db, pot):
+        raise HTTPException(status_code=403, detail="Tu ne cotises pas ici")
+    member = db.query(KoryMember).filter(KoryMember.pot_id == pot.id, KoryMember.user_id == me).first()
+    if member is None:
+        # Membre par le groupe, sans ligne : on la crée pour porter son choix.
+        member = KoryMember(pot_id=pot.id, user_id=me)
+        db.add(member)
+    member.reminders_muted = not body.enabled
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)
 
 
 def _my_upcoming_round(db: Session, pot: KoryPot, user_id: int) -> Optional[KoryRound]:

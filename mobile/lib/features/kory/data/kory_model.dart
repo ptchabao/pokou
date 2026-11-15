@@ -530,7 +530,11 @@ class KoryCotisation {
     this.myNext,
     this.schedule = const [],
     this.nextPeriodDue,
+    this.myReminders = true,
   });
+
+  /// KOR-21 : les rappels J−2, jour J et J+1 me parviennent.
+  final bool myReminders;
 
   final int membersCount;
   final bool isMember;
@@ -577,6 +581,7 @@ class KoryCotisation {
       nextPeriodDue: next is Map<String, dynamic>
           ? tryParseServerTime(next['due_at'] as String? ?? '')
           : null,
+      myReminders: json['my_reminders'] as bool? ?? true,
     );
   }
 }

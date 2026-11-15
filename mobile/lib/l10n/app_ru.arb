@@ -2497,7 +2497,7 @@
   "koryXYourMonth": "Ваш месяц",
   "koryXUpToDate": "Оплачено",
   "koryXPlusFeeTitle": "Плата за открытие Kory Plus",
-  "koryXPlusFeeBody": "{ht} без НДС ({ttc} с НДС) с участника, один раз, через Mobile Money.",
+  "koryXPlusFeeBody": "{ht} без НДС ({ttc} с НДС) с участника, один раз, через CashPay.",
   "koryXPlusFeePaidOf": "Оплатили {paid} из {total} участников",
   "koryXPayAndJoin": "Оплатить {amount} и вступить",
   "koryXPayMyFee": "Оплатить взнос · {amount}",

@@ -2497,7 +2497,7 @@
   "koryXYourMonth": "Il tuo mese",
   "koryXUpToDate": "In regola",
   "koryXPlusFeeTitle": "Costo di apertura Kory Plus",
-  "koryXPlusFeeBody": "{ht} IVA esclusa ({ttc} IVA inclusa) per membro, una sola volta, tramite Mobile Money.",
+  "koryXPlusFeeBody": "{ht} IVA esclusa ({ttc} IVA inclusa) per membro, una sola volta, tramite CashPay.",
   "koryXPlusFeePaidOf": "{paid} membri su {total} hanno pagato",
   "koryXPayAndJoin": "Paga {amount} e unisciti",
   "koryXPayMyFee": "Paga la mia quota · {amount}",
