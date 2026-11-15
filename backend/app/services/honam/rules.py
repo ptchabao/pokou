@@ -13,7 +13,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.countries import country_config
-from app.models import CourierLedgerEntry, CourierProfile, HonamOrder, HonamOrderEvent, Pharmacy
+from app.models import CourierDefault, CourierLedgerEntry, CourierProfile, HonamOrder, HonamOrderEvent, Pharmacy
 from app.services.events.outbox import record_event
 
 EVENTS_TOPIC = "honam.events"
@@ -48,6 +48,29 @@ REFERRAL_GIFT_RIDES = 2
 ATTACHED_PRIORITY_MINUTES = 5
 #: Une position plus vieille que ça est montrée « position non à jour ».
 LOCATION_STALE_SECONDS = 60
+#: Maquette Honam patient 6 : sans choix de la patiente sous 15 minutes
+#: après un produit manquant, tout est annulé et remboursé.
+MISSING_CHOICE_MINUTES = 15
+#: Maquette Coursiers 11 : 5 essais au plus pour le code de remise.
+MAX_CODE_ATTEMPTS = 5
+#: Maquette Coursiers 19 : le coursier attend 10 minutes un patient
+#: injoignable, puis rapporte le colis à l'officine, sans défaut.
+NO_ANSWER_WAIT_MINUTES = 10
+#: Maquette Coursiers 20 : un défaut se conteste pendant 48 heures.
+DEFAULT_CONTEST_HOURS = 48
+#: Maquette Coursiers 8 : l'original se rapporte à l'officine au plus tard
+#: le lendemain de la livraison. Hypothèse : 24 heures.
+ORIGINAL_RETURN_HOURS = 24
+#: Maquette Coursiers 2 : le mode coursier est réservé aux 18 ans et plus.
+MIN_COURIER_AGE = 18
+#: Maquette Coursiers 2 : la distance des courses proposées selon le moyen
+#: de transport (« jusqu'à 8 km »…), et l'allure qui sert à estimer une
+#: heure d'arrivée. Hypothèse pour l'allure : moto 25 km/h, vélo 12, à pied 5.
+TRANSPORTS = {
+    "MOTO": {"range_km": 8.0, "speed_kmh": 25.0},
+    "VELO": {"range_km": 4.0, "speed_kmh": 12.0},
+    "PIED": {"range_km": 1.5, "speed_kmh": 5.0},
+}
 
 #: Nombre de courses et prix HT au Togo. La Côte d'Ivoire paie 1,5 fois,
 #: comme le prix de sa course (1 500 FCFA contre 1 000).
@@ -208,7 +231,7 @@ def courier_can_accept(db: Session, courier: CourierProfile) -> tuple[bool, Opti
     status = refresh_courier_status(courier)
     if status == "SUSPENDED":
         return False, "Compte coursier suspendu"
-    if status == "PENDING":
+    if status in ("PENDING", "INCOMPLETE"):
         return False, "Candidature en cours de vérification"
     if status == "REJECTED":
         # Candidature refusée par l'équipe : pas de course, même pendant
@@ -250,10 +273,18 @@ def record_ride(db: Session, courier: CourierProfile, order: HonamOrder) -> None
     ))
 
 
-def record_default(db: Session, courier: CourierProfile, order: HonamOrder) -> bool:
-    """Renvoie vrai si ce défaut suspend le coursier (BM-05)."""
+def record_default(db: Session, courier: CourierProfile, order: HonamOrder, reason: Optional[str] = None) -> bool:
+    """Renvoie vrai si ce défaut suspend le coursier (BM-05). Le défaut est
+    daté et motivé : le coursier le voit et peut le contester 48 h
+    (maquettes Coursiers 20 et 21)."""
     courier.defaults_count += 1
     db.add(CourierLedgerEntry(courier_id=courier.id, kind="DEFAULT", rides=0, order_id=order.id))
+    now = datetime.utcnow()
+    db.add(CourierDefault(
+        courier_id=courier.id, order_id=order.id, pharmacy_id=order.pharmacy_id,
+        reason=(reason or "Défaut de livraison").strip()[:255],
+        contest_until=now + timedelta(hours=DEFAULT_CONTEST_HOURS), created_at=now,
+    ))
     if courier.defaults_count >= MAX_COURIER_DEFAULTS and courier.status != "SUSPENDED":
         courier.status = "SUSPENDED"
         courier.suspended_at = datetime.utcnow()
@@ -281,14 +312,16 @@ def served_cities(db: Session, country: Optional[str]) -> list[str]:
     return list(country_config(db, country).get("honam_cities") or [])
 
 
-def city_served(db: Session, country: Optional[str], city: Optional[str]) -> bool:
-    """Comparaison sans casse ni accents : « lome » vaut « Lomé »."""
+def city_served_key(value: str) -> str:
+    """La clé de comparaison d'un nom de ville, sans casse ni accents."""
     import unicodedata
 
-    def key(value: str) -> str:
-        return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode().strip().lower()
+    return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode().strip().lower()
 
-    return bool(city) and key(city) in {key(c) for c in served_cities(db, country)}
+
+def city_served(db: Session, country: Optional[str], city: Optional[str]) -> bool:
+    """Comparaison sans casse ni accents : « lome » vaut « Lomé »."""
+    return bool(city) and city_served_key(city) in {city_served_key(c) for c in served_cities(db, country)}
 
 
 def new_referral_code(db: Session) -> str:
@@ -377,8 +410,38 @@ def transition(db: Session, order: HonamOrder, status: str, actor_id: Optional[i
 
 
 def expire_quote_if_due(db: Session, order: HonamOrder) -> None:
-    if order.status == "QUOTED" and order.quote_expires_at and order.quote_expires_at < datetime.utcnow():
+    """Les délais qui font bouger une commande sans que personne n'agisse :
+    le devis sans réponse, et le produit manquant sans choix de la patiente
+    (tout est alors annulé et remboursé)."""
+    now = datetime.utcnow()
+    if order.status == "QUOTED" and order.quote_expires_at and order.quote_expires_at < now:
         transition(db, order, "EXPIRED", None, "Devis sans réponse")
+    elif (
+        order.status == "PAID"
+        and order.missing_amount is not None
+        and order.missing_choice is None
+        and order.missing_reported_at is not None
+        and order.missing_reported_at + timedelta(minutes=MISSING_CHOICE_MINUTES) < now
+    ):
+        order.missing_choice = "CANCEL"
+        order.refund_requested_at = now
+        order.refund_reason = order.missing_reason
+        order.refund_due = (order.medicines_total or 0) + (order.delivery_price or 0)
+        transition(db, order, "CANCELLED", None, "Sans réponse après un produit manquant : commande annulée et remboursée")
+
+
+def courier_age(birth_date, today=None) -> int:
+    today = today or datetime.utcnow().date()
+    return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+
+
+def eta_minutes(distance: Optional[float], transport: Optional[str]) -> Optional[int]:
+    """Une estimation, pas une promesse : la distance à vol d'oiseau à
+    l'allure du moyen de transport, arrondie à la minute supérieure."""
+    if distance is None:
+        return None
+    speed = TRANSPORTS.get(transport or "MOTO", TRANSPORTS["MOTO"])["speed_kmh"]
+    return max(1, math.ceil(distance / speed * 60))
 
 
 def new_delivery_code() -> str:

@@ -301,7 +301,8 @@ def test_coursiers_candidatures_et_suspension(client):
     assert client.get(f"{API}/honam/couriers?status=PENDING", headers=viewer).json()["total"] == 2
     assert client.post(f"{API}/honam/couriers/{a}/reject", json={"reason": "Pièce illisible"}, headers=viewer).status_code == 403
     info = client.post(f"{API}/honam/couriers/{a}/request-info", json={"reason": "Ajoute ta zone"}, headers=support)
-    assert info.json()["status"] == "PENDING" and any("Ajoute ta zone" in m for m in _notified(a))
+    # Maquette Coursiers 18 : la candidature passe « à compléter ».
+    assert info.json()["status"] == "INCOMPLETE" and any("Ajoute ta zone" in m for m in _notified(a))
     assert client.post(f"{API}/honam/couriers/{a}/reject", json={"reason": "Hors zone"}, headers=support).json()["status"] == "REJECTED"
     assert client.post(f"{API}/honam/couriers/{a}/reject", json={"reason": "Hors zone"}, headers=support).status_code == 409
     with Session() as db:

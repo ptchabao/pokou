@@ -232,3 +232,188 @@ class HonamPrimaryButton extends StatelessWidget {
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }
 }
+
+/// La frise des cinq temps, avec leurs libellés (maquette Honam patient 2) :
+/// envoyée, devis, payée, en route, livrée. Le temps en cours en terre
+/// cuite, les temps passés en vert.
+class HonamStepRail extends StatelessWidget {
+  const HonamStepRail({super.key, required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final active = honamStepIndex(status);
+    final finished = status == 'DELIVERED';
+    final labels = [
+      l.honamPStepSent,
+      l.honamPStepQuote,
+      l.honamPStepPaid,
+      l.honamPStepOnTheWay,
+      l.honamPStepDelivered,
+    ];
+    Color tone(int index) => index < active || finished
+        ? AppColors.feedbackSuccess
+        : index == active
+        ? AppColors.accentPrimaryDark
+        : AppColors.surfaceElevated;
+    Color ink(int index) => index < active || finished
+        ? AppColors.feedbackSuccess
+        : index == active
+        ? AppColors.accentPrimaryDark
+        : AppColors.textMuted;
+    return Semantics(
+      label: l.honamUiStepOf(active + 1, honamStepCount),
+      child: ExcludeSemantics(
+        child: Row(
+          children: [
+            for (var index = 0; index < honamStepCount; index++) ...[
+              if (index > 0) const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: tone(index),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      labels[index],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: index <= active
+                            ? FontWeight.w700
+                            : FontWeight.w400,
+                        color: ink(index),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Une ligne qui s'ouvre : une icône, un titre, une précision, un chevron
+/// (« Écrire à la pharmacie », « Livrer à … »).
+class HonamLinkRow extends StatelessWidget {
+  const HonamLinkRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.onTap,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 52),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: AppColors.accentPrimaryDark),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (subtitle != null && subtitle!.isNotEmpty)
+                    Text(
+                      subtitle!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            ?trailing,
+            if (onTap != null && trailing == null)
+              Icon(Icons.chevron_right, color: AppColors.textMuted),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// La pastille d'état d'une commande dans une liste (« En route »,
+/// « Livrée », « Remboursée »…).
+Widget honamOrderPill(L l, HonamOrder order) {
+  final (String label, Color color) = switch (order.status) {
+    _ when order.refundDue > 0 && order.refundConfirmed => (
+      l.honamPPillRefunded,
+      AppColors.securityWarning,
+    ),
+    _ when order.refundDue > 0 => (
+      l.honamPPillRefundPending,
+      AppColors.securityWarning,
+    ),
+    'SUBMITTED' => (l.honamPPillWaitingQuote, AppColors.textSecondary),
+    'QUOTED' || 'ACCEPTED' => (l.honamPPillToPay, AppColors.accentPrimaryDark),
+    'PAID' || 'READY' => (l.honamPPillPreparing, AppColors.accentPrimaryDark),
+    'IN_DELIVERY' => (l.honamPPillOnTheWay, AppColors.feedbackSuccess),
+    'DELIVERED' => (l.honamPPillDelivered, AppColors.feedbackSuccess),
+    'REJECTED' => (l.honamPPillRejected, AppColors.textSecondary),
+    'EXPIRED' => (l.honamPPillExpired, AppColors.textSecondary),
+    _ => (l.honamPPillCancelled, AppColors.textSecondary),
+  };
+  return HonamPill(
+    label,
+    background: color.withValues(alpha: AppColors.isDark ? 0.22 : 0.12),
+    ink: AppColors.isDark ? AppColors.textPrimary : color,
+  );
+}
+
+/// « aujourd'hui, 9:42 », « hier, 17:02 », « 2 nov. à 09:15 ».
+String honamWhen(BuildContext context, DateTime at) {
+  final l = L.of(context);
+  final locale = Localizations.localeOf(context).toLanguageTag();
+  final local = at.toLocal();
+  final now = DateTime.now();
+  final time = DateFormat.Hm(locale).format(local);
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(local.year, local.month, local.day);
+  if (day == today) return l.honamPTodayAt(time);
+  if (day == today.subtract(const Duration(days: 1))) {
+    return l.honamPYesterdayAt(time);
+  }
+  if (day == today.add(const Duration(days: 1))) {
+    return l.honamPTomorrowAt(time);
+  }
+  return l.honamUiDateAt(DateFormat.MMMd(locale).format(local), time);
+}

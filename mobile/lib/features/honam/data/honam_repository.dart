@@ -58,6 +58,7 @@ class HonamRepository {
     double? lat,
     double? lng,
     String? note,
+    String? landmark,
   }) async {
     final json = await _api.post(
       '/honam/orders',
@@ -68,6 +69,7 @@ class HonamRepository {
         'delivery_latitude': ?lat,
         'delivery_longitude': ?lng,
         if (note != null && note.isNotEmpty) 'note': note,
+        if (landmark != null && landmark.isNotEmpty) 'landmark': landmark,
       },
     );
     return HonamOrder.fromJson(json as Map<String, dynamic>);

@@ -741,7 +741,7 @@ def honam_pharmacy_reactivate(
 @router.get("/honam/couriers")
 def honam_couriers(
     q: Optional[str] = Query(None, max_length=80),
-    status: Optional[str] = Query(None, pattern="^(PENDING|TRIAL|MEMBER|ENDED|SUSPENDED|REJECTED)$"),
+    status: Optional[str] = Query(None, pattern="^(PENDING|INCOMPLETE|TRIAL|MEMBER|ENDED|SUSPENDED|REJECTED)$"),
     page: int = Query(1, ge=1),
     size: int = Query(25, ge=1, le=100),
     user: User = Depends(require_permission("honam.view")),
@@ -791,7 +791,7 @@ def honam_courier_reject(
     user: User = Depends(require_permission("honam.manage")), db: Session = Depends(get_db),
 ):
     courier = _get_courier(db, user_id)
-    if courier.status != "PENDING":
+    if courier.status not in ("PENDING", "INCOMPLETE"):
         raise HTTPException(status_code=409, detail="Cette candidature n'est plus en attente")
     reason = body.reason.strip()
     courier.status = "REJECTED"
@@ -802,14 +802,20 @@ def honam_courier_reject(
 @router.post("/honam/couriers/{user_id}/request-info")
 def honam_courier_request_info(
     user_id: int, body: ReasonBody, request: Request,
+    item: str = Query("SELFIE", pattern="^(SELFIE|ID_FRONT|ID_BACK|WALLET)$"),
     user: User = Depends(require_permission("honam.manage")), db: Session = Depends(get_db),
 ):
-    """Demander des compléments : la candidature reste en attente, et le
-    candidat peut la renvoyer depuis l'app (POST /honam/courier/join)."""
+    """Demander des compléments : la candidature passe « à compléter »
+    (maquette Coursiers 18), avec la pièce à reprendre (`item` : SELFIE,
+    ID_FRONT, ID_BACK ou WALLET) et le motif. Le candidat la reprend depuis
+    l'app (POST /honam/courier/identity) et elle repart en vérification."""
     courier = _get_courier(db, user_id)
-    if courier.status != "PENDING":
+    if courier.status not in ("PENDING", "INCOMPLETE"):
         raise HTTPException(status_code=409, detail="Cette candidature n'est plus en attente")
     reason = body.reason.strip()
+    courier.status = "INCOMPLETE"
+    courier.incomplete_item = item
+    courier.incomplete_reason = reason
     return _courier_decision(db, user, request, courier, "courier_request_info", reason,
                              f"Ta candidature de coursier doit être complétée : {reason}")
 

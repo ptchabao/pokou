@@ -4730,5 +4730,366 @@
     }
   },
   "courierStatusRejected": "Candidature refusée",
-  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus."
+  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.",
+  "courierTransportMoto": "moto",
+  "courierTransportBike": "vélo",
+  "courierTransportWalk": "à pied",
+  "honamPAddAddress": "Ajouter l’adresse de livraison",
+  "honamPAmountToSend": "Montant à envoyer",
+  "honamPArrivesAround": "{name} arrive vers {time}",
+  "@honamPArrivesAround": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPArrivesIn": "{name} arrive dans {minutes} min",
+  "@honamPArrivesIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "honamPAtKm": "à {km} km",
+  "@honamPAtKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPCallRelayed": "Appeler {name} par Pokou, numéro masqué",
+  "@honamPCallRelayed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPCancelAllBody": "Rien n’est livré. La pharmacie te rembourse {amount}.",
+  "@honamPCancelAllBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPCheckRecipient": "Vérifie que ton opérateur affiche bien « {pharmacy} » avant de valider. Les frais de l’opérateur s’appliquent.",
+  "@honamPCheckRecipient": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPCodeLater": "Ton code de remise s’affiche quand le coursier est en route. Ne le donne qu’à lui, au moment où il te remet le colis.",
+  "honamPCopyAmount": "Copier le montant",
+  "honamPCurrentLine": "{pharmacy} · {amount}, course comprise",
+  "@honamPCurrentLine": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPCurrentOrder": "Commande en cours",
+  "honamPDeliverTo": "Livrer à {address}",
+  "@honamPDeliverTo": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPDeliveryByHonam": "Course, ajoutée par Honam",
+  "honamPDialUssd": "Composer le code USSD",
+  "honamPFollowOrder": "Suivre ma commande",
+  "honamPFollowWithoutMap": "Suivre sans la carte",
+  "honamPGeneric": "Générique",
+  "honamPGenericOffered": "Un générique t’est proposé pour : {names}. Une question ? Écris à la pharmacie avant de payer.",
+  "@honamPGenericOffered": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPGiveCodeOnly": "Donne-le seulement à {name}, quand il te remet le colis.",
+  "@honamPGiveCodeOnly": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPGoingToPharmacy": "{name} va chercher ta commande à la pharmacie",
+  "@honamPGoingToPharmacy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPHome": "Chez toi",
+  "honamPInDelivery": "Commande en livraison",
+  "honamPInProgress": "En cours",
+  "honamPKeepRestBody": "Le reste de ta commande est livré. La pharmacie te rembourse {amount}.",
+  "@honamPKeepRestBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPLandmark": "Repère : {landmark}",
+  "@honamPLandmark": {
+    "placeholders": {
+      "landmark": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPLandmarkHint": "Portail bleu face au kiosque",
+  "honamPLandmarkLabel": "Repère pour le coursier",
+  "honamPLater": "Plus tard",
+  "honamPLightTracking": "Suivi léger, presque sans données : la carte se charge seulement si tu la demandes. C’est le mode par défaut avec l’économie de données.",
+  "honamPMessageHint": "À livrer avant 13 h, merci",
+  "honamPMessageToPharmacy": "Message à la pharmacie",
+  "honamPMissingLead": "{pharmacy} n’a plus ce produit : {reason}. Que préfères-tu ?",
+  "@honamPMissingLead": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPMissingNoAnswer": "Sans réponse de ta part sous 15 minutes, tout est annulé et remboursé.",
+  "honamPMore": "Plus d’options",
+  "honamPMyOrder": "Ma commande",
+  "honamPNothingPaid": "{pharmacy} · rien n’a été payé",
+  "@honamPNothingPaid": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPOnItsWallet": "Sur son application de wallet",
+  "honamPOrderOf": "Commande de {pharmacy}",
+  "@honamPOrderOf": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPPaidOrderOf": "{pharmacy} · commande payée",
+  "@honamPPaidOrderOf": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPPast": "Passées",
+  "honamPPastQuestion": "Une question sur une commande passée ? Ouvre-la : la discussion avec la pharmacie y reste.",
+  "honamPPayAmount": "Payer {amount}",
+  "@honamPPayAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPPayDirectly": "Tu paies la pharmacie directement depuis ton wallet. Pokou ne touche pas l’argent et ne prend rien sur les médicaments.",
+  "honamPPayTitle": "Payer la pharmacie",
+  "honamPPharmacyHonam": "{pharmacy} · Honam",
+  "@honamPPharmacyHonam": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPPhotoAdded": "Photo ajoutée",
+  "honamPPhotoHelp": "Vérifie que toute la page est visible, nom du médecin compris.",
+  "honamPPillCancelled": "Annulée",
+  "honamPPillDelivered": "Livrée",
+  "honamPPillExpired": "Expirée",
+  "honamPPillOnTheWay": "En route",
+  "honamPPillPreparing": "En préparation",
+  "honamPPillRefundPending": "Remboursement attendu",
+  "honamPPillRefunded": "Remboursée",
+  "honamPPillRejected": "Refusée",
+  "honamPPillToPay": "Devis à payer",
+  "honamPPillWaitingQuote": "Devis attendu",
+  "honamPPrescriptionSent": "Ordonnance envoyée",
+  "honamPPrivacyNotice": "Seule la pharmacie choisie voit ta photo. Le coursier ne voit ni l’ordonnance ni les produits.",
+  "honamPProducts": "{count, plural, =1{1 produit} other{{count} produits}}",
+  "@honamPProducts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "honamPQuoteFrom": "Devis de {pharmacy}",
+  "@honamPQuoteFrom": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPReason": "Motif",
+  "honamPReceivedAt": "Reçu {when}",
+  "@honamPReceivedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPRef": "réf. {reference}",
+  "@honamPRef": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPReferenceHelp": "Dans le SMS de confirmation {operator}",
+  "@honamPReferenceHelp": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPRefundDone": "Remboursement de {amount} reçu.",
+  "@honamPRefundDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPRefundToPayer": "Le remboursement arrive sous 2 h, uniquement sur le numéro qui a payé : {wallet}.",
+  "@honamPRefundToPayer": {
+    "placeholders": {
+      "wallet": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPRefuseQuote": "Refuser le devis",
+  "honamPRefusedTitle": "Ordonnance refusée",
+  "honamPRetake": "Reprendre",
+  "honamPSamePhoto": "La même photo est envoyée : tu n’as rien à refaire.",
+  "honamPSeeQuoteAndPay": "Voir le devis et payer",
+  "honamPSendElsewhere": "Envoyer à une autre pharmacie",
+  "honamPSendTo": "Envoyer à {pharmacy}",
+  "@honamPSendTo": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPSentAt": "{pharmacy} · envoyée {when}",
+  "@honamPSentAt": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPShowMap": "Afficher la carte",
+  "honamPStepDelivered": "Livrée",
+  "honamPStepOnTheWay": "En route",
+  "honamPStepPaid": "Payée",
+  "honamPStepPaymentReceived": "La pharmacie a reçu ton paiement",
+  "honamPStepPaymentSignaled": "Paiement signalé",
+  "honamPStepPharmacyChecks": "La pharmacie vérifie la réception",
+  "honamPStepPreparing": "Préparation, puis départ du coursier",
+  "honamPStepPreparingBody": "Tu suis la livraison et reçois ton code",
+  "honamPStepQuote": "Devis",
+  "honamPStepSent": "Envoyée",
+  "honamPToPharmacy": "À {pharmacy}",
+  "@honamPToPharmacy": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPTodayAt": "aujourd’hui, {time}",
+  "@honamPTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPTomorrowAt": "demain, {time}",
+  "@honamPTomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPTotalToPay": "Total à payer",
+  "honamPUpdatedSecondsAgo": "mis à jour il y a {seconds} s",
+  "@honamPUpdatedSecondsAgo": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "honamPValidUntil": "valable jusqu’à {when}",
+  "@honamPValidUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPValidateChoice": "Valider mon choix",
+  "honamPVerifiedCourier": "Coursier vérifié",
+  "honamPWaitingQuoteBody": "{pharmacy} lit ton ordonnance et prépare le devis. Tu reçois une notification dès qu’il arrive.",
+  "@honamPWaitingQuoteBody": {
+    "placeholders": {
+      "pharmacy": {
+        "type": "String"
+      }
+    }
+  },
+  "honamPWriteToPharmacy": "Écrire à la pharmacie",
+  "honamPYesterdayAt": "hier, {time}",
+  "@honamPYesterdayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

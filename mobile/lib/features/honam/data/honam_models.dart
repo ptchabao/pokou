@@ -12,7 +12,12 @@ class Pharmacy {
     required this.isOnDuty,
     this.openingHours,
     this.distanceKm,
+    this.latitude,
+    this.longitude,
   });
+
+  final double? latitude;
+  final double? longitude;
 
   final int id;
   final String name;
@@ -30,6 +35,8 @@ class Pharmacy {
     isOnDuty: json['is_on_duty'] as bool? ?? false,
     openingHours: json['opening_hours'] as String?,
     distanceKm: (json['distance_km'] as num?)?.toDouble(),
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
   );
 }
 
@@ -39,6 +46,8 @@ class QuoteItem {
     required this.quantity,
     required this.unitPrice,
     required this.available,
+    this.packaging,
+    this.generic = false,
   });
 
   final String name;
@@ -46,11 +55,18 @@ class QuoteItem {
   final int unitPrice;
   final bool available;
 
+  /// Le conditionnement (« 12 gélules ») et le générique proposé à la
+  /// place du princeps (maquette Honam patient 3).
+  final String? packaging;
+  final bool generic;
+
   factory QuoteItem.fromJson(Map<String, dynamic> json) => QuoteItem(
     name: json['name'] as String,
     quantity: json['quantity'] as int? ?? 1,
     unitPrice: json['unit_price'] as int? ?? 0,
     available: json['available'] as bool? ?? true,
+    packaging: json['packaging'] as String?,
+    generic: json['generic'] as bool? ?? false,
   );
 }
 
@@ -124,7 +140,50 @@ class HonamOrder {
     this.timeline = const [],
     this.deliveryLatitude,
     this.deliveryLongitude,
+    this.deliveryLandmark,
+    this.patientNote,
+    this.paymentReference,
+    this.paymentDeclaredAt,
+    this.prescriptionMediaId,
+    this.courierUserId,
+    this.courierTransport,
+    this.patientName,
+    this.patientUserId,
+    this.pickedUpAt,
+    this.incidentKind,
+    this.incidentAt,
+    this.codeAttemptsLeft,
+    this.priority = false,
+    this.quoteExpiresAt,
+    this.deliveredAt,
   });
+
+  /// Le repère qui aide le coursier (maquette Honam patient 1).
+  final String? deliveryLandmark;
+  final String? patientNote;
+
+  /// La référence de la transaction, lue dans le SMS de l'opérateur.
+  final String? paymentReference;
+  final DateTime? paymentDeclaredAt;
+  final int? prescriptionMediaId;
+
+  /// Pendant la course : de quoi appeler le coursier par Pokou (numéro
+  /// masqué) et dire comment il vient.
+  final int? courierUserId;
+  final String? courierTransport;
+
+  /// Côté coursier : le prénom du patient, et de quoi l'appeler par Pokou.
+  final String? patientName;
+  final int? patientUserId;
+  final DateTime? pickedUpAt;
+  final String? incidentKind;
+  final DateTime? incidentAt;
+  final int? codeAttemptsLeft;
+
+  /// « Proposée d'abord à toi » (maquette Coursiers 9).
+  final bool priority;
+  final DateTime? quoteExpiresAt;
+  final DateTime? deliveredAt;
 
   /// Le point de remise, envoyé au seul coursier : il navigue avec
   /// l'application de cartes de son téléphone, pas dans Pokou.
@@ -196,6 +255,22 @@ class HonamOrder {
     refundConfirmed: json['refund_confirmed_at'] != null,
     courierName: json['courier_name'] as String?,
     courierPaid: json['courier_paid_at'] != null,
+    deliveryLandmark: json['delivery_landmark'] as String?,
+    patientNote: json['patient_note'] as String?,
+    paymentReference: json['payment_reference'] as String?,
+    paymentDeclaredAt: tryParseServerTime(json['patient_paid_declared_at']),
+    prescriptionMediaId: json['prescription_media_id'] as int?,
+    courierUserId: json['courier_user_id'] as int?,
+    courierTransport: json['courier_transport'] as String?,
+    patientName: json['patient_name'] as String?,
+    patientUserId: json['patient_user_id'] as int?,
+    pickedUpAt: tryParseServerTime(json['picked_up_at']),
+    incidentKind: json['incident_kind'] as String?,
+    incidentAt: tryParseServerTime(json['incident_at']),
+    codeAttemptsLeft: json['code_attempts_left'] as int?,
+    priority: json['priority'] as bool? ?? false,
+    quoteExpiresAt: tryParseServerTime(json['quote_expires_at']),
+    deliveredAt: tryParseServerTime(json['delivered_at']),
     timeline: [
       for (final step in (json['timeline'] as List? ?? const []))
         TimelineStep.fromJson(step as Map<String, dynamic>),
@@ -293,7 +368,28 @@ class CourierTracking {
     this.at,
     this.stale = false,
     this.distanceKm,
+    this.etaMinutes,
+    this.pharmacyLatitude,
+    this.pharmacyLongitude,
+    this.deliveryLatitude,
+    this.deliveryLongitude,
+    this.courierUserId,
+    this.courierTransport,
+    this.courierVerified = false,
+    this.pickedUp = false,
   });
+
+  /// Une estimation (distance et allure du moyen de transport), pas une
+  /// promesse ; nulle avant le retrait du colis.
+  final int? etaMinutes;
+  final double? pharmacyLatitude;
+  final double? pharmacyLongitude;
+  final double? deliveryLatitude;
+  final double? deliveryLongitude;
+  final int? courierUserId;
+  final String? courierTransport;
+  final bool courierVerified;
+  final bool pickedUp;
 
   final bool active;
   final String? courierName;
@@ -314,6 +410,15 @@ class CourierTracking {
         at: json['at'] != null ? parseServerTime(json['at'] as String) : null,
         stale: json['stale'] as bool? ?? false,
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
+        etaMinutes: json['eta_minutes'] as int?,
+        pharmacyLatitude: (json['pharmacy_latitude'] as num?)?.toDouble(),
+        pharmacyLongitude: (json['pharmacy_longitude'] as num?)?.toDouble(),
+        deliveryLatitude: (json['delivery_latitude'] as num?)?.toDouble(),
+        deliveryLongitude: (json['delivery_longitude'] as num?)?.toDouble(),
+        courierUserId: json['courier_user_id'] as int?,
+        courierTransport: json['courier_transport'] as String?,
+        courierVerified: json['courier_verified'] as bool? ?? false,
+        pickedUp: json['picked_up'] as bool? ?? false,
       );
 }
 

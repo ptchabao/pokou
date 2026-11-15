@@ -15211,6 +15211,612 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.'**
   String get courierRejectedBody;
+
+  /// No description provided for @courierTransportMoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'moto'**
+  String get courierTransportMoto;
+
+  /// No description provided for @courierTransportBike.
+  ///
+  /// In fr, this message translates to:
+  /// **'vélo'**
+  String get courierTransportBike;
+
+  /// No description provided for @courierTransportWalk.
+  ///
+  /// In fr, this message translates to:
+  /// **'à pied'**
+  String get courierTransportWalk;
+
+  /// No description provided for @honamPAddAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter l’adresse de livraison'**
+  String get honamPAddAddress;
+
+  /// No description provided for @honamPAmountToSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant à envoyer'**
+  String get honamPAmountToSend;
+
+  /// No description provided for @honamPArrivesAround.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} arrive vers {time}'**
+  String honamPArrivesAround(String name, String time);
+
+  /// No description provided for @honamPArrivesIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} arrive dans {minutes} min'**
+  String honamPArrivesIn(String name, int minutes);
+
+  /// No description provided for @honamPAtKm.
+  ///
+  /// In fr, this message translates to:
+  /// **'à {km} km'**
+  String honamPAtKm(String km);
+
+  /// No description provided for @honamPCallRelayed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler {name} par Pokou, numéro masqué'**
+  String honamPCallRelayed(String name);
+
+  /// No description provided for @honamPCancelAllBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien n’est livré. La pharmacie te rembourse {amount}.'**
+  String honamPCancelAllBody(String amount);
+
+  /// No description provided for @honamPCheckRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie que ton opérateur affiche bien « {pharmacy} » avant de valider. Les frais de l’opérateur s’appliquent.'**
+  String honamPCheckRecipient(String pharmacy);
+
+  /// No description provided for @honamPCodeLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code de remise s’affiche quand le coursier est en route. Ne le donne qu’à lui, au moment où il te remet le colis.'**
+  String get honamPCodeLater;
+
+  /// No description provided for @honamPCopyAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier le montant'**
+  String get honamPCopyAmount;
+
+  /// No description provided for @honamPCurrentLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} · {amount}, course comprise'**
+  String honamPCurrentLine(String pharmacy, String amount);
+
+  /// No description provided for @honamPCurrentOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande en cours'**
+  String get honamPCurrentOrder;
+
+  /// No description provided for @honamPDeliverTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrer à {address}'**
+  String honamPDeliverTo(String address);
+
+  /// No description provided for @honamPDeliveryByHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course, ajoutée par Honam'**
+  String get honamPDeliveryByHonam;
+
+  /// No description provided for @honamPDialUssd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Composer le code USSD'**
+  String get honamPDialUssd;
+
+  /// No description provided for @honamPFollowOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre ma commande'**
+  String get honamPFollowOrder;
+
+  /// No description provided for @honamPFollowWithoutMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre sans la carte'**
+  String get honamPFollowWithoutMap;
+
+  /// No description provided for @honamPGeneric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Générique'**
+  String get honamPGeneric;
+
+  /// No description provided for @honamPGenericOffered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un générique t’est proposé pour : {names}. Une question ? Écris à la pharmacie avant de payer.'**
+  String honamPGenericOffered(String names);
+
+  /// No description provided for @honamPGiveCodeOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donne-le seulement à {name}, quand il te remet le colis.'**
+  String honamPGiveCodeOnly(String name);
+
+  /// No description provided for @honamPGoingToPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} va chercher ta commande à la pharmacie'**
+  String honamPGoingToPharmacy(String name);
+
+  /// No description provided for @honamPHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chez toi'**
+  String get honamPHome;
+
+  /// No description provided for @honamPInDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande en livraison'**
+  String get honamPInDelivery;
+
+  /// No description provided for @honamPInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get honamPInProgress;
+
+  /// No description provided for @honamPKeepRestBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le reste de ta commande est livré. La pharmacie te rembourse {amount}.'**
+  String honamPKeepRestBody(String amount);
+
+  /// No description provided for @honamPLandmark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repère : {landmark}'**
+  String honamPLandmark(String landmark);
+
+  /// No description provided for @honamPLandmarkHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Portail bleu face au kiosque'**
+  String get honamPLandmarkHint;
+
+  /// No description provided for @honamPLandmarkLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repère pour le coursier'**
+  String get honamPLandmarkLabel;
+
+  /// No description provided for @honamPLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get honamPLater;
+
+  /// No description provided for @honamPLightTracking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi léger, presque sans données : la carte se charge seulement si tu la demandes. C’est le mode par défaut avec l’économie de données.'**
+  String get honamPLightTracking;
+
+  /// No description provided for @honamPMessageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'À livrer avant 13 h, merci'**
+  String get honamPMessageHint;
+
+  /// No description provided for @honamPMessageToPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message à la pharmacie'**
+  String get honamPMessageToPharmacy;
+
+  /// No description provided for @honamPMissingLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} n’a plus ce produit : {reason}. Que préfères-tu ?'**
+  String honamPMissingLead(String pharmacy, String reason);
+
+  /// No description provided for @honamPMissingNoAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans réponse de ta part sous 15 minutes, tout est annulé et remboursé.'**
+  String get honamPMissingNoAnswer;
+
+  /// No description provided for @honamPMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d’options'**
+  String get honamPMore;
+
+  /// No description provided for @honamPMyOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma commande'**
+  String get honamPMyOrder;
+
+  /// No description provided for @honamPNothingPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} · rien n’a été payé'**
+  String honamPNothingPaid(String pharmacy);
+
+  /// No description provided for @honamPOnItsWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur son application de wallet'**
+  String get honamPOnItsWallet;
+
+  /// No description provided for @honamPOrderOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande de {pharmacy}'**
+  String honamPOrderOf(String pharmacy);
+
+  /// No description provided for @honamPPaidOrderOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} · commande payée'**
+  String honamPPaidOrderOf(String pharmacy);
+
+  /// No description provided for @honamPPast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passées'**
+  String get honamPPast;
+
+  /// No description provided for @honamPPastQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une question sur une commande passée ? Ouvre-la : la discussion avec la pharmacie y reste.'**
+  String get honamPPastQuestion;
+
+  /// No description provided for @honamPPayAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount}'**
+  String honamPPayAmount(String amount);
+
+  /// No description provided for @honamPPayDirectly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu paies la pharmacie directement depuis ton wallet. Pokou ne touche pas l’argent et ne prend rien sur les médicaments.'**
+  String get honamPPayDirectly;
+
+  /// No description provided for @honamPPayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer la pharmacie'**
+  String get honamPPayTitle;
+
+  /// No description provided for @honamPPharmacyHonam.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} · Honam'**
+  String honamPPharmacyHonam(String pharmacy);
+
+  /// No description provided for @honamPPhotoAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo ajoutée'**
+  String get honamPPhotoAdded;
+
+  /// No description provided for @honamPPhotoHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie que toute la page est visible, nom du médecin compris.'**
+  String get honamPPhotoHelp;
+
+  /// No description provided for @honamPPillCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get honamPPillCancelled;
+
+  /// No description provided for @honamPPillDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée'**
+  String get honamPPillDelivered;
+
+  /// No description provided for @honamPPillExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expirée'**
+  String get honamPPillExpired;
+
+  /// No description provided for @honamPPillOnTheWay.
+  ///
+  /// In fr, this message translates to:
+  /// **'En route'**
+  String get honamPPillOnTheWay;
+
+  /// No description provided for @honamPPillPreparing.
+  ///
+  /// In fr, this message translates to:
+  /// **'En préparation'**
+  String get honamPPillPreparing;
+
+  /// No description provided for @honamPPillRefundPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement attendu'**
+  String get honamPPillRefundPending;
+
+  /// No description provided for @honamPPillRefunded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursée'**
+  String get honamPPillRefunded;
+
+  /// No description provided for @honamPPillRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get honamPPillRejected;
+
+  /// No description provided for @honamPPillToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis à payer'**
+  String get honamPPillToPay;
+
+  /// No description provided for @honamPPillWaitingQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis attendu'**
+  String get honamPPillWaitingQuote;
+
+  /// No description provided for @honamPPrescriptionSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance envoyée'**
+  String get honamPPrescriptionSent;
+
+  /// No description provided for @honamPPrivacyNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seule la pharmacie choisie voit ta photo. Le coursier ne voit ni l’ordonnance ni les produits.'**
+  String get honamPPrivacyNotice;
+
+  /// No description provided for @honamPProducts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 produit} other{{count} produits}}'**
+  String honamPProducts(int count);
+
+  /// No description provided for @honamPQuoteFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis de {pharmacy}'**
+  String honamPQuoteFrom(String pharmacy);
+
+  /// No description provided for @honamPReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get honamPReason;
+
+  /// No description provided for @honamPReceivedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu {when}'**
+  String honamPReceivedAt(String when);
+
+  /// No description provided for @honamPRef.
+  ///
+  /// In fr, this message translates to:
+  /// **'réf. {reference}'**
+  String honamPRef(String reference);
+
+  /// No description provided for @honamPReferenceHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans le SMS de confirmation {operator}'**
+  String honamPReferenceHelp(String operator);
+
+  /// No description provided for @honamPRefundDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement de {amount} reçu.'**
+  String honamPRefundDone(String amount);
+
+  /// No description provided for @honamPRefundToPayer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le remboursement arrive sous 2 h, uniquement sur le numéro qui a payé : {wallet}.'**
+  String honamPRefundToPayer(String wallet);
+
+  /// No description provided for @honamPRefuseQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser le devis'**
+  String get honamPRefuseQuote;
+
+  /// No description provided for @honamPRefusedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnance refusée'**
+  String get honamPRefusedTitle;
+
+  /// No description provided for @honamPRetake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre'**
+  String get honamPRetake;
+
+  /// No description provided for @honamPSamePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'La même photo est envoyée : tu n’as rien à refaire.'**
+  String get honamPSamePhoto;
+
+  /// No description provided for @honamPSeeQuoteAndPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir le devis et payer'**
+  String get honamPSeeQuoteAndPay;
+
+  /// No description provided for @honamPSendElsewhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à une autre pharmacie'**
+  String get honamPSendElsewhere;
+
+  /// No description provided for @honamPSendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à {pharmacy}'**
+  String honamPSendTo(String pharmacy);
+
+  /// No description provided for @honamPSentAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} · envoyée {when}'**
+  String honamPSentAt(String pharmacy, String when);
+
+  /// No description provided for @honamPShowMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher la carte'**
+  String get honamPShowMap;
+
+  /// No description provided for @honamPStepDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée'**
+  String get honamPStepDelivered;
+
+  /// No description provided for @honamPStepOnTheWay.
+  ///
+  /// In fr, this message translates to:
+  /// **'En route'**
+  String get honamPStepOnTheWay;
+
+  /// No description provided for @honamPStepPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée'**
+  String get honamPStepPaid;
+
+  /// No description provided for @honamPStepPaymentReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'La pharmacie a reçu ton paiement'**
+  String get honamPStepPaymentReceived;
+
+  /// No description provided for @honamPStepPaymentSignaled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement signalé'**
+  String get honamPStepPaymentSignaled;
+
+  /// No description provided for @honamPStepPharmacyChecks.
+  ///
+  /// In fr, this message translates to:
+  /// **'La pharmacie vérifie la réception'**
+  String get honamPStepPharmacyChecks;
+
+  /// No description provided for @honamPStepPreparing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation, puis départ du coursier'**
+  String get honamPStepPreparing;
+
+  /// No description provided for @honamPStepPreparingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu suis la livraison et reçois ton code'**
+  String get honamPStepPreparingBody;
+
+  /// No description provided for @honamPStepQuote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devis'**
+  String get honamPStepQuote;
+
+  /// No description provided for @honamPStepSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée'**
+  String get honamPStepSent;
+
+  /// No description provided for @honamPToPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'À {pharmacy}'**
+  String honamPToPharmacy(String pharmacy);
+
+  /// No description provided for @honamPTodayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui, {time}'**
+  String honamPTodayAt(String time);
+
+  /// No description provided for @honamPTomorrowAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'demain, {time}'**
+  String honamPTomorrowAt(String time);
+
+  /// No description provided for @honamPTotalToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total à payer'**
+  String get honamPTotalToPay;
+
+  /// No description provided for @honamPUpdatedSecondsAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'mis à jour il y a {seconds} s'**
+  String honamPUpdatedSecondsAgo(int seconds);
+
+  /// No description provided for @honamPValidUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'valable jusqu’à {when}'**
+  String honamPValidUntil(String when);
+
+  /// No description provided for @honamPValidateChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider mon choix'**
+  String get honamPValidateChoice;
+
+  /// No description provided for @honamPVerifiedCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coursier vérifié'**
+  String get honamPVerifiedCourier;
+
+  /// No description provided for @honamPWaitingQuoteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{pharmacy} lit ton ordonnance et prépare le devis. Tu reçois une notification dès qu’il arrive.'**
+  String honamPWaitingQuoteBody(String pharmacy);
+
+  /// No description provided for @honamPWriteToPharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à la pharmacie'**
+  String get honamPWriteToPharmacy;
+
+  /// No description provided for @honamPYesterdayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier, {time}'**
+  String honamPYesterdayAt(String time);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -9015,4 +9016,392 @@ class LAr extends L {
   @override
   String get courierRejectedBody =>
       'لم يقبل فريق Pokou طلبك كعامل توصيل. يمكنك مراسلة الدعم لمعرفة المزيد.';
+
+  @override
+  String get courierTransportMoto => 'moto';
+
+  @override
+  String get courierTransportBike => 'vélo';
+
+  @override
+  String get courierTransportWalk => 'à pied';
+
+  @override
+  String get honamPAddAddress => 'Ajouter l’adresse de livraison';
+
+  @override
+  String get honamPAmountToSend => 'Montant à envoyer';
+
+  @override
+  String honamPArrivesAround(String name, String time) {
+    return '$name arrive vers $time';
+  }
+
+  @override
+  String honamPArrivesIn(String name, int minutes) {
+    return '$name arrive dans $minutes min';
+  }
+
+  @override
+  String honamPAtKm(String km) {
+    return 'à $km km';
+  }
+
+  @override
+  String honamPCallRelayed(String name) {
+    return 'Appeler $name par Pokou, numéro masqué';
+  }
+
+  @override
+  String honamPCancelAllBody(String amount) {
+    return 'Rien n’est livré. La pharmacie te rembourse $amount.';
+  }
+
+  @override
+  String honamPCheckRecipient(String pharmacy) {
+    return 'Vérifie que ton opérateur affiche bien « $pharmacy » avant de valider. Les frais de l’opérateur s’appliquent.';
+  }
+
+  @override
+  String get honamPCodeLater =>
+      'Ton code de remise s’affiche quand le coursier est en route. Ne le donne qu’à lui, au moment où il te remet le colis.';
+
+  @override
+  String get honamPCopyAmount => 'Copier le montant';
+
+  @override
+  String honamPCurrentLine(String pharmacy, String amount) {
+    return '$pharmacy · $amount, course comprise';
+  }
+
+  @override
+  String get honamPCurrentOrder => 'Commande en cours';
+
+  @override
+  String honamPDeliverTo(String address) {
+    return 'Livrer à $address';
+  }
+
+  @override
+  String get honamPDeliveryByHonam => 'Course, ajoutée par Honam';
+
+  @override
+  String get honamPDialUssd => 'Composer le code USSD';
+
+  @override
+  String get honamPFollowOrder => 'Suivre ma commande';
+
+  @override
+  String get honamPFollowWithoutMap => 'Suivre sans la carte';
+
+  @override
+  String get honamPGeneric => 'Générique';
+
+  @override
+  String honamPGenericOffered(String names) {
+    return 'Un générique t’est proposé pour : $names. Une question ? Écris à la pharmacie avant de payer.';
+  }
+
+  @override
+  String honamPGiveCodeOnly(String name) {
+    return 'Donne-le seulement à $name, quand il te remet le colis.';
+  }
+
+  @override
+  String honamPGoingToPharmacy(String name) {
+    return '$name va chercher ta commande à la pharmacie';
+  }
+
+  @override
+  String get honamPHome => 'Chez toi';
+
+  @override
+  String get honamPInDelivery => 'Commande en livraison';
+
+  @override
+  String get honamPInProgress => 'En cours';
+
+  @override
+  String honamPKeepRestBody(String amount) {
+    return 'Le reste de ta commande est livré. La pharmacie te rembourse $amount.';
+  }
+
+  @override
+  String honamPLandmark(String landmark) {
+    return 'Repère : $landmark';
+  }
+
+  @override
+  String get honamPLandmarkHint => 'Portail bleu face au kiosque';
+
+  @override
+  String get honamPLandmarkLabel => 'Repère pour le coursier';
+
+  @override
+  String get honamPLater => 'Plus tard';
+
+  @override
+  String get honamPLightTracking =>
+      'Suivi léger, presque sans données : la carte se charge seulement si tu la demandes. C’est le mode par défaut avec l’économie de données.';
+
+  @override
+  String get honamPMessageHint => 'À livrer avant 13 h, merci';
+
+  @override
+  String get honamPMessageToPharmacy => 'Message à la pharmacie';
+
+  @override
+  String honamPMissingLead(String pharmacy, String reason) {
+    return '$pharmacy n’a plus ce produit : $reason. Que préfères-tu ?';
+  }
+
+  @override
+  String get honamPMissingNoAnswer =>
+      'Sans réponse de ta part sous 15 minutes, tout est annulé et remboursé.';
+
+  @override
+  String get honamPMore => 'Plus d’options';
+
+  @override
+  String get honamPMyOrder => 'Ma commande';
+
+  @override
+  String honamPNothingPaid(String pharmacy) {
+    return '$pharmacy · rien n’a été payé';
+  }
+
+  @override
+  String get honamPOnItsWallet => 'Sur son application de wallet';
+
+  @override
+  String honamPOrderOf(String pharmacy) {
+    return 'Commande de $pharmacy';
+  }
+
+  @override
+  String honamPPaidOrderOf(String pharmacy) {
+    return '$pharmacy · commande payée';
+  }
+
+  @override
+  String get honamPPast => 'Passées';
+
+  @override
+  String get honamPPastQuestion =>
+      'Une question sur une commande passée ? Ouvre-la : la discussion avec la pharmacie y reste.';
+
+  @override
+  String honamPPayAmount(String amount) {
+    return 'Payer $amount';
+  }
+
+  @override
+  String get honamPPayDirectly =>
+      'Tu paies la pharmacie directement depuis ton wallet. Pokou ne touche pas l’argent et ne prend rien sur les médicaments.';
+
+  @override
+  String get honamPPayTitle => 'Payer la pharmacie';
+
+  @override
+  String honamPPharmacyHonam(String pharmacy) {
+    return '$pharmacy · Honam';
+  }
+
+  @override
+  String get honamPPhotoAdded => 'Photo ajoutée';
+
+  @override
+  String get honamPPhotoHelp =>
+      'Vérifie que toute la page est visible, nom du médecin compris.';
+
+  @override
+  String get honamPPillCancelled => 'Annulée';
+
+  @override
+  String get honamPPillDelivered => 'Livrée';
+
+  @override
+  String get honamPPillExpired => 'Expirée';
+
+  @override
+  String get honamPPillOnTheWay => 'En route';
+
+  @override
+  String get honamPPillPreparing => 'En préparation';
+
+  @override
+  String get honamPPillRefundPending => 'Remboursement attendu';
+
+  @override
+  String get honamPPillRefunded => 'Remboursée';
+
+  @override
+  String get honamPPillRejected => 'Refusée';
+
+  @override
+  String get honamPPillToPay => 'Devis à payer';
+
+  @override
+  String get honamPPillWaitingQuote => 'Devis attendu';
+
+  @override
+  String get honamPPrescriptionSent => 'Ordonnance envoyée';
+
+  @override
+  String get honamPPrivacyNotice =>
+      'Seule la pharmacie choisie voit ta photo. Le coursier ne voit ni l’ordonnance ni les produits.';
+
+  @override
+  String honamPProducts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produits',
+      one: '1 produit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String honamPQuoteFrom(String pharmacy) {
+    return 'Devis de $pharmacy';
+  }
+
+  @override
+  String get honamPReason => 'Motif';
+
+  @override
+  String honamPReceivedAt(String when) {
+    return 'Reçu $when';
+  }
+
+  @override
+  String honamPRef(String reference) {
+    return 'réf. $reference';
+  }
+
+  @override
+  String honamPReferenceHelp(String operator) {
+    return 'Dans le SMS de confirmation $operator';
+  }
+
+  @override
+  String honamPRefundDone(String amount) {
+    return 'Remboursement de $amount reçu.';
+  }
+
+  @override
+  String honamPRefundToPayer(String wallet) {
+    return 'Le remboursement arrive sous 2 h, uniquement sur le numéro qui a payé : $wallet.';
+  }
+
+  @override
+  String get honamPRefuseQuote => 'Refuser le devis';
+
+  @override
+  String get honamPRefusedTitle => 'Ordonnance refusée';
+
+  @override
+  String get honamPRetake => 'Reprendre';
+
+  @override
+  String get honamPSamePhoto =>
+      'La même photo est envoyée : tu n’as rien à refaire.';
+
+  @override
+  String get honamPSeeQuoteAndPay => 'Voir le devis et payer';
+
+  @override
+  String get honamPSendElsewhere => 'Envoyer à une autre pharmacie';
+
+  @override
+  String honamPSendTo(String pharmacy) {
+    return 'Envoyer à $pharmacy';
+  }
+
+  @override
+  String honamPSentAt(String pharmacy, String when) {
+    return '$pharmacy · envoyée $when';
+  }
+
+  @override
+  String get honamPShowMap => 'Afficher la carte';
+
+  @override
+  String get honamPStepDelivered => 'Livrée';
+
+  @override
+  String get honamPStepOnTheWay => 'En route';
+
+  @override
+  String get honamPStepPaid => 'Payée';
+
+  @override
+  String get honamPStepPaymentReceived => 'La pharmacie a reçu ton paiement';
+
+  @override
+  String get honamPStepPaymentSignaled => 'Paiement signalé';
+
+  @override
+  String get honamPStepPharmacyChecks => 'La pharmacie vérifie la réception';
+
+  @override
+  String get honamPStepPreparing => 'Préparation, puis départ du coursier';
+
+  @override
+  String get honamPStepPreparingBody =>
+      'Tu suis la livraison et reçois ton code';
+
+  @override
+  String get honamPStepQuote => 'Devis';
+
+  @override
+  String get honamPStepSent => 'Envoyée';
+
+  @override
+  String honamPToPharmacy(String pharmacy) {
+    return 'À $pharmacy';
+  }
+
+  @override
+  String honamPTodayAt(String time) {
+    return 'aujourd’hui, $time';
+  }
+
+  @override
+  String honamPTomorrowAt(String time) {
+    return 'demain, $time';
+  }
+
+  @override
+  String get honamPTotalToPay => 'Total à payer';
+
+  @override
+  String honamPUpdatedSecondsAgo(int seconds) {
+    return 'mis à jour il y a $seconds s';
+  }
+
+  @override
+  String honamPValidUntil(String when) {
+    return 'valable jusqu’à $when';
+  }
+
+  @override
+  String get honamPValidateChoice => 'Valider mon choix';
+
+  @override
+  String get honamPVerifiedCourier => 'Coursier vérifié';
+
+  @override
+  String honamPWaitingQuoteBody(String pharmacy) {
+    return '$pharmacy lit ton ordonnance et prépare le devis. Tu reçois une notification dès qu’il arrive.';
+  }
+
+  @override
+  String get honamPWriteToPharmacy => 'Écrire à la pharmacie';
+
+  @override
+  String honamPYesterdayAt(String time) {
+    return 'hier, $time';
+  }
 }
