@@ -5055,6 +5055,41 @@
   "contactNotificationsMuted": "En sourdine",
   "contactInfoTitle": "Infos du contact",
   "composerWriteHint": "Écrire un message…",
+  "newChatOnPokouCount": "{count, plural, =0{Aucun contact sur Pokou} =1{1 contact sur Pokou} other{{count} contacts sur Pokou}}",
+  "@newChatOnPokouCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newChatNewGroupHint": "Réunis tes proches dans une discussion",
+  "newChatInviteRow": "Inviter sur Pokou",
+  "newChatInviteRowHint": "Partager un lien d'invitation",
+  "newChatOnPokouSection": "Contacts sur Pokou",
+  "groupMembersChosen": "{count, plural, =0{Aucun membre choisi} =1{1 membre choisi} other{{count} membres choisis}}",
+  "@groupMembersChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMembersSection": "Membres · {count}",
+  "@groupMembersSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNewAdminsOnly": "Seuls les administrateurs modifient le groupe",
+  "groupNewAdminsOnlyHint": "Nom, photo et description",
+  "groupNewInviteHint": "Révocable à tout moment",
+  "groupNewFootnote": "Tu gères le groupe et peux nommer d'autres administrateurs. Chaque membre est prévenu de son ajout.",
+  "groupNewCreate": "Créer le groupe",
+  "groupNoPokouContacts": "Aucun de tes contacts n'est encore sur Pokou. Invite-les pour créer un groupe.",
+  "groupCreateSettingsFailed": "Groupe créé. La photo ou un réglage n'a pas pu être appliqué : réessaie depuis Infos du groupe.",
   "newChatNotOnPokou": "Pas encore sur Pokou",
   "reportGroupNamed": "Signaler {name}",
   "@reportGroupNamed": {

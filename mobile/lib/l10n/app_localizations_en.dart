@@ -9539,6 +9539,71 @@ class LEn extends L {
   String get composerWriteHint => 'Write a message…';
 
   @override
+  String newChatOnPokouCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts on Pokou',
+      one: '1 contact on Pokou',
+      zero: 'No contacts on Pokou',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newChatNewGroupHint => 'Bring your people into one chat';
+
+  @override
+  String get newChatInviteRow => 'Invite to Pokou';
+
+  @override
+  String get newChatInviteRowHint => 'Share an invite link';
+
+  @override
+  String get newChatOnPokouSection => 'Contacts on Pokou';
+
+  @override
+  String groupMembersChosen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members chosen',
+      one: '1 member chosen',
+      zero: 'No members chosen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupMembersSection(int count) {
+    return 'Members · $count';
+  }
+
+  @override
+  String get groupNewAdminsOnly => 'Only admins edit the group';
+
+  @override
+  String get groupNewAdminsOnlyHint => 'Name, photo and description';
+
+  @override
+  String get groupNewInviteHint => 'Revocable at any time';
+
+  @override
+  String get groupNewFootnote =>
+      'You manage the group and can appoint other admins. Each member is told they were added.';
+
+  @override
+  String get groupNewCreate => 'Create group';
+
+  @override
+  String get groupNoPokouContacts =>
+      'None of your contacts is on Pokou yet. Invite them to create a group.';
+
+  @override
+  String get groupCreateSettingsFailed =>
+      'Group created. The photo or a setting could not be applied: try again from Group info.';
+
+  @override
   String get newChatNotOnPokou => 'Not on Pokou yet';
 
   @override

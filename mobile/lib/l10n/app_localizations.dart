@@ -15986,6 +15986,90 @@ abstract class L {
   /// **'Écrire un message…'**
   String get composerWriteHint;
 
+  /// No description provided for @newChatOnPokouCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun contact sur Pokou} =1{1 contact sur Pokou} other{{count} contacts sur Pokou}}'**
+  String newChatOnPokouCount(int count);
+
+  /// No description provided for @newChatNewGroupHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réunis tes proches dans une discussion'**
+  String get newChatNewGroupHint;
+
+  /// No description provided for @newChatInviteRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviter sur Pokou'**
+  String get newChatInviteRow;
+
+  /// No description provided for @newChatInviteRowHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager un lien d\'invitation'**
+  String get newChatInviteRowHint;
+
+  /// No description provided for @newChatOnPokouSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts sur Pokou'**
+  String get newChatOnPokouSection;
+
+  /// No description provided for @groupMembersChosen.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun membre choisi} =1{1 membre choisi} other{{count} membres choisis}}'**
+  String groupMembersChosen(int count);
+
+  /// No description provided for @groupMembersSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres · {count}'**
+  String groupMembersSection(int count);
+
+  /// No description provided for @groupNewAdminsOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les administrateurs modifient le groupe'**
+  String get groupNewAdminsOnly;
+
+  /// No description provided for @groupNewAdminsOnlyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom, photo et description'**
+  String get groupNewAdminsOnlyHint;
+
+  /// No description provided for @groupNewInviteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Révocable à tout moment'**
+  String get groupNewInviteHint;
+
+  /// No description provided for @groupNewFootnote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu gères le groupe et peux nommer d\'autres administrateurs. Chaque membre est prévenu de son ajout.'**
+  String get groupNewFootnote;
+
+  /// No description provided for @groupNewCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le groupe'**
+  String get groupNewCreate;
+
+  /// No description provided for @groupNoPokouContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun de tes contacts n\'est encore sur Pokou. Invite-les pour créer un groupe.'**
+  String get groupNoPokouContacts;
+
+  /// No description provided for @groupCreateSettingsFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe créé. La photo ou un réglage n\'a pas pu être appliqué : réessaie depuis Infos du groupe.'**
+  String get groupCreateSettingsFailed;
+
   /// No description provided for @newChatNotOnPokou.
   ///
   /// In fr, this message translates to:
