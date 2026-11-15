@@ -9473,6 +9473,72 @@ class LEs extends L {
       'Pas de connexion. Tes messages partiront dès le retour du réseau.';
 
   @override
+  String get groupInfoTitle => 'Infos du groupe';
+
+  @override
+  String groupInfoSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Groupe · $count membres',
+      one: 'Groupe · 1 membre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupInfoAudio => 'Audio';
+
+  @override
+  String get groupInfoVideo => 'Vidéo';
+
+  @override
+  String get groupInfoAdd => 'Ajouter';
+
+  @override
+  String get groupInfoProofOn => 'Mode preuve : activé';
+
+  @override
+  String get groupInfoProofOff => 'Mode preuve : désactivé';
+
+  @override
+  String get groupInfoProofHint =>
+      'Tout membre titulaire du badge peut l\'activer';
+
+  @override
+  String get groupInfoProofEnable => 'Activer';
+
+  @override
+  String get groupInfoProofDisable => 'Désactiver';
+
+  @override
+  String get groupInfoInviteHint =>
+      'Révocable à tout moment, réservé aux administrateurs';
+
+  @override
+  String groupInfoMessage(String name) {
+    return 'Écrire à $name';
+  }
+
+  @override
+  String get groupSettingsMembers => 'Membres';
+
+  @override
+  String get groupSettingsAdmins => 'Administrateurs';
+
+  @override
+  String get groupSettingsMe => 'toi';
+
+  @override
+  String get groupSettingsProof => 'Mode preuve';
+
+  @override
+  String get groupSettingsProofOn => 'Activé';
+
+  @override
+  String get groupSettingsProofOff => 'Désactivé';
+
+  @override
   String get composerWriteHint => 'Écrire un message…';
 
   @override

@@ -15824,6 +15824,114 @@ abstract class L {
   /// **'Pas de connexion. Tes messages partiront dès le retour du réseau.'**
   String get offlineMessagesWillSend;
 
+  /// No description provided for @groupInfoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Infos du groupe'**
+  String get groupInfoTitle;
+
+  /// No description provided for @groupInfoSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Groupe · 1 membre} other{Groupe · {count} membres}}'**
+  String groupInfoSubtitle(int count);
+
+  /// No description provided for @groupInfoAudio.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audio'**
+  String get groupInfoAudio;
+
+  /// No description provided for @groupInfoVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo'**
+  String get groupInfoVideo;
+
+  /// No description provided for @groupInfoAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get groupInfoAdd;
+
+  /// No description provided for @groupInfoProofOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve : activé'**
+  String get groupInfoProofOn;
+
+  /// No description provided for @groupInfoProofOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve : désactivé'**
+  String get groupInfoProofOff;
+
+  /// No description provided for @groupInfoProofHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout membre titulaire du badge peut l\'activer'**
+  String get groupInfoProofHint;
+
+  /// No description provided for @groupInfoProofEnable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer'**
+  String get groupInfoProofEnable;
+
+  /// No description provided for @groupInfoProofDisable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver'**
+  String get groupInfoProofDisable;
+
+  /// No description provided for @groupInfoInviteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Révocable à tout moment, réservé aux administrateurs'**
+  String get groupInfoInviteHint;
+
+  /// No description provided for @groupInfoMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {name}'**
+  String groupInfoMessage(String name);
+
+  /// No description provided for @groupSettingsMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get groupSettingsMembers;
+
+  /// No description provided for @groupSettingsAdmins.
+  ///
+  /// In fr, this message translates to:
+  /// **'Administrateurs'**
+  String get groupSettingsAdmins;
+
+  /// No description provided for @groupSettingsMe.
+  ///
+  /// In fr, this message translates to:
+  /// **'toi'**
+  String get groupSettingsMe;
+
+  /// No description provided for @groupSettingsProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode preuve'**
+  String get groupSettingsProof;
+
+  /// No description provided for @groupSettingsProofOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activé'**
+  String get groupSettingsProofOn;
+
+  /// No description provided for @groupSettingsProofOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivé'**
+  String get groupSettingsProofOff;
+
   /// No description provided for @composerWriteHint.
   ///
   /// In fr, this message translates to:

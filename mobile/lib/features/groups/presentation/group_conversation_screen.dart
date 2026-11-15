@@ -56,6 +56,8 @@ import '../../messaging/presentation/message_appear.dart';
 import '../../messaging/presentation/attach_sheet.dart';
 import '../../messaging/presentation/forward_screen.dart';
 import '../../messaging/presentation/offline_banner.dart';
+import '../../messaging/presentation/report_sheet.dart';
+import 'group_info_screen.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../stickers/data/sticker_models.dart';
 import '../../stickers/presentation/sticker_image.dart';
@@ -1030,181 +1032,32 @@ class _GroupConversationScreenState
 
   Future<void> _showGroupSheet(Group? group) async {
     if (group == null) return;
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      isScrollControlled: true,
-      builder: (sheetContext) => SafeArea(
-        child: DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.6,
-          maxChildSize: 0.9,
-          builder: (_, scrollController) => ListView(
-            controller: scrollController,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-                child: Text(
-                  group.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                child: Text(
-                  '${group.memberCount} participant${group.memberCount > 1 ? 's' : ''}',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              // Administration réservée aux admins — le serveur tranche
-              // (`can_manage`), le client ne devine pas les droits.
-              // Le mode preuve : tout titulaire du badge, admin ou non.
-              const Divider(height: 1),
-              ListTile(
-                leading: Icon(
-                  Icons.gavel_outlined,
-                  color: AppColors.accentPrimaryDark,
-                ),
-                title: Text(
-                  group.proofMode ? _l.proofModeDisable : _l.proofModeEnable,
-                ),
-                subtitle: group.proofMode ? null : Text(_l.proofModeOnBanner),
-                onTap: () => Navigator.pop(sheetContext, 'proof'),
-              ),
-              if (group.proofMode)
-                ListTile(
-                  leading: Icon(
-                    Icons.picture_as_pdf_outlined,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  title: Text(_l.proofExport),
-                  onTap: () => Navigator.pop(sheetContext, 'proof:export'),
-                ),
-              // Nom et photo : administrateurs, ou tous les membres si le
-              // groupe l'autorise (DIS-26).
-              if (group.canEditInfo) ...[
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(
-                    Icons.edit_outlined,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  title: Text(_l.groupEditName),
-                  onTap: () => Navigator.pop(sheetContext, 'rename'),
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.photo_camera_outlined,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                  title: Text(
-                    group.avatarMediaId == null
-                        ? _l.groupAddPhoto
-                        : _l.groupChangePhoto,
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'photo'),
-                ),
-                if (group.avatarMediaId != null)
-                  ListTile(
-                    leading: Icon(
-                      Icons.hide_image_outlined,
-                      color: AppColors.textMuted,
-                    ),
-                    title: Text(_l.groupRemovePhoto),
-                    onTap: () => Navigator.pop(sheetContext, 'photo:clear'),
-                  ),
-              ],
-              if (group.canManage) ...[
-                ListTile(
-                  leading: Icon(Icons.tune, color: AppColors.accentPrimaryDark),
-                  title: Text(_l.groupManageTitle),
-                  subtitle: Text(
-                    _l.groupManageSubtitle,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'manage'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.link, color: AppColors.accentPrimaryDark),
-                  title: Text(_l.groupInviteLink),
-                  subtitle: Text(
-                    group.inviteCode == null
-                        ? _l.groupNoLink
-                        : _l.groupLinkActive,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'invite'),
-                ),
-              ],
-              const Divider(height: 1),
-              for (final member in group.members)
-                ListTile(
-                  leading: Icon(
-                    Icons.person_outline,
-                    color: AppColors.textMuted,
-                  ),
-                  title: Text(
-                    member.userId == widget.myUserId
-                        ? _l.navYou
-                        : member.displayName,
-                  ),
-                  subtitle: member.canManage
-                      ? Text(member.isOwner ? _l.groupCreator : _l.groupAdmin)
-                      : null,
-                  trailing: _memberActions(group, member, sheetContext),
-                  // Toucher un membre ouvre une discussion à deux avec lui.
-                  onTap: member.userId == widget.myUserId
-                      ? null
-                      : () =>
-                            Navigator.pop(sheetContext, 'dm:${member.userId}'),
-                ),
-              const Divider(height: 1),
-              ListTile(
-                leading: Icon(
-                  Icons.person_add_alt,
-                  color: AppColors.accentPrimaryDark,
-                ),
-                title: Text(_l.groupAddMembers),
-                onTap: () => Navigator.pop(sheetContext, 'add'),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.logout,
-                  color: AppColors.semanticError,
-                ),
-                title: Text(
-                  _l.groupLeave,
-                  style: TextStyle(color: AppColors.semanticError),
-                ),
-                onTap: () => Navigator.pop(sheetContext, 'leave'),
-              ),
-              if (group.isOwnedBy(widget.myUserId))
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete_forever_outlined,
-                    color: AppColors.semanticError,
-                  ),
-                  title: Text(
-                    _l.groupDelete,
-                    style: TextStyle(color: AppColors.semanticError),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, 'delete'),
-                ),
-            ],
-          ),
-        ),
+    // Discussions · 8 — un écran « Infos du groupe », qui rend le geste
+    // choisi ; les méthodes qui l'exécutent restent celles de cet écran.
+    final action = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => GroupInfoScreen(group: group, myUserId: widget.myUserId),
       ),
     );
 
     if (!mounted || action == null) return;
-    if (action == 'proof') {
+    if (action == 'call:audio' || action == 'call:video') {
+      await _startOrJoinCall(withVideo: action == 'call:video');
+    } else if (action == 'report') {
+      final recent = await recentGroupForReport(
+        ref,
+        groupId: widget.groupId,
+        myUserId: widget.myUserId,
+      );
+      if (!mounted) return;
+      await showReportSheet(
+        context,
+        ref,
+        title: _l.reportGroupNamed(group.name),
+        groupId: widget.groupId,
+        recentMessages: recent,
+      );
+    } else if (action == 'proof') {
       await _toggleProofMode(group);
     } else if (action == 'proof:export') {
       await _exportProof();
@@ -1229,7 +1082,9 @@ class _GroupConversationScreenState
         );
       }
     } else if (action == 'manage') {
-      await Navigator.of(context).push(
+      // « Gérer le groupe » peut rendre la main avec un geste qui vit ici
+      // (lien d'invitation, mode preuve).
+      final next = await Navigator.of(context).push<String>(
         MaterialPageRoute(
           builder: (_) => GroupSettingsScreen(groupId: widget.groupId),
         ),
@@ -1239,6 +1094,9 @@ class _GroupConversationScreenState
             .read(groupChatControllerProvider(widget.groupId).notifier)
             .refreshGroup();
       }
+      if (!mounted) return;
+      if (next == 'invite') await _manageInviteLink(group);
+      if (next == 'proof') await _toggleProofMode(group);
     } else if (action == 'rename') {
       await _renameGroup(group);
     } else if (action == 'photo') {
@@ -1263,46 +1121,6 @@ class _GroupConversationScreenState
             .setMemberRole(userId: userId, role: parts[2]);
       }
     }
-  }
-
-  /// Boutons par membre : nommer/révoquer un admin (créateur seulement) et
-  /// retirer (créateur et admins). Le créateur n'est ni rétrogradable ni
-  /// évinçable — sinon le groupe se retrouverait sans personne pour le gérer.
-  Widget? _memberActions(
-    Group group,
-    GroupMember member,
-    BuildContext sheetContext,
-  ) {
-    if (member.userId == widget.myUserId || member.isOwner) return null;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (group.isOwner)
-          IconButton(
-            icon: Icon(
-              member.isAdmin
-                  ? Icons.remove_moderator_outlined
-                  : Icons.add_moderator_outlined,
-              size: 20,
-            ),
-            tooltip: member.isAdmin
-                ? _l.groupDemoteAdmin
-                : _l.groupPromoteAdmin,
-            onPressed: () => Navigator.pop(
-              sheetContext,
-              'role:${member.userId}:${member.isAdmin ? 'MEMBER' : 'ADMIN'}',
-            ),
-          ),
-        if (group.canManage)
-          IconButton(
-            icon: const Icon(Icons.person_remove_outlined, size: 20),
-            tooltip: _l.marketRemove,
-            onPressed: () =>
-                Navigator.pop(sheetContext, 'remove:${member.userId}'),
-          ),
-      ],
-    );
   }
 
   Future<void> _renameGroup(Group group) async {

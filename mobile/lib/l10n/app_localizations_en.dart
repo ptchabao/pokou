@@ -9439,6 +9439,71 @@ class LEn extends L {
       'No connection. Your messages will go out as soon as the network is back.';
 
   @override
+  String get groupInfoTitle => 'Group info';
+
+  @override
+  String groupInfoSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Group · $count members',
+      one: 'Group · 1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupInfoAudio => 'Audio';
+
+  @override
+  String get groupInfoVideo => 'Video';
+
+  @override
+  String get groupInfoAdd => 'Add';
+
+  @override
+  String get groupInfoProofOn => 'Proof mode: on';
+
+  @override
+  String get groupInfoProofOff => 'Proof mode: off';
+
+  @override
+  String get groupInfoProofHint =>
+      'Any member holding the badge can turn it on';
+
+  @override
+  String get groupInfoProofEnable => 'Turn on';
+
+  @override
+  String get groupInfoProofDisable => 'Turn off';
+
+  @override
+  String get groupInfoInviteHint => 'Revocable at any time, admins only';
+
+  @override
+  String groupInfoMessage(String name) {
+    return 'Message $name';
+  }
+
+  @override
+  String get groupSettingsMembers => 'Members';
+
+  @override
+  String get groupSettingsAdmins => 'Admins';
+
+  @override
+  String get groupSettingsMe => 'you';
+
+  @override
+  String get groupSettingsProof => 'Proof mode';
+
+  @override
+  String get groupSettingsProofOn => 'On';
+
+  @override
+  String get groupSettingsProofOff => 'Off';
+
+  @override
   String get composerWriteHint => 'Write a message…';
 
   @override

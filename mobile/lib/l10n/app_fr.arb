@@ -4983,6 +4983,38 @@
     }
   },
   "offlineMessagesWillSend": "Pas de connexion. Tes messages partiront dès le retour du réseau.",
+  "groupInfoTitle": "Infos du groupe",
+  "groupInfoSubtitle": "{count, plural, =1{Groupe · 1 membre} other{Groupe · {count} membres}}",
+  "@groupInfoSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupInfoAudio": "Audio",
+  "groupInfoVideo": "Vidéo",
+  "groupInfoAdd": "Ajouter",
+  "groupInfoProofOn": "Mode preuve : activé",
+  "groupInfoProofOff": "Mode preuve : désactivé",
+  "groupInfoProofHint": "Tout membre titulaire du badge peut l'activer",
+  "groupInfoProofEnable": "Activer",
+  "groupInfoProofDisable": "Désactiver",
+  "groupInfoInviteHint": "Révocable à tout moment, réservé aux administrateurs",
+  "groupInfoMessage": "Écrire à {name}",
+  "@groupInfoMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSettingsMembers": "Membres",
+  "groupSettingsAdmins": "Administrateurs",
+  "groupSettingsMe": "toi",
+  "groupSettingsProof": "Mode preuve",
+  "groupSettingsProofOn": "Activé",
+  "groupSettingsProofOff": "Désactivé",
   "composerWriteHint": "Écrire un message…",
   "newChatNotOnPokou": "Pas encore sur Pokou",
   "reportGroupNamed": "Signaler {name}",

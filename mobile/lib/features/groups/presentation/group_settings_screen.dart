@@ -149,6 +149,47 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
     );
   }
 
+  /// « Edem K., toi » : les administrateurs, moi compris.
+  String _adminNames(Group group, L l) {
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    return group.members
+        .where((m) => m.canManage)
+        .map((m) => m.userId == myUserId ? l.groupSettingsMe : m.displayName)
+        .join(', ');
+  }
+
+  Future<void> _showAdmins(Group group) async {
+    final l = L.of(context);
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l.groupSettingsAdmins,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            for (final m in group.members.where((m) => m.canManage))
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: Text(m.userId == myUserId ? l.navYou : m.displayName),
+                subtitle: Text(m.isOwner ? l.groupCreator : l.groupAdmin),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _decide(String requestId, bool approve) async {
     try {
       await ref
@@ -216,6 +257,71 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                         subtitle: Text(l.groupApproveSettingSub),
                         value: group.joinApproval,
                         onChanged: (v) => _save(joinApproval: v),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // Discussions · 26 — « Membres » : administrateurs, lien
+                  // d'invitation, mode preuve. Le lien et le mode preuve
+                  // s'ouvrent depuis la conversation, qui a déjà leurs
+                  // feuilles : cet écran lui rend la main avec le geste.
+                  _Section(l.groupSettingsMembers),
+                  _Card(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.workspace_premium_outlined),
+                        title: Text(l.groupSettingsAdmins),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 140),
+                              child: Text(
+                                _adminNames(group, l),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () => _showAdmins(group),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.link),
+                        title: Text(l.groupInviteLink),
+                        subtitle: Text(
+                          group.inviteCode == null
+                              ? l.groupNoLink
+                              : l.groupInfoInviteHint,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.of(context).pop('invite'),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.history_toggle_off),
+                        title: Text(l.groupSettingsProof),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              group.proofMode
+                                  ? l.groupSettingsProofOn
+                                  : l.groupSettingsProofOff,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
+                        onTap: () => Navigator.of(context).pop('proof'),
                       ),
                     ],
                   ),
