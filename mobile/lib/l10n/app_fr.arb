@@ -19,7 +19,7 @@
   "actionJoin": "Rejoindre",
   "actionCreate": "Créer",
   "navChats": "Discussions",
-  "navStatus": "Actus",
+  "navStatus": "Statuts",
   "navCalls": "Appels",
   "navMarket": "Marché",
   "chatsEmptyTitle": "Aucune discussion",
@@ -4730,5 +4730,30 @@
     }
   },
   "courierStatusRejected": "Candidature refusée",
-  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus."
+  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.",
+  "welcomeServiceStatus": "Partage tes statuts, visibles 24 h",
+  "welcomeServiceProof": "Garde la preuve de tes échanges",
+  "authPhoneGenericHint": "Numéro de téléphone",
+  "authContactsNotice": "Les personnes qui ont déjà ton numéro dans leurs contacts pourront te trouver sur Pokou.",
+  "authAcceptIntro": "En continuant, tu confirmes avoir au moins 13 ans et tu acceptes les ",
+  "authAcceptAnd": " et la ",
+  "authAcceptEnd": ".",
+  "authVerifyButton": "Vérifier",
+  "otpDigitsLabel": "Code à 6 chiffres",
+  "otpAutoFilled": "Code rempli automatiquement",
+  "otpAutoVerifyNote": "Dès les 6 chiffres saisis, la vérification part toute seule.",
+  "otpErrorHint": "Vérifie le dernier SMS reçu. Au 5e échec, la saisie est bloquée 15 minutes.",
+  "otpWrongAttempts": "{count, plural, =1{Code incorrect. Il te reste 1 essai.} other{Code incorrect. Il te reste {count} essais.}}",
+  "@otpWrongAttempts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "twoStepPinLabel": "Code PIN à 6 chiffres",
+  "twoStepRecoveryNote": "Sans ton code PIN, la reconnexion reste possible au bout de 7 jours. Ce délai bloque une personne qui aurait récupéré ton numéro.",
+  "homeKoryCardSubtitle": "Cagnottes",
+  "homeHonamCardSubtitle": "Pharmacies",
+  "marketSubtitle": "Petites annonces"
 }

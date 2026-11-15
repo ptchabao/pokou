@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/country/country_config.dart';
@@ -10,38 +9,34 @@ import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
-import '../../chat/presentation/chat_controller.dart';
 import '../../contacts/data/conversation_summary.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../contacts/presentation/open_discussion.dart';
 import '../../honam/data/honam_models.dart';
 import '../../honam/presentation/honam_controller.dart';
 import '../../honam/presentation/honam_order_screen.dart';
-import '../../honam/presentation/honam_send_screen.dart';
 import '../../kory/data/kory_model.dart';
 import '../../kory/presentation/kory_controller.dart';
-import '../../kory/presentation/kory_create_screen.dart';
 import '../../kory/presentation/kory_pot_screen.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../notifications/presentation/notifications_center_screen.dart';
 import '../data/home_banner.dart';
 import 'global_search_screen.dart';
 import 'home_carousel.dart';
 import 'pokou_page_header.dart';
-import '../../../core/widgets/assistant_orb.dart';
-import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/pokou_icon.dart';
 
-/// APP-1 · Accueil — maquette « Terre de Confiance » (Stitch) :
+/// Pokou · 1. Accueil (maquette p.14) :
 ///
-/// 1. la salutation, avec la recherche ;
-/// 2. Baba, en un geste ;
-/// 3. « En cours » : la cagnotte ouverte et la commande qui avance ;
-/// 4. les dernières discussions ;
-/// 5. « Que veux-tu faire ? » : une carte par service, action directe ;
-/// 6. le rappel du chiffrement.
+/// 1. la salutation, la recherche et les notifications ;
+/// 2. une carte « Tout voir » par module ouvert dans le pays — Discussions
+///    d'abord, puis Kory et Honam si lancés ;
+/// 3. Assimé, en simple ligne d'entrée (il n'a pas encore son onglet) ;
+/// 4. le rappel du chiffrement, dans le carrousel.
 ///
-/// Les cartes ne s'affichent que pour les modules ouverts dans le pays.
+/// Chaque carte ne s'affiche que pour un module ouvert dans le pays — voir
+/// `CountryConfig`.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.onOpenTab});
 
@@ -60,56 +55,6 @@ class HomeScreen extends ConsumerWidget {
             .fold<int>(0, (sum, d) => sum + d.unreadCount),
       ),
     );
-    final services = <_Service>[
-      if (config.has('kory'))
-        _Service(
-          module: PokouModule.kory,
-          title: l.navKory,
-          pitch: l.homeKoryShort,
-          illustration: PokouIllustrations.kory,
-          tint: const Color(0xFFF9E4D6),
-          darkTint: const Color(0xFF3A2A22),
-          ink: AppColors.accentPrimaryDark,
-          actionIcon: Icons.add,
-          actionLabel: l.koryCreate,
-          onAction: () => openKoryCreate(context, ref),
-          onTap: () => onOpenTab(PokouTab.kory),
-        ),
-      if (config.has('honam'))
-        _Service(
-          module: PokouModule.honam,
-          title: l.navHonam,
-          pitch: l.homeHonamShort,
-          illustration: PokouIllustrations.honam,
-          tint: const Color(0xFFDFF3E4),
-          darkTint: const Color(0xFF1F2E24),
-          ink: AppColors.feedbackSuccess,
-          actionIcon: Icons.document_scanner_outlined,
-          actionLabel: l.honamSend,
-          onAction: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const HonamSendScreen())),
-          onTap: () => onOpenTab(PokouTab.honam),
-        ),
-      if (config.has('assime'))
-        _Service(
-          module: PokouModule.assime,
-          title: l.homeAssimeTitle,
-          pitch: l.homeAssimeShort,
-          illustration: PokouIllustrations.assime,
-          tint: const Color(0xFFFCEFC7),
-          darkTint: const Color(0xFF33290F),
-          ink: AppColors.warning,
-          actionIcon: Icons.arrow_forward,
-          actionLabel: l.homeAssimeCta,
-          onAction: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen())),
-          onTap: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen())),
-        ),
-    ];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -124,9 +69,9 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 120),
           children: [
-            // ── En-tête : la salutation et l'état du jour à gauche, la
-            // cloche et la photo à droite. Pas de barre de titre : l'onglet
-            // dit déjà « Accueil ».
+            // ── En-tête : la salutation à gauche, la loupe et la cloche à
+            // droite (maquette p.14 : pas de barre de recherche pleine
+            // largeur ici, elle vit sur sa propre icône).
             PokouPageHeader(
               title: firstName.isEmpty
                   ? l.homeHelloOverline
@@ -135,34 +80,34 @@ class HomeScreen extends ConsumerWidget {
                   ? l.homeUnreadSummary(unreadMessages)
                   : l.homeTagline,
               emphasized: unreadMessages > 0,
+              actions: [
+                IconButton(
+                  tooltip: l.homeSearchEverything,
+                  icon: const Icon(Icons.search),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const GlobalSearchScreen(),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            // ── Recherche en pilule.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-              child: _SearchPill(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+            _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
+            if (config.has('kory'))
+              _KoryCard(onSeeAll: () => onOpenTab(PokouTab.kory)),
+            if (config.has('honam'))
+              _HonamCard(onSeeAll: () => onOpenTab(PokouTab.honam)),
+            if (config.has('assime'))
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                child: _AssimeRow(
+                  onTap: () => PokouTabPage.push(
+                    context,
+                    tab: PokouTab.more,
+                    child: const MarketplaceScreen(),
+                  ),
                 ),
               ),
-            ),
-            // ── Baba se présente, à la première personne.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: _BabaCard(
-                onTap: () =>
-                    context.push('/chat/$kNoMonitor', extra: l.navBaba),
-              ),
-            ),
-            // ── Les services, en grille de cartes pastel illustrées.
-            if (services.isNotEmpty) ...[
-              _SectionHeader(title: l.homeServicesTitle),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _ServiceGrid(services: services),
-              ),
-            ],
-            _InProgress(kory: config.has('kory'), honam: config.has('honam')),
-            _RecentDiscussions(onSeeAll: () => onOpenTab(PokouTab.discussions)),
             // ── Le carrousel : les annonces de ma zone, puis le rappel du
             // chiffrement.
             Padding(
@@ -176,308 +121,193 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// La recherche, en pilule pleine largeur.
-class _SearchPill extends StatelessWidget {
-  const _SearchPill({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: AppColors.surface,
-    shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
-    child: InkWell(
-      customBorder: const StadiumBorder(),
-      onTap: onTap,
-      child: SizedBox(
-        height: 52,
-        child: Row(
-          children: [
-            const SizedBox(width: 16),
-            Icon(Icons.search, color: AppColors.textMuted),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                L.of(context).homeSearchEverything,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: AppColors.textMuted, fontSize: 15),
-              ),
-            ),
-            const SizedBox(width: 16),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-/// Baba, l'assistant — une personne qui se présente, pas un bouton.
-///
-/// Il était un carré sombre marqué d'une étoile, à côté de la recherche :
-/// une icône de plus, que rien ne reliait au reste de l'écran et qui ne
-/// disait pas à qui l'on allait parler. Ici il a un visage (son orbe, qui
-/// respire), il parle à la première personne, et sa carte reprend les
-/// formes des cartes de services : même arrondi, même bouton rond.
-class _BabaCard extends StatelessWidget {
-  const _BabaCard({required this.onTap});
+/// La ligne d'entrée d'Assimé (maquette p.14) : pas encore une carte pleine,
+/// juste une porte vers le module — il n'a pas d'onglet avant le lot 3.
+class _AssimeRow extends StatelessWidget {
+  const _AssimeRow({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    return Semantics(
-      button: true,
-      label: l.homeBabaCta,
-      child: Material(
-        color: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.card,
-          side: BorderSide(color: AppColors.border),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-            child: Row(
+    return _Card(
+      onTap: onTap,
+      child: Row(
+        children: [
+          const PokouModuleLogo(PokouModule.assime, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ExcludeSemantics(child: AssistantOrb(size: 48)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.homeBabaHello,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 17,
-                          height: 1.2,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        l.homeBabaOffer,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          height: 1.3,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                Text(
+                  '${l.homeAssimeTitle} · ${l.marketSubtitle}',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.accentPrimary.withValues(alpha: 0.12),
-                  ),
-                  child: Icon(
-                    Icons.arrow_forward,
-                    size: 20,
-                    color: AppColors.accentPrimaryDark,
-                  ),
+                Text(
+                  l.homeAssimeShort,
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
               ],
             ),
           ),
-        ),
+          Icon(Icons.chevron_right, color: AppColors.textMuted),
+        ],
       ),
     );
   }
 }
 
-class _Service {
-  const _Service({
-    required this.module,
-    required this.title,
-    required this.pitch,
-    required this.illustration,
-    required this.tint,
-    required this.darkTint,
-    required this.ink,
-    required this.actionIcon,
-    required this.actionLabel,
-    required this.onAction,
-    required this.onTap,
-  });
+/// La carte Discussions (maquette p.14) : titre, « Tout voir », et les deux
+/// dernières discussions — Baba compris si c'est la plus récente.
+class _DiscussionsCard extends ConsumerWidget {
+  const _DiscussionsCard({required this.onSeeAll});
 
-  final PokouModule module;
-  final String title;
-  final String pitch;
-  final PokouIllustrations illustration;
-  final Color tint;
-  final Color darkTint;
-  final Color ink;
-  final IconData actionIcon;
-  final String actionLabel;
-  final VoidCallback onAction;
-  final VoidCallback onTap;
-}
-
-/// Les services en grille à deux colonnes. Un nombre impair : le dernier
-/// prend toute la largeur, à l'horizontale, plutôt que de laisser un trou.
-class _ServiceGrid extends StatelessWidget {
-  const _ServiceGrid({required this.services});
-
-  final List<_Service> services;
+  final VoidCallback onSeeAll;
 
   @override
-  Widget build(BuildContext context) {
-    final rows = <Widget>[];
-    for (var i = 0; i < services.length; i += 2) {
-      final last = i + 1 >= services.length;
-      rows.add(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final discussions =
+        (ref.watch(discussionsProvider).valueOrNull ??
+                const <ConversationSummary>[])
+            .where((d) => !d.isArchived)
+            .toList();
+    final unread = discussions.fold<int>(0, (s, d) => s + d.unreadCount);
+    final recent = discussions.take(2).toList();
+    return Column(
+      children: [
+        _SectionHeader(
+          title: l.navChats,
+          trailing: TextButton(
+            onPressed: onSeeAll,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accentPrimaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(44, 44),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll),
+          ),
+        ),
         Padding(
-          padding: EdgeInsets.only(top: i == 0 ? 0 : 12),
-          child: last
-              ? _ServiceTile(service: services[i], wide: true)
-              : IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _Card(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            onTap: recent.isEmpty ? onSeeAll : null,
+            child: recent.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      l.homeNoChats,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
+                : Column(
                     children: [
-                      Expanded(child: _ServiceTile(service: services[i])),
-                      const SizedBox(width: 12),
-                      Expanded(child: _ServiceTile(service: services[i + 1])),
+                      for (final (i, d) in recent.indexed) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            indent: 72,
+                            color: AppColors.border,
+                          ),
+                        _DiscussionRow(discussion: d),
+                      ],
                     ],
                   ),
-                ),
-        ),
-      );
-    }
-    return Column(children: rows);
-  }
-}
-
-/// Une carte de service : fond pastel uni, le nom et sa promesse en haut,
-/// l'illustration en bas, et un bouton rond pour l'action directe.
-class _ServiceTile extends StatelessWidget {
-  const _ServiceTile({required this.service, this.wide = false});
-
-  final _Service service;
-  final bool wide;
-
-  @override
-  Widget build(BuildContext context) {
-    final background = AppColors.isDark ? service.darkTint : service.tint;
-    final text = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            PokouModuleLogo(service.module, size: 26),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                service.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 19,
-                  height: 1.2,
-                  letterSpacing: -0.2,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          service.pitch,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 13,
-            height: 1.3,
-            color: AppColors.textSecondary,
           ),
         ),
       ],
     );
-    final action = Tooltip(
-      message: service.actionLabel,
-      child: Semantics(
-        button: true,
-        label: service.actionLabel,
-        child: Material(
-          color: AppColors.surface,
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: service.onAction,
-            child: SizedBox(
-              width: 44,
-              height: 44,
-              child: Icon(service.actionIcon, size: 20, color: service.ink),
+  }
+}
+
+/// La carte Kory (maquette p.14) : « Kory · Cagnottes », « Tout voir », et
+/// la cagnotte ouverte la plus proche de son échéance, s'il y en a une.
+class _KoryCard extends ConsumerWidget {
+  const _KoryCard({required this.onSeeAll});
+
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final pots = ref.watch(koryPotsProvider).valueOrNull ?? const <KoryPot>[];
+    final pot = pots.where((p) => p.isOpen).firstOrNull;
+    return Column(
+      children: [
+        _SectionHeader(
+          title: '${l.navKory} · ${l.homeKoryCardSubtitle}',
+          trailing: TextButton(
+            onPressed: onSeeAll,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accentPrimaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(44, 44),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
+            child: Text(l.homeSeeAll),
           ),
         ),
-      ),
+        if (pot != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _KoryInProgress(pot: pot),
+          ),
+      ],
     );
-    return Material(
-      color: background,
-      borderRadius: BorderRadius.circular(22),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: service.onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 12, 12),
-          child: wide
-              ? Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [text, const SizedBox(height: 12), action],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    PokouIllustration(service.illustration, height: 104),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    text,
-                    const SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        action,
-                        const Spacer(),
-                        PokouIllustration(service.illustration, height: 88),
-                      ],
-                    ),
-                  ],
-                ),
+  }
+}
+
+/// La carte Honam (maquette p.14) : « Honam · Pharmacies », « Tout voir »,
+/// et la commande en cours, s'il y en a une.
+class _HonamCard extends ConsumerWidget {
+  const _HonamCard({required this.onSeeAll});
+
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final orders =
+        ref.watch(honamOrdersProvider).valueOrNull ?? const <HonamOrder>[];
+    final order = orders.where((o) => !o.isFinished).firstOrNull;
+    return Column(
+      children: [
+        _SectionHeader(
+          title: '${l.navHonam} · ${l.homeHonamCardSubtitle}',
+          trailing: TextButton(
+            onPressed: onSeeAll,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accentPrimaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(44, 44),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(l.homeSeeAll),
+          ),
         ),
-      ),
+        if (order != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _HonamInProgress(order: order),
+          ),
+      ],
     );
   }
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing, this.dot = false});
+  const _SectionHeader({required this.title, this.trailing});
 
   final String title;
   final Widget? trailing;
-  final bool dot;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -486,17 +316,6 @@ class _SectionHeader extends StatelessWidget {
     // lien flottait au-dessus du titre.
     child: Row(
       children: [
-        if (dot) ...[
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: AppColors.accentPrimary,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
         Expanded(
           child: Text(
             title,
@@ -635,55 +454,6 @@ class _Overline extends StatelessWidget {
       ?trailing,
     ],
   );
-}
-
-/// « En cours » : la cagnotte ouverte et la commande Honam qui avance.
-/// Rien quand il n'y a rien à suivre — l'Accueil ne montre pas de vide.
-class _InProgress extends ConsumerWidget {
-  const _InProgress({required this.kory, required this.honam});
-
-  final bool kory;
-  final bool honam;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    final pots = kory
-        ? (ref.watch(koryPotsProvider).valueOrNull ?? const <KoryPot>[])
-        : const <KoryPot>[];
-    final orders = honam
-        ? (ref.watch(honamOrdersProvider).valueOrNull ?? const <HonamOrder>[])
-        : const <HonamOrder>[];
-    final pot = pots.where((p) => p.isOpen).firstOrNull;
-    final order = orders.where((o) => !o.isFinished).firstOrNull;
-    final count = (pot == null ? 0 : 1) + (order == null ? 0 : 1);
-    if (count == 0) return const SizedBox.shrink();
-    return Column(
-      children: [
-        _SectionHeader(
-          title: l.homeInProgress,
-          dot: true,
-          trailing: Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Text(
-              l.homeAlertsActive(count),
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
-          ),
-        ),
-        if (pot != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: _KoryInProgress(pot: pot),
-          ),
-        if (order != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: _HonamInProgress(order: order),
-          ),
-      ],
-    );
-  }
 }
 
 class _KoryInProgress extends StatelessWidget {
@@ -886,77 +656,6 @@ class _HonamInProgress extends StatelessWidget {
           ink: AppColors.warning,
         ),
       ),
-    );
-  }
-}
-
-/// Les dernières discussions, dans une carte blanche ; toucher ouvre la
-/// discussion directement.
-class _RecentDiscussions extends ConsumerWidget {
-  const _RecentDiscussions({required this.onSeeAll});
-
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    final discussions =
-        (ref.watch(discussionsProvider).valueOrNull ??
-                const <ConversationSummary>[])
-            .where((d) => !d.isArchived)
-            .toList();
-    final unread = discussions.fold<int>(0, (s, d) => s + d.unreadCount);
-    final recent = discussions.take(3).toList();
-    return Column(
-      children: [
-        _SectionHeader(
-          title: l.navChats,
-          trailing: TextButton(
-            onPressed: onSeeAll,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.accentPrimaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(44, 44),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll),
-                const Icon(Icons.chevron_right, size: 18),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _Card(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            onTap: recent.isEmpty ? onSeeAll : null,
-            child: recent.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Text(
-                      l.homeNoChats,
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      for (final (i, d) in recent.indexed) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1,
-                            indent: 72,
-                            color: AppColors.border,
-                          ),
-                        _DiscussionRow(discussion: d),
-                      ],
-                    ],
-                  ),
-          ),
-        ),
-      ],
     );
   }
 }

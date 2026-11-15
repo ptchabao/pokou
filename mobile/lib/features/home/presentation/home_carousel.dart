@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../data/home_banner.dart';
@@ -67,9 +68,13 @@ class _HomeCarouselState extends ConsumerState<HomeCarousel> {
       case 'app:honam':
         widget.onOpenTab(PokouTab.honam);
       case 'app:assime':
-        await Navigator.of(
+        // Barre du bas conservée, « Plus » actif (maquette p.15) : Assimé
+        // n'a pas son propre onglet avant le lot 3.
+        await PokouTabPage.push(
           context,
-        ).push(MaterialPageRoute(builder: (_) => const MarketplaceScreen()));
+          tab: PokouTab.more,
+          child: const MarketplaceScreen(),
+        );
       default:
         final uri = Uri.tryParse(url);
         // Seulement du https : ce lien vient du serveur, et il s'ouvre chez

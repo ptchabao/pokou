@@ -64,7 +64,13 @@ class OTPRateLimitError(OTPError):
 
 
 class OTPInvalidError(OTPError):
-    pass
+    """`attempts_left` n'est renseigné que pour un code faux : l'écran
+    « Code incorrect » (maquette Inscription 2b) dit combien d'essais il
+    reste, dans la langue de l'application."""
+
+    def __init__(self, message: str, attempts_left: Optional[int] = None):
+        super().__init__(message)
+        self.attempts_left = attempts_left
 
 
 def _recent_failures(db: Session, phone: str) -> int:
@@ -356,7 +362,8 @@ def consume_otp(db: Session, raw_phone: str, code: str) -> str:
                 f"Trop d'essais pour ce numéro — réessayez dans {LOCKOUT_MINUTES} minutes."
             )
         raise OTPInvalidError(
-            f"Code incorrect — il vous reste {left} essai{'s' if left > 1 else ''}."
+            f"Code incorrect — il vous reste {left} essai{'s' if left > 1 else ''}.",
+            attempts_left=left,
         )
 
     otp.consumed_at = datetime.utcnow()

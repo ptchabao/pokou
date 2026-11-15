@@ -16,7 +16,7 @@
   "actionJoin": "Join",
   "actionCreate": "Create",
   "navChats": "Chats",
-  "navStatus": "Updates",
+  "navStatus": "Status",
   "navCalls": "Calls",
   "navMarket": "Market",
   "chatsEmptyTitle": "No chats yet",
@@ -2516,5 +2516,30 @@
   "koryFrozenTitle": "Collection suspended by the Pokou team",
   "koryFrozenBody": "While it is being checked, you can view it but nothing can change. Reason: {reason}",
   "courierStatusRejected": "Application declined",
-  "courierRejectedBody": "The Pokou team did not accept your courier application. You can contact support to learn more."
+  "courierRejectedBody": "The Pokou team did not accept your courier application. You can contact support to learn more.",
+  "welcomeServiceStatus": "Share your statuses, visible for 24 h",
+  "welcomeServiceProof": "Keep proof of your conversations",
+  "authPhoneGenericHint": "Phone number",
+  "authContactsNotice": "People who already have your number in their contacts will be able to find you on Pokou.",
+  "authAcceptIntro": "By continuing, you confirm you are at least 13 years old and accept the ",
+  "authAcceptAnd": " and the ",
+  "authAcceptEnd": ".",
+  "authVerifyButton": "Verify",
+  "otpDigitsLabel": "6-digit code",
+  "otpAutoFilled": "Code filled in automatically",
+  "otpAutoVerifyNote": "As soon as the 6 digits are entered, verification starts on its own.",
+  "otpErrorHint": "Check the latest SMS you received. After the 5th failure, entry is blocked for 15 minutes.",
+  "otpWrongAttempts": "{count, plural, =1{Wrong code. You have 1 attempt left.} other{Wrong code. You have {count} attempts left.}}",
+  "@otpWrongAttempts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "twoStepPinLabel": "6-digit PIN",
+  "twoStepRecoveryNote": "Without your PIN, you can still sign back in after 7 days. This delay stops someone who got hold of your number.",
+  "homeKoryCardSubtitle": "Group funds",
+  "homeHonamCardSubtitle": "Pharmacies",
+  "marketSubtitle": "Classified ads"
 }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/contact_avatar.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../notifications/presentation/notifications_center_screen.dart';
@@ -101,10 +103,11 @@ class PokouPageHeader extends ConsumerWidget {
             if (showBell)
               IconButton(
                 tooltip: l.notifCenterTitle,
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationsCenterScreen(),
-                  ),
+                // La barre du bas reste, Accueil actif (maquette p.109).
+                onPressed: () => PokouTabPage.push(
+                  context,
+                  tab: PokouTab.home,
+                  child: const NotificationsCenterScreen(),
                 ),
                 icon: Badge(
                   isLabelVisible: unread > 0,

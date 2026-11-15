@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokou/features/calls/presentation/missed_calls_badge.dart';
 import 'package:pokou/features/contacts/presentation/discussions_controller.dart';
 import 'package:pokou/core/theme/app_colors.dart';
 import 'package:pokou/core/widgets/pokou_bottom_nav.dart';
@@ -17,12 +18,18 @@ void main() {
   BottomNavigationBar navOf(WidgetTester tester) =>
       tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
 
-  Future<void> pump(WidgetTester tester, {int index = 0, Locale? locale}) {
+  Future<void> pump(
+    WidgetTester tester, {
+    int index = 0,
+    Locale? locale,
+    int missedCalls = 0,
+  }) {
     return tester.pumpWidget(
       ProviderScope(
         overrides: [
           // Pas de réseau ni de base dans ce test : aucune discussion.
           discussionsProvider.overrideWith((ref) => Stream.value(const [])),
+          unseenMissedCallsProvider.overrideWithValue(missedCalls),
         ],
         child: MaterialApp(
           locale: locale,
@@ -115,14 +122,20 @@ void main() {
     ]);
   });
 
-  test('Kory et Honam actifs affichent les onglets de service partout', () {
-    expect(pokouTabsFor({'discussions', 'kory', 'honam'}), [
+  test('Assimé seul suffit à quitter le Lot 1, sans onglet à lui', () {
+    expect(pokouTabsFor({'discussions', 'assime'}), [
       PokouTab.home,
       PokouTab.discussions,
-      PokouTab.kory,
-      PokouTab.honam,
       PokouTab.more,
     ]);
+  });
+
+  testWidgets('les appels manqués font une pastille sur Appels', (
+    tester,
+  ) async {
+    await pump(tester, missedCalls: 2, locale: const Locale('fr'));
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('Statuts'), findsOneWidget);
   });
 
   testWidgets("l'onglet actif suit l'index demandé", (tester) async {

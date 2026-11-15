@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/calls/presentation/missed_calls_badge.dart';
 import '../../features/contacts/presentation/discussions_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
@@ -15,10 +16,10 @@ class PokouNavDestination {
   final String label;
 }
 
-/// Les onglets possibles. Kory et Honam sont désormais ouverts dans tous les
-/// pays ; les autres modules restent pilotés par la configuration reçue.
-/// Le mode allégé reste disponible si une configuration ne contient que la
-/// messagerie.
+/// Les onglets possibles, pilotés par les modules ouverts dans le pays
+/// (maquette p.1) : au lancement, seule la messagerie est ouverte et la barre
+/// montre Discussions, Statuts, Appels, Réglages (Lot 1). Kory et Honam
+/// rejoignent la barre quand la console les ouvre dans le pays.
 ///
 /// Un ENUM et non un index : la liste des onglets dépend du pays (NAV-01),
 /// et un index partagé entre la barre et la coquille ouvrait le mauvais
@@ -121,7 +122,7 @@ class PokouBottomNav extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Pastille des non-lus sur Discussions (maquette Terre de Confiance).
+    // Pastille des non-lus sur Discussions (maquette p.14 et p.52).
     final unread = ref.watch(
       discussionsProvider.select(
         (async) => (async.valueOrNull ?? const [])
@@ -129,6 +130,20 @@ class PokouBottomNav extends ConsumerWidget {
             .fold<int>(0, (sum, d) => sum + d.unreadCount),
       ),
     );
+    // Pastille des appels manqués sur Appels (Lot 1, maquette p.52). Le
+    // journal n'est lu que si l'onglet existe : l'application complète n'a
+    // pas d'onglet Appels.
+    // Rien à signaler sur l'onglet qu'on regarde déjà.
+    final missed =
+        tabs.contains(PokouTab.calls) &&
+            tabs.elementAtOrNull(currentIndex) != PokouTab.calls
+        ? ref.watch(unseenMissedCallsProvider)
+        : 0;
+    int badgeOf(PokouTab tab) => switch (tab) {
+      PokouTab.discussions => unread,
+      PokouTab.calls => missed,
+      _ => 0,
+    };
     // Le fond couvre AUSSI la zone de l'indicateur d'accueil (iPhone) et de
     // la navigation par gestes (Android) : la zone sûre est à l'intérieur du
     // fond, pas autour. Sinon le contenu qui défile réapparaissait dans une
@@ -165,12 +180,12 @@ class PokouBottomNav extends ConsumerWidget {
                 icon: _Glyph(
                   icon: destination.icon,
                   active: false,
-                  badge: tabs[i] == PokouTab.discussions ? unread : 0,
+                  badge: badgeOf(tabs[i]),
                 ),
                 activeIcon: _Glyph(
                   icon: destination.icon,
                   active: true,
-                  badge: tabs[i] == PokouTab.discussions ? unread : 0,
+                  badge: badgeOf(tabs[i]),
                 ),
                 label: destination.label,
               ),

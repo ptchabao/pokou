@@ -2,7 +2,7 @@
 /// callers branch on specific cases (e.g. 429 for OTP rate-limiting)
 /// without parsing the message string.
 class ApiException implements Exception {
-  ApiException(this.statusCode, this.message, {this.code});
+  ApiException(this.statusCode, this.message, {this.code, this.attemptsLeft});
 
   final int statusCode;
   final String message;
@@ -10,6 +10,11 @@ class ApiException implements Exception {
   /// Le `code` d'un refus structuré `{code, message}` (« use_honam »,
   /// « waitlist »…), pour brancher sans lire le texte.
   final String? code;
+
+  /// Essais restants d'un refus `otp_wrong` (voir otp_verify_screen.dart) :
+  /// l'écran « Code incorrect » (maquette Inscription 2b) l'affiche sans
+  /// avoir à l'extraire du texte, déjà traduit par le serveur ou l'app.
+  final int? attemptsLeft;
 
   @override
   String toString() => 'ApiException($statusCode): $message';

@@ -95,8 +95,9 @@ def test_pays_modifier_ajouter_et_revenir(client):
     assert config["delivery_price"] == 1200 and config["kory_plus_fee_ht"] == 1500
     assert config["honam_cities"] == ["Lomé", "Kara"]
     assert config["emergency_numbers"] == {"police": "117", "pompiers": "118"}
-    # Kory et HONAM restent ouverts quoi qu'on coche.
-    assert config["modules"] == ["discussions", "kory", "honam", "assime"]
+    # Seuls les modules cochés sont ouverts : Kory et HONAM se ferment aussi.
+    assert config["modules"] == ["discussions", "assime"]
+    assert done.json()["always_open"] == []
     with TestingSessionLocal() as db:
         stored = json.loads(db.query(SystemSetting).filter(SystemSetting.key == "country.TG").one().value)
         assert stored["delivery_price"] == 1200

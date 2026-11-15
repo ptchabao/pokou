@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 import '../../../core/api/api_exceptions.dart';
+import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart' show isLot1;
 import '../../../core/widgets/pokou_background.dart';
 import '../../profile/presentation/language_screen.dart';
 import 'auth_controller.dart';
@@ -179,6 +182,13 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
     // « Accepter et continuer » vaut acceptation des conditions et de l'âge
     // (AUTH-09) : il n'y a donc plus de cases à cocher ici ni plus loin.
     final canSubmit = _isValidNumber && !_loading;
+    // Avant toute connexion, le pays n'est connu que par l'indicatif choisi
+    // dans le sélecteur — la même supposition que le repli hors-ligne
+    // (`CountryConfig.guessFromPhone`), pour ne jamais promettre Kory ou
+    // Honam là où le serveur ne les ouvrirait pas.
+    final lot1 = isLot1(
+      CountryConfig.guessFromPhone('+${_country.dialCode}').modules,
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -201,15 +211,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                     // quelqu'un qui ne lit pas le français.
                     Align(
                       alignment: Alignment.centerRight,
-                      child: IconButton(
-                        tooltip: L.of(context).profileLanguage,
-                        icon: const Icon(Icons.language),
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LanguageScreen(),
-                          ),
-                        ),
-                      ),
+                      child: _LanguagePill(),
                     ),
                     Center(
                       child: Image.asset(
@@ -228,48 +230,59 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    // Kory et Honam sont désormais disponibles dans tous les
-                    // pays, y compris avant que le compte soit identifié.
-                    _Service(
-                      icon: Icons.forum_outlined,
-                      label: L.of(context).welcomeServiceChats,
-                    ),
-                    _Service(
-                      icon: Icons.savings_outlined,
-                      label: L.of(context).welcomeServiceKory,
-                    ),
-                    _Service(
-                      icon: Icons.local_pharmacy_outlined,
-                      label: L.of(context).honamSubtitle,
-                    ),
-                    const _Service(
-                      icon: Icons.donut_large_outlined,
-                      label: 'Partage tes statuts, visibles 24 h',
-                    ),
-                    const _Service(
-                      icon: Icons.verified_outlined,
-                      label: 'Garde la preuve de tes échanges',
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      L.of(context).onbStep('1'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
+                    const SizedBox(height: 16),
+                    // Maquette INS-1 : une carte à 3 lignes, pas 5 — ce que
+                    // le pays choisi ouvre vraiment (Kory/Honam) ou, en
+                    // Lot 1, ce que la messagerie offre déjà (statuts,
+                    // preuve des échanges).
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 16,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      L.of(context).authSubtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Column(
+                        children: [
+                          _Service(
+                            icon: Icons.forum_outlined,
+                            label: L.of(context).welcomeServiceChats,
+                          ),
+                          if (lot1) ...[
+                            _Service(
+                              icon: Icons.donut_large_outlined,
+                              label: L.of(context).welcomeServiceStatus,
+                            ),
+                            _Service(
+                              icon: Icons.verified_outlined,
+                              label: L.of(context).welcomeServiceProof,
+                            ),
+                          ] else ...[
+                            _Service(
+                              icon: Icons.savings_outlined,
+                              label: L.of(context).welcomeServiceKory,
+                            ),
+                            _Service(
+                              icon: Icons.local_pharmacy_outlined,
+                              label: L.of(context).honamSubtitle,
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     const SizedBox(height: 24),
+                    Text(
+                      L.of(context).authPhoneHint,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOutCubic,
@@ -352,7 +365,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                                 // Un exemple de numéro DU PAYS CHOISI : « 90 12
                                 // 34 56 » au Togo, « 06 12 34 56 78 » en France.
                                 hintText: _country.exampleNsn.isEmpty
-                                    ? L.of(context).authPhoneHint
+                                    ? L.of(context).authPhoneGenericHint
                                     : _country.exampleNsn,
                                 border: InputBorder.none,
                                 filled: false,
@@ -374,42 +387,92 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                         style: const TextStyle(color: AppColors.semanticError),
                       ),
                     ],
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const LegalScreen(name: 'conditions'),
-                            ),
-                          ),
-                          child: Text(L.of(context).legalTerms),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const LegalScreen(name: 'confidentialite'),
-                            ),
-                          ),
-                          child: Text(L.of(context).legalPrivacy),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // AUTH-09 : l'acceptation des conditions et de l'âge est
-                    // portée par le bouton lui-même, pas par des cases à
-                    // cocher. Elle est donc ANNONCÉE juste avant, avec les
-                    // deux documents lisibles au-dessus.
+                    const SizedBox(height: 8),
                     Text(
-                      L.of(context).authAcceptNotice,
-                      textAlign: TextAlign.center,
+                      L.of(context).authSubtitle,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Maquette INS-1 : qui a déjà ce numéro dans ses contacts
+                    // le retrouvera — annoncé avant l'inscription, pas après.
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              L.of(context).authContactsNotice,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.4,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // AUTH-09 : l'acceptation des conditions et de l'âge est
+                    // portée par le bouton lui-même, pas par des cases à
+                    // cocher — annoncée ici, en une phrase, les deux
+                    // documents restant lisibles par leurs liens.
+                    Text.rich(
+                      TextSpan(
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                        children: [
+                          TextSpan(text: L.of(context).authAcceptIntro),
+                          TextSpan(
+                            text: L.of(context).legalTerms,
+                            style: TextStyle(
+                              color: AppColors.accentPrimaryDark,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const LegalScreen(name: 'conditions'),
+                                ),
+                              ),
+                          ),
+                          TextSpan(text: L.of(context).authAcceptAnd),
+                          TextSpan(
+                            text: L.of(context).legalPrivacy,
+                            style: TextStyle(
+                              color: AppColors.accentPrimaryDark,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const LegalScreen(
+                                    name: 'confidentialite',
+                                  ),
+                                ),
+                              ),
+                          ),
+                          TextSpan(text: L.of(context).authAcceptEnd),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton(
@@ -438,17 +501,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                               child: Text(L.of(context).authAcceptAndContinue),
                             ),
                     ),
-                    const SizedBox(height: 24),
-                    // Formulation honnête : Pokou ne fait PAS de chiffrement de
-                    // bout en bout aujourd'hui — inutile de le promettre ici.
-                    Text(
-                      L.of(context).authPrivacyNote,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -460,8 +513,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
   }
 }
 
-/// Un service ouvert dans le pays, annoncé sur INS-1. Repris de l'ancien
-/// écran de bienvenue, que cet écran remplace.
+/// Une ligne de la carte des services ouverts dans le pays (maquette INS-1).
 class _Service extends StatelessWidget {
   const _Service({required this.icon, required this.label});
 
@@ -471,14 +523,71 @@ class _Service extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 20, color: AppColors.accentPrimaryDark),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 15)),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
         ],
+      ),
+    );
+  }
+}
+
+/// La puce de langue (maquette INS-1) : le globe, la langue courante, et un
+/// chevron — pas juste une icône, pour que la langue déjà choisie se voie
+/// sans ouvrir l'écran.
+class _LanguagePill extends ConsumerWidget {
+  const _LanguagePill();
+
+  static const _nativeNames = {
+    'fr': 'Français',
+    'en': 'English',
+    'es': 'Español',
+    'it': 'Italiano',
+    'ru': 'Русский',
+    'ar': 'العربية',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final code = ref.watch(
+      appSettingsProvider.select((settings) => settings.localeCode),
+    );
+    // Sans choix explicite, l'app suit le téléphone (voir AppSettings) : on
+    // affiche alors la langue réellement rendue, celle de ce `context`.
+    final label =
+        _nativeNames[code] ??
+        _nativeNames[Localizations.localeOf(context).languageCode] ??
+        _nativeNames['fr']!;
+    return Material(
+      color: AppColors.surface,
+      shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const LanguageScreen())),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.language, size: 16, color: AppColors.textSecondary),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+              ),
+              Icon(
+                Icons.expand_more,
+                size: 16,
+                color: AppColors.textMuted,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

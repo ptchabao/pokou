@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -57,7 +58,7 @@ class LAr extends L {
   String get navChats => 'المحادثات';
 
   @override
-  String get navStatus => 'الأخبار';
+  String get navStatus => 'الحالات';
 
   @override
   String get navCalls => 'المكالمات';
@@ -9015,4 +9016,71 @@ class LAr extends L {
   @override
   String get courierRejectedBody =>
       'لم يقبل فريق Pokou طلبك كعامل توصيل. يمكنك مراسلة الدعم لمعرفة المزيد.';
+
+  @override
+  String get welcomeServiceStatus => 'Partage tes statuts, visibles 24 h';
+
+  @override
+  String get welcomeServiceProof => 'Garde la preuve de tes échanges';
+
+  @override
+  String get authPhoneGenericHint => 'Numéro de téléphone';
+
+  @override
+  String get authContactsNotice =>
+      'Les personnes qui ont déjà ton numéro dans leurs contacts pourront te trouver sur Pokou.';
+
+  @override
+  String get authAcceptIntro =>
+      'En continuant, tu confirmes avoir au moins 13 ans et tu acceptes les ';
+
+  @override
+  String get authAcceptAnd => ' et la ';
+
+  @override
+  String get authAcceptEnd => '.';
+
+  @override
+  String get authVerifyButton => 'Vérifier';
+
+  @override
+  String get otpDigitsLabel => 'Code à 6 chiffres';
+
+  @override
+  String get otpAutoFilled => 'Code rempli automatiquement';
+
+  @override
+  String get otpAutoVerifyNote =>
+      'Dès les 6 chiffres saisis, la vérification part toute seule.';
+
+  @override
+  String get otpErrorHint =>
+      'Vérifie le dernier SMS reçu. Au 5e échec, la saisie est bloquée 15 minutes.';
+
+  @override
+  String otpWrongAttempts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Code incorrect. Il te reste $count essais.',
+      one: 'Code incorrect. Il te reste 1 essai.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get twoStepPinLabel => 'Code PIN à 6 chiffres';
+
+  @override
+  String get twoStepRecoveryNote =>
+      'Sans ton code PIN, la reconnexion reste possible au bout de 7 jours. Ce délai bloque une personne qui aurait récupéré ton numéro.';
+
+  @override
+  String get homeKoryCardSubtitle => 'Cagnottes';
+
+  @override
+  String get homeHonamCardSubtitle => 'Pharmacies';
+
+  @override
+  String get marketSubtitle => 'Petites annonces';
 }

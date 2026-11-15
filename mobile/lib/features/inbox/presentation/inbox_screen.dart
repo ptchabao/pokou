@@ -9,7 +9,9 @@ import '../../../core/providers.dart';
 import '../../settings/presentation/backup_screens.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import '../../calls/presentation/call_log_screen.dart';
+import '../../calls/presentation/missed_calls_badge.dart';
 import '../../contacts/presentation/contacts_screen.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../honam/presentation/honam_screen.dart';
@@ -25,6 +27,8 @@ import '../../status/presentation/status_list_screen.dart';
 /// n'apparaît pas là où il n'est pas lancé. L'onglet courant est retenu par
 /// son identité (`PokouTab`), pas par sa position, pour qu'un onglet qui
 /// apparaît au chargement de la configuration ne décale pas la sélection.
+/// Il vit dans `pokouCurrentTabProvider`, pour qu'un écran ouvert par-dessus
+/// avec la barre du bas (`PokouTabPage`) puisse changer d'onglet.
 class InboxScreen extends ConsumerStatefulWidget {
   const InboxScreen({super.key});
 
@@ -33,15 +37,13 @@ class InboxScreen extends ConsumerStatefulWidget {
 }
 
 class _InboxScreenState extends ConsumerState<InboxScreen> {
-  PokouTab _current = PokouTab.home;
-
   /// Les onglets déjà ouverts au moins une fois.
   ///
   /// `IndexedStack` construit TOUS ses enfants. On ne construit donc un
   /// onglet qu'à sa première visite, et on le garde monté ensuite : la
   /// position de défilement de chaque onglet est conservée (NAV-02), sans
   /// faire démarrer tous les écrans — et toutes leurs requêtes — d'un coup.
-  final Set<PokouTab> _visited = {PokouTab.home};
+  final Set<PokouTab> _visited = {};
 
   @override
   void initState() {
@@ -81,10 +83,9 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     }
   }
 
-  void _open(PokouTab tab) => setState(() {
-    _current = tab;
-    _visited.add(tab);
-  });
+  void _open(PokouTab tab) {
+    ref.read(pokouCurrentTabProvider.notifier).state = tab;
+  }
 
   Widget _build(PokouTab tab) => switch (tab) {
     PokouTab.home => HomeScreen(onOpenTab: _open),
@@ -107,9 +108,17 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     final tabs = pokouTabsFor(modules);
     // L'onglet de départ : l'Accueil dans l'application complète, les
     // Discussions au lot 1, qui n'a pas d'Accueil.
-    final current = tabs.contains(_current) ? _current : tabs.first;
-    if (!_visited.contains(current)) _visited.add(current);
+    final requested = ref.watch(pokouCurrentTabProvider);
+    final current = tabs.contains(requested) ? requested! : tabs.first;
+    _visited.add(current);
     final index = tabs.indexOf(current);
+    // Ouvrir le journal d'appels éteint la pastille des appels manqués ; le
+    // quitter aussi, pour les appels arrivés pendant qu'il était affiché.
+    ref.listen(pokouCurrentTabProvider, (previous, tab) {
+      if (tab == PokouTab.calls || previous == PokouTab.calls) {
+        ref.read(callsSeenAtProvider.notifier).markSeen();
+      }
+    });
 
     return PokouBackground(
       child: Scaffold(

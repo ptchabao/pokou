@@ -111,23 +111,29 @@ class ApiClient {
     }
     String message = _l.apiError(response.statusCode);
     String? code;
+    int? attemptsLeft;
     try {
       final body = jsonDecode(response.body);
       final detail = body is Map ? body['detail'] : null;
       if (detail is Map) {
         code = detail['code'] as String?;
+        attemptsLeft = detail['attempts_left'] as int?;
         // Refus structuré `{code, message}` : le code choisit un texte
         // traduit, le message du serveur sert de repli.
-        message = detail['code'] == 'use_honam'
-            ? _l.marketUseHonam
-            : (detail['message'] as String?) ?? message;
+        message = switch (code) {
+          'use_honam' => _l.marketUseHonam,
+          'otp_wrong' when attemptsLeft != null => _l.otpWrongAttempts(
+            attemptsLeft,
+          ),
+          _ => (detail['message'] as String?) ?? message,
+        };
       } else if (detail != null) {
         message = detail.toString();
       }
     } catch (_) {
       // Body wasn't JSON — keep the generic message.
     }
-    throw ApiException(response.statusCode, message, code: code);
+    throw ApiException(response.statusCode, message, code: code, attemptsLeft: attemptsLeft);
   }
 
   /// Le jeton d'accès expire au bout de 30 min côté API (voir

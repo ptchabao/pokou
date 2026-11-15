@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -57,7 +58,7 @@ class LEn extends L {
   String get navChats => 'Chats';
 
   @override
-  String get navStatus => 'Updates';
+  String get navStatus => 'Status';
 
   @override
   String get navCalls => 'Calls';
@@ -9030,4 +9031,71 @@ class LEn extends L {
   @override
   String get courierRejectedBody =>
       'The Pokou team did not accept your courier application. You can contact support to learn more.';
+
+  @override
+  String get welcomeServiceStatus => 'Share your statuses, visible for 24 h';
+
+  @override
+  String get welcomeServiceProof => 'Keep proof of your conversations';
+
+  @override
+  String get authPhoneGenericHint => 'Phone number';
+
+  @override
+  String get authContactsNotice =>
+      'People who already have your number in their contacts will be able to find you on Pokou.';
+
+  @override
+  String get authAcceptIntro =>
+      'By continuing, you confirm you are at least 13 years old and accept the ';
+
+  @override
+  String get authAcceptAnd => ' and the ';
+
+  @override
+  String get authAcceptEnd => '.';
+
+  @override
+  String get authVerifyButton => 'Verify';
+
+  @override
+  String get otpDigitsLabel => '6-digit code';
+
+  @override
+  String get otpAutoFilled => 'Code filled in automatically';
+
+  @override
+  String get otpAutoVerifyNote =>
+      'As soon as the 6 digits are entered, verification starts on its own.';
+
+  @override
+  String get otpErrorHint =>
+      'Check the latest SMS you received. After the 5th failure, entry is blocked for 15 minutes.';
+
+  @override
+  String otpWrongAttempts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Wrong code. You have $count attempts left.',
+      one: 'Wrong code. You have 1 attempt left.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get twoStepPinLabel => '6-digit PIN';
+
+  @override
+  String get twoStepRecoveryNote =>
+      'Without your PIN, you can still sign back in after 7 days. This delay stops someone who got hold of your number.';
+
+  @override
+  String get homeKoryCardSubtitle => 'Group funds';
+
+  @override
+  String get homeHonamCardSubtitle => 'Pharmacies';
+
+  @override
+  String get marketSubtitle => 'Classified ads';
 }

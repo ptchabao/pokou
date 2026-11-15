@@ -2,11 +2,12 @@
 
 Les valeurs par défaut sont écrites ici ; chacune se surcharge sans
 publication par un réglage système `country.<CC>` (JSON partiel), que
-l'équipe modifie depuis la base. Kory et HONAM sont ouverts dans tous les
-pays ; les réglages pays ne peuvent désactiver que les autres modules.
+l'équipe modifie depuis la console. Chaque module, Kory et HONAM compris,
+s'ouvre pays par pays : le Togo et la Côte d'Ivoire les ont par défaut.
 
-Un pays absent de la table conserve les discussions, Kory et HONAM. Les
-autres modules restent limités aux pays configurés.
+Un pays absent de la table n'a que la messagerie (le Lot 1 de la maquette :
+Discussions, Statuts, Appels, Réglages). Les modules rejoignent l'app quand
+la console les ouvre dans ce pays.
 """
 import json
 from typing import Any, Optional
@@ -16,8 +17,7 @@ from sqlalchemy.orm import Session
 from app.services.settings_service import get_setting
 from app.utils.phone import country_for_e164
 
-#: Les modules connus. Kory et HONAM restent ouverts même s'ils sont absents
-#: d'un réglage pays ; les autres modules doivent être listés.
+#: Les modules connus. Un module absent du réglage d'un pays y est fermé.
 MODULES = ("discussions", "kory", "kory_plus", "honam", "assime", "certified")
 
 _DEFAULTS: dict[str, dict[str, Any]] = {
@@ -57,7 +57,9 @@ _FALLBACK: dict[str, Any] = {
     "emergency_numbers": {},
     "honam_cities": [],
     "kory_plus_fee_ht": 1000,
-    "modules": ["discussions", "kory", "honam"],
+    #: Messagerie seule (Lot 1). Pokou certifié reste réservé aux pays où
+    #: la vérification d'identité est en place.
+    "modules": ["discussions"],
 }
 
 
@@ -81,7 +83,7 @@ def country_config(db: Session, country: Optional[str]) -> dict[str, Any]:
         module
         for module in configured_modules
         if isinstance(module, str) and module in MODULES
-    } | {"kory", "honam"}
+    }
     config["modules"] = [module for module in MODULES if module in enabled]
     config["country"] = code or None
     return config

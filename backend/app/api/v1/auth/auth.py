@@ -236,6 +236,13 @@ async def verify_phone_otp(
     except otp_service.OTPRateLimitError as exc:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc)) from exc
     except otp_service.OTPInvalidError as exc:
+        if exc.attempts_left is not None:
+            # Refus structuré : l'app dit « Il te reste N essais » dans sa
+            # langue ; le message reste le repli des versions antérieures.
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "otp_wrong", "message": str(exc), "attempts_left": exc.attempts_left},
+            ) from exc
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     if not user.is_active:

@@ -39,15 +39,12 @@ void main() {
     expect(formatFcfa(25000), '25 000 FCFA');
   });
 
-  test('hors ligne, Kory et Honam restent ouverts dans tous les pays', () {
+  test('hors ligne, Kory et Honam restent ouverts au Togo et en CI', () {
     expect(CountryConfig.guessFromPhone('+22890112233').has('kory'), isTrue);
     expect(CountryConfig.guessFromPhone('+22890112233').has('honam'), isTrue);
     expect(CountryConfig.guessFromPhone('+2250700112233').has('kory'), isTrue);
     expect(CountryConfig.guessFromPhone('+2250700112233').has('honam'), isTrue);
-    expect(CountryConfig.guessFromPhone(null).modules, {
-      'discussions',
-      'kory',
-      'honam',
-    });
+    // Ailleurs, la messagerie seule (Lot 1), comme le repli du serveur.
+    expect(CountryConfig.guessFromPhone(null).modules, {'discussions'});
   });
 }

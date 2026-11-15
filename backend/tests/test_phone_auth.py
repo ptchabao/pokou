@@ -402,7 +402,10 @@ def test_cinq_codes_faux_verrouillent_le_numero(client):
         r = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": "000000"})
         assert r.status_code == 400
         messages.append(r.json()["detail"])
-    assert "4 essais" in messages[0] and "1 essai" in messages[-1]
+    assert "4 essais" in messages[0]["message"] and "1 essai" in messages[-1]["message"]
+    # Le nombre d'essais restants, lisible sans analyser le texte.
+    assert [m["attempts_left"] for m in messages] == [4, 3, 2, 1]
+    assert {m["code"] for m in messages} == {"otp_wrong"}
     fifth = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": "000000"})
     assert fifth.status_code == 429
     # Même le BON code est refusé pendant le verrou.

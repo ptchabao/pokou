@@ -9,11 +9,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/assistant_orb.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../data/auth_repository.dart' show TwoStepRequired;
 import 'auth_controller.dart';
+import 'auth_progress_bar.dart';
 import 'onboarding_screen.dart';
 import 'two_step_pin_screen.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
@@ -46,6 +47,13 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   late final AnimationController _successController;
   bool _success = false;
   String? _error;
+
+  /// Vrai dès que les 6 chiffres sont arrivés d'un coup (collage ou saisie
+  /// automatique du système), faux dès qu'ils sont tapés un par un : la
+  /// puce « Code rempli automatiquement » (maquette 2. Code) ne vaut que
+  /// pour le premier cas.
+  bool _autoFilled = false;
+  int _lastLength = 0;
 
   /// 50 s, comme le serveur (RESEND_MIN_SECONDS, égal à la durée de vie du
   /// code) : un bouton qui se réactive avant que le serveur accepte ne
@@ -148,6 +156,8 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
     setState(() {
       _error = message;
       _codeController.clear();
+      _autoFilled = false;
+      _lastLength = 0;
     });
     _shakeController.forward(from: 0);
   }
@@ -220,8 +230,6 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
                   ),
                   const SizedBox(height: 16),
                 ],
-                const Center(child: AssistantOrb(size: 80)),
-                const SizedBox(height: 28),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   switchInCurve: Curves.easeOutCubic,
@@ -254,17 +262,21 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
   }
 
   Widget _buildForm() {
+    final l = L.of(context);
+    final canVerify = _codeController.text.trim().length == _codeLength;
     return Column(
       key: const ValueKey('form'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          L.of(context).onbStep('2'),
+          l.onbStep('2'),
           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
+        const AuthProgressBar(step: 2),
+        const SizedBox(height: 16),
         Text(
-          L.of(context).otpTitle,
+          l.otpTitle,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -273,10 +285,10 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
         ),
         const SizedBox(height: 8),
         Text(
-          L.of(context).authCodeSentTo(widget.phone),
+          l.authCodeSentTo(widget.phone),
           style: TextStyle(color: AppColors.textSecondary),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
@@ -287,7 +299,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              L.of(context).authChangeNumber,
+              l.authChangeNumber,
               style: TextStyle(
                 color: AppColors.accentPrimaryDark,
                 decoration: TextDecoration.underline,
@@ -296,7 +308,16 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
             ),
           ),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 20),
+        Text(
+          l.otpDigitsLabel,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
         AnimatedBuilder(
           animation: _shakeController,
           builder: (context, child) {
@@ -310,18 +331,73 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
           },
           child: _buildOtpBoxes(),
         ),
-        if (_error != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            _error!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.chatIconMuted,
-              fontSize: 13,
-            ),
+        const SizedBox(height: 14),
+        // Maquette « 2. Code » / « 2b. Code incorrect » : un état (puce verte
+        // ou erreur), puis le compte à rebours, puis une note qui en dépend.
+        if (_error != null)
+          Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 16,
+                color: AppColors.semanticError,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  _error!,
+                  style: const TextStyle(
+                    color: AppColors.semanticError,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          )
+        else if (_autoFilled && canVerify)
+          Row(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 16,
+                color: AppColors.feedbackSuccess,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                l.otpAutoFilled,
+                style: TextStyle(
+                  color: AppColors.feedbackSuccess,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        if (_resendCooldown > 0) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.schedule, size: 16, color: AppColors.textMuted),
+              const SizedBox(width: 6),
+              Text(
+                l.authResendIn(_formatCooldown(_resendCooldown)),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+            ],
           ),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
+        Text(
+          _error != null ? l.otpErrorHint : l.otpAutoVerifyNote,
+          style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 20),
+        FilledButton(
+          onPressed: canVerify ? _verify : null,
+          style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
+          child: Text(l.authVerifyButton),
+        ),
+        const SizedBox(height: 20),
         Center(child: _buildResendArea()),
       ],
     );
@@ -344,7 +420,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 for (var i = 0; i < _codeLength; i++) ...[
-                  if (i > 0) const SizedBox(width: 16),
+                  if (i > 0) const SizedBox(width: 12),
                   _OtpBox(
                     digit: i < code.length ? code[i] : null,
                     active: hasFocus && i == code.length,
@@ -372,6 +448,10 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen>
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {
+                  // Plusieurs chiffres d'un coup = collage ou saisie
+                  // automatique du système ; un par un = tapé à la main.
+                  setState(() => _autoFilled = value.length - _lastLength > 1);
+                  _lastLength = value.length;
                   if (value.length == _codeLength) _verify();
                 },
               ),
@@ -446,11 +526,10 @@ class _OtpBox extends StatelessWidget {
           : Matrix4.identity(),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: active ? AppColors.focusRing : AppColors.border,
-            width: 2,
-          ),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(
+          color: active ? AppColors.focusRing : AppColors.border,
+          width: active ? 2 : 1,
         ),
       ),
       child: Text(

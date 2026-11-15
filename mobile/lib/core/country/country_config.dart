@@ -5,8 +5,9 @@ import '../providers.dart';
 
 /// Ce que Pokou ouvre dans le pays de la personne connectée (NAV-01).
 ///
-/// La décision vient du serveur (`/config/country`). Kory et HONAM sont
-/// ouverts dans tous les pays ; les autres modules peuvent varier par pays.
+/// La décision vient du serveur (`/config/country`) : chaque module, Kory et
+/// HONAM compris, s'ouvre pays par pays depuis la console. Un pays sans
+/// module de service se présente en Lot 1 (messagerie seule).
 class CountryConfig {
   const CountryConfig({
     required this.country,
@@ -30,8 +31,6 @@ class CountryConfig {
     country: json['country'] as String?,
     modules: {
       for (final m in (json['modules'] as List? ?? const [])) m as String,
-      'kory',
-      'honam',
     },
     currency: json['currency'] as String? ?? 'XOF',
     vatRate: (json['vat_rate'] as num?)?.toDouble() ?? 0,
@@ -42,13 +41,22 @@ class CountryConfig {
     },
   );
 
-  /// Ce qu'on suppose quand le serveur ne répond pas : les modules communs
-  /// restent visibles quel que soit l'indicatif.
+  /// Ce qu'on suppose quand le serveur ne répond pas : les mêmes valeurs par
+  /// défaut que le serveur (backend/app/core/countries.py). Le Togo et la
+  /// Côte d'Ivoire gardent leurs modules ; un autre indicatif n'a que la
+  /// messagerie, comme un pays que la console n'a pas encore configuré.
   factory CountryConfig.guessFromPhone(String? phone) {
     if (phone != null && phone.startsWith('+228')) {
       return const CountryConfig(
         country: 'TG',
-        modules: {'discussions', 'kory', 'honam', 'assime', 'certified'},
+        modules: {
+          'discussions',
+          'kory',
+          'kory_plus',
+          'honam',
+          'assime',
+          'certified',
+        },
         vatRate: 0.18,
         deliveryPrice: 1000,
       );
@@ -56,15 +64,12 @@ class CountryConfig {
     if (phone != null && phone.startsWith('+225')) {
       return const CountryConfig(
         country: 'CI',
-        modules: {'discussions', 'kory', 'honam', 'assime'},
+        modules: {'discussions', 'kory', 'kory_plus', 'honam', 'assime'},
         vatRate: 0.18,
         deliveryPrice: 1500,
       );
     }
-    return const CountryConfig(
-      country: null,
-      modules: {'discussions', 'kory', 'honam'},
-    );
+    return const CountryConfig(country: null, modules: {'discussions'});
   }
 }
 

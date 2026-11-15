@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_background.dart';
 import '../../../l10n/app_localizations.dart';
@@ -28,8 +29,11 @@ class TwoStepPinScreen extends ConsumerStatefulWidget {
   ConsumerState<TwoStepPinScreen> createState() => _TwoStepPinScreenState();
 }
 
+const _pinLength = 6;
+
 class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
   final _pinController = TextEditingController();
+  final _focusNode = FocusNode();
   bool _submitting = false;
   String? _error;
 
@@ -37,15 +41,22 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
   void initState() {
     super.initState();
     _pinController.addListener(() => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _focusNode.requestFocus(),
+    );
   }
 
   @override
   void dispose() {
     _pinController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  bool get _canSubmit => !_submitting && _pinController.text.trim().length >= 4;
+  // Exactement 6 chiffres (voir _validate_pin, account_privacy.py) : un
+  // bouton actif avant ça laisserait envoyer un code tronqué pour rien.
+  bool get _canSubmit =>
+      !_submitting && _pinController.text.trim().length == _pinLength;
 
   Future<void> _submit() async {
     if (!_canSubmit) return;
@@ -98,8 +109,10 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
                   child: PokouBackButton(),
                 ),
                 const SizedBox(height: 16),
+                // Maquette Connexion · 1 : un bouclier, pas un cadenas — ce
+                // code protège le COMPTE, pas un simple verrou d'écran.
                 Icon(
-                  Icons.lock_outline,
+                  Icons.shield_outlined,
                   size: 56,
                   color: AppColors.accentPrimaryDark,
                 ),
@@ -122,30 +135,83 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                Text(
+                  l.twoStepPinLabel,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _PinBoxes(
                   controller: _pinController,
-                  autofocus: true,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(12),
-                  ],
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _submit(),
-                  decoration: InputDecoration(hintText: l.twoStepHint),
+                  focusNode: _focusNode,
+                  onSubmitted: _submit,
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
                   Text(
                     _error!,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.semanticError,
                       fontSize: 13,
                     ),
                   ),
                 ],
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: _submitting
+                        ? null
+                        : () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ForgotPinScreen(
+                                verificationToken: widget.verificationToken,
+                              ),
+                            ),
+                          ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(l.pinForgot),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // REG-6 : le délai de 7 jours (PIN_RESET_DELAY côté serveur)
+                // avant qu'une reconnexion au seul SMS soit acceptée.
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l.twoStepRecoveryNote,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            height: 1.4,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 20),
                 FilledButton(
                   onPressed: _canSubmit ? _submit : null,
@@ -158,24 +224,112 @@ class _TwoStepPinScreenState extends ConsumerState<TwoStepPinScreen> {
                         )
                       : Text(l.actionContinue),
                 ),
-                // CNX-1 → REG-6.
-                TextButton(
-                  onPressed: _submitting
-                      ? null
-                      : () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ForgotPinScreen(
-                              verificationToken: widget.verificationToken,
-                            ),
-                          ),
-                        ),
-                  child: Text(l.pinForgot),
-                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 6 cases encadrées pour le code PIN (maquette Connexion · 1), sur le même
+/// principe que les cases du code SMS : un champ invisible capte la saisie,
+/// les cases n'en affichent qu'un rendu — ici un point plutôt que le
+/// chiffre, le code restant masqué.
+class _PinBoxes extends StatelessWidget {
+  const _PinBoxes({
+    required this.controller,
+    required this.focusNode,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final VoidCallback onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final filled = controller.text.length;
+        return GestureDetector(
+          onTap: () => focusNode.requestFocus(),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < _pinLength; i++) ...[
+                      if (i > 0) const SizedBox(width: 10),
+                      _PinBox(filled: i < filled, active: i == filled),
+                    ],
+                  ],
+                ),
+              ),
+              Opacity(
+                opacity: 0,
+                child: SizedBox(
+                  width: _pinLength * 48,
+                  child: TextField(
+                    contextMenuBuilder: pokouContextMenuBuilder,
+                    controller: controller,
+                    focusNode: focusNode,
+                    obscureText: true,
+                    keyboardType: TextInputType.number,
+                    maxLength: _pinLength,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(
+                      counterText: '',
+                      border: InputBorder.none,
+                    ),
+                    onSubmitted: (_) => onSubmitted(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PinBox extends StatelessWidget {
+  const _PinBox({required this.filled, required this.active});
+
+  final bool filled;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      width: 44,
+      height: 48,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(
+          color: active ? AppColors.focusRing : AppColors.border,
+          width: active ? 2 : 1,
+        ),
+      ),
+      child: filled
+          ? Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: AppColors.textPrimary,
+                shape: BoxShape.circle,
+              ),
+            )
+          : null,
     );
   }
 }

@@ -204,7 +204,7 @@ abstract class L {
   /// No description provided for @navStatus.
   ///
   /// In fr, this message translates to:
-  /// **'Actus'**
+  /// **'Statuts'**
   String get navStatus;
 
   /// No description provided for @navCalls.
@@ -15211,6 +15211,114 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.'**
   String get courierRejectedBody;
+
+  /// No description provided for @welcomeServiceStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partage tes statuts, visibles 24 h'**
+  String get welcomeServiceStatus;
+
+  /// No description provided for @welcomeServiceProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garde la preuve de tes échanges'**
+  String get welcomeServiceProof;
+
+  /// No description provided for @authPhoneGenericHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone'**
+  String get authPhoneGenericHint;
+
+  /// No description provided for @authContactsNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les personnes qui ont déjà ton numéro dans leurs contacts pourront te trouver sur Pokou.'**
+  String get authContactsNotice;
+
+  /// No description provided for @authAcceptIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'En continuant, tu confirmes avoir au moins 13 ans et tu acceptes les '**
+  String get authAcceptIntro;
+
+  /// No description provided for @authAcceptAnd.
+  ///
+  /// In fr, this message translates to:
+  /// **' et la '**
+  String get authAcceptAnd;
+
+  /// No description provided for @authAcceptEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'.'**
+  String get authAcceptEnd;
+
+  /// No description provided for @authVerifyButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier'**
+  String get authVerifyButton;
+
+  /// No description provided for @otpDigitsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à 6 chiffres'**
+  String get otpDigitsLabel;
+
+  /// No description provided for @otpAutoFilled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code rempli automatiquement'**
+  String get otpAutoFilled;
+
+  /// No description provided for @otpAutoVerifyNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès les 6 chiffres saisis, la vérification part toute seule.'**
+  String get otpAutoVerifyNote;
+
+  /// No description provided for @otpErrorHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie le dernier SMS reçu. Au 5e échec, la saisie est bloquée 15 minutes.'**
+  String get otpErrorHint;
+
+  /// No description provided for @otpWrongAttempts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Code incorrect. Il te reste 1 essai.} other{Code incorrect. Il te reste {count} essais.}}'**
+  String otpWrongAttempts(int count);
+
+  /// No description provided for @twoStepPinLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN à 6 chiffres'**
+  String get twoStepPinLabel;
+
+  /// No description provided for @twoStepRecoveryNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans ton code PIN, la reconnexion reste possible au bout de 7 jours. Ce délai bloque une personne qui aurait récupéré ton numéro.'**
+  String get twoStepRecoveryNote;
+
+  /// No description provided for @homeKoryCardSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnottes'**
+  String get homeKoryCardSubtitle;
+
+  /// No description provided for @homeHonamCardSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacies'**
+  String get homeHonamCardSubtitle;
+
+  /// No description provided for @marketSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petites annonces'**
+  String get marketSubtitle;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

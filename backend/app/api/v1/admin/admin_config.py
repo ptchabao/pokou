@@ -29,7 +29,9 @@ router = APIRouter(prefix="/admin", tags=["Administration"])
 
 CountryCode = Annotated[str, Path(pattern=r"^[A-Za-z]{2}$")]
 _PREFIX = "country."
-_ALWAYS_OPEN = {"kory", "honam"}
+#: Plus aucun module n'est imposé : la console ouvre chacun pays par pays.
+#: Le champ reste dans la réponse pour la console, qui le lit encore.
+_ALWAYS_OPEN: set[str] = set()
 
 Price = Optional[Annotated[int, Field(strict=True, ge=0, le=10_000_000)]]
 EmergencyNumber = Optional[Annotated[str, Field(pattern=r"^[0-9]{2,10}$")]]

@@ -89,7 +89,8 @@ def test_le_code_part_par_twilio_verify_et_s_y_verifie(client):
 
         wrong = client.post("/api/v1/auth/phone/verify-otp", json={"phone": "+22890700001", "code": "000000"})
         assert wrong.status_code == 400
-        assert "4 essais" in wrong.json()["detail"]
+        assert "4 essais" in wrong.json()["detail"]["message"]
+        assert wrong.json()["detail"]["attempts_left"] == 4
 
         ok = client.post("/api/v1/auth/phone/verify-otp", json={"phone": "+22890700001", "code": "424242"})
         assert ok.status_code == 200, ok.text
