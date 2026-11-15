@@ -16,6 +16,7 @@ import '../../honam/presentation/honam_controller.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../../modules/presentation/modules_screen.dart';
 import '../../modules/shared/module_ui.dart';
+import '../../officine/presentation/officine_entry.dart';
 import '../../profile/presentation/language_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import '../../profile/presentation/theme_screen.dart';
@@ -272,6 +273,9 @@ class MoreScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+        // Espace officine : seulement pour l'équipe d'une officine.
+        if (!lot1 && config.has('honam')) const OfficineEntryCard(),
 
         // Lot 1 : Encart « Bientôt : Kory, Honam, Assimé » (LOT-4 / NAV-12)
         if (lot1)
