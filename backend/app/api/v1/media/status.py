@@ -15,7 +15,7 @@ from app.core.database import get_db
 from app.models import Contact, MarketplaceBoost, MediaAsset, Status, StatusContentType, StatusRecipient, StatusView, User
 from app.api.v1.messaging.ws import manager
 from app.services.privacy import status_privacy_service
-from app.utils.identity import est_certifie, nom_affiche
+from app.utils.identity import est_certifie, forme_du_badge, nom_affiche
 from app.core.security import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -318,6 +318,7 @@ async def get_feed(db: Session = Depends(get_db), current_user: dict = Depends(g
             "user_id": author_id,
             "display_name": nom_affiche(authors[author_id], feed_petnames.get(author_id)),
             "is_verified": est_certifie(authors[author_id]),
+            "badge": forme_du_badge(authors[author_id]),
             "avatar": _serialize_avatar(authors[author_id].avatar_media),
             "statuses": entries,
         }

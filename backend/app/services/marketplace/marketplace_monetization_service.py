@@ -82,10 +82,13 @@ def create_payment(
     amount: int,
     description: str,
     metadata: dict[str, Any],
+    client_phone: str | None = None,
 ) -> MarketplacePayment:
     """Crée une intention de paiement et son checkout Semoa.
 
     Rien n'est activé ici: seule la confirmation signée du webhook le peut.
+    `client_phone` : le wallet choisi pour payer (« Payer avec »), s'il
+    n'est pas le numéro du compte.
     """
     if not user.phone:
         raise ValueError("Un numéro de téléphone est nécessaire pour Mobile Money")
@@ -105,7 +108,7 @@ def create_payment(
             amount=amount,
             description=description,
             merchant_reference=f"marketplace-payment-{payment.id}",
-            client_phone=user.phone,
+            client_phone=client_phone or user.phone,
             client_firstname=user.full_name or user.phone,
             client_lastname=user.full_name or user.phone,
             callback_url=semoa_client.build_callback_url(db, "marketplace-payment"),
@@ -165,9 +168,12 @@ def _apply_module_payment(db: Session, payment: MarketplacePayment) -> dict[str,
     return module.apply_confirmed_payment(db, payment)
 
 
-def attach_payer_name(db: Session, provider_reference: str, payer_name: str) -> None:
+def attach_payer_name(
+    db: Session, provider_reference: str, payer_name: str, operator: str | None = None
+) -> None:
     """Retient le nom du titulaire du wallet AVANT la confirmation, pour que
-    l'effet du paiement (Pokou certifié) puisse le comparer."""
+    l'effet du paiement (Pokou certifié) puisse le comparer — et l'opérateur
+    qui l'a vérifié, que l'écran « Badge actif » nomme."""
     payment = (
         db.query(MarketplacePayment)
         .filter(MarketplacePayment.provider_reference == provider_reference)
@@ -175,7 +181,11 @@ def attach_payer_name(db: Session, provider_reference: str, payer_name: str) -> 
     )
     if payment is None or payment.status != "PENDING":
         return
-    payment.metadata_json = {**(payment.metadata_json or {}), "payer_name": payer_name}
+    payment.metadata_json = {
+        **(payment.metadata_json or {}),
+        "payer_name": payer_name,
+        **({"payer_operator": operator} if operator else {}),
+    }
     db.flush()
 
 

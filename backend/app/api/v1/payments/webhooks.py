@@ -48,8 +48,13 @@ async def semoa_marketplace_payment_webhook(request: Request, db: Session = Depe
     # l'identité de Pokou certifié. Hypothèse sur le nom du champ, à
     # confirmer avec la documentation CashPay — d'où les trois lectures.
     payer_name = body.get("payer_name") or body.get("customer_name") or body.get("account_holder_name")
+    # L'opérateur du wallet (« Mixx by Yas », « Flooz ») : même hypothèse
+    # sur le nom du champ.
+    operator = body.get("operator") or body.get("payment_operator") or body.get("network")
     if payer_name:
-        marketplace_monetization_service.attach_payer_name(db, reference, str(payer_name)[:160])
+        marketplace_monetization_service.attach_payer_name(
+            db, reference, str(payer_name)[:160], str(operator)[:60] if operator else None
+        )
     try:
         return marketplace_monetization_service.confirm_payment(db, reference)
     except ValueError as exc:

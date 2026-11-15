@@ -19,6 +19,19 @@ def est_certifie(user) -> bool:
     return bool(getattr(user, "is_verified", False))
 
 
+def forme_du_badge(user) -> Optional[str]:
+    """La forme du badge à côté du nom : "PRO" (hexagone), "CERTIFIED"
+    (rosette) ou `None`.
+
+    Mêmes droits, même vérification d'identité : seule la forme dit ce qui
+    est derrière le nom, une personne ou une activité (maquette « Deux
+    badges, deux formes »). À renvoyer à côté de `is_verified`, partout où
+    celui-ci l'est, pour la même raison qu'`est_certifie` existe."""
+    if not est_certifie(user):
+        return None
+    return "PRO" if bool(getattr(user, "is_pro_badge", False)) else "CERTIFIED"
+
+
 def est_vendeur_verifie(user) -> bool:
     """Le VENDEUR est-il vérifié sur le marché ?
 

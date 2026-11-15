@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.database import get_db
 from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
 from app.utils.editing import MESSAGE_EDIT_WINDOW_MINUTES
-from app.utils.identity import est_certifie, nom_certifie
+from app.utils.identity import est_certifie, forme_du_badge, nom_certifie
 from app.services.messaging import group_invitation_service
 from app.services.privacy import privacy_service
 from app.core.security import get_current_user
@@ -171,6 +171,13 @@ def _serialize_group(group: Group, *, with_members: bool = False) -> dict:
         "disappearing_seconds": group.disappearing_seconds,
         "proof_mode": bool(group.proof_mode),
         "proof_mode_since": group.proof_mode_since.isoformat() if group.proof_mode_since else None,
+        # « Mode preuve activé par Afi » : le bandeau et le message système
+        # nomment qui l'a activé (maquette 5) — c'est aussi elle qui peut le
+        # couper.
+        "proof_mode_by": group.proof_mode_by,
+        "proof_mode_by_name": next(
+            (_display_name(m.user) for m in group.members if m.user_id == group.proof_mode_by), None
+        ) if group.proof_mode_by else None,
         "crypto_epoch": group.crypto_epoch,
     }
     if with_members:
@@ -293,6 +300,7 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
         # l'emporte sur tous les carnets, vient d'ici (utils/identity.py).
         "sender_certified_name": nom_certifie(message.sender),
         "sender_is_verified": est_certifie(message.sender),
+        "sender_badge": forme_du_badge(message.sender),
         "message_type": message.message_type.value,
         "content": None,
         "encryption": message.encryption,
@@ -1754,15 +1762,25 @@ async def set_proof_mode(
     return _serialize_group_for(group, user_id)
 
 
+#: Types qu'« Inclure les photos et les documents » retire de l'export
+#: quand la personne décoche l'interrupteur (maquette 8) : le PDF ne peut de
+#: toute façon pas MONTRER un média chiffré, mais il peut au moins omettre
+#: la ligne « [IMAGE] » qui n'apporte rien sans lui.
+_MEDIA_TYPES = {"IMAGE", "VIDEO", "AUDIO", "DOCUMENT", "STICKER"}
+
+
 @router.get("/{group_id}/proof-export")
 def export_proof(
     group_id: int,
+    since: Optional[datetime] = None,
+    until: Optional[datetime] = None,
+    include_media: bool = True,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """L'export daté (maquettes 8 et 9) : tout membre, tant que le groupe
-    est en mode preuve. Depuis l'activation, messages supprimés et versions
-    d'origine compris."""
+    est en mode preuve. Par défaut depuis l'activation ; `since`/`until`
+    couvrent « Toute la discussion » ou une période choisie (maquette 8)."""
     from fastapi.responses import Response as RawResponse
 
     from app.services.messaging.proof_export import render
@@ -1772,12 +1790,15 @@ def export_proof(
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group.proof_mode:
         raise HTTPException(status_code=409, detail="Le mode preuve n'est pas actif")
-    rows = (
-        db.query(GroupMessage)
-        .filter(GroupMessage.group_id == group_id, GroupMessage.created_at >= group.proof_mode_since)
-        .order_by(GroupMessage.created_at)
-        .all()
+    period_start = since or group.proof_mode_since
+    query = db.query(GroupMessage).filter(
+        GroupMessage.group_id == group_id, GroupMessage.created_at >= period_start
     )
+    if until is not None:
+        query = query.filter(GroupMessage.created_at <= until)
+    if not include_media:
+        query = query.filter(GroupMessage.message_type.notin_(_MEDIA_TYPES))
+    rows = query.order_by(GroupMessage.created_at).all()
     messages = [{
         "sender": _display_name(m.sender),
         "created_at": m.created_at,
@@ -1788,7 +1809,7 @@ def export_proof(
         "edited_at": m.edited_at,
     } for m in rows]
     me = db.query(User).filter(User.id == user_id).first()
-    pdf = render(group.name, group.proof_mode_since, messages, _display_name(me))
+    pdf = render(group.name, period_start, messages, _display_name(me))
     filename = f"pokou-preuve-{group_id}-{datetime.utcnow():%Y%m%d-%H%M}.pdf"
     return RawResponse(pdf, media_type="application/pdf",
                        headers={"Content-Disposition": f'attachment; filename="{filename}"'})

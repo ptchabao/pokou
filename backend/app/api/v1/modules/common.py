@@ -38,7 +38,8 @@ def require_module(db: Session, user_id: int, slug: str) -> None:
 
 
 def open_payment(
-    db: Session, user_id: int, *, kind: str, amount: int, description: str, metadata: dict
+    db: Session, user_id: int, *, kind: str, amount: int, description: str, metadata: dict,
+    client_phone: str | None = None,
 ) -> MarketplacePayment:
     """Ouvre un paiement Mobile Money, sans rien accorder.
 
@@ -50,7 +51,8 @@ def open_payment(
     user = db.query(User).filter(User.id == user_id).first()
     try:
         return create_payment(
-            db, user, kind=kind, amount=amount, description=description, metadata=metadata
+            db, user, kind=kind, amount=amount, description=description, metadata=metadata,
+            client_phone=client_phone,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

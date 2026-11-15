@@ -23,7 +23,7 @@ from app.services.calls import call_housekeeping, call_thread_service, livekit_s
 from app.services.messaging import notification_policy
 from app.services.notifications.push_service import send_push
 from app.services.privacy import privacy_service
-from app.utils.identity import est_certifie, nom_affiche, nom_certifie
+from app.utils.identity import est_certifie, forme_du_badge, nom_affiche, nom_certifie
 from app.core.security import get_current_user
 
 router = APIRouter(prefix="/calls", tags=["Pokou calls"])
@@ -1054,6 +1054,7 @@ def _serialize_call_log(db: Session, call: CallLog, viewer_id: int) -> dict:
                 "display_name": nom_affiche(u, petnames.get(u.id)),
                 "avatar": _serialize_avatar(u.avatar_media),
                 "is_verified": est_certifie(u),
+                "badge": forme_du_badge(u),
             }
             for u in others
         ],

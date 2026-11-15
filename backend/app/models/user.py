@@ -166,6 +166,12 @@ class User(Base):
     # comptes qui l'avaient déjà.
     is_verified = Column(Boolean, default=False, nullable=False)
     verified_at = Column(DateTime, nullable=True)
+    # La FORME du badge (maquette « Deux badges, deux formes ») : rosette
+    # pour Pokou certifié, hexagone pour Pokou certifié Pro. Mêmes droits,
+    # seule la forme change ; posé avec `is_verified` par le paiement (voir
+    # certified.py::_apply_badge), pour que les listes n'aient pas à relire
+    # l'abonnement de chaque personne.
+    is_pro_badge = Column(Boolean, default=False, nullable=False)
     # Compte d'un bot Pokou Business (voir models/pokou_business.py::Bot) :
     # ni téléphone ni mot de passe, il ne se connecte jamais — il ne fait
     # que porter le nom et les conversations du bot.

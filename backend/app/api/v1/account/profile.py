@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session, aliased, joinedload
 from app.core.database import get_db
 from app.models import Contact, DirectMessage, Group, GroupMember, MediaAsset, MessageType, SellerVerificationApplication, User
 from app.services.privacy import privacy_service
-from app.utils.identity import est_certifie, est_vendeur_verifie
+from app.utils.identity import est_certifie, forme_du_badge, est_vendeur_verifie
 from app.core.security import get_current_user
 
 # Bornes de la fiche contact : on remplit des sections (médias, documents,
@@ -57,6 +57,7 @@ def _serialize(user: User) -> dict:
         "full_name": user.full_name,
         "about": user.about,
         "is_verified": est_certifie(user),
+        "badge": forme_du_badge(user),
         "is_bot": bool(user.is_bot),
         "avatar_media_id": user.avatar_media_id,
         "avatar": _serialize_avatar(user.avatar_media),
