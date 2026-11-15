@@ -183,6 +183,66 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
     }
   }
 
+  /// La ligne de carnet de cette personne — c'est elle qui porte la
+  /// sourdine (PUT /conversations/mute, `kind: contact`).
+  int? _contactRowId() {
+    final contacts = ref.watch(contactsProvider).valueOrNull ?? const [];
+    for (final c in contacts) {
+      if (c.contactUserId == widget.contactUserId) return c.id;
+    }
+    return null;
+  }
+
+  bool _isMuted() {
+    final discussions = ref.watch(discussionsProvider).valueOrNull ?? const [];
+    for (final d in discussions) {
+      if (d.kind == 'contact' && d.contactUserId == widget.contactUserId) {
+        return d.isMuted;
+      }
+    }
+    return false;
+  }
+
+  /// Mêmes durées que la liste des discussions : 8 h, 1 semaine, toujours —
+  /// les seules que le serveur accepte.
+  Future<void> _toggleMute() async {
+    final id = _contactRowId();
+    if (id == null) return;
+    final l = L.of(context);
+    final repository = ref.read(conversationsRepositoryProvider);
+    if (_isMuted()) {
+      await repository.mute(kind: 'contact', id: id, durationSeconds: null);
+      ref.invalidate(discussionsProvider);
+      return;
+    }
+    final seconds = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(l.chatsMute8h),
+              onTap: () => Navigator.pop(sheetContext, 28800),
+            ),
+            ListTile(
+              title: Text(l.chatsMute1w),
+              onTap: () => Navigator.pop(sheetContext, 604800),
+            ),
+            ListTile(
+              title: Text(l.chatsMuteAlways),
+              onTap: () => Navigator.pop(sheetContext, 3155760000),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (seconds == null) return;
+    await repository.mute(kind: 'contact', id: id, durationSeconds: seconds);
+    ref.invalidate(discussionsProvider);
+  }
+
   /// Discussions · 16 — « Signaler {nom} », avec les 5 derniers messages
   /// relus du cache local.
   Future<void> _report() async {
@@ -311,7 +371,20 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                   children: [
-                    Row(children: const [PokouBackButton(), Spacer()]),
+                    Row(
+                      children: [
+                        const PokouBackButton(),
+                        const SizedBox(width: 8),
+                        // Discussions · 7 — « Infos du contact ».
+                        Text(
+                          L.of(context).contactInfoTitle,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     Center(
                       child: IdentityAvatar(
@@ -440,6 +513,38 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                           products: profile.products,
                           sellerId: profile.userId,
                           sellerName: profile.displayName,
+                        ),
+                      ],
+                      // Discussions · 7 — « Notifications » : la sourdine de
+                      // cette discussion, seulement s'il existe une ligne
+                      // de carnet pour la porter.
+                      if (_contactRowId() != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: AppRadius.card,
+                          ),
+                          child: ListTile(
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: AppRadius.card,
+                            ),
+                            leading: const Icon(Icons.notifications_none),
+                            title: Text(
+                              L.of(context).contactNotifications,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            subtitle: Text(
+                              _isMuted()
+                                  ? L.of(context).contactNotificationsMuted
+                                  : L.of(context).contactNotificationsOn,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                            onTap: _toggleMute,
+                          ),
                         ),
                       ],
                       // Discussions · 7 — « Bloquer » toujours disponible :

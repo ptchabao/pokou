@@ -1145,6 +1145,28 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
+  /// « Bloquer {nom} » depuis le ⋮ : même confirmation que la fiche.
+  Future<void> _confirmBlockFromMenu() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_l.contactBlockTitle(widget.contactName)),
+        content: Text(_l.contactBlockBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(_l.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(_l.chatsBlock),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) await _blockUnknownSender();
+  }
+
   Future<void> _reportUnknownSender() async {
     final recent = await recentDirectForReport(
       ref,
@@ -1339,6 +1361,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Lot 1 · 2b — un ⋮ complet. Les entrées du mode preuve mènent
+            // à ses propres feuilles, inchangées.
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: Text(_l.contactInfoTitle),
+              onTap: () => Navigator.pop(sheetContext, 'info'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: Text(_l.actionSearch),
+              onTap: () => Navigator.pop(sheetContext, 'search'),
+            ),
             ListTile(
               leading: const Icon(Icons.gavel_outlined),
               title: Text(proofOn ? _l.proofModeDisable : _l.proofModeEnable),
@@ -1351,11 +1385,35 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 title: Text(_l.proofExport),
                 onTap: () => Navigator.pop(sheetContext, 'export'),
               ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.block, color: AppColors.semanticError),
+              title: Text(
+                _l.contactBlockName(widget.contactName),
+                style: const TextStyle(color: AppColors.semanticError),
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'block'),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.flag_outlined,
+                color: AppColors.semanticError,
+              ),
+              title: Text(
+                _l.reportTitle(widget.contactName),
+                style: const TextStyle(color: AppColors.semanticError),
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'report'),
+            ),
           ],
         ),
       ),
     );
     if (!mounted) return;
+    if (action == 'info') _openContactProfile();
+    if (action == 'search') await _openSearch();
+    if (action == 'block') await _confirmBlockFromMenu();
+    if (action == 'report') await _reportUnknownSender();
     if (action == 'toggle') await _toggleProof(proofOn);
     if (action == 'export') await _exportProof(messages);
   }
@@ -1591,12 +1649,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           ),
                         ),
                       ),
-                      _ChatIconButton(
-                        icon: Icons.search,
-                        onPressed: _openSearch,
-
-                        tooltip: L.of(context).actionSearch,
-                      ),
+                      // Pas de loupe dans l'en-tête (Lot 1 · 2b) : la
+                      // recherche passe par le ⋮ et par Infos du contact.
                       _ChatIconButton(
                         icon: Icons.call_outlined,
                         onPressed: () => _startCall(startWithVideo: false),
@@ -1610,11 +1664,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         tooltip: L.of(context).a11yVideoCall,
                       ),
                       if (!isContactBot)
+                        // Le ⋮ reste un ⋮, mode preuve ou non : l'état du
+                        // mode est déjà dit par son bandeau.
                         _ChatIconButton(
-                          icon: proofOn ? Icons.gavel : Icons.more_vert,
+                          icon: Icons.more_vert,
                           onPressed: () =>
                               _openProofMenu(proofOn, state.messages),
-                          tooltip: L.of(context).proofModeTitle,
+                          tooltip: L.of(context).a11yMoreOptions,
                         ),
                     ],
                   ),

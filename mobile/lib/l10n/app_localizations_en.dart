@@ -9504,6 +9504,18 @@ class LEn extends L {
   String get groupSettingsProofOff => 'Off';
 
   @override
+  String get contactNotifications => 'Notifications';
+
+  @override
+  String get contactNotificationsOn => 'On';
+
+  @override
+  String get contactNotificationsMuted => 'Muted';
+
+  @override
+  String get contactInfoTitle => 'Contact info';
+
+  @override
   String get composerWriteHint => 'Write a message…';
 
   @override

@@ -15932,6 +15932,30 @@ abstract class L {
   /// **'Désactivé'**
   String get groupSettingsProofOff;
 
+  /// No description provided for @contactNotifications.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get contactNotifications;
+
+  /// No description provided for @contactNotificationsOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activées'**
+  String get contactNotificationsOn;
+
+  /// No description provided for @contactNotificationsMuted.
+  ///
+  /// In fr, this message translates to:
+  /// **'En sourdine'**
+  String get contactNotificationsMuted;
+
+  /// No description provided for @contactInfoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Infos du contact'**
+  String get contactInfoTitle;
+
   /// No description provided for @composerWriteHint.
   ///
   /// In fr, this message translates to:

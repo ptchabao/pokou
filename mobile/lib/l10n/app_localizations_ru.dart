@@ -9594,6 +9594,18 @@ class LRu extends L {
   String get groupSettingsProofOff => 'Désactivé';
 
   @override
+  String get contactNotifications => 'Notifications';
+
+  @override
+  String get contactNotificationsOn => 'Activées';
+
+  @override
+  String get contactNotificationsMuted => 'En sourdine';
+
+  @override
+  String get contactInfoTitle => 'Infos du contact';
+
+  @override
   String get composerWriteHint => 'Écrire un message…';
 
   @override
