@@ -9263,4 +9263,10 @@ class LEn extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get koryMqAmounts => 'Amounts';
+
+  @override
+  String get koryMqVerifiedByCode => 'verified by code';
 }

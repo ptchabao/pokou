@@ -2569,5 +2569,7 @@
   "koryMqHaveContributed": "{done} sur {total} ont cotisé",
   "koryMqPlusFeeNotRefunded": "Les frais Kory Plus ne sont pas remboursés.",
   "koryMqSeeTontine": "Voir la tontine",
-  "koryMqAllPaid": "{count, plural, =1{Le membre a payé ses frais. La tontine est ouverte.} other{Les {count} membres ont payé leurs frais. La tontine est ouverte.}}"
+  "koryMqAllPaid": "{count, plural, =1{Le membre a payé ses frais. La tontine est ouverte.} other{Les {count} membres ont payé leurs frais. La tontine est ouverte.}}",
+  "koryMqAmounts": "Montants",
+  "koryMqVerifiedByCode": "vérifié par code"
 }

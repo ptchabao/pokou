@@ -9326,4 +9326,10 @@ class LFr extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get koryMqAmounts => 'Montants';
+
+  @override
+  String get koryMqVerifiedByCode => 'vérifié par code';
 }

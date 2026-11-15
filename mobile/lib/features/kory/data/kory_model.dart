@@ -60,7 +60,12 @@ class KoryPot {
     this.frozenReason,
     this.cotisation,
     this.organizerId,
+    this.participants = const [],
   });
+
+  /// KOR-11 : les participants, vus du collecteur et de l'organisateur
+  /// seulement (numéros masqués).
+  final List<KoryParticipantInfo> participants;
 
   final DateTime? createdAt;
   final DateTime? extendedAt;
@@ -244,7 +249,37 @@ class KoryPot {
         ? KoryCotisation.fromJson(json['cotisation'] as Map<String, dynamic>)
         : null,
     organizerId: json['organizer_id'] as int?,
+    participants: [
+      for (final p in (json['participants'] as List? ?? const []))
+        KoryParticipantInfo.fromJson(p as Map<String, dynamic>),
+    ],
   );
+}
+
+/// Un participant d'une cagnotte : sur Pokou, ou invité par SMS (KOR-11).
+class KoryParticipantInfo {
+  const KoryParticipantInfo({
+    required this.name,
+    this.userId,
+    this.phoneMasked,
+    this.onPokou = true,
+    this.isCollector = false,
+  });
+
+  final int? userId;
+  final String name;
+  final String? phoneMasked;
+  final bool onPokou;
+  final bool isCollector;
+
+  factory KoryParticipantInfo.fromJson(Map<String, dynamic> json) =>
+      KoryParticipantInfo(
+        userId: json['user_id'] as int?,
+        name: json['name'] as String? ?? '—',
+        phoneMasked: json['phone'] as String?,
+        onPokou: json['on_pokou'] as bool? ?? true,
+        isCollector: json['is_collector'] as bool? ?? false,
+      );
 }
 
 /// Un engagement : un montant de départ, plus un montant par jour jusqu'à

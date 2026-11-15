@@ -15529,6 +15529,18 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{Le membre a payé ses frais. La tontine est ouverte.} other{Les {count} membres ont payé leurs frais. La tontine est ouverte.}}'**
   String koryMqAllPaid(int count);
+
+  /// No description provided for @koryMqAmounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants'**
+  String get koryMqAmounts;
+
+  /// No description provided for @koryMqVerifiedByCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'vérifié par code'**
+  String get koryMqVerifiedByCode;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

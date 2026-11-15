@@ -5004,5 +5004,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "koryMqAmounts": "Montants",
+  "koryMqVerifiedByCode": "vérifié par code"
 }
