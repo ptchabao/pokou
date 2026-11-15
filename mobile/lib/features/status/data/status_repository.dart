@@ -429,6 +429,16 @@ class StatusRepository {
     return (response as Map).cast<String, dynamic>();
   }
 
+  /// Le cœur posé sur le statut d'un autre — seul l'auteur le voit, dans
+  /// « Vu par » (voir status.py::like_status).
+  Future<bool> like(String statusId, {required bool liked}) async {
+    final response = await _api.post(
+      '/status/$statusId/like',
+      body: {'liked': liked},
+    );
+    return (response as Map)['liked'] as bool? ?? liked;
+  }
+
   Future<List<StatusViewer>> viewers(String statusId) async {
     final response = await _api.get('/status/$statusId/views');
     return (response['items'] as List)

@@ -70,6 +70,23 @@ class MainActivity : FlutterActivity() {
                 result.success(simCountryIso())
             }
 
+        // Réglages › Stockage et données : la place totale et libre du
+        // téléphone, pour la jauge. StatFs sur le dossier de l'application —
+        // c'est le volume où Pokou range ses fichiers. Aucune permission.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.pokou.pokou/storage")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "diskSpace") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                try {
+                    val stat = android.os.StatFs(filesDir.path)
+                    result.success(mapOf("total" to stat.totalBytes, "free" to stat.availableBytes))
+                } catch (exception: Exception) {
+                    result.success(null)
+                }
+            }
+
         configureCallBridge(flutterEngine)
     }
 
@@ -171,6 +188,10 @@ class MainActivity : FlutterActivity() {
                     }
                     "stopRingVibration" -> {
                         RingVibration.stop()
+                        result.success(null)
+                    }
+                    "setCallVibrate" -> {
+                        RingVibration.setEnabled(applicationContext, call.arguments != false)
                         result.success(null)
                     }
                     // Picture-in-Picture : Flutter dit quand un appel VIDÉO

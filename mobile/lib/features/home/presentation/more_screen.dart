@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../settings/presentation/account_security_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'certified_screen.dart';
@@ -379,7 +380,9 @@ class MoreScreen extends ConsumerWidget {
             _Row(
               Icons.lock_outline,
               l.moreAccount,
-              () => push(const ProfileScreen()),
+              // Compte et sécurité (REG-3) : le Profil reste ouvert par la
+              // carte d'identité en tête de cet écran.
+              () => push(const AccountSecurityScreen()),
             ),
             _Row(
               Icons.visibility_outlined,

@@ -44,6 +44,7 @@ class PrivacySettings {
     required this.groupInvites,
     required this.readReceipts,
     required this.presenceReciprocal,
+    this.silenceUnknownCalls = false,
   });
 
   final PrivacyAudience lastSeen;
@@ -59,6 +60,11 @@ class PrivacySettings {
   final bool readReceipts;
   final bool presenceReciprocal;
 
+  /// « Couper les appels d'inconnus » : un appel de quelqu'un qui n'est pas
+  /// dans mon carnet ne sonne pas, mais reste dans le journal des appels.
+  /// Appliqué par le serveur, qui ne fait pas sonner (voir calls.py::_ring).
+  final bool silenceUnknownCalls;
+
   factory PrivacySettings.fromJson(Map<String, dynamic> json) =>
       PrivacySettings(
         lastSeen: PrivacyAudience.parse(json['last_seen'] as String?),
@@ -71,6 +77,7 @@ class PrivacySettings {
         groupInvites: PrivacyAudience.parse(json['group_invites'] as String?),
         readReceipts: json['read_receipts'] as bool? ?? true,
         presenceReciprocal: json['presence_reciprocal'] as bool? ?? true,
+        silenceUnknownCalls: json['silence_unknown_calls'] as bool? ?? false,
       );
 }
 
@@ -100,6 +107,7 @@ class PrivacyRepository {
     PrivacyAudience? groupInvites,
     bool? readReceipts,
     bool? presenceReciprocal,
+    bool? silenceUnknownCalls,
   }) async {
     final reponse = await _api.put(
       '/account-privacy/privacy',
@@ -113,6 +121,8 @@ class PrivacyRepository {
         if (readReceipts != null) 'read_receipts': readReceipts,
         if (presenceReciprocal != null)
           'presence_reciprocal': presenceReciprocal,
+        if (silenceUnknownCalls != null)
+          'silence_unknown_calls': silenceUnknownCalls,
       },
     );
     return PrivacySettings.fromJson(reponse as Map<String, dynamic>);

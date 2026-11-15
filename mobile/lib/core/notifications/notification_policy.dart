@@ -73,6 +73,10 @@ NotificationPresentation decidePresentation({
 
   final allowedBySettings = switch (type) {
     'group_message' || 'group_mention' => settings.groupNotifications,
+    'reaction' => settings.reactionNotifications,
+    // Les services (Kory, Honam, Assimé) se règlent côté serveur, module
+    // par module : un push coupé n'arrive pas (voir inbox.py).
+    'service' => true,
     _ => settings.messageNotifications,
   };
   if (!allowedBySettings) return NotificationPresentation.suppressed;

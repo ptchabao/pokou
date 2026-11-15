@@ -29,6 +29,7 @@ import 'features/contacts/presentation/contacts_controller.dart';
 import 'features/contacts/presentation/discussions_controller.dart';
 import 'features/presence/presentation/typing_controller.dart';
 import 'features/status/presentation/status_controller.dart';
+import 'features/settings/presentation/account_pin_reminder.dart';
 import 'features/communities/presentation/community_controller.dart';
 import 'features/calls/presentation/ongoing_call_banner.dart';
 import 'features/modules/verses/verse_controller.dart';
@@ -134,6 +135,9 @@ class PokouApp extends ConsumerWidget {
     // seulement après un passage par l'onglet Actus : il se dessine dans la
     // liste des discussions et dans les contacts.
     ref.watch(statusRingSyncProvider);
+    // « Me le redemander de temps en temps » : le code PIN du compte,
+    // redemandé au plus une fois par semaine (Compte et sécurité).
+    ref.watch(accountPinReminderProvider);
     ref.watch(channelsRealtimeProvider);
     // File d'attente des messages composés hors ligne — surveillée ici et
     // non dans l'écran de conversation : un message écrit puis l'écran

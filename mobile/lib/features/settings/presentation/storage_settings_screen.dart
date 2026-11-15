@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,8 +9,25 @@ import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../../core/widgets/contact_avatar.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'settings_widgets.dart';
+
+/// La place totale et libre du téléphone (canal natif, Android). `null`
+/// ailleurs — iOS, web, tests : la jauge montre alors Pokou seul.
+Future<({int total, int free})?> _diskSpace() async {
+  try {
+    final raw = await const MethodChannel(
+      'com.pokou.pokou/storage',
+    ).invokeMapMethod<String, dynamic>('diskSpace');
+    final total = raw?['total'];
+    final free = raw?['free'];
+    if (total is! int || free is! int || total <= 0) return null;
+    return (total: total, free: free);
+  } catch (_) {
+    return null;
+  }
+}
 
 /// Profil > Stockage et données. Remplace l'ancien « vider le cache » à
 /// l'aveugle (un simple SnackBar) : on montre d'abord ce que le cache
@@ -31,6 +49,12 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
   Map<String, int> _byDiscussion = const {};
   int _bigFiles = 0;
 
+  /// Les médias de chaque discussion, pour les libérer d'un geste.
+  Map<String, Set<int>> _idsByDiscussion = const {};
+  Set<int> _bigIds = const {};
+  int _bigBytes = 0;
+  ({int total, int free})? _disk;
+
   @override
   void initState() {
     super.initState();
@@ -47,15 +71,27 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
           ? const <int, String>{}
           : await ref.read(pokouMessageStoreProvider).mediaOwners(me);
       final byDiscussion = <String, int>{};
+      final idsByDiscussion = <String, Set<int>>{};
       sizes.forEach((id, bytes) {
         final key = owners[id] ?? 'other';
         byDiscussion[key] = (byDiscussion[key] ?? 0) + bytes;
+        (idsByDiscussion[key] ??= <int>{}).add(id);
       });
+      final disk = await _diskSpace();
       if (mounted) {
         setState(() {
           _stats = stats;
           _byDiscussion = byDiscussion;
-          _bigFiles = sizes.values.where((b) => b > 5 * 1024 * 1024).length;
+          _idsByDiscussion = idsByDiscussion;
+          _bigIds = {
+            for (final entry in sizes.entries)
+              if (entry.value > 5 * 1024 * 1024) entry.key,
+          };
+          _bigFiles = _bigIds.length;
+          _bigBytes = sizes.entries
+              .where((entry) => _bigIds.contains(entry.key))
+              .fold(0, (sum, entry) => sum + entry.value);
+          _disk = disk;
         });
       }
     } catch (_) {
@@ -66,20 +102,56 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
     }
   }
 
-  Future<void> _clear() async {
+  /// Libère les médias en cache d'une discussion (ou les gros fichiers),
+  /// après confirmation : ils se retéléchargeront si on les rouvre.
+  Future<void> _free(String label, Set<int> ids, int bytes) async {
+    final l = L.of(context);
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheet) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l.storageFreeBody,
+                style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                onPressed: () => Navigator.pop(sheet, true),
+                child: Text(l.storageFree(formatBytes(bytes))),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
     setState(() => _busy = true);
     try {
-      final removed = await ref.read(mediaRepositoryProvider).clearCache();
+      final freed = await ref
+          .read(mediaRepositoryProvider)
+          .clearCachedMedia(ids);
       await _refresh();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            removed == 0
-                ? L.of(context).storageNoCachedMedia
-                : L.of(context).storageFilesCleared(removed),
-          ),
-        ),
+        SnackBar(content: Text(l.storageFreed(formatBytes(freed)))),
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -95,65 +167,33 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
       title: L.of(context).storageTitle,
       onRefresh: _refresh,
       children: [
-        SettingsSectionTitle(L.of(context).storageCachedMedia),
-        SettingsCard(
-          children: [
-            SettingsRow(
-              icon: Icons.folder_outlined,
-              label: L.of(context).storageMediaLabel,
-              subtitle: stats == null
-                  ? L.of(context).storageComputing
-                  : stats.fileCount == 0
-                  ? L.of(context).storageNoFile
-                  : L
-                        .of(context)
-                        .storageFileCount(
-                          stats.fileCount,
-                          formatBytes(stats.totalBytes),
-                        ),
-              trailing: const SizedBox(),
-            ),
-            SettingsRow(
-              icon: Icons.delete_outline,
-              label: L.of(context).storageClearCache,
-              destructive: true,
-              onTap: _busy || (stats?.fileCount ?? 0) == 0 ? null : _clear,
-              trailing: _busy
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.textMuted,
-                      ),
-                    )
-                  : null,
-            ),
-          ],
-        ),
-        SettingsFootnote(L.of(context).storageClearFootnote),
+        _StorageGauge(pokouBytes: stats?.totalBytes, disk: _disk),
         // REG-2 · Gérer le stockage : ce que prend chaque discussion.
         SettingsSectionTitle(L.of(context).storageManage),
         SettingsCard(
           children: [
             for (final entry in _topDiscussions())
-              SettingsRow(
-                icon: entry.key.startsWith('group:')
-                    ? Icons.groups_outlined
-                    : Icons.person_outline,
-                label: _discussionName(context, entry.key),
-                trailing: Text(
-                  formatBytes(entry.value),
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
+              _DiscussionRow(
+                name: _discussionName(context, entry.key),
+                size: formatBytes(entry.value),
+                onTap: _busy
+                    ? null
+                    : () => _free(
+                        _discussionName(context, entry.key),
+                        _idsByDiscussion[entry.key] ?? const {},
+                        entry.value,
+                      ),
               ),
             SettingsRow(
-              icon: Icons.insert_drive_file_outlined,
               label: L.of(context).storageBigFiles,
-              trailing: Text(
-                '$_bigFiles',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
+              trailing: SettingsValue('$_bigFiles'),
+              onTap: _busy || _bigIds.isEmpty
+                  ? null
+                  : () => _free(
+                      L.of(context).storageBigFiles,
+                      _bigIds,
+                      _bigBytes,
+                    ),
             ),
           ],
         ),
@@ -162,23 +202,24 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
         SettingsCard(
           children: [
             SettingsRow(
-              icon: Icons.signal_cellular_alt,
               label: L.of(context).storageMobileData,
-              subtitle: _autoLabel(context, settings.autoDownloadMobile),
+              trailing: SettingsValue(
+                _autoLabel(context, settings.autoDownloadMobile),
+              ),
               onTap: () => _chooseAuto(
                 wifi: false,
                 current: settings.autoDownloadMobile,
               ),
             ),
             SettingsRow(
-              icon: Icons.wifi,
               label: L.of(context).storageOnWifi,
-              subtitle: _autoLabel(context, settings.autoDownloadWifi),
+              trailing: SettingsValue(
+                _autoLabel(context, settings.autoDownloadWifi),
+              ),
               onTap: () =>
                   _chooseAuto(wifi: true, current: settings.autoDownloadWifi),
             ),
             SettingsRow(
-              icon: Icons.call_outlined,
               label: L.of(context).storageCallSaver,
               subtitle: L.of(context).storageCallSaverSub,
               trailing: SettingsSwitch(
@@ -189,8 +230,10 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
                     .setCallDataSaver,
               ),
             ),
+            // Absente de la maquette, gardée : c'est elle qui coupe tout
+            // téléchargement automatique, et l'ôter laisserait coincé qui
+            // l'a déjà activée.
             SettingsRow(
-              icon: Icons.data_saver_on_outlined,
               label: L.of(context).storageDataSaver,
               subtitle: L.of(context).storageDataSaverSub,
               trailing: SettingsSwitch(
@@ -265,5 +308,161 @@ extension on _StorageSettingsScreenState {
     await ref
         .read(appSettingsProvider.notifier)
         .setAutoDownload(wifi: wifi, value: picked);
+  }
+}
+
+/// « Téléphone · 32 Go — 3,1 Go libres », et la barre Pokou · Autres ·
+/// Libre. Sans la place du téléphone (iOS, web), Pokou seul.
+class _StorageGauge extends StatelessWidget {
+  const _StorageGauge({required this.pokouBytes, required this.disk});
+
+  final int? pokouBytes;
+  final ({int total, int free})? disk;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final pokou = pokouBytes ?? 0;
+    final disk = this.disk;
+    final total = disk?.total ?? 0;
+    final free = disk?.free ?? 0;
+    final others = disk == null ? 0 : (total - free - pokou).clamp(0, total);
+    // Une part minuscule reste visible : 1,8 Go sur 32 se voit à peine.
+    int flex(int bytes) =>
+        total == 0 || bytes == 0 ? 0 : (bytes * 1000 ~/ total).clamp(8, 1000);
+
+    Widget legend(Color color, String label) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    disk == null
+                        ? l.storagePokouOnly(
+                            pokouBytes == null ? '…' : formatBytes(pokou),
+                          )
+                        : l.storagePhone(formatBytes(total)),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                if (disk != null)
+                  Text(
+                    l.storageFreeSpace(formatBytes(free)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+            if (disk != null) ...[
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: SizedBox(
+                  height: 8,
+                  child: Row(
+                    children: [
+                      if (flex(pokou) > 0)
+                        Expanded(
+                          flex: flex(pokou),
+                          child: ColoredBox(color: AppColors.accentPrimary),
+                        ),
+                      if (flex(others) > 0)
+                        Expanded(
+                          flex: flex(others),
+                          child: ColoredBox(color: AppColors.border),
+                        ),
+                      if (flex(free) > 0)
+                        Expanded(
+                          flex: flex(free),
+                          child: ColoredBox(color: AppColors.feedbackSuccess),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 12,
+                children: [
+                  legend(
+                    AppColors.accentPrimary,
+                    'Pokou ${formatBytes(pokou)}',
+                  ),
+                  legend(AppColors.border, l.storageOthers),
+                  legend(AppColors.feedbackSuccess, l.storageFreeLabel),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Une discussion : ses initiales, son nom, sa place, et le geste pour la
+/// libérer.
+class _DiscussionRow extends StatelessWidget {
+  const _DiscussionRow({
+    required this.name,
+    required this.size,
+    required this.onTap,
+  });
+
+  final String name;
+  final String size;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            ContactAvatar(avatar: null, displayName: name, size: 32),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            SettingsValue(size),
+          ],
+        ),
+      ),
+    );
   }
 }

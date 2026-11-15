@@ -5,12 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/country/country_config.dart';
 import '../../../core/media/media_repository.dart';
 import '../../../core/providers.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/verified_badge.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../data/status_model.dart';
 import 'status_controller.dart';
+import 'status_time.dart';
 import 'status_viewers_sheet.dart';
 import '../../messaging/presentation/messaging_controller.dart';
 import '../../../core/widgets/media_image.dart';
@@ -47,6 +51,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   final _reply = TextEditingController();
   final _replyFocus = FocusNode();
   bool _sendingReply = false;
+
+  /// Le cœur posé sur le statut d'un autre — optimiste, puis confirmé par
+  /// le serveur (`/status/{id}/like`).
+  final Set<String> _liked = {};
 
   @override
   void initState() {
@@ -187,6 +195,87 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     }
   }
 
+  bool get _liking {
+    final status = widget.item.statuses[_index];
+    return _liked.contains(status.id) || status.likedByMe;
+  }
+
+  Future<void> _toggleLike() async {
+    final status = widget.item.statuses[_index];
+    final next = !_liking;
+    setState(() {
+      if (next) {
+        _liked.add(status.id);
+      } else {
+        _liked.remove(status.id);
+      }
+    });
+    try {
+      await ref.read(statusRepositoryProvider).like(status.id, liked: next);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          if (next) {
+            _liked.remove(status.id);
+          } else {
+            _liked.add(status.id);
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _report() async {
+    final l = L.of(context);
+    _controller.stop();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(l.helpReport),
+        content: Text(l.statusReportBody(widget.item.displayName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialog, false),
+            child: Text(l.actionCancel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.semanticError,
+            ),
+            onPressed: () => Navigator.pop(dialog, true),
+            child: Text(l.helpReport),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) {
+      if (mounted) _controller.forward();
+      return;
+    }
+    try {
+      await ref.read(apiClientProvider).post(
+        '/conversations/report',
+        body: {
+          'contact_user_id': widget.item.userId,
+          'reason': 'Statut signalé depuis la visionneuse',
+        },
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.statusReportSent)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.errorNetwork)));
+      }
+    } finally {
+      if (mounted) _controller.forward();
+    }
+  }
+
   Future<void> _boostCurrent() async {
     try {
       final result = await ref
@@ -288,9 +377,13 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                       _controller.stop();
                       StatusViewersSheet.show(
                         context,
-                        statusId: status.id,
-                        viewCount: status.viewCount,
-                      ).whenComplete(() {
+                        status: status,
+                      ).then((deleted) {
+                        if (deleted == true && mounted) {
+                          ref.invalidate(statusFeedProvider);
+                          Navigator.of(context).maybePop();
+                          return;
+                        }
                         if (mounted) _controller.forward();
                       });
                     },
@@ -326,8 +419,11 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                   ),
                 ),
               ),
+            // Pas de mise en avant payante au lot 1 : Assimé n'y est pas
+            // ouvert.
             if (widget.item.userId ==
-                ref.watch(authControllerProvider).user?.id)
+                    ref.watch(authControllerProvider).user?.id &&
+                !isLot1(ref.watch(currentCountryConfigProvider).modules))
               Positioned(
                 bottom: 70,
                 left: 24,
@@ -379,10 +475,31 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                             ),
                           ),
                         ),
-                        IconButton(
-                          tooltip: L.of(context).actionSend,
-                          onPressed: _sendingReply ? null : _sendReply,
-                          icon: const Icon(Icons.send, color: Colors.white),
+                        // Le cœur fait un commentaire rapide sans écrire ;
+                        // dès qu'on tape, c'est l'envoi qui prend sa place.
+                        AnimatedBuilder(
+                          animation: _reply,
+                          builder: (context, _) => _reply.text.trim().isEmpty
+                              ? IconButton(
+                                  tooltip: L.of(context).statusLikeAction,
+                                  onPressed: _toggleLike,
+                                  icon: Icon(
+                                    _liking
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: _liking
+                                        ? AppColors.semanticError
+                                        : Colors.white,
+                                  ),
+                                )
+                              : IconButton(
+                                  tooltip: L.of(context).actionSend,
+                                  onPressed: _sendingReply ? null : _sendReply,
+                                  icon: const Icon(
+                                    Icons.send,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -399,10 +516,17 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
               ),
             Positioned(
               top: 20,
-              left: 12,
-              right: 12,
+              left: 4,
+              right: 4,
               child: Row(
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).backButtonTooltip,
+                  ),
                   StatusHalo(
                     size: 42,
                     thickness: 3,
@@ -425,13 +549,36 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      widget.item.displayName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.item.displayName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (widget.item.isVerified) ...[
+                              const SizedBox(width: 4),
+                              const VerifiedBadge(size: 13),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          statusAgo(L.of(context), status.createdAt),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   if (widget.item.userId ==
@@ -453,12 +600,26 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                       onPressed: _deleting ? null : _deleteCurrent,
                       tooltip: L.of(context).statusDeleteTitle,
                     ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.of(context).maybePop(),
-
-                    tooltip: L.of(context).actionClose,
-                  ),
+                  // Menu ⋮ : signaler — pas sur MON statut, se signaler
+                  // soi-même n'a pas de sens (même règle que report_conversation).
+                  if (widget.item.userId !=
+                      ref.watch(authControllerProvider).user?.id)
+                    PopupMenuButton<void>(
+                      icon: const Icon(Icons.more_vert, color: Colors.white),
+                      onSelected: (_) {},
+                      itemBuilder: (context) => [
+                        PopupMenuItem<void>(
+                          onTap: _report,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.flag_outlined, size: 18),
+                              const SizedBox(width: 10),
+                              Text(L.of(context).helpReport),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

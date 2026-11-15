@@ -87,6 +87,7 @@ def _serialize_status(
     viewed_by_me: bool,
     view_count: int,
     encrypted_content: Optional[StatusRecipient] = None,
+    liked_by_me: bool = False,
 ) -> dict:
     return {
         "id": status.id,
@@ -109,6 +110,7 @@ def _serialize_status(
         "created_at": status.created_at.isoformat(),
         "expires_at": status.expires_at.isoformat(),
         "viewed_by_me": viewed_by_me,
+        "liked_by_me": liked_by_me,
         "view_count": view_count,
     }
 
@@ -284,6 +286,9 @@ async def get_feed(db: Session = Depends(get_db), current_user: dict = Depends(g
     status_ids = [s.id for s in statuses]
     views = db.query(StatusView).filter(StatusView.status_id.in_(status_ids)).all() if status_ids else []
     viewed_by_me_ids = {v.status_id for v in views if v.viewer_id == user_id}
+    liked_by_me_ids = {
+        v.status_id for v in views if v.viewer_id == user_id and v.liked_at is not None
+    }
     view_counts: dict[str, int] = {}
     for v in views:
         view_counts[v.status_id] = view_counts.get(v.status_id, 0) + 1
@@ -296,6 +301,7 @@ async def get_feed(db: Session = Depends(get_db), current_user: dict = Depends(g
                 viewed_by_me=status_row.id in viewed_by_me_ids,
                 view_count=view_counts.get(status_row.id, 0),
                 encrypted_content=recipient_content.get(status_row.id),
+                liked_by_me=status_row.id in liked_by_me_ids,
             )
         )
 
@@ -397,6 +403,8 @@ async def list_status_viewers(
                 "display_name": nom_affiche(view.viewer, petnames.get(view.viewer_id)),
                 "avatar": _serialize_avatar(view.viewer.avatar_media) if view.viewer else None,
                 "viewed_at": view.viewed_at.isoformat(),
+                # Le cœur : seul l'auteur le voit, ici.
+                "liked": view.liked_at is not None,
             }
             for view in views
         ],
@@ -437,6 +445,47 @@ async def delete_status(
         except Exception:  # noqa: BLE001 — best-effort, comme l'annonce
             logger.warning("Pokou: retrait de statut non annoncé (%s)", status_id, exc_info=True)
     return {"ok": True}
+
+
+class StatusLike(BaseModel):
+    liked: bool = True
+
+
+@router.post("/{status_id}/like")
+async def like_status(
+    status_id: str,
+    payload: StatusLike,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Le cœur posé sur le statut d'un autre (« Vu par » de l'auteur).
+
+    Mêmes portes que `/view` : un statut qu'on n'a pas le droit de voir
+    n'existe pas (404). Aimer, c'est forcément avoir vu — la vue est créée
+    au passage si elle manquait. Rien n'est poussé à l'auteur : comme les
+    vues, le cœur se lit en ouvrant la liste, sans notification."""
+    user_id = current_user["user_id"]
+    status_row = db.query(Status).filter(Status.id == status_id, Status.expires_at > datetime.utcnow()).first()
+    if not status_row or status_row.user_id == user_id:
+        raise HTTPException(status_code=404, detail="Statut introuvable ou expiré")
+    if not status_privacy_service.can_view_statuses_of(db, status_row.user_id, user_id):
+        raise HTTPException(status_code=404, detail="Statut introuvable")
+    if not db.query(StatusRecipient.id).filter(
+        StatusRecipient.status_id == status_id,
+        StatusRecipient.recipient_id == user_id,
+    ).first():
+        raise HTTPException(status_code=404, detail="Statut introuvable")
+
+    now = datetime.utcnow()
+    view = db.query(StatusView).filter(
+        StatusView.status_id == status_id, StatusView.viewer_id == user_id
+    ).first()
+    if view is None:
+        view = StatusView(status_id=status_id, viewer_id=user_id, viewed_at=now)
+        db.add(view)
+    view.liked_at = now if payload.liked else None
+    db.commit()
+    return {"liked": view.liked_at is not None}
 
 
 @router.post("/{status_id}/view")

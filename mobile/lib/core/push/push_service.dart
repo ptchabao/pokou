@@ -632,7 +632,9 @@ class PushService {
                 ]
               : null,
           playSound: withSound,
-          enableVibration: withSound,
+          enableVibration:
+              withSound &&
+              (!isCall || _ref.read(appSettingsProvider).callVibrate),
         ),
       ),
       payload: jsonEncode(data),
@@ -665,6 +667,7 @@ class PushService {
         push,
         presentation: presentation,
         withSound: settings.notificationSound,
+        showPreview: settings.messagePreview,
       );
     } catch (exc) {
       debugPrint('[Push] Notification de message impossible: $exc');

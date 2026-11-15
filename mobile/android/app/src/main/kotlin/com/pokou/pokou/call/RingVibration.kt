@@ -20,8 +20,26 @@ import android.os.VibratorManager
 object RingVibration {
     private var vibrator: Vibrator? = null
 
+    private const val PREFS = "pokou_call_prefs"
+    private const val KEY_VIBRATE = "vibrate"
+
+    /**
+     * Réglages › Notifications › Appels › Vibreur, recopié par Flutter
+     * (canal `com.pokou.pokou/call`, méthode `setCallVibrate`) pour que
+     * [RingtoneService] le respecte aussi application fermée.
+     */
+    fun setEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_VIBRATE, enabled).apply()
+    }
+
+    private fun enabled(context: Context): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_VIBRATE, true)
+
     fun start(context: Context) {
         stop()
+        if (!enabled(context)) return
         val vib = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator
         } else {

@@ -10,11 +10,16 @@ import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../data/status_model.dart';
 import '../data/status_text_style.dart';
 import 'status_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 
 enum _Mode { text, mediaPreview }
+
+/// Par quoi le compositeur s'ouvre — le crayon de l'en-tête de Statuts
+/// ouvre directement sur le texte, l'appareil photo sur le choix de source.
+enum StatusComposerStart { text, photo, video }
 
 /// Durée maximale d'un statut vidéo. Une demi-seconde de marge : la durée
 /// lue dans le fichier d'un enregistrement « de 60 s » dépasse souvent de
@@ -25,7 +30,9 @@ const kStatusMaxVideoDuration = Duration(seconds: 60, milliseconds: 500);
 /// caméra) avec légende optionnelle. Retourne `true` via `Navigator.pop`
 /// quand la publication a réussi, pour que l'appelant rafraîchisse le feed.
 class PostStatusScreen extends ConsumerStatefulWidget {
-  const PostStatusScreen({super.key});
+  const PostStatusScreen({super.key, this.start = StatusComposerStart.text});
+
+  final StatusComposerStart start;
 
   @override
   ConsumerState<PostStatusScreen> createState() => _PostStatusScreenState();
@@ -41,12 +48,69 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
   String? _pickedContentType; // IMAGE | VIDEO
   VideoPlayerController? _previewController;
 
+  /// « Qui voit mes statuts » — chargée pour l'afficher dans le sélecteur
+  /// « Mes contacts ⌄ », au même endroit qu'à l'écran Statuts et dans
+  /// Confidentialité. Changer ici change le réglage du COMPTE (voir
+  /// status_privacy_service.py), pour ce statut comme pour les suivants.
+  StatusAudience? _audience;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(statusRepositoryProvider).getPrivacy().then((privacy) {
+      if (mounted) setState(() => _audience = privacy.audience);
+    });
+    if (widget.start != StatusComposerStart.text) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _chooseSource(video: widget.start == StatusComposerStart.video),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _textController.dispose();
     _captionController.dispose();
     _previewController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _chooseAudience() async {
+    final l = L.of(context);
+    final current = _audience ?? StatusAudience.contacts;
+    final choice = await showModalBottomSheet<StatusAudience>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (sheet) => SafeArea(
+        child: RadioGroup<StatusAudience>(
+          groupValue: current,
+          onChanged: (v) => Navigator.pop(sheet, v),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final option in StatusAudience.values)
+                if (option != StatusAudience.nobody)
+                  RadioListTile<StatusAudience>(
+                    value: option,
+                    title: Text(option.labelOf(l)),
+                  ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (choice == null || choice == _audience) return;
+    setState(() => _audience = choice);
+    try {
+      await ref
+          .read(statusRepositoryProvider)
+          .setPrivacy(audience: choice, userIds: const []);
+    } catch (_) {
+      // Le statut part quand même avec l'audience choisie côté serveur au
+      // prochain chargement : rien à bloquer ici, l'échec se corrige en
+      // rouvrant Confidentialité.
+    }
   }
 
   Future<void> _chooseSource({required bool video}) async {
@@ -316,51 +380,44 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
                 ),
               ),
             ),
-            // ── En bas : photo, vidéo, à qui, publier ──────────────────
+            // ── Puces Texte / Photo / Vidéo ─────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Row(
                 children: [
-                  _GlassButton(
-                    tooltip: l.mediaPhoto,
+                  _ModePill(
+                    label: l.statusText,
                     ink: ink,
-                    onTap: posting ? null : () => _chooseSource(video: false),
-                    child: Icon(
-                      Icons.photo_camera_outlined,
-                      color: ink,
-                      size: 22,
-                    ),
+                    selected: true,
+                    onTap: () {},
                   ),
                   const SizedBox(width: 8),
-                  _GlassButton(
-                    tooltip: l.statusVideoLimitHint,
+                  _ModePill(
+                    label: l.mediaPhoto,
                     ink: ink,
-                    onTap: posting ? null : () => _chooseSource(video: true),
-                    child: Icon(Icons.videocam_outlined, color: ink, size: 22),
+                    selected: false,
+                    onTap: posting ? null : () => _chooseSource(video: false),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
+                  _ModePill(
+                    label: l.mediaVideo,
+                    ink: ink,
+                    selected: false,
+                    onTap: posting ? null : () => _chooseSource(video: true),
+                  ),
+                ],
+              ),
+            ),
+            // ── En bas : à qui, publier ─────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Row(
+                children: [
                   Expanded(
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.lock_outline,
-                          size: 14,
-                          color: ink.withValues(alpha: 0.75),
-                        ),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            l.statusVisible24h,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: ink.withValues(alpha: 0.75),
-                              fontSize: 12,
-                              height: 1.25,
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: _AudienceChip(
+                      ink: ink,
+                      label: _audience?.labelOf(l) ?? l.audienceContacts,
+                      onTap: _chooseAudience,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -426,55 +483,89 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
         SafeArea(
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 6),
-                  child: IconButton(
-                    tooltip: l.actionClose,
-                    onPressed: posting ? null : _backToText,
-                    icon: const Icon(Icons.close, color: Colors.white),
-                  ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 12, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      tooltip: l.actionClose,
+                      onPressed: posting ? null : _backToText,
+                      icon: const Icon(Icons.close, color: Colors.white),
+                    ),
+                    const Spacer(),
+                    // « T » : ajouter une légende texte par-dessus la photo.
+                    _GlassButton(
+                      tooltip: l.statusText,
+                      ink: Colors.white,
+                      onTap: null,
+                      child: const Text(
+                        'T',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 17,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Le crayon ouvre le même champ : il n'y a qu'une seule
+                    // légende à cet écran, le réserver à un futur éditeur
+                    // (recadrage, dessin) n'a rien à annoncer aujourd'hui.
+                    _GlassButton(
+                      tooltip: l.actionEdit,
+                      ink: Colors.white,
+                      onTap: null,
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: TextField(
+                  contextMenuBuilder: pokouContextMenuBuilder,
+                  controller: _captionController,
+                  minLines: 1,
+                  maxLines: 4,
+                  maxLength: 700,
+                  textCapitalization: TextCapitalization.sentences,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: l.composerCaptionHint,
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(26),
+                      borderSide: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.28),
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
+                    ),
+                    counterText: '',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(26),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.28),
-                          ),
+                      child: _AudienceChip(
+                        ink: Colors.white,
+                        label: l.statusVisibleBy(
+                          _audience?.labelOf(l) ?? l.audienceContacts,
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: TextField(
-                          contextMenuBuilder: pokouContextMenuBuilder,
-                          controller: _captionController,
-                          minLines: 1,
-                          maxLines: 4,
-                          maxLength: 700,
-                          textCapitalization: TextCapitalization.sentences,
-                          cursorColor: Colors.white,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: l.composerCaptionHint,
-                            hintStyle: const TextStyle(color: Colors.white70),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            counterText: '',
-                          ),
-                        ),
+                        onTap: _chooseAudience,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -493,6 +584,95 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// « Texte » / « Photo » / « Vidéo » — le mode en cours est plein, les
+/// deux autres ouvrent directement le bon chemin (pas un détour par le
+/// texte).
+class _ModePill extends StatelessWidget {
+  const _ModePill({
+    required this.label,
+    required this.ink,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color ink;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? ink.withValues(alpha: 0.22) : Colors.transparent,
+      shape: StadiumBorder(side: BorderSide(color: ink.withValues(alpha: 0.4))),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: ink,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// « Mes contacts ⌄ » / « Visible par : Mes contacts › » — le réglage
+/// d'audience, à portée de main avant de publier.
+class _AudienceChip extends StatelessWidget {
+  const _AudienceChip({
+    required this.ink,
+    required this.label,
+    required this.onTap,
+  });
+
+  final Color ink;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: ink.withValues(alpha: 0.14),
+      shape: StadiumBorder(side: BorderSide(color: ink.withValues(alpha: 0.3))),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.people_outline, size: 16, color: ink),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Icon(Icons.expand_more, size: 16, color: ink),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

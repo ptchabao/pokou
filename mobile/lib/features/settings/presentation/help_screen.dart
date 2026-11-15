@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/country/country_config.dart';
+import '../../../core/widgets/pokou_bottom_nav.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
@@ -11,24 +15,33 @@ import '../../../core/widgets/pokou_context_menu.dart';
 /// La recherche filtre les questions fréquentes sur place : elles sont peu
 /// nombreuses, et une aide qui part chercher sur le réseau ne sert à rien
 /// quand c'est justement le réseau qui manque.
-class HelpScreen extends StatefulWidget {
+class HelpScreen extends ConsumerStatefulWidget {
   const HelpScreen({super.key});
 
   @override
-  State<HelpScreen> createState() => _HelpScreenState();
+  ConsumerState<HelpScreen> createState() => _HelpScreenState();
 }
 
-class _HelpScreenState extends State<HelpScreen> {
+class _HelpScreenState extends ConsumerState<HelpScreen> {
   String _query = '';
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    // Lot 1 : une aide centrée sur la messagerie — ni argent ni coursier,
+    // ce sont des services qui ne sont pas ouverts.
+    final lot1 = isLot1(ref.watch(currentCountryConfigProvider).modules);
     final faq = <(String, String)>[
-      (l.helpQMoney, l.helpAMoney),
+      if (lot1)
+        (l.helpQCertified, l.helpACertified)
+      else
+        (l.helpQMoney, l.helpAMoney),
       (l.helpQProof, l.helpAProof),
       (l.helpQSms, l.helpASms),
-      (l.helpQCourier, l.helpACourier),
+      if (lot1)
+        (l.helpQBlock, l.helpABlock)
+      else
+        (l.helpQCourier, l.helpACourier),
       (l.helpQScam, l.helpAScam),
     ];
     final q = _query.trim().toLowerCase();

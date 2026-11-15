@@ -228,3 +228,75 @@ class SettingsSwitch extends StatelessWidget {
     );
   }
 }
+
+/// Un encadré d'information sous une liste — ⓘ et texte, ou ⚠ sur fond
+/// ambré quand il met en garde (« Pokou ne te demandera jamais… »).
+class SettingsNote extends StatelessWidget {
+  const SettingsNote({super.key, required this.text, this.warning = false});
+
+  final String text;
+  final bool warning;
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = warning ? AppColors.chatAiIconColor : AppColors.textSecondary;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: warning
+            ? AppColors.chatAiIconColor.withValues(alpha: 0.10)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: warning
+              ? AppColors.chatAiIconColor.withValues(alpha: 0.35)
+              : AppColors.border,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            warning ? Icons.warning_amber_rounded : Icons.info_outline,
+            size: 16,
+            color: tint,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.4,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// La valeur courante à droite d'une ligne, suivie du chevron — « Mes
+/// contacts › », « 1,8 Go › ».
+class SettingsValue extends StatelessWidget {
+  const SettingsValue(this.value, {super.key});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
+        Icon(Icons.chevron_right, size: 20, color: AppColors.textMuted),
+      ],
+    );
+  }
+}

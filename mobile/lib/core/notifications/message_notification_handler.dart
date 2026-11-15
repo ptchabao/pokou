@@ -74,6 +74,7 @@ class MessageNotificationHandler {
     required NotificationPresentation presentation,
     required bool withSound,
     bool fallbackFirst = false,
+    bool showPreview = true,
   }) async {
     if (presentation == NotificationPresentation.suppressed) return;
     final silent = presentation == NotificationPresentation.silent;
@@ -103,6 +104,19 @@ class MessageNotificationHandler {
     );
 
     final fallback = messagePreviewLabel(l, push.messageType, null);
+    // « Aperçu du message » coupé : « Nouveau message », et rien n'est
+    // déchiffré pour le volet.
+    if (!showPreview) {
+      await presenter.add(
+        push: push,
+        title: title,
+        line: lineWith(fallback),
+        payload: payload,
+        silent: silent,
+        withSound: withSound,
+      );
+      return;
+    }
     if (fallbackFirst) {
       await presenter.add(
         push: push,

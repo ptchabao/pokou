@@ -9030,4 +9030,330 @@ class LEn extends L {
   @override
   String get courierRejectedBody =>
       'The Pokou team did not accept your courier application. You can contact support to learn more.';
+
+  @override
+  String get notifDirect => 'One-to-one chats';
+
+  @override
+  String get notifPreview => 'Message preview';
+
+  @override
+  String get notifPreviewSub => 'The text doesn\'t appear on the lock screen';
+
+  @override
+  String get notifReactions => 'Reactions';
+
+  @override
+  String get notifRingtone => 'Ringtone';
+
+  @override
+  String get notifVibrate => 'Vibrate';
+
+  @override
+  String get notifModules => 'Modules';
+
+  @override
+  String get notifModuleKorySub => 'Pledges, payment reminders, closings';
+
+  @override
+  String get notifModuleHonamSub => 'Quotes, delivery, handover code';
+
+  @override
+  String get notifModuleAssimeSub => 'Search alerts, at most one a day';
+
+  @override
+  String get notifRingtoneNote =>
+      'Pokou\'s ringtone is the only one available for now.';
+
+  @override
+  String get accountSecurityTitle => 'Account and security';
+
+  @override
+  String get accountSecurityWarning =>
+      'Pokou will never ask for your PIN or the code you got by SMS, neither by message nor by call.';
+
+  @override
+  String get accountPinTitle => 'PIN';
+
+  @override
+  String get accountPinRowSub => 'Asked on a new phone';
+
+  @override
+  String get accountPinOn => 'On';
+
+  @override
+  String get accountPinOff => 'Off';
+
+  @override
+  String get accountPinUnknown => 'Unavailable';
+
+  @override
+  String get accountPinIntro =>
+      'Choose a 6-digit code. It\'s asked when your number signs in on a new phone.';
+
+  @override
+  String get accountPinCurrent => 'Your current code';
+
+  @override
+  String get accountPinChoose => 'Choose your code';
+
+  @override
+  String get accountPinConfirm => 'Confirm your code';
+
+  @override
+  String get accountPinMismatch =>
+      'The two codes don\'t match. Choose it again.';
+
+  @override
+  String get accountPinReminder => 'Ask me again from time to time';
+
+  @override
+  String get accountPinReminderSub => 'So you don\'t forget it';
+
+  @override
+  String get accountPinNote =>
+      'Your PIN protects your account if someone gets hold of your SIM card. Don\'t write it down in your phone.';
+
+  @override
+  String get accountPinEnable => 'Turn on PIN';
+
+  @override
+  String get accountPinSave => 'Save PIN';
+
+  @override
+  String get accountPinEnabled => 'PIN turned on.';
+
+  @override
+  String get accountPinChanged => 'PIN changed.';
+
+  @override
+  String get accountPinChange => 'Change PIN';
+
+  @override
+  String get accountPinDisable => 'Turn off PIN';
+
+  @override
+  String get accountPinDisableConfirm => 'Turn off';
+
+  @override
+  String get accountPinDisabled => 'PIN turned off.';
+
+  @override
+  String get accountPinReminderTitle => 'Your PIN';
+
+  @override
+  String get accountPinReminderBody =>
+      'Enter your PIN to check you still remember it.';
+
+  @override
+  String get accountPinReminderLater => 'Later';
+
+  @override
+  String get accountPinReminderOk => 'That\'s your code.';
+
+  @override
+  String get accountExport => 'Download my data';
+
+  @override
+  String get accountExportSub => 'Profile, contacts and settings, as a file';
+
+  @override
+  String get accountExportFailed => 'Export failed — check your connection.';
+
+  @override
+  String get privacyWhoCanSee => 'Who can see';
+
+  @override
+  String get privacySeenAt => 'Last seen';
+
+  @override
+  String get privacyStatuses => 'Statuses';
+
+  @override
+  String get privacyReadReceiptsTitle => 'Read receipts';
+
+  @override
+  String get privacyReadReceiptsSub =>
+      'When off, you no longer see other people\'s';
+
+  @override
+  String get privacyGroupsAndStrangers => 'Groups and strangers';
+
+  @override
+  String get privacyGroupAdd => 'Who can add me to groups';
+
+  @override
+  String get privacyGroupAddSub => 'Others send you an invitation';
+
+  @override
+  String get privacySilenceUnknown => 'Silence unknown callers';
+
+  @override
+  String get privacySilenceUnknownSub => 'They stay in the call list';
+
+  @override
+  String get privacyBlocked => 'Blocked';
+
+  @override
+  String get privacyBlockedEmpty => 'Nobody is blocked.';
+
+  @override
+  String get privacyBlockedNote =>
+      'A blocked person can no longer message or call you. They are not told.';
+
+  @override
+  String get privacyUnblock => 'Unblock';
+
+  @override
+  String storagePhone(Object size) {
+    return 'Phone · $size';
+  }
+
+  @override
+  String storagePokouOnly(Object size) {
+    return 'Pokou · $size';
+  }
+
+  @override
+  String storageFreeSpace(Object size) {
+    return '$size free';
+  }
+
+  @override
+  String get storageOthers => 'Other';
+
+  @override
+  String get storageFreeLabel => 'Free';
+
+  @override
+  String storageFree(Object size) {
+    return 'Free up $size';
+  }
+
+  @override
+  String storageFreed(Object size) {
+    return '$size freed.';
+  }
+
+  @override
+  String get storageFreeBody =>
+      'This chat\'s photos, videos and documents are removed from the phone. They\'ll download again if you reopen them; messages stay.';
+
+  @override
+  String get languageNoteLot1 =>
+      'The app\'s language doesn\'t change the language of your messages. The name Pokou stays the same in every language.';
+
+  @override
+  String get helpQCertified => 'How do I pay for Pokou certified?';
+
+  @override
+  String get helpACertified =>
+      'In Settings, tap \"Pokou certified\" and pick your plan. Payment is by Mobile Money, from your wallet: your identity is checked against the wallet holder\'s name. You can cancel the badge at any time.';
+
+  @override
+  String get helpQBlock => 'How do I block a stranger?';
+
+  @override
+  String get helpABlock =>
+      'Open the chat, tap their name at the top, then \"Block\". They can no longer message or call you, and aren\'t told. In Settings › Privacy you can also silence unknown callers.';
+
+  @override
+  String get aboutNameTitle => 'What our name means';
+
+  @override
+  String get legalPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String legalUpdatedOn(Object date) {
+    return 'Updated: $date';
+  }
+
+  @override
+  String get legalDownloadPdf => 'Download as PDF';
+
+  @override
+  String get legalPdfFailed => 'Couldn\'t create the PDF for now.';
+
+  @override
+  String get termsLot1Messaging =>
+      'Pokou is a messaging app: everyone remains responsible for what they send.';
+
+  @override
+  String get privacyLot1Numbers => 'No phone number is shown in group chats.';
+
+  @override
+  String get privacyLot1Codes =>
+      'A request for a secret code is spotted on your phone, without Pokou reading the message.';
+
+  @override
+  String get actionEdit => 'Edit';
+
+  @override
+  String statusVisibleBy(Object audience) {
+    return 'Visible to: $audience';
+  }
+
+  @override
+  String get statusFeedSubtitle => 'Visible for 24 h, then they disappear';
+
+  @override
+  String get statusRecent => 'Recent';
+
+  @override
+  String get statusSeen => 'Seen';
+
+  @override
+  String get statusNoneYet => 'No statuses yet.';
+
+  @override
+  String get statusJustNow => 'Just now';
+
+  @override
+  String statusMinutesAgo(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes ago',
+      one: '1 minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusHoursAgo(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statusYesterdayAt(Object time) {
+    return 'Yesterday, $time';
+  }
+
+  @override
+  String get statusLikeAction => 'Like';
+
+  @override
+  String statusReportBody(Object name) {
+    return 'Report $name\'s status to the Pokou team?';
+  }
+
+  @override
+  String get statusReportSent => 'Status reported.';
+
+  @override
+  String get statusForwardMediaUnsupported =>
+      'Forwarding a photo or video isn\'t possible yet.';
+
+  @override
+  String get changeNumberHint => 'Number';
+
+  @override
+  String get changeNumberInfoLot1 =>
+      'Your account, your chats and your Pokou certified badge follow you. A code is sent to the new number.';
 }

@@ -8,7 +8,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../honam/presentation/honam_order_screen.dart';
 import '../../kory/presentation/kory_pot_screen.dart';
 import '../../marketplace/presentation/assime_sale_screens.dart';
-import '../../settings/presentation/notifications_settings_screen.dart';
 import '../data/service_notification.dart';
 import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/skeleton.dart';
@@ -74,15 +73,6 @@ class NotificationsCenterScreen extends ConsumerWidget {
               },
               child: Text(l.notifReadAll),
             ),
-          IconButton(
-            tooltip: l.notifSettings,
-            icon: const Icon(Icons.tune),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const NotificationsSettingsScreen(),
-              ),
-            ),
-          ),
         ],
       ),
       body: RefreshIndicator(
