@@ -245,6 +245,17 @@ def _phone(db: Session, user_id: int) -> Optional[str]:
     return user.phone if user else None
 
 
+def _iso(value: Optional[datetime]) -> Optional[str]:
+    return value.isoformat() if value else None
+
+
+def _courier_wallet(db: Session, order: HonamOrder) -> Optional[str]:
+    if order.courier_id is None:
+        return None
+    courier = db.query(CourierProfile).filter(CourierProfile.user_id == order.courier_id).first()
+    return courier.wallet_phone if courier else None
+
+
 def _order_json(db: Session, order: HonamOrder, viewer: str) -> dict:
     """`viewer` : patient | pharmacy | courier."""
     pharmacy = db.query(Pharmacy).filter(Pharmacy.id == order.pharmacy_id).first()
@@ -276,6 +287,9 @@ def _order_json(db: Session, order: HonamOrder, viewer: str) -> dict:
             "refund_due": order.refund_due,
             "refund_reason": order.refund_reason,
             "refund_confirmed_at": order.refund_confirmed_at.isoformat() if order.refund_confirmed_at else None,
+            "refund_requested_at": _iso(order.refund_requested_at),
+            "refund_sent_at": _iso(order.refund_sent_at),
+            "refund_reference": order.refund_reference,
             "timeline": [
                 {"status": e.status, "note": e.note, "at": e.created_at.isoformat()}
                 for e in db.query(HonamOrderEvent).filter(HonamOrderEvent.order_id == order.id).order_by(HonamOrderEvent.id)
@@ -291,12 +305,19 @@ def _order_json(db: Session, order: HonamOrder, viewer: str) -> dict:
             "prescription_media_id": order.prescription_media_id,
             "patient_note": order.patient_note,
             "courier_paid_at": order.courier_paid_at.isoformat() if order.courier_paid_at else None,
+            "courier_paid_declared_at": _iso(order.courier_paid_declared_at),
+            "original_collected_at": _iso(order.original_collected_at),
+            "original_returned_at": _iso(order.original_returned_at),
             # Le remboursement part UNIQUEMENT vers le numéro qui a payé.
             "refund_to_phone": _phone(db, order.patient_id) if order.refund_due > 0 else None,
+            # Le wallet du coursier, pour lui payer la course : seulement
+            # une fois la commande livrée, et seulement à l'officine.
+            "courier_wallet_phone": _courier_wallet(db, order) if order.status == "DELIVERED" else None,
         })
     if viewer == "courier":
         data.update({
             "courier_paid_at": order.courier_paid_at.isoformat() if order.courier_paid_at else None,
+            "courier_paid_declared_at": _iso(order.courier_paid_declared_at),
             "delivery_latitude": order.delivery_latitude,
             "delivery_longitude": order.delivery_longitude,
         })
@@ -746,10 +767,17 @@ def report_courier_default(order_id: int, body: ReasonBody, current_user: dict =
     PRÊTE pour un autre coursier, et le défaut est compté (BM-05)."""
     pharmacy = _staff_pharmacy(db, current_user["user_id"])
     order = _pharmacy_order(db, order_id, pharmacy)
-    if order.courier_id is None or order.status not in ("READY", "IN_DELIVERY"):
+    if order.courier_id is None or order.status not in ("READY", "IN_DELIVERY", "DELIVERED"):
         raise HTTPException(status_code=409, detail="Aucun coursier sur cette commande")
     courier = db.query(CourierProfile).filter(CourierProfile.user_id == order.courier_id).first()
     suspended = rules.record_default(db, courier, order) if courier else False
+    if order.status == "DELIVERED":
+        # Après la livraison (maquette 11 : retard, colis abîmé, original
+        # non rapporté) : le défaut est compté, la commande ne bouge pas.
+        db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                               note=f"Défaut du coursier : {body.reason}"))
+        db.commit()
+        return {"courier_suspended": suspended, "order": _order_json(db, order, "pharmacy")}
     state_changed = order.status == "IN_DELIVERY"
     if state_changed:
         _move(db, order, "READY", current_user["user_id"], f"Défaut du coursier : {body.reason}")
@@ -758,6 +786,125 @@ def report_courier_default(order_id: int, body: ReasonBody, current_user: dict =
     if state_changed:
         notify_order_state_changed(db, order, actor_id=current_user["user_id"])
     return {"courier_suspended": suspended, "order": _order_json(db, order, "pharmacy")}
+
+
+class RefundSentBody(BaseModel):
+    reference: Optional[str] = Field(None, max_length=40)
+
+
+@router.post("/pharmacy/orders/{order_id}/handed-over")
+def handed_over(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Colis remis à Kodjo » (maquette 4) : l'officine confirme la remise
+    au coursier qui a accepté la course ; la livraison commence."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _pharmacy_order(db, order_id, pharmacy)
+    if order.status != "READY" or order.courier_id is None:
+        raise HTTPException(status_code=409, detail="Aucun coursier n'a encore accepté la course")
+    _move(db, order, "IN_DELIVERY", current_user["user_id"], "Colis remis au coursier par l'officine")
+    _commit_order_change(db, order, current_user["user_id"])
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/courier-paid")
+def pharmacy_paid_courier(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« J'ai payé Kodjo » (maquette 4b) : l'officine le déclare, le coursier
+    le confirme ensuite de son côté (`courier_paid_at`)."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _pharmacy_order(db, order_id, pharmacy)
+    if order.status != "DELIVERED":
+        raise HTTPException(status_code=409, detail="Course non livrée")
+    if order.courier_paid_declared_at is None:
+        order.courier_paid_declared_at = datetime.utcnow()
+        db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                               note="Course payée au coursier, selon l'officine"))
+    db.commit()
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/original-received")
+def original_received(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Original reçu » (maquette 4c) : le coursier a rapporté l'ordonnance
+    originale demandée au devis."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _pharmacy_order(db, order_id, pharmacy)
+    if not order.original_required or order.status != "DELIVERED":
+        raise HTTPException(status_code=409, detail="Aucun original attendu")
+    if order.original_returned_at is None:
+        order.original_returned_at = datetime.utcnow()
+        db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                               note="Ordonnance originale rapportée à l'officine"))
+    db.commit()
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/refund-sent")
+def refund_sent(order_id: int, body: RefundSentBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« J'ai remboursé Afi » (maquette A2), avec la référence du transfert.
+    Seule la confirmation de la patiente lève le délai de 2 h."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _pharmacy_order(db, order_id, pharmacy)
+    if order.refund_due <= 0 or order.refund_confirmed_at is not None:
+        raise HTTPException(status_code=409, detail="Aucun remboursement attendu")
+    order.refund_sent_at = datetime.utcnow()
+    order.refund_reference = (body.reference or "").strip() or None
+    db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                           note="Remboursement envoyé par l'officine"))
+    db.commit()
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/cancel")
+def pharmacy_cancel(order_id: int, body: ReasonBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """L'officine annule : paiement jamais reçu (maquette P2, rien à
+    rembourser), ou commande payée qu'elle ne peut pas servir (A1 : tout est
+    remboursé, sous 2 h, au seul numéro qui a payé)."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _pharmacy_order(db, order_id, pharmacy)
+    reason = body.reason.strip()
+    if order.status == "PAID":
+        order.refund_due = (order.medicines_total or 0) + (order.delivery_price or 0)
+        order.refund_requested_at = datetime.utcnow()
+        order.refund_reason = reason
+    elif order.status != "ACCEPTED":
+        raise HTTPException(status_code=409, detail="Cette commande ne peut plus être annulée par l'officine")
+    _move(db, order, "CANCELLED", current_user["user_id"], reason)
+    _commit_order_change(db, order, current_user["user_id"])
+    return _order_json(db, order, "pharmacy")
+
+
+_CLOSED = ("DELIVERED", "REJECTED", "CANCELLED", "EXPIRED")
+
+
+@router.get("/pharmacy/history")
+def pharmacy_history(month: Optional[str] = None, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Historique d'un mois (maquette 12) : les commandes closes reçues ce
+    mois-là, et ses chiffres. `month` au format AAAA-MM (défaut : en cours)."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    now = datetime.utcnow()
+    try:
+        year, mon = (int(p) for p in month.split("-")) if month else (now.year, now.month)
+        start = datetime(year, mon, 1)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Mois invalide (AAAA-MM)") from exc
+    end = datetime(year + (mon == 12), mon % 12 + 1, 1)
+    orders = (
+        db.query(HonamOrder)
+        .filter(HonamOrder.pharmacy_id == pharmacy.id, HonamOrder.status.in_(_CLOSED),
+                HonamOrder.created_at >= start, HonamOrder.created_at < end)
+        .order_by(HonamOrder.created_at.desc())
+        .limit(500)
+        .all()
+    )
+    delivered = [o for o in orders if o.status == "DELIVERED"]
+    return {
+        "month": f"{year:04d}-{mon:02d}",
+        "items": [_order_json(db, o, "pharmacy") for o in orders],
+        "stats": {
+            "delivered": len(delivered),
+            "collected": sum((o.medicines_total or 0) + (o.delivery_price or 0) for o in delivered),
+            "cancelled": len(orders) - len(delivered),
+        },
+    }
 
 
 @router.post("/pharmacy/on-duty")
