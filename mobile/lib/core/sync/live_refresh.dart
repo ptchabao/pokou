@@ -8,6 +8,8 @@ import '../../features/calls/presentation/call_controller.dart';
 import '../../features/calls/presentation/call_session.dart';
 import '../../features/communities/presentation/community_controller.dart';
 import '../../features/contacts/presentation/discussions_controller.dart';
+import '../../features/honam/presentation/courier_ride_screens.dart'
+    show courierRideOfferListenerProvider;
 import '../../features/notifications/presentation/notifications_center_screen.dart';
 import '../../features/status/presentation/status_controller.dart';
 import '../providers.dart';
@@ -42,6 +44,9 @@ final liveRefreshProvider = Provider<void>((ref) {
   }
 
   void refreshBell() => ref.invalidate(serviceNotificationsProvider);
+
+  // Maquette Coursiers 27 : une course proposée s'ouvre où qu'on soit.
+  ref.watch(courierRideOfferListenerProvider);
 
   listenDurableEventTypes(ref, (type) {
     switch (type) {

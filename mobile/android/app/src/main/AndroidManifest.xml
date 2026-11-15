@@ -124,6 +124,7 @@
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/honam/orders/"/>
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/kory/"/>
                 <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/honam/order/"/>
+                <data android:scheme="https" android:host="apipokou.cabinet-p-et-associes.com" android:pathPrefix="/honam/coursier/"/>
             </intent-filter>
         </activity>
         <!-- Éditeur de recadrage d'image (uCrop), requis par image_cropper.

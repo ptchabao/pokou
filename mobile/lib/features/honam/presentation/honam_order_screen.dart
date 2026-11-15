@@ -1,32 +1,32 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
-import '../../../core/widgets/pokou_back_button.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
-import '../../../core/widgets/pokou_icon.dart';
-import '../../../core/widgets/pokou_illustration.dart';
-import '../../../core/widgets/skeleton.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
+import '../../kory/presentation/kory_ui.dart';
+import '../../kory/presentation/kory_wallet.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/honam_models.dart';
-import 'courier_tracking.dart';
+import 'courier_join_screen.dart' show CourierOfferPrompt;
 import 'honam_controller.dart';
-import 'honam_send_screen.dart';
+import 'honam_order_messages.dart';
+import 'honam_pay_screen.dart';
+import 'honam_send_screen.dart' show currentPosition, honamPharmacyLine;
+import 'honam_tracking.dart';
 import 'honam_ui.dart';
 
-/// Le suivi d'une commande (fil de suivi, NAV-04) : devis, paiement à
-/// l'officine, code de remise, et les cas particuliers — refus, paiement non
-/// reçu, produit manquant.
-///
-/// L'écran se lit de haut en bas, en sections à plat séparées par une fine
-/// bande de fond : où en est la commande, où elle va, ce qu'il reste à
-/// faire, ce qu'elle contient, ses dates, les messages. Le geste qui compte
-/// maintenant reste en bas, sous le pouce.
+/// Le détail d'une commande, côté patient (maquettes Honam patient 2 à 7 et
+/// « Suivi sans carte »). Un seul écran qui prend la forme de l'étape : en
+/// attente du devis, devis reçu, paiement signalé, produit manquant,
+/// ordonnance refusée, en livraison, livrée.
 class HonamOrderScreen extends ConsumerStatefulWidget {
   const HonamOrderScreen({super.key, required this.orderId});
 
@@ -39,30 +39,60 @@ class HonamOrderScreen extends ConsumerStatefulWidget {
 class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
   bool _busy = false;
 
+  /// Produit manquant : le choix en cours (KEEP | CANCEL).
+  String? _missingChoice;
+
+  /// Ordonnance refusée : l'autre pharmacie choisie.
+  int? _otherPharmacyId;
+
   int get _id => widget.orderId;
 
-  Future<void> _runWith(String action, Map<String, dynamic>? body) async {
-    if (_busy) return;
-    final l = L.of(context);
-    final messenger = ScaffoldMessenger.of(context);
+  Future<HonamOrder?> _run(String action, {Map<String, dynamic>? body}) async {
+    if (_busy) return null;
     setState(() => _busy = true);
     try {
-      await ref.read(honamRepositoryProvider).action(_id, action, body: body);
+      final order = await ref
+          .read(honamRepositoryProvider)
+          .action(_id, action, body: body);
       HapticFeedback.lightImpact();
       ref.invalidate(honamOrderProvider(_id));
       ref.invalidate(honamOrdersProvider);
+      return order;
     } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(l.honamFailed)));
+      if (mounted) koryToast(context, L.of(context).honamFailed);
+      return null;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _run(String action) => _runWith(action, null);
+  Future<void> _pay(HonamOrder order) async {
+    var current = order;
+    if (order.status == 'QUOTED') {
+      final accepted = await _run('accept');
+      if (accepted == null || !mounted) return;
+      current = accepted;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => HonamPayScreen(order: current)),
+    );
+  }
 
-  void _resend(HonamOrder order) => Navigator.of(context).pushReplacement(
+  Future<void> _resend(HonamOrder order, Pharmacy pharmacy) async {
+    final created = await _run('resend', body: {'pharmacy_id': pharmacy.id});
+    if (created == null || !mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => HonamOrderScreen(orderId: created.id)),
+    );
+  }
+
+  void _openMessages(HonamOrder order) => Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (_) => HonamSendScreen(resendFromOrderId: order.id),
+      builder: (_) => HonamOrderMessagesScreen(
+        orderId: order.id,
+        title: order.pharmacy?.name ?? '',
+      ),
     ),
   );
 
@@ -75,909 +105,579 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
     builder: (_) => _TimelineSheet(order: order),
   );
 
-  /// Le geste le plus utile maintenant, pour le bouton du bas.
-  ({String label, IconData? icon, VoidCallback onPressed}) _primary(
-    L l,
-    HonamOrder order,
-  ) {
-    if (order.status == 'QUOTED') {
-      return (
-        label: l.honamAcceptQuote,
-        icon: null,
-        onPressed: () => _run('accept'),
-      );
-    }
-    if (order.status == 'ACCEPTED' && !order.patientPaidDeclared) {
-      return (
-        label: l.honamDeclarePaid,
-        icon: null,
-        onPressed: () => _run('declare-paid'),
-      );
-    }
-    if (order.status == 'REJECTED' || order.status == 'EXPIRED') {
-      return (
-        label: l.honamResend,
-        icon: Icons.send_outlined,
-        onPressed: () => _resend(order),
-      );
-    }
-    return (
-      label: order.isFinished ? l.honamUiDeliveryInfo : l.honamUiTrack,
-      icon: Icons.timeline,
-      onPressed: () => _openTimeline(order),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final async = ref.watch(honamOrderProvider(_id));
     final order = async.valueOrNull;
+    if (order == null) {
+      return KoryPage(
+        title: l.honamPMyOrder,
+        loading: !async.hasError,
+        body: async.hasError
+            ? ModuleEmptyState(
+                icon: Icons.cloud_off,
+                title: l.honamFailed,
+                message: l.modulesCheckNetwork,
+                action: HonamPrimaryButton(
+                  label: l.actionRetry,
+                  icon: Icons.refresh,
+                  expanded: false,
+                  onPressed: () => ref.invalidate(honamOrderProvider(_id)),
+                ),
+              )
+            : const SizedBox.shrink(),
+      );
+    }
+    final pharmacy = order.pharmacy?.name ?? l.honamUiPharmacy;
+    final refused = order.status == 'REJECTED' || order.status == 'EXPIRED';
+    final delivering =
+        order.status == 'IN_DELIVERY' ||
+        (order.status == 'READY' && order.courierName != null);
 
-    final Widget body;
-    if (order != null) {
-      final primary = _primary(l, order);
-      body = Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async => ref.invalidate(honamOrderProvider(_id)),
-              child: ListView(
-                padding: const EdgeInsets.only(bottom: 24),
-                children: _sections(l, order),
-              ),
-            ),
-          ),
-          _BottomBar(
-            child: HonamPrimaryButton(
-              label: primary.label,
-              icon: primary.icon,
-              busy: _busy,
-              onPressed: primary.onPressed,
-            ),
-          ),
-        ],
+    if (refused) return _refusedPage(l, order, pharmacy);
+    if (order.awaitsMissingChoice) return _missingPage(l, order, pharmacy);
+    if (delivering) {
+      return KoryPage(
+        title: l.honamPPharmacyHonam(pharmacy),
+        subtitle: l.honamPInDelivery,
+        actions: [_menu(l, order)],
+        body: HonamTrackingBody(order: order),
       );
-    } else if (async.hasError) {
-      body = ModuleEmptyState(
-        icon: Icons.cloud_off,
-        title: l.honamFailed,
-        message: l.modulesCheckNetwork,
-        action: HonamPrimaryButton(
-          label: l.actionRetry,
-          icon: Icons.refresh,
-          expanded: false,
-          onPressed: () => ref.invalidate(honamOrderProvider(_id)),
-        ),
-      );
-    } else {
-      body = const _OrderSkeleton();
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          // La barre, sobre : le retour et le numéro de la commande.
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-              child: Row(
-                children: [
-                  const PokouBackButton(),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      l.honamOrderTitle('$_id'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 20,
-                        letterSpacing: -0.2,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const HonamHairline(),
-          Expanded(child: body),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _sections(L l, HonamOrder order) {
-    final refused = order.status == 'REJECTED' || order.status == 'EXPIRED';
-    return [
-      _Banner(order: order),
-      _Section(
-        child: Column(
+    final String title;
+    final String subtitle;
+    if (order.status == 'QUOTED') {
+      final quotedAt = honamStepTime(order, 'QUOTED');
+      title = l.honamPQuoteFrom(pharmacy);
+      subtitle = [
+        if (quotedAt != null) l.honamPReceivedAt(honamWhen(context, quotedAt)),
+        if (order.quoteExpiresAt != null)
+          l.honamPValidUntil(honamWhen(context, order.quoteExpiresAt!)),
+      ].join(' · ');
+    } else {
+      title = l.honamPMyOrder;
+      subtitle = order.status == 'SUBMITTED'
+          ? l.honamPSentAt(pharmacy, honamWhen(context, order.createdAt))
+          : pharmacy;
+    }
+    return KoryPage(
+      title: title,
+      subtitle: subtitle,
+      actions: [_menu(l, order)],
+      footer: _footer(l, order),
+      body: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(honamOrderProvider(_id)),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            _PlaceRow(
-              icon: const Icon(Icons.location_on_outlined),
-              title: order.deliveryAddress,
-              subtitle: l.honamAddress,
-            ),
-            if (order.pharmacy case final pharmacy?) ...[
-              const HonamHairline(indent: 16),
-              _PlaceRow(
-                icon: const Icon(Icons.local_pharmacy_outlined),
-                title: pharmacy.name,
-                subtitle: pharmacy.address.isEmpty
-                    ? l.honamUiPharmacy
-                    : pharmacy.address,
-              ),
-            ],
-            if (order.courierName case final courier?) ...[
-              const HonamHairline(indent: 16),
-              _PlaceRow(
-                icon: const PokouIcon(PokouModuleIcon.coursier),
-                title: courier,
-                subtitle: l.honamUiCourier,
-              ),
-            ],
-            const HonamHairline(),
-            _StatusRow(order: order, onTap: () => _openTimeline(order)),
+            HonamStepRail(status: order.status),
+            const SizedBox(height: 16),
+            ..._body(l, order, pharmacy),
           ],
         ),
       ),
-      // ── Ce qu'il reste à faire, selon l'état.
-      if (refused && order.rejectionReason != null) ...[
-        const _Band(),
-        _Section(
-          padding: const EdgeInsets.all(16),
-          child: _NoteRow(
-            icon: Icons.info_outline,
-            color: AppColors.textSecondary,
-            text: l.honamReason(order.rejectionReason!),
-          ),
-        ),
-      ],
-      if (order.status == 'ACCEPTED') ...[
-        const _Band(),
-        _Section(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-          child: _PayStep(order: order),
-        ),
-      ],
-      if (order.deliveryCode != null) ...[
-        const _Band(),
-        _Section(
-          padding: const EdgeInsets.all(16),
-          child: _Code(order: order),
-        ),
-      ],
-      if (order.status == 'IN_DELIVERY' ||
-          (order.status == 'READY' && order.courierName != null))
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: CourierTrackingCard(orderId: order.id),
-        ),
-      if (order.awaitsMissingChoice) ...[
-        const _Band(),
-        _Section(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionHeading(l.honamMissingTitle),
-              const SizedBox(height: 6),
-              Text(
-                l.honamMissingBody(
-                  formatFcfa(order.missingAmount!),
-                  order.missingReason ?? '',
-                ),
-                style: _bodyStyle,
-              ),
-              const SizedBox(height: 14),
-              HonamPrimaryButton(
-                label: l.honamKeepRest,
-                busy: _busy,
-                onPressed: () => _runWith('missing-choice', {'choice': 'KEEP'}),
-              ),
-              const SizedBox(height: 8),
-              ModuleQuietButton(
-                label: l.honamCancelAll,
-                onPressed: _busy
-                    ? null
-                    : () => _runWith('missing-choice', {'choice': 'CANCEL'}),
-              ),
-              const SizedBox(height: 10),
-              Text(l.honamRefundDelay, style: _hintStyle),
-            ],
-          ),
-        ),
-      ],
-      if (order.refundDue > 0 && !order.refundConfirmed) ...[
-        const _Band(),
-        _Section(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionHeading(l.honamUiRefundTitle),
-              const SizedBox(height: 6),
-              Text(
-                l.honamRefundDue(
-                  formatFcfa(order.refundDue),
-                  order.refundReason ?? '',
-                ),
-                style: _bodyStyle,
-              ),
-              const SizedBox(height: 4),
-              Text(l.honamRefundDelay, style: _hintStyle),
-              const SizedBox(height: 12),
-              ModuleQuietButton(
-                label: l.honamRefundReceived,
-                onPressed: _busy ? null : () => _run('refund-received'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      const _Band(),
-      _Section(child: _Items(order: order)),
-      const _Band(),
-      _Section(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-        child: _Info(order: order),
-      ),
-      const _Band(),
-      _Section(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-        child: _OrderMessages(orderId: order.id),
-      ),
-      if (const {'SUBMITTED', 'QUOTED', 'ACCEPTED'}.contains(order.status))
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Center(
-            child: TextButton(
-              onPressed: _busy ? null : () => _run('cancel'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.securityCritical,
-                minimumSize: const Size(64, 48),
-              ),
-              child: Text(
-                l.honamCancel,
-                style: const TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ),
-    ];
-  }
-}
-
-TextStyle get _bodyStyle =>
-    TextStyle(fontSize: 14.5, height: 1.4, color: AppColors.textPrimary);
-
-TextStyle get _hintStyle =>
-    TextStyle(fontSize: 13, height: 1.35, color: AppColors.textSecondary);
-
-const _figures = [FontFeature.tabularFigures()];
-
-/// Une section à plat : une surface pleine largeur, bordée d'un filet en
-/// haut et en bas. Pas d'ombre, pas de coins : c'est la bande de fond entre
-/// deux sections qui les sépare.
-class _Section extends StatelessWidget {
-  const _Section({required this.child, this.padding = EdgeInsets.zero});
-
-  final Widget child;
-  final EdgeInsets padding;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: padding,
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      border: Border.symmetric(horizontal: BorderSide(color: AppColors.border)),
-    ),
-    child: child,
-  );
-}
-
-/// La fine bande de fond entre deux sections.
-class _Band extends StatelessWidget {
-  const _Band();
-
-  @override
-  Widget build(BuildContext context) => const SizedBox(height: 8);
-}
-
-class _SectionHeading extends StatelessWidget {
-  const _SectionHeading(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => Text(
-    title,
-    maxLines: 2,
-    overflow: TextOverflow.ellipsis,
-    style: TextStyle(
-      fontFamily: 'Outfit',
-      fontSize: 18,
-      height: 1.25,
-      letterSpacing: -0.2,
-      fontWeight: FontWeight.w700,
-      color: AppColors.textPrimary,
-    ),
-  );
-}
-
-/// Le bandeau pastel : où en est la commande, en gras, la phrase qui aide,
-/// et une scène à droite.
-class _Banner extends StatelessWidget {
-  const _Banner({required this.order});
-
-  final HonamOrder order;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final (title, help) = switch (order.status) {
-      'SUBMITTED' => (l.honamUiHeadSubmitted, l.honamUiHelpSubmitted),
-      'QUOTED' => (l.honamUiHeadQuoted, l.honamUiHelpQuoted),
-      'ACCEPTED' => (
-        l.honamUiHeadAccepted,
-        order.patientPaidDeclared ? l.honamPaidDeclared : l.honamUiHelpAccepted,
-      ),
-      'PAID' => (l.honamUiHeadPaid, l.honamUiHelpPaid),
-      'READY' => (l.honamUiHeadReady, l.honamUiHelpReady),
-      'IN_DELIVERY' => (l.honamUiHeadInDelivery, l.honamUiHelpInDelivery),
-      'DELIVERED' => (l.honamUiHeadDelivered, l.honamUiHelpDelivered),
-      'REJECTED' => (l.honamUiHeadRejected, l.honamUiHelpRejected),
-      'EXPIRED' => (l.honamUiHeadExpired, l.honamUiHelpExpired),
-      _ => (l.honamUiHeadCancelled, l.honamUiHelpCancelled),
-    };
-    final tint = switch (honamFilterOf(order)) {
-      HonamOrderFilter.toReceive => AppColors.terracottaTint,
-      HonamOrderFilter.completed => AppColors.feedbackSuccess.withValues(
-        alpha: AppColors.isDark ? 0.2 : 0.12,
-      ),
-      HonamOrderFilter.cancelled => AppColors.surfaceElevated,
-    };
-    final onTheWay = const {
-      'READY',
-      'IN_DELIVERY',
-      'DELIVERED',
-    }.contains(order.status);
-    return Container(
-      color: tint,
-      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 12, 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 22,
-                      height: 1.2,
-                      letterSpacing: -0.3,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    help,
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      height: 1.4,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: PokouIllustration(
-              onTheWay ? PokouIllustrations.delivery : PokouIllustrations.honam,
-              height: 92,
-            ),
-          ),
-        ],
-      ),
     );
   }
-}
 
-/// Un lieu ou une personne de la commande : repère, nom en gras, précision.
-class _PlaceRow extends StatelessWidget {
-  const _PlaceRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final Widget icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-    child: Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.terracottaTint,
-            shape: BoxShape.circle,
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(color: AppColors.onTerracottaTint, size: 20),
-            child: icon,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.3,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/// « Livrée le 16/07 à 20:53 › » : la ligne d'état, qui ouvre le suivi.
-class _StatusRow extends StatelessWidget {
-  const _StatusRow({required this.order, required this.onTap});
-
-  final HonamOrder order;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    hint: L.of(context).honamUiDeliveryInfo,
-    child: InkWell(
-      onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 52),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 40,
-                child: Icon(
-                  honamStatusIcon(order.status),
-                  size: 20,
-                  color: honamStatusColor(order),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  honamStatusPhrase(context, order),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right, color: AppColors.accentPrimaryDark),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-/// Une icône et une phrase : un motif, un avertissement, une précision.
-class _NoteRow extends StatelessWidget {
-  const _NoteRow({
-    required this.icon,
-    required this.color,
-    required this.text,
-    this.tinted = false,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String text;
-
-  /// Un avertissement : la phrase prend la couleur de l'icône.
-  final bool tinted;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(top: 1),
-        child: Icon(icon, size: 18, color: color),
-      ),
-      const SizedBox(width: 10),
-      Expanded(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 14,
-            height: 1.4,
-            color: tinted ? color : AppColors.textPrimary,
-          ),
-        ),
-      ),
+  Widget _menu(L l, HonamOrder order) => PopupMenuButton<String>(
+    tooltip: l.honamPMore,
+    icon: Icon(Icons.more_vert, color: AppColors.textPrimary),
+    onSelected: (value) => switch (value) {
+      'write' => _openMessages(order),
+      _ => _openTimeline(order),
+    },
+    itemBuilder: (_) => [
+      PopupMenuItem(value: 'write', child: Text(l.honamPWriteToPharmacy)),
+      PopupMenuItem(value: 'timeline', child: Text(l.honamUiDeliveryInfo)),
     ],
   );
-}
 
-/// Le paiement à l'officine : combien, à quel numéro, et où il en est. Le
-/// bouton « J'ai payé » est celui du bas de l'écran.
-class _PayStep extends StatelessWidget {
-  const _PayStep({required this.order});
-
-  final HonamOrder order;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final phone = order.payToPhone ?? '';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l.honamPayTo(formatFcfa(order.total ?? 0), phone),
-          style: _bodyStyle,
-        ),
-        const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsetsDirectional.fromSTEB(14, 2, 4, 2),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  phone,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.4,
-                    color: AppColors.textPrimary,
-                    fontFeatures: _figures,
-                  ),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: phone));
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(l.koryCopied)));
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.accentPrimaryDark,
-                  minimumSize: const Size(44, 44),
-                ),
-                icon: const Icon(Icons.copy, size: 16),
-                label: Text(l.koryCopyPhone),
-              ),
-            ],
-          ),
-        ),
-        if (order.paymentNotReceived) ...[
-          const SizedBox(height: 12),
-          _NoteRow(
-            icon: Icons.error_outline,
-            color: AppColors.securityCritical,
-            text: l.honamPaymentNotReceived,
-            tinted: true,
-          ),
-        ],
-        if (order.patientPaidDeclared) ...[
-          const SizedBox(height: 12),
-          _NoteRow(
-            icon: Icons.hourglass_top_rounded,
-            color: AppColors.securityWarning,
-            text: l.honamPaidDeclared,
-          ),
-        ],
-        const SizedBox(height: 4),
-      ],
+  Widget? _footer(L l, HonamOrder order) {
+    final cancel = TextButton(
+      onPressed: _busy ? null : () => _run('cancel'),
+      style: TextButton.styleFrom(foregroundColor: AppColors.accentPrimaryDark),
+      child: Text(l.honamCancel),
     );
-  }
-}
-
-/// Le code de remise, en grand : c'est lui qu'on dicte au coursier.
-class _Code extends StatelessWidget {
-  const _Code({required this.order});
-
-  final HonamOrder order;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: BoxDecoration(
-        color: AppColors.terracottaTint,
-        borderRadius: AppRadius.card,
-      ),
-      child: Column(
+    switch (order.status) {
+      case 'SUBMITTED':
+        return KoryFooter(children: [cancel]);
+      case 'QUOTED':
+        return KoryFooter(
+          children: [
+            KoryButton(
+              label: l.honamPPayAmount(formatFcfa(order.total ?? 0)),
+              busy: _busy,
+              onPressed: () => _pay(order),
+            ),
+            TextButton(
+              onPressed: _busy ? null : () => _run('cancel'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.accentPrimaryDark,
+              ),
+              child: Text(l.honamPRefuseQuote),
+            ),
+          ],
+        );
+      case 'ACCEPTED' when !order.patientPaidDeclared:
+        return KoryFooter(
+          children: [
+            KoryButton(
+              label: l.honamPPayAmount(formatFcfa(order.total ?? 0)),
+              busy: _busy,
+              onPressed: () => _pay(order),
+            ),
+            cancel,
+          ],
+        );
+      case 'ACCEPTED' || 'PAID' || 'READY':
+        return KoryFooter(
+          children: [
+            KoryButton(
+              label: l.honamPFollowOrder,
+              onPressed: () => _openTimeline(order),
+            ),
+          ],
+        );
+    }
+    if (order.refundDue > 0 && !order.refundConfirmed) {
+      return KoryFooter(
         children: [
-          Text(
-            l.honamCode,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.onTerracottaTint,
-            ),
+          KoryButton(
+            label: l.honamRefundReceived,
+            busy: _busy,
+            onPressed: () => _run('refund-received'),
           ),
-          const SizedBox(height: 4),
-          Semantics(
-            label: order.deliveryCode!.split('').join(' '),
-            child: ExcludeSemantics(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  order.deliveryCode!,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 36,
-                    height: 1.2,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 8,
-                    color: AppColors.textPrimary,
-                    fontFeatures: _figures,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(l.honamCodeHelp, textAlign: TextAlign.center, style: _hintStyle),
         ],
+      );
+    }
+    return null;
+  }
+
+  List<Widget> _body(L l, HonamOrder order, String pharmacy) {
+    final write = KoryCard(
+      padding: EdgeInsets.zero,
+      child: HonamLinkRow(
+        icon: Icons.chat_bubble_outline,
+        title: l.honamPWriteToPharmacy,
+        onTap: () => _openMessages(order),
       ),
     );
-  }
-}
-
-/// « Articles de la commande » : le devis du pharmacien, ligne à ligne, puis
-/// les médicaments, la course et le total.
-class _Items extends StatelessWidget {
-  const _Items({required this.order});
-
-  final HonamOrder order;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final hasQuote = order.quoteItems.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-          child: Row(
-            children: [
-              Expanded(child: _SectionHeading(l.honamUiItemsTitle)),
-              if (hasQuote) ...[
-                const SizedBox(width: 12),
-                Text(
-                  l.honamUiItemsCount(honamItemsCount(order)),
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ],
+    final address = KoryCard(
+      padding: EdgeInsets.zero,
+      child: HonamLinkRow(
+        icon: Icons.location_on_outlined,
+        title: l.honamPDeliverTo(order.deliveryAddress),
+        subtitle: order.deliveryLandmark == null
+            ? null
+            : l.honamPLandmark(order.deliveryLandmark!),
+      ),
+    );
+    final refund = order.refundDue > 0
+        ? [
+            const SizedBox(height: 12),
+            KoryNotice(
+              tone: order.refundConfirmed ? KoryTone.success : KoryTone.warning,
+              title: l.honamUiRefundTitle,
+              text: order.refundConfirmed
+                  ? l.honamPRefundDone(formatFcfa(order.refundDue))
+                  : l.honamRefundDue(
+                      formatFcfa(order.refundDue),
+                      order.refundReason ?? '',
+                    ),
+            ),
+          ]
+        : const <Widget>[];
+    switch (order.status) {
+      case 'SUBMITTED':
+        return [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.terracottaTint,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.history, color: AppColors.onTerracottaTint),
           ),
-        ),
-        const HonamHairline(),
-        if (!hasQuote)
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const SizedBox(height: 10),
+          Text(
+            l.honamPWaitingQuoteBody(pharmacy),
+            style: TextStyle(
+              fontSize: 14.5,
+              height: 1.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          KoryCard(
             child: Row(
               children: [
-                const HonamThumb(child: PokouIcon(PokouModuleIcon.honam)),
+                _PrescriptionThumb(mediaId: order.prescriptionMediaId),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l.honamUiPrescription,
+                        l.honamPPrescriptionSent,
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        order.status == 'SUBMITTED'
-                            ? l.honamUiQuotePendingBody
-                            : honamStatusLabel(l, order.status),
-                        style: _hintStyle,
-                      ),
+                      if (order.patientNote != null)
+                        Text(
+                          '« ${order.patientNote} »',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
-          )
-        else ...[
-          for (final (index, item) in order.quoteItems.indexed) ...[
-            if (index > 0) const HonamHairline(indent: 16),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: _ItemRow(item: item),
+          ),
+          const SizedBox(height: 12),
+          write,
+          const SizedBox(height: 8),
+          address,
+          const SizedBox(height: 12),
+          KoryNotice(text: l.honamNotEmergency, icon: Icons.info_outline),
+        ];
+      case 'QUOTED':
+      case 'ACCEPTED' when !order.patientPaidDeclared:
+        final generics = order.quoteItems
+            .where((i) => i.generic && i.available)
+            .map((i) => i.name)
+            .toList();
+        return [
+          _QuoteItems(order: order),
+          const SizedBox(height: 12),
+          _Totals(order: order),
+          if (order.paymentNotReceived) ...[
+            const SizedBox(height: 12),
+            KoryNotice(tone: KoryTone.danger, text: l.honamPaymentNotReceived),
+          ],
+          const SizedBox(height: 12),
+          KoryNotice(icon: Icons.info_outline, text: l.honamPPayDirectly),
+          if (generics.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            KoryNotice(
+              icon: Icons.info_outline,
+              text: l.honamPGenericOffered(generics.join(', ')),
             ),
           ],
-          const HonamHairline(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+          if (order.originalRequired) ...[
+            const SizedBox(height: 8),
+            KoryNotice(icon: Icons.description_outlined, text: l.honamOriginal),
+          ],
+          const SizedBox(height: 12),
+          write,
+        ];
+      case 'ACCEPTED' || 'PAID' || 'READY':
+        return [
+          _PaymentSteps(order: order),
+          const SizedBox(height: 12),
+          KoryNotice(tone: KoryTone.success, text: l.honamPCodeLater),
+          const SizedBox(height: 12),
+          write,
+        ];
+      default:
+        // Livrée ou annulée : le récapitulatif.
+        return [
+          KoryNotice(
+            tone: order.status == 'DELIVERED'
+                ? KoryTone.success
+                : KoryTone.neutral,
+            icon: order.status == 'DELIVERED'
+                ? Icons.check_circle_outline
+                : Icons.info_outline,
+            text: honamStatusPhrase(context, order),
+          ),
+          // Maquette Coursiers 0 : l'encart après une livraison reçue.
+          if (order.status == 'DELIVERED' && order.courierName != null) ...[
+            const SizedBox(height: 12),
+            CourierOfferPrompt(
+              deliveredBy: order.deliveredAt == null
+                  ? order.courierName!
+                  : l.courierByAt(
+                      order.courierName!,
+                      honamWhen(context, order.deliveredAt!),
+                    ),
+            ),
+          ],
+          ...refund,
+          if (order.quoteItems.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _QuoteItems(order: order),
+            const SizedBox(height: 12),
+            _Totals(order: order),
+          ],
+          const SizedBox(height: 12),
+          address,
+          const SizedBox(height: 8),
+          write,
+        ];
+    }
+  }
+
+  // ── Maquette Honam patient 6 : un produit manque ──────────────────────
+
+  Widget _missingPage(L l, HonamOrder order, String pharmacy) {
+    final phone = ref.watch(authControllerProvider).user?.phone;
+    final wallet = KoryWallet.of(phone);
+    final total = (order.medicinesTotal ?? 0) + (order.deliveryPrice ?? 0);
+    return KoryPage(
+      title: l.honamMissingTitle,
+      subtitle: l.honamPPaidOrderOf(pharmacy),
+      footer: KoryFooter(
+        children: [
+          KoryButton(
+            label: l.honamPValidateChoice,
+            busy: _busy,
+            onPressed: _missingChoice == null
+                ? null
+                : () => _run('missing-choice', body: {'choice': _missingChoice}),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.securityWarning.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.securityWarning,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            l.honamPMissingLead(pharmacy, order.missingReason ?? ''),
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          KoryChoice(
+            selected: _missingChoice == 'KEEP',
+            title: l.honamKeepRest,
+            subtitle: l.honamPKeepRestBody(
+              formatFcfa(order.missingAmount ?? 0),
+            ),
+            onTap: () => setState(() => _missingChoice = 'KEEP'),
+          ),
+          KoryChoice(
+            selected: _missingChoice == 'CANCEL',
+            title: l.honamCancelAll,
+            subtitle: l.honamPCancelAllBody(formatFcfa(total)),
+            onTap: () => setState(() => _missingChoice = 'CANCEL'),
+          ),
+          KoryNotice(
+            icon: Icons.info_outline,
+            text: l.honamPRefundToPayer(wallet?.label ?? ''),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            l.honamPMissingNoAnswer,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Maquette Honam patient 7 : ordonnance refusée ─────────────────────
+
+  Widget _refusedPage(L l, HonamOrder order, String pharmacy) {
+    final others = (ref.watch(honamOtherPharmaciesProvider).valueOrNull ??
+            const <Pharmacy>[])
+        .where((p) => p.id != order.pharmacy?.id)
+        .take(5)
+        .toList();
+    final chosen =
+        others.where((p) => p.id == _otherPharmacyId).firstOrNull ??
+        others.firstOrNull;
+    return KoryPage(
+      title: order.status == 'EXPIRED'
+          ? l.honamUiHeadExpired
+          : l.honamPRefusedTitle,
+      subtitle: l.honamPNothingPaid(pharmacy),
+      footer: KoryFooter(
+        children: [
+          if (chosen != null)
+            KoryButton(
+              label: l.honamPSendTo(chosen.name),
+              busy: _busy,
+              onPressed: () => _resend(order, chosen),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).maybePop(),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accentPrimaryDark,
+            ),
+            child: Text(l.honamPLater),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          KoryCard(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _AmountRow(
-                  label: l.honamMedicines,
-                  value: formatFcfa(order.medicinesTotal ?? 0),
+                Text(
+                  l.honamPReason,
+                  style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                 ),
-                const SizedBox(height: 8),
-                _AmountRow(
-                  label: l.honamDelivery,
-                  value: formatFcfa(order.deliveryPrice ?? 0),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l.honamTotal,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 15.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      formatFcfa(order.total ?? 0),
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 19,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.accentPrimaryDark,
-                        fontFeatures: _figures,
-                      ),
-                    ),
-                  ],
-                ),
-                if (order.originalRequired) ...[
-                  const SizedBox(height: 12),
-                  _NoteRow(
-                    icon: Icons.description_outlined,
-                    color: AppColors.textSecondary,
-                    text: l.honamOriginal,
+                const SizedBox(height: 6),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
+                  child: Text(
+                    order.status == 'EXPIRED'
+                        ? l.honamUiHelpExpired
+                        : '« ${order.rejectionReason ?? l.honamUiHelpRejected} »',
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.4,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+          KorySection(l.honamPSendElsewhere),
+          if (others.isEmpty)
+            KoryNotice(text: l.honamNoPharmacy)
+          else
+            for (final p in others)
+              KoryChoice(
+                selected: p.id == chosen?.id,
+                title: p.name,
+                subtitle: honamPharmacyLine(context, p),
+                onTap: () => setState(() => _otherPharmacyId = p.id),
+              ),
+          Text(
+            l.honamPSamePhoto,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
         ],
-      ],
+      ),
     );
   }
 }
 
-class _ItemRow extends StatelessWidget {
-  const _ItemRow({required this.item});
+/// Les officines à qui renvoyer une ordonnance refusée, les plus proches
+/// d'abord, sans redemander la position.
+final honamOtherPharmaciesProvider = FutureProvider.autoDispose<List<Pharmacy>>(
+  (ref) async {
+    final position = await currentPosition(ask: false);
+    return ref
+        .watch(honamRepositoryProvider)
+        .pharmacies(lat: position?.latitude, lng: position?.longitude);
+  },
+);
 
-  final QuoteItem item;
+/// La vignette de l'ordonnance envoyée.
+class _PrescriptionThumb extends ConsumerWidget {
+  const _PrescriptionThumb({required this.mediaId});
+
+  final int? mediaId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final id = mediaId;
+    const fallback = HonamThumb(child: Icon(Icons.description_outlined));
+    if (id == null) return fallback;
+    return FutureBuilder<File>(
+      future: ref.read(mediaRepositoryProvider).resolveLocalFile(id, largeur: 96),
+      builder: (context, snapshot) => snapshot.hasData
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                snapshot.data!,
+                width: 48,
+                height: 56,
+                fit: BoxFit.cover,
+              ),
+            )
+          : fallback,
+    );
+  }
+}
+
+/// Les lignes du devis : nom, conditionnement, « Générique », prix.
+class _QuoteItems extends StatelessWidget {
+  const _QuoteItems({required this.order});
+
+  final HonamOrder order;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const HonamThumb(child: Icon(Icons.medication_outlined)),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.3,
-                  fontWeight: FontWeight.w500,
-                  color: item.available
-                      ? AppColors.textPrimary
-                      : AppColors.textSecondary,
-                  decoration: item.available
-                      ? null
-                      : TextDecoration.lineThrough,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Row(
+    return KoryCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (final (index, item) in order.quoteItems.indexed) ...[
+            if (index > 0) Divider(height: 1, color: AppColors.border),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
                 children: [
                   Expanded(
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            l.honamUiUnitPrice(formatFcfa(item.unitPrice)),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              fontFeatures: _figures,
-                            ),
+                        Text(
+                          item.name,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: item.available
+                                ? AppColors.textPrimary
+                                : AppColors.textMuted,
+                            decoration: item.available
+                                ? null
+                                : TextDecoration.lineThrough,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        HonamPill('×${item.quantity}'),
+                        const SizedBox(height: 2),
+                        Wrap(
+                          spacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              item.packaging ?? '×${item.quantity}',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            if (item.packaging != null && item.quantity > 1)
+                              HonamPill('×${item.quantity}'),
+                            if (item.generic) HonamPill(l.honamPGeneric),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -986,180 +686,140 @@ class _ItemRow extends StatelessWidget {
                     item.available
                         ? formatFcfa(item.unitPrice * item.quantity)
                         : l.honamUnavailableItem,
-                    maxLines: 1,
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: item.available
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                      fontFeatures: _figures,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
 
-class _AmountRow extends StatelessWidget {
-  const _AmountRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Expanded(
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Text(
-        value,
-        style: TextStyle(
-          fontSize: 14,
-          color: AppColors.textPrimary,
-          fontFeatures: _figures,
-        ),
-      ),
-    ],
-  );
-}
-
-/// Les repères de la commande, en lignes libellé / valeur : son numéro, et
-/// les heures que son fil de suivi a réellement enregistrées.
-class _Info extends StatelessWidget {
-  const _Info({required this.order});
+/// Médicaments, course ajoutée par Honam, total à payer.
+class _Totals extends StatelessWidget {
+  const _Totals({required this.order});
 
   final HonamOrder order;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final closed =
-        honamStepTime(order, 'REJECTED') ??
-        honamStepTime(order, 'EXPIRED') ??
-        honamStepTime(order, 'CANCELLED');
-    final times = <(String, DateTime?)>[
-      (l.honamUiOrderTime, order.createdAt),
-      (l.honamUiQuoteTime, honamStepTime(order, 'QUOTED', last: false)),
-      (l.honamUiPaymentTime, honamStepTime(order, 'PAID', last: false)),
-      (l.honamUiShipTime, honamStepTime(order, 'IN_DELIVERY', last: false)),
-      (l.honamUiDeliveredTime, honamStepTime(order, 'DELIVERED')),
-      (l.honamUiClosedTime, closed),
+    return KoryCard(
+      child: Column(
+        children: [
+          KoryLine(l.honamMedicines, formatFcfa(order.medicinesTotal ?? 0)),
+          KoryLine(l.honamPDeliveryByHonam, formatFcfa(order.deliveryPrice ?? 0)),
+          Divider(height: 16, color: AppColors.border),
+          KoryLine(l.honamPTotalToPay, formatFcfa(order.total ?? 0), strong: true),
+        ],
+      ),
+    );
+  }
+}
+
+/// Maquette Honam patient 5 : paiement signalé, vérification par la
+/// pharmacie, préparation puis départ du coursier.
+class _PaymentSteps extends StatelessWidget {
+  const _PaymentSteps({required this.order});
+
+  final HonamOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final paid = order.status != 'ACCEPTED';
+    final declared = order.paymentDeclaredAt;
+    final steps = [
+      (
+        l.honamPStepPaymentSignaled,
+        [
+          if (declared != null) honamWhen(context, declared),
+          if (order.paymentReference != null)
+            l.honamPRef(order.paymentReference!),
+        ].join(' · '),
+        true,
+      ),
+      (
+        paid ? l.honamPStepPaymentReceived : l.honamPStepPharmacyChecks,
+        paid ? l.honamUiHeadPaid : l.honamPOnItsWallet,
+        paid,
+      ),
+      (l.honamPStepPreparing, l.honamPStepPreparingBody, order.status == 'READY'),
     ];
-    final id = '${order.id}';
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l.honamUiOrderId,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            Text(
-              id,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-                fontFeatures: _figures,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: id));
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(l.honamUiOrderIdCopied)));
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.accentPrimaryDark,
-                minimumSize: const Size(44, 44),
-                padding: const EdgeInsetsDirectional.only(start: 10),
-                tapTargetSize: MaterialTapTargetSize.padded,
-              ),
-              child: Text(
-                l.honamUiCopy,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        for (final (label, at) in times)
-          if (at != null)
+    return KoryCard(
+      child: Column(
+        children: [
+          for (final (index, (title, subtitle, done)) in steps.indexed)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 7),
+              padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: done
+                          ? AppColors.feedbackSuccess
+                          : AppColors.surfaceElevated,
                     ),
+                    child: done
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    honamDateTime(context, at),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      fontFeatures: _figures,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        if (subtitle.isNotEmpty)
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-/// Le bouton principal, épinglé en bas de l'écran.
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.child});
+TextStyle get _hintStyle =>
+    TextStyle(fontSize: 13, height: 1.35, color: AppColors.textSecondary);
 
-  final Widget child;
+const _figures = [FontFeature.tabularFigures()];
 
-  @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      border: Border(top: BorderSide(color: AppColors.border)),
-    ),
-    child: SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: child,
-    ),
-  );
-}
 
 /// « Suivi de livraison » : la frise des étapes, la plus récente en haut.
 class _TimelineSheet extends StatelessWidget {
@@ -1386,332 +1046,6 @@ class _TimelineRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Les messages de la commande, et le champ pour écrire.
-class _OrderMessages extends ConsumerStatefulWidget {
-  const _OrderMessages({required this.orderId});
-
-  final int orderId;
-
-  @override
-  ConsumerState<_OrderMessages> createState() => _OrderMessagesState();
-}
-
-class _OrderMessagesState extends ConsumerState<_OrderMessages> {
-  final _controller = TextEditingController();
-  bool _sending = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _send() async {
-    final body = _controller.text.trim();
-    if (body.isEmpty || _sending) return;
-    setState(() => _sending = true);
-    try {
-      await ref
-          .read(honamRepositoryProvider)
-          .sendOrderMessage(widget.orderId, body);
-      _controller.clear();
-      ref.invalidate(honamOrderMessagesProvider(widget.orderId));
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(L.of(context).honamFailed)));
-    } finally {
-      if (mounted) setState(() => _sending = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final messages = ref.watch(honamOrderMessagesProvider(widget.orderId));
-    final Widget list;
-    if (messages.hasValue) {
-      final items = messages.requireValue;
-      list = items.isEmpty
-          ? Text(l.honamUiNoMessages, style: _hintStyle)
-          : Column(
-              children: [
-                for (final (index, message) in items.indexed)
-                  Padding(
-                    padding: EdgeInsets.only(top: index == 0 ? 0 : 8),
-                    child: _MessageBlock(message: message),
-                  ),
-              ],
-            );
-    } else if (messages.hasError) {
-      list = Text(l.honamFailed, style: _hintStyle);
-    } else {
-      list = const SkeletonPulse(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SkeletonBox(width: double.infinity, height: 56, radius: 12),
-            SizedBox(height: 8),
-            SkeletonBox(width: 220, height: 56, radius: 12),
-          ],
-        ),
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SectionHeading(l.honamOrderMessages),
-        const SizedBox(height: 12),
-        list,
-        const SizedBox(height: 14),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: TextField(
-                contextMenuBuilder: pokouContextMenuBuilder,
-                controller: _controller,
-                maxLength: 1000,
-                minLines: 1,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: l.honamWriteMessage,
-                  counterText: '',
-                  isDense: true,
-                  filled: true,
-                  fillColor: AppColors.surfaceElevated,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
-                  ),
-                ),
-                onSubmitted: (_) => _send(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: _sending ? null : _send,
-              tooltip: l.actionSend,
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.actionButtonBackground,
-                foregroundColor: AppColors.actionButtonForeground,
-                disabledBackgroundColor: AppColors.surfaceElevated,
-                minimumSize: const Size(48, 48),
-              ),
-              icon: _sending
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.textMuted,
-                      ),
-                    )
-                  : const Icon(Icons.send, size: 20),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MessageBlock extends StatelessWidget {
-  const _MessageBlock({required this.message});
-
-  final HonamOrderMessage message;
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  message.senderName ?? message.senderRole,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                DateFormat.Hm(locale).format(message.createdAt.toLocal()),
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: AppColors.textMuted,
-                  fontFeatures: _figures,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 3),
-          Text(
-            message.body,
-            style: TextStyle(
-              fontSize: 14.5,
-              height: 1.4,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// La forme de l'écran pendant le chargement : le bandeau, les repères, les
-/// articles, les dates.
-class _OrderSkeleton extends StatelessWidget {
-  const _OrderSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    Widget place(double title, double subtitle) => Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          const SkeletonCircle(size: 40),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SkeletonBox(width: title, height: 14),
-              const SizedBox(height: 8),
-              SkeletonBox(width: subtitle, height: 12),
-            ],
-          ),
-        ],
-      ),
-    );
-    Widget item(double name) => Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Row(
-        children: [
-          const SkeletonBox(width: 48, height: 48, radius: 13),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SkeletonBox(width: name, height: 14),
-                const SizedBox(height: 9),
-                const SkeletonBox(width: 96, height: 12),
-              ],
-            ),
-          ),
-          const SkeletonBox(width: 64, height: 12),
-        ],
-      ),
-    );
-    Widget info(double label) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 9),
-      child: Row(
-        children: [
-          SkeletonBox(width: label, height: 12),
-          const Spacer(),
-          const SkeletonBox(width: 104, height: 12),
-        ],
-      ),
-    );
-    return SkeletonPulse(
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: 124,
-              color: AppColors.surfaceElevated,
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SkeletonBox(width: 190, height: 20),
-                        SizedBox(height: 12),
-                        SkeletonBox(width: 220, height: 12),
-                        SizedBox(height: 8),
-                        SkeletonBox(width: 160, height: 12),
-                      ],
-                    ),
-                  ),
-                  SkeletonBox(width: 84, height: 84, radius: 18),
-                ],
-              ),
-            ),
-            _Section(
-              child: Column(
-                children: [
-                  place(180, 120),
-                  const HonamHairline(indent: 16),
-                  place(150, 190),
-                  const HonamHairline(),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(28, 18, 16, 18),
-                    child: Row(
-                      children: [
-                        SkeletonBox(width: 18, height: 18, radius: 9),
-                        SizedBox(width: 22),
-                        SkeletonBox(width: 170, height: 12),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const _Band(),
-            _Section(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 18, 16, 18),
-                    child: Row(
-                      children: [
-                        SkeletonBox(width: 190, height: 16),
-                        Spacer(),
-                        SkeletonBox(width: 60, height: 12),
-                      ],
-                    ),
-                  ),
-                  const HonamHairline(),
-                  item(200),
-                  const HonamHairline(indent: 16),
-                  item(150),
-                ],
-              ),
-            ),
-            const _Band(),
-            _Section(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-              child: Column(children: [info(120), info(140), info(100)]),
-            ),
-          ],
-        ),
       ),
     );
   }

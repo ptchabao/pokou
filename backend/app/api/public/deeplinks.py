@@ -53,6 +53,7 @@ _KIND_LABELS = {
     "channel": ("une invitation à une chaîne", "Suivez cette chaîne"),
     "kory": ("une cagnotte Kory", "Ouvrez cette cagnotte dans Pokou"),
     "honam": ("une commande HONAM", "Ouvrez le suivi de cette commande dans Pokou"),
+    "honam_courier": ("une invitation à livrer pour Honam", "Découvrez l'offre coursier dans Pokou"),
     "unknown": ("une invitation Pokou", "Ouvrez-la dans Pokou"),
 }
 
@@ -208,6 +209,13 @@ async def kory_pot_link(pot_id: int):
 async def honam_order_link(order_id: int):
     """Public landing page for a HONAM order deep link; no order data is exposed."""
     return _page(f"/honam/order/{order_id}", "honam")
+
+
+@router.get("/honam/coursier/{code}", response_class=HTMLResponse)
+async def honam_courier_link(code: str):
+    """Le lien de parrainage d'un coursier (maquettes Coursiers 15 et 23) :
+    ouvre l'offre coursier avec le code appliqué. Rien n'est exposé."""
+    return _page(f"/honam/coursier/{code}", "honam_courier")
 
 
 @router.get("/invite/channel/{code}/post/{post_id}", response_class=HTMLResponse)

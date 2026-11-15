@@ -12596,4 +12596,1451 @@ class LEs extends L {
   @override
   String get offiTeamNote =>
       'Pour changer d’adresse, d’horaires, de wallet ou ajouter un collaborateur, écrivez au support Pokou.';
+
+  @override
+  String get courierTransportMoto => 'moto';
+
+  @override
+  String get courierTransportBike => 'vélo';
+
+  @override
+  String get courierTransportWalk => 'à pied';
+
+  @override
+  String get honamPAddAddress => 'Ajouter l’adresse de livraison';
+
+  @override
+  String get honamPAmountToSend => 'Montant à envoyer';
+
+  @override
+  String honamPArrivesAround(String name, String time) {
+    return '$name arrive vers $time';
+  }
+
+  @override
+  String honamPArrivesIn(String name, int minutes) {
+    return '$name arrive dans $minutes min';
+  }
+
+  @override
+  String honamPAtKm(String km) {
+    return 'à $km km';
+  }
+
+  @override
+  String honamPCallRelayed(String name) {
+    return 'Appeler $name par Pokou, numéro masqué';
+  }
+
+  @override
+  String honamPCancelAllBody(String amount) {
+    return 'Rien n’est livré. La pharmacie te rembourse $amount.';
+  }
+
+  @override
+  String honamPCheckRecipient(String pharmacy) {
+    return 'Vérifie que ton opérateur affiche bien « $pharmacy » avant de valider. Les frais de l’opérateur s’appliquent.';
+  }
+
+  @override
+  String get honamPCodeLater =>
+      'Ton code de remise s’affiche quand le coursier est en route. Ne le donne qu’à lui, au moment où il te remet le colis.';
+
+  @override
+  String get honamPCopyAmount => 'Copier le montant';
+
+  @override
+  String honamPCurrentLine(String pharmacy, String amount) {
+    return '$pharmacy · $amount, course comprise';
+  }
+
+  @override
+  String get honamPCurrentOrder => 'Commande en cours';
+
+  @override
+  String honamPDeliverTo(String address) {
+    return 'Livrer à $address';
+  }
+
+  @override
+  String get honamPDeliveryByHonam => 'Course, ajoutée par Honam';
+
+  @override
+  String get honamPDialUssd => 'Composer le code USSD';
+
+  @override
+  String get honamPFollowOrder => 'Suivre ma commande';
+
+  @override
+  String get honamPFollowWithoutMap => 'Suivre sans la carte';
+
+  @override
+  String get honamPGeneric => 'Générique';
+
+  @override
+  String honamPGenericOffered(String names) {
+    return 'Un générique t’est proposé pour : $names. Une question ? Écris à la pharmacie avant de payer.';
+  }
+
+  @override
+  String honamPGiveCodeOnly(String name) {
+    return 'Donne-le seulement à $name, quand il te remet le colis.';
+  }
+
+  @override
+  String honamPGoingToPharmacy(String name) {
+    return '$name va chercher ta commande à la pharmacie';
+  }
+
+  @override
+  String get honamPHome => 'Chez toi';
+
+  @override
+  String get honamPInDelivery => 'Commande en livraison';
+
+  @override
+  String get honamPInProgress => 'En cours';
+
+  @override
+  String honamPKeepRestBody(String amount) {
+    return 'Le reste de ta commande est livré. La pharmacie te rembourse $amount.';
+  }
+
+  @override
+  String honamPLandmark(String landmark) {
+    return 'Repère : $landmark';
+  }
+
+  @override
+  String get honamPLandmarkHint => 'Portail bleu face au kiosque';
+
+  @override
+  String get honamPLandmarkLabel => 'Repère pour le coursier';
+
+  @override
+  String get honamPLater => 'Plus tard';
+
+  @override
+  String get honamPLightTracking =>
+      'Suivi léger, presque sans données : la carte se charge seulement si tu la demandes. C’est le mode par défaut avec l’économie de données.';
+
+  @override
+  String get honamPMessageHint => 'À livrer avant 13 h, merci';
+
+  @override
+  String get honamPMessageToPharmacy => 'Message à la pharmacie';
+
+  @override
+  String honamPMissingLead(String pharmacy, String reason) {
+    return '$pharmacy n’a plus ce produit : $reason. Que préfères-tu ?';
+  }
+
+  @override
+  String get honamPMissingNoAnswer =>
+      'Sans réponse de ta part sous 15 minutes, tout est annulé et remboursé.';
+
+  @override
+  String get honamPMore => 'Plus d’options';
+
+  @override
+  String get honamPMyOrder => 'Ma commande';
+
+  @override
+  String honamPNothingPaid(String pharmacy) {
+    return '$pharmacy · rien n’a été payé';
+  }
+
+  @override
+  String get honamPOnItsWallet => 'Sur son application de wallet';
+
+  @override
+  String honamPOrderOf(String pharmacy) {
+    return 'Commande de $pharmacy';
+  }
+
+  @override
+  String honamPPaidOrderOf(String pharmacy) {
+    return '$pharmacy · commande payée';
+  }
+
+  @override
+  String get honamPPast => 'Passées';
+
+  @override
+  String get honamPPastQuestion =>
+      'Une question sur une commande passée ? Ouvre-la : la discussion avec la pharmacie y reste.';
+
+  @override
+  String honamPPayAmount(String amount) {
+    return 'Payer $amount';
+  }
+
+  @override
+  String get honamPPayDirectly =>
+      'Tu paies la pharmacie directement depuis ton wallet. Pokou ne touche pas l’argent et ne prend rien sur les médicaments.';
+
+  @override
+  String get honamPPayTitle => 'Payer la pharmacie';
+
+  @override
+  String honamPPharmacyHonam(String pharmacy) {
+    return '$pharmacy · Honam';
+  }
+
+  @override
+  String get honamPPhotoAdded => 'Photo ajoutée';
+
+  @override
+  String get honamPPhotoHelp =>
+      'Vérifie que toute la page est visible, nom du médecin compris.';
+
+  @override
+  String get honamPPillCancelled => 'Annulée';
+
+  @override
+  String get honamPPillDelivered => 'Livrée';
+
+  @override
+  String get honamPPillExpired => 'Expirée';
+
+  @override
+  String get honamPPillOnTheWay => 'En route';
+
+  @override
+  String get honamPPillPreparing => 'En préparation';
+
+  @override
+  String get honamPPillRefundPending => 'Remboursement attendu';
+
+  @override
+  String get honamPPillRefunded => 'Remboursée';
+
+  @override
+  String get honamPPillRejected => 'Refusée';
+
+  @override
+  String get honamPPillToPay => 'Devis à payer';
+
+  @override
+  String get honamPPillWaitingQuote => 'Devis attendu';
+
+  @override
+  String get honamPPrescriptionSent => 'Ordonnance envoyée';
+
+  @override
+  String get honamPPrivacyNotice =>
+      'Seule la pharmacie choisie voit ta photo. Le coursier ne voit ni l’ordonnance ni les produits.';
+
+  @override
+  String honamPProducts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produits',
+      one: '1 produit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String honamPQuoteFrom(String pharmacy) {
+    return 'Devis de $pharmacy';
+  }
+
+  @override
+  String get honamPReason => 'Motif';
+
+  @override
+  String honamPReceivedAt(String when) {
+    return 'Reçu $when';
+  }
+
+  @override
+  String honamPRef(String reference) {
+    return 'réf. $reference';
+  }
+
+  @override
+  String honamPReferenceHelp(String operator) {
+    return 'Dans le SMS de confirmation $operator';
+  }
+
+  @override
+  String honamPRefundDone(String amount) {
+    return 'Remboursement de $amount reçu.';
+  }
+
+  @override
+  String honamPRefundToPayer(String wallet) {
+    return 'Le remboursement arrive sous 2 h, uniquement sur le numéro qui a payé : $wallet.';
+  }
+
+  @override
+  String get honamPRefuseQuote => 'Refuser le devis';
+
+  @override
+  String get honamPRefusedTitle => 'Ordonnance refusée';
+
+  @override
+  String get honamPRetake => 'Reprendre';
+
+  @override
+  String get honamPSamePhoto =>
+      'La même photo est envoyée : tu n’as rien à refaire.';
+
+  @override
+  String get honamPSeeQuoteAndPay => 'Voir le devis et payer';
+
+  @override
+  String get honamPSendElsewhere => 'Envoyer à une autre pharmacie';
+
+  @override
+  String honamPSendTo(String pharmacy) {
+    return 'Envoyer à $pharmacy';
+  }
+
+  @override
+  String honamPSentAt(String pharmacy, String when) {
+    return '$pharmacy · envoyée $when';
+  }
+
+  @override
+  String get honamPShowMap => 'Afficher la carte';
+
+  @override
+  String get honamPStepDelivered => 'Livrée';
+
+  @override
+  String get honamPStepOnTheWay => 'En route';
+
+  @override
+  String get honamPStepPaid => 'Payée';
+
+  @override
+  String get honamPStepPaymentReceived => 'La pharmacie a reçu ton paiement';
+
+  @override
+  String get honamPStepPaymentSignaled => 'Paiement signalé';
+
+  @override
+  String get honamPStepPharmacyChecks => 'La pharmacie vérifie la réception';
+
+  @override
+  String get honamPStepPreparing => 'Préparation, puis départ du coursier';
+
+  @override
+  String get honamPStepPreparingBody =>
+      'Tu suis la livraison et reçois ton code';
+
+  @override
+  String get honamPStepQuote => 'Devis';
+
+  @override
+  String get honamPStepSent => 'Envoyée';
+
+  @override
+  String honamPToPharmacy(String pharmacy) {
+    return 'À $pharmacy';
+  }
+
+  @override
+  String honamPTodayAt(String time) {
+    return 'aujourd’hui, $time';
+  }
+
+  @override
+  String honamPTomorrowAt(String time) {
+    return 'demain, $time';
+  }
+
+  @override
+  String get honamPTotalToPay => 'Total à payer';
+
+  @override
+  String honamPUpdatedSecondsAgo(int seconds) {
+    return 'mis à jour il y a $seconds s';
+  }
+
+  @override
+  String honamPValidUntil(String when) {
+    return 'valable jusqu’à $when';
+  }
+
+  @override
+  String get honamPValidateChoice => 'Valider mon choix';
+
+  @override
+  String get honamPVerifiedCourier => 'Coursier vérifié';
+
+  @override
+  String honamPWaitingQuoteBody(String pharmacy) {
+    return '$pharmacy lit ton ordonnance et prépare le devis. Tu reçois une notification dès qu’il arrive.';
+  }
+
+  @override
+  String get honamPWriteToPharmacy => 'Écrire à la pharmacie';
+
+  @override
+  String honamPYesterdayAt(String time) {
+    return 'hier, $time';
+  }
+
+  @override
+  String get courierAccept => 'Accepter';
+
+  @override
+  String get courierAcceptConditions => 'J’accepte les conditions coursier';
+
+  @override
+  String get courierAccident => 'Accident ou panne';
+
+  @override
+  String get courierAccidentBody =>
+      'L’officine est prévenue et la course est réattribuée';
+
+  @override
+  String get courierAddZone => 'Ajouter un quartier';
+
+  @override
+  String get courierAddressNotFound => 'Adresse introuvable';
+
+  @override
+  String courierAddressNotFoundBody(String name) {
+    return '$name est prévenu(e) et peut te guider par message';
+  }
+
+  @override
+  String courierAfterHandover(String pharmacy, String amount) {
+    return 'Après la remise : la course est décomptée de ton essai ou de ton pack, et $pharmacy te paie $amount sur ton wallet. Tu confirmes la réception dans le mode coursier.';
+  }
+
+  @override
+  String get courierAfternoon => 'Après-midi';
+
+  @override
+  String get courierAlreadyValidated => 'Déjà validé';
+
+  @override
+  String get courierAnswerIn30 => 'Réponds dans 30 secondes';
+
+  @override
+  String get courierApplicationOpen30 =>
+      'Ta candidature reste ouverte 30 jours.';
+
+  @override
+  String courierAskCode(String name) {
+    return 'Demande le code à $name : il s’affiche dans son application. Saisis-le quand tu lui remets le colis.';
+  }
+
+  @override
+  String courierAtTheLatest(String when) {
+    return 'Au plus tard $when';
+  }
+
+  @override
+  String get courierAvailable => 'Disponible';
+
+  @override
+  String get courierAvailableBody =>
+      'Les courses t’arrivent, même quand tu discutes';
+
+  @override
+  String get courierAwaitingPayment =>
+      'Livrée · paiement de l’officine en attente';
+
+  @override
+  String get courierBack => 'le verso';
+
+  @override
+  String get courierBackToPokou => 'Retour à Pokou';
+
+  @override
+  String get courierBackWhereYouWere =>
+      'Tu étais dans une autre section : tu y reviens après ta réponse.';
+
+  @override
+  String get courierBecome => 'Je deviens coursier';
+
+  @override
+  String courierBefore(String when) {
+    return 'avant $when';
+  }
+
+  @override
+  String get courierBirthDate => 'Date de naissance';
+
+  @override
+  String courierCallAgain(String name) {
+    return 'Rappeler $name, numéro masqué';
+  }
+
+  @override
+  String courierCallPatient(String name) {
+    return 'Appeler $name';
+  }
+
+  @override
+  String get courierCallRelayed => 'Appel relayé par Pokou, numéro masqué';
+
+  @override
+  String get courierChooseDate => 'Choisir la date';
+
+  @override
+  String courierChoosePack(String pack) {
+    return 'Choisir $pack';
+  }
+
+  @override
+  String get courierChooseYourPack =>
+      'Choisis ton pack pour continuer à livrer';
+
+  @override
+  String get courierCodeRefused => 'Le code est refusé';
+
+  @override
+  String courierCodeRefusedBody(String name) {
+    return 'Vérifie les chiffres avec $name, puis réessaie';
+  }
+
+  @override
+  String get courierContactSupport => 'Contacter le support';
+
+  @override
+  String get courierContest => 'Contestation';
+
+  @override
+  String get courierContestDefault => 'Contester ce défaut';
+
+  @override
+  String get courierContestHint => 'Ce qui s’est passé, en quelques mots';
+
+  @override
+  String get courierContestHow =>
+      'Si tu contestes, le support compare l’heure de retrait, ta position pendant la course et les appels passés par Pokou.';
+
+  @override
+  String get courierContestSent => 'Contestation envoyée au support';
+
+  @override
+  String get courierContinue => 'Continuer';
+
+  @override
+  String get courierCopyLink => 'Copier mon lien';
+
+  @override
+  String get courierCouldNotVerify =>
+      'Le support n’a pas pu vérifier ton identité.';
+
+  @override
+  String courierCountOf(int count, int total) {
+    return '$count sur $total';
+  }
+
+  @override
+  String courierDefaultLead(String pharmacy, String when) {
+    return '$pharmacy a signalé un défaut sur la course du $when.';
+  }
+
+  @override
+  String get courierDefaultTitle => 'Défaut signalé';
+
+  @override
+  String get courierDefaults => 'Défauts';
+
+  @override
+  String get courierDefaultsInProgress => 'Défauts en cours';
+
+  @override
+  String get courierDelivered => 'Colis remis : la course est validée.';
+
+  @override
+  String get courierDelivery => 'Livraison';
+
+  @override
+  String courierDeliveryAt(String address) {
+    return 'Livraison : $address';
+  }
+
+  @override
+  String courierDeliveryTo(String name) {
+    return 'Livraison à $name';
+  }
+
+  @override
+  String get courierDocCni => 'CNI';
+
+  @override
+  String get courierDocPassport => 'Passeport';
+
+  @override
+  String get courierDocVoter => 'Carte d’électeur';
+
+  @override
+  String get courierDone => 'Terminé';
+
+  @override
+  String courierEarned(String amount) {
+    return '$amount gagnés';
+  }
+
+  @override
+  String courierEarningsNote(String wallet) {
+    return 'Chaque officine te paie la course sur ton wallet $wallet. Un paiement en retard se signale depuis la course.';
+  }
+
+  @override
+  String get courierEarningsTitle => 'Mes courses et gains';
+
+  @override
+  String get courierEnterCode => 'Saisir le code';
+
+  @override
+  String get courierEvening => 'Soir';
+
+  @override
+  String get courierFirstDeliveryDone => 'Première livraison faite';
+
+  @override
+  String get courierFiveAttempts =>
+      '5 essais au maximum. Chaque essai est enregistré.';
+
+  @override
+  String get courierFree => 'Gratuit';
+
+  @override
+  String get courierFri => 'Ven.';
+
+  @override
+  String get courierFriendActive => 'Coursier actif';
+
+  @override
+  String get courierFriendApplying => 'Inscription en cours';
+
+  @override
+  String get courierFriendDeclined => 'Non retenu';
+
+  @override
+  String courierFriendMessage(String code) {
+    return 'Salut ! Je livre pour Honam avec Pokou : payé à chaque course, près de chez toi, quand tu veux. Rejoins-moi avec mon code $code.';
+  }
+
+  @override
+  String get courierFriendNotice =>
+      'Tu reçois des courses offertes quand ton ami termine sa première livraison. L’invitation est réservée aux 18 ans et plus, dans une ville où Honam est ouvert.';
+
+  @override
+  String courierFromPerMonth(String amount) {
+    return '$amount TTC par mois';
+  }
+
+  @override
+  String get courierFront => 'le recto';
+
+  @override
+  String get courierGains => 'Gains';
+
+  @override
+  String courierGiftNotice(int count) {
+    return 'Tu reçois $count courses offertes quand ton filleul termine sa première livraison.';
+  }
+
+  @override
+  String get courierGoOffline => 'Passer indisponible';
+
+  @override
+  String get courierGoOnline => 'Passer disponible';
+
+  @override
+  String get courierGoToMode => 'Passer en mode coursier';
+
+  @override
+  String get courierHandoverCode => 'Code de remise';
+
+  @override
+  String get courierHonamOpen => 'Honam ouvert';
+
+  @override
+  String get courierHowDoYouDeliver => 'Comment livres-tu ?';
+
+  @override
+  String get courierHowMuch => 'Combien je peux gagner ?';
+
+  @override
+  String courierHt(String amount) {
+    return '$amount HT';
+  }
+
+  @override
+  String get courierIdDocument => 'Pièce d’identité';
+
+  @override
+  String get courierIdNameNotice =>
+      'Le nom de ta pièce doit être celui du titulaire de ton wallet.';
+
+  @override
+  String get courierIdPrivacy =>
+      'Ta pièce sert seulement à vérifier ton identité. Elle est chiffrée et supprimée 30 jours après la décision.';
+
+  @override
+  String courierInviteMessage(String code, String link) {
+    return 'Livre pour Honam avec moi : payé à chaque course, près de chez toi. Mon code : $code — $link';
+  }
+
+  @override
+  String courierInviteSubtitle(int count) {
+    return '$count courses offertes après sa première livraison';
+  }
+
+  @override
+  String get courierInviteTitle => 'Invite un coursier';
+
+  @override
+  String courierInvitedBy(String name) {
+    return 'Invité par $name';
+  }
+
+  @override
+  String courierInviterCodeApplied(String code) {
+    return 'Coursier vérifié · code $code appliqué';
+  }
+
+  @override
+  String courierInviterGets(String name, int count) {
+    return '$name t’a recommandé : il reçoit $count courses offertes quand tu termines ta première livraison.';
+  }
+
+  @override
+  String get courierItemBack => 'Verso de la pièce illisible';
+
+  @override
+  String get courierItemFront => 'Recto de la pièce illisible';
+
+  @override
+  String get courierItemSelfie => 'Selfie';
+
+  @override
+  String get courierItemWallet => 'Wallet';
+
+  @override
+  String get courierItinerary => 'Itinéraire';
+
+  @override
+  String courierKmAfterPickup(String km) {
+    return '$km km après le retrait';
+  }
+
+  @override
+  String courierKmFromYou(String km) {
+    return 'à $km km de toi';
+  }
+
+  @override
+  String get courierLaunchCaption =>
+      'Pendant le lancement : sans adhésion ni pack, puis Win Pokou';
+
+  @override
+  String get courierLaunchLine => 'Si Honam vient d’ouvrir dans ta ville';
+
+  @override
+  String get courierLetGo => 'Laisser passer cette course';
+
+  @override
+  String courierMembershipAndPack(String pack) {
+    return 'Adhésion et pack $pack, TTC';
+  }
+
+  @override
+  String courierMembershipAndPackOf(String month) {
+    return 'Adhésion et pack de $month';
+  }
+
+  @override
+  String courierMembershipAndPackTtc(String amount) {
+    return 'Adhésion et pack : $amount TTC par mois';
+  }
+
+  @override
+  String get courierMembershipFirst =>
+      'L’adhésion se paie d’abord ; le pack se choisit ensuite, dans le même écran.';
+
+  @override
+  String get courierMembershipLine => 'Adhésion Win Pokou';
+
+  @override
+  String courierMinutesOf(int minutes, int total) {
+    return '$minutes min sur $total';
+  }
+
+  @override
+  String get courierMon => 'Lun.';
+
+  @override
+  String get courierMonthEarnings => 'Gains du mois';
+
+  @override
+  String get courierMoreRides => 'Courses en plus ce mois-ci';
+
+  @override
+  String get courierMorning => 'Matin';
+
+  @override
+  String get courierNeedAge => '18 ans ou plus, une pièce d’identité';
+
+  @override
+  String get courierNeedPhone => 'Un smartphone et un wallet mobile money';
+
+  @override
+  String get courierNeedVehicle =>
+      'Une moto, un vélo, ou tes pieds pour les courses proches';
+
+  @override
+  String get courierNetForYou => 'Net pour toi';
+
+  @override
+  String get courierNewRide => 'Nouvelle course';
+
+  @override
+  String get courierNewRideMode => 'Nouvelle course · mode coursier';
+
+  @override
+  String get courierNewRideNearby => 'Nouvelle course près de toi';
+
+  @override
+  String courierNoAnswer(String name) {
+    return '$name ne répond pas';
+  }
+
+  @override
+  String get courierNoAnswerBody =>
+      'Pokou l’appelle et le prévient. Attends 10 minutes sur place.';
+
+  @override
+  String courierNoAnswerReturn(String pharmacy) {
+    return 'Sans réponse à 10 min, tu rapportes le colis fermé à $pharmacy. Ce n’est pas un défaut pour toi.';
+  }
+
+  @override
+  String get courierNoReferrals => 'Personne encore : partage ton lien.';
+
+  @override
+  String get courierNoon => 'Midi';
+
+  @override
+  String get courierNotNow => 'Pas maintenant';
+
+  @override
+  String courierNotYetBody(String city) {
+    return 'Aucune officine de $city n’a encore rejoint Honam : il n’y aurait pas de courses pour toi. On te prévient dès qu’elles arrivent.';
+  }
+
+  @override
+  String courierNotYetIn(String city) {
+    return 'Honam n’est pas encore à $city';
+  }
+
+  @override
+  String get courierNotifyMe => 'Me prévenir';
+
+  @override
+  String courierOfferCityOpen(String city) {
+    return '$city · Honam est ouvert';
+  }
+
+  @override
+  String get courierOfferTitle => 'Livre pour Honam';
+
+  @override
+  String get courierOriginalToReturn => 'Original à rapporter';
+
+  @override
+  String courierPackDifference(String from, String to) {
+    return 'Différence $from → $to';
+  }
+
+  @override
+  String courierPackExhausted(String pack) {
+    return 'Ton pack $pack est épuisé';
+  }
+
+  @override
+  String courierPackExhaustedBody(String amount, String pack) {
+    return 'Cette course te rapporte $amount. Passe à $pack en payant seulement la différence et accepte-la.';
+  }
+
+  @override
+  String get courierPackExhaustedNoNext =>
+      'Tu as le plus grand pack : attends le mois prochain ou laisse passer cette course.';
+
+  @override
+  String get courierPackForYou => 'Le pack qui te convient';
+
+  @override
+  String courierPackLeft(String pack, int left, int total) {
+    return '$pack : $left courses restantes sur $total';
+  }
+
+  @override
+  String courierPackLine(String pack) {
+    return 'Pack $pack';
+  }
+
+  @override
+  String courierPackRides(String pack, int count) {
+    return '$pack · $count courses';
+  }
+
+  @override
+  String get courierPaid => 'Payée';
+
+  @override
+  String get courierPaidByPharmacy =>
+      'versés par l’officine sur ton wallet, quand tu veux, près de chez toi';
+
+  @override
+  String get courierPaidByPharmacyShort =>
+      'payés par l’officine sur ton wallet';
+
+  @override
+  String get courierPaidOnYourWallet => 'Payée par l’officine sur ton wallet.';
+
+  @override
+  String courierPaidRides(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses payées',
+      one: '1 course payée',
+      zero: 'aucune course payée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierPayByCashPay(String amount) {
+    return 'Payer $amount par CashPay';
+  }
+
+  @override
+  String get courierPending => 'En attente';
+
+  @override
+  String courierPeopleWaiting(String city) {
+    return 'personnes attendent Honam à $city, coursiers et patients';
+  }
+
+  @override
+  String courierPerRide(String amount) {
+    return '$amount par course';
+  }
+
+  @override
+  String get courierPharmacyWrote => 'Ce qu’a écrit l’officine';
+
+  @override
+  String courierPickedUpAt(String when) {
+    return 'Colis retiré $when';
+  }
+
+  @override
+  String courierPickupAt(String pharmacy) {
+    return 'Retrait : $pharmacy';
+  }
+
+  @override
+  String courierPlusRides(int count) {
+    return '+$count courses';
+  }
+
+  @override
+  String courierPositionShared(String name) {
+    return 'Ta position est partagée avec $name et l’officine jusqu’à la remise.';
+  }
+
+  @override
+  String get courierProblem => 'Un problème ?';
+
+  @override
+  String get courierProblemDuringRide => 'Un problème pendant la course ?';
+
+  @override
+  String get courierProposeToFriend => 'Proposer à un ami';
+
+  @override
+  String courierProposedFirst(String pharmacy) {
+    return 'Proposée d’abord à toi : $pharmacy t’a invité';
+  }
+
+  @override
+  String get courierQueenUnlocked => 'Débloqué : aucun défaut le mois dernier';
+
+  @override
+  String courierQuestionOf(int index, int total) {
+    return 'Question $index sur $total';
+  }
+
+  @override
+  String get courierQuiz1 =>
+      'Le patient veut te payer la course en espèces. Que fais-tu ?';
+
+  @override
+  String get courierQuiz1Right => 'Je refuse : l’officine me paie';
+
+  @override
+  String get courierQuiz1Wrong => 'J’accepte, c’est plus simple';
+
+  @override
+  String get courierQuiz2 =>
+      'Le patient te demande d’ouvrir le colis. Que fais-tu ?';
+
+  @override
+  String get courierQuiz2Right =>
+      'Le colis reste fermé : il l’ouvre après la remise';
+
+  @override
+  String get courierQuiz2Wrong => 'Je l’ouvre devant lui';
+
+  @override
+  String get courierQuiz3 =>
+      'Le patient ne retrouve pas son code. Que fais-tu ?';
+
+  @override
+  String get courierQuiz3Right =>
+      'Je ne remets rien sans le code : il le retrouve dans son application';
+
+  @override
+  String get courierQuiz3Wrong => 'Je remets le colis quand même';
+
+  @override
+  String get courierQuizPassed => 'Quiz réussi : tu connais les règles d’or.';
+
+  @override
+  String get courierQuizRetry =>
+      'Ce n’est pas la bonne réponse : relis les règles et réessaie.';
+
+  @override
+  String get courierRecommended => 'Recommandé';
+
+  @override
+  String get courierReminder =>
+      'Rappel : le colis reste fermé, tu n’encaisses rien du patient, et c’est le patient qui te donne le code de remise.';
+
+  @override
+  String get courierRequestReview => 'Demander un réexamen';
+
+  @override
+  String get courierResendCode => 'Renvoyer le code';
+
+  @override
+  String courierRetake(String item) {
+    return 'Reprendre : $item';
+  }
+
+  @override
+  String get courierReturnParcel => 'Rapporter le colis à l’officine';
+
+  @override
+  String get courierReviewNotice =>
+      'Tu peux demander un réexamen au support. Pendant ce temps, tes discussions, Kory et tes commandes Honam restent accessibles.';
+
+  @override
+  String get courierReviewRequested => 'Réexamen demandé';
+
+  @override
+  String get courierRides => 'Courses';
+
+  @override
+  String courierRidesAndDefaults(int rides, int defaults) {
+    return '$rides courses livrées · $defaults défaut(s)';
+  }
+
+  @override
+  String courierRidesLeftOf(int left, int total) {
+    return '$left courses restantes sur $total';
+  }
+
+  @override
+  String courierRidesPerMonth(int count) {
+    return '$count courses par mois';
+  }
+
+  @override
+  String get courierRule1 => 'Le colis reste fermé';
+
+  @override
+  String get courierRule1Body => 'Tu ne vois ni l’ordonnance ni les produits.';
+
+  @override
+  String get courierRule2 => 'Tu n’encaisses rien du patient';
+
+  @override
+  String get courierRule2Body => 'L’officine te paie la course sur ton wallet.';
+
+  @override
+  String get courierRule3 => 'Le code vient du patient';
+
+  @override
+  String get courierRule3Body =>
+      'Il s’affiche dans son application, à la remise.';
+
+  @override
+  String get courierRule4 => '3 défauts, compte suspendu';
+
+  @override
+  String get courierRule4Body => 'Avec un recours possible auprès du support.';
+
+  @override
+  String get courierRulesAccepted => 'Règles d’or acceptées';
+
+  @override
+  String get courierSat => 'Sam.';
+
+  @override
+  String get courierSeeAllPacks => 'Voir tous les packs';
+
+  @override
+  String get courierSeeDefault => 'Voir le défaut';
+
+  @override
+  String get courierSelfieDone => 'Selfie pris';
+
+  @override
+  String get courierSendCode => 'Recevoir le code par SMS';
+
+  @override
+  String get courierSendInvite => 'Envoyer l’invitation';
+
+  @override
+  String get courierSentBody =>
+      'Le support vérifie ton identité sous 48 h. Tu reçois une notification dès que ton mode coursier est activé.';
+
+  @override
+  String get courierSentStep1 => 'Inscription envoyée';
+
+  @override
+  String get courierSentStep2 => 'Vérification de l’identité';
+
+  @override
+  String get courierSentStep3 => 'Mode coursier activé';
+
+  @override
+  String get courierSentStep3Body => 'Tu passes « Disponible » quand tu veux';
+
+  @override
+  String get courierShareLink => 'Partager mon lien';
+
+  @override
+  String courierShoot(String side) {
+    return 'Photographier $side';
+  }
+
+  @override
+  String courierShotDone(String side) {
+    return '$side · pris';
+  }
+
+  @override
+  String get courierShowOrShare => 'À montrer, ou à partager en lien';
+
+  @override
+  String get courierSkip => 'Passer';
+
+  @override
+  String get courierSlots => 'Créneaux';
+
+  @override
+  String get courierSmsCode => 'Code reçu par SMS';
+
+  @override
+  String get courierStepBefore => 'Avant de commencer';
+
+  @override
+  String get courierStepIdentity => 'Ton identité';
+
+  @override
+  String courierStepOf(int step, int total) {
+    return 'Devenir coursier · étape $step sur $total';
+  }
+
+  @override
+  String get courierStepRules => 'Les règles d’or';
+
+  @override
+  String get courierStepSent => 'Candidature envoyée';
+
+  @override
+  String get courierStepWallet => 'Où recevoir tes gains';
+
+  @override
+  String get courierStepZones => 'Tes zones et tes créneaux';
+
+  @override
+  String get courierSun => 'Dim.';
+
+  @override
+  String courierSuspendedLead(int count) {
+    return 'Tu as reçu $count défauts confirmés. Tu ne reçois plus de courses.';
+  }
+
+  @override
+  String get courierSuspendedTitle => 'Compte coursier suspendu';
+
+  @override
+  String get courierSuspensionScope =>
+      'La suspension ne touche que le mode coursier, pas ton compte Pokou.';
+
+  @override
+  String courierSwitchTo(String pack, String amount) {
+    return 'Passer à $pack · $amount';
+  }
+
+  @override
+  String get courierTakeSelfie => 'Prendre un selfie';
+
+  @override
+  String get courierThePatient => 'le patient';
+
+  @override
+  String get courierThenWinPokou => 'Ensuite, Win Pokou';
+
+  @override
+  String get courierThenWinPokouCaption => 'Plus un pack de courses, au choix';
+
+  @override
+  String get courierThirdDefault =>
+      'Au 3e défaut confirmé, ton compte coursier est suspendu.';
+
+  @override
+  String get courierThisMonth => 'Ce mois-ci avec Pokou';
+
+  @override
+  String get courierThu => 'Jeu.';
+
+  @override
+  String get courierToComplete => 'Candidature à compléter';
+
+  @override
+  String get courierToPay => 'À payer';
+
+  @override
+  String get courierToRedo => 'À reprendre';
+
+  @override
+  String get courierTooYoung =>
+      'Le mode coursier n’est pas accessible avant 18 ans.';
+
+  @override
+  String get courierTransportBikeTitle => 'Vélo';
+
+  @override
+  String get courierTransportMotoTitle => 'Moto';
+
+  @override
+  String get courierTransportNote =>
+      'Les courses proposées tiennent compte de ton moyen de transport. Le mode coursier n’est pas accessible avant 18 ans.';
+
+  @override
+  String get courierTransportWalkTitle => 'À pied';
+
+  @override
+  String get courierTrial => 'Essai';
+
+  @override
+  String get courierTrialCaption => 'Dès la validation, sur un mois';
+
+  @override
+  String get courierTrialEndTitle => 'Ton essai est terminé';
+
+  @override
+  String courierTrialLeft(int left, int total) {
+    return 'Essai : $left courses restantes sur $total';
+  }
+
+  @override
+  String courierTrialLeftAfter(int count) {
+    return 'Il te restera $count courses d’essai.';
+  }
+
+  @override
+  String courierTrialOffered(int count) {
+    return '$count courses d’essai offertes';
+  }
+
+  @override
+  String get courierTrialOfferedBody =>
+      'Sans adhésion ni pack, sur un mois. Tes premières courses portent sur des commandes de moins de 15 000 FCFA.';
+
+  @override
+  String courierTrialRides(int count) {
+    return '$count courses offertes';
+  }
+
+  @override
+  String courierTrialWaiting(int count) {
+    return 'Dès l’activation, $count courses d’essai t’attendent, sans adhésion ni pack.';
+  }
+
+  @override
+  String courierTtc(String amount) {
+    return '$amount TTC';
+  }
+
+  @override
+  String get courierTue => 'Mar.';
+
+  @override
+  String get courierUnavailable => 'Indisponible';
+
+  @override
+  String get courierUnavailableBody =>
+      'Tu ne reçois pas de courses. Passe « Disponible » quand tu veux livrer.';
+
+  @override
+  String get courierUnderstood => 'J’ai compris';
+
+  @override
+  String courierUntil(String when) {
+    return 'jusqu’au $when';
+  }
+
+  @override
+  String courierUpToKm(String km) {
+    return 'jusqu’à $km km';
+  }
+
+  @override
+  String get courierValidateHandover => 'Valider la remise';
+
+  @override
+  String get courierWaitingOnSite => 'Attente sur place';
+
+  @override
+  String get courierWaitlistHelps =>
+      'Ces inscriptions aident Pokou à choisir les prochaines villes.';
+
+  @override
+  String get courierWaitlistJoined => 'Tu seras prévenu';
+
+  @override
+  String get courierWallet => 'Wallet';
+
+  @override
+  String courierWalletLabel(String wallet) {
+    return 'Wallet $wallet';
+  }
+
+  @override
+  String get courierWalletNotice =>
+      'Les officines te paient directement sur ce wallet après chaque livraison. Pokou ne touche jamais cet argent.';
+
+  @override
+  String get courierWalletNumber => 'Numéro du wallet';
+
+  @override
+  String get courierWalletVerified => 'Numéro vérifié par SMS.';
+
+  @override
+  String get courierWed => 'Mer.';
+
+  @override
+  String courierWelcomeBody(String name) {
+    return 'Ton identité est vérifiée, $name. Ton mode coursier est activé.';
+  }
+
+  @override
+  String get courierWelcomeTitle => 'Bienvenue chez les coursiers';
+
+  @override
+  String get courierWhatItCosts => 'Ce que ça coûte';
+
+  @override
+  String get courierWhenAvailable => 'Quand es-tu souvent disponible ?';
+
+  @override
+  String courierWriteToPatient(String name) {
+    return 'Écrire à $name';
+  }
+
+  @override
+  String get courierYouEarn => 'Tu gagnes';
+
+  @override
+  String get courierYouNeed => 'Il te faut';
+
+  @override
+  String get courierYourCode => 'Ton code';
+
+  @override
+  String courierYourCodeIs(String code) {
+    return 'Ton code : $code';
+  }
+
+  @override
+  String get courierYourMessage => 'Ton message, modifiable';
+
+  @override
+  String get courierYourReferrals => 'Tes filleuls';
+
+  @override
+  String get courierZones => 'Zones';
+
+  @override
+  String get courierZonesAndSlots => 'Zones et créneaux';
+
+  @override
+  String get courierZonesNotice =>
+      'Ces choix servent à te proposer des courses. Tu restes libre : seul le bouton « Disponible » compte.';
+
+  @override
+  String get courierZonesTitle => 'Quartiers où tu livres';
+
+  @override
+  String get courierRideReleased =>
+      'La course est rendue à l’officine, qui la réattribue. Ce n’est pas un défaut.';
+
+  @override
+  String get courierParcelReturned =>
+      'Colis à rapporter fermé à l’officine. Ce n’est pas un défaut.';
+
+  @override
+  String get courierBecomeHonam => 'Devenir coursier Honam';
+
+  @override
+  String get courierOfferSubtitle => 'Payé à chaque course, près de chez toi';
+
+  @override
+  String get courierLaunchShort => 'Période de lancement · sans pack';
+
+  @override
+  String courierTrialRidesLeftShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses d’essai restantes',
+      one: '1 course d’essai restante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierBannerTitle =>
+      'Gagne de l’argent en livrant près de chez toi';
+
+  @override
+  String get courierDiscover => 'Découvrir';
+
+  @override
+  String courierAfterDelivery(String who) {
+    return 'Livrée par $who. Toi aussi, tu peux livrer pour Honam quand tu veux.';
+  }
+
+  @override
+  String get courierLearnMore => 'En savoir plus';
+
+  @override
+  String get courierDontPropose => 'Ne plus me proposer';
+
+  @override
+  String courierByAt(String name, String when) {
+    return '$name $when';
+  }
 }

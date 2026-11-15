@@ -12,7 +12,7 @@ pharmaciens du Togo et de Côte d'Ivoire n'autorisent pas autre chose.
 """
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 
 from app.core.database import Base
 
@@ -81,12 +81,18 @@ class HonamOrder(Base):
     prescription_media_id = Column(Integer, ForeignKey("media_assets.id", ondelete="SET NULL"), nullable=True)
     patient_note = Column(String(500), nullable=True)
     delivery_address = Column(String(255), nullable=False)
+    #: Le repère qui aide le coursier à trouver la porte (« portail bleu face
+    #: au kiosque ») — maquette Honam patient 1.
+    delivery_landmark = Column(String(255), nullable=True)
     delivery_latitude = Column(Float, nullable=True)
     delivery_longitude = Column(Float, nullable=True)
     #: Le coursier doit rapporter l'ordonnance ORIGINALE à l'officine
     #: (médicaments soumis à prescription stricte).
     original_required = Column(Boolean, default=False, nullable=False)
     original_collected_at = Column(DateTime, nullable=True)
+    #: L'officine confirme avoir récupéré l'original que le coursier a
+    #: rapporté (maquette Coursiers 8, « Original à rapporter »).
+    original_returned_at = Column(DateTime, nullable=True)
     #: [{"name", "quantity", "unit_price", "available"}] — jamais affiché
     #: hors du détail de la commande (HON-04).
     quote_items = Column(JSON, nullable=True)
@@ -98,12 +104,17 @@ class HonamOrder(Base):
     #: clair parce que le patient doit pouvoir le relire ; seul le patient
     #: le reçoit dans une réponse, jamais l'officine ni le coursier.
     delivery_code = Column(String(6), nullable=True)
+    #: Codes faux saisis par le coursier : 5 au plus (maquette Coursiers 11).
+    code_attempts = Column(Integer, default=0, nullable=False)
     #: Produit manquant, signalé PENDANT LA PRÉPARATION, avant tout appel de
     #: coursier : la patiente choisit de recevoir le reste (KEEP) ou de tout
     #: annuler (CANCEL). Tant qu'elle n'a pas choisi, la commande n'avance pas.
     missing_amount = Column(Integer, nullable=True)
     missing_reason = Column(String(255), nullable=True)
     missing_choice = Column(String(8), nullable=True)
+    #: Début des 15 minutes laissées à la patiente pour choisir ; sans
+    #: réponse, tout est annulé et remboursé (maquette Honam patient 6).
+    missing_reported_at = Column(DateTime, nullable=True)
     #: Ce que l'officine doit rembourser, au seul numéro qui a payé, sous
     #: 2 heures à compter du choix (maquette « A2. Rembourser Afi »).
     refund_due = Column(Integer, default=0, nullable=False)
@@ -119,13 +130,18 @@ class HonamOrder(Base):
     #: L'officine dit avoir payé la course (maquette 4b, « J'ai payé
     #: Kodjo ») ; le coursier confirme ensuite (courier_paid_at).
     courier_paid_declared_at = Column(DateTime, nullable=True)
-    #: L'officine a récupéré l'ordonnance originale rapportée par le coursier
-    #: (maquette 4c, « Original reçu »).
-    original_returned_at = Column(DateTime, nullable=True)
     #: Le patient a signalé avoir payé ; l'officine confirme (PAID) ou
     #: répond « paiement non reçu ».
     patient_paid_declared_at = Column(DateTime, nullable=True)
     payment_not_received_at = Column(DateTime, nullable=True)
+    #: La référence de la transaction, lue dans le SMS de l'opérateur
+    #: (maquette Honam patient 4) : elle aide l'officine à retrouver l'envoi.
+    payment_reference = Column(String(64), nullable=True)
+    #: Un problème pendant la course (maquette Coursiers 19) : NO_ANSWER
+    #: (patient injoignable), ADDRESS (adresse introuvable), CODE (code
+    #: refusé) ou ACCIDENT (accident ou panne).
+    incident_kind = Column(String(10), nullable=True)
+    incident_at = Column(DateTime, nullable=True)
     #: Dernière position du coursier, envoyée toutes les 15 s PENDANT la
     #: course et effacée à la remise : jamais d'historique de trajet.
     courier_latitude = Column(Float, nullable=True)
@@ -174,9 +190,32 @@ class CourierProfile(Base):
     #: Candidature (maquettes Coursiers 3 à 6) : zones et créneaux, wallet
     #: qui reçoit le prix des courses, règles d'or acceptées.
     zones = Column(String(255), nullable=True)
+    #: Les mêmes choix, structurés (maquette Coursiers 4) : quartiers, jours
+    #: (« MON »…« SUN ») et moments (MORNING, NOON, AFTERNOON, EVENING).
+    zones_list = Column(JSON, nullable=True)
+    days = Column(JSON, nullable=True)
+    moments = Column(JSON, nullable=True)
+    #: Maquette Coursiers 2 : le mode coursier n'est ouvert qu'aux 18 ans et
+    #: plus ; le moyen de transport règle la distance des courses proposées.
+    birth_date = Column(Date, nullable=True)
+    transport = Column(String(6), nullable=True)  # MOTO | VELO | PIED
+    #: Maquette Coursiers 3 : la pièce (CNI | PASSPORT | VOTER), ses deux
+    #: faces et un selfie. Supprimées 30 jours après la décision.
+    id_doc_type = Column(String(10), nullable=True)
+    id_front_media_id = Column(Integer, nullable=True)
+    id_back_media_id = Column(Integer, nullable=True)
+    selfie_media_id = Column(Integer, nullable=True)
+    #: Candidature à compléter (maquette Coursiers 18) : ce qui est à
+    #: reprendre (SELFIE | ID_FRONT | ID_BACK | WALLET) et pourquoi.
+    incomplete_item = Column(String(10), nullable=True)
+    incomplete_reason = Column(String(255), nullable=True)
+    #: Le quiz des règles d'or réussi (maquette Coursiers 6).
+    quiz_passed_at = Column(DateTime, nullable=True)
     #: Ville desservie où le coursier livre (configuration `honam_cities`).
     city = Column(String(80), nullable=True)
     wallet_phone = Column(String(32), nullable=True)
+    #: Le numéro du wallet vérifié par un code SMS (maquette Coursiers 5).
+    wallet_verified_at = Column(DateTime, nullable=True)
     rules_accepted_at = Column(DateTime, nullable=True)
     validated_at = Column(DateTime, nullable=True)
     trial_ends_at = Column(DateTime, nullable=True)
@@ -186,6 +225,13 @@ class CourierProfile(Base):
     pack_until = Column(DateTime, nullable=True)
     defaults_count = Column(Integer, default=0, nullable=False)
     suspended_at = Column(DateTime, nullable=True)
+    #: Maquette Coursiers 21 : le coursier suspendu demande un réexamen.
+    review_requested_at = Column(DateTime, nullable=True)
+    #: Disponible : il reçoit les courses, même en dehors du mode coursier
+    #: (maquettes Coursiers 8 et 27). Le bouton marche/arrêt le coupe.
+    available = Column(Boolean, default=False, nullable=False)
+    #: L'écran « Bienvenue chez les coursiers » a été vu (Coursiers 17).
+    welcomed_at = Column(DateTime, nullable=True)
     #: Parrainage (maquette Coursiers 15) : code à partager, et le parrain
     #: de ce coursier. La récompense part à la première course livrée du
     #: filleul, une seule fois.
@@ -248,3 +294,43 @@ class CourierLedgerEntry(Base):
     #: Fin de validité du pack auquel la ligne appartient.
     period_end = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class CourierDefault(Base):
+    """Un défaut de livraison signalé par une officine (maquettes Coursiers
+    20 et 21) : daté, motivé, et contestable pendant 48 heures."""
+    __tablename__ = "honam_courier_defaults"
+
+    id = Column(Integer, primary_key=True, index=True)
+    courier_id = Column(Integer, ForeignKey("honam_couriers.id", ondelete="CASCADE"), nullable=False, index=True)
+    order_id = Column(Integer, ForeignKey("honam_orders.id", ondelete="SET NULL"), nullable=True)
+    pharmacy_id = Column(Integer, ForeignKey("honam_pharmacies.id", ondelete="SET NULL"), nullable=True)
+    #: Ce qu'a écrit l'officine.
+    reason = Column(String(255), nullable=False)
+    #: CONFIRMED | CONTESTED | CANCELLED (contestation acceptée par le support)
+    status = Column(String(10), default="CONFIRMED", nullable=False)
+    contest_until = Column(DateTime, nullable=False)
+    contested_at = Column(DateTime, nullable=True)
+    contest_note = Column(String(500), nullable=True)
+    acknowledged_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class CourierWalletCheck(Base):
+    """Un numéro de wallet dont la personne a prouvé la possession par un
+    code SMS, pendant l'inscription coursier (maquette Coursiers 5)."""
+    __tablename__ = "honam_wallet_checks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    phone = Column(String(32), nullable=False)
+    verified_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class CourierOfferDismissal(Base):
+    """« Ne plus me proposer » l'offre coursier (maquette Coursiers 0)."""
+    __tablename__ = "honam_courier_offer_dismissals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    dismissed_at = Column(DateTime, default=datetime.utcnow, nullable=False)

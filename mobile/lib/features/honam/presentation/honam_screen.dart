@@ -12,8 +12,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../home/presentation/pokou_page_header.dart';
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 import '../data/honam_models.dart';
+import 'courier_join_screen.dart' show CourierOfferPrompt;
 import 'honam_controller.dart';
 import 'honam_order_screen.dart';
+import 'honam_orders_screen.dart';
 import 'honam_send_screen.dart';
 import 'honam_ui.dart';
 
@@ -33,13 +35,13 @@ class HonamScreen extends ConsumerStatefulWidget {
 }
 
 class _HonamScreenState extends ConsumerState<HonamScreen> {
-  /// La pilule choisie. `null` tant que la personne n'a rien touché : on
-  /// ouvre alors sur la première catégorie qui a quelque chose à montrer.
-  HonamOrderFilter? _picked;
-
   void _openSend() => Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (_) => const HonamSendScreen()));
+
+  void _openOrders() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (_) => const HonamOrdersScreen()));
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +49,6 @@ class _HonamScreenState extends ConsumerState<HonamScreen> {
     final async = ref.watch(honamOrdersProvider);
     final orders = async.valueOrNull ?? const <HonamOrder>[];
     final current = orders.where((o) => !o.isFinished).toList();
-    final filter =
-        _picked ??
-        HonamOrderFilter.values.firstWhere(
-          (f) => orders.any((o) => honamFilterOf(o) == f),
-          orElse: () => HonamOrderFilter.toReceive,
-        );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -73,22 +69,36 @@ class _HonamScreenState extends ConsumerState<HonamScreen> {
               emphasized: current.isNotEmpty,
               // Le logo du module (guide des logos, novembre 2026).
               leading: const PokouModuleLogo(PokouModule.honam, size: 40),
-              // Maquette p.14 : ni cloche ni photo dans l'en-tête de Honam.
+              // Maquette p.14 : ni cloche ni photo, seulement l'icône reçu.
               showBell: false,
               showAvatar: false,
+              actions: [
+                // Maquette p. 14 : l'icône reçu ouvre « Mes commandes ».
+                IconButton(
+                  tooltip: l.honamMyOrders,
+                  icon: Icon(
+                    Icons.receipt_long_outlined,
+                    color: AppColors.textPrimary,
+                  ),
+                  onPressed: _openOrders,
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
               child: _SendHero(onSend: _openSend),
             ),
-            _SectionTitle(l.honamMyOrders),
+            // Maquette Coursiers 0 : le bandeau de l'offre coursier.
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: CourierOfferPrompt(),
+            ),
             if (async.hasValue)
-              _Orders(
-                orders: orders,
-                filter: filter,
-                onFilter: (f) => setState(() => _picked = f),
-                onSend: _openSend,
-              )
+              for (final order in current)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: _CurrentOrderCard(order: order),
+                )
             else if (async.hasError)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -211,215 +221,27 @@ class _SendHero extends StatelessWidget {
   }
 }
 
-/// « Mes commandes » : les pilules, puis les cartes de la catégorie choisie.
-class _Orders extends StatelessWidget {
-  const _Orders({
-    required this.orders,
-    required this.filter,
-    required this.onFilter,
-    required this.onSend,
-  });
-
-  final List<HonamOrder> orders;
-  final HonamOrderFilter filter;
-  final ValueChanged<HonamOrderFilter> onFilter;
-  final VoidCallback onSend;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    // Rien du tout : pas de pilules pour trier du vide, une scène qui invite.
-    if (orders.isEmpty) {
-      // États vides · 3 (maquette p.111) : l'action principale, puis le
-      // rappel que Honam n'est pas un service d'urgence.
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _FlatNotice(
-              illustration: PokouIllustrations.delivery,
-              title: l.honamUiEmptyTitle,
-              message: l.honamUiEmptyBody,
-              actionLabel: l.honamSend,
-              onAction: onSend,
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l.emptyHonamNotEmergency,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    final shown = orders.where((o) => honamFilterOf(o) == filter);
-    // L'historique reste court : les dix dernières, comme avant.
-    final visible = filter == HonamOrderFilter.toReceive
-        ? shown.toList()
-        : shown.take(10).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _FilterPills(filter: filter, onFilter: onFilter),
-        const SizedBox(height: 12),
-        if (visible.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _EmptyLine(switch (filter) {
-              HonamOrderFilter.toReceive => l.honamUiEmptyTitle,
-              HonamOrderFilter.completed => l.honamUiEmptyCompleted,
-              HonamOrderFilter.cancelled => l.honamUiEmptyCancelled,
-            }),
-          )
-        else
-          for (final (index, order) in visible.indexed)
-            Padding(
-              padding: EdgeInsets.fromLTRB(16, index == 0 ? 0 : 10, 16, 0),
-              child: HonamOrderCard(key: ValueKey(order.id), order: order),
-            ),
-      ],
-    );
-  }
-}
-
-/// À recevoir / Terminées / Annulées — la pilule active en fond plein.
-class _FilterPills extends StatelessWidget {
-  const _FilterPills({required this.filter, required this.onFilter});
-
-  final HonamOrderFilter filter;
-  final ValueChanged<HonamOrderFilter> onFilter;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          for (final (index, value) in HonamOrderFilter.values.indexed) ...[
-            if (index > 0) const SizedBox(width: 8),
-            _Pill(
-              label: switch (value) {
-                HonamOrderFilter.toReceive => l.honamUiFilterToReceive,
-                HonamOrderFilter.completed => l.honamUiFilterCompleted,
-                HonamOrderFilter.cancelled => l.honamUiFilterCancelled,
-              },
-              selected: value == filter,
-              onTap: () => onFilter(value),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    selected: selected,
-    child: Material(
-      color: selected ? AppColors.actionButtonBackground : AppColors.surface,
-      shape: StadiumBorder(
-        side: BorderSide(
-          color: selected ? Colors.transparent : AppColors.border,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            maxLines: 1,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected
-                  ? AppColors.actionButtonForeground
-                  : AppColors.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-/// Une commande dans une liste : une carte plate, en trois bandes.
-///
-/// 1. l'état, daté, et le numéro de la commande ;
-/// 2. l'ordonnance — la pharmacie, le nombre d'articles, le prix — et, à la
-///    demande, la course ;
-/// 3. le total, et le chevron qui ouvre le détail.
-///
-/// L'état seul, jamais un nom de médicament (HON-04) : la liste se voit
-/// par-dessus l'épaule. Les noms ne sont que dans le détail.
-class HonamOrderCard extends StatefulWidget {
-  const HonamOrderCard({super.key, required this.order});
+/// « Commande en cours » (maquette p. 14) : la pharmacie, le montant, la
+/// frise, une pastille d'état et le geste qui compte maintenant.
+class _CurrentOrderCard extends StatelessWidget {
+  const _CurrentOrderCard({required this.order});
 
   final HonamOrder order;
 
   @override
-  State<HonamOrderCard> createState() => _HonamOrderCardState();
-}
-
-class _HonamOrderCardState extends State<HonamOrderCard> {
-  bool _expanded = false;
-
-  @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final order = widget.order;
-    final hasQuote = order.quoteItems.isNotEmpty;
-    final hasDeliveryLine = order.deliveryPrice != null && order.total != null;
-    final accent = AppColors.accentPrimaryDark;
-    final footer = TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      color: accent,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
-
+    final pharmacy = order.pharmacy?.name ?? l.navHonam;
+    final line = order.total == null
+        ? pharmacy
+        : l.honamPCurrentLine(pharmacy, formatFcfa(order.total!));
+    final action = switch (order.status) {
+      'QUOTED' || 'ACCEPTED' when !order.patientPaidDeclared =>
+        l.honamPSeeQuoteAndPay,
+      'READY' || 'IN_DELIVERY' when order.courierName != null =>
+        l.honamPFollowOrder,
+      _ => l.honamUiSeeOrder,
+    };
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
@@ -433,286 +255,45 @@ class _HonamOrderCardState extends State<HonamOrderCard> {
             builder: (_) => HonamOrderScreen(orderId: order.id),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── 1. L'état et le numéro.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-              child: Row(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Icon(
-                    honamStatusIcon(order.status),
-                    size: 18,
-                    color: honamStatusColor(order),
-                  ),
-                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      honamStatusPhrase(context, order),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      l.honamPCurrentOrder,
                       style: TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  HonamPill(
-                    l.honamUiOrderNo('${order.id}'),
-                    background: AppColors.surfaceElevated,
-                    ink: AppColors.textSecondary,
-                  ),
+                  honamOrderPill(l, order),
                 ],
               ),
-            ),
-            const HonamHairline(),
-            // ── 2. L'ordonnance, et la course à la demande.
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                14,
-                16,
-                // « Voir plus » porte déjà sa propre hauteur de toucher.
-                hasDeliveryLine && order.isFinished ? 2 : 14,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _OrderLine(
-                    thumb: const PokouIcon(PokouModuleIcon.honam),
-                    title: order.pharmacy?.name ?? l.navHonam,
-                    subtitle: l.honamUiPrescription,
-                    quantity: hasQuote ? '×${honamItemsCount(order)}' : null,
-                    price: order.medicinesTotal == null
-                        ? null
-                        : formatFcfa(order.medicinesTotal!),
-                  ),
-                  if (hasDeliveryLine && _expanded) ...[
-                    const SizedBox(height: 12),
-                    _OrderLine(
-                      thumb: const PokouIcon(PokouModuleIcon.coursier),
-                      title: l.honamDelivery,
-                      subtitle: order.deliveryAddress,
-                      price: formatFcfa(order.deliveryPrice!),
-                    ),
-                  ],
-                  if (hasDeliveryLine)
-                    _MoreToggle(
-                      expanded: _expanded,
-                      onTap: () => setState(() => _expanded = !_expanded),
-                    ),
-                  if (!order.isFinished) ...[
-                    SizedBox(height: hasDeliveryLine ? 6 : 14),
-                    _StepBar(order: order),
-                  ],
-                ],
-              ),
-            ),
-            const HonamHairline(indent: 16),
-            // ── 3. Le total, et l'accès au détail.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
-              child: Row(
-                children: [
-                  if (order.total != null) ...[
-                    Text(
-                      l.honamUiItemsCount(honamItemsCount(order)),
-                      style: footer,
-                    ),
-                    Container(
-                      width: 1,
-                      height: 14,
-                      margin: const EdgeInsets.symmetric(horizontal: 12),
-                      color: AppColors.border,
-                    ),
-                    Expanded(
-                      child: Text(
-                        formatFcfa(order.total!),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: footer,
-                      ),
-                    ),
-                  ] else
-                    Expanded(
-                      child: Text(
-                        order.status == 'SUBMITTED'
-                            ? l.honamUiQuotePending
-                            : l.honamUiSeeOrder,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: footer,
-                      ),
-                    ),
-                  Icon(Icons.chevron_right, color: accent),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Une ligne de commande : vignette, nom sur une ligne, quantité en
-/// pastille, prix à droite.
-class _OrderLine extends StatelessWidget {
-  const _OrderLine({
-    required this.thumb,
-    required this.title,
-    required this.subtitle,
-    this.quantity,
-    this.price,
-  });
-
-  final Widget thumb;
-  final String title;
-  final String subtitle;
-  final String? quantity;
-  final String? price;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      HonamThumb(child: thumb),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                      if (quantity != null) ...[
-                        const SizedBox(width: 8),
-                        HonamPill(quantity!),
-                      ],
-                    ],
-                  ),
-                ),
-                if (price != null) ...[
-                  const SizedBox(width: 12),
-                  Text(
-                    price!,
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-/// « + Voir plus » / « − Voir moins », sous les lignes d'une commande.
-class _MoreToggle extends StatelessWidget {
-  const _MoreToggle({required this.expanded, required this.onTap});
-
-  final bool expanded;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final accent = AppColors.accentPrimaryDark;
-    return Semantics(
-      button: true,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 44),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                expanded ? Icons.remove : Icons.add,
-                size: 16,
-                color: accent,
-              ),
-              const SizedBox(width: 6),
+              const SizedBox(height: 4),
               Text(
-                expanded ? l.honamUiSeeLess : l.honamUiSeeMore,
+                line,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 10),
+              HonamStepRail(status: order.status),
+              const SizedBox(height: 10),
+              Text(
+                action,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: accent,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.accentPrimaryDark,
                 ),
               ),
-              const SizedBox(width: 8),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Les cinq temps d'une commande en cours, en un trait segmenté : envoyée,
-/// devis, payée, en route, livrée.
-class _StepBar extends StatelessWidget {
-  const _StepBar({required this.order});
-
-  final HonamOrder order;
-
-  @override
-  Widget build(BuildContext context) {
-    final active = honamStepIndex(order.status);
-    return Semantics(
-      label: L.of(context).honamUiStepOf(active + 1, honamStepCount),
-      child: Row(
-        children: [
-          for (var index = 0; index < honamStepCount; index++) ...[
-            if (index > 0) const SizedBox(width: 4),
-            Expanded(
-              child: Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  color: index <= active
-                      ? AppColors.accentPrimaryDark
-                      : AppColors.surfaceElevated,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }
@@ -871,40 +452,6 @@ class _FlatNotice extends StatelessWidget {
             actionLabel,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/// Une catégorie sans commande : une ligne discrète, pas une scène.
-class _EmptyLine extends StatelessWidget {
-  const _EmptyLine(this.message);
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: AppRadius.card,
-      border: Border.all(color: AppColors.border),
-    ),
-    child: Row(
-      children: [
-        Icon(Icons.inbox_outlined, size: 20, color: AppColors.textMuted),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            message,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.35,
-              color: AppColors.textSecondary,
-            ),
           ),
         ),
       ],

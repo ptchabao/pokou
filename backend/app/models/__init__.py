@@ -161,6 +161,9 @@ from app.models.honam import (  # noqa: F401
     CourierLedgerEntry,
     PharmacyCourier,
     HonamWaitlistEntry,
+    CourierDefault,
+    CourierWalletCheck,
+    CourierOfferDismissal,
 )
 from app.models.baba import (  # noqa: F401
     BabaMessage,

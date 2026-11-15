@@ -199,15 +199,15 @@ class MoreScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: ModuleCard(
-              onTap: () => push(const CourierScreen()),
+              // L'écran coursier a son propre bouton retour : pas de _Pushed.
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CourierScreen()),
+              ),
               child: Row(
                 children: [
                   ModuleBadge(
                     icon: Icons.delivery_dining,
-                    color:
-                        courier != null &&
-                            courier.status != 'SUSPENDED' &&
-                            courier.status != 'PENDING'
+                    color: courier?.available ?? false
                         ? AppColors.feedbackSuccess
                         : AppColors.accentPrimary,
                   ),
@@ -220,15 +220,14 @@ class MoreScreen extends ConsumerWidget {
                           children: [
                             Text(
                               courier != null
-                                  ? 'Mode coursier'
-                                  : 'Devenir coursier Honam',
+                                  ? l.honamCourierMode
+                                  : l.courierBecomeHonam,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            if (courier != null &&
-                                courier.status != 'SUSPENDED' &&
-                                courier.status != 'PENDING') ...[
+                            // COU-26 : la puce suit le vrai état.
+                            if (courier?.available ?? false) ...[
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -241,9 +240,9 @@ class MoreScreen extends ConsumerWidget {
                                   ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Text(
-                                  'Disponible',
-                                  style: TextStyle(
+                                child: Text(
+                                  l.courierAvailable,
+                                  style: const TextStyle(
                                     color: AppColors.feedbackSuccess,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -254,13 +253,15 @@ class MoreScreen extends ConsumerWidget {
                           ],
                         ),
                         Text(
-                          courier != null
-                              ? (courier.launchPeriod
-                                    ? 'Période de lancement · courses illimitées'
-                                    : (courier.unlimited
-                                          ? 'Pack Queen Pokou illimité'
-                                          : '${courier.ridesLeft} courses restantes'))
-                              : '1 000 FCFA par course, près de chez toi',
+                          courier == null
+                              ? l.courierOfferSubtitle
+                              : courier.launchPeriod
+                              ? l.courierLaunchShort
+                              : courier.unlimited
+                              ? l.honamUnlimited
+                              : courier.status == 'TRIAL'
+                              ? l.courierTrialRidesLeftShort(courier.ridesLeft)
+                              : l.honamRidesLeft('${courier.ridesLeft}'),
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,

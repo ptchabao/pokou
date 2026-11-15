@@ -94,6 +94,22 @@ def _after_rollback(session: Session) -> None:
     session.info.pop(_KEY, None)
 
 
+def _available_couriers(db: Session, order) -> list:
+    from app.models import CourierProfile, Pharmacy
+
+    pharmacy = db.get(Pharmacy, order.pharmacy_id)
+    if pharmacy is None:
+        return []
+    return [
+        uid
+        for (uid,) in db.query(CourierProfile.user_id).filter(
+            CourierProfile.country == pharmacy.country,
+            CourierProfile.available.is_(True),
+            CourierProfile.status.in_(("TRIAL", "MEMBER")),
+        )
+    ]
+
+
 async def _announce(bind, pot_ids: Set[int], order_ids: Set[int]) -> None:
     from app.api.v1.messaging.ws import manager
     from app.models import HonamOrder, KoryMember, KoryPot, PharmacyStaff
@@ -124,6 +140,14 @@ async def _announce(bind, pot_ids: Set[int], order_ids: Set[int]) -> None:
                     for u in users
                     if u
                 ]
+                # Maquette Coursiers 27 : une course prête et libre est
+                # proposée aux coursiers DISPONIBLES du pays, où qu'ils
+                # soient dans l'application.
+                if order.status == "READY" and order.courier_id is None:
+                    sends += [
+                        (uid, {"type": "honam:ride_offered", "order_id": order_id})
+                        for uid in _available_couriers(db, order)
+                    ]
         for user_id, payload in sends:
             try:
                 await manager.send_to_user(user_id, payload)
