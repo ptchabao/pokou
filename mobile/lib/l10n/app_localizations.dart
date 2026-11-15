@@ -12024,7 +12024,7 @@ abstract class L {
   /// No description provided for @annTagPunctual.
   ///
   /// In fr, this message translates to:
-  /// **'Ponctuel·le'**
+  /// **'Ponctuelle'**
   String get annTagPunctual;
 
   /// No description provided for @annTagFairPrice.
@@ -15655,6 +15655,576 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{seller} a indiqué que tu as acheté cet article pour {price}.'**
   String assimeRateInvite(String seller, String price);
+
+  /// No description provided for @assimeMyListings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes annonces'**
+  String get assimeMyListings;
+
+  /// No description provided for @assimeMyListingsSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} · {count} annonces'**
+  String assimeMyListingsSub(String name, int count);
+
+  /// No description provided for @assimeTabOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'En ligne · {count}'**
+  String assimeTabOnline(int count);
+
+  /// No description provided for @assimeTabSold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendues · {count}'**
+  String assimeTabSold(int count);
+
+  /// No description provided for @assimeTabExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expirées · {count}'**
+  String assimeTabExpired(int count);
+
+  /// No description provided for @assimeBadgeSponsored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sponsorisée · {days} j'**
+  String assimeBadgeSponsored(int days);
+
+  /// No description provided for @assimeBadgeExpiresIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expire dans {days} jours'**
+  String assimeBadgeExpiresIn(int days);
+
+  /// No description provided for @assimeBadgeOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'En ligne'**
+  String get assimeBadgeOnline;
+
+  /// No description provided for @assimeBadgeExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expirée'**
+  String get assimeBadgeExpired;
+
+  /// No description provided for @assimeBadgeSold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendue'**
+  String get assimeBadgeSold;
+
+  /// No description provided for @assimeStatsLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{views} vues · {favorites} favoris · {messages} messages'**
+  String assimeStatsLine(int views, int favorites, int messages);
+
+  /// No description provided for @assimeMarkSold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer vendue'**
+  String get assimeMarkSold;
+
+  /// No description provided for @assimeRenew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renouveler'**
+  String get assimeRenew;
+
+  /// No description provided for @assimeRenewed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce renouvelée pour 30 jours.'**
+  String get assimeRenewed;
+
+  /// No description provided for @assimePromote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre en avant'**
+  String get assimePromote;
+
+  /// No description provided for @assimeStatsPrivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les vues et les favoris ne sont visibles que de toi.'**
+  String get assimeStatsPrivate;
+
+  /// No description provided for @assimePublishCta.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier une annonce'**
+  String get assimePublishCta;
+
+  /// No description provided for @assimeNoneInTab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien ici pour l’instant.'**
+  String get assimeNoneInTab;
+
+  /// No description provided for @assimeDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l’annonce ?'**
+  String get assimeDeleteTitle;
+
+  /// No description provided for @assimeDeleteNotSelling.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne la vends plus'**
+  String get assimeDeleteNotSelling;
+
+  /// No description provided for @assimeDeleteSoldPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendue sur Pokou'**
+  String get assimeDeleteSoldPokou;
+
+  /// No description provided for @assimeDeleteSoldPokouSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis l’acheteur pour qu’il puisse noter'**
+  String get assimeDeleteSoldPokouSub;
+
+  /// No description provided for @assimeDeleteSoldElsewhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendue ailleurs'**
+  String get assimeDeleteSoldElsewhere;
+
+  /// No description provided for @assimeDeleteNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les discussions liées restent dans tes Discussions. Cette action est définitive.'**
+  String get assimeDeleteNote;
+
+  /// No description provided for @assimeDeleteAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l’annonce'**
+  String get assimeDeleteAction;
+
+  /// No description provided for @assimeEditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l’annonce'**
+  String get assimeEditTitle;
+
+  /// No description provided for @assimeSaveChanges.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer les modifications'**
+  String get assimeSaveChanges;
+
+  /// No description provided for @assimeTitleLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get assimeTitleLabel;
+
+  /// No description provided for @assimeAreaLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ville et quartier'**
+  String get assimeAreaLabel;
+
+  /// No description provided for @assimeSavedSearches.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherches enregistrées'**
+  String get assimeSavedSearches;
+
+  /// No description provided for @assimeFavoriteListings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonces favorites'**
+  String get assimeFavoriteListings;
+
+  /// No description provided for @assimeAlertFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} annonces trouvées'**
+  String assimeAlertFound(int count);
+
+  /// No description provided for @assimeAlertPaused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte coupée'**
+  String get assimeAlertPaused;
+
+  /// No description provided for @assimeWhyPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou ne lit jamais tes messages ni tes statuts pour choisir les annonces. Au plus un statut sponsorisé tous les 5 statuts.'**
+  String get assimeWhyPrivacy;
+
+  /// No description provided for @assimeHideListing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer cette annonce'**
+  String get assimeHideListing;
+
+  /// No description provided for @assimeHideSeller.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne plus voir les annonces de ce vendeur'**
+  String get assimeHideSeller;
+
+  /// No description provided for @assimeHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce masquée.'**
+  String get assimeHidden;
+
+  /// No description provided for @assimeSellerHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu ne verras plus les annonces de ce vendeur.'**
+  String get assimeSellerHidden;
+
+  /// No description provided for @assimeProfileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get assimeProfileTitle;
+
+  /// No description provided for @assimePrivateSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Particulier · sur Pokou depuis {date}'**
+  String assimePrivateSince(String date);
+
+  /// No description provided for @assimeProSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendeur Pro · sur Pokou depuis {date}'**
+  String assimeProSince(String date);
+
+  /// No description provided for @assimeRatedSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} ventes notées'**
+  String assimeRatedSales(int count);
+
+  /// No description provided for @assimeMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message'**
+  String get assimeMessage;
+
+  /// No description provided for @assimeReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler'**
+  String get assimeReport;
+
+  /// No description provided for @assimeListingsOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonces de {name} · {count}'**
+  String assimeListingsOf(String name, int count);
+
+  /// No description provided for @assimeBadgeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le badge montre un nom vérifié par Pokou certifié. Un particulier n’a pas de badge Pro.'**
+  String get assimeBadgeNote;
+
+  /// No description provided for @assimeBoostRunning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise en avant en cours'**
+  String get assimeBoostRunning;
+
+  /// No description provided for @assimeBoostEnded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise en avant terminée'**
+  String get assimeBoostEnded;
+
+  /// No description provided for @assimeBoostSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} · {days} jours'**
+  String assimeBoostSub(String name, int days);
+
+  /// No description provided for @assimeBoostDayOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour {day} sur {total}'**
+  String assimeBoostDayOf(int day, int total);
+
+  /// No description provided for @assimeBoostEnds.
+  ///
+  /// In fr, this message translates to:
+  /// **'fin {date}'**
+  String assimeBoostEnds(String date);
+
+  /// No description provided for @assimeViewsResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vues dans les résultats'**
+  String get assimeViewsResults;
+
+  /// No description provided for @assimeViewsStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vues en statut'**
+  String get assimeViewsStatus;
+
+  /// No description provided for @assimeOpens.
+  ///
+  /// In fr, this message translates to:
+  /// **'« Voir l’annonce »'**
+  String get assimeOpens;
+
+  /// No description provided for @assimeMessagesReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages reçus'**
+  String get assimeMessagesReceived;
+
+  /// No description provided for @assimeMessagesBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'contre {count} avant'**
+  String assimeMessagesBefore(int count);
+
+  /// No description provided for @assimeViewsPerDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vues par jour'**
+  String get assimeViewsPerDay;
+
+  /// No description provided for @assimeLegendResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultats'**
+  String get assimeLegendResults;
+
+  /// No description provided for @assimeLegendStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statuts'**
+  String get assimeLegendStatus;
+
+  /// No description provided for @assimeBoostNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces chiffres ne sont visibles que de toi. Pas de renouvellement automatique : tu choisiras à la fin.'**
+  String get assimeBoostNote;
+
+  /// No description provided for @assimeSeeListing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l’annonce'**
+  String get assimeSeeListing;
+
+  /// No description provided for @assimeBeforeBuying.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant d’acheter'**
+  String get assimeBeforeBuying;
+
+  /// No description provided for @assimeTipPublicPlace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouve le vendeur dans un lieu public, en journée.'**
+  String get assimeTipPublicPlace;
+
+  /// No description provided for @assimeTipNoAdvance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne paie jamais d’avance : vois l’article d’abord.'**
+  String get assimeTipNoAdvance;
+
+  /// No description provided for @assimeTipNoCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou n’encaisse aucun paiement et ne te demandera jamais ton code secret.'**
+  String get assimeTipNoCode;
+
+  /// No description provided for @assimeNumberHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton numéro n’est pas montré au vendeur.'**
+  String get assimeNumberHidden;
+
+  /// No description provided for @assimeQuickPhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'D’autres photos ?'**
+  String get assimeQuickPhotos;
+
+  /// No description provided for @assimeQuickAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toujours disponible ?'**
+  String get assimeQuickAvailable;
+
+  /// No description provided for @assimeQuickNegotiable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix négociable ?'**
+  String get assimeQuickNegotiable;
+
+  /// No description provided for @assimeSee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir'**
+  String get assimeSee;
+
+  /// No description provided for @assimePromoteDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days} jours'**
+  String assimePromoteDays(int days);
+
+  /// No description provided for @assimePromoteTop.
+  ///
+  /// In fr, this message translates to:
+  /// **'En tête des résultats de sa catégorie, dans sa ville'**
+  String get assimePromoteTop;
+
+  /// No description provided for @assimePromoteStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une place parmi les statuts des acheteurs de sa ville'**
+  String get assimePromoteStatus;
+
+  /// No description provided for @assimePromoteCheaper.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moins cher par jour · badge payant requis pour les statuts'**
+  String get assimePromoteCheaper;
+
+  /// No description provided for @assimePromoteTtc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix TTC. Ton annonce porte la mention « Sponsorisé ». Pas de renouvellement automatique.'**
+  String get assimePromoteTtc;
+
+  /// No description provided for @assimePromoteStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début'**
+  String get assimePromoteStart;
+
+  /// No description provided for @assimePromoteStartNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès la validation'**
+  String get assimePromoteStartNow;
+
+  /// No description provided for @assimePromoteEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin'**
+  String get assimePromoteEnd;
+
+  /// No description provided for @assimePromotePayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement'**
+  String get assimePromotePayment;
+
+  /// No description provided for @assimePromotePaymentMm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get assimePromotePaymentMm;
+
+  /// No description provided for @assimePromoteModeration.
+  ///
+  /// In fr, this message translates to:
+  /// **'La place en statut est vérifiée par la modération avant la diffusion. Une catégorie interdite ne peut jamais être mise en avant.'**
+  String get assimePromoteModeration;
+
+  /// No description provided for @assimePromotePay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} FCFA'**
+  String assimePromotePay(String amount);
+
+  /// No description provided for @assimeAdAssime.
+  ///
+  /// In fr, this message translates to:
+  /// **'annonce Assimé'**
+  String get assimeAdAssime;
+
+  /// No description provided for @assimeWrite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire'**
+  String get assimeWrite;
+
+  /// No description provided for @assimeNextHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passe au statut suivant en touchant à droite.'**
+  String get assimeNextHint;
+
+  /// No description provided for @assimeCover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couverture'**
+  String get assimeCover;
+
+  /// No description provided for @assimeAddPhotoShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get assimeAddPhotoShort;
+
+  /// No description provided for @assimePhotosHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} photos sur 5. La première sert de couverture. D’autres photos pourront être envoyées dans la discussion avec l’acheteur.'**
+  String assimePhotosHint(int count);
+
+  /// No description provided for @assimeNumberNeverShown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton numéro n’est jamais affiché : les acheteurs t’écrivent sur Pokou.'**
+  String get assimeNumberNeverShown;
+
+  /// No description provided for @assimeContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get assimeContinue;
+
+  /// No description provided for @assimeStep1Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos et catégorie'**
+  String get assimeStep1Title;
+
+  /// No description provided for @assimeStep2Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix, état et lieu'**
+  String get assimeStep2Title;
+
+  /// No description provided for @assimeToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui'**
+  String get assimeToday;
+
+  /// No description provided for @assimeYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier'**
+  String get assimeYesterday;
+
+  /// No description provided for @assimeNearYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de chez toi'**
+  String get assimeNearYou;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

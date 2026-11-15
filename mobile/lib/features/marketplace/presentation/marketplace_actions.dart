@@ -5,8 +5,103 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/product_model.dart';
+import '../../modules/shared/module_ui.dart';
+import 'assime_sale_screens.dart';
 import 'marketplace_controller.dart';
 import 'product_editor.dart';
+
+/// Assimé 24 · Supprimer l'annonce : trois motifs, un bouton rouge.
+class _DeleteSheet extends StatefulWidget {
+  const _DeleteSheet();
+
+  @override
+  State<_DeleteSheet> createState() => _DeleteSheetState();
+}
+
+class _DeleteSheetState extends State<_DeleteSheet> {
+  String _reason = 'not_selling';
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    Widget option(String value, String title, [String? subtitle]) {
+      final selected = _reason == value;
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Material(
+          color: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: selected ? AppColors.accentPrimary : AppColors.border,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: RadioListTile<String>(
+            value: value,
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: subtitle == null ? null : Text(subtitle),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(child: ModuleSheetTitle(l.assimeDeleteTitle)),
+            IconButton(
+              tooltip: l.actionClose,
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        RadioGroup<String>(
+          groupValue: _reason,
+          onChanged: (v) => setState(() => _reason = v ?? _reason),
+          child: Column(
+            children: [
+              option('not_selling', l.assimeDeleteNotSelling),
+              option(
+                'sold_pokou',
+                l.assimeDeleteSoldPokou,
+                l.assimeDeleteSoldPokouSub,
+              ),
+              option('sold_elsewhere', l.assimeDeleteSoldElsewhere),
+            ],
+          ),
+        ),
+        Text(
+          l.assimeDeleteNote,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+        ),
+        const SizedBox(height: 14),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.feedbackDanger,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: const StadiumBorder(),
+          ),
+          onPressed: () => Navigator.of(context).pop(_reason),
+          child: Text(l.assimeDeleteAction),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.actionCancel),
+        ),
+      ],
+    );
+  }
+}
 
 /// Les trois gestes qu'un vendeur pose sur sa propre annonce : la modifier,
 /// la retirer, la booster.
@@ -36,43 +131,46 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   /// sort du marché, les conversations qui la citent restent lisibles. Sans
   /// cette phrase, on hésite à supprimer de peur de casser une discussion en
   /// cours avec un acheteur.
-  Future<void> deleteProduct(
+  ///
+  /// Assimé 24 : la feuille demande pourquoi. « Vendue sur Pokou » ouvre
+  /// « Marquer comme vendue » pour que l'acheteur puisse noter ; « Vendue
+  /// ailleurs » la marque vendue sans acheteur — elle rejoint « Vendues »
+  /// au lieu de disparaître. Rend `true` si l'annonce a quitté le marché.
+  Future<bool> deleteProduct(
     BuildContext context,
     WidgetRef ref,
     MarketplaceProduct product,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final reason = await showModuleSheet<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(L.of(context).marketRemoveProduct(product.name)),
-        content: Text(L.of(context).marketRemoveBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(L.of(context).actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(
-              L.of(context).marketRemove,
-              style: TextStyle(color: AppColors.semanticError),
-            ),
-          ),
-        ],
-      ),
+      builder: (_) => const _DeleteSheet(),
     );
-    if (confirmed != true || !context.mounted) return;
-
+    if (reason == null || !context.mounted) return false;
+    final repository = ref.read(marketplaceRepositoryProvider);
     try {
-      await ref.read(marketplaceRepositoryProvider).delete(product.id);
+      switch (reason) {
+        case 'sold_pokou':
+          final done = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (_) => AssimeMarkSoldScreen(product: product),
+            ),
+          );
+          if (done != true) return false;
+        case 'sold_elsewhere':
+          await repository.markSold(product.id);
+        default:
+          await repository.delete(product.id);
+      }
       ref.invalidate(myProductsProvider);
-      ref.invalidate(marketplaceProductsProvider);
+      ref.read(marketplaceProductsProvider.notifier).invalidate();
+      return true;
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(L.of(context).marketRemoveFailed)),
         );
       }
+      return false;
     }
   }
 
@@ -88,6 +186,10 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
       MaterialPageRoute(
         builder: (_) => ProductEditor(
           product: product,
+          // Assimé 23 : « Supprimer l'annonce » sous le formulaire.
+          onDelete: product == null
+              ? null
+              : (editorContext) => deleteProduct(editorContext, ref, product),
           onSubmit: (result) async {
             if (product == null) {
               await repo.create(

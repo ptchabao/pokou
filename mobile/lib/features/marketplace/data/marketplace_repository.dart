@@ -359,6 +359,37 @@ class MarketplaceRepository {
   Future<void> reportReview(int reviewId) =>
       _api.post('/marketplace/reviews/$reviewId/report');
 
+  /// « Renouveler » (Assimé 9) : 30 jours de plus en ligne.
+  Future<void> renew(int productId) =>
+      _api.post('/marketplace/$productId/renew');
+
+  /// « Masquer cette annonce » (Assimé 16), pour moi seul.
+  Future<void> hideProduct(int productId) =>
+      _api.post('/marketplace/$productId/hide');
+
+  /// « Ne plus voir les annonces de ce vendeur » (Assimé 16).
+  Future<void> hideSeller(int sellerId) =>
+      _api.post('/marketplace/sellers/$sellerId/hide');
+
+  /// Les annonces d'un vendeur, vendues comprises (Assimé 22).
+  Future<List<MarketplaceProduct>> sellerProducts(int sellerId) async {
+    final json =
+        await _api.get('/marketplace/sellers/$sellerId/products')
+            as Map<String, dynamic>;
+    return (json['items'] as List? ?? const [])
+        .cast<Map<String, dynamic>>()
+        .map(MarketplaceProduct.fromJson)
+        .toList();
+  }
+
+  /// Couper ou rallumer une alerte (Assimé 12).
+  Future<void> setAlertPaused(int alertId, bool paused) =>
+      _api.patch('/marketplace/alerts/$alertId', body: {'paused': paused});
+
+  /// « Voir l'annonce » depuis le statut sponsorisé, compté pour le bilan.
+  Future<void> countSponsoredOpen(int boostId) =>
+      _api.post('/marketplace/boosts/$boostId/open');
+
   /// Signaler une annonce (Assimé 11) : scam, forbidden, counterfeit,
   /// misleading ou other.
   Future<void> reportProduct(int productId, String reason) =>
@@ -509,6 +540,8 @@ class AssimeSnapshot {
     required this.sellerName,
     this.location,
     this.imageMediaId,
+    this.sold = false,
+    this.createdAt,
   });
 
   final int id;
@@ -520,6 +553,10 @@ class AssimeSnapshot {
   final String? location;
   final int? imageMediaId;
 
+  /// Assimé 12 : un favori vendu reste, barré.
+  final bool sold;
+  final DateTime? createdAt;
+
   factory AssimeSnapshot.fromJson(Map<String, dynamic> json) => AssimeSnapshot(
     id: json['id'] as int,
     name: json['name'] as String? ?? '',
@@ -529,6 +566,10 @@ class AssimeSnapshot {
     sellerName: json['seller_name'] as String? ?? '',
     location: json['location'] as String?,
     imageMediaId: json['image_media_id'] as int?,
+    sold: json['sold'] as bool? ?? false,
+    createdAt: json['created_at'] is String
+        ? parseServerTime(json['created_at'] as String)
+        : null,
   );
 }
 
@@ -539,6 +580,8 @@ class AssimeAlert {
     this.category,
     this.maxPrice,
     this.matchesCount = 0,
+    this.location,
+    this.paused = false,
   });
 
   final int id;
@@ -546,6 +589,10 @@ class AssimeAlert {
   final String? category;
   final int? maxPrice;
   final int matchesCount;
+  final String? location;
+
+  /// « Alerte coupée » (Assimé 12).
+  final bool paused;
 
   factory AssimeAlert.fromJson(Map<String, dynamic> json) => AssimeAlert(
     id: json['id'] as int,
@@ -553,6 +600,8 @@ class AssimeAlert {
     category: json['category'] as String?,
     maxPrice: json['max_price'] as int?,
     matchesCount: json['matches_count'] as int? ?? 0,
+    location: json['location'] as String?,
+    paused: json['paused'] as bool? ?? false,
   );
 }
 
@@ -592,7 +641,21 @@ class BoostReport {
     required this.statusViews,
     required this.contacts,
     this.statusModeration,
+    this.opens = 0,
+    this.messages = 0,
+    this.messagesBefore = 0,
+    this.daily = const [],
   });
+
+  /// « Voir l'annonce » touché depuis le statut sponsorisé.
+  final int opens;
+
+  /// Messages reçus pendant la mise en avant, et avant elle.
+  final int messages;
+  final int messagesBefore;
+
+  /// Vues par jour : (jour, résultats, statuts).
+  final List<({DateTime day, int results, int status})> daily;
 
   final int? days;
   final DateTime startsAt;
@@ -612,5 +675,17 @@ class BoostReport {
     statusViews: json['status_views'] as int? ?? 0,
     contacts: json['contacts'] as int? ?? 0,
     statusModeration: json['status_moderation'] as String?,
+    opens: json['opens'] as int? ?? 0,
+    messages: json['messages'] as int? ?? 0,
+    messagesBefore: json['messages_before'] as int? ?? 0,
+    daily: [
+      for (final d in (json['daily'] as List? ?? const []))
+        if (d is Map && DateTime.tryParse('${d['day']}') != null)
+          (
+            day: DateTime.parse('${d['day']}'),
+            results: (d['results'] as num?)?.toInt() ?? 0,
+            status: (d['status'] as num?)?.toInt() ?? 0,
+          ),
+    ],
   );
 }

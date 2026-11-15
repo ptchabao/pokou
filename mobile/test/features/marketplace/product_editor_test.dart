@@ -40,7 +40,7 @@ Future<ProductDraft?> _publish(
   );
   await tester.tap(find.text('ouvrir'));
   await tester.pumpAndSettle();
-  await tester.enterText(find.widgetWithText(TextField, 'Nom'), 'Pagne wax');
+  await tester.enterText(find.widgetWithText(TextField, 'Titre'), 'Pagne wax');
   await tester.enterText(find.widgetWithText(TextField, 'Prix'), '5000');
   await tester.pump();
   if (before != null) await before();
@@ -99,7 +99,7 @@ void main() {
         ),
       );
       await tester.enterText(
-        find.widgetWithText(TextField, 'Nom'),
+        find.widgetWithText(TextField, 'Titre'),
         'Pagne wax',
       );
       await tester.enterText(find.widgetWithText(TextField, 'Prix'), '5 000');

@@ -61,7 +61,11 @@ class ProductDraft {
 }
 
 class ProductEditor extends ConsumerStatefulWidget {
-  const ProductEditor({this.product, this.onSubmit});
+  const ProductEditor({this.product, this.onSubmit, this.onDelete});
+
+  /// Assimé 23 : « Supprimer l'annonce », sous le formulaire de
+  /// modification. Rend `true` si l'annonce a quitté le marché.
+  final Future<bool> Function(BuildContext context)? onDelete;
 
   /// Envoie l'annonce au serveur. Quand il est fourni, le formulaire RESTE
   /// ouvert pendant l'envoi et en cas d'échec : il fermait d'abord, puis
@@ -421,7 +425,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
         title: Text(
           widget.product == null
               ? L.of(context).marketAddProduct
-              : L.of(context).marketEditProduct,
+              : L.of(context).assimeEditTitle,
         ),
       ),
       body: ListView(
@@ -470,7 +474,9 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
           TextField(
   contextMenuBuilder: pokouContextMenuBuilder,
             controller: _name,
-            decoration: InputDecoration(labelText: L.of(context).marketName),
+            decoration: InputDecoration(
+              labelText: L.of(context).assimeTitleLabel,
+            ),
           ),
           TextField(
   contextMenuBuilder: pokouContextMenuBuilder,
@@ -567,7 +573,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
   contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _location,
                   decoration: InputDecoration(
-                    labelText: L.of(context).marketCityOrArea,
+                    labelText: L.of(context).assimeAreaLabel,
                   ),
                 ),
               ),
@@ -616,9 +622,24 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
                         ? L.of(context).marketUploadingPhoto
                         : widget.product == null && widget.onSubmit != null
                         ? L.of(context).assimeSeePreview
+                        : widget.product != null
+                        ? L.of(context).assimeSaveChanges
                         : L.of(context).actionSave,
                   ),
           ),
+          if (widget.onDelete != null)
+            TextButton(
+              onPressed: _saving
+                  ? null
+                  : () async {
+                      final gone = await widget.onDelete!(context);
+                      if (gone && mounted) Navigator.of(context).pop();
+                    },
+              child: Text(
+                L.of(context).assimeDeleteAction,
+                style: TextStyle(color: AppColors.feedbackDanger),
+              ),
+            ),
         ],
       ),
     );

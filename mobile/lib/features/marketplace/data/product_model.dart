@@ -194,7 +194,21 @@ class MarketplaceProduct {
     this.condition,
     this.negotiable = false,
     this.createdAt,
+    this.expiresAt,
+    this.stats,
   });
+
+  /// Assimé 9 : l'annonce expire 30 jours après sa publication ou son
+  /// renouvellement. `null` pour une annonce sans échéance.
+  final DateTime? expiresAt;
+
+  /// Assimé 9 : vues, favoris, messages — renvoyées au SEUL vendeur.
+  final ProductStats? stats;
+
+  bool get isExpired =>
+      soldAt == null &&
+      expiresAt != null &&
+      expiresAt!.isBefore(DateTime.now());
 
   /// ANN-18 : vendue — l'annonce a quitté le marché.
   final DateTime? soldAt;
@@ -285,9 +299,40 @@ class MarketplaceProduct {
       isBoosted: json['is_boosted'] as bool? ?? false,
       condition: json['condition'] as String?,
       negotiable: json['negotiable'] as bool? ?? false,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
+      createdAt: _serverDate(json['created_at']),
+      expiresAt: _serverDate(json['expires_at']),
+      stats: json['stats'] is Map<String, dynamic>
+          ? ProductStats.fromJson(json['stats'] as Map<String, dynamic>)
+          : null,
     );
   }
+}
+
+DateTime? _serverDate(Object? raw) =>
+    raw is String && raw.isNotEmpty ? parseServerTime(raw) : null;
+
+/// Ce que le vendeur voit de son annonce (Assimé 9).
+class ProductStats {
+  const ProductStats({
+    required this.views,
+    required this.favorites,
+    required this.contacts,
+    this.boostExpiresAt,
+  });
+
+  final int views;
+  final int favorites;
+  final int contacts;
+
+  /// Fin de la mise en avant en cours, s'il y en a une.
+  final DateTime? boostExpiresAt;
+
+  factory ProductStats.fromJson(Map<String, dynamic> json) => ProductStats(
+    views: json['views'] as int? ?? 0,
+    favorites: json['favorites'] as int? ?? 0,
+    contacts: json['contacts'] as int? ?? 0,
+    boostExpiresAt: _serverDate(json['boost_expires_at']),
+  );
 }
 
 /// Les états d'un article (Assimé 2 et 6), dans l'ordre de la maquette.
@@ -344,6 +389,8 @@ class SellerProfile {
     required this.rating,
     required this.reviewCount,
     required this.productCount,
+    this.memberSince,
+    this.area,
   });
 
   final int sellerId;
@@ -353,6 +400,12 @@ class SellerProfile {
   final double? rating;
   final int reviewCount;
   final int productCount;
+
+  /// Assimé 22 : « sur Pokou depuis août 2026 ».
+  final DateTime? memberSince;
+
+  /// Assimé 22 : le quartier de sa dernière annonce.
+  final String? area;
 
   factory SellerProfile.fromJson(Map<String, dynamic> json) {
     final rating = json['rating'];
@@ -364,6 +417,8 @@ class SellerProfile {
       rating: rating == null ? null : (rating as num).toDouble(),
       reviewCount: json['review_count'] as int? ?? 0,
       productCount: json['product_count'] as int? ?? 0,
+      memberSince: _serverDate(json['member_since']),
+      area: json['area'] as String?,
     );
   }
 }
