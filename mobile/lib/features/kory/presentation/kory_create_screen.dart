@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
@@ -251,17 +252,74 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
     if (potId != null && mounted) Navigator.of(context).pop(potId);
   }
 
+  /// « le 5 du mois » : le jour de l'échéance (cotisation) ou de la levée
+  /// (tontine). C'est le jour de la première date : le choisir ici la
+  /// déplace au prochain mois qui l'a encore devant lui.
+  Future<void> _pickDay() async {
+    final d = _draft;
+    if (d.period == 'WEEKLY' || d.period == 'BIWEEKLY') {
+      final date = await _pickDate(d.dueAt);
+      if (date != null) setState(() => d.dueAt = date);
+      return;
+    }
+    final day = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          d.kind == 'TONTINE'
+              ? L.of(dialogContext).koryMqLeveeDay
+              : L.of(dialogContext).koryMqDueDay,
+        ),
+        content: Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            // Jusqu'au 28 : chaque mois l'a.
+            for (var i = 1; i <= 28; i++)
+              ChoiceChip(
+                label: Text('$i'),
+                selected: d.dueAt?.day == i,
+                showCheckmark: false,
+                onSelected: (_) => Navigator.pop(dialogContext, i),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (day == null || !mounted) return;
+    final today = DateUtils.dateOnly(DateTime.now());
+    final base = d.dueAt ?? today;
+    var next = DateTime(base.year, base.month, day, 12);
+    if (next.isBefore(today)) {
+      next = DateTime(base.year, base.month + 1, day, 12);
+    }
+    setState(() => d.dueAt = next);
+  }
+
+  /// « le 5 du mois », « chaque lundi » — d'après la première date.
+  String _dayLabel(L l, KoryDraft d) {
+    final due = d.dueAt;
+    if (due == null) return l.koryXChoose;
+    if (d.period == 'WEEKLY' || d.period == 'BIWEEKLY') {
+      return l.koryMqEveryWeekday(
+        DateFormat.EEEE(
+          Localizations.localeOf(context).toLanguageTag(),
+        ).format(due),
+      );
+    }
+    return l.koryMqDayOfMonth('${due.day}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final d = _draft;
     final me = ref.watch(authControllerProvider).user;
     final wallet = KoryWallet.of(me?.phone);
+    final country = ref.watch(currentCountryConfigProvider);
     // Kory Plus (BM-13) : la tontine ne se propose que dans un pays qui l'a
     // ouverte.
-    final tontineOpen = ref
-        .watch(currentCountryConfigProvider)
-        .has('kory_plus');
+    final tontineOpen = country.has('kory_plus');
     final kinds = [
       ('CAGNOTTE', l.koryKindCagnotte),
       ('COTISATION', l.koryKindCotisation),
@@ -286,6 +344,14 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
     };
     final stake = int.tryParse(_amount.text) ?? 0;
     final size = d.group?.members.length ?? 0;
+    final tontine = d.kind == 'TONTINE';
+    final cotisation = d.kind == 'COTISATION';
+    final feeHt = country.koryPlusFeeHt;
+    final linkedChat = _DateRow(
+      label: l.koryXLinkedChat,
+      value: _loadingGroup ? '…' : (d.group?.name ?? l.koryXNoLinkedChat),
+      onTap: widget.groupId != null ? null : _pickGroup,
+    );
     return KoryPage(
       title: title,
       subtitle: subtitle,
@@ -305,84 +371,58 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
         children: [
           Semantics(
             label: l.koryXCollectType,
-            child: Wrap(
-              spacing: 8,
-              children: [
-                for (final (kind, label) in kinds)
-                  ChoiceChip(
-                    label: Text(label),
-                    selected: d.kind == kind,
-                    showCheckmark: false,
-                    onSelected: (_) => setState(() {
-                      d.kind = kind;
-                      _error = null;
-                    }),
-                  ),
-              ],
+            child: _Segmented(
+              options: kinds,
+              value: d.kind,
+              onChanged: (kind) => setState(() {
+                d.kind = kind;
+                _error = null;
+              }),
             ),
           ),
-          const SizedBox(height: 14),
-          TextField(
-            contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _title,
-            maxLength: 120,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(
-              labelText: d.kind == 'TONTINE' ? l.koryXName : l.koryFieldTitle,
+          _Field(
+            label: tontine ? l.koryXName : l.koryFieldTitle,
+            child: TextField(
+              contextMenuBuilder: pokouContextMenuBuilder,
+              controller: _title,
+              maxLength: 120,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(counterText: ''),
             ),
           ),
           if (d.kind == 'CAGNOTTE')
-            TextField(
-              contextMenuBuilder: pokouContextMenuBuilder,
-              controller: _beneficiary,
-              maxLength: 120,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(labelText: l.koryXBeneficiaryField),
-            ),
-          TextField(
-            contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _amount,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              labelText: switch (d.kind) {
-                'CAGNOTTE' => l.koryFieldGoal,
-                'TONTINE' => l.koryXStakePerMember,
-                _ => l.koryFieldPerMember,
-              },
-              suffixText: 'FCFA',
-            ),
-          ),
-          if (d.kind != 'CAGNOTTE') ...[
-            KorySection(l.koryXPeriodicity),
-            Semantics(
-              label: l.koryXPeriodicity,
-              child: Wrap(
-                spacing: 8,
-                children: [
-                  for (final (period, label) in periods)
-                    ChoiceChip(
-                      label: Text(label),
-                      selected: d.period == period,
-                      showCheckmark: false,
-                      onSelected: (_) => setState(() => d.period = period),
-                    ),
-                ],
+            _Field(
+              label: l.koryMqBeneficiary,
+              child: TextField(
+                contextMenuBuilder: pokouContextMenuBuilder,
+                controller: _beneficiary,
+                maxLength: 120,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(counterText: ''),
               ),
             ),
-          ],
-          const SizedBox(height: 12),
-          KoryCard(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            child: Column(
-              children: [
-                _DateRow(
-                  label: switch (d.kind) {
-                    'COTISATION' => l.koryXFirstDue,
-                    'TONTINE' => l.koryXFirstRound,
-                    _ => l.koryXClosing,
-                  },
+          // Le montant, et à côté sa date : clôture, jour d'échéance ou
+          // nombre de membres.
+          _FieldPair(
+            first: _Field(
+              label: switch (d.kind) {
+                'CAGNOTTE' => l.koryMqGoalOptional,
+                'TONTINE' => l.koryXStakePerMember,
+                _ => l.koryMqAmountPerMember,
+              },
+              child: TextField(
+                contextMenuBuilder: pokouContextMenuBuilder,
+                controller: _amount,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(suffixText: 'FCFA'),
+              ),
+            ),
+            second: switch (d.kind) {
+              'CAGNOTTE' => _Field(
+                label: l.koryXClosing,
+                child: _TapField(
                   value: d.dueAt == null
                       ? l.koryXChoose
                       : koryDate(context, d.dueAt!),
@@ -391,52 +431,141 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
                     if (date != null) setState(() => d.dueAt = date);
                   },
                 ),
-                if (d.kind == 'COTISATION')
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l.koryXEnd),
-                    subtitle: Text(
-                      !_withEnd || d.endsAt == null
-                          ? l.koryXNoEnd
-                          : koryDate(context, d.endsAt!),
+              ),
+              'TONTINE' => _Field(
+                label: l.koryMqMembers,
+                // Les membres viennent de la discussion liée ; on les
+                // choisit à l'étape 2.
+                child: _TapField(
+                  value: size > 0 ? '$size' : l.koryXChoose,
+                  onTap: widget.groupId != null ? null : _pickGroup,
+                ),
+              ),
+              _ => _Field(
+                label: l.koryMqDue,
+                child: _TapField(value: _dayLabel(l, d), onTap: _pickDay),
+              ),
+            },
+          ),
+          if (d.kind != 'CAGNOTTE')
+            _Field(
+              label: l.koryXPeriodicity,
+              child: _Segmented(
+                options: periods,
+                value: d.period,
+                onChanged: (period) => setState(() => d.period = period),
+              ),
+            ),
+          if (cotisation)
+            _FieldPair(
+              first: _Field(
+                label: l.koryXFirstDue,
+                child: _TapField(
+                  value: d.dueAt == null
+                      ? l.koryXChoose
+                      : koryDate(context, d.dueAt!),
+                  onTap: () async {
+                    final date = await _pickDate(d.dueAt);
+                    if (date != null) setState(() => d.dueAt = date);
+                  },
+                ),
+              ),
+              second: _Field(
+                label: l.koryXEnd,
+                child: _TapField(
+                  value: !_withEnd || d.endsAt == null
+                      ? l.koryXNoEnd
+                      : koryDate(context, d.endsAt!),
+                  onTap: () async {
+                    final date = await _pickDate(d.endsAt ?? d.dueAt);
+                    setState(() {
+                      // Fermer le calendrier sans choisir : sans date de fin.
+                      _withEnd = date != null;
+                      d.endsAt = date;
+                    });
+                  },
+                ),
+              ),
+            ),
+          if (tontine)
+            _FieldPair(
+              first: _Field(
+                label: l.koryMqLeveeDay,
+                child: _TapField(value: _dayLabel(l, d), onTap: _pickDay),
+              ),
+              second: _Field(
+                label: l.koryXFirstRound,
+                child: _TapField(
+                  value: d.dueAt == null
+                      ? l.koryXChoose
+                      : koryMonth(context, d.dueAt!, year: true),
+                  onTap: () async {
+                    final date = await _pickDate(d.dueAt);
+                    if (date != null) setState(() => d.dueAt = date);
+                  },
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          KoryRowsCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            children: [
+              if (tontine) ...[
+                if (size > 1 && d.dueAt != null)
+                  KoryLine(
+                    l.koryMqRounds,
+                    l.koryXRoundsSpan(
+                      size,
+                      koryMonth(context, d.dueAt!).toLowerCase(),
+                      koryMonth(
+                        context,
+                        koryAddPeriod(d.dueAt!, d.period, size - 1),
+                      ).toLowerCase(),
                     ),
-                    value: _withEnd,
-                    onChanged: (v) async {
-                      if (!v) {
-                        setState(() => _withEnd = false);
-                        return;
-                      }
-                      final date = await _pickDate(d.endsAt ?? d.dueAt);
-                      if (date != null) {
-                        setState(() {
-                          _withEnd = true;
-                          d.endsAt = date;
-                        });
-                      }
-                    },
                   ),
-                if (d.kind == 'TONTINE' && stake > 0 && size > 1)
+                if (stake > 0 && size > 1)
                   KoryLine(
                     l.koryXLeveePerRound,
                     formatFcfa(stake * (size - 1)),
                     caption: l.koryXLeveeCaption(size - 1, formatFcfa(stake)),
                   ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          KoryCard(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            child: Column(
-              children: [
-                if (d.kind != 'TONTINE')
-                  KoryLine(
-                    l.koryXCollectorLabel,
-                    [l.koryYou, ?wallet?.shortLabel].join(' · '),
+              ] else
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l.koryXCollectorLabel,
+                          style: TextStyle(color: AppColors.textPrimary),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          [l.koryYou, ?wallet?.shortLabel].join(' · '),
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const KoryVerifiedPill(),
+                    ],
                   ),
+                ),
+              if (!tontine)
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(l.koryXIndividualAmounts),
+                  dense: true,
+                  title: Text(
+                    l.koryXIndividualAmounts,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                   subtitle: Text(
                     d.amountsVisible
                         ? l.koryXVisibleToAll
@@ -445,16 +574,8 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
                   value: d.amountsVisible,
                   onChanged: (v) => setState(() => d.amountsVisible = v),
                 ),
-                _DateRow(
-                  label: l.koryXLinkedChat,
-                  value: _loadingGroup
-                      ? '…'
-                      : (d.group?.name ?? l.koryXNoLinkedChat),
-                  icon: Icons.forum_outlined,
-                  onTap: widget.groupId != null ? null : _pickGroup,
-                ),
-              ],
-            ),
+              linkedChat,
+            ],
           ),
           if (d.kind == 'CAGNOTTE') ...[
             const SizedBox(height: 10),
@@ -472,13 +593,161 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
             KoryNotice(tone: KoryTone.danger, text: _error!),
           ],
           const SizedBox(height: 12),
-          KoryNotice(
-            text: d.kind == 'TONTINE' ? l.koryTontineNote : l.koryXFreeNotice,
-          ),
+          if (tontine && feeHt != null && feeHt > 0)
+            KoryNotice(
+              tone: KoryTone.warning,
+              text: l.koryMqPlusFeeNotice(
+                formatFcfa(feeHt),
+                formatFcfa((feeHt * (1 + country.vatRate)).round()),
+              ),
+            )
+          else
+            KoryNotice(
+              text: tontine
+                  ? l.koryTontineNote
+                  : cotisation
+                  ? l.koryMqFreeNoticeDue
+                  : l.koryXFreeNotice,
+            ),
         ],
       ),
     );
   }
+}
+
+/// Un champ et son libellé au-dessus, comme la maquette.
+class _Field extends StatelessWidget {
+  const _Field({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        child,
+      ],
+    ),
+  );
+}
+
+/// Deux champs côte à côte.
+class _FieldPair extends StatelessWidget {
+  const _FieldPair({required this.first, required this.second});
+
+  final Widget first;
+  final Widget second;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(child: first),
+      const SizedBox(width: 10),
+      Expanded(child: second),
+    ],
+  );
+}
+
+/// Un champ qu'on touche pour choisir (une date, un jour).
+class _TapField extends StatelessWidget {
+  const _TapField({required this.value, required this.onTap});
+
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(28),
+    // Le décor des champs du thème : on ne distingue pas un champ à choisir
+    // d'un champ à taper.
+    child: InputDecorator(
+      decoration: const InputDecoration(),
+      child: Text(
+        value,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: AppColors.textPrimary),
+      ),
+    ),
+  );
+}
+
+/// Des onglets côte à côte : le choix retenu est plein.
+class _Segmented extends StatelessWidget {
+  const _Segmented({
+    required this.options,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final List<(String, String)> options;
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (final (i, (key, label)) in options.indexed) ...[
+        if (i > 0) const SizedBox(width: 6),
+        Expanded(
+          child: Semantics(
+            selected: key == value,
+            button: true,
+            child: Material(
+              color: key == value
+                  ? AppColors.actionButtonBackground
+                  : AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: key == value
+                      ? AppColors.actionButtonBackground
+                      : AppColors.border,
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => onChanged(key),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 11,
+                  ),
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: key == value
+                          ? AppColors.actionButtonForeground
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
 }
 
 class _DateRow extends StatelessWidget {
@@ -486,13 +755,11 @@ class _DateRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onTap,
-    this.icon = Icons.event_outlined,
   });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
-  final IconData icon;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -501,8 +768,6 @@ class _DateRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.textSecondary),
-          const SizedBox(width: 12),
           Expanded(
             child: Text(label, style: TextStyle(color: AppColors.textPrimary)),
           ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/kory_model.dart';
@@ -104,6 +105,24 @@ class KoryWallet {
     final code = ussd;
     if (code == null) return false;
     return launchUrl(Uri(scheme: 'tel', path: code));
+  }
+
+  /// « Ouvrir l'application Flooz » : Pokou ne connaît pas l'adresse interne
+  /// de chaque appli d'opérateur ; il ouvre la boutique sur son nom, qui
+  /// propose « Ouvrir » si elle est installée, « Installer » sinon.
+  Future<bool> openApp() async {
+    final name = operator;
+    if (name == null) return false;
+    final store = defaultTargetPlatform == TargetPlatform.iOS
+        ? Uri.parse(
+            'itms-apps://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/'
+            'search?media=software&term=${Uri.encodeQueryComponent(name)}',
+          )
+        : Uri.https('play.google.com', '/store/search', {
+            'q': name,
+            'c': 'apps',
+          });
+    return launchUrl(store, mode: LaunchMode.externalApplication);
   }
 }
 

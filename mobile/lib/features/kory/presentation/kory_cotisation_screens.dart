@@ -458,8 +458,38 @@ class _MemberView extends ConsumerWidget {
                   ),
                 ),
               ],
-            const SizedBox(height: 16),
-            KoryNotice(text: l.koryNoMoney),
+            // KOR-21 : « Rappels de cette cotisation » — J−2, jour J et
+            // relance J+1, envoyés par le serveur ; chacun peut les couper.
+            if (pot.cotisation?.isMember ?? false) ...[
+              const SizedBox(height: 10),
+              KoryCard(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    l.koryMqRemindersTitle,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  subtitle: Text(l.koryMqRemindersSub),
+                  value: pot.cotisation!.myReminders,
+                  onChanged: pot.isFrozen
+                      ? null
+                      : (on) async {
+                          try {
+                            await ref
+                                .read(koryRepositoryProvider)
+                                .setReminders(pot.id, enabled: on);
+                            refreshKory(ref, potId: pot.id);
+                          } catch (_) {
+                            if (context.mounted) koryFailed(context);
+                          }
+                        },
+                ),
+              ),
+            ],
           ],
         ),
       ),

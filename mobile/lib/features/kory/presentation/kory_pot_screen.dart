@@ -169,24 +169,6 @@ class _CagnotteView extends ConsumerWidget {
             ),
           ),
       ],
-      footer: koryCanContribute(pot)
-          ? KoryFooter(
-              children: [
-                KoryButton(
-                  icon: Icons.volunteer_activism_outlined,
-                  label: l.koryHomeContribute,
-                  onPressed: () => openKoryContribute(
-                    context,
-                    ref,
-                    pot,
-                    amount: (pot.myPledge?.remaining ?? 0) > 0
-                        ? pot.myPledge!.remaining
-                        : null,
-                  ),
-                ),
-              ],
-            )
-          : null,
       body: RefreshIndicator(
         onRefresh: () async {
           refreshKory(ref, potId: pot.id);
@@ -239,35 +221,35 @@ class _CagnotteView extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            KoryCard(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              child: Column(
-                children: [
-                  KoryPersonRow(
-                    name: pot.isCollector
-                        ? l.koryYou
-                        : (pot.collectorName ?? '—'),
-                    subtitle: pot.isCollector
-                        ? l.koryCollectorIsYou
-                        : l.koryXCollectorWallet(wallet?.label ?? '—'),
-                  ),
-                  if (pot.beneficiaryName != null)
-                    KoryLine(l.koryXBeneficiary, pot.beneficiaryName!),
-                  if (pot.description != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          pot.description!,
-                          style: TextStyle(color: AppColors.textPrimary),
-                        ),
-                      ),
-                    ),
-                ],
+            const SizedBox(height: 14),
+            // La maquette : une ligne de texte, pas une carte — qui reçoit,
+            // sur quel wallet, et que ce numéro a été vérifié par code.
+            Text(
+              l.koryMqCollectorLine(
+                pot.isCollector ? l.koryYou : (pot.collectorName ?? '—'),
+                wallet?.shortLabel ?? '—',
               ),
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
+            if (pot.beneficiaryName != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  l.koryMqBeneficiaryLine(pot.beneficiaryName!),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            if (pot.description != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  pot.description!,
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+              ),
             if (pot.isCollector && pending > 0) ...[
               const SizedBox(height: 10),
               KoryActionRow(
@@ -283,6 +265,34 @@ class _CagnotteView extends ConsumerWidget {
               ),
             ],
             KoryPledgeBlock(pot: pot),
+            const SizedBox(height: 10),
+            // « Contribuer » et « Journal » côte à côte, sous l'engagement.
+            if (koryCanContribute(pot))
+              KoryButtonPair(
+                first: KoryButton(
+                  label: l.koryHomeContribute,
+                  onPressed: () => openKoryContribute(
+                    context,
+                    ref,
+                    pot,
+                    amount: (pot.myPledge?.remaining ?? 0) > 0
+                        ? pot.myPledge!.remaining
+                        : null,
+                  ),
+                ),
+                second: KoryButton(
+                  outlined: true,
+                  label: l.koryJournalTab,
+                  onPressed: () => _openJournal(context, pot),
+                ),
+              )
+            else
+              KoryButton(
+                outlined: true,
+                label: l.koryJournalTab,
+                onPressed: () => _openJournal(context, pot),
+              ),
+            // Gestionnaire : ajouter des participants, en ligne discrète.
             if (manager && pot.isOpen) ...[
               const SizedBox(height: 10),
               KoryActionRow(
@@ -297,9 +307,7 @@ class _CagnotteView extends ConsumerWidget {
                 ),
               ),
             ],
-            KoryJournalPreview(pot: pot),
-            const SizedBox(height: 16),
-            KoryNotice(text: l.koryNoMoney),
+            KoryJournalPreview(pot: pot, compact: true),
           ],
         ),
       ),
@@ -428,14 +436,17 @@ class KoryPledgeBlock extends ConsumerWidget {
     final next = await Navigator.of(
       context,
     ).push<Object?>(MaterialPageRoute(builder: (_) => screen));
-    if (next == KoryNextStep.pay && context.mounted) {
-      final remaining = pot.myPledge?.remaining ?? 0;
+    if (!context.mounted) return;
+    final remaining = pot.myPledge?.remaining ?? 0;
+    if (next == KoryNextStep.pay) {
       await openKoryContribute(
         context,
         ref,
         pot,
         amount: remaining > 0 ? remaining : null,
       );
+    } else if (next == KoryNextStep.declare && remaining > 0) {
+      await openKoryDeclare(context, ref, pot, amount: remaining);
     }
   }
 
@@ -485,7 +496,7 @@ class KoryPledgeBlock extends ConsumerWidget {
       } else {
         children.add(
           KoryActionRow(
-            icon: Icons.handshake_outlined,
+            icon: mine.isFirm ? Icons.lock_outline : Icons.edit_outlined,
             title: l.koryXMyPledgeAmount(formatFcfa(mine.total)),
             subtitle: mine.isFirm
                 ? l.koryXFirmRemaining(formatFcfa(mine.remaining))
@@ -508,27 +519,39 @@ class KoryPledgeBlock extends ConsumerWidget {
   }
 }
 
+void _openJournal(BuildContext context, KoryPot pot) => Navigator.of(
+  context,
+).push(MaterialPageRoute(builder: (_) => KoryJournalScreen(potId: pot.id)));
+
 /// Le journal en bref : les dernières contributions, puis « Voir tout ».
+/// En version [compact] (la cagnotte, KOR-1), le titre compte les
+/// contributions et le bouton « Journal » de l'écran mène au reste.
 class KoryJournalPreview extends StatelessWidget {
-  const KoryJournalPreview({super.key, required this.pot, this.limit = 4});
+  const KoryJournalPreview({
+    super.key,
+    required this.pot,
+    this.limit = 4,
+    this.compact = false,
+  });
 
   final KoryPot pot;
   final int limit;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    void openJournal() => Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => KoryJournalScreen(potId: pot.id)));
+    void openJournal() => _openJournal(context, pot);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        KorySection(
-          l.koryJournalTab,
-          trailing: l.koryXContributionsCount(pot.entries.length),
-          onTrailing: openJournal,
-        ),
+        compact
+            ? KorySection(l.koryXContributionsCount(pot.entries.length))
+            : KorySection(
+                l.koryJournalTab,
+                trailing: l.koryXContributionsCount(pot.entries.length),
+                onTrailing: openJournal,
+              ),
         if (pot.entries.isEmpty)
           Text(
             l.koryJournalEmpty,
@@ -544,7 +567,7 @@ class KoryJournalPreview extends StatelessWidget {
               ],
             ),
           ),
-        if (pot.entries.isNotEmpty)
+        if (pot.entries.length > (compact ? limit : 0))
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton(

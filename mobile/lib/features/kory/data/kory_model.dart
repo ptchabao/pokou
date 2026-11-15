@@ -530,7 +530,11 @@ class KoryCotisation {
     this.myNext,
     this.schedule = const [],
     this.nextPeriodDue,
+    this.myReminders = true,
   });
+
+  /// KOR-21 : les rappels J−2, jour J et J+1 me parviennent.
+  final bool myReminders;
 
   final int membersCount;
   final bool isMember;
@@ -577,6 +581,7 @@ class KoryCotisation {
       nextPeriodDue: next is Map<String, dynamic>
           ? tryParseServerTime(next['due_at'] as String? ?? '')
           : null,
+      myReminders: json['my_reminders'] as bool? ?? true,
     );
   }
 }
@@ -787,7 +792,12 @@ class KoryEntry {
     this.amountHidden = false,
     this.reviewerName,
     this.reviewedAt,
+    this.contributorPhoneMasked,
   });
+
+  /// « +228 96 •• •• 12 », pour celui qui confirme et l'auteur seulement :
+  /// assez pour reconnaître l'opérateur de l'envoi (KOR-4).
+  final String? contributorPhoneMasked;
 
   /// KOR-6 : montant masqué aux autres membres ([amount] vaut alors 0).
   final bool amountHidden;
@@ -841,6 +851,7 @@ class KoryEntry {
     canReview: json['can_review'] as bool? ?? false,
     reviewReason: json['review_reason'] as String?,
     proofMediaId: json['proof_media_id'] as int?,
+    contributorPhoneMasked: json['contributor_phone_masked'] as String?,
   );
 }
 

@@ -10,6 +10,7 @@ import calendar
 from datetime import datetime, timedelta
 from typing import Dict, Iterable, List, Optional, Tuple
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.models import GroupMember, KoryEntry, KoryMember, KoryPot
@@ -254,3 +255,81 @@ def late_member_ids(db: Session, pot: KoryPot, now: datetime) -> Iterable[int]:
         uid for uid in member_ids(db, pot)
         if (best.get((uid, label)) is None or best[(uid, label)].status == "REJECTED")
     ]
+
+
+# ── Rappels automatiques (KOR-21) ────────────────────────────────────────
+
+#: Les étapes d'un rappel, par écart en jours à l'échéance : deux jours
+#: avant, le jour même, puis une relance le lendemain.
+_STAGES = {2: "J-2", 0: "J", -1: "J+1"}
+
+
+def muted_member_ids(db: Session, pot: KoryPot) -> set:
+    """Ceux qui ont coupé les rappels de cette cotisation."""
+    return {
+        uid for (uid,) in db.query(KoryMember.user_id).filter(
+            KoryMember.pot_id == pot.id, KoryMember.reminders_muted.is_(True)
+        )
+    }
+
+
+def reminder_targets(db: Session, pot: KoryPot, now: datetime) -> List[Tuple[str, str, List[int]]]:
+    """Les rappels dus maintenant : (étiquette, étape, destinataires).
+
+    J−2 et jour J : ceux qui n'ont encore ni réglé ni déclaré l'échéance.
+    J+1 : ceux qui sont en retard. Jamais ceux qui ont coupé les rappels.
+    """
+    best = _statuses(db, pot)
+    muted = muted_member_ids(db, pot)
+    members = [uid for uid in member_ids(db, pot) if uid not in muted]
+    result = []
+    for label, due in dues(pot, now + timedelta(days=3)):
+        stage = _STAGES.get((due.date() - now.date()).days)
+        if stage is None:
+            continue
+        waiting = [
+            uid for uid in members
+            if best.get((uid, label)) is None or best[(uid, label)].status == "REJECTED"
+        ]
+        if waiting:
+            result.append((label, stage, waiting))
+    return result
+
+
+def _fcfa(amount: int) -> str:
+    return f"{amount:,}".replace(",", " ") + " FCFA"
+
+
+def send_due_reminders(db: Session, now: Optional[datetime] = None) -> int:
+    """Envoie les rappels J−2, jour J et J+1 des cotisations ouvertes, une
+    seule fois par échéance et par étape — le planificateur passe souvent.
+    Renvoie le nombre de notifications envoyées."""
+    from app.services.notifications.inbox import notify
+
+    now = now or datetime.utcnow()
+    sent = 0
+    pots = db.query(KoryPot).filter(
+        KoryPot.kind == "COTISATION", KoryPot.status == "OPEN", KoryPot.due_at.isnot(None)
+    ).all()
+    for pot in pots:
+        for label, stage, users in reminder_targets(db, pot, now):
+            key = f"{label}:{stage}"
+            # Réserver l'envoi AVANT de notifier : un second passage (ou une
+            # seconde instance) ne renverra pas le même rappel.
+            claimed = db.query(KoryPot).filter(
+                KoryPot.id == pot.id,
+                or_(KoryPot.auto_reminder_key.is_(None), KoryPot.auto_reminder_key != key),
+            ).update({"auto_reminder_key": key}, synchronize_session=False)
+            if not claimed:
+                continue
+            db.commit()
+            amount = _fcfa(amount_for(pot, label))
+            body = {
+                "J-2": f"Échéance dans 2 jours : {amount} à verser.",
+                "J": f"C'est le jour de l'échéance : {amount} à verser.",
+                "J+1": f"Échéance passée : ta contribution de {amount} est attendue.",
+            }[stage]
+            notify(db, users, service="kory", title=pot.title, body=body, route=f"kory/{pot.id}")
+            db.commit()
+            sent += len(users)
+    return sent

@@ -121,9 +121,25 @@ class KoryRepository {
   /// Kory Plus : ouvre le paiement Mobile Money des frais d'ouverture.
   /// Renvoie l'adresse de la passerelle ; la confirmation du paiement, côté
   /// serveur, vaut acceptation de l'invitation.
-  Future<String?> payPlusFee(int potId) async {
-    final response = await _api.post('/kory/pots/$potId/fee', body: const {});
+  ///
+  /// [forOthers] : l'administrateur règle d'un coup les frais de tous ceux
+  /// qui n'ont pas encore payé (KOR-8 « Payer pour les N restants »).
+  Future<String?> payPlusFee(int potId, {bool forOthers = false}) async {
+    final response = await _api.post(
+      '/kory/pots/$potId/fee',
+      body: forOthers ? const {'for_others': true} : const {},
+    );
     return (response as Map<String, dynamic>)['payment_url'] as String?;
+  }
+
+  /// KOR-21 : couper ou remettre les rappels J−2, jour J et J+1 d'une
+  /// cotisation, pour soi seulement.
+  Future<KoryPot> setReminders(int potId, {required bool enabled}) async {
+    final response = await _api.put(
+      '/kory/pots/$potId/reminders',
+      body: {'enabled': enabled},
+    );
+    return KoryPot.fromJson(response as Map<String, dynamic>);
   }
 
   /// L'administrateur démarre sans ceux qui ont refusé.

@@ -555,6 +555,7 @@ class KoryButton extends StatelessWidget {
     this.quiet = false,
     this.busy = false,
     this.danger = false,
+    this.outlined = false,
   });
 
   final String label;
@@ -564,8 +565,46 @@ class KoryButton extends StatelessWidget {
   final bool busy;
   final bool danger;
 
+  /// Le bouton à contour terre cuite de la maquette (« Journal », « Pas
+  /// reçu ») : l'action d'à côté, sans fond.
+  final bool outlined;
+
   @override
   Widget build(BuildContext context) {
+    if (outlined) {
+      final ink = danger ? AppColors.securityCritical : AppColors.accentPrimary;
+      return OutlinedButton(
+        onPressed: busy ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: ink,
+          minimumSize: const Size(64, 50),
+          side: BorderSide(color: ink, width: 1.4),
+          shape: const StadiumBorder(),
+          textStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 19),
+              const SizedBox(width: 8),
+            ],
+            Flexible(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     final background = danger
         ? AppColors.securityCritical
         : quiet
@@ -618,6 +657,127 @@ class KoryButton extends StatelessWidget {
             ),
     );
   }
+}
+
+/// Une ligne de liste qui mène quelque part : libellé, complément discret à
+/// droite, chevron (« Composer le code USSD … prérempli › »).
+class KoryChevronRow extends StatelessWidget {
+  const KoryChevronRow({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.trailing,
+    this.strongTrailing = false,
+    this.icon,
+  });
+
+  final String label;
+  final String? trailing;
+
+  /// Le complément en gras (« décembre », « avec un autre membre »).
+  final bool strongTrailing;
+  final IconData? icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 20, color: AppColors.accentPrimary),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: onTap == null
+                    ? AppColors.textMuted
+                    : AppColors.textPrimary,
+              ),
+            ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                trailing!,
+                textAlign: TextAlign.end,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: strongTrailing ? FontWeight.w700 : null,
+                  color: strongTrailing
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(width: 4),
+          Icon(Icons.chevron_right, color: AppColors.textMuted),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Des lignes [KoryChevronRow] (ou [KoryLine]) groupées dans une carte,
+/// séparées d'un filet.
+class KoryRowsCard extends StatelessWidget {
+  const KoryRowsCard({super.key, required this.children, this.padding});
+
+  final List<Widget> children;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) => KoryCard(
+    padding: padding ?? EdgeInsets.zero,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) Divider(height: 1, color: AppColors.border),
+          children[i],
+        ],
+      ],
+    ),
+  );
+}
+
+/// La pastille « vérifié » : le numéro du collecteur a été confirmé par un
+/// code reçu par SMS (le compte Pokou s'ouvre sur ce code).
+class KoryVerifiedPill extends StatelessWidget {
+  const KoryVerifiedPill({super.key});
+
+  @override
+  Widget build(BuildContext context) => KoryStatusPill(
+    icon: Icons.verified_outlined,
+    label: L.of(context).koryMqVerified,
+    color: AppColors.feedbackSuccess,
+  );
+}
+
+/// Deux boutons côte à côte : l'action pleine, puis l'action à contour.
+class KoryButtonPair extends StatelessWidget {
+  const KoryButtonPair({super.key, required this.first, required this.second});
+
+  final Widget first;
+  final Widget second;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(child: first),
+      const SizedBox(width: 10),
+      Expanded(child: second),
+    ],
+  );
 }
 
 /// Le grand chiffre d'un écran : un libellé, le montant, une précision.
@@ -711,6 +871,22 @@ String koryDate(BuildContext context, DateTime date) => DateFormat.yMMMd(
 
 /// « 14:02 »
 String koryTime(DateTime date) => DateFormat.Hm().format(date.toLocal());
+
+/// « ce matin », « aujourd'hui à 15:20 », « hier », « le 2 nov. » : quand
+/// une relance est partie (KOR-7, 27).
+String koryWhen(BuildContext context, DateTime at) {
+  final l = L.of(context);
+  final local = at.toLocal();
+  final today = DateUtils.dateOnly(DateTime.now());
+  final day = DateUtils.dateOnly(local);
+  if (day == today) {
+    return local.hour < 12
+        ? l.koryMqThisMorning
+        : l.koryMqTodayAt(koryTime(at));
+  }
+  if (today.difference(day).inDays == 1) return l.koryMqYesterday;
+  return l.koryMqOnDay(koryDay(context, at));
+}
 
 /// « Février », « décembre 2026 » : le mois d'une échéance ou d'un tour.
 String koryMonth(BuildContext context, DateTime date, {bool year = false}) {

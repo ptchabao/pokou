@@ -666,13 +666,7 @@ void main() {
       () => KoryTontineMembersScreen(draft: _draft('TONTINE')),
       height: 1200,
     );
-    await shot(
-      'k08_ouvrir',
-      () => KoryTontineOpenScreen(
-        draft: _draft('TONTINE')..memberIds = [7, 41, 42, 43, 44, 45],
-      ),
-      height: 900,
-    );
+    // KOR-8 : l'étape 3 de la création est la tontine en attente elle-même.
     await shot(
       'k08_attente_admin',
       () => const KoryPotScreen(potId: 4),

@@ -9614,7 +9614,7 @@ class LFr extends L {
 
   @override
   String koryXPlusFeeBody(String ht, String ttc) {
-    return '$ht HT ($ttc TTC) par membre, une seule fois, par Mobile Money.';
+    return '$ht HT ($ttc TTC) par membre, une fois, par CashPay.';
   }
 
   @override
@@ -10957,4 +10957,196 @@ class LFr extends L {
   @override
   String get groupLeaveLot1Note =>
       'En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus.';
+
+  @override
+  String get koryMqVerified => 'vérifié';
+
+  @override
+  String koryMqCollectorLine(String name, String wallet) {
+    return 'Collecteur : $name · $wallet · vérifié par code';
+  }
+
+  @override
+  String koryMqBeneficiaryLine(String name) {
+    return 'Bénéficiaire : $name';
+  }
+
+  @override
+  String koryMqOpenOperatorApp(String operator) {
+    return 'Ouvrir l’application $operator';
+  }
+
+  @override
+  String get koryMqDialUssd => 'Composer le code USSD';
+
+  @override
+  String get koryMqPrefilled => 'prérempli';
+
+  @override
+  String koryMqCheckWalletOf(String operator) {
+    return 'Vérifie dans ton application $operator ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.';
+  }
+
+  @override
+  String koryMqRoundSubtitle(String title, String current, String total) {
+    return '$title · tour $current sur $total';
+  }
+
+  @override
+  String koryMqAmountConfirmed(String amount) {
+    return '$amount confirmés';
+  }
+
+  @override
+  String koryMqOnExpected(String amount) {
+    return 'sur $amount attendus';
+  }
+
+  @override
+  String koryMqTimesStake(String count, String amount) {
+    return '$count × $amount';
+  }
+
+  @override
+  String koryMqLeveeCounts(String confirmed, String toConfirm, String late) {
+    return '$confirmed confirmées · $toConfirm à confirmer · $late en retard';
+  }
+
+  @override
+  String koryMqReminded(String when) {
+    return 'relance $when';
+  }
+
+  @override
+  String get koryMqThisMorning => 'ce matin';
+
+  @override
+  String koryMqTodayAt(String time) {
+    return 'aujourd’hui à $time';
+  }
+
+  @override
+  String get koryMqYesterday => 'hier';
+
+  @override
+  String koryMqOnDay(String day) {
+    return 'le $day';
+  }
+
+  @override
+  String get koryMqLeveeDay => 'Jour de la levée';
+
+  @override
+  String get koryMqDueDay => 'Jour de l’échéance';
+
+  @override
+  String get koryMqDue => 'Échéance';
+
+  @override
+  String koryMqEveryWeekday(String weekday) {
+    return 'chaque $weekday';
+  }
+
+  @override
+  String koryMqDayOfMonth(String day) {
+    return 'le $day du mois';
+  }
+
+  @override
+  String get koryMqBeneficiary => 'Bénéficiaire';
+
+  @override
+  String get koryMqGoalOptional => 'Objectif (facultatif)';
+
+  @override
+  String get koryMqAmountPerMember => 'Montant par membre';
+
+  @override
+  String get koryMqMembers => 'Membres';
+
+  @override
+  String get koryMqRounds => 'Tours';
+
+  @override
+  String koryMqPlusFeeNotice(String ht, String ttc) {
+    return 'Kory Plus · $ht HT ($ttc TTC) par membre, une fois, à l’ouverture. Les cotisations vont directement au bénéficiaire de chaque tour.';
+  }
+
+  @override
+  String get koryMqFreeNoticeDue =>
+      'Sans frais. Pokou ne touche pas l’argent : à chaque échéance, chacun verse depuis son wallet au collecteur.';
+
+  @override
+  String koryMqRoundCounts(String confirmed, String declared, String late) {
+    return '$confirmed confirmées · $declared déclarées · $late en retard';
+  }
+
+  @override
+  String get koryMqStake => 'Cotisation';
+
+  @override
+  String koryMqTtc(String amount) {
+    return '$amount TTC';
+  }
+
+  @override
+  String koryMqFeeHtOnce(String amount) {
+    return '$amount HT, une fois, par CashPay';
+  }
+
+  @override
+  String koryMqPayForRemaining(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Payer pour les $count restants · $amount TTC',
+      one: 'Payer pour le dernier · $amount TTC',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String koryMqPayTtcByCashPay(String amount) {
+    return 'Payer $amount TTC par CashPay';
+  }
+
+  @override
+  String get koryMqStartsWhenAllPaid =>
+      'La tontine démarre quand tous ont payé leurs frais et accepté. Frais non remboursables une fois la tontine ouverte.';
+
+  @override
+  String get koryMqAdd => 'Ajouter';
+
+  @override
+  String get koryMqAddMember => 'Ajouter un membre';
+
+  @override
+  String get koryMqEveryoneIn =>
+      'Tous les membres de la discussion sont déjà dans la tontine.';
+
+  @override
+  String get koryMqOnPokou => 'Sur Pokou';
+
+  @override
+  String get koryMqRemoveDeputy => 'Retirer le rôle de suppléant';
+
+  @override
+  String get koryMqRemoveMember => 'Retirer de la tontine';
+
+  @override
+  String koryMqAndOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'et $count autres',
+      one: 'et 1 autre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get koryMqRemindersTitle => 'Rappels de cette cotisation';
+
+  @override
+  String get koryMqRemindersSub => 'J−2, jour J et relance J+1';
 }
