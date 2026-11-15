@@ -15211,6 +15211,108 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.'**
   String get courierRejectedBody;
+
+  /// No description provided for @koryMqVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'vérifié'**
+  String get koryMqVerified;
+
+  /// No description provided for @koryMqCollectorLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecteur : {name} · {wallet} · vérifié par code'**
+  String koryMqCollectorLine(String name, String wallet);
+
+  /// No description provided for @koryMqBeneficiaryLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéficiaire : {name}'**
+  String koryMqBeneficiaryLine(String name);
+
+  /// No description provided for @koryMqOpenOperatorApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir l’application {operator}'**
+  String koryMqOpenOperatorApp(String operator);
+
+  /// No description provided for @koryMqDialUssd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Composer le code USSD'**
+  String get koryMqDialUssd;
+
+  /// No description provided for @koryMqPrefilled.
+  ///
+  /// In fr, this message translates to:
+  /// **'prérempli'**
+  String get koryMqPrefilled;
+
+  /// No description provided for @koryMqCheckWalletOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie dans ton application {operator} ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.'**
+  String koryMqCheckWalletOf(String operator);
+
+  /// No description provided for @koryMqRoundSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · tour {current} sur {total}'**
+  String koryMqRoundSubtitle(String title, String current, String total);
+
+  /// No description provided for @koryMqAmountConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} confirmés'**
+  String koryMqAmountConfirmed(String amount);
+
+  /// No description provided for @koryMqOnExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {amount} attendus'**
+  String koryMqOnExpected(String amount);
+
+  /// No description provided for @koryMqTimesStake.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} × {amount}'**
+  String koryMqTimesStake(String count, String amount);
+
+  /// No description provided for @koryMqLeveeCounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'{confirmed} confirmées · {toConfirm} à confirmer · {late} en retard'**
+  String koryMqLeveeCounts(String confirmed, String toConfirm, String late);
+
+  /// No description provided for @koryMqReminded.
+  ///
+  /// In fr, this message translates to:
+  /// **'relance {when}'**
+  String koryMqReminded(String when);
+
+  /// No description provided for @koryMqThisMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'ce matin'**
+  String get koryMqThisMorning;
+
+  /// No description provided for @koryMqTodayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui à {time}'**
+  String koryMqTodayAt(String time);
+
+  /// No description provided for @koryMqYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier'**
+  String get koryMqYesterday;
+
+  /// No description provided for @koryMqOnDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'le {day}'**
+  String koryMqOnDay(String day);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -293,6 +293,10 @@ def _entry_json(db: Session, entry: KoryEntry, viewer_id: int, pot: KoryPot) -> 
     if viewer_id == entry.contributor_id or can_review:
         data["wallet_reference"] = entry.wallet_reference
         data["proof_media_id"] = entry.proof_media_id
+        # KOR-4 : « Flooz · réf. … » — le numéro masqué de l'auteur suffit à
+        # l'application pour reconnaître son opérateur, sans le révéler.
+        contributor = db.query(User).filter(User.id == entry.contributor_id).first()
+        data["contributor_phone_masked"] = _mask(contributor.phone) if contributor and contributor.phone else None
     else:
         data["proof_media_id"] = None
     return data

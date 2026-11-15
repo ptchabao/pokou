@@ -9084,4 +9084,79 @@ class LIt extends L {
   @override
   String get courierRejectedBody =>
       'Il team Pokou non ha accettato la tua candidatura come corriere. Puoi scrivere al supporto per saperne di più.';
+
+  @override
+  String get koryMqVerified => 'vérifié';
+
+  @override
+  String koryMqCollectorLine(String name, String wallet) {
+    return 'Collecteur : $name · $wallet · vérifié par code';
+  }
+
+  @override
+  String koryMqBeneficiaryLine(String name) {
+    return 'Bénéficiaire : $name';
+  }
+
+  @override
+  String koryMqOpenOperatorApp(String operator) {
+    return 'Ouvrir l’application $operator';
+  }
+
+  @override
+  String get koryMqDialUssd => 'Composer le code USSD';
+
+  @override
+  String get koryMqPrefilled => 'prérempli';
+
+  @override
+  String koryMqCheckWalletOf(String operator) {
+    return 'Vérifie dans ton application $operator ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.';
+  }
+
+  @override
+  String koryMqRoundSubtitle(String title, String current, String total) {
+    return '$title · tour $current sur $total';
+  }
+
+  @override
+  String koryMqAmountConfirmed(String amount) {
+    return '$amount confirmés';
+  }
+
+  @override
+  String koryMqOnExpected(String amount) {
+    return 'sur $amount attendus';
+  }
+
+  @override
+  String koryMqTimesStake(String count, String amount) {
+    return '$count × $amount';
+  }
+
+  @override
+  String koryMqLeveeCounts(String confirmed, String toConfirm, String late) {
+    return '$confirmed confirmées · $toConfirm à confirmer · $late en retard';
+  }
+
+  @override
+  String koryMqReminded(String when) {
+    return 'relance $when';
+  }
+
+  @override
+  String get koryMqThisMorning => 'ce matin';
+
+  @override
+  String koryMqTodayAt(String time) {
+    return 'aujourd’hui à $time';
+  }
+
+  @override
+  String get koryMqYesterday => 'hier';
+
+  @override
+  String koryMqOnDay(String day) {
+    return 'le $day';
+  }
 }

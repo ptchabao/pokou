@@ -9,7 +9,9 @@ import '../../../l10n/app_localizations.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
 import 'kory_tontine_screens.dart';
+import 'kory_home_widgets.dart';
 import 'kory_ui.dart';
+import 'kory_wallet.dart';
 
 /// Confirmer ou contester une contribution — la même tuile partout : écran
 /// « À confirmer » (KOR-4), levée de tontine (KOR-27), suivi d'une
@@ -105,7 +107,9 @@ class _KoryReviewTileState extends ConsumerState<KoryReviewTile> {
     final l = L.of(context);
     final entry = widget.entry;
     final proof = entry.proofMediaId;
+    final operator = KoryWallet.of(entry.contributorPhoneMasked)?.operator;
     final subtitle = [
+      ?operator,
       if (entry.walletReference != null)
         l.koryXRefShort(entry.walletReference!),
       if (entry.periodLabel != null) entry.periodLabel!,
@@ -149,25 +153,18 @@ class _KoryReviewTileState extends ConsumerState<KoryReviewTile> {
                 ),
               ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: KoryButton(
-                    quiet: true,
-                    label: l.koryReject,
-                    onPressed: _busy ? null : () => _review(false),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: KoryButton(
-                    icon: Icons.check,
-                    label: l.koryConfirm,
-                    busy: _busy,
-                    onPressed: () => _review(true),
-                  ),
-                ),
-              ],
+            // « Reçu » plein à gauche, « Pas reçu » à contour à droite.
+            KoryButtonPair(
+              first: KoryButton(
+                label: l.koryConfirm,
+                busy: _busy,
+                onPressed: () => _review(true),
+              ),
+              second: KoryButton(
+                outlined: true,
+                label: l.koryReject,
+                onPressed: _busy ? null : () => _review(false),
+              ),
             ),
           ],
         ),
@@ -203,18 +200,28 @@ class KoryReviewScreen extends ConsumerWidget {
         ? pot.rounds.where((r) => r.isCurrent).firstOrNull
         : null;
     final myLevee = round != null && pot.isCollector;
+    final operator = KoryWallet.of(pot.collectorPhone)?.operator;
+    final late = [
+      if (round != null)
+        for (final c in round.contributors)
+          if (c.status == 'LATE') c.name ?? '—',
+    ];
     return KoryPage(
       title: myLevee
           ? l.koryXMyLeveeOf(koryMonth(context, round.dueAt ?? DateTime.now()))
           : l.koryXToConfirmCount('${pending.length}'),
       subtitle: myLevee
-          ? '${pot.title} · ${l.koryHomeRoundOf('${round.number}', '${pot.rounds.length}')}'
+          ? l.koryMqRoundSubtitle(
+              pot.title,
+              '${round.number}',
+              '${pot.rounds.length}',
+            )
           : l.koryXOrganizerView(pot.title),
       footer: pot.isTontine
           ? KoryFooter(
               children: [
                 KoryButton(
-                  quiet: true,
+                  outlined: true,
                   label: l.koryXSeeReport,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(
@@ -234,26 +241,22 @@ class KoryReviewScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             if (myLevee) ...[
-              KoryCard(
-                child: KoryFigure(
-                  label: l.koryXYouReceive,
-                  amount: round.confirmedTotal,
-                  caption: [
-                    l.koryXConfirmedOnExpected(formatFcfa(round.expectedTotal)),
-                    l.koryXRoundCounts(
-                      '${round.confirmedCount}',
-                      '${round.declaredCount}',
-                      '${round.lateCount}',
-                    ),
-                  ].join('\n'),
-                ),
-              ),
+              _LeveeCard(pot: pot, round: round, toConfirm: pending.length),
               const SizedBox(height: 12),
             ],
             KoryNotice(
-              text: myLevee ? l.koryXOnlyYouConfirm : l.koryXCheckWallet,
+              text: myLevee
+                  ? l.koryXOnlyYouConfirm
+                  : operator == null
+                  ? l.koryXCheckWallet
+                  : l.koryMqCheckWalletOf(operator),
             ),
-            KorySection(l.koryXToConfirmCount('${pending.length}')),
+            // Le titre de l'écran compte déjà ce qui reste à confirmer : pas
+            // d'en-tête répété, sauf sur la levée (dont le titre est le mois).
+            if (myLevee)
+              KorySection(l.koryXToConfirmCount('${pending.length}'))
+            else
+              const SizedBox(height: 12),
             if (pending.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -265,14 +268,21 @@ class KoryReviewScreen extends ConsumerWidget {
             else
               for (final entry in pending)
                 KoryReviewTile(key: ValueKey(entry.id), pot: pot, entry: entry),
-            if (round != null && round.lateCount > 0) ...[
-              KorySection(l.koryXLateCount('${round.lateCount}')),
-              Text(
-                [
-                  for (final c in round.contributors)
-                    if (c.status == 'LATE') c.name ?? '—',
-                ].join(', '),
-                style: TextStyle(color: AppColors.textSecondary),
+            if (late.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              KoryCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                child: KoryLine(
+                  l.koryXLateCount('${late.length}'),
+                  [
+                    late.join(', '),
+                    if (pot.remindedAt != null)
+                      l.koryMqReminded(koryWhen(context, pot.remindedAt!)),
+                  ].join(' · '),
+                ),
               ),
             ],
             const SizedBox(height: 16),
@@ -282,6 +292,74 @@ class KoryReviewScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// KOR-27 : ce que je reçois ce tour — confirmé, attendu, et où en est
+/// chacun.
+class _LeveeCard extends StatelessWidget {
+  const _LeveeCard({
+    required this.pot,
+    required this.round,
+    required this.toConfirm,
+  });
+
+  final KoryPot pot;
+  final KoryRound round;
+  final int toConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final stake = pot.amountPerMember;
+    return KoryCard(
+      color: AppColors.terracottaTint.withValues(alpha: 0.35),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.koryXYouReceive,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              l.koryMqAmountConfirmed(formatFcfa(round.confirmedTotal)),
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          Text(
+            [
+              l.koryMqOnExpected(formatFcfa(round.expectedTotal)),
+              if (stake != null && round.expectedCount > 0)
+                l.koryMqTimesStake('${round.expectedCount}', formatFcfa(stake)),
+            ].join(' · '),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          if (round.expectedTotal > 0) ...[
+            const SizedBox(height: 10),
+            KoryProgressBar(value: round.confirmedTotal / round.expectedTotal),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            l.koryMqLeveeCounts(
+              '${round.confirmedCount}',
+              '$toConfirm',
+              '${round.lateCount}',
+            ),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+        ],
       ),
     );
   }

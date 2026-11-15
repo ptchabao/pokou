@@ -2516,5 +2516,22 @@
   "koryFrozenTitle": "Collection suspended by the Pokou team",
   "koryFrozenBody": "While it is being checked, you can view it but nothing can change. Reason: {reason}",
   "courierStatusRejected": "Application declined",
-  "courierRejectedBody": "The Pokou team did not accept your courier application. You can contact support to learn more."
+  "courierRejectedBody": "The Pokou team did not accept your courier application. You can contact support to learn more.",
+  "koryMqVerified": "verified",
+  "koryMqCollectorLine": "Collector: {name} · {wallet} · verified by code",
+  "koryMqBeneficiaryLine": "Beneficiary: {name}",
+  "koryMqOpenOperatorApp": "Open the {operator} app",
+  "koryMqDialUssd": "Dial the USSD code",
+  "koryMqPrefilled": "prefilled",
+  "koryMqCheckWalletOf": "Check in your {operator} app or in the operator’s SMS. Every answer is timestamped in the log.",
+  "koryMqRoundSubtitle": "{title} · round {current} of {total}",
+  "koryMqAmountConfirmed": "{amount} confirmed",
+  "koryMqOnExpected": "out of {amount} expected",
+  "koryMqTimesStake": "{count} × {amount}",
+  "koryMqLeveeCounts": "{confirmed} confirmed · {toConfirm} to confirm · {late} late",
+  "koryMqReminded": "reminded {when}",
+  "koryMqThisMorning": "this morning",
+  "koryMqTodayAt": "today at {time}",
+  "koryMqYesterday": "yesterday",
+  "koryMqOnDay": "on {day}"
 }

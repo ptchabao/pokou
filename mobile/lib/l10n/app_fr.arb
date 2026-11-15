@@ -4730,5 +4730,124 @@
     }
   },
   "courierStatusRejected": "Candidature refusée",
-  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus."
+  "courierRejectedBody": "L’équipe Pokou n’a pas retenu ta candidature de coursier. Tu peux écrire au support pour en savoir plus.",
+  "koryMqVerified": "vérifié",
+  "koryMqCollectorLine": "Collecteur : {name} · {wallet} · vérifié par code",
+  "@koryMqCollectorLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "wallet": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqBeneficiaryLine": "Bénéficiaire : {name}",
+  "@koryMqBeneficiaryLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqOpenOperatorApp": "Ouvrir l’application {operator}",
+  "@koryMqOpenOperatorApp": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqDialUssd": "Composer le code USSD",
+  "koryMqPrefilled": "prérempli",
+  "koryMqCheckWalletOf": "Vérifie dans ton application {operator} ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.",
+  "@koryMqCheckWalletOf": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqRoundSubtitle": "{title} · tour {current} sur {total}",
+  "@koryMqRoundSubtitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqAmountConfirmed": "{amount} confirmés",
+  "@koryMqAmountConfirmed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqOnExpected": "sur {amount} attendus",
+  "@koryMqOnExpected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqTimesStake": "{count} × {amount}",
+  "@koryMqTimesStake": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqLeveeCounts": "{confirmed} confirmées · {toConfirm} à confirmer · {late} en retard",
+  "@koryMqLeveeCounts": {
+    "placeholders": {
+      "confirmed": {
+        "type": "String"
+      },
+      "toConfirm": {
+        "type": "String"
+      },
+      "late": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqReminded": "relance {when}",
+  "@koryMqReminded": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqThisMorning": "ce matin",
+  "koryMqTodayAt": "aujourd’hui à {time}",
+  "@koryMqTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "koryMqYesterday": "hier",
+  "koryMqOnDay": "le {day}",
+  "@koryMqOnDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  }
 }

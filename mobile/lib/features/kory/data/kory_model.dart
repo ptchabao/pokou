@@ -787,7 +787,12 @@ class KoryEntry {
     this.amountHidden = false,
     this.reviewerName,
     this.reviewedAt,
+    this.contributorPhoneMasked,
   });
+
+  /// « +228 96 •• •• 12 », pour celui qui confirme et l'auteur seulement :
+  /// assez pour reconnaître l'opérateur de l'envoi (KOR-4).
+  final String? contributorPhoneMasked;
 
   /// KOR-6 : montant masqué aux autres membres ([amount] vaut alors 0).
   final bool amountHidden;
@@ -841,6 +846,7 @@ class KoryEntry {
     canReview: json['can_review'] as bool? ?? false,
     reviewReason: json['review_reason'] as String?,
     proofMediaId: json['proof_media_id'] as int?,
+    contributorPhoneMasked: json['contributor_phone_masked'] as String?,
   );
 }
 

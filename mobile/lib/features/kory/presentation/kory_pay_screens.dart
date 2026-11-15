@@ -31,6 +31,25 @@ Future<void> openKoryContribute(
   }
 }
 
+/// Ouvre directement « J'ai envoyé » (KOR-3) : le versement est déjà parti
+/// (KOR-16 « J'ai déjà envoyé »). Au retour, relit la collecte.
+Future<void> openKoryDeclare(
+  BuildContext context,
+  WidgetRef ref,
+  KoryPot pot, {
+  required int amount,
+}) async {
+  final declared = await Navigator.of(context).push<bool>(
+    MaterialPageRoute(
+      builder: (_) => KoryDeclareScreen(pot: pot, amount: amount),
+    ),
+  );
+  if (declared == true && context.mounted) {
+    refreshKory(ref, potId: pot.id);
+    koryToast(context, L.of(context).koryDeclared);
+  }
+}
+
 /// Le montant proposé : ce que l'échéance, le tour ou l'engagement attend.
 int _suggested(KoryPot pot) {
   final next = pot.cotisation?.myNext;
@@ -152,6 +171,7 @@ class _KoryContributeScreenState extends State<KoryContributeScreen> {
               children: [
                 KoryPersonRow(
                   name: _recipient(pot),
+                  trailing: const KoryVerifiedPill(),
                   subtitle: pot.isCollector && !pot.isTontine
                       ? l.koryCollectorIsYou
                       : wallet?.label,
@@ -192,24 +212,33 @@ class _KoryContributeScreenState extends State<KoryContributeScreen> {
           const SizedBox(height: 12),
           KoryNotice(tone: KoryTone.warning, text: l.koryXNoTransferNotice),
           const SizedBox(height: 16),
-          if (wallet?.ussd != null) ...[
-            KoryButton(
-              quiet: true,
-              icon: Icons.dialpad,
-              label: l.koryXDialUssd(wallet!.operator ?? ''),
-              onPressed: () async {
-                final ok = await wallet.dialUssd();
-                if (!ok && context.mounted) koryFailed(context);
-              },
-            ),
-            const SizedBox(height: 10),
-          ],
+          // Les trois chemins vers son wallet, en lignes à chevron : l'appli
+          // de l'opérateur, son menu USSD, ou le numéro à coller ailleurs.
           if (wallet != null)
-            KoryButton(
-              quiet: true,
-              icon: Icons.copy,
-              label: l.koryCopyPhone,
-              onPressed: () => _copy(wallet.phone),
+            KoryRowsCard(
+              children: [
+                if (wallet.operator != null)
+                  KoryChevronRow(
+                    label: l.koryMqOpenOperatorApp(wallet.operator!),
+                    onTap: () async {
+                      final ok = await wallet.openApp();
+                      if (!ok && context.mounted) koryFailed(context);
+                    },
+                  ),
+                if (wallet.ussd != null)
+                  KoryChevronRow(
+                    label: l.koryMqDialUssd,
+                    trailing: l.koryMqPrefilled,
+                    onTap: () async {
+                      final ok = await wallet.dialUssd();
+                      if (!ok && context.mounted) koryFailed(context);
+                    },
+                  ),
+                KoryChevronRow(
+                  label: l.koryCopyPhone,
+                  onTap: () => _copy(wallet.phone),
+                ),
+              ],
             ),
         ],
       ),

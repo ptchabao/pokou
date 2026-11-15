@@ -2516,5 +2516,22 @@
   "koryFrozenTitle": "Colecta suspendida por el equipo de Pokou",
   "koryFrozenBody": "Mientras se verifica, puedes consultarla pero nada cambia. Motivo: {reason}",
   "courierStatusRejected": "Solicitud rechazada",
-  "courierRejectedBody": "El equipo de Pokou no aceptó tu solicitud de repartidor. Puedes escribir al soporte para saber más."
+  "courierRejectedBody": "El equipo de Pokou no aceptó tu solicitud de repartidor. Puedes escribir al soporte para saber más.",
+  "koryMqVerified": "vérifié",
+  "koryMqCollectorLine": "Collecteur : {name} · {wallet} · vérifié par code",
+  "koryMqBeneficiaryLine": "Bénéficiaire : {name}",
+  "koryMqOpenOperatorApp": "Ouvrir l’application {operator}",
+  "koryMqDialUssd": "Composer le code USSD",
+  "koryMqPrefilled": "prérempli",
+  "koryMqCheckWalletOf": "Vérifie dans ton application {operator} ou dans le SMS de l’opérateur. Chaque réponse est horodatée dans le journal.",
+  "koryMqRoundSubtitle": "{title} · tour {current} sur {total}",
+  "koryMqAmountConfirmed": "{amount} confirmés",
+  "koryMqOnExpected": "sur {amount} attendus",
+  "koryMqTimesStake": "{count} × {amount}",
+  "koryMqLeveeCounts": "{confirmed} confirmées · {toConfirm} à confirmer · {late} en retard",
+  "koryMqReminded": "relance {when}",
+  "koryMqThisMorning": "ce matin",
+  "koryMqTodayAt": "aujourd’hui à {time}",
+  "koryMqYesterday": "hier",
+  "koryMqOnDay": "le {day}"
 }
