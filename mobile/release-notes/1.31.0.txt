@@ -1,0 +1,30 @@
+<fr-FR>
+• Toute l'application suit les nouvelles maquettes : inscription, accueil, discussions, appels, statuts, réglages, Kory, Honam et Assimé.
+• Plus de sécurité : alerte sur les messages d'inconnus, signalement, liste des contacts bloqués, aucun numéro affiché.
+• Pokou certifié : nouveau badge, mode preuve avec export PDF et empreinte d'intégrité.
+• Honam : suivi de commande revu, espace coursier complet et espace officine sur téléphone.
+</fr-FR>
+<en-US>
+• The whole app follows the new designs: sign-up, home, chats, calls, statuses, settings, Kory, Honam and Assimé.
+• Safer: warning on messages from strangers, reporting, blocked contacts list, no phone number shown.
+• Pokou certified: new badge, proof mode with PDF export and integrity fingerprint.
+• Honam: redesigned order tracking, full courier space and a pharmacy space on the phone.
+</en-US>
+<es-ES>
+• Toda la aplicación sigue los nuevos diseños: registro, inicio, chats, llamadas, estados, ajustes, Kory, Honam y Assimé.
+• Más seguridad: aviso en mensajes de desconocidos, denuncias, lista de contactos bloqueados, ningún número visible.
+• Pokou certificado: nueva insignia, modo prueba con exportación PDF y huella de integridad.
+• Honam: seguimiento de pedidos renovado, espacio completo para repartidores y espacio farmacia en el teléfono.
+</es-ES>
+<it-IT>
+• Tutta l'app segue i nuovi design: registrazione, home, chat, chiamate, stati, impostazioni, Kory, Honam e Assimé.
+• Più sicurezza: avviso sui messaggi di sconosciuti, segnalazioni, elenco dei contatti bloccati, nessun numero mostrato.
+• Pokou certificato: nuovo badge, modalità prova con esportazione PDF e impronta di integrità.
+• Honam: tracciamento ordini rinnovato, spazio corrieri completo e spazio farmacia sul telefono.
+</it-IT>
+<ru-RU>
+• Всё приложение соответствует новому дизайну: регистрация, главная, чаты, звонки, статусы, настройки, Kory, Honam и Assimé.
+• Больше безопасности: предупреждение о сообщениях от незнакомцев, жалобы, список заблокированных, номера не показываются.
+• Pokou certifié: новый значок, режим доказательства с экспортом в PDF и отпечатком целостности.
+• Honam: обновлённое отслеживание заказов, полный раздел курьера и раздел аптеки в телефоне.
+</ru-RU>
