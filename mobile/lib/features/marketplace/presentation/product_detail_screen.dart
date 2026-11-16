@@ -143,18 +143,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   Future<void> _writeToSeller() async {
     setState(() => _contacting = true);
     try {
-      await ref
-          .read(marketplaceRepositoryProvider)
-          .shareProduct(
-            productId: _product.id,
-            message: L
-                .of(context)
-                .productInterestedMessage(
-                  _product.name,
-                  _product.price,
-                  _product.currency,
-                ),
-          );
+      // Assimé 4 : rien ne part d'office. La discussion s'ouvre sur la
+      // fiche épinglée et des réponses rapides ; la fiche est envoyée au
+      // vendeur avec le premier message de l'acheteur.
       final myUserId = ref.read(authControllerProvider).user?.id;
       if (!mounted || myUserId == null) return;
       await Navigator.of(context).push(

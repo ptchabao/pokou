@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/product_model.dart';
 import '../../modules/shared/module_ui.dart';
+import 'assime_promote.dart';
 import 'assime_sale_screens.dart';
 import 'marketplace_controller.dart';
 import 'product_editor.dart';
@@ -240,32 +241,8 @@ mixin MarketplaceActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     if (boostingProductIds.contains(product.id)) return;
     // 3 jours : en tête des résultats ; 7 jours : résultats et bande des
     // statuts (maquette Assimé 10).
-    final l = L.of(context);
-    final days = await showModalBottomSheet<int>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(
-                l.marketBoost,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.trending_up),
-              title: Text(l.marketBoost3),
-              onTap: () => Navigator.pop(sheetContext, 3),
-            ),
-            ListTile(
-              leading: const Icon(Icons.campaign_outlined),
-              title: Text(l.marketBoost7),
-              onTap: () => Navigator.pop(sheetContext, 7),
-            ),
-          ],
-        ),
-      ),
+    final days = await Navigator.of(context).push<int>(
+      MaterialPageRoute(builder: (_) => AssimePromoteScreen(product: product)),
     );
     if (days == null || !mounted) return;
     setState(() => boostingProductIds.add(product.id));
