@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4056,7 +4055,8 @@ class LIt extends L {
       locale: localeName,
       other:
           '$count messaggi trattenuti dalla Modalità Scudo: scorri verso il basso per mostrarli',
-      one: '1 messaggio trattenuto dalla Modalità Scudo: scorri verso il basso per mostrarlo',
+      one:
+          '1 messaggio trattenuto dalla Modalità Scudo: scorri verso il basso per mostrarlo',
     );
     return '$_temp0';
   }
@@ -14761,7 +14761,8 @@ class LIt extends L {
       locale: localeName,
       other:
           'Ricevi $count corse in omaggio quando il tuo amico completa la prima consegna. L’invito va solo a maggiorenni, in una città dove Honam è aperto.',
-      one: 'Ricevi 1 corsa in omaggio quando il tuo amico completa la prima consegna. L’invito va solo a maggiorenni, in una città dove Honam è aperto.',
+      one:
+          'Ricevi 1 corsa in omaggio quando il tuo amico completa la prima consegna. L’invito va solo a maggiorenni, in una città dove Honam è aperto.',
     );
     return '$_temp0';
   }

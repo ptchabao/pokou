@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4048,7 +4047,8 @@ class LEs extends L {
       locale: localeName,
       other:
           '$count mensajes retenidos por el Modo Escudo: desliza hacia abajo para verlos',
-      one: '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
+      one:
+          '1 mensaje retenido por el Modo Escudo: desliza hacia abajo para verlo',
     );
     return '$_temp0';
   }
@@ -14741,7 +14741,8 @@ class LEs extends L {
       locale: localeName,
       other:
           'Recibes $count carreras gratis cuando tu amigo termina su primera entrega. La invitación solo llega a mayores de 18 años, en una ciudad donde Honam está abierto.',
-      one: 'Recibes 1 carrera gratis cuando tu amigo termina su primera entrega. La invitación solo llega a mayores de 18 años, en una ciudad donde Honam está abierto.',
+      one:
+          'Recibes 1 carrera gratis cuando tu amigo termina su primera entrega. La invitación solo llega a mayores de 18 años, en una ciudad donde Honam está abierto.',
     );
     return '$_temp0';
   }

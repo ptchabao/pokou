@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14683,7 +14682,8 @@ class LEn extends L {
       locale: localeName,
       other:
           'You get $count free rides when your friend completes their first delivery. The invitation only goes to people aged 18 and over, in a city where Honam is open.',
-      one: 'You get 1 free ride when your friend completes their first delivery. The invitation only goes to people aged 18 and over, in a city where Honam is open.',
+      one:
+          'You get 1 free ride when your friend completes their first delivery. The invitation only goes to people aged 18 and over, in a city where Honam is open.',
     );
     return '$_temp0';
   }

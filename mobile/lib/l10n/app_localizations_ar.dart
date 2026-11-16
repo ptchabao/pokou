@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14677,7 +14676,8 @@ class LAr extends L {
       locale: localeName,
       other:
           'تحصل على $count رحلات مجانية عندما يُنهي صديقك أول توصيل له. تُرسل الدعوة فقط لمن بلغوا 18 عامًا فأكثر، في مدينة يعمل فيها Honam.',
-      one: 'تحصل على رحلة مجانية واحدة عندما يُنهي صديقك أول توصيل له. تُرسل الدعوة فقط لمن بلغوا 18 عامًا فأكثر، في مدينة يعمل فيها Honam.',
+      one:
+          'تحصل على رحلة مجانية واحدة عندما يُنهي صديقك أول توصيل له. تُرسل الدعوة فقط لمن بلغوا 18 عامًا فأكثر، في مدينة يعمل فيها Honam.',
     );
     return '$_temp0';
   }
