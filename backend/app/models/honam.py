@@ -63,6 +63,46 @@ class PharmacyStaff(Base):
     role = Column(String(12), default="COLLABORATEUR", nullable=False)  # TITULAIRE|COLLABORATEUR
 
 
+class PharmacyApplication(Base):
+    """« Référencer votre officine » (maquettes Officine 14 à 16).
+
+    Le pharmacien remplit le dossier depuis l'application : nom, adresse,
+    n° d'autorisation d'exercice, wallet de réception, arrêté d'autorisation
+    d'ouverture, et la formule choisie. Le support vérifie l'autorisation et
+    le wallet sous 48 h, comme un dossier Pokou certifié Pro ; l'officine
+    n'est créée qu'à la validation, puis s'ouvre au paiement de la formule
+    depuis l'espace officine.
+    """
+    __tablename__ = "honam_pharmacy_applications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    country = Column(String(2), nullable=False, index=True)
+    name = Column(String(160), nullable=False)
+    address = Column(String(255), nullable=False)
+    #: Le n° d'autorisation d'exercice, « tel qu'il figure sur l'arrêté ».
+    license_number = Column(String(64), nullable=False)
+    wallet_phone = Column(String(32), nullable=False)
+    #: L'arrêté d'autorisation d'ouverture (photo ou PDF). Visible du seul
+    #: support, jamais renvoyé à l'application.
+    authorization_media_id = Column(Integer, ForeignKey("media_assets.id", ondelete="SET NULL"), nullable=True)
+    #: WETRI | EPE : la formule payée une fois le dossier validé.
+    plan = Column(String(8), nullable=False)
+    #: La position du téléphone à l'envoi, si la personne l'a permise ; le
+    #: support peut la corriger à la validation (l'annuaire en a besoin).
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    #: PENDING (en vérification) | APPROVED (officine créée) | REJECTED
+    status = Column(String(12), nullable=False, default="PENDING", index=True)
+    review_note = Column(String(500), nullable=True)
+    submitted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    #: L'engagement affiché : décision sous 48 h.
+    review_due_at = Column(DateTime, nullable=False)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewer_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    pharmacy_id = Column(Integer, ForeignKey("honam_pharmacies.id", ondelete="SET NULL"), nullable=True)
+
+
 class HonamOrder(Base):
     """Une commande, de l'ordonnance à la remise du colis.
 

@@ -24186,6 +24186,264 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{Il reçoit 1 course offerte quand tu termines ta première livraison} other{Il reçoit {count} courses offertes quand tu termines ta première livraison}}'**
   String courierInviteRecommendedCaption(int count);
+
+  /// No description provided for @officineRegEntryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référencer mon officine'**
+  String get officineRegEntryTitle;
+
+  /// No description provided for @officineRegEntrySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevez les ordonnances des patients proches'**
+  String get officineRegEntrySubtitle;
+
+  /// No description provided for @officineRegEntryPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier en cours de vérification'**
+  String get officineRegEntryPending;
+
+  /// No description provided for @officineRegEntryRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier non retenu : corrigez-le et renvoyez-le'**
+  String get officineRegEntryRejected;
+
+  /// No description provided for @officineRegStep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape {step} sur 3'**
+  String officineRegStep(int step);
+
+  /// No description provided for @officineRegInfoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référencer votre officine'**
+  String get officineRegInfoTitle;
+
+  /// No description provided for @officineRegName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de l’officine'**
+  String get officineRegName;
+
+  /// No description provided for @officineRegAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse'**
+  String get officineRegAddress;
+
+  /// No description provided for @officineRegLicense.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° d’autorisation d’exercice'**
+  String get officineRegLicense;
+
+  /// No description provided for @officineRegLicenseHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tel qu’il figure sur l’arrêté'**
+  String get officineRegLicenseHint;
+
+  /// No description provided for @officineRegWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wallet de réception'**
+  String get officineRegWallet;
+
+  /// No description provided for @officineRegWalletHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro mobile money'**
+  String get officineRegWalletHint;
+
+  /// No description provided for @officineRegWalletHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les patients vous paient sur ce numéro. Il doit être au nom de l’officine.'**
+  String get officineRegWalletHelp;
+
+  /// No description provided for @officineRegAuthorization.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisation d’ouverture'**
+  String get officineRegAuthorization;
+
+  /// No description provided for @officineRegAuthorizationHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo ou PDF'**
+  String get officineRegAuthorizationHint;
+
+  /// No description provided for @officineRegAuthorizationAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutée'**
+  String get officineRegAuthorizationAdded;
+
+  /// No description provided for @officineRegMobilePaymentNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honam est réservé aux pharmacies qui acceptent le paiement mobile.'**
+  String get officineRegMobilePaymentNote;
+
+  /// No description provided for @officineRegContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get officineRegContinue;
+
+  /// No description provided for @officineRegRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier non retenu : {reason}'**
+  String officineRegRejected(String reason);
+
+  /// No description provided for @officineRegPlanTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre formule'**
+  String get officineRegPlanTitle;
+
+  /// No description provided for @officineRegPerMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'au mois'**
+  String get officineRegPerMonth;
+
+  /// No description provided for @officineRegAmountHt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} HT'**
+  String officineRegAmountHt(String amount);
+
+  /// No description provided for @officineRegWetriCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{ttc} TTC par mois, TVA de {vat} %'**
+  String officineRegWetriCaption(String ttc, int vat);
+
+  /// No description provided for @officineRegEpeCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'au lieu de {instead}, soit {ttc} TTC par an'**
+  String officineRegEpeCaption(String instead, String ttc);
+
+  /// No description provided for @officineRegBenefitVisible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre officine visible des patients proches'**
+  String get officineRegBenefitVisible;
+
+  /// No description provided for @officineRegBenefitPrescriptions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordonnances et devis sur téléphone'**
+  String get officineRegBenefitPrescriptions;
+
+  /// No description provided for @officineRegBenefitCouriers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les coursiers Honam de votre zone'**
+  String get officineRegBenefitCouriers;
+
+  /// No description provided for @officineRegBenefitInvoices.
+  ///
+  /// In fr, this message translates to:
+  /// **'Factures CashPay pour votre comptabilité'**
+  String get officineRegBenefitInvoices;
+
+  /// No description provided for @officineRegNoPaymentYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement avant la vérification de votre officine. Vous payez ensuite par CashPay : mobile money ou carte.'**
+  String get officineRegNoPaymentYet;
+
+  /// No description provided for @officineRegSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer pour vérification'**
+  String get officineRegSend;
+
+  /// No description provided for @officineRegPendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification en cours'**
+  String get officineRegPendingTitle;
+
+  /// No description provided for @officineRegPendingText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le support de Pokou vérifie votre autorisation et votre wallet sous {hours} h. Vous recevez une notification dès la décision.'**
+  String officineRegPendingText(int hours);
+
+  /// No description provided for @officineRegStepSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier envoyé'**
+  String get officineRegStepSent;
+
+  /// No description provided for @officineRegToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui, {time}'**
+  String officineRegToday(String time);
+
+  /// No description provided for @officineRegOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le {date} à {time}'**
+  String officineRegOn(String date, String time);
+
+  /// No description provided for @officineRegStepReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification par le support'**
+  String get officineRegStepReview;
+
+  /// No description provided for @officineRegDueBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au plus tard le {date} à {time}'**
+  String officineRegDueBy(String date, String time);
+
+  /// No description provided for @officineRegStepPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement {plan}, puis ouverture'**
+  String officineRegStepPayment(String plan);
+
+  /// No description provided for @officineRegPaymentAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} TTC par CashPay'**
+  String officineRegPaymentAmount(String amount);
+
+  /// No description provided for @officineRegPrepareNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attendant, préparez votre comptoir : l’affiche QR et la liste de vos livreurs habituels.'**
+  String get officineRegPrepareNote;
+
+  /// No description provided for @officineRegDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get officineRegDone;
+
+  /// No description provided for @officineRegPickPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une photo'**
+  String get officineRegPickPhoto;
+
+  /// No description provided for @officineRegPickPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un PDF'**
+  String get officineRegPickPdf;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

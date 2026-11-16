@@ -9225,5 +9225,137 @@
         "type": "int"
       }
     }
-  }
+  },
+  "officineRegEntryTitle": "Référencer mon officine",
+  "officineRegEntrySubtitle": "Recevez les ordonnances des patients proches",
+  "officineRegEntryPending": "Dossier en cours de vérification",
+  "officineRegEntryRejected": "Dossier non retenu : corrigez-le et renvoyez-le",
+  "officineRegStep": "Étape {step} sur 3",
+  "@officineRegStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "officineRegInfoTitle": "Référencer votre officine",
+  "officineRegName": "Nom de l’officine",
+  "officineRegAddress": "Adresse",
+  "officineRegLicense": "N° d’autorisation d’exercice",
+  "officineRegLicenseHint": "Tel qu’il figure sur l’arrêté",
+  "officineRegWallet": "Wallet de réception",
+  "officineRegWalletHint": "Numéro mobile money",
+  "officineRegWalletHelp": "Les patients vous paient sur ce numéro. Il doit être au nom de l’officine.",
+  "officineRegAuthorization": "Autorisation d’ouverture",
+  "officineRegAuthorizationHint": "Photo ou PDF",
+  "officineRegAuthorizationAdded": "Ajoutée",
+  "officineRegMobilePaymentNote": "Honam est réservé aux pharmacies qui acceptent le paiement mobile.",
+  "officineRegContinue": "Continuer",
+  "officineRegRejected": "Dossier non retenu : {reason}",
+  "@officineRegRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegPlanTitle": "Choisissez votre formule",
+  "officineRegPerMonth": "au mois",
+  "officineRegAmountHt": "{amount} HT",
+  "@officineRegAmountHt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegWetriCaption": "{ttc} TTC par mois, TVA de {vat} %",
+  "@officineRegWetriCaption": {
+    "placeholders": {
+      "ttc": {
+        "type": "String"
+      },
+      "vat": {
+        "type": "int"
+      }
+    }
+  },
+  "officineRegEpeCaption": "au lieu de {instead}, soit {ttc} TTC par an",
+  "@officineRegEpeCaption": {
+    "placeholders": {
+      "instead": {
+        "type": "String"
+      },
+      "ttc": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegBenefitVisible": "Votre officine visible des patients proches",
+  "officineRegBenefitPrescriptions": "Ordonnances et devis sur téléphone",
+  "officineRegBenefitCouriers": "Les coursiers Honam de votre zone",
+  "officineRegBenefitInvoices": "Factures CashPay pour votre comptabilité",
+  "officineRegNoPaymentYet": "Aucun paiement avant la vérification de votre officine. Vous payez ensuite par CashPay : mobile money ou carte.",
+  "officineRegSend": "Envoyer pour vérification",
+  "officineRegPendingTitle": "Vérification en cours",
+  "officineRegPendingText": "Le support de Pokou vérifie votre autorisation et votre wallet sous {hours} h. Vous recevez une notification dès la décision.",
+  "@officineRegPendingText": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "officineRegStepSent": "Dossier envoyé",
+  "officineRegToday": "Aujourd’hui, {time}",
+  "@officineRegToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegOn": "Le {date} à {time}",
+  "@officineRegOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegStepReview": "Vérification par le support",
+  "officineRegDueBy": "Au plus tard le {date} à {time}",
+  "@officineRegDueBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegStepPayment": "Paiement {plan}, puis ouverture",
+  "@officineRegStepPayment": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegPaymentAmount": "{amount} TTC par CashPay",
+  "@officineRegPaymentAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "officineRegPrepareNote": "En attendant, préparez votre comptoir : l’affiche QR et la liste de vos livreurs habituels.",
+  "officineRegDone": "Terminé",
+  "officineRegPickPhoto": "Choisir une photo",
+  "officineRegPickPdf": "Choisir un PDF"
 }

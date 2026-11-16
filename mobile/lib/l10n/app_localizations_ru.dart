@@ -14844,4 +14844,163 @@ class LRu extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get officineRegEntryTitle => 'Зарегистрировать мою аптеку';
+
+  @override
+  String get officineRegEntrySubtitle =>
+      'Получайте рецепты от пациентов поблизости';
+
+  @override
+  String get officineRegEntryPending => 'Заявка на проверке';
+
+  @override
+  String get officineRegEntryRejected =>
+      'Заявка отклонена: исправьте её и отправьте снова';
+
+  @override
+  String officineRegStep(int step) {
+    return 'Шаг $step из 3';
+  }
+
+  @override
+  String get officineRegInfoTitle => 'Регистрация аптеки';
+
+  @override
+  String get officineRegName => 'Название аптеки';
+
+  @override
+  String get officineRegAddress => 'Адрес';
+
+  @override
+  String get officineRegLicense => '№ разрешения на деятельность';
+
+  @override
+  String get officineRegLicenseHint => 'Как указано в приказе';
+
+  @override
+  String get officineRegWallet => 'Кошелёк для оплаты';
+
+  @override
+  String get officineRegWalletHint => 'Номер мобильного кошелька';
+
+  @override
+  String get officineRegWalletHelp =>
+      'Пациенты платят вам на этот номер. Он должен быть оформлен на аптеку.';
+
+  @override
+  String get officineRegAuthorization => 'Разрешение на открытие';
+
+  @override
+  String get officineRegAuthorizationHint => 'Фото или PDF';
+
+  @override
+  String get officineRegAuthorizationAdded => 'Добавлено';
+
+  @override
+  String get officineRegMobilePaymentNote =>
+      'Honam доступен только аптекам, принимающим мобильные платежи.';
+
+  @override
+  String get officineRegContinue => 'Продолжить';
+
+  @override
+  String officineRegRejected(String reason) {
+    return 'Заявка отклонена: $reason';
+  }
+
+  @override
+  String get officineRegPlanTitle => 'Выберите тариф';
+
+  @override
+  String get officineRegPerMonth => 'в месяц';
+
+  @override
+  String officineRegAmountHt(String amount) {
+    return '$amount без НДС';
+  }
+
+  @override
+  String officineRegWetriCaption(String ttc, int vat) {
+    return '$ttc с НДС в месяц, НДС $vat %';
+  }
+
+  @override
+  String officineRegEpeCaption(String instead, String ttc) {
+    return 'вместо $instead, то есть $ttc с НДС в год';
+  }
+
+  @override
+  String get officineRegBenefitVisible =>
+      'Ваша аптека видна пациентам поблизости';
+
+  @override
+  String get officineRegBenefitPrescriptions => 'Рецепты и сметы в телефоне';
+
+  @override
+  String get officineRegBenefitCouriers => 'Курьеры Honam в вашем районе';
+
+  @override
+  String get officineRegBenefitInvoices =>
+      'Счета CashPay для вашей бухгалтерии';
+
+  @override
+  String get officineRegNoPaymentYet =>
+      'Никаких платежей до проверки аптеки. Затем вы платите через CashPay: мобильный кошелёк или карта.';
+
+  @override
+  String get officineRegSend => 'Отправить на проверку';
+
+  @override
+  String get officineRegPendingTitle => 'Идёт проверка';
+
+  @override
+  String officineRegPendingText(int hours) {
+    return 'Поддержка Pokou проверит ваше разрешение и кошелёк в течение $hours ч. Вы получите уведомление о решении.';
+  }
+
+  @override
+  String get officineRegStepSent => 'Заявка отправлена';
+
+  @override
+  String officineRegToday(String time) {
+    return 'Сегодня, $time';
+  }
+
+  @override
+  String officineRegOn(String date, String time) {
+    return '$date в $time';
+  }
+
+  @override
+  String get officineRegStepReview => 'Проверка поддержкой';
+
+  @override
+  String officineRegDueBy(String date, String time) {
+    return 'Не позднее $date в $time';
+  }
+
+  @override
+  String officineRegStepPayment(String plan) {
+    return 'Оплата $plan, затем открытие';
+  }
+
+  @override
+  String officineRegPaymentAmount(String amount) {
+    return '$amount с НДС через CashPay';
+  }
+
+  @override
+  String get officineRegPrepareNote =>
+      'А пока подготовьте прилавок: плакат с QR-кодом и список ваших постоянных курьеров.';
+
+  @override
+  String get officineRegDone => 'Готово';
+
+  @override
+  String get officineRegPickPhoto => 'Выбрать фото';
+
+  @override
+  String get officineRegPickPdf => 'Выбрать PDF';
 }

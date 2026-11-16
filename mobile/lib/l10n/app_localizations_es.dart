@@ -14782,4 +14782,164 @@ class LEs extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get officineRegEntryTitle => 'Registrar mi farmacia';
+
+  @override
+  String get officineRegEntrySubtitle =>
+      'Reciba las recetas de los pacientes cercanos';
+
+  @override
+  String get officineRegEntryPending => 'Solicitud en verificación';
+
+  @override
+  String get officineRegEntryRejected =>
+      'Solicitud no aceptada: corríjala y reenvíela';
+
+  @override
+  String officineRegStep(int step) {
+    return 'Paso $step de 3';
+  }
+
+  @override
+  String get officineRegInfoTitle => 'Registre su farmacia';
+
+  @override
+  String get officineRegName => 'Nombre de la farmacia';
+
+  @override
+  String get officineRegAddress => 'Dirección';
+
+  @override
+  String get officineRegLicense => 'N.º de autorización de ejercicio';
+
+  @override
+  String get officineRegLicenseHint => 'Tal como figura en la resolución';
+
+  @override
+  String get officineRegWallet => 'Wallet de cobro';
+
+  @override
+  String get officineRegWalletHint => 'Número de mobile money';
+
+  @override
+  String get officineRegWalletHelp =>
+      'Los pacientes le pagan en este número. Debe estar a nombre de la farmacia.';
+
+  @override
+  String get officineRegAuthorization => 'Autorización de apertura';
+
+  @override
+  String get officineRegAuthorizationHint => 'Foto o PDF';
+
+  @override
+  String get officineRegAuthorizationAdded => 'Añadida';
+
+  @override
+  String get officineRegMobilePaymentNote =>
+      'Honam está reservado a las farmacias que aceptan el pago móvil.';
+
+  @override
+  String get officineRegContinue => 'Continuar';
+
+  @override
+  String officineRegRejected(String reason) {
+    return 'Solicitud no aceptada: $reason';
+  }
+
+  @override
+  String get officineRegPlanTitle => 'Elija su plan';
+
+  @override
+  String get officineRegPerMonth => 'al mes';
+
+  @override
+  String officineRegAmountHt(String amount) {
+    return '$amount sin IVA';
+  }
+
+  @override
+  String officineRegWetriCaption(String ttc, int vat) {
+    return '$ttc con IVA al mes, IVA del $vat %';
+  }
+
+  @override
+  String officineRegEpeCaption(String instead, String ttc) {
+    return 'en lugar de $instead, es decir $ttc con IVA al año';
+  }
+
+  @override
+  String get officineRegBenefitVisible =>
+      'Su farmacia visible para los pacientes cercanos';
+
+  @override
+  String get officineRegBenefitPrescriptions =>
+      'Recetas y presupuestos en el teléfono';
+
+  @override
+  String get officineRegBenefitCouriers => 'Los repartidores Honam de su zona';
+
+  @override
+  String get officineRegBenefitInvoices =>
+      'Facturas CashPay para su contabilidad';
+
+  @override
+  String get officineRegNoPaymentYet =>
+      'Ningún pago antes de la verificación de su farmacia. Después paga con CashPay: mobile money o tarjeta.';
+
+  @override
+  String get officineRegSend => 'Enviar para verificación';
+
+  @override
+  String get officineRegPendingTitle => 'Verificación en curso';
+
+  @override
+  String officineRegPendingText(int hours) {
+    return 'El soporte de Pokou verifica su autorización y su wallet en $hours h. Recibirá una notificación en cuanto se decida.';
+  }
+
+  @override
+  String get officineRegStepSent => 'Solicitud enviada';
+
+  @override
+  String officineRegToday(String time) {
+    return 'Hoy, $time';
+  }
+
+  @override
+  String officineRegOn(String date, String time) {
+    return 'El $date a las $time';
+  }
+
+  @override
+  String get officineRegStepReview => 'Verificación por el soporte';
+
+  @override
+  String officineRegDueBy(String date, String time) {
+    return 'A más tardar el $date a las $time';
+  }
+
+  @override
+  String officineRegStepPayment(String plan) {
+    return 'Pago $plan, luego apertura';
+  }
+
+  @override
+  String officineRegPaymentAmount(String amount) {
+    return '$amount con IVA por CashPay';
+  }
+
+  @override
+  String get officineRegPrepareNote =>
+      'Mientras tanto, prepare su mostrador: el cartel QR y la lista de sus repartidores habituales.';
+
+  @override
+  String get officineRegDone => 'Listo';
+
+  @override
+  String get officineRegPickPhoto => 'Elegir una foto';
+
+  @override
+  String get officineRegPickPdf => 'Elegir un PDF';
 }

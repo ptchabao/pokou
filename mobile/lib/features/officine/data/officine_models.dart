@@ -362,3 +362,102 @@ class OfficineHistory {
     );
   }
 }
+
+/// Le dossier « Référencer votre officine » (maquettes Officine 14 à 16),
+/// tel que le renvoie `/honam/pharmacy/registration`.
+class OfficineRegistration {
+  const OfficineRegistration({
+    required this.status,
+    required this.hasPharmacy,
+    required this.pricesHt,
+    required this.vatRate,
+    required this.reviewHours,
+    this.name,
+    this.address,
+    this.licenseNumber,
+    this.walletPhone,
+    this.hasAuthorization = false,
+    this.plan,
+    this.reviewNote,
+    this.submittedAt,
+    this.reviewDueAt,
+  });
+
+  /// NONE (rien envoyé) | PENDING (vérification en cours) | APPROVED
+  /// (l'officine existe) | REJECTED (motif dans [reviewNote]).
+  final String status;
+
+  /// Le compte appartient déjà à l'équipe d'une officine.
+  final bool hasPharmacy;
+
+  /// Prix HT des formules du pays : WETRI (mois), EPE (an).
+  final Map<String, int> pricesHt;
+  final double vatRate;
+
+  /// « Sous 48 h » : l'engagement du support.
+  final int reviewHours;
+  final String? name;
+  final String? address;
+  final String? licenseNumber;
+  final String? walletPhone;
+
+  /// L'arrêté est déjà chez le support (renvoi après un refus).
+  final bool hasAuthorization;
+  final String? plan;
+  final String? reviewNote;
+  final DateTime? submittedAt;
+  final DateTime? reviewDueAt;
+
+  bool get pending => status == 'PENDING';
+  bool get rejected => status == 'REJECTED';
+
+  /// On peut (r)envoyer un dossier : rien d'envoyé, ou un refus.
+  bool get canApply => !hasPharmacy && (status == 'NONE' || rejected);
+
+  int ttc(int ht) => (ht * (1 + vatRate)).round();
+
+  factory OfficineRegistration.fromJson(Map<String, dynamic> json) {
+    final prices = (json['prices_ht'] as Map?) ?? const {};
+    return OfficineRegistration(
+      status: json['status'] as String? ?? 'NONE',
+      hasPharmacy: json['has_pharmacy'] as bool? ?? false,
+      pricesHt: {
+        for (final plan in const ['WETRI', 'EPE'])
+          if (prices[plan] is num) plan: (prices[plan] as num).toInt(),
+      },
+      vatRate: (json['vat_rate'] as num?)?.toDouble() ?? 0,
+      reviewHours: (json['review_hours'] as num?)?.toInt() ?? 48,
+      name: json['name'] as String?,
+      address: json['address'] as String?,
+      licenseNumber: json['license_number'] as String?,
+      walletPhone: json['wallet_phone'] as String?,
+      hasAuthorization: json['has_authorization'] as bool? ?? false,
+      plan: json['plan'] as String?,
+      reviewNote: json['review_note'] as String?,
+      submittedAt: _at(json['submitted_at']),
+      reviewDueAt: _at(json['review_due_at']),
+    );
+  }
+}
+
+/// Ce que l'écran 1/3 a rempli, porté jusqu'à l'envoi de l'écran 2/3.
+class OfficineRegistrationDraft {
+  const OfficineRegistrationDraft({
+    required this.name,
+    required this.address,
+    required this.licenseNumber,
+    required this.walletPhone,
+    this.authorizationPath,
+    this.authorizationName,
+  });
+
+  final String name;
+  final String address;
+  final String licenseNumber;
+  final String walletPhone;
+
+  /// Le fichier de l'arrêté choisi sur le téléphone ; `null` au renvoi
+  /// d'un dossier refusé dont l'arrêté est déjà chez le support.
+  final String? authorizationPath;
+  final String? authorizationName;
+}

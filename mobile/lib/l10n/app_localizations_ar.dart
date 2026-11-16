@@ -14717,4 +14717,160 @@ class LAr extends L {
     );
     return '$_temp0';
   }
+
+  @override
+  String get officineRegEntryTitle => 'تسجيل صيدليتي';
+
+  @override
+  String get officineRegEntrySubtitle => 'استقبل وصفات المرضى القريبين منك';
+
+  @override
+  String get officineRegEntryPending => 'الملف قيد التحقق';
+
+  @override
+  String get officineRegEntryRejected => 'لم يُقبل الملف: صحّحه وأعد إرساله';
+
+  @override
+  String officineRegStep(int step) {
+    return 'الخطوة $step من 3';
+  }
+
+  @override
+  String get officineRegInfoTitle => 'سجّل صيدليتك';
+
+  @override
+  String get officineRegName => 'اسم الصيدلية';
+
+  @override
+  String get officineRegAddress => 'العنوان';
+
+  @override
+  String get officineRegLicense => 'رقم ترخيص المزاولة';
+
+  @override
+  String get officineRegLicenseHint => 'كما هو مذكور في القرار';
+
+  @override
+  String get officineRegWallet => 'محفظة الاستلام';
+
+  @override
+  String get officineRegWalletHint => 'رقم الدفع عبر الهاتف';
+
+  @override
+  String get officineRegWalletHelp =>
+      'يدفع لك المرضى على هذا الرقم. يجب أن يكون باسم الصيدلية.';
+
+  @override
+  String get officineRegAuthorization => 'رخصة الافتتاح';
+
+  @override
+  String get officineRegAuthorizationHint => 'صورة أو PDF';
+
+  @override
+  String get officineRegAuthorizationAdded => 'أُضيفت';
+
+  @override
+  String get officineRegMobilePaymentNote =>
+      'Honam مخصص للصيدليات التي تقبل الدفع عبر الهاتف.';
+
+  @override
+  String get officineRegContinue => 'متابعة';
+
+  @override
+  String officineRegRejected(String reason) {
+    return 'لم يُقبل الملف: $reason';
+  }
+
+  @override
+  String get officineRegPlanTitle => 'اختر باقتك';
+
+  @override
+  String get officineRegPerMonth => 'شهريًا';
+
+  @override
+  String officineRegAmountHt(String amount) {
+    return '$amount دون ضريبة';
+  }
+
+  @override
+  String officineRegWetriCaption(String ttc, int vat) {
+    return '$ttc شاملة الضريبة شهريًا، ضريبة $vat٪';
+  }
+
+  @override
+  String officineRegEpeCaption(String instead, String ttc) {
+    return 'بدلًا من $instead، أي $ttc شاملة الضريبة سنويًا';
+  }
+
+  @override
+  String get officineRegBenefitVisible => 'صيدليتك ظاهرة للمرضى القريبين';
+
+  @override
+  String get officineRegBenefitPrescriptions =>
+      'الوصفات وعروض الأسعار على الهاتف';
+
+  @override
+  String get officineRegBenefitCouriers => 'مندوبو توصيل Honam في منطقتك';
+
+  @override
+  String get officineRegBenefitInvoices => 'فواتير CashPay لمحاسبتك';
+
+  @override
+  String get officineRegNoPaymentYet =>
+      'لا دفع قبل التحقق من صيدليتك. بعدها تدفع عبر CashPay: الدفع بالهاتف أو البطاقة.';
+
+  @override
+  String get officineRegSend => 'إرسال للتحقق';
+
+  @override
+  String get officineRegPendingTitle => 'التحقق جارٍ';
+
+  @override
+  String officineRegPendingText(int hours) {
+    return 'يتحقق دعم Pokou من رخصتك ومحفظتك خلال $hours ساعة. ستصلك إشعار فور صدور القرار.';
+  }
+
+  @override
+  String get officineRegStepSent => 'أُرسل الملف';
+
+  @override
+  String officineRegToday(String time) {
+    return 'اليوم، $time';
+  }
+
+  @override
+  String officineRegOn(String date, String time) {
+    return 'في $date الساعة $time';
+  }
+
+  @override
+  String get officineRegStepReview => 'التحقق من طرف الدعم';
+
+  @override
+  String officineRegDueBy(String date, String time) {
+    return 'في موعد أقصاه $date الساعة $time';
+  }
+
+  @override
+  String officineRegStepPayment(String plan) {
+    return 'دفع $plan، ثم الافتتاح';
+  }
+
+  @override
+  String officineRegPaymentAmount(String amount) {
+    return '$amount شاملة الضريبة عبر CashPay';
+  }
+
+  @override
+  String get officineRegPrepareNote =>
+      'في الأثناء، جهّز منضدتك: ملصق رمز QR وقائمة مندوبي التوصيل المعتادين لديك.';
+
+  @override
+  String get officineRegDone => 'تم';
+
+  @override
+  String get officineRegPickPhoto => 'اختر صورة';
+
+  @override
+  String get officineRegPickPdf => 'اختر ملف PDF';
 }
