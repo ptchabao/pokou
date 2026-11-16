@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../honam/data/honam_models.dart' show HonamOrderMessage;
+import '../../honam/presentation/honam_tracking.dart' show honamRelayedCall;
 import '../../honam/presentation/honam_ui.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/officine_models.dart';
@@ -324,16 +325,23 @@ class _OfficineCourierChatScreenState
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final order = widget.order;
+    // La commande relue en temps réel : l'appel et la fermeture de la
+    // discussion suivent la course.
+    final order =
+        ref.watch(officineOrderProvider(widget.order.id)).valueOrNull ??
+        widget.order;
     final patient = officinePatient(context, order);
     final withPatient = widget.withPatient;
     // L'interlocuteur : la patiente, ou le coursier de la course.
     final courier = withPatient ? patient : order.courierName ?? l.honamCourier;
     final async = ref.watch(officineMessagesProvider(widget.threadKey));
     final messages = async.valueOrNull ?? const <HonamOrderMessage>[];
-    final presets = withPatient
+    // 24 h après la livraison, plus rien ne part au coursier.
+    final closed = !withPatient && order.courierChatClosed;
+    final presets = withPatient || closed
         ? const <String>[]
         : [l.offiQuickReady, l.offiQuickWhere, l.offiQuickThanks];
+    final callee = withPatient ? null : order.courierUserId;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -383,6 +391,17 @@ class _OfficineCourierChatScreenState
                       ],
                     ),
                   ),
+                  // Un appel relayé par Pokou : le numéro du coursier
+                  // n'apparaît jamais.
+                  if (callee != null)
+                    IconButton(
+                      tooltip: l.officineDispatchCall(courier),
+                      icon: const Icon(
+                        Icons.call_outlined,
+                        color: AppColors.accentPrimary,
+                      ),
+                      onPressed: () => honamRelayedCall(context, ref, callee),
+                    ),
                 ],
               ),
             ),
@@ -413,7 +432,7 @@ class _OfficineCourierChatScreenState
                           child: Text(
                             withPatient
                                 ? l.offiChatPatientNotice(patient)
-                                : l.offiChatNotice(patient),
+                                : l.officineDispatchChatNotice(patient),
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -426,7 +445,26 @@ class _OfficineCourierChatScreenState
                   const SizedBox(height: 12),
                   if (messages.isEmpty && async.isLoading)
                     const Center(child: CircularProgressIndicator()),
-                  for (final message in messages) _Bubble(message: message),
+                  for (final (i, message) in messages.indexed) ...[
+                    // « Aujourd'hui », « Hier », puis la date : à chaque
+                    // nouveau jour du fil.
+                    if (i == 0 ||
+                        !_sameDay(messages[i - 1].createdAt, message.createdAt))
+                      _DaySeparator(at: message.createdAt),
+                    _Bubble(message: message),
+                  ],
+                  if (closed)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        l.officineDispatchChatClosed,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -449,43 +487,86 @@ class _OfficineCourierChatScreenState
                 ],
               ),
             ),
-          SafeArea(
-            top: false,
-            minimum: const EdgeInsets.fromLTRB(12, 6, 12, 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _text,
-                    minLines: 1,
-                    maxLines: 4,
-                    maxLength: 1000,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      hintText: l.offiWriteTo(courier),
-                      counterText: '',
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: AppColors.border),
+          if (!closed)
+            SafeArea(
+              top: false,
+              minimum: const EdgeInsets.fromLTRB(12, 6, 12, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _text,
+                      minLines: 1,
+                      maxLines: 4,
+                      maxLength: 1000,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(
+                        hintText: l.offiWriteTo(courier),
+                        counterText: '',
+                        filled: true,
+                        fillColor: AppColors.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  tooltip: l.offiSend,
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.accentPrimary,
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    tooltip: l.offiSend,
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.accentPrimary,
+                    ),
+                    onPressed: _sending ? null : () => _send(),
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
                   ),
-                  onPressed: _sending ? null : () => _send(),
-                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+bool _sameDay(DateTime a, DateTime b) {
+  final x = a.toLocal();
+  final y = b.toLocal();
+  return x.year == y.year && x.month == y.month && x.day == y.day;
+}
+
+/// Le séparateur de jour du fil (« Aujourd'hui », maquette Officine 10).
+class _DaySeparator extends StatelessWidget {
+  const _DaySeparator({required this.at});
+
+  final DateTime at;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final now = DateTime.now();
+    final label = _sameDay(at, now)
+        ? l.notifToday
+        : _sameDay(at, now.subtract(const Duration(days: 1)))
+        ? l.notifYesterday
+        : officineDate(context, at);
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -547,7 +628,11 @@ class _Bubble extends StatelessWidget {
               ),
             ),
             Text(
-              officineTime(context, message.createdAt),
+              // « 10:03 · Lu » : l'accusé de lecture de l'autre partie.
+              mine && message.readAt != null
+                  ? '${officineTime(context, message.createdAt)} · '
+                        '${l.officineDispatchChatRead}'
+                  : officineTime(context, message.createdAt),
               style: TextStyle(
                 fontSize: 10,
                 color: mine ? Colors.white70 : AppColors.textMuted,
@@ -663,8 +748,8 @@ class _OfficineDefectScreenState extends ConsumerState<OfficineDefectScreen> {
         ),
         OfficineNote(
           delivered
-              ? l.offiDefectNoteDelivered(courier)
-              : l.offiDefectNoteOngoing(courier),
+              ? l.officineDispatchDefectNoteDelivered(courier)
+              : l.officineDispatchDefectNoteOngoing(courier),
           tone: CalloutTone.amber,
         ),
       ],

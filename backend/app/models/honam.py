@@ -50,6 +50,15 @@ class Pharmacy(Base):
     #: ACTIVE | SUSPENDED (remboursement ou course impayés, HON-35) | EXCLUDED
     status = Column(String(10), default="ACTIVE", nullable=False, index=True)
     suspension_reason = Column(String(255), nullable=True)
+    #: « Prochaine garde » (maquette Officine 13) : le prochain jour du tour
+    #: de garde, tel que l'officine le connaît.
+    next_duty_on = Column(Date, nullable=True)
+    #: « Fermer temporairement » : tant que la date est posée, l'officine
+    #: disparaît de l'annuaire et ne reçoit plus d'ordonnances.
+    temporarily_closed_at = Column(DateTime, nullable=True)
+    #: Un nouveau wallet demandé par le titulaire. L'ancien reste celui des
+    #: paiements jusqu'à ce que l'équipe vérifie le nouveau (BM-02).
+    wallet_phone_pending = Column(String(32), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
@@ -61,6 +70,10 @@ class PharmacyStaff(Base):
     pharmacy_id = Column(Integer, ForeignKey("honam_pharmacies.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     role = Column(String(12), default="COLLABORATEUR", nullable=False)  # TITULAIRE|COLLABORATEUR
+    #: « Sonnerie à chaque ordonnance » (maquette Officine 13) : propre à
+    #: chaque téléphone du comptoir. Coupée, la notification arrive sans son.
+    ring_on_order = Column(Boolean, default=True, nullable=False)
+    added_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 
 class PharmacyApplication(Base):
@@ -187,6 +200,17 @@ class HonamOrder(Base):
     courier_latitude = Column(Float, nullable=True)
     courier_longitude = Column(Float, nullable=True)
     courier_location_at = Column(DateTime, nullable=True)
+    #: La recherche d'un coursier (maquettes Officine 8 et 9) : son début
+    #: (remis à zéro à chaque relance), son rayon autour de l'officine, et
+    #: son annulation par l'officine. Une course annulée n'est plus proposée.
+    dispatch_started_at = Column(DateTime, nullable=True)
+    dispatch_radius_km = Column(Float, nullable=True)
+    dispatch_cancelled_at = Column(DateTime, nullable=True)
+    #: « Proposer le retrait à l'officine » (maquette Officine 9) : proposé,
+    #: puis accepté par la patiente. La commande est alors remise au comptoir
+    #: contre le code de remise, et la course lui est remboursée.
+    pickup_proposed_at = Column(DateTime, nullable=True)
+    pickup_at_pharmacy = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     delivered_at = Column(DateTime, nullable=True)
@@ -219,6 +243,8 @@ class HonamOrderMessage(Base):
     #: message. Un coursier remplacé ne relit pas ce qui a suivi, ni l'autre.
     courier_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     body = Column(String(1000), nullable=False)
+    #: Lu par l'autre partie du canal (accusé « Lu », maquette Officine 10).
+    read_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
@@ -276,6 +302,12 @@ class CourierProfile(Base):
     #: Disponible : il reçoit les courses, même en dehors du mode coursier
     #: (maquettes Coursiers 8 et 27). Le bouton marche/arrêt le coupe.
     available = Column(Boolean, default=False, nullable=False)
+    #: Position approximative du coursier DISPONIBLE, envoyée quand il
+    #: consulte les courses : elle situe les courses dans le rayon d'une
+    #: officine (maquette Officine 8). Une seule, écrasée, effacée à l'arrêt.
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    located_at = Column(DateTime, nullable=True)
     #: L'écran « Bienvenue chez les coursiers » a été vu (Coursiers 17).
     welcomed_at = Column(DateTime, nullable=True)
     #: Parrainage (maquette Coursiers 15) : code à partager, et le parrain

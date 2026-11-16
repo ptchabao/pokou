@@ -9406,5 +9406,204 @@
         "type": "String"
       }
     }
-  }
+  },
+  "officineDispatchSubtitle": "Commande de {patient} · {address} · {distance} km",
+  "@officineDispatchSubtitle": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchNoAnswer": "{name} n’a pas répondu en {minutes} min",
+  "@officineDispatchNoAnswer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "officineDispatchNoAnswerMany": "{count} coursiers rattachés n’ont pas répondu en {minutes} min",
+  "@officineDispatchNoAnswerMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "officineDispatchAvailableAround": "{count, plural, =0{Aucun disponible autour de {area}} =1{1 disponible autour de {area}} other{{count} disponibles autour de {area}}}",
+  "@officineDispatchAvailableAround": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchAvailable": "{count, plural, =0{Aucun disponible dans la zone} =1{1 disponible dans la zone} other{{count} disponibles dans la zone}}",
+  "@officineDispatchAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "officineDispatchCancel": "Annuler la demande",
+  "officineDispatchCancelTitle": "Annuler la demande de coursier ?",
+  "officineDispatchCancelBody": "La course ne sera plus proposée aux coursiers. Vous pourrez relancer la recherche ou proposer le retrait à l’officine.",
+  "officineDispatchKeep": "Continuer la recherche",
+  "officineDispatchCancelledTitle": "Demande annulée",
+  "officineDispatchCancelledBody": "La course n’est plus proposée aux coursiers.",
+  "officineDispatchRelaunch": "Relancer la recherche",
+  "officineDispatchRelaunched": "Recherche relancée",
+  "officineDispatchWiden": "Élargir la zone à {km} km",
+  "@officineDispatchWiden": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchWidened": "Zone élargie à {km} km",
+  "@officineDispatchWidened": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchPickupProposed": "Retrait proposé à {patient}. La recherche de coursier est suspendue en attendant sa réponse.",
+  "@officineDispatchPickupProposed": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchPickupAccepted": "{patient} a accepté",
+  "@officineDispatchPickupAccepted": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchPickupTitle": "Retrait à l’officine",
+  "officineDispatchPickupBody": "{patient} vient retirer sa commande au comptoir. Demandez son code de remise à 6 chiffres.",
+  "@officineDispatchPickupBody": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchPickupCode": "Code de remise",
+  "officineDispatchPickupHandOver": "Remettre la commande",
+  "officineDispatchPickupDone": "Commande remise au comptoir",
+  "officineDispatchPickupRefund": "Remboursez la course de {amount} sur le numéro qui a payé, sous 2 h.",
+  "@officineDispatchPickupRefund": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchPickupRefundAction": "Rembourser la course",
+  "officineDispatchChatNotice": "Discussion liée à la course de {patient}. Elle se ferme 24 h après la livraison. Les numéros restent masqués.",
+  "@officineDispatchChatNotice": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchChatClosed": "La discussion s’est fermée 24 h après la livraison.",
+  "officineDispatchChatRead": "Lu",
+  "officineDispatchCall": "Appeler {name}",
+  "@officineDispatchCall": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchDefectNoteDelivered": "{courier} est prévenu et peut contester sous 48 h. Au 3e défaut confirmé, son compte coursier est suspendu.",
+  "@officineDispatchDefectNoteDelivered": {
+    "placeholders": {
+      "courier": {
+        "type": "String"
+      }
+    }
+  },
+  "officineDispatchDefectNoteOngoing": "{courier} est prévenu et peut contester sous 48 h. La commande revient à « prête » pour un autre coursier. Au 3e défaut confirmé, son compte coursier est suspendu.",
+  "@officineDispatchDefectNoteOngoing": {
+    "placeholders": {
+      "courier": {
+        "type": "String"
+      }
+    }
+  },
+  "officineAccountNextDuty": "Prochaine garde",
+  "officineAccountNextDutyNone": "À définir",
+  "officineAccountChooseDate": "Choisir la date",
+  "officineAccountClearDuty": "Effacer la date",
+  "officineAccountCounterPhones": "Téléphones du comptoir",
+  "officineAccountRing": "Sonnerie à chaque ordonnance",
+  "officineAccountRingHint": "Sur ce téléphone",
+  "officineAccountClose": "Fermer temporairement",
+  "officineAccountCloseHint": "Les patients ne vous voient plus",
+  "officineAccountCloseTitle": "Fermer temporairement l’officine ?",
+  "officineAccountCloseBody": "Votre officine disparaît de l’annuaire et ne reçoit plus d’ordonnances tant que vous ne la rouvrez pas. Les commandes en cours continuent.",
+  "officineAccountCloseYes": "Fermer",
+  "officineAccountLogout": "Se déconnecter de ce téléphone",
+  "officineAccountLogoutTitle": "Se déconnecter de ce téléphone ?",
+  "officineAccountLogoutBody": "Ce téléphone n’aura plus accès à l’espace officine. Le titulaire pourra l’ajouter de nouveau.",
+  "officineAccountInfoTitle": "Informations de l’officine",
+  "officineAccountAddress": "Adresse",
+  "officineAccountPhone": "Téléphone de l’officine",
+  "officineAccountNameNote": "Le nom de l’officine se change avec l’équipe Pokou.",
+  "officineAccountSave": "Enregistrer",
+  "officineAccountSaved": "Enregistré",
+  "officineAccountHoursHint": "Lun.–sam., 8 h–21 h",
+  "officineAccountWalletTitle": "Changer de wallet de réception",
+  "officineAccountWalletBody": "Le nouveau numéro doit être au nom de l’officine. L’équipe Pokou le vérifie ; d’ici là, les patients paient sur le wallet actuel.",
+  "officineAccountWalletPending": "Nouveau wallet en vérification : {phone}",
+  "@officineAccountWalletPending": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "officineAccountWalletName": "{phone} · au nom de l’officine",
+  "@officineAccountWalletName": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "officineAccountTitulaireOnly": "Seul le pharmacien titulaire peut faire ce changement.",
+  "officineAccountPhonesNote": "Chaque téléphone du comptoir reçoit les ordonnances et traite les commandes. Les numéros restent masqués.",
+  "officineAccountAddPhone": "Ajouter un téléphone",
+  "officineAccountAddPhoneHint": "Le numéro d’un compte Pokou",
+  "officineAccountAdd": "Ajouter",
+  "officineAccountRemovePhone": "Retirer ce téléphone",
+  "officineAccountThisPhone": "Ce téléphone",
+  "officineAccountTitulaire": "Titulaire",
+  "officineAccountCollaborator": "Collaborateur"
 }

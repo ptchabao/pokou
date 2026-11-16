@@ -632,6 +632,7 @@ def _pharmacy_row(db: Session, p: Pharmacy) -> dict:
         "id": p.id, "name": p.name, "country": p.country, "address": p.address, "phone": p.phone,
         "status": p.status, "suspension_reason": p.suspension_reason,
         "wallet_phone": p.wallet_phone, "wallet_verified": bool(p.wallet_verified),
+        "wallet_phone_pending": p.wallet_phone_pending,
         "subscription_plan": p.subscription_plan, "subscription_until": _iso(p.subscription_until),
         "subscription_active": bool(p.subscription_until and p.subscription_until > datetime.utcnow()),
         "credit_balance": p.credit_balance, "is_on_duty": bool(p.is_on_duty),
@@ -651,7 +652,7 @@ def honam_pharmacies_search(
 ):
     query = db.query(Pharmacy)
     if status == "TO_VALIDATE":
-        query = query.filter(Pharmacy.wallet_verified.is_(False), Pharmacy.status != "EXCLUDED")
+        query = query.filter(or_(Pharmacy.wallet_verified.is_(False), Pharmacy.wallet_phone_pending.isnot(None)), Pharmacy.status != "EXCLUDED")
     elif status:
         query = query.filter(Pharmacy.status == status)
     if country:

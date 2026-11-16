@@ -14983,4 +14983,259 @@ class LAr extends L {
   String groupPollPreview(String question) {
     return '📊 $question';
   }
+
+  @override
+  String officineDispatchSubtitle(
+    String patient,
+    String address,
+    String distance,
+  ) {
+    return 'طلب $patient · $address · $distance كم';
+  }
+
+  @override
+  String officineDispatchNoAnswer(String name, int minutes) {
+    return 'لم يردّ $name خلال $minutes د';
+  }
+
+  @override
+  String officineDispatchNoAnswerMany(int count, int minutes) {
+    return 'لم يردّ $count من المندوبين المعتادين خلال $minutes د';
+  }
+
+  @override
+  String officineDispatchAvailableAround(int count, String area) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count متاحون حول $area',
+      one: 'مندوب واحد متاح حول $area',
+      zero: 'لا أحد متاح حول $area',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String officineDispatchAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count متاحون في المنطقة',
+      one: 'مندوب واحد متاح في المنطقة',
+      zero: 'لا أحد متاح في المنطقة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get officineDispatchCancel => 'إلغاء الطلب';
+
+  @override
+  String get officineDispatchCancelTitle => 'إلغاء طلب المندوب؟';
+
+  @override
+  String get officineDispatchCancelBody =>
+      'لن تُعرض التوصيلة على المندوبين بعد الآن. يمكنكم إعادة البحث أو اقتراح الاستلام من الصيدلية.';
+
+  @override
+  String get officineDispatchKeep => 'متابعة البحث';
+
+  @override
+  String get officineDispatchCancelledTitle => 'أُلغي الطلب';
+
+  @override
+  String get officineDispatchCancelledBody =>
+      'لم تعد التوصيلة معروضة على المندوبين.';
+
+  @override
+  String get officineDispatchRelaunch => 'إعادة البحث';
+
+  @override
+  String get officineDispatchRelaunched => 'أُعيد البحث';
+
+  @override
+  String officineDispatchWiden(String km) {
+    return 'توسيع المنطقة إلى $km كم';
+  }
+
+  @override
+  String officineDispatchWidened(String km) {
+    return 'وُسّعت المنطقة إلى $km كم';
+  }
+
+  @override
+  String officineDispatchPickupProposed(String patient) {
+    return 'اقتُرح الاستلام على $patient. البحث عن مندوب متوقف بانتظار الرد.';
+  }
+
+  @override
+  String officineDispatchPickupAccepted(String patient) {
+    return 'وافق $patient';
+  }
+
+  @override
+  String get officineDispatchPickupTitle => 'الاستلام من الصيدلية';
+
+  @override
+  String officineDispatchPickupBody(String patient) {
+    return 'سيأتي $patient لاستلام الطلب من الصيدلية. اطلبوا رمز التسليم المكوّن من 6 أرقام.';
+  }
+
+  @override
+  String get officineDispatchPickupCode => 'رمز التسليم';
+
+  @override
+  String get officineDispatchPickupHandOver => 'تسليم الطلب';
+
+  @override
+  String get officineDispatchPickupDone => 'سُلّم الطلب في الصيدلية';
+
+  @override
+  String officineDispatchPickupRefund(String amount) {
+    return 'أعيدوا ثمن التوصيل $amount إلى الرقم الذي دفع، خلال ساعتين.';
+  }
+
+  @override
+  String get officineDispatchPickupRefundAction => 'إعادة ثمن التوصيل';
+
+  @override
+  String officineDispatchChatNotice(String patient) {
+    return 'محادثة مرتبطة بتوصيلة $patient. تُغلق بعد 24 ساعة من التسليم. تبقى الأرقام مخفية.';
+  }
+
+  @override
+  String get officineDispatchChatClosed =>
+      'أُغلقت المحادثة بعد 24 ساعة من التسليم.';
+
+  @override
+  String get officineDispatchChatRead => 'مقروءة';
+
+  @override
+  String officineDispatchCall(String name) {
+    return 'اتصال بـ$name';
+  }
+
+  @override
+  String officineDispatchDefectNoteDelivered(String courier) {
+    return 'يُبلَّغ $courier ويمكنه الاعتراض خلال 48 ساعة. عند المخالفة الثالثة المؤكدة يُعلَّق حسابه كمندوب.';
+  }
+
+  @override
+  String officineDispatchDefectNoteOngoing(String courier) {
+    return 'يُبلَّغ $courier ويمكنه الاعتراض خلال 48 ساعة. يعود الطلب «جاهزًا» لمندوب آخر. عند المخالفة الثالثة المؤكدة يُعلَّق حسابه كمندوب.';
+  }
+
+  @override
+  String get officineAccountNextDuty => 'المناوبة القادمة';
+
+  @override
+  String get officineAccountNextDutyNone => 'غير محددة';
+
+  @override
+  String get officineAccountChooseDate => 'اختيار التاريخ';
+
+  @override
+  String get officineAccountClearDuty => 'مسح التاريخ';
+
+  @override
+  String get officineAccountCounterPhones => 'هواتف الصيدلية';
+
+  @override
+  String get officineAccountRing => 'رنين مع كل وصفة';
+
+  @override
+  String get officineAccountRingHint => 'على هذا الهاتف';
+
+  @override
+  String get officineAccountClose => 'إغلاق مؤقت';
+
+  @override
+  String get officineAccountCloseHint => 'لن يراكم المرضى';
+
+  @override
+  String get officineAccountCloseTitle => 'إغلاق الصيدلية مؤقتًا؟';
+
+  @override
+  String get officineAccountCloseBody =>
+      'تختفي صيدليتكم من الدليل ولا تستقبل وصفات حتى تعيدوا فتحها. تستمر الطلبات الجارية.';
+
+  @override
+  String get officineAccountCloseYes => 'إغلاق';
+
+  @override
+  String get officineAccountLogout => 'تسجيل الخروج من هذا الهاتف';
+
+  @override
+  String get officineAccountLogoutTitle => 'تسجيل الخروج من هذا الهاتف؟';
+
+  @override
+  String get officineAccountLogoutBody =>
+      'لن يعود لهذا الهاتف وصول إلى فضاء الصيدلية. يمكن للصيدلي المسؤول إضافته من جديد.';
+
+  @override
+  String get officineAccountInfoTitle => 'معلومات الصيدلية';
+
+  @override
+  String get officineAccountAddress => 'العنوان';
+
+  @override
+  String get officineAccountPhone => 'هاتف الصيدلية';
+
+  @override
+  String get officineAccountNameNote => 'يُغيَّر اسم الصيدلية عبر فريق Pokou.';
+
+  @override
+  String get officineAccountSave => 'حفظ';
+
+  @override
+  String get officineAccountSaved => 'تم الحفظ';
+
+  @override
+  String get officineAccountHoursHint => 'الإثنين–السبت، 8–21';
+
+  @override
+  String get officineAccountWalletTitle => 'تغيير محفظة الاستلام';
+
+  @override
+  String get officineAccountWalletBody =>
+      'يجب أن يكون الرقم الجديد باسم الصيدلية. يتحقق منه فريق Pokou؛ وحتى ذلك الحين يدفع المرضى إلى المحفظة الحالية.';
+
+  @override
+  String officineAccountWalletPending(String phone) {
+    return 'محفظة جديدة قيد التحقق: $phone';
+  }
+
+  @override
+  String officineAccountWalletName(String phone) {
+    return '$phone · باسم الصيدلية';
+  }
+
+  @override
+  String get officineAccountTitulaireOnly =>
+      'وحده الصيدلي المسؤول يمكنه إجراء هذا التغيير.';
+
+  @override
+  String get officineAccountPhonesNote =>
+      'يستقبل كل هاتف في الصيدلية الوصفات ويعالج الطلبات. تبقى الأرقام مخفية.';
+
+  @override
+  String get officineAccountAddPhone => 'إضافة هاتف';
+
+  @override
+  String get officineAccountAddPhoneHint => 'رقم حساب على Pokou';
+
+  @override
+  String get officineAccountAdd => 'إضافة';
+
+  @override
+  String get officineAccountRemovePhone => 'إزالة هذا الهاتف';
+
+  @override
+  String get officineAccountThisPhone => 'هذا الهاتف';
+
+  @override
+  String get officineAccountTitulaire => 'الصيدلي المسؤول';
+
+  @override
+  String get officineAccountCollaborator => 'معاون';
 }

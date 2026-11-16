@@ -18,12 +18,17 @@ def notify_order_state_changed(
 ) -> None:
     """Notify only the users participating in this order, excluding its actor."""
     recipient_ids = {order.patient_id}
-    recipient_ids.update(
-        row[0]
-        for row in db.query(PharmacyStaff.user_id)
+    staff_rows = (
+        db.query(PharmacyStaff.user_id, PharmacyStaff.ring_on_order)
         .filter(PharmacyStaff.pharmacy_id == order.pharmacy_id)
         .all()
     )
+    recipient_ids.update(row[0] for row in staff_rows)
+    # « Sonnerie à chaque ordonnance » coupée (maquette Officine 13) : la
+    # nouvelle ordonnance arrive sur ce téléphone, mais sans son.
+    silent_ids = {
+        user_id for user_id, ring in staff_rows if ring is False and order.status == "SUBMITTED"
+    }
     if order.courier_id is not None:
         recipient_ids.add(order.courier_id)
     if actor_id is not None:
@@ -37,7 +42,8 @@ def notify_order_state_changed(
         "muted": "0",
     }
     for user_id in recipient_ids:
-        send_push(db, user_id, _TITLE, _BODY, data=payload)
+        data = {**payload, "muted": "1"} if user_id in silent_ids else payload
+        send_push(db, user_id, _TITLE, _BODY, data=data)
 
 
 _MESSAGE_BODY = "Nouveau message dans le suivi de votre commande."

@@ -15074,4 +15074,262 @@ class LIt extends L {
   String groupPollPreview(String question) {
     return '📊 $question';
   }
+
+  @override
+  String officineDispatchSubtitle(
+    String patient,
+    String address,
+    String distance,
+  ) {
+    return 'Ordine di $patient · $address · $distance km';
+  }
+
+  @override
+  String officineDispatchNoAnswer(String name, int minutes) {
+    return '$name non ha risposto in $minutes min';
+  }
+
+  @override
+  String officineDispatchNoAnswerMany(int count, int minutes) {
+    return '$count corrieri abituali non hanno risposto in $minutes min';
+  }
+
+  @override
+  String officineDispatchAvailableAround(int count, String area) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count disponibili intorno a $area',
+      one: '1 disponibile intorno a $area',
+      zero: 'Nessuno disponibile intorno a $area',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String officineDispatchAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count disponibili nella zona',
+      one: '1 disponibile nella zona',
+      zero: 'Nessuno disponibile nella zona',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get officineDispatchCancel => 'Annulla la richiesta';
+
+  @override
+  String get officineDispatchCancelTitle =>
+      'Annullare la richiesta di corriere?';
+
+  @override
+  String get officineDispatchCancelBody =>
+      'La consegna non sarà più proposta ai corrieri. Potrete rilanciare la ricerca o proporre il ritiro in farmacia.';
+
+  @override
+  String get officineDispatchKeep => 'Continua la ricerca';
+
+  @override
+  String get officineDispatchCancelledTitle => 'Richiesta annullata';
+
+  @override
+  String get officineDispatchCancelledBody =>
+      'La consegna non è più proposta ai corrieri.';
+
+  @override
+  String get officineDispatchRelaunch => 'Rilancia la ricerca';
+
+  @override
+  String get officineDispatchRelaunched => 'Ricerca rilanciata';
+
+  @override
+  String officineDispatchWiden(String km) {
+    return 'Allarga la zona a $km km';
+  }
+
+  @override
+  String officineDispatchWidened(String km) {
+    return 'Zona allargata a $km km';
+  }
+
+  @override
+  String officineDispatchPickupProposed(String patient) {
+    return 'Ritiro proposto a $patient. La ricerca del corriere è sospesa in attesa della risposta.';
+  }
+
+  @override
+  String officineDispatchPickupAccepted(String patient) {
+    return '$patient ha accettato';
+  }
+
+  @override
+  String get officineDispatchPickupTitle => 'Ritiro in farmacia';
+
+  @override
+  String officineDispatchPickupBody(String patient) {
+    return '$patient viene a ritirare l’ordine al banco. Chiedete il codice di consegna di 6 cifre.';
+  }
+
+  @override
+  String get officineDispatchPickupCode => 'Codice di consegna';
+
+  @override
+  String get officineDispatchPickupHandOver => 'Consegna l’ordine';
+
+  @override
+  String get officineDispatchPickupDone => 'Ordine consegnato al banco';
+
+  @override
+  String officineDispatchPickupRefund(String amount) {
+    return 'Rimborsate la consegna di $amount sul numero che ha pagato, entro 2 ore.';
+  }
+
+  @override
+  String get officineDispatchPickupRefundAction => 'Rimborsa la consegna';
+
+  @override
+  String officineDispatchChatNotice(String patient) {
+    return 'Chat legata alla consegna di $patient. Si chiude 24 ore dopo la consegna. I numeri restano nascosti.';
+  }
+
+  @override
+  String get officineDispatchChatClosed =>
+      'La chat si è chiusa 24 ore dopo la consegna.';
+
+  @override
+  String get officineDispatchChatRead => 'Letto';
+
+  @override
+  String officineDispatchCall(String name) {
+    return 'Chiama $name';
+  }
+
+  @override
+  String officineDispatchDefectNoteDelivered(String courier) {
+    return '$courier viene avvisato e può contestare entro 48 ore. Al 3° difetto confermato, il suo account corriere è sospeso.';
+  }
+
+  @override
+  String officineDispatchDefectNoteOngoing(String courier) {
+    return '$courier viene avvisato e può contestare entro 48 ore. L’ordine torna «pronto» per un altro corriere. Al 3° difetto confermato, il suo account corriere è sospeso.';
+  }
+
+  @override
+  String get officineAccountNextDuty => 'Prossimo turno di guardia';
+
+  @override
+  String get officineAccountNextDutyNone => 'Da definire';
+
+  @override
+  String get officineAccountChooseDate => 'Scegli la data';
+
+  @override
+  String get officineAccountClearDuty => 'Cancella la data';
+
+  @override
+  String get officineAccountCounterPhones => 'Telefoni del banco';
+
+  @override
+  String get officineAccountRing => 'Suoneria a ogni ricetta';
+
+  @override
+  String get officineAccountRingHint => 'Su questo telefono';
+
+  @override
+  String get officineAccountClose => 'Chiudi temporaneamente';
+
+  @override
+  String get officineAccountCloseHint => 'I pazienti non vi vedono più';
+
+  @override
+  String get officineAccountCloseTitle =>
+      'Chiudere temporaneamente la farmacia?';
+
+  @override
+  String get officineAccountCloseBody =>
+      'La farmacia scompare dall’elenco e non riceve ricette finché non la riaprite. Gli ordini in corso continuano.';
+
+  @override
+  String get officineAccountCloseYes => 'Chiudi';
+
+  @override
+  String get officineAccountLogout => 'Disconnetti questo telefono';
+
+  @override
+  String get officineAccountLogoutTitle => 'Disconnettere questo telefono?';
+
+  @override
+  String get officineAccountLogoutBody =>
+      'Questo telefono non avrà più accesso allo spazio farmacia. Il titolare potrà aggiungerlo di nuovo.';
+
+  @override
+  String get officineAccountInfoTitle => 'Dati della farmacia';
+
+  @override
+  String get officineAccountAddress => 'Indirizzo';
+
+  @override
+  String get officineAccountPhone => 'Telefono della farmacia';
+
+  @override
+  String get officineAccountNameNote =>
+      'Il nome della farmacia si cambia con il team Pokou.';
+
+  @override
+  String get officineAccountSave => 'Salva';
+
+  @override
+  String get officineAccountSaved => 'Salvato';
+
+  @override
+  String get officineAccountHoursHint => 'Lun.–sab., 8–21';
+
+  @override
+  String get officineAccountWalletTitle => 'Cambia il wallet di incasso';
+
+  @override
+  String get officineAccountWalletBody =>
+      'Il nuovo numero deve essere intestato alla farmacia. Il team Pokou lo verifica; nel frattempo i pazienti pagano sul wallet attuale.';
+
+  @override
+  String officineAccountWalletPending(String phone) {
+    return 'Nuovo wallet in verifica: $phone';
+  }
+
+  @override
+  String officineAccountWalletName(String phone) {
+    return '$phone · intestato alla farmacia';
+  }
+
+  @override
+  String get officineAccountTitulaireOnly =>
+      'Solo il farmacista titolare può fare questa modifica.';
+
+  @override
+  String get officineAccountPhonesNote =>
+      'Ogni telefono del banco riceve le ricette e gestisce gli ordini. I numeri restano nascosti.';
+
+  @override
+  String get officineAccountAddPhone => 'Aggiungi un telefono';
+
+  @override
+  String get officineAccountAddPhoneHint => 'Il numero di un account Pokou';
+
+  @override
+  String get officineAccountAdd => 'Aggiungi';
+
+  @override
+  String get officineAccountRemovePhone => 'Rimuovi questo telefono';
+
+  @override
+  String get officineAccountThisPhone => 'Questo telefono';
+
+  @override
+  String get officineAccountTitulaire => 'Titolare';
+
+  @override
+  String get officineAccountCollaborator => 'Collaboratore';
 }
