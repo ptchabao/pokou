@@ -422,18 +422,47 @@ def test_un_inconnu_se_bloque_sans_entrer_dans_le_carnet(client):
     assert stranger["is_unknown_contact"] is True
 
 
-def test_signaler_un_inconnu_avec_ses_derniers_messages_et_le_bloquer(client):
+REPORT_KEY = "kKz2uM5r0mJm6nqvC3m1tYbq7Q8pXq0yWnB9Ys5mH2E="
+
+
+def _messages(n=5):
+    return [
+        {"sender": "~ Agent", "text": f"Envoyez votre code secret {i}", "sent_at": "2026-11-15T11:52:00"}
+        for i in range(n)
+    ]
+
+
+def _make_admin(user_id):
+    """Un membre de l'équipe : jeton de la console, comme
+    test_admin_space.py."""
+    from app.models import User, UserRole
+    from tests.helpers import console_bearer
+
+    session = TestingSessionLocal()
+    try:
+        session.query(User).filter(User.id == user_id).update({User.role: UserRole.ADMIN})
+        session.commit()
+    finally:
+        session.close()
+    return console_bearer(TestingSessionLocal, user_id)
+
+
+def test_signaler_un_inconnu_avec_ses_derniers_messages_et_le_bloquer(client, monkeypatch):
+    """Avec consentement et clé : les messages sont stockés CHIFFRÉS, et
+    seule la lecture d'un signalement dans l'espace d'administration les
+    rend en clair."""
     from app.models import AbuseReport
 
+    monkeypatch.setenv("REPORTS_ENCRYPTION_KEY", REPORT_KEY)
     headers_a, user_a, _, user_b = _stranger_writes(client, "+22889500303", "+22889500304")
-    messages = [{"sender": "~ Agent", "text": f"message {i}", "sent_at": "2026-11-15T11:52:00"} for i in range(5)]
     response = client.post(
         "/api/v1/conversations/report",
         json={
             "contact_user_id": user_b,
             "reason": "Arnaque ou demande d'argent",
             "also_block": True,
-            "recent_messages": messages,
+            "consent": True,
+            "recent_messages": _messages(),
         },
         headers=headers_a,
     )
@@ -446,17 +475,83 @@ def test_signaler_un_inconnu_avec_ses_derniers_messages_et_le_bloquer(client):
     try:
         report = session.query(AbuseReport).one()
         assert report.target_user_id == user_b
-        assert [m["text"] for m in report.recent_messages] == [m["text"] for m in messages]
+        # Au repos : un jeton chiffré, jamais le texte.
+        assert report.recent_messages_encrypted
+        assert "code secret" not in report.recent_messages_encrypted
+        assert report.messages_consent_at is not None
+        report_id = report.id
     finally:
         session.close()
+
+    # Les listes ne déchiffrent pas ; la lecture d'UN signalement, oui.
+    _, admin_id = _signup(client, "+22889500399")
+    client.cookies.clear()
+    admin_headers = _make_admin(admin_id)
+    queue = client.get("/api/v1/admin/reports", headers=admin_headers).json()["items"]
+    assert queue[0]["has_recent_messages"] is True
+    assert "recent_messages" not in queue[0]
+    detail = client.get(f"/api/v1/admin/reports/{report_id}", headers=admin_headers).json()
+    assert [m["text"] for m in detail["recent_messages"]] == [m["text"] for m in _messages()]
 
     # Six messages, c'est un de trop : « les 5 derniers, rien d'autre ».
     too_many = client.post(
         "/api/v1/conversations/report",
-        json={"contact_user_id": user_b, "reason": "Spam", "recent_messages": messages + messages[:1]},
+        json={"contact_user_id": user_b, "reason": "Spam", "consent": True,
+              "recent_messages": _messages(6)},
         headers=headers_a,
     )
     assert too_many.status_code == 422
+
+
+def test_pas_de_messages_joints_sans_consentement(client, monkeypatch):
+    from app.models import AbuseReport
+
+    monkeypatch.setenv("REPORTS_ENCRYPTION_KEY", REPORT_KEY)
+    headers_a, _, _, user_b = _stranger_writes(client, "+22889500311", "+22889500312")
+    refused = client.post(
+        "/api/v1/conversations/report",
+        json={"contact_user_id": user_b, "reason": "Spam", "recent_messages": _messages()},
+        headers=headers_a,
+    )
+    assert refused.status_code == 400
+
+    # Sans messages, le signalement passe — et rien n'est joint.
+    plain = client.post(
+        "/api/v1/conversations/report",
+        json={"contact_user_id": user_b, "reason": "Spam"},
+        headers=headers_a,
+    )
+    assert plain.status_code == 200
+    session = TestingSessionLocal()
+    try:
+        report = session.query(AbuseReport).one()
+        assert report.recent_messages_encrypted is None
+        assert report.messages_consent_at is None
+    finally:
+        session.close()
+
+
+def test_sans_cle_les_messages_joints_ne_sont_pas_stockes(client, monkeypatch):
+    """Sans clé configurée : le signalement passe, sans les messages —
+    jamais en clair."""
+    from app.models import AbuseReport
+
+    monkeypatch.delenv("REPORTS_ENCRYPTION_KEY", raising=False)
+    headers_a, _, _, user_b = _stranger_writes(client, "+22889500313", "+22889500314")
+    response = client.post(
+        "/api/v1/conversations/report",
+        json={"contact_user_id": user_b, "reason": "Spam", "consent": True,
+              "recent_messages": _messages()},
+        headers=headers_a,
+    )
+    assert response.status_code == 200, response.text
+    session = TestingSessionLocal()
+    try:
+        report = session.query(AbuseReport).one()
+        assert report.recent_messages_encrypted is None
+        assert report.messages_consent_at is None
+    finally:
+        session.close()
 
 
 def test_signaler_un_groupe_est_reserve_a_ses_membres(client):

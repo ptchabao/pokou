@@ -134,6 +134,11 @@ class Settings(BaseSettings):
     review_phone_numbers: str = ""
     review_otp_code: str = ""
 
+    # Clé Fernet qui chiffre au repos les messages joints à un signalement
+    # (voir app/core/report_crypto.py). Vide : ces messages ne sont pas
+    # stockés du tout — jamais en clair.
+    reports_encryption_key: str = ""
+
     # CORS
     allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:8000"]
 

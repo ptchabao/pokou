@@ -457,8 +457,10 @@ def _report_json(db: Session, r: AbuseReport) -> dict:
     group = db.get(Group, r.group_id) if r.group_id else None
     return {
         "group": {"id": group.id, "name": group.name} if group else None,
-        # Les 5 derniers messages, joints par l'appareil de qui signale.
-        "recent_messages": r.recent_messages or [],
+        # Les messages joints restent chiffrés dans les listes : ils ne se
+        # déchiffrent qu'à l'ouverture d'UN signalement (report_detail).
+        "has_recent_messages": bool(r.recent_messages_encrypted),
+        "messages_consent_at": r.messages_consent_at.isoformat() if r.messages_consent_at else None,
         "id": r.id,
         "status": r.status,
         "reason": r.reason,

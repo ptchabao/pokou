@@ -29,6 +29,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.admin.admin import _audit, _report_json
 from app.core.database import get_db
+from app.core import report_crypto
 from app.core.permissions import permissions_of, require_permission
 from app.models import (
     AbuseReport, AuditLog, CertifiedProApplication, CertifiedSubscription, CourierProfile, GroupMember,
@@ -158,6 +159,9 @@ def report_detail(report_id: int, user: User = Depends(require_permission("repor
     resolver = db.get(User, r.resolved_by) if r.resolved_by else None
     return {
         **_report_json(db, r),
+        # Déchiffrés ICI seulement, à la lecture du signalement. Une clé
+        # absente ou changée rend une liste vide, jamais une erreur.
+        "recent_messages": report_crypto.decrypt_messages(r.recent_messages_encrypted) or [],
         "resolved_by": _label(resolver),
         "history": [{"id": h.id, "status": h.status, "reason": h.reason, "resolution": h.resolution,
                      "created_at": h.created_at.isoformat()} for h in history],

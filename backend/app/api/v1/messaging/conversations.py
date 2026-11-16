@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session, joinedload
 
+from app.core import report_crypto
 from app.core.database import get_db
 from app.models import Community, Contact, DirectMessage, Group, GroupMember, GroupMessage, MediaAsset, MessageStatus, User
 from app.utils.identity import est_certifie, forme_du_badge, nom_affiche
@@ -107,6 +108,9 @@ class ReportRequest(BaseModel):
     recent_messages: List[ReportedMessage] = Field(
         default_factory=list, max_length=MAX_REPORTED_MESSAGES
     )
+    #: La case « Joindre les 5 derniers messages », cochée par la personne
+    #: qui signale. Sans elle, aucun message n'est accepté.
+    consent: bool = False
     # Deux gestes distincts : on peut signaler un abus sans se couper de la
     # personne (un litige commercial en cours, par exemple), et l'immense
     # majorité des signalements s'accompagne quand même d'un blocage — d'où
@@ -519,8 +523,23 @@ async def report_conversation(
         raise HTTPException(
             status_code=400, detail="Signalez une personne ou un groupe, pas les deux"
         )
-    # Les 5 derniers messages, déchiffrés par l'appareil de qui signale.
-    recent = [m.model_dump() for m in payload.recent_messages] or None
+    # Les 5 derniers messages, déchiffrés par l'appareil de qui signale —
+    # seulement avec son consentement explicite, et seulement CHIFFRÉS au
+    # repos. Sans clé configurée, ils ne sont pas stockés du tout : le
+    # signalement passe sans eux, jamais en clair.
+    if payload.recent_messages and not payload.consent:
+        raise HTTPException(
+            status_code=400,
+            detail="Les messages ne se joignent qu'avec votre accord",
+        )
+    encrypted = report_crypto.encrypt_messages(
+        [m.model_dump() for m in payload.recent_messages]
+    )
+    if payload.recent_messages and encrypted is None:
+        logger.error(
+            "REPORTS_ENCRYPTION_KEY absente : messages joints au signalement non stockés"
+        )
+    consent_at = datetime.utcnow() if encrypted is not None else None
 
     # ── Un groupe ─────────────────────────────────────────────────────────
     # Réservé à ses membres : eux seuls en voient les messages. Le geste ne
@@ -535,7 +554,8 @@ async def report_conversation(
             reporter_id=user_id,
             group_id=payload.group_id,
             reason=(payload.reason or "")[:280] or None,
-            recent_messages=recent,
+            recent_messages_encrypted=encrypted,
+            messages_consent_at=consent_at,
         ))
         db.commit()
         return {
@@ -574,7 +594,8 @@ async def report_conversation(
             target_user_id=payload.contact_user_id,
             reason=(payload.reason or "")[:280] or None,
             blocked=1 if contact is not None else 0,
-            recent_messages=recent,
+            recent_messages_encrypted=encrypted,
+            messages_consent_at=consent_at,
         ))
     db.commit()
 

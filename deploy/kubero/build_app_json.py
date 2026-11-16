@@ -46,6 +46,10 @@ if env.get("LIVEKIT_API_KEY") and env.get("LIVEKIT_API_SECRET"):
     })
 else:
     app_env["LIVEKIT_ENABLED"] = "false"
+# Messages joints aux signalements : chiffrés au repos avec cette clé
+# (app/core/report_crypto.py). Absente, ils ne sont pas stockés du tout.
+if env.get("REPORTS_ENCRYPTION_KEY"):
+    app_env["REPORTS_ENCRYPTION_KEY"] = env["REPORTS_ENCRYPTION_KEY"]
 for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_SMS_FROM", "TWILIO_MESSAGING_SERVICE_SID"):
     if env.get(k):
         app_env[k] = env[k]
