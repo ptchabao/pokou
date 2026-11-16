@@ -109,14 +109,11 @@ class _HomeHeader extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 10, 6, 0),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              'assets/brand/pokou_logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.cover,
-            ),
+          // Le même logotype qu'en tête des Discussions.
+          Image.asset(
+            'assets/brand/pokou_logotype_couleur.png',
+            height: 30,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 10),
           Expanded(
