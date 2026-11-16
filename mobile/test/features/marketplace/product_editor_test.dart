@@ -102,6 +102,9 @@ void main() {
         find.widgetWithText(TextField, 'Titre'),
         'Pagne wax',
       );
+      // Assimé 5 → 6 : l'assistant passe aux prix, état et lieu.
+      await tester.tap(find.text('Continuer'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.widgetWithText(TextField, 'Prix'), '5 000');
       // Une nouvelle annonce passe par l'aperçu (Assimé 7) : rien ne part
       // avant l'engagement sur les produits interdits.
@@ -121,6 +124,10 @@ void main() {
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
       await tester.pumpAndSettle();
       expect(find.byType(ProductEditor), findsOneWidget);
+      expect(find.text('5 000'), findsOneWidget);
+      // Le retour ramène à l'étape 1, titre intact.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
       expect(find.text('Pagne wax'), findsOneWidget);
     },
   );

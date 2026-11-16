@@ -10,6 +10,7 @@ import '../../../core/settings/app_settings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../modules/shared/module_ui.dart';
 import '../data/product_model.dart';
 import 'assime_publish.dart';
 import 'assime_sheets.dart';
@@ -91,8 +92,13 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
   double? _longitude;
   bool _fetchingLocation = false;
 
-  MediaMeta? _mainImage;
-  final List<MediaMeta> _gallery = [];
+  /// Les photos, la couverture d'abord (Assimé 5 : cinq au plus). La
+  /// première part comme photo principale, les autres comme galerie.
+  final List<MediaMeta> _photos = [];
+
+  /// Étape de l'assistant de publication : 1 (photos et catégorie) ou 2
+  /// (prix, état et lieu) ; l'aperçu est un écran à part.
+  int _step = 1;
 
   bool _uploading = false;
   bool _saving = false;
@@ -108,7 +114,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
   late String _currencyCode;
   late String _categorySlug;
 
-  static const _maxGallery = 8;
+  static const _maxPhotos = 5;
 
   @override
   void initState() {
@@ -139,10 +145,9 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
     _location = TextEditingController(text: product?.location ?? '');
     _latitude = product?.latitude;
     _longitude = product?.longitude;
-    _mainImage = product?.image;
     _condition = product?.condition;
     _negotiable = product?.negotiable ?? false;
-    if (product != null) _gallery.addAll(product.gallery);
+    if (product != null) _photos.addAll(product.allImages);
   }
 
   @override
@@ -226,15 +231,10 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
     }
   }
 
-  Future<void> _pickMainImage() async {
+  Future<void> _addPhoto() async {
+    if (_photos.length >= _maxPhotos) return;
     final media = await _pickAndUpload();
-    if (media != null && mounted) setState(() => _mainImage = media);
-  }
-
-  Future<void> _addGalleryImage() async {
-    if (_gallery.length >= _maxGallery) return;
-    final media = await _pickAndUpload();
-    if (media != null && mounted) setState(() => _gallery.add(media));
+    if (media != null && mounted) setState(() => _photos.add(media));
   }
 
   Future<void> _useMyGpsLocation() async {
@@ -369,8 +369,8 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
       longitude: _longitude ?? widget.product?.longitude,
       price: price,
       currency: _currencyCode,
-      imageMediaId: _mainImage?.id,
-      galleryMediaIds: [for (final media in _gallery) media.id],
+      imageMediaId: _photos.firstOrNull?.id,
+      galleryMediaIds: [for (final media in _photos.skip(1)) media.id],
       condition: _condition,
       negotiable: _negotiable,
     );
@@ -386,7 +386,7 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
         MaterialPageRoute(
           builder: (_) => AssimePreviewScreen(
             draft: draft,
-            cover: _mainImage ?? (_gallery.isEmpty ? null : _gallery.first),
+            cover: _photos.firstOrNull,
             onPublish: submit,
           ),
         ),
@@ -416,335 +416,328 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final config = ref.watch(marketplaceConfigProvider);
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          widget.product == null
-              ? L.of(context).marketAddProduct
-              : L.of(context).assimeEditTitle,
-        ),
+  /// Assimé 5 → 6 : « Continuer » demande au moins un titre.
+  void _continue() {
+    if (_name.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(L.of(context).marketNameAndPrice)));
+      return;
+    }
+    setState(() => _step = 2);
+  }
+
+  List<Widget> _photosAndCategory(L l, MarketplaceConfig config) => [
+    _PhotoStrip(
+      photos: _photos,
+      busy: _uploading,
+      onAdd: _uploading || _photos.length >= _maxPhotos ? null : _addPhoto,
+      onRemove: (index) => setState(() => _photos.removeAt(index)),
+    ),
+    const SizedBox(height: 6),
+    Text(
+      l.assimePhotosHint(_photos.length),
+      style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+    ),
+    const SizedBox(height: 14),
+    TextField(
+      contextMenuBuilder: pokouContextMenuBuilder,
+      controller: _name,
+      decoration: InputDecoration(labelText: l.assimeTitleLabel),
+    ),
+    const SizedBox(height: 8),
+    DropdownMenu<String>(
+      controller: _category,
+      initialSelection: _categorySlug,
+      enableSearch: true,
+      expandedInsets: EdgeInsets.zero,
+      label: Text(l.marketCategory),
+      dropdownMenuEntries: [
+        for (final categorie in config.categories)
+          DropdownMenuEntry(value: categorie.slug, label: categorie.label),
+      ],
+      onSelected: (value) => setState(() => _categorySlug = value ?? 'AUTRE'),
+    ),
+    if (_categorySlug == 'AUTRE')
+      TextField(
+        contextMenuBuilder: pokouContextMenuBuilder,
+        controller: _categoryDetail,
+        decoration: InputDecoration(labelText: l.marketSpecifyCategory),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text(
-            L.of(context).marketMainPhoto,
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            L.of(context).marketMainPhotoHint,
-            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 8),
-          _MainImagePicker(
-            image: _mainImage,
-            busy: _uploading,
-            onPick: _uploading ? null : _pickMainImage,
-            onRemove: _mainImage == null
-                ? null
-                : () => setState(() => _mainImage = null),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Text(
-                L.of(context).marketOtherPhotos,
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '${_gallery.length}/$_maxGallery',
-                style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _GalleryStrip(
-            images: _gallery,
-            canAdd: !_uploading && _gallery.length < _maxGallery,
-            onAdd: _addGalleryImage,
-            onRemove: (index) => setState(() => _gallery.removeAt(index)),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _name,
-            decoration: InputDecoration(
-              labelText: L.of(context).assimeTitleLabel,
-            ),
-          ),
-          TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _description,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: L.of(context).marketDescription,
-            ),
-          ),
-          TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+  ];
+
+  List<Widget> _priceConditionPlace(L l, MarketplaceConfig config) => [
+    Row(
+      children: [
+        Expanded(
+          child: TextField(
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _price,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: L.of(context).marketPrice),
+            decoration: InputDecoration(labelText: l.marketPrice),
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            value: _negotiable,
-            onChanged: (v) => setState(() => _negotiable = v),
-            title: Text(L.of(context).assimeNegotiable),
-            subtitle: Text(L.of(context).assimeNegotiableSub),
-          ),
-          Text(
-            L.of(context).assimeFilterCondition,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final condition in assimeConditions)
-                AssimeChoiceChip(
-                  label: assimeConditionLabel(L.of(context), condition),
-                  selected: _condition == condition,
-                  onSelected: (on) =>
-                      setState(() => _condition = on ? condition : null),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // ── La devise se CHOISIT ──────────────────────────────────
-          //
-          // C'était un champ de texte libre. « XOF », « FCFA », « fcfa » et
-          // « CFA » désignaient la même monnaie sans jamais se comparer, et
-          // rien n'empêchait de publier un prix en « BTC ». La liste vient
-          // de l'administration, et le serveur refuse désormais ce qui n'y
-          // est pas.
-          DropdownMenu<String>(
-            controller: _currency,
-            initialSelection: _currencyCode,
-            label: Text(L.of(context).marketCurrency),
-            dropdownMenuEntries: [
-              for (final devise in config.currencies)
-                DropdownMenuEntry(
-                  value: devise.code,
-                  label: devise.label == devise.code
-                      ? devise.code
-                      : '${devise.label} (${devise.code})',
-                ),
-            ],
-            onSelected: (value) => setState(
-              () => _currencyCode = value ?? config.defaultCurrency.code,
-            ),
-          ),
-          DropdownMenu<String>(
-            controller: _category,
-            initialSelection: _categorySlug,
-            enableSearch: true,
-            label: Text(L.of(context).marketCategory),
-            dropdownMenuEntries: [
-              for (final categorie in config.categories)
-                DropdownMenuEntry(
-                  value: categorie.slug,
-                  label: categorie.label,
-                ),
-            ],
-            onSelected: (value) =>
-                setState(() => _categorySlug = value ?? 'AUTRE'),
-          ),
-          if (_categorySlug == 'AUTRE')
-            TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-              controller: _categoryDetail,
-              decoration: InputDecoration(
-                labelText: L.of(context).marketSpecifyCategory,
+        ),
+        const SizedBox(width: 10),
+        // ── La devise se CHOISIT ──────────────────────────────────────
+        //
+        // C'était un champ de texte libre : « XOF », « FCFA » et « fcfa »
+        // désignaient la même monnaie sans jamais se comparer. La liste
+        // vient de l'administration, et le serveur refuse le reste.
+        DropdownMenu<String>(
+          controller: _currency,
+          initialSelection: _currencyCode,
+          width: 130,
+          label: Text(l.marketCurrency),
+          dropdownMenuEntries: [
+            for (final devise in config.currencies)
+              DropdownMenuEntry(
+                value: devise.code,
+                label: devise.label == devise.code
+                    ? devise.code
+                    : '${devise.label} (${devise.code})',
               ),
-            ),
-          const SizedBox(height: 4),
-          Row(
+          ],
+          onSelected: (value) => setState(
+            () => _currencyCode = value ?? config.defaultCurrency.code,
+          ),
+        ),
+      ],
+    ),
+    SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      value: _negotiable,
+      onChanged: (v) => setState(() => _negotiable = v),
+      title: Text(l.assimeNegotiable),
+      subtitle: Text(l.assimeNegotiableSub),
+    ),
+    Text(
+      l.assimeFilterCondition,
+      style: const TextStyle(fontWeight: FontWeight.w600),
+    ),
+    const SizedBox(height: 8),
+    Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final condition in assimeConditions)
+          AssimeChoiceChip(
+            label: assimeConditionLabel(l, condition),
+            selected: _condition == condition,
+            onSelected: (on) =>
+                setState(() => _condition = on ? condition : null),
+          ),
+      ],
+    ),
+    const SizedBox(height: 8),
+    TextField(
+      contextMenuBuilder: pokouContextMenuBuilder,
+      controller: _description,
+      maxLines: 3,
+      decoration: InputDecoration(labelText: l.marketDescription),
+    ),
+    const SizedBox(height: 4),
+    Row(
+      children: [
+        Expanded(
+          child: TextField(
+            contextMenuBuilder: pokouContextMenuBuilder,
+            controller: _location,
+            decoration: InputDecoration(labelText: l.assimeAreaLabel),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          onPressed: _fetchingLocation ? null : _useMyGpsLocation,
+          tooltip: l.marketUseGps,
+          icon: _fetchingLocation
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.my_location),
+          style: IconButton.styleFrom(
+            backgroundColor: AppColors.accentPrimaryDark.withValues(alpha: 0.1),
+            foregroundColor: AppColors.accentPrimaryDark,
+          ),
+        ),
+      ],
+    ),
+    if (_latitude != null && _longitude != null)
+      Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Text(
+          l.marketGpsCoords(
+            _latitude!.toStringAsFixed(4),
+            _longitude!.toStringAsFixed(4),
+          ),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+        ),
+      ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final config = ref.watch(marketplaceConfigProvider);
+    // Une nouvelle annonce (Assimé 5 à 7) : un assistant en trois étapes,
+    // la troisième étant l'aperçu. Une modification (Assimé 23) : une page.
+    final wizard = widget.product == null && widget.onSubmit != null;
+    final String title;
+    String? subtitle;
+    if (wizard) {
+      title = _step == 1 ? l.assimeStep1Title : l.assimeStep2Title;
+      subtitle = l.assimePublishStep(_step);
+    } else {
+      title = widget.product == null ? l.marketAddProduct : l.assimeEditTitle;
+    }
+    final String action = _uploading
+        ? l.marketUploadingPhoto
+        : wizard
+        ? (_step == 1 ? l.assimeContinue : l.assimeSeePreview)
+        : widget.product != null
+        ? l.assimeSaveChanges
+        : l.actionSave;
+    return PopScope(
+      canPop: !(wizard && _step == 2),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) setState(() => _step = 1);
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-                  controller: _location,
-                  decoration: InputDecoration(
-                    labelText: L.of(context).assimeAreaLabel,
+              Text(title),
+              if (subtitle != null)
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
                   ),
                 ),
+            ],
+          ),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          children: [
+            if (wizard) ...[
+              AssimeStepBar(step: _step),
+              const SizedBox(height: 14),
+            ],
+            if (!wizard || _step == 1) ..._photosAndCategory(l, config),
+            if (wizard && _step == 1) ...[
+              const SizedBox(height: 14),
+              ModuleCallout(
+                tone: CalloutTone.beige,
+                text: l.assimeNumberNeverShown,
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: _fetchingLocation ? null : _useMyGpsLocation,
-                tooltip: L.of(context).marketUseGps,
-                icon: _fetchingLocation
+            ],
+            if (!wizard) const SizedBox(height: 8),
+            if (!wizard || _step == 2) ..._priceConditionPlace(l, config),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ModuleActionButton(
+                  label: action,
+                  busy: _saving,
+                  onPressed: _uploading || _saving
+                      ? null
+                      : wizard && _step == 1
+                      ? _continue
+                      : _save,
+                ),
+                if (widget.onDelete != null)
+                  TextButton(
+                    onPressed: _saving
+                        ? null
+                        : () async {
+                            final gone = await widget.onDelete!(context);
+                            if (gone && mounted) Navigator.of(context).pop();
+                          },
+                    child: Text(
+                      l.assimeDeleteAction,
+                      style: TextStyle(color: AppColors.feedbackDanger),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Assimé 5 et 23 : cinq photos au plus, la première sert de couverture.
+class _PhotoStrip extends StatelessWidget {
+  const _PhotoStrip({
+    required this.photos,
+    required this.busy,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  final List<MediaMeta> photos;
+  final bool busy;
+  final VoidCallback? onAdd;
+  final ValueChanged<int> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    const size = 76.0;
+    return SizedBox(
+      height: size,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: photos.length + (onAdd == null && !busy ? 0 : 1),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          if (index == photos.length) {
+            return InkWell(
+              onTap: onAdd,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: size,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: busy
                     ? const SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.my_location),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.accentPrimaryDark.withOpacity(0.1),
-                  foregroundColor: AppColors.accentPrimaryDark,
-                ),
-              ),
-            ],
-          ),
-          if (_latitude != null && _longitude != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                L
-                    .of(context)
-                    .marketGpsCoords(
-                      _latitude!.toStringAsFixed(4),
-                      _longitude!.toStringAsFixed(4),
-                    ),
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-              ),
-            ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _uploading || _saving ? null : _save,
-            child: _saving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    _uploading
-                        ? L.of(context).marketUploadingPhoto
-                        : widget.product == null && widget.onSubmit != null
-                        ? L.of(context).assimeSeePreview
-                        : widget.product != null
-                        ? L.of(context).assimeSaveChanges
-                        : L.of(context).actionSave,
-                  ),
-          ),
-          if (widget.onDelete != null)
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () async {
-                      final gone = await widget.onDelete!(context);
-                      if (gone && mounted) Navigator.of(context).pop();
-                    },
-              child: Text(
-                L.of(context).assimeDeleteAction,
-                style: TextStyle(color: AppColors.feedbackDanger),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MainImagePicker extends ConsumerWidget {
-  const _MainImagePicker({
-    required this.image,
-    required this.busy,
-    required this.onPick,
-    required this.onRemove,
-  });
-
-  final MediaMeta? image;
-  final bool busy;
-  final VoidCallback? onPick;
-  final VoidCallback? onRemove;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final media = image;
-    return Stack(
-      children: [
-        InkWell(
-          onTap: onPick,
-          borderRadius: AppRadius.card,
-          child: Container(
-            height: 160,
-            width: double.infinity,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceElevated,
-              borderRadius: AppRadius.card,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: busy && media == null
-                ? const CircularProgressIndicator()
-                : media == null
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add_a_photo_outlined,
-                        color: AppColors.accentPrimaryDark,
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.photo_camera_outlined,
+                            color: AppColors.accentPrimary,
+                          ),
+                          Text(
+                            l.assimeAddPhotoShort,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accentPrimary,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 6),
-                      Text(
-                        L.of(context).marketAddPhoto,
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  )
-                : ClipRRect(
-                    borderRadius: AppRadius.card,
-                    child: _MediaThumbnail(
-                      media: media,
-                      width: double.infinity,
-                      height: 160,
-                    ),
-                  ),
-          ),
-        ),
-        if (media != null && onRemove != null)
-          Positioned(top: 6, right: 6, child: _RemoveBadge(onTap: onRemove!)),
-      ],
-    );
-  }
-}
-
-class _GalleryStrip extends StatelessWidget {
-  const _GalleryStrip({
-    required this.images,
-    required this.canAdd,
-    required this.onAdd,
-    required this.onRemove,
-  });
-
-  final List<MediaMeta> images;
-  final bool canAdd;
-  final VoidCallback onAdd;
-  final ValueChanged<int> onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 84,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: images.length + (canAdd ? 1 : 0),
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          if (index == images.length) {
-            return InkWell(
-              onTap: onAdd,
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                width: 84,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceElevated,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Icon(Icons.add, color: AppColors.accentPrimaryDark),
               ),
             );
           }
@@ -753,11 +746,34 @@ class _GalleryStrip extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: _MediaThumbnail(
-                  media: images[index],
-                  width: 84,
-                  height: 84,
+                  media: photos[index],
+                  width: size,
+                  height: size,
                 ),
               ),
+              if (index == 0)
+                Positioned(
+                  left: 4,
+                  bottom: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      l.assimeCover,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
               Positioned(
                 top: 2,
                 right: 2,
