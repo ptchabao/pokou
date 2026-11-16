@@ -104,14 +104,15 @@ class ConversationsRepository {
   /// Signale une personne ([contactUserId]) ou un groupe ([groupId]).
   ///
   /// [recentMessages] : les 5 derniers messages de la discussion, tels que
-  /// CET appareil les a déchiffrés — le serveur ne peut pas les lire seul.
-  /// La feuille « Signaler » prévient que c'est tout ce qui part.
+  /// CET appareil les a déchiffrés — envoyés seulement avec [consent]. Le
+  /// serveur les chiffre au repos (REPORTS_ENCRYPTION_KEY).
   Future<void> report({
     int? contactUserId,
     int? groupId,
     required String reason,
     bool alsoBlock = false,
     List<ReportedMessage> recentMessages = const [],
+    bool consent = false,
   }) {
     return _api.post(
       '/conversations/report',
@@ -120,9 +121,13 @@ class ConversationsRepository {
         'group_id': ?groupId,
         'reason': reason,
         if (alsoBlock) 'also_block': true,
-        'recent_messages': [
-          for (final message in recentMessages.take(5)) message.toJson(),
-        ],
+        // Les messages ne partent qu'avec le consentement explicite.
+        if (consent && recentMessages.isNotEmpty) ...{
+          'consent': true,
+          'recent_messages': [
+            for (final message in recentMessages.take(5)) message.toJson(),
+          ],
+        },
       },
     );
   }

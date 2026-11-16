@@ -3,15 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/time/server_time.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import '../../../core/widgets/pokou_back_button.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
+import '../../contacts/data/conversations_repository.dart' show ReportedMessage;
+import '../../messaging/presentation/report_sheet.dart';
 import '../data/contact_profile_model.dart';
 
 /// Le profil Pro (maquette Pro 5), tel que les autres le voient : le nom
@@ -288,41 +289,25 @@ class _ReportRow extends ConsumerWidget {
     );
   }
 
+  /// La même feuille « Signaler » que partout : motifs, « Bloquer aussi »,
+  /// et la case de consentement (décochée) pour joindre les messages.
   Future<void> _report(BuildContext context, WidgetRef ref) async {
-    final l = L.of(context);
-    final controller = TextEditingController();
-    final reason = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l.contactReport(name)),
-        content: TextField(
-          contextMenuBuilder: pokouContextMenuBuilder,
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(hintText: l.contactReportReasonHint),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l.actionCancel)),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
-            child: Text(l.contactReportSend),
-          ),
-        ],
-      ),
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    final recent = myUserId == null
+        ? const <ReportedMessage>[]
+        : await recentDirectForReport(
+            ref,
+            myUserId: myUserId,
+            contactUserId: userId,
+            contactName: name,
+          );
+    if (!context.mounted) return;
+    await showReportSheet(
+      context,
+      ref,
+      title: L.of(context).reportTitle(name),
+      contactUserId: userId,
+      recentMessages: recent,
     );
-    if (reason == null || reason.isEmpty || !context.mounted) return;
-    try {
-      await ref.read(apiClientProvider).post('/conversations/report', body: {
-        'contact_user_id': userId,
-        'reason': reason,
-      });
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.contactReportSent)));
-      }
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
-      }
-    }
   }
 }

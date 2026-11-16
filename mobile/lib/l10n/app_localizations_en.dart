@@ -10199,698 +10199,6 @@ class LEn extends L {
       'Statuses aren\'t chat messages: proof mode doesn\'t apply to them.';
 
   @override
-  String get forwardTitle => 'Forward to…';
-
-  @override
-  String get forwardLimit => 'Up to 5 chats';
-
-  @override
-  String get forwardSearch => 'Search';
-
-  @override
-  String get forwardRecent => 'Recent';
-
-  @override
-  String get forwardContacts => 'Contacts';
-
-  @override
-  String get forwardGroup => 'Group';
-
-  @override
-  String get forwardNote =>
-      'The message is labelled “Forwarded”. Sent on more than 5 times, it becomes “Forwarded many times”.';
-
-  @override
-  String forwardSendTo(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Send to $count chats',
-      one: 'Send to 1 chat',
-      zero: 'Choose up to 5 chats',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get forwardMaxReached => '5 chats at most.';
-
-  @override
-  String forwardDone(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Forwarded to $count chats.',
-      one: 'Forwarded to 1 chat.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String forwardPartial(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Could not forward to $count chats.',
-      one: 'Could not forward to 1 chat.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get forwardedLabel => 'Forwarded';
-
-  @override
-  String get forwardedManyLabel => 'Forwarded many times';
-
-  @override
-  String get contactAvailable => 'Available';
-
-  @override
-  String reportTitle(String name) {
-    return 'Report $name';
-  }
-
-  @override
-  String get reportGroup => 'Report group';
-
-  @override
-  String get reportReasonScam => 'Scam or money request';
-
-  @override
-  String get reportReasonImpersonation => 'Pretends to be someone else';
-
-  @override
-  String get reportReasonSpam => 'Spam or advertising';
-
-  @override
-  String get reportReasonShocking => 'Offensive content';
-
-  @override
-  String get reportReasonOther => 'Other';
-
-  @override
-  String get reportNote =>
-      'The last 5 messages of this chat are sent to Pokou support with your report. It sees nothing else.';
-
-  @override
-  String get reportAlsoBlock => 'Also block this number';
-
-  @override
-  String get reportSend => 'Send report';
-
-  @override
-  String get reportSent => 'Report sent. Thank you.';
-
-  @override
-  String get reportSentBlocked => 'Report sent, number blocked.';
-
-  @override
-  String get reportFailed => 'Report not sent — check your connection.';
-
-  @override
-  String get blockedTitle => 'Blocked contacts';
-
-  @override
-  String blockedCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count people',
-      one: '1 person',
-      zero: 'No one blocked',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get blockedEmpty => 'You haven\'t blocked anyone.';
-
-  @override
-  String get blockedInfo =>
-      'A blocked person can\'t call or message you. They no longer see your photo, your “last seen” or your statuses. They aren\'t told.';
-
-  @override
-  String get blockedGroupsNote =>
-      'Blocking also applies in shared groups: you no longer get their group calls.';
-
-  @override
-  String get blockedAdd => 'Block a contact';
-
-  @override
-  String get blockedUnblock => 'Unblock';
-
-  @override
-  String blockedUnblocked(String name) {
-    return '$name is unblocked.';
-  }
-
-  @override
-  String blockedOn(String date) {
-    return 'Blocked on $date';
-  }
-
-  @override
-  String blockedOnAfterReport(String date) {
-    return 'Blocked on $date · after a report';
-  }
-
-  @override
-  String get unknownSenderTitle => 'This number isn\'t in your contacts';
-
-  @override
-  String get unknownSenderBody =>
-      'The name shown is chosen by the sender: it isn\'t verified. Pokou will never ask for your secret code or for money.';
-
-  @override
-  String get unknownSenderSubtitle => 'Not in your contacts';
-
-  @override
-  String get unknownSenderBlock => 'Block';
-
-  @override
-  String get unknownSenderReport => 'Report';
-
-  @override
-  String get unknownSenderAdd => 'Add';
-
-  @override
-  String get secretCodeAlertTitle => 'This message asks for a secret code.';
-
-  @override
-  String get secretCodeAlertBody => 'Never give it, not even to an agent.';
-
-  @override
-  String convEditWindow(int minutes) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: 'For $minutes minutes after sending',
-      one: 'For 1 minute after sending',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get messageInfoTitle => 'Message info';
-
-  @override
-  String messageInfoSentAt(String time) {
-    return 'Sent $time';
-  }
-
-  @override
-  String messageInfoDeliveredAt(String time) {
-    return 'Delivered $time';
-  }
-
-  @override
-  String messageInfoReadAt(String time) {
-    return 'Read $time';
-  }
-
-  @override
-  String get messageInfoSentOnly => 'Sent';
-
-  @override
-  String attachTo(String name) {
-    return 'Attach to $name';
-  }
-
-  @override
-  String get attachGallery => 'Gallery';
-
-  @override
-  String get attachCamera => 'Camera';
-
-  @override
-  String get attachPoll => 'Poll';
-
-  @override
-  String get attachKory => 'Kory pot';
-
-  @override
-  String get attachKoryGroupsOnly =>
-      'The pot can only be created inside a group.';
-
-  @override
-  String get chatsMenuDirectChat => 'One-to-one chat';
-
-  @override
-  String get chatsMenuGroupChat => 'Group';
-
-  @override
-  String get chatsPinHint => 'Up to three pinned chats';
-
-  @override
-  String get chatsAddFavorite => 'Add to favourites';
-
-  @override
-  String get chatsRemoveFavorite => 'Remove from favourites';
-
-  @override
-  String get chatsFavoriteHint => 'Find it again in the “Favourites” filter';
-
-  @override
-  String get chatsArchiveHint => 'It leaves the list without being deleted';
-
-  @override
-  String get archivedScreenTitle => 'Archived';
-
-  @override
-  String archivedScreenCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count chats',
-      one: '1 chat',
-      zero: 'No chats',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get archivedScreenNote =>
-      'An archived chat stays here when a message arrives. Its content and proof mode don\'t change.';
-
-  @override
-  String get archivedScreenHelpTitle => 'Long-press a chat';
-
-  @override
-  String get archivedScreenUnarchive => 'Unarchive';
-
-  @override
-  String get archivedScreenAddFavorite => 'Add to favourites';
-
-  @override
-  String get archivedScreenEmpty => 'No archived chats.';
-
-  @override
-  String get callGroupTitle => 'Group call';
-
-  @override
-  String callParticipants(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count participants',
-      one: '1 participant',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String callSpeaking(String name) {
-    return '$name is speaking';
-  }
-
-  @override
-  String get callPoorNetwork => 'Weak network. The call goes on.';
-
-  @override
-  String callPoorNetworkVideoPaused(String name) {
-    return 'Weak network. $name\'s video is paused, the call continues as audio.';
-  }
-
-  @override
-  String get callMinimize => 'Minimise';
-
-  @override
-  String get callFlipShort => 'Flip';
-
-  @override
-  String get callVideoShort => 'Video';
-
-  @override
-  String get callQuit => 'Leave';
-
-  @override
-  String get callHangUpShort => 'Hang up';
-
-  @override
-  String get callIncomingAudioTitle => 'Incoming voice call';
-
-  @override
-  String get callIncomingVideoTitle => 'Incoming video call';
-
-  @override
-  String get callIncomingPokouAudio => 'Pokou · voice call';
-
-  @override
-  String get callIncomingPokouVideo => 'Pokou · video call';
-
-  @override
-  String get callReplyWithMessage => 'Reply with a message';
-
-  @override
-  String get callReplyCallBack => 'I\'ll call you back';
-
-  @override
-  String get callReplyCantTalk => 'I can\'t talk now';
-
-  @override
-  String get callReplyWriteMe => 'Text me';
-
-  @override
-  String get callReplyFailed => 'Message not sent — the call was declined.';
-
-  @override
-  String get callDecline => 'Decline';
-
-  @override
-  String get callAccept => 'Accept';
-
-  @override
-  String get callsSearchHint => 'Search a name';
-
-  @override
-  String get callsIncoming => 'Incoming';
-
-  @override
-  String get callsOutgoing => 'Outgoing';
-
-  @override
-  String get callsGroupAudio => 'Group voice';
-
-  @override
-  String get callsGroupVideo => 'Group video';
-
-  @override
-  String callsPeople(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count people',
-      one: '1 person',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String callsDurationSeconds(int seconds) {
-    return '$seconds s';
-  }
-
-  @override
-  String callsDurationMinutes(int minutes) {
-    return '$minutes min';
-  }
-
-  @override
-  String callsDurationMinSec(int minutes, String seconds) {
-    return '$minutes min $seconds';
-  }
-
-  @override
-  String get offlineMessagesWillSend =>
-      'No connection. Your messages will go out as soon as the network is back.';
-
-  @override
-  String get groupInfoTitle => 'Group info';
-
-  @override
-  String groupInfoSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Group · $count members',
-      one: 'Group · 1 member',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get groupInfoAudio => 'Audio';
-
-  @override
-  String get groupInfoVideo => 'Video';
-
-  @override
-  String get groupInfoAdd => 'Add';
-
-  @override
-  String get groupInfoProofOn => 'Proof mode: on';
-
-  @override
-  String get groupInfoProofOff => 'Proof mode: off';
-
-  @override
-  String get groupInfoProofHint =>
-      'Any member holding the badge can turn it on';
-
-  @override
-  String get groupInfoProofEnable => 'Turn on';
-
-  @override
-  String get groupInfoProofDisable => 'Turn off';
-
-  @override
-  String get groupInfoInviteHint => 'Revocable at any time, admins only';
-
-  @override
-  String groupInfoMessage(String name) {
-    return 'Message $name';
-  }
-
-  @override
-  String get groupSettingsMembers => 'Members';
-
-  @override
-  String get groupSettingsAdmins => 'Admins';
-
-  @override
-  String get groupSettingsMe => 'you';
-
-  @override
-  String get groupSettingsProof => 'Proof mode';
-
-  @override
-  String get groupSettingsProofOn => 'On';
-
-  @override
-  String get groupSettingsProofOff => 'Off';
-
-  @override
-  String groupKoryOngoing(String title) {
-    return 'Pot in progress · $title';
-  }
-
-  @override
-  String groupKoryProgress(String collected, String goal) {
-    return '$collected of $goal FCFA';
-  }
-
-  @override
-  String groupKoryCollected(String collected) {
-    return '$collected FCFA confirmed';
-  }
-
-  @override
-  String groupKoryCloses(String date) {
-    return 'closes $date';
-  }
-
-  @override
-  String get contactNotifications => 'Notifications';
-
-  @override
-  String get contactNotificationsOn => 'On';
-
-  @override
-  String get contactNotificationsMuted => 'Muted';
-
-  @override
-  String get contactInfoTitle => 'Contact info';
-
-  @override
-  String get composerWriteHint => 'Write a message…';
-
-  @override
-  String newChatOnPokouCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count contacts on Pokou',
-      one: '1 contact on Pokou',
-      zero: 'No contacts on Pokou',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get newChatNewGroupHint => 'Bring your people into one chat';
-
-  @override
-  String get newChatInviteRow => 'Invite to Pokou';
-
-  @override
-  String get newChatInviteRowHint => 'Share an invite link';
-
-  @override
-  String get newChatOnPokouSection => 'Contacts on Pokou';
-
-  @override
-  String get mentionPickerTitle => 'Mention';
-
-  @override
-  String statusReplyCardTitle(String name) {
-    return '$name · Status';
-  }
-
-  @override
-  String get statusReplyCardMine => 'Your status';
-
-  @override
-  String statusReplyNotice(String name) {
-    return 'Your reply to $name\'s status arrived here, in private. Other contacts don\'t see it.';
-  }
-
-  @override
-  String get proofEditNote =>
-      'Proof mode is on. The original version of your message will stay visible to both of you, with the time of the edit.';
-
-  @override
-  String get pollKindSingle => 'Poll · single choice';
-
-  @override
-  String get pollKindMultiple => 'Poll · multiple choice';
-
-  @override
-  String pollVotes(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count votes',
-      one: '1 vote',
-      zero: 'No votes',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get pollSeeVotes => 'See votes';
-
-  @override
-  String get pollVoterUnknown => 'A member';
-
-  @override
-  String get searchScopeAll => 'All';
-
-  @override
-  String get searchScopeChats => 'Chats';
-
-  @override
-  String get searchScopeMessages => 'Messages';
-
-  @override
-  String get searchScopePhotos => 'Photos';
-
-  @override
-  String get searchScopeLinks => 'Links';
-
-  @override
-  String get searchChatsSection => 'Chats';
-
-  @override
-  String searchMessagesSection(int count) {
-    return 'Messages · $count';
-  }
-
-  @override
-  String searchPhotosSection(int count) {
-    return 'Photos · $count';
-  }
-
-  @override
-  String searchLinksSection(int count) {
-    return 'Links · $count';
-  }
-
-  @override
-  String searchLastMessage(String text) {
-    return 'Last message: $text';
-  }
-
-  @override
-  String get viewerReply => 'Reply';
-
-  @override
-  String get viewerForward => 'Forward';
-
-  @override
-  String get viewerSave => 'Save';
-
-  @override
-  String get viewerReact => 'React';
-
-  @override
-  String viewerSubtitle(String place, String when) {
-    return '$place · $when';
-  }
-
-  @override
-  String composerSendTo(String name) {
-    return 'Send to $name';
-  }
-
-  @override
-  String get composerCompressedNote =>
-      'Photos are compressed to save your data.';
-
-  @override
-  String groupMembersChosen(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count members chosen',
-      one: '1 member chosen',
-      zero: 'No members chosen',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String groupMembersSection(int count) {
-    return 'Members · $count';
-  }
-
-  @override
-  String get groupNewAdminsOnly => 'Only admins edit the group';
-
-  @override
-  String get groupNewAdminsOnlyHint => 'Name, photo and description';
-
-  @override
-  String get groupNewInviteHint => 'Revocable at any time';
-
-  @override
-  String get groupNewFootnote =>
-      'You manage the group and can appoint other admins. Each member is told they were added.';
-
-  @override
-  String get groupNewCreate => 'Create group';
-
-  @override
-  String get groupNoPokouContacts =>
-      'None of your contacts is on Pokou yet. Invite them to create a group.';
-
-  @override
-  String get groupCreateSettingsFailed =>
-      'Group created. The photo or a setting could not be applied: try again from Group info.';
-
-  @override
-  String get newChatNotOnPokou => 'Not on Pokou yet';
-
-  @override
-  String reportGroupNamed(String name) {
-    return 'Report $name';
-  }
-
-  @override
-  String get groupLeaveLot1Note =>
-      'Leaving the group keeps your messages with the other members. Admins are notified.';
-
-  @override
   String get koryMqVerified => 'verified';
 
   @override
@@ -13987,4 +13295,700 @@ class LEn extends L {
   String courierByAt(String name, String when) {
     return '$name $when';
   }
+
+  @override
+  String get forwardTitle => 'Forward to…';
+
+  @override
+  String get forwardLimit => 'Up to 5 chats';
+
+  @override
+  String get forwardSearch => 'Search';
+
+  @override
+  String get forwardRecent => 'Recent';
+
+  @override
+  String get forwardContacts => 'Contacts';
+
+  @override
+  String get forwardGroup => 'Group';
+
+  @override
+  String get forwardNote =>
+      'The message is labelled “Forwarded”. Sent on more than 5 times, it becomes “Forwarded many times”.';
+
+  @override
+  String forwardSendTo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Send to $count chats',
+      one: 'Send to 1 chat',
+      zero: 'Choose up to 5 chats',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forwardMaxReached => '5 chats at most.';
+
+  @override
+  String forwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Forwarded to $count chats.',
+      one: 'Forwarded to 1 chat.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forwardPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Could not forward to $count chats.',
+      one: 'Could not forward to 1 chat.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get forwardedLabel => 'Forwarded';
+
+  @override
+  String get forwardedManyLabel => 'Forwarded many times';
+
+  @override
+  String get contactAvailable => 'Available';
+
+  @override
+  String reportTitle(String name) {
+    return 'Report $name';
+  }
+
+  @override
+  String get reportGroup => 'Report group';
+
+  @override
+  String get reportReasonScam => 'Scam or money request';
+
+  @override
+  String get reportReasonImpersonation => 'Pretends to be someone else';
+
+  @override
+  String get reportReasonSpam => 'Spam or advertising';
+
+  @override
+  String get reportReasonShocking => 'Offensive content';
+
+  @override
+  String get reportReasonOther => 'Other';
+
+  @override
+  String get reportNote =>
+      'Your report goes to Pokou support with the reason you chose. Messages are attached only if you tick the box below.';
+
+  @override
+  String get reportAttachConsent =>
+      'Attach the last 5 messages of this chat to help support check (they are decrypted on your phone and sent to support encrypted)';
+
+  @override
+  String get reportAlsoBlock => 'Also block this number';
+
+  @override
+  String get reportSend => 'Send report';
+
+  @override
+  String get reportSent => 'Report sent. Thank you.';
+
+  @override
+  String get reportSentBlocked => 'Report sent, number blocked.';
+
+  @override
+  String get reportFailed => 'Report not sent — check your connection.';
+
+  @override
+  String get blockedTitle => 'Blocked contacts';
+
+  @override
+  String blockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+      zero: 'No one blocked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get blockedEmpty => 'You haven\'t blocked anyone.';
+
+  @override
+  String get blockedInfo =>
+      'A blocked person can\'t call or message you. They no longer see your photo, your “last seen” or your statuses. They aren\'t told.';
+
+  @override
+  String get blockedGroupsNote =>
+      'Blocking also applies in shared groups: you no longer get their group calls.';
+
+  @override
+  String get blockedAdd => 'Block a contact';
+
+  @override
+  String get blockedUnblock => 'Unblock';
+
+  @override
+  String blockedUnblocked(String name) {
+    return '$name is unblocked.';
+  }
+
+  @override
+  String blockedOn(String date) {
+    return 'Blocked on $date';
+  }
+
+  @override
+  String blockedOnAfterReport(String date) {
+    return 'Blocked on $date · after a report';
+  }
+
+  @override
+  String get unknownSenderTitle => 'This number isn\'t in your contacts';
+
+  @override
+  String get unknownSenderBody =>
+      'The name shown is chosen by the sender: it isn\'t verified. Pokou will never ask for your secret code or for money.';
+
+  @override
+  String get unknownSenderSubtitle => 'Not in your contacts';
+
+  @override
+  String get unknownSenderBlock => 'Block';
+
+  @override
+  String get unknownSenderReport => 'Report';
+
+  @override
+  String get unknownSenderAdd => 'Add';
+
+  @override
+  String get secretCodeAlertTitle => 'This message asks for a secret code.';
+
+  @override
+  String get secretCodeAlertBody => 'Never give it, not even to an agent.';
+
+  @override
+  String convEditWindow(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'For $minutes minutes after sending',
+      one: 'For 1 minute after sending',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get messageInfoTitle => 'Message info';
+
+  @override
+  String messageInfoSentAt(String time) {
+    return 'Sent $time';
+  }
+
+  @override
+  String messageInfoDeliveredAt(String time) {
+    return 'Delivered $time';
+  }
+
+  @override
+  String messageInfoReadAt(String time) {
+    return 'Read $time';
+  }
+
+  @override
+  String get messageInfoSentOnly => 'Sent';
+
+  @override
+  String attachTo(String name) {
+    return 'Attach to $name';
+  }
+
+  @override
+  String get attachGallery => 'Gallery';
+
+  @override
+  String get attachCamera => 'Camera';
+
+  @override
+  String get attachPoll => 'Poll';
+
+  @override
+  String get attachKory => 'Kory pot';
+
+  @override
+  String get attachKoryGroupsOnly =>
+      'The pot can only be created inside a group.';
+
+  @override
+  String get chatsMenuDirectChat => 'One-to-one chat';
+
+  @override
+  String get chatsMenuGroupChat => 'Group';
+
+  @override
+  String get chatsPinHint => 'Up to three pinned chats';
+
+  @override
+  String get chatsAddFavorite => 'Add to favourites';
+
+  @override
+  String get chatsRemoveFavorite => 'Remove from favourites';
+
+  @override
+  String get chatsFavoriteHint => 'Find it again in the “Favourites” filter';
+
+  @override
+  String get chatsArchiveHint => 'It leaves the list without being deleted';
+
+  @override
+  String get archivedScreenTitle => 'Archived';
+
+  @override
+  String archivedScreenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chats',
+      one: '1 chat',
+      zero: 'No chats',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get archivedScreenNote =>
+      'An archived chat stays here when a message arrives. Its content and proof mode don\'t change.';
+
+  @override
+  String get archivedScreenHelpTitle => 'Long-press a chat';
+
+  @override
+  String get archivedScreenUnarchive => 'Unarchive';
+
+  @override
+  String get archivedScreenAddFavorite => 'Add to favourites';
+
+  @override
+  String get archivedScreenEmpty => 'No archived chats.';
+
+  @override
+  String get callGroupTitle => 'Group call';
+
+  @override
+  String callParticipants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callSpeaking(String name) {
+    return '$name is speaking';
+  }
+
+  @override
+  String get callPoorNetwork => 'Weak network. The call goes on.';
+
+  @override
+  String callPoorNetworkVideoPaused(String name) {
+    return 'Weak network. $name\'s video is paused, the call continues as audio.';
+  }
+
+  @override
+  String get callMinimize => 'Minimise';
+
+  @override
+  String get callFlipShort => 'Flip';
+
+  @override
+  String get callVideoShort => 'Video';
+
+  @override
+  String get callQuit => 'Leave';
+
+  @override
+  String get callHangUpShort => 'Hang up';
+
+  @override
+  String get callIncomingAudioTitle => 'Incoming voice call';
+
+  @override
+  String get callIncomingVideoTitle => 'Incoming video call';
+
+  @override
+  String get callIncomingPokouAudio => 'Pokou · voice call';
+
+  @override
+  String get callIncomingPokouVideo => 'Pokou · video call';
+
+  @override
+  String get callReplyWithMessage => 'Reply with a message';
+
+  @override
+  String get callReplyCallBack => 'I\'ll call you back';
+
+  @override
+  String get callReplyCantTalk => 'I can\'t talk now';
+
+  @override
+  String get callReplyWriteMe => 'Text me';
+
+  @override
+  String get callReplyFailed => 'Message not sent — the call was declined.';
+
+  @override
+  String get callDecline => 'Decline';
+
+  @override
+  String get callAccept => 'Accept';
+
+  @override
+  String get callsSearchHint => 'Search a name';
+
+  @override
+  String get callsIncoming => 'Incoming';
+
+  @override
+  String get callsOutgoing => 'Outgoing';
+
+  @override
+  String get callsGroupAudio => 'Group voice';
+
+  @override
+  String get callsGroupVideo => 'Group video';
+
+  @override
+  String callsPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callsDurationSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String callsDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String callsDurationMinSec(int minutes, String seconds) {
+    return '$minutes min $seconds';
+  }
+
+  @override
+  String get offlineMessagesWillSend =>
+      'No connection. Your messages will go out as soon as the network is back.';
+
+  @override
+  String get groupInfoTitle => 'Group info';
+
+  @override
+  String groupInfoSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Group · $count members',
+      one: 'Group · 1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupInfoAudio => 'Audio';
+
+  @override
+  String get groupInfoVideo => 'Video';
+
+  @override
+  String get groupInfoAdd => 'Add';
+
+  @override
+  String get groupInfoProofOn => 'Proof mode: on';
+
+  @override
+  String get groupInfoProofOff => 'Proof mode: off';
+
+  @override
+  String get groupInfoProofHint =>
+      'Any member holding the badge can turn it on';
+
+  @override
+  String get groupInfoProofEnable => 'Turn on';
+
+  @override
+  String get groupInfoProofDisable => 'Turn off';
+
+  @override
+  String get groupInfoInviteHint => 'Revocable at any time, admins only';
+
+  @override
+  String groupInfoMessage(String name) {
+    return 'Message $name';
+  }
+
+  @override
+  String get groupSettingsMembers => 'Members';
+
+  @override
+  String get groupSettingsAdmins => 'Admins';
+
+  @override
+  String get groupSettingsMe => 'you';
+
+  @override
+  String get groupSettingsProof => 'Proof mode';
+
+  @override
+  String get groupSettingsProofOn => 'On';
+
+  @override
+  String get groupSettingsProofOff => 'Off';
+
+  @override
+  String groupKoryOngoing(String title) {
+    return 'Pot in progress · $title';
+  }
+
+  @override
+  String groupKoryProgress(String collected, String goal) {
+    return '$collected of $goal FCFA';
+  }
+
+  @override
+  String groupKoryCollected(String collected) {
+    return '$collected FCFA confirmed';
+  }
+
+  @override
+  String groupKoryCloses(String date) {
+    return 'closes $date';
+  }
+
+  @override
+  String get contactNotifications => 'Notifications';
+
+  @override
+  String get contactNotificationsOn => 'On';
+
+  @override
+  String get contactNotificationsMuted => 'Muted';
+
+  @override
+  String get contactInfoTitle => 'Contact info';
+
+  @override
+  String get composerWriteHint => 'Write a message…';
+
+  @override
+  String newChatOnPokouCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts on Pokou',
+      one: '1 contact on Pokou',
+      zero: 'No contacts on Pokou',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newChatNewGroupHint => 'Bring your people into one chat';
+
+  @override
+  String get newChatInviteRow => 'Invite to Pokou';
+
+  @override
+  String get newChatInviteRowHint => 'Share an invite link';
+
+  @override
+  String get newChatOnPokouSection => 'Contacts on Pokou';
+
+  @override
+  String get mentionPickerTitle => 'Mention';
+
+  @override
+  String statusReplyCardTitle(String name) {
+    return '$name · Status';
+  }
+
+  @override
+  String get statusReplyCardMine => 'Your status';
+
+  @override
+  String statusReplyNotice(String name) {
+    return 'Your reply to $name\'s status arrived here, in private. Other contacts don\'t see it.';
+  }
+
+  @override
+  String get proofEditNote =>
+      'Proof mode is on. The original version of your message will stay visible to both of you, with the time of the edit.';
+
+  @override
+  String get pollKindSingle => 'Poll · single choice';
+
+  @override
+  String get pollKindMultiple => 'Poll · multiple choice';
+
+  @override
+  String pollVotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '1 vote',
+      zero: 'No votes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pollSeeVotes => 'See votes';
+
+  @override
+  String get pollVoterUnknown => 'A member';
+
+  @override
+  String get searchScopeAll => 'All';
+
+  @override
+  String get searchScopeChats => 'Chats';
+
+  @override
+  String get searchScopeMessages => 'Messages';
+
+  @override
+  String get searchScopePhotos => 'Photos';
+
+  @override
+  String get searchScopeLinks => 'Links';
+
+  @override
+  String get searchChatsSection => 'Chats';
+
+  @override
+  String searchMessagesSection(int count) {
+    return 'Messages · $count';
+  }
+
+  @override
+  String searchPhotosSection(int count) {
+    return 'Photos · $count';
+  }
+
+  @override
+  String searchLinksSection(int count) {
+    return 'Links · $count';
+  }
+
+  @override
+  String searchLastMessage(String text) {
+    return 'Last message: $text';
+  }
+
+  @override
+  String get viewerReply => 'Reply';
+
+  @override
+  String get viewerForward => 'Forward';
+
+  @override
+  String get viewerSave => 'Save';
+
+  @override
+  String get viewerReact => 'React';
+
+  @override
+  String viewerSubtitle(String place, String when) {
+    return '$place · $when';
+  }
+
+  @override
+  String composerSendTo(String name) {
+    return 'Send to $name';
+  }
+
+  @override
+  String get composerCompressedNote =>
+      'Photos are compressed to save your data.';
+
+  @override
+  String groupMembersChosen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members chosen',
+      one: '1 member chosen',
+      zero: 'No members chosen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupMembersSection(int count) {
+    return 'Members · $count';
+  }
+
+  @override
+  String get groupNewAdminsOnly => 'Only admins edit the group';
+
+  @override
+  String get groupNewAdminsOnlyHint => 'Name, photo and description';
+
+  @override
+  String get groupNewInviteHint => 'Revocable at any time';
+
+  @override
+  String get groupNewFootnote =>
+      'You manage the group and can appoint other admins. Each member is told they were added.';
+
+  @override
+  String get groupNewCreate => 'Create group';
+
+  @override
+  String get groupNoPokouContacts =>
+      'None of your contacts is on Pokou yet. Invite them to create a group.';
+
+  @override
+  String get groupCreateSettingsFailed =>
+      'Group created. The photo or a setting could not be applied: try again from Group info.';
+
+  @override
+  String get newChatNotOnPokou => 'Not on Pokou yet';
+
+  @override
+  String reportGroupNamed(String name) {
+    return 'Report $name';
+  }
+
+  @override
+  String get groupLeaveLot1Note =>
+      'Leaving the group keeps your messages with the other members. Admins are notified.';
 }

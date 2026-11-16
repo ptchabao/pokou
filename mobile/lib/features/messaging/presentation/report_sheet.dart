@@ -31,10 +31,11 @@ typedef ReportOutcome = ({bool blocked});
 ///
 /// ── Ce qui part, et rien d'autre ─────────────────────────────────────
 ///
-/// Le motif choisi et les 5 derniers messages de la discussion
-/// ([recentMessages]), tels que CET appareil les a déchiffrés : le serveur
-/// ne peut pas les lire seul. La feuille le dit avant l'envoi — la personne
-/// qui signale sait exactement ce qu'elle transmet.
+/// Le motif choisi — et, SEULEMENT si la personne coche la case prévue
+/// (décochée par défaut), les 5 derniers messages de la discussion
+/// ([recentMessages]) tels que CET appareil les a déchiffrés. Le serveur
+/// les chiffre au repos et ne les rend lisibles qu'à l'équipe qui traite le
+/// signalement. Sans la case, aucun message ne part.
 ///
 /// « Bloquer aussi ce numéro » n'est proposé que pour une personne
 /// ([contactUserId]) : un groupe se quitte, il ne se bloque pas.
@@ -48,13 +49,22 @@ Future<ReportOutcome?> showReportSheet(
 }) async {
   final messenger = ScaffoldMessenger.of(context);
   final l = L.of(context);
-  final choice = await showModalBottomSheet<({ReportReason reason, bool block})>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-    builder: (_) => _ReportSheet(title: title, offerBlock: contactUserId != null),
-  );
+  final choice =
+      await showModalBottomSheet<
+        ({ReportReason reason, bool block, bool attach})
+      >(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: AppColors.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.bottomSheet,
+        ),
+        builder: (_) => _ReportSheet(
+          title: title,
+          offerBlock: contactUserId != null,
+          offerMessages: recentMessages.isNotEmpty,
+        ),
+      );
   if (choice == null) return null;
   try {
     await ref
@@ -66,7 +76,10 @@ Future<ReportOutcome?> showReportSheet(
           // l'écran : c'est l'équipe Pokou qui le lit.
           reason: _reasonForSupport(choice.reason),
           alsoBlock: choice.block,
-          recentMessages: recentMessages,
+          // Rien sans la case cochée — le serveur le refuserait de toute
+          // façon.
+          recentMessages: choice.attach ? recentMessages : const [],
+          consent: choice.attach,
         );
   } on ApiException catch (exc) {
     messenger.showSnackBar(SnackBar(content: Text(exc.message)));
@@ -162,10 +175,17 @@ String _reasonForSupport(ReportReason reason) => switch (reason) {
 };
 
 class _ReportSheet extends StatefulWidget {
-  const _ReportSheet({required this.title, required this.offerBlock});
+  const _ReportSheet({
+    required this.title,
+    required this.offerBlock,
+    required this.offerMessages,
+  });
 
   final String title;
   final bool offerBlock;
+
+  /// Il y a des messages à joindre : la case de consentement s'affiche.
+  final bool offerMessages;
 
   @override
   State<_ReportSheet> createState() => _ReportSheetState();
@@ -177,6 +197,9 @@ class _ReportSheetState extends State<_ReportSheet> {
   /// Coché par défaut : l'immense majorité des signalements s'accompagne
   /// d'un blocage, et c'est le choix le plus protecteur.
   bool _block = true;
+
+  /// Le consentement à joindre les messages : DÉCOCHÉ par défaut.
+  bool _attach = false;
 
   @override
   Widget build(BuildContext context) {
@@ -273,6 +296,19 @@ class _ReportSheetState extends State<_ReportSheet> {
                   ],
                 ),
               ),
+              if (widget.offerMessages)
+                CheckboxListTile(
+                  value: _attach,
+                  onChanged: (value) =>
+                      setState(() => _attach = value ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.accentPrimary,
+                  title: Text(
+                    l.reportAttachConsent,
+                    style: const TextStyle(fontSize: 13.5),
+                  ),
+                ),
               if (widget.offerBlock)
                 CheckboxListTile(
                   value: _block,
@@ -295,6 +331,7 @@ class _ReportSheetState extends State<_ReportSheet> {
                   onPressed: () => Navigator.pop(context, (
                     reason: _reason,
                     block: widget.offerBlock && _block,
+                    attach: widget.offerMessages && _attach,
                   )),
                   child: Text(l.reportSend),
                 ),

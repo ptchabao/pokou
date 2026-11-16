@@ -18,6 +18,8 @@ import 'status_time.dart';
 import 'status_viewers_sheet.dart';
 import '../../messaging/presentation/messaging_controller.dart';
 import '../../messaging/presentation/status_reply.dart';
+import '../../messaging/presentation/report_sheet.dart';
+import '../../contacts/data/conversations_repository.dart' show ReportedMessage;
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/status_halo.dart';
 import '../data/status_text_style.dart';
@@ -244,55 +246,29 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     }
   }
 
+  /// Signaler l'auteur du statut : la MÊME feuille que partout ailleurs
+  /// (motifs, « Bloquer aussi », case de consentement décochée pour joindre
+  /// les messages de la discussion à deux).
   Future<void> _report() async {
-    final l = L.of(context);
     _controller.stop();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialog) => AlertDialog(
-        title: Text(l.helpReport),
-        content: Text(l.statusReportBody(widget.item.displayName)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialog, false),
-            child: Text(l.actionCancel),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.semanticError,
-            ),
-            onPressed: () => Navigator.pop(dialog, true),
-            child: Text(l.helpReport),
-          ),
-        ],
-      ),
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    final recent = myUserId == null
+        ? const <ReportedMessage>[]
+        : await recentDirectForReport(
+            ref,
+            myUserId: myUserId,
+            contactUserId: widget.item.userId,
+            contactName: widget.item.displayName,
+          );
+    if (!mounted) return;
+    await showReportSheet(
+      context,
+      ref,
+      title: L.of(context).reportTitle(widget.item.displayName),
+      contactUserId: widget.item.userId,
+      recentMessages: recent,
     );
-    if (confirmed != true) {
-      if (mounted) _controller.forward();
-      return;
-    }
-    try {
-      await ref.read(apiClientProvider).post(
-        '/conversations/report',
-        body: {
-          'contact_user_id': widget.item.userId,
-          'reason': 'Statut signalé depuis la visionneuse',
-        },
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l.statusReportSent)));
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l.errorNetwork)));
-      }
-    } finally {
-      if (mounted) _controller.forward();
-    }
+    if (mounted) _controller.forward();
   }
 
   Future<void> _boostCurrent() async {
