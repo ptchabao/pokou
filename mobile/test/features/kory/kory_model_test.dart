@@ -44,7 +44,9 @@ void main() {
     expect(CountryConfig.guessFromPhone('+22890112233').has('honam'), isTrue);
     expect(CountryConfig.guessFromPhone('+2250700112233').has('kory'), isTrue);
     expect(CountryConfig.guessFromPhone('+2250700112233').has('honam'), isTrue);
-    // Ailleurs, la messagerie seule (Lot 1), comme le repli du serveur.
-    expect(CountryConfig.guessFromPhone(null).modules, {'discussions'});
+    // Ailleurs aussi : la même application partout, comme le repli du
+    // serveur.
+    expect(CountryConfig.guessFromPhone(null).has('kory'), isTrue);
+    expect(CountryConfig.guessFromPhone(null).has('honam'), isTrue);
   });
 }

@@ -32,7 +32,9 @@ import '../../messaging/presentation/conversation_screen.dart';
 import 'add_contact_screen.dart';
 import 'contacts_controller.dart';
 import '../../../core/country/country_config.dart';
-import '../../../core/widgets/pokou_bottom_nav.dart' show isLot1;
+import '../../../core/widgets/pokou_bottom_nav.dart' show PokouTab, isLot1;
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/pokou_tab_page.dart';
 import '../../status/presentation/post_status_screen.dart';
 import 'discovery_strip.dart';
 import 'new_chat_screen.dart';
@@ -560,6 +562,23 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               emphasized: true,
               showBell: false,
               showAvatar: false,
+              // Application complète : la barre du bas est ici celle de la
+              // messagerie ; la maison ramène à l'Accueil et à ses modules.
+              leading: lot1
+                  ? null
+                  : IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                      tooltip: L.of(context).navHome,
+                      icon: const PokouIcon(PokouModuleIcon.accueil),
+                      onPressed: () =>
+                          ref.read(pokouCurrentTabProvider.notifier).state =
+                              PokouTab.home,
+                    ),
               actions: [
                 if (lot1)
                   IconButton(

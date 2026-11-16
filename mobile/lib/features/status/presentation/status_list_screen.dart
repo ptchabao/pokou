@@ -68,7 +68,10 @@ class StatusListScreen extends ConsumerWidget {
     final audience = ref.watch(statusPrivacyProvider).valueOrNull;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      // Un fond plein : ouvert par-dessus la coquille (« Tout voir » de la
+      // bande des statuts), l'écran n'a plus le fond de la coquille derrière
+      // lui, et un fond transparent laissait voir du noir.
+      backgroundColor: AppColors.background,
       body: SafeArea(
         top: false,
         child: Column(

@@ -94,6 +94,7 @@ def test_apple_app_site_association_is_served_without_api_prefix(client, monkeyp
         "/honam/order/*",
         "/kory/pots/*",
         "/honam/orders/*",
+        "/honam/coursier/*",
     ]
 
 

@@ -59,6 +59,33 @@ List<PokouTab> pokouTabsFor(Set<String> modules) => isLot1(modules)
         PokouTab.more,
       ];
 
+/// L'espace messagerie : les quatre onglets de la maquette p.52.
+const pokouMessagingTabs = [
+  PokouTab.discussions,
+  PokouTab.statuses,
+  PokouTab.calls,
+  PokouTab.settings,
+];
+
+/// La barre à montrer quand [current] est affiché.
+///
+/// Dans l'application complète, la barre change avec la vue : sur l'Accueil,
+/// Kory, Honam et Plus, c'est la barre des modules ; dès qu'on ouvre les
+/// Discussions, elle laisse place à celle de la messagerie (Discussions,
+/// Statuts, Appels, Réglages). Le retour ramène à l'Accueil.
+List<PokouTab> pokouBarFor(Set<String> modules, PokouTab current) =>
+    !isLot1(modules) && pokouMessagingTabs.contains(current)
+    ? pokouMessagingTabs
+    : pokouTabsFor(modules);
+
+/// Tous les écrans que la coquille peut montrer dans ce pays : les onglets
+/// des modules, plus ceux de la messagerie.
+List<PokouTab> pokouShellTabsFor(Set<String> modules) => [
+  ...pokouTabsFor(modules),
+  for (final tab in pokouMessagingTabs)
+    if (!pokouTabsFor(modules).contains(tab)) tab,
+];
+
 /// Les destinations, construites AVEC un contexte.
 ///
 /// Une fonction et non une liste `const` : un libellé traduit ne peut pas

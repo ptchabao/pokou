@@ -48,9 +48,9 @@ class CountryConfig {
   );
 
   /// Ce qu'on suppose quand le serveur ne répond pas : les mêmes valeurs par
-  /// défaut que le serveur (backend/app/core/countries.py). Le Togo et la
-  /// Côte d'Ivoire gardent leurs modules ; un autre indicatif n'a que la
-  /// messagerie, comme un pays que la console n'a pas encore configuré.
+  /// défaut que le serveur (backend/app/core/countries.py). La même
+  /// application partout : un autre indicatif a aussi Kory, Honam et Assimé,
+  /// comme un pays que la console n'a pas encore configuré.
   factory CountryConfig.guessFromPhone(String? phone) {
     if (phone != null && phone.startsWith('+228')) {
       return const CountryConfig(
@@ -75,7 +75,10 @@ class CountryConfig {
         deliveryPrice: 1500,
       );
     }
-    return const CountryConfig(country: null, modules: {'discussions'});
+    return const CountryConfig(
+      country: null,
+      modules: {'discussions', 'kory', 'kory_plus', 'honam', 'assime'},
+    );
   }
 }
 

@@ -122,6 +122,26 @@ void main() {
     ]);
   });
 
+  test('application complète : la barre change avec la vue', () {
+    const modules = {'discussions', 'kory', 'honam', 'assime'};
+    // Accueil, Kory, Honam, Plus : la barre des modules.
+    for (final tab in [PokouTab.home, PokouTab.kory, PokouTab.more]) {
+      expect(pokouBarFor(modules, tab), pokouTabsFor(modules));
+    }
+    // Discussions, Statuts, Appels, Réglages : la barre de la messagerie.
+    for (final tab in pokouMessagingTabs) {
+      expect(pokouBarFor(modules, tab), pokouMessagingTabs);
+    }
+    // La coquille sait montrer les uns et les autres.
+    expect(
+      pokouShellTabsFor(modules),
+      containsAll({...pokouTabsFor(modules), ...pokouMessagingTabs}),
+    );
+    // Au Lot 1, rien ne change : une seule barre.
+    expect(pokouBarFor({'discussions'}, PokouTab.calls), pokouMessagingTabs);
+    expect(pokouShellTabsFor({'discussions'}), pokouMessagingTabs);
+  });
+
   test('Assimé seul suffit à quitter le Lot 1, sans onglet à lui', () {
     expect(pokouTabsFor({'discussions', 'assime'}), [
       PokouTab.home,

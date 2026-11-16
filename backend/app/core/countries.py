@@ -3,11 +3,12 @@
 Les valeurs par défaut sont écrites ici ; chacune se surcharge sans
 publication par un réglage système `country.<CC>` (JSON partiel), que
 l'équipe modifie depuis la console. Chaque module, Kory et HONAM compris,
-s'ouvre pays par pays : le Togo et la Côte d'Ivoire les ont par défaut.
+se règle pays par pays : tous les pays les ont par défaut.
 
-Un pays absent de la table n'a que la messagerie (le Lot 1 de la maquette :
-Discussions, Statuts, Appels, Réglages). Les modules rejoignent l'app quand
-la console les ouvre dans ce pays.
+Un pays absent de la table a la même application que les autres : Kory,
+Honam et Assimé y sont ouverts par défaut. La console peut fermer un module
+dans un pays ; s'ils sont tous fermés, l'app se présente en Lot 1
+(Discussions, Statuts, Appels, Réglages).
 """
 import json
 from typing import Any, Optional
@@ -57,9 +58,10 @@ _FALLBACK: dict[str, Any] = {
     "emergency_numbers": {},
     "honam_cities": [],
     "kory_plus_fee_ht": 1000,
-    #: Messagerie seule (Lot 1). Pokou certifié reste réservé aux pays où
+    #: La même application partout : Kory, Honam et Assimé sont ouverts par
+    #: défaut dans tous les pays. Pokou certifié reste réservé aux pays où
     #: la vérification d'identité est en place.
-    "modules": ["discussions"],
+    "modules": ["discussions", "kory", "kory_plus", "honam", "assime"],
 }
 
 

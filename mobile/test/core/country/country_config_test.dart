@@ -27,13 +27,15 @@ void main() {
       }
     });
 
-    test('un indicatif inconnu se présente en Lot 1', () {
+    test('un indicatif inconnu a la même application que les autres', () {
       for (final config in [
         CountryConfig.guessFromPhone('+221771234567'),
         CountryConfig.guessFromPhone(null),
       ]) {
-        expect(config.modules, {'discussions'});
-        expect(isLot1(config.modules), isTrue);
+        expect(config.has('kory'), isTrue);
+        expect(config.has('honam'), isTrue);
+        expect(config.has('assime'), isTrue);
+        expect(isLot1(config.modules), isFalse);
       }
     });
   });

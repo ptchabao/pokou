@@ -68,12 +68,13 @@ def test_configuration_du_pays_suit_le_numero(client):
     assert ci["pharmacy_monthly_price"] == 7500
 
 
-def test_pays_sans_configuration_n_a_que_la_messagerie(client):
-    # Un pays que la console n'a pas encore configuré se présente en Lot 1
-    # (messagerie seule) : aucun module n'est plus imposé partout.
+def test_pays_sans_configuration_a_la_meme_application(client):
+    # La même interface dans tous les pays : un pays que la console n'a pas
+    # encore configuré a Kory, Honam et Assimé ouverts, comme les autres.
+    full = ["discussions", "kory", "kory_plus", "honam", "assime"]
     with TestingSessionLocal() as db:
-        assert country_config(db, None)["modules"] == ["discussions"]
-        assert country_config(db, "BJ")["modules"] == ["discussions"]
+        assert country_config(db, None)["modules"] == full
+        assert country_config(db, "BJ")["modules"] == full
 
 
 def test_reglage_systeme_ferme_ce_qu_il_ne_coche_pas(client):

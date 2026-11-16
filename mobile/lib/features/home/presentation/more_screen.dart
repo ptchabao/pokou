@@ -200,9 +200,9 @@ class MoreScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: ModuleCard(
               // L'écran coursier a son propre bouton retour : pas de _Pushed.
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CourierScreen()),
-              ),
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const CourierScreen())),
               child: Row(
                 children: [
                   ModuleBadge(
@@ -385,7 +385,7 @@ class MoreScreen extends ConsumerWidget {
 
         // Lot 1 : encart « Bientôt : Kory, Honam, Assimé » EN BAS (maquette
         // p.52, LOT-4 / NAV-12).
-        if (lot1)
+        if (lot1 && isLot1(config.modules))
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Container(

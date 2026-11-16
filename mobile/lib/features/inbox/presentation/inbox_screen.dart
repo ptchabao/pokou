@@ -105,13 +105,19 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     final modules = ref.watch(
       currentCountryConfigProvider.select((config) => config.modules),
     );
-    final tabs = pokouTabsFor(modules);
+    final tabs = pokouShellTabsFor(modules);
     // L'onglet de départ : l'Accueil dans l'application complète, les
     // Discussions au lot 1, qui n'a pas d'Accueil.
     final requested = ref.watch(pokouCurrentTabProvider);
     final current = tabs.contains(requested) ? requested! : tabs.first;
     _visited.add(current);
     final index = tabs.indexOf(current);
+    // La barre change avec la vue : celle de la messagerie dès qu'on ouvre
+    // les Discussions, celle des modules ailleurs.
+    final bar = pokouBarFor(modules, current);
+    // Dans l'espace messagerie de l'application complète, le retour système
+    // ramène à l'Accueil au lieu de quitter l'application.
+    final backToHome = !isLot1(modules) && bar.contains(PokouTab.statuses);
     // Ouvrir le journal d'appels éteint la pastille des appels manqués ; le
     // quitter aussi, pour les appels arrivés pendant qu'il était affiché.
     ref.listen(pokouCurrentTabProvider, (previous, tab) {
@@ -120,27 +126,33 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       }
     });
 
-    return PokouBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        extendBody: true,
-        body: SafeArea(
-          bottom: false,
-          child: IndexedStack(
-            index: index,
-            children: [
-              for (final tab in tabs)
-                if (_visited.contains(tab))
-                  KeyedSubtree(key: ValueKey(tab), child: _build(tab))
-                else
-                  SizedBox.shrink(key: ValueKey(tab)),
-            ],
+    return PopScope(
+      canPop: !backToHome,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _open(PokouTab.home);
+      },
+      child: PokouBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBody: true,
+          body: SafeArea(
+            bottom: false,
+            child: IndexedStack(
+              index: index,
+              children: [
+                for (final tab in tabs)
+                  if (_visited.contains(tab))
+                    KeyedSubtree(key: ValueKey(tab), child: _build(tab))
+                  else
+                    SizedBox.shrink(key: ValueKey(tab)),
+              ],
+            ),
           ),
-        ),
-        bottomNavigationBar: PokouBottomNav(
-          currentIndex: index,
-          tabs: tabs,
-          onTap: (i) => _open(tabs[i]),
+          bottomNavigationBar: PokouBottomNav(
+            currentIndex: bar.indexOf(current),
+            tabs: bar,
+            onTap: (i) => _open(bar[i]),
+          ),
         ),
       ),
     );
