@@ -164,7 +164,9 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
             borderColor: Colors.transparent,
             child: KoryPersonRow(
               name: l.courierInvitedBy(offer.inviterName!),
-              subtitle: l.courierInviterCodeApplied(offer.inviterCode ?? ''),
+              subtitle: offer.inviterVerified
+                  ? l.courierInviterCodeApplied(offer.inviterCode ?? '')
+                  : l.courierInviteCodeApplied(offer.inviterCode ?? ''),
               trailing: Icon(Icons.check, color: green),
             ),
           ),
@@ -197,7 +199,15 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        if (offer.inviterName == null)
+        // Coursiers 25 · L'ami invité : les trois avantages, ce qu'il faut,
+        // puis ce que le mode coursier coûte après l'essai.
+        if (offer.inviterName != null) ...[
+          _InvitedPerks(offer: offer),
+          const SizedBox(height: 12),
+          KoryNotice(icon: Icons.info_outline, text: l.courierInviteNeeds),
+          KorySection(l.courierWhatItCosts),
+          _costs(l, offer),
+        ] else ...[
           KoryCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,34 +255,7 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
             ),
           ),
         KorySection(l.courierWhatItCosts),
-        KoryCard(
-          child: Column(
-            children: [
-              KoryLine(
-                l.courierTrial,
-                l.courierTrialRides(offer.trialRides),
-                caption: l.courierTrialCaption,
-              ),
-              KoryLine(
-                l.courierThenWinPokou,
-                l.courierFromPerMonth(formatFcfa(offer.membershipPriceTtc)),
-                caption: l.courierThenWinPokouCaption,
-              ),
-              KoryLine(
-                l.courierLaunchLine,
-                l.courierFree,
-                caption: l.courierLaunchCaption,
-              ),
-            ],
-          ),
-        ),
-        if (offer.inviterName != null) ...[
-          const SizedBox(height: 12),
-          KoryNotice(
-            icon: Icons.group_outlined,
-            text: l.courierInviterGets(offer.inviterName!, offer.giftRides),
-          ),
-        ],
+        _costs(l, offer),
         KorySection(l.courierYouNeed),
         for (final need in [l.courierNeedAge, l.courierNeedVehicle, l.courierNeedPhone])
           Padding(
@@ -291,9 +274,117 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
               ],
             ),
           ),
+        ],
       ],
     );
   }
+
+  /// L'essai, Win Pokou ensuite, et la période de lancement.
+  Widget _costs(L l, CourierOffer offer) => KoryCard(
+    child: Column(
+      children: [
+        KoryLine(
+          l.courierTrial,
+          l.courierTrialRides(offer.trialRides),
+          caption: l.courierTrialCaption,
+        ),
+        KoryLine(
+          l.courierThenWinPokou,
+          l.courierFromPerMonth(formatFcfa(offer.membershipPriceTtc)),
+          caption: l.courierThenWinPokouCaption,
+        ),
+        KoryLine(
+          l.courierLaunchLine,
+          l.courierFree,
+          caption: l.courierLaunchCaption,
+        ),
+      ],
+    ),
+  );
+}
+
+/// Les trois avantages de l'ami invité (maquette Coursiers 25) : les
+/// courses d'essai, des premières courses simples, et la recommandation
+/// du parrain, qui reçoit des courses offertes.
+class _InvitedPerks extends StatelessWidget {
+  const _InvitedPerks({required this.offer});
+
+  final CourierOffer offer;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final inviter = offer.inviterName!.trim().split(RegExp(r'\s+')).first;
+    return KoryCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      child: Column(
+        children: [
+          _Perk(
+            icon: Icons.check,
+            title: l.courierTrialOffered(offer.trialRides),
+            caption: l.courierInviteTrialCaption,
+          ),
+          _Perk(
+            icon: Icons.two_wheeler,
+            title: l.courierInviteSimpleRides,
+            caption: l.courierInviteSimpleRidesCaption,
+          ),
+          _Perk(
+            icon: Icons.group_outlined,
+            title: l.courierInviteRecommended(inviter),
+            caption: l.courierInviteRecommendedCaption(offer.giftRides),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Perk extends StatelessWidget {
+  const _Perk({required this.icon, required this.title, required this.caption});
+
+  final IconData icon;
+  final String title;
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: AppColors.terracottaTint,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 17, color: AppColors.onTerracottaTint),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                caption,
+                style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 /// « Honam n'est pas encore à {ville} » (maquette Coursiers 16).

@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4056,8 +4057,7 @@ class LFr extends L {
       locale: localeName,
       other:
           '$count messages mis en attente par le Mode Bouclier — glisser vers le bas pour les afficher',
-      one:
-          '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
+      one: '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
     );
     return '$_temp0';
   }
@@ -14662,4 +14662,147 @@ class LFr extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String get courierInviteCardLabel => 'Invitation coursier Honam';
+
+  @override
+  String courierInviteCardTitle(String name) {
+    return '$name t’invite à livrer pour Honam';
+  }
+
+  @override
+  String courierInviteCardTitleMine(String name) {
+    return 'Tu invites $name à livrer pour Honam';
+  }
+
+  @override
+  String courierInviteCardCode(String code) {
+    return 'code $code';
+  }
+
+  @override
+  String get courierInviteSeeOffer => 'Voir l’offre';
+
+  @override
+  String courierInviteHello(String name) {
+    return 'Salut $name !';
+  }
+
+  @override
+  String get courierInviteHelloAll => 'Salut !';
+
+  @override
+  String courierInviteBody(String amount, String code) {
+    return 'Je livre pour Honam avec Pokou : $amount par course, près de chez toi, quand tu veux. Rejoins-moi avec mon code $code.';
+  }
+
+  @override
+  String courierInviteBodyNoPrice(String code) {
+    return 'Je livre pour Honam avec Pokou : payé à chaque course, près de chez toi, quand tu veux. Rejoins-moi avec mon code $code.';
+  }
+
+  @override
+  String courierInviteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations ne sont pas parties. Réessaie.',
+      one: 'Une invitation n’est pas partie. Réessaie.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations envoyées',
+      one: 'Invitation envoyée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSendTo(String name) {
+    return 'Envoyer à $name';
+  }
+
+  @override
+  String courierInviteSendToCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Envoyer à $count contacts',
+      one: 'Envoyer à 1 contact',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierInviteSearch => 'Rechercher un contact';
+
+  @override
+  String get courierInviteOnPokou => 'Sur Pokou';
+
+  @override
+  String get courierInviteBySms => 'Pas encore sur Pokou · invitation par SMS';
+
+  @override
+  String get courierInviteNoContact =>
+      'Aucun contact trouvé. Sans contact coché, ton message part par le partage du téléphone.';
+
+  @override
+  String get courierInviteCardAdded =>
+      'La carte « Devenir coursier Honam » est ajoutée au message.';
+
+  @override
+  String courierInviteFriendNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tu reçois $count courses offertes quand ton ami termine sa première livraison. L’invitation part seulement vers les 18 ans et plus, dans une ville où Honam est ouvert.',
+      one: 'Tu reçois 1 course offerte quand ton ami termine sa première livraison. L’invitation part seulement vers les 18 ans et plus, dans une ville où Honam est ouvert.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteCodeApplied(String code) {
+    return 'Code $code appliqué';
+  }
+
+  @override
+  String get courierInviteNeeds =>
+      'Il te faut 18 ans ou plus, une pièce d’identité, un smartphone et un wallet mobile money. Une moto, un vélo, ou tes pieds pour les courses proches.';
+
+  @override
+  String get courierInviteTrialCaption =>
+      'Dès la validation de ton inscription, sans adhésion ni pack';
+
+  @override
+  String get courierInviteSimpleRides => 'Des premières courses simples';
+
+  @override
+  String get courierInviteSimpleRidesCaption =>
+      'Des commandes de moins de 15 000 FCFA, le temps de prendre tes repères';
+
+  @override
+  String courierInviteRecommended(String name) {
+    return '$name t’a recommandé';
+  }
+
+  @override
+  String courierInviteRecommendedCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Il reçoit $count courses offertes quand tu termines ta première livraison',
+      one: 'Il reçoit 1 course offerte quand tu termines ta première livraison',
+    );
+    return '$_temp0';
+  }
 }

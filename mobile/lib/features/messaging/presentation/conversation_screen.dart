@@ -44,6 +44,8 @@ import '../../../core/widgets/chat_wallpaper.dart';
 import '../../calls/presentation/call_controller.dart';
 import '../../calls/presentation/call_screen.dart';
 import '../../contacts/presentation/contacts_controller.dart';
+import '../../honam/data/courier_invite_message.dart';
+import '../../honam/presentation/courier_invite_card.dart';
 import '../../marketplace/data/product_model.dart';
 import '../../marketplace/presentation/assime_contact_panel.dart';
 import '../../marketplace/presentation/assime_rate_invitation.dart';
@@ -3225,6 +3227,24 @@ class _BubbleState extends State<_Bubble> {
       // la carte de visite — même geste, même fonction (voir
       // contact_card_bubble.dart::handlePhoneTap).
       final content = message.content ?? '';
+      // Coursiers 24 — une invitation coursier Honam : la carte « Voir
+      // l'offre », puis le message du coursier.
+      final courierInvite = decodeCourierInvite(content);
+      if (courierInvite != null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CourierInviteCard(
+              code: courierInvite.code,
+              contactName: widget.contactName,
+              isMine: isMine,
+            ),
+            if (courierInvite.text.isNotEmpty)
+              LinkifiedText(text: courierInvite.text, style: textStyle),
+          ],
+        );
+      }
       // Fiche Statuts · 7 — une réponse à un statut : la carte-vignette
       // « {Nom} · Statut » et la légende citée, puis la réponse.
       final statusReply = decodeStatusReply(content, L.of(context));

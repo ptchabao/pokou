@@ -24030,6 +24030,162 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Vendu'**
   String get assimeSoldBadge;
+
+  /// No description provided for @courierInviteCardLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invitation coursier Honam'**
+  String get courierInviteCardLabel;
+
+  /// No description provided for @courierInviteCardTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} t’invite à livrer pour Honam'**
+  String courierInviteCardTitle(String name);
+
+  /// No description provided for @courierInviteCardTitleMine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu invites {name} à livrer pour Honam'**
+  String courierInviteCardTitleMine(String name);
+
+  /// No description provided for @courierInviteCardCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'code {code}'**
+  String courierInviteCardCode(String code);
+
+  /// No description provided for @courierInviteSeeOffer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l’offre'**
+  String get courierInviteSeeOffer;
+
+  /// No description provided for @courierInviteHello.
+  ///
+  /// In fr, this message translates to:
+  /// **'Salut {name} !'**
+  String courierInviteHello(String name);
+
+  /// No description provided for @courierInviteHelloAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Salut !'**
+  String get courierInviteHelloAll;
+
+  /// No description provided for @courierInviteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je livre pour Honam avec Pokou : {amount} par course, près de chez toi, quand tu veux. Rejoins-moi avec mon code {code}.'**
+  String courierInviteBody(String amount, String code);
+
+  /// No description provided for @courierInviteBodyNoPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je livre pour Honam avec Pokou : payé à chaque course, près de chez toi, quand tu veux. Rejoins-moi avec mon code {code}.'**
+  String courierInviteBodyNoPrice(String code);
+
+  /// No description provided for @courierInviteFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Une invitation n’est pas partie. Réessaie.} other{{count} invitations ne sont pas parties. Réessaie.}}'**
+  String courierInviteFailed(int count);
+
+  /// No description provided for @courierInviteSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Invitation envoyée} other{{count} invitations envoyées}}'**
+  String courierInviteSent(int count);
+
+  /// No description provided for @courierInviteSendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer à {name}'**
+  String courierInviteSendTo(String name);
+
+  /// No description provided for @courierInviteSendToCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Envoyer à 1 contact} other{Envoyer à {count} contacts}}'**
+  String courierInviteSendToCount(int count);
+
+  /// No description provided for @courierInviteSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un contact'**
+  String get courierInviteSearch;
+
+  /// No description provided for @courierInviteOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur Pokou'**
+  String get courierInviteOnPokou;
+
+  /// No description provided for @courierInviteBySms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore sur Pokou · invitation par SMS'**
+  String get courierInviteBySms;
+
+  /// No description provided for @courierInviteNoContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact trouvé. Sans contact coché, ton message part par le partage du téléphone.'**
+  String get courierInviteNoContact;
+
+  /// No description provided for @courierInviteCardAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'La carte « Devenir coursier Honam » est ajoutée au message.'**
+  String get courierInviteCardAdded;
+
+  /// No description provided for @courierInviteFriendNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Tu reçois 1 course offerte quand ton ami termine sa première livraison. L’invitation part seulement vers les 18 ans et plus, dans une ville où Honam est ouvert.} other{Tu reçois {count} courses offertes quand ton ami termine sa première livraison. L’invitation part seulement vers les 18 ans et plus, dans une ville où Honam est ouvert.}}'**
+  String courierInviteFriendNotice(int count);
+
+  /// No description provided for @courierInviteCodeApplied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code {code} appliqué'**
+  String courierInviteCodeApplied(String code);
+
+  /// No description provided for @courierInviteNeeds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il te faut 18 ans ou plus, une pièce d’identité, un smartphone et un wallet mobile money. Une moto, un vélo, ou tes pieds pour les courses proches.'**
+  String get courierInviteNeeds;
+
+  /// No description provided for @courierInviteTrialCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès la validation de ton inscription, sans adhésion ni pack'**
+  String get courierInviteTrialCaption;
+
+  /// No description provided for @courierInviteSimpleRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des premières courses simples'**
+  String get courierInviteSimpleRides;
+
+  /// No description provided for @courierInviteSimpleRidesCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des commandes de moins de 15 000 FCFA, le temps de prendre tes repères'**
+  String get courierInviteSimpleRidesCaption;
+
+  /// No description provided for @courierInviteRecommended.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} t’a recommandé'**
+  String courierInviteRecommended(String name);
+
+  /// No description provided for @courierInviteRecommendedCaption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Il reçoit 1 course offerte quand tu termines ta première livraison} other{Il reçoit {count} courses offertes quand tu termines ta première livraison}}'**
+  String courierInviteRecommendedCaption(int count);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

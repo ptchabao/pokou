@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14574,4 +14575,146 @@ class LAr extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String get courierInviteCardLabel => 'دعوة لتصبح مندوب توصيل Honam';
+
+  @override
+  String courierInviteCardTitle(String name) {
+    return '$name يدعوك للتوصيل مع Honam';
+  }
+
+  @override
+  String courierInviteCardTitleMine(String name) {
+    return 'أنت تدعو $name للتوصيل مع Honam';
+  }
+
+  @override
+  String courierInviteCardCode(String code) {
+    return 'الرمز $code';
+  }
+
+  @override
+  String get courierInviteSeeOffer => 'عرض العرض';
+
+  @override
+  String courierInviteHello(String name) {
+    return 'مرحبًا $name!';
+  }
+
+  @override
+  String get courierInviteHelloAll => 'مرحبًا!';
+
+  @override
+  String courierInviteBody(String amount, String code) {
+    return 'أعمل في التوصيل مع Honam عبر Pokou: $amount لكل رحلة، قرب منزلك، متى شئت. انضم إليّ برمزي $code.';
+  }
+
+  @override
+  String courierInviteBodyNoPrice(String code) {
+    return 'أعمل في التوصيل مع Honam عبر Pokou: أجر على كل رحلة، قرب منزلك، متى شئت. انضم إليّ برمزي $code.';
+  }
+
+  @override
+  String courierInviteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'لم تُرسل $count دعوات. أعد المحاولة.',
+      one: 'لم تُرسل دعوة واحدة. أعد المحاولة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'أُرسلت $count دعوات',
+      one: 'أُرسلت الدعوة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSendTo(String name) {
+    return 'إرسال إلى $name';
+  }
+
+  @override
+  String courierInviteSendToCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'إرسال إلى $count جهات اتصال',
+      one: 'إرسال إلى جهة اتصال واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierInviteSearch => 'ابحث عن جهة اتصال';
+
+  @override
+  String get courierInviteOnPokou => 'على Pokou';
+
+  @override
+  String get courierInviteBySms => 'ليس على Pokou بعد · دعوة عبر رسالة SMS';
+
+  @override
+  String get courierInviteNoContact =>
+      'لم يُعثر على أي جهة اتصال. إن لم تحدد أحدًا، تُرسل رسالتك عبر قائمة المشاركة في الهاتف.';
+
+  @override
+  String get courierInviteCardAdded =>
+      'تُضاف بطاقة «كن مندوب توصيل Honam» إلى الرسالة.';
+
+  @override
+  String courierInviteFriendNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'تحصل على $count رحلات مجانية عندما يُنهي صديقك أول توصيل له. تُرسل الدعوة فقط لمن بلغوا 18 عامًا فأكثر، في مدينة يعمل فيها Honam.',
+      one: 'تحصل على رحلة مجانية واحدة عندما يُنهي صديقك أول توصيل له. تُرسل الدعوة فقط لمن بلغوا 18 عامًا فأكثر، في مدينة يعمل فيها Honam.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteCodeApplied(String code) {
+    return 'تم تطبيق الرمز $code';
+  }
+
+  @override
+  String get courierInviteNeeds =>
+      'يجب أن يكون عمرك 18 عامًا أو أكثر، ولديك وثيقة هوية وهاتف ذكي ومحفظة أموال عبر الهاتف. دراجة نارية أو هوائية، أو قدماك للرحلات القريبة.';
+
+  @override
+  String get courierInviteTrialCaption =>
+      'فور اعتماد تسجيلك، دون اشتراك ولا باقة';
+
+  @override
+  String get courierInviteSimpleRides => 'رحلات أولى بسيطة';
+
+  @override
+  String get courierInviteSimpleRidesCaption =>
+      'طلبات بأقل من 15 000 فرنك، ريثما تتعوّد';
+
+  @override
+  String courierInviteRecommended(String name) {
+    return '$name أوصى بك';
+  }
+
+  @override
+  String courierInviteRecommendedCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'يحصل على $count رحلات مجانية عندما تُنهي أول توصيل لك',
+      one: 'يحصل على رحلة مجانية واحدة عندما تُنهي أول توصيل لك',
+    );
+    return '$_temp0';
+  }
 }

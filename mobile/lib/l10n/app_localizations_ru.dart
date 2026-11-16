@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14688,4 +14689,159 @@ class LRu extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String get courierInviteCardLabel => 'Приглашение курьером Honam';
+
+  @override
+  String courierInviteCardTitle(String name) {
+    return '$name приглашает тебя доставлять для Honam';
+  }
+
+  @override
+  String courierInviteCardTitleMine(String name) {
+    return 'Ты приглашаешь $name доставлять для Honam';
+  }
+
+  @override
+  String courierInviteCardCode(String code) {
+    return 'код $code';
+  }
+
+  @override
+  String get courierInviteSeeOffer => 'Посмотреть предложение';
+
+  @override
+  String courierInviteHello(String name) {
+    return 'Привет, $name!';
+  }
+
+  @override
+  String get courierInviteHelloAll => 'Привет!';
+
+  @override
+  String courierInviteBody(String amount, String code) {
+    return 'Я доставляю для Honam с Pokou: $amount за поездку, рядом с домом, когда захочешь. Присоединяйся с моим кодом $code.';
+  }
+
+  @override
+  String courierInviteBodyNoPrice(String code) {
+    return 'Я доставляю для Honam с Pokou: оплата за каждую поездку, рядом с домом, когда захочешь. Присоединяйся с моим кодом $code.';
+  }
+
+  @override
+  String courierInviteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count приглашения не отправлены. Попробуй ещё раз.',
+      many: '$count приглашений не отправлено. Попробуй ещё раз.',
+      few: '$count приглашения не отправлены. Попробуй ещё раз.',
+      one: 'Одно приглашение не отправлено. Попробуй ещё раз.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count приглашения отправлены',
+      many: '$count приглашений отправлено',
+      few: '$count приглашения отправлены',
+      one: 'Приглашение отправлено',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSendTo(String name) {
+    return 'Отправить: $name';
+  }
+
+  @override
+  String courierInviteSendToCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Отправить контактам: $count',
+      one: 'Отправить 1 контакту',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierInviteSearch => 'Найти контакт';
+
+  @override
+  String get courierInviteOnPokou => 'В Pokou';
+
+  @override
+  String get courierInviteBySms => 'Ещё не в Pokou · приглашение по SMS';
+
+  @override
+  String get courierInviteNoContact =>
+      'Контакты не найдены. Если никто не отмечен, сообщение уйдёт через меню «Поделиться» телефона.';
+
+  @override
+  String get courierInviteCardAdded =>
+      'К сообщению добавлена карточка «Стать курьером Honam».';
+
+  @override
+  String courierInviteFriendNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Ты получишь $count бесплатные поездки, когда друг выполнит первую доставку. Приглашение получат только люди от 18 лет в городе, где работает Honam.',
+      many:
+          'Ты получишь $count бесплатных поездок, когда друг выполнит первую доставку. Приглашение получат только люди от 18 лет в городе, где работает Honam.',
+      few:
+          'Ты получишь $count бесплатные поездки, когда друг выполнит первую доставку. Приглашение получат только люди от 18 лет в городе, где работает Honam.',
+      one: 'Ты получишь 1 бесплатную поездку, когда друг выполнит первую доставку. Приглашение получат только люди от 18 лет в городе, где работает Honam.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteCodeApplied(String code) {
+    return 'Код $code применён';
+  }
+
+  @override
+  String get courierInviteNeeds =>
+      'Нужно быть старше 18 лет, иметь удостоверение личности, смартфон и кошелёк мобильных денег. Мотоцикл, велосипед или свои ноги для близких поездок.';
+
+  @override
+  String get courierInviteTrialCaption =>
+      'Сразу после подтверждения регистрации, без взноса и пакета';
+
+  @override
+  String get courierInviteSimpleRides => 'Простые первые поездки';
+
+  @override
+  String get courierInviteSimpleRidesCaption =>
+      'Заказы до 15 000 FCFA, пока ты осваиваешься';
+
+  @override
+  String courierInviteRecommended(String name) {
+    return '$name рекомендует тебя';
+  }
+
+  @override
+  String courierInviteRecommendedCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Получит $count бесплатные поездки, когда ты выполнишь первую доставку',
+      many:
+          'Получит $count бесплатных поездок, когда ты выполнишь первую доставку',
+      few:
+          'Получит $count бесплатные поездки, когда ты выполнишь первую доставку',
+      one: 'Получит 1 бесплатную поездку, когда ты выполнишь первую доставку',
+    );
+    return '$_temp0';
+  }
 }

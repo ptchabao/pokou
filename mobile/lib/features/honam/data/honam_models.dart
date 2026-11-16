@@ -505,6 +505,7 @@ class CourierOffer {
     this.launchPeriod = false,
     this.inviterName,
     this.inviterCode,
+    this.inviterVerified = false,
     this.transports = const {},
     this.dismissed = false,
   });
@@ -522,6 +523,9 @@ class CourierOffer {
   final int giftRides;
   final String? inviterName;
   final String? inviterCode;
+
+  /// Le parrain est un coursier validé : « Coursier vérifié · code … ».
+  final bool inviterVerified;
 
   /// La portée des courses par moyen de transport, en km.
   final Map<String, double> transports;
@@ -545,6 +549,7 @@ class CourierOffer {
     ],
     inviterName: (json['inviter'] as Map?)?['name'] as String?,
     inviterCode: (json['inviter'] as Map?)?['code'] as String?,
+    inviterVerified: (json['inviter'] as Map?)?['verified'] as bool? ?? false,
     dismissed: json['dismissed'] as bool? ?? false,
     transports: {
       for (final e in ((json['transports'] as Map?) ?? const {}).entries)
