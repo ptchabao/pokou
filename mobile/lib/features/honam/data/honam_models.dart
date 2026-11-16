@@ -92,6 +92,7 @@ class HonamOrderMessage {
     required this.createdAt,
     this.senderId,
     this.senderName,
+    this.readAt,
   });
 
   final int id;
@@ -101,6 +102,9 @@ class HonamOrderMessage {
   final String body;
   final DateTime createdAt;
 
+  /// Lu par l'autre partie du canal (accusé « Lu »).
+  final DateTime? readAt;
+
   factory HonamOrderMessage.fromJson(Map<String, dynamic> json) =>
       HonamOrderMessage(
         id: json['id'] as int,
@@ -109,6 +113,7 @@ class HonamOrderMessage {
         senderRole: json['sender_role'] as String? ?? 'UNKNOWN',
         body: json['body'] as String,
         createdAt: tryParseServerTime(json['created_at']) ?? DateTime.now(),
+        readAt: tryParseServerTime(json['read_at']),
       );
 }
 

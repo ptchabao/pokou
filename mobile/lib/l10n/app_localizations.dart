@@ -24072,6 +24072,400 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Vendu'**
   String get assimeSoldBadge;
+
+  /// No description provided for @officineDispatchSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande de {patient} · {address} · {distance} km'**
+  String officineDispatchSubtitle(
+    String patient,
+    String address,
+    String distance,
+  );
+
+  /// No description provided for @officineDispatchNoAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} n’a pas répondu en {minutes} min'**
+  String officineDispatchNoAnswer(String name, int minutes);
+
+  /// No description provided for @officineDispatchNoAnswerMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} coursiers rattachés n’ont pas répondu en {minutes} min'**
+  String officineDispatchNoAnswerMany(int count, int minutes);
+
+  /// No description provided for @officineDispatchAvailableAround.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun disponible autour de {area}} =1{1 disponible autour de {area}} other{{count} disponibles autour de {area}}}'**
+  String officineDispatchAvailableAround(int count, String area);
+
+  /// No description provided for @officineDispatchAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun disponible dans la zone} =1{1 disponible dans la zone} other{{count} disponibles dans la zone}}'**
+  String officineDispatchAvailable(int count);
+
+  /// No description provided for @officineDispatchCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la demande'**
+  String get officineDispatchCancel;
+
+  /// No description provided for @officineDispatchCancelTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la demande de coursier ?'**
+  String get officineDispatchCancelTitle;
+
+  /// No description provided for @officineDispatchCancelBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course ne sera plus proposée aux coursiers. Vous pourrez relancer la recherche ou proposer le retrait à l’officine.'**
+  String get officineDispatchCancelBody;
+
+  /// No description provided for @officineDispatchKeep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer la recherche'**
+  String get officineDispatchKeep;
+
+  /// No description provided for @officineDispatchCancelledTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande annulée'**
+  String get officineDispatchCancelledTitle;
+
+  /// No description provided for @officineDispatchCancelledBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course n’est plus proposée aux coursiers.'**
+  String get officineDispatchCancelledBody;
+
+  /// No description provided for @officineDispatchRelaunch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancer la recherche'**
+  String get officineDispatchRelaunch;
+
+  /// No description provided for @officineDispatchRelaunched.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche relancée'**
+  String get officineDispatchRelaunched;
+
+  /// No description provided for @officineDispatchWiden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Élargir la zone à {km} km'**
+  String officineDispatchWiden(String km);
+
+  /// No description provided for @officineDispatchWidened.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zone élargie à {km} km'**
+  String officineDispatchWidened(String km);
+
+  /// No description provided for @officineDispatchPickupProposed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait proposé à {patient}. La recherche de coursier est suspendue en attendant sa réponse.'**
+  String officineDispatchPickupProposed(String patient);
+
+  /// No description provided for @officineDispatchPickupAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} a accepté'**
+  String officineDispatchPickupAccepted(String patient);
+
+  /// No description provided for @officineDispatchPickupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait à l’officine'**
+  String get officineDispatchPickupTitle;
+
+  /// No description provided for @officineDispatchPickupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{patient} vient retirer sa commande au comptoir. Demandez son code de remise à 6 chiffres.'**
+  String officineDispatchPickupBody(String patient);
+
+  /// No description provided for @officineDispatchPickupCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de remise'**
+  String get officineDispatchPickupCode;
+
+  /// No description provided for @officineDispatchPickupHandOver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettre la commande'**
+  String get officineDispatchPickupHandOver;
+
+  /// No description provided for @officineDispatchPickupDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande remise au comptoir'**
+  String get officineDispatchPickupDone;
+
+  /// No description provided for @officineDispatchPickupRefund.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursez la course de {amount} sur le numéro qui a payé, sous 2 h.'**
+  String officineDispatchPickupRefund(String amount);
+
+  /// No description provided for @officineDispatchPickupRefundAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser la course'**
+  String get officineDispatchPickupRefundAction;
+
+  /// No description provided for @officineDispatchChatNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion liée à la course de {patient}. Elle se ferme 24 h après la livraison. Les numéros restent masqués.'**
+  String officineDispatchChatNotice(String patient);
+
+  /// No description provided for @officineDispatchChatClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La discussion s’est fermée 24 h après la livraison.'**
+  String get officineDispatchChatClosed;
+
+  /// No description provided for @officineDispatchChatRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu'**
+  String get officineDispatchChatRead;
+
+  /// No description provided for @officineDispatchCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler {name}'**
+  String officineDispatchCall(String name);
+
+  /// No description provided for @officineDispatchDefectNoteDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'{courier} est prévenu et peut contester sous 48 h. Au 3e défaut confirmé, son compte coursier est suspendu.'**
+  String officineDispatchDefectNoteDelivered(String courier);
+
+  /// No description provided for @officineDispatchDefectNoteOngoing.
+  ///
+  /// In fr, this message translates to:
+  /// **'{courier} est prévenu et peut contester sous 48 h. La commande revient à « prête » pour un autre coursier. Au 3e défaut confirmé, son compte coursier est suspendu.'**
+  String officineDispatchDefectNoteOngoing(String courier);
+
+  /// No description provided for @officineAccountNextDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochaine garde'**
+  String get officineAccountNextDuty;
+
+  /// No description provided for @officineAccountNextDutyNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'À définir'**
+  String get officineAccountNextDutyNone;
+
+  /// No description provided for @officineAccountChooseDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date'**
+  String get officineAccountChooseDate;
+
+  /// No description provided for @officineAccountClearDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer la date'**
+  String get officineAccountClearDuty;
+
+  /// No description provided for @officineAccountCounterPhones.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphones du comptoir'**
+  String get officineAccountCounterPhones;
+
+  /// No description provided for @officineAccountRing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sonnerie à chaque ordonnance'**
+  String get officineAccountRing;
+
+  /// No description provided for @officineAccountRingHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur ce téléphone'**
+  String get officineAccountRingHint;
+
+  /// No description provided for @officineAccountClose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer temporairement'**
+  String get officineAccountClose;
+
+  /// No description provided for @officineAccountCloseHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les patients ne vous voient plus'**
+  String get officineAccountCloseHint;
+
+  /// No description provided for @officineAccountCloseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer temporairement l’officine ?'**
+  String get officineAccountCloseTitle;
+
+  /// No description provided for @officineAccountCloseBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre officine disparaît de l’annuaire et ne reçoit plus d’ordonnances tant que vous ne la rouvrez pas. Les commandes en cours continuent.'**
+  String get officineAccountCloseBody;
+
+  /// No description provided for @officineAccountCloseYes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get officineAccountCloseYes;
+
+  /// No description provided for @officineAccountLogout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter de ce téléphone'**
+  String get officineAccountLogout;
+
+  /// No description provided for @officineAccountLogoutTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter de ce téléphone ?'**
+  String get officineAccountLogoutTitle;
+
+  /// No description provided for @officineAccountLogoutBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce téléphone n’aura plus accès à l’espace officine. Le titulaire pourra l’ajouter de nouveau.'**
+  String get officineAccountLogoutBody;
+
+  /// No description provided for @officineAccountInfoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations de l’officine'**
+  String get officineAccountInfoTitle;
+
+  /// No description provided for @officineAccountAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse'**
+  String get officineAccountAddress;
+
+  /// No description provided for @officineAccountPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone de l’officine'**
+  String get officineAccountPhone;
+
+  /// No description provided for @officineAccountNameNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom de l’officine se change avec l’équipe Pokou.'**
+  String get officineAccountNameNote;
+
+  /// No description provided for @officineAccountSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get officineAccountSave;
+
+  /// No description provided for @officineAccountSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré'**
+  String get officineAccountSaved;
+
+  /// No description provided for @officineAccountHoursHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lun.–sam., 8 h–21 h'**
+  String get officineAccountHoursHint;
+
+  /// No description provided for @officineAccountWalletTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de wallet de réception'**
+  String get officineAccountWalletTitle;
+
+  /// No description provided for @officineAccountWalletBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nouveau numéro doit être au nom de l’officine. L’équipe Pokou le vérifie ; d’ici là, les patients paient sur le wallet actuel.'**
+  String get officineAccountWalletBody;
+
+  /// No description provided for @officineAccountWalletPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau wallet en vérification : {phone}'**
+  String officineAccountWalletPending(String phone);
+
+  /// No description provided for @officineAccountWalletName.
+  ///
+  /// In fr, this message translates to:
+  /// **'{phone} · au nom de l’officine'**
+  String officineAccountWalletName(String phone);
+
+  /// No description provided for @officineAccountTitulaireOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul le pharmacien titulaire peut faire ce changement.'**
+  String get officineAccountTitulaireOnly;
+
+  /// No description provided for @officineAccountPhonesNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque téléphone du comptoir reçoit les ordonnances et traite les commandes. Les numéros restent masqués.'**
+  String get officineAccountPhonesNote;
+
+  /// No description provided for @officineAccountAddPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un téléphone'**
+  String get officineAccountAddPhone;
+
+  /// No description provided for @officineAccountAddPhoneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le numéro d’un compte Pokou'**
+  String get officineAccountAddPhoneHint;
+
+  /// No description provided for @officineAccountAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get officineAccountAdd;
+
+  /// No description provided for @officineAccountRemovePhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer ce téléphone'**
+  String get officineAccountRemovePhone;
+
+  /// No description provided for @officineAccountThisPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce téléphone'**
+  String get officineAccountThisPhone;
+
+  /// No description provided for @officineAccountTitulaire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titulaire'**
+  String get officineAccountTitulaire;
+
+  /// No description provided for @officineAccountCollaborator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collaborateur'**
+  String get officineAccountCollaborator;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

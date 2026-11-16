@@ -23,6 +23,9 @@ class OfficinePharmacy {
     this.walletPhone,
     this.walletVerified = false,
     this.suspensionReason,
+    this.walletPhonePending,
+    this.nextDutyOn,
+    this.temporarilyClosed = false,
   });
 
   final int id;
@@ -38,6 +41,16 @@ class OfficinePharmacy {
   final String status;
   final String? suspensionReason;
 
+  /// Le nouveau wallet demandé, en attente de vérification par l'équipe :
+  /// l'ancien reçoit les paiements jusque-là.
+  final String? walletPhonePending;
+
+  /// « Prochaine garde » (Officine 13).
+  final DateTime? nextDutyOn;
+
+  /// « Fermer temporairement » : les patients ne la voient plus.
+  final bool temporarilyClosed;
+
   factory OfficinePharmacy.fromJson(Map<String, dynamic> json) =>
       OfficinePharmacy(
         id: json['id'] as int,
@@ -50,6 +63,9 @@ class OfficinePharmacy {
         walletVerified: json['wallet_verified'] as bool? ?? false,
         status: json['status'] as String? ?? 'ACTIVE',
         suspensionReason: json['suspension_reason'] as String?,
+        walletPhonePending: json['wallet_phone_pending'] as String?,
+        nextDutyOn: DateTime.tryParse(json['next_duty_on'] as String? ?? ''),
+        temporarilyClosed: json['temporarily_closed'] as bool? ?? false,
       );
 }
 
@@ -69,9 +85,22 @@ class OfficineMe {
     required this.rejected,
     this.plan,
     this.subscriptionUntil,
+    this.staffRole,
+    this.ringOnOrder = true,
+    this.phonesCount = 1,
   });
 
   final OfficinePharmacy pharmacy;
+
+  /// Ce téléphone du comptoir : TITULAIRE ou COLLABORATEUR. Seul le
+  /// titulaire change le wallet et les téléphones du comptoir.
+  final String? staffRole;
+
+  /// « Sonnerie à chaque ordonnance », propre à ce téléphone.
+  final bool ringOnOrder;
+  final int phonesCount;
+
+  bool get isTitulaire => staffRole == 'TITULAIRE';
 
   /// Visible des patients : active, wallet vérifié, abonnement et crédit.
   final bool visible;
@@ -98,7 +127,11 @@ class OfficineMe {
     final credit = (json['credit'] as Map?)?.cast<String, dynamic>() ?? {};
     final stats = (json['stats_month'] as Map?)?.cast<String, dynamic>() ?? {};
     final prices = (sub['prices_ht'] as Map?)?.cast<String, dynamic>() ?? {};
+    final staff = (json['staff'] as Map?)?.cast<String, dynamic>() ?? {};
     return OfficineMe(
+      staffRole: staff['role'] as String?,
+      ringOnOrder: staff['ring_on_order'] as bool? ?? true,
+      phonesCount: (json['phones_count'] as num?)?.toInt() ?? 1,
       pharmacy: OfficinePharmacy.fromJson(
         (json['pharmacy'] as Map).cast<String, dynamic>(),
       ),
@@ -157,6 +190,12 @@ class OfficineOrder {
     this.courierWalletPhone,
     this.deliveredAt,
     this.timeline = const [],
+    this.courierUserId,
+    this.courierChatClosesAt,
+    this.pickupProposedAt,
+    this.pickupAtPharmacy = false,
+    this.deliveryDistanceKm,
+    this.dispatch,
   });
 
   final int id;
@@ -209,6 +248,28 @@ class OfficineOrder {
   final String? courierWalletPhone;
   final DateTime? deliveredAt;
   final List<TimelineStep> timeline;
+
+  /// Le coursier, pour un appel relayé par Pokou : jamais son numéro. Rien
+  /// quand la discussion avec lui est fermée.
+  final int? courierUserId;
+
+  /// 24 h après la livraison, la discussion avec le coursier se ferme.
+  final DateTime? courierChatClosesAt;
+
+  /// Le retrait à l'officine proposé à la patiente (Officine 9), puis
+  /// accepté : la commande se remet alors au comptoir.
+  final DateTime? pickupProposedAt;
+  final bool pickupAtPharmacy;
+
+  /// De l'officine à l'adresse de livraison (« 5,8 km »).
+  final double? deliveryDistanceKm;
+
+  /// La recherche d'un coursier, tant qu'elle dure (Officine 8 et 9).
+  final OfficineDispatch? dispatch;
+
+  bool get courierChatClosed =>
+      courierChatClosesAt != null &&
+      courierChatClosesAt!.isBefore(DateTime.now().toUtc());
 
   bool get isFinished =>
       const {'DELIVERED', 'REJECTED', 'EXPIRED', 'CANCELLED'}.contains(status);
@@ -274,6 +335,104 @@ class OfficineOrder {
       for (final step in (json['timeline'] as List? ?? const []))
         TimelineStep.fromJson((step as Map).cast<String, dynamic>()),
     ],
+    courierUserId: json['courier_user_id'] as int?,
+    courierChatClosesAt: _at(json['courier_chat_closes_at']),
+    pickupProposedAt: _at(json['pickup_proposed_at']),
+    pickupAtPharmacy: json['pickup_at_pharmacy'] as bool? ?? false,
+    deliveryDistanceKm: (json['delivery_distance_km'] as num?)?.toDouble(),
+    dispatch: json['dispatch'] is Map
+        ? OfficineDispatch.fromJson(
+            (json['dispatch'] as Map).cast<String, dynamic>(),
+          )
+        : null,
+  );
+}
+
+/// La recherche d'un coursier, telle que le serveur la mène : proposée
+/// d'abord aux livreurs habituels, puis aux coursiers de la zone, dans un
+/// rayon autour de l'officine.
+class OfficineDispatch {
+  const OfficineDispatch({
+    required this.radiusKm,
+    required this.wideRadiusKm,
+    required this.availableCount,
+    this.startedAt,
+    this.cancelledAt,
+    this.attachedCount = 0,
+    this.unanswered = const [],
+    this.priorityMinutes = 5,
+    this.noCourierMinutes = 10,
+    this.area,
+  });
+
+  /// Début de la recherche, remis à zéro à chaque relance.
+  final DateTime? startedAt;
+
+  /// L'officine a annulé la demande : la course n'est plus proposée.
+  final DateTime? cancelledAt;
+  final double radiusKm;
+  final double wideRadiusKm;
+
+  /// Les coursiers disponibles dans le rayon.
+  final int availableCount;
+  final int attachedCount;
+
+  /// Les livreurs habituels qui n'ont pas pris la course pendant leur
+  /// avance (« Kodjo n'a pas répondu »).
+  final List<String> unanswered;
+  final int priorityMinutes;
+  final int noCourierMinutes;
+
+  /// Le quartier de l'officine (« autour de Tokoin »).
+  final String? area;
+
+  bool get cancelled => cancelledAt != null;
+  bool get canWiden => radiusKm < wideRadiusKm;
+
+  factory OfficineDispatch.fromJson(Map<String, dynamic> json) =>
+      OfficineDispatch(
+        startedAt: _at(json['started_at']),
+        cancelledAt: _at(json['cancelled_at']),
+        radiusKm: (json['radius_km'] as num?)?.toDouble() ?? 5,
+        wideRadiusKm: (json['wide_radius_km'] as num?)?.toDouble() ?? 8,
+        availableCount: (json['available_count'] as num?)?.toInt() ?? 0,
+        attachedCount: (json['attached_count'] as num?)?.toInt() ?? 0,
+        unanswered: [
+          for (final name in (json['unanswered'] as List? ?? const [])) '$name',
+        ],
+        priorityMinutes: (json['priority_minutes'] as num?)?.toInt() ?? 5,
+        noCourierMinutes: (json['no_courier_minutes'] as num?)?.toInt() ?? 10,
+        area: json['area'] as String?,
+      );
+}
+
+/// Un téléphone du comptoir : le compte Pokou d'un membre de l'équipe,
+/// numéro masqué.
+class CounterPhone {
+  const CounterPhone({
+    required this.id,
+    required this.role,
+    this.name,
+    this.phoneMasked,
+    this.me = false,
+  });
+
+  final int id;
+  final String? name;
+  final String? phoneMasked;
+
+  /// TITULAIRE | COLLABORATEUR
+  final String role;
+
+  /// Ce téléphone-ci.
+  final bool me;
+
+  factory CounterPhone.fromJson(Map<String, dynamic> json) => CounterPhone(
+    id: json['id'] as int,
+    name: json['name'] as String?,
+    phoneMasked: json['phone_masked'] as String?,
+    role: json['role'] as String? ?? 'COLLABORATEUR',
+    me: json['me'] as bool? ?? false,
   );
 }
 

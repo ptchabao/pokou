@@ -60,6 +60,13 @@ final officineCouriersProvider = FutureProvider.autoDispose<OfficineCouriers>((
   return ref.watch(officineRepositoryProvider).couriers();
 });
 
+/// Les téléphones du comptoir (Officine 13).
+final officinePhonesProvider = FutureProvider.autoDispose<List<CounterPhone>>((
+  ref,
+) {
+  return ref.watch(officineRepositoryProvider).phones();
+});
+
 /// Les messages d'un canal (`patient` ou `coursier`) d'une commande.
 final officineMessagesProvider = FutureProvider.autoDispose
     .family<List<HonamOrderMessage>, ({int id, String channel})>((ref, key) {

@@ -120,8 +120,14 @@ class _OfficineOrderScreenState extends ConsumerState<OfficineOrderScreen> {
         busy: _busy,
       ),
       'PAID' => OfficinePreparationView(order: order, run: run, busy: _busy),
+      'READY' when order.pickupAtPharmacy => OfficinePickupView(
+        order: order,
+        run: run,
+        busy: _busy,
+      ),
       'READY' when order.courierName == null => OfficineCourierSearchView(
         order: order,
+        run: run,
         busy: _busy,
       ),
       'READY' || 'IN_DELIVERY' => OfficineDeliveryView(

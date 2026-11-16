@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14710,4 +14711,264 @@ class LRu extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String officineDispatchSubtitle(
+    String patient,
+    String address,
+    String distance,
+  ) {
+    return 'Заказ $patient · $address · $distance км';
+  }
+
+  @override
+  String officineDispatchNoAnswer(String name, int minutes) {
+    return '$name не ответил за $minutes мин';
+  }
+
+  @override
+  String officineDispatchNoAnswerMany(int count, int minutes) {
+    return 'Постоянные курьеры ($count) не ответили за $minutes мин';
+  }
+
+  @override
+  String officineDispatchAvailableAround(int count, String area) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count свободны рядом с $area',
+      many: '$count свободны рядом с $area',
+      few: '$count свободны рядом с $area',
+      one: '$count свободен рядом с $area',
+      zero: 'Рядом с $area никого нет',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String officineDispatchAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count свободны в зоне',
+      many: '$count свободны в зоне',
+      few: '$count свободны в зоне',
+      one: '$count свободен в зоне',
+      zero: 'В зоне никого нет',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get officineDispatchCancel => 'Отменить запрос';
+
+  @override
+  String get officineDispatchCancelTitle => 'Отменить запрос курьера?';
+
+  @override
+  String get officineDispatchCancelBody =>
+      'Доставка больше не будет предлагаться курьерам. Можно возобновить поиск или предложить самовывоз из аптеки.';
+
+  @override
+  String get officineDispatchKeep => 'Продолжить поиск';
+
+  @override
+  String get officineDispatchCancelledTitle => 'Запрос отменён';
+
+  @override
+  String get officineDispatchCancelledBody =>
+      'Доставка больше не предлагается курьерам.';
+
+  @override
+  String get officineDispatchRelaunch => 'Возобновить поиск';
+
+  @override
+  String get officineDispatchRelaunched => 'Поиск возобновлён';
+
+  @override
+  String officineDispatchWiden(String km) {
+    return 'Расширить зону до $km км';
+  }
+
+  @override
+  String officineDispatchWidened(String km) {
+    return 'Зона расширена до $km км';
+  }
+
+  @override
+  String officineDispatchPickupProposed(String patient) {
+    return 'Самовывоз предложен: $patient. Поиск курьера приостановлен до ответа.';
+  }
+
+  @override
+  String officineDispatchPickupAccepted(String patient) {
+    return '$patient: согласие получено';
+  }
+
+  @override
+  String get officineDispatchPickupTitle => 'Самовывоз из аптеки';
+
+  @override
+  String officineDispatchPickupBody(String patient) {
+    return '$patient заберёт заказ у стойки. Спросите 6-значный код выдачи.';
+  }
+
+  @override
+  String get officineDispatchPickupCode => 'Код выдачи';
+
+  @override
+  String get officineDispatchPickupHandOver => 'Выдать заказ';
+
+  @override
+  String get officineDispatchPickupDone => 'Заказ выдан у стойки';
+
+  @override
+  String officineDispatchPickupRefund(String amount) {
+    return 'Верните $amount за доставку на номер, с которого платили, в течение 2 ч.';
+  }
+
+  @override
+  String get officineDispatchPickupRefundAction => 'Вернуть плату за доставку';
+
+  @override
+  String officineDispatchChatNotice(String patient) {
+    return 'Чат по доставке для $patient. Закрывается через 24 ч после доставки. Номера скрыты.';
+  }
+
+  @override
+  String get officineDispatchChatClosed =>
+      'Чат закрылся через 24 ч после доставки.';
+
+  @override
+  String get officineDispatchChatRead => 'Прочитано';
+
+  @override
+  String officineDispatchCall(String name) {
+    return 'Позвонить: $name';
+  }
+
+  @override
+  String officineDispatchDefectNoteDelivered(String courier) {
+    return '$courier получит уведомление и может оспорить его в течение 48 ч. После 3-го подтверждённого нарушения аккаунт курьера блокируется.';
+  }
+
+  @override
+  String officineDispatchDefectNoteOngoing(String courier) {
+    return '$courier получит уведомление и может оспорить его в течение 48 ч. Заказ снова «готов» для другого курьера. После 3-го подтверждённого нарушения аккаунт курьера блокируется.';
+  }
+
+  @override
+  String get officineAccountNextDuty => 'Следующее дежурство';
+
+  @override
+  String get officineAccountNextDutyNone => 'Не задано';
+
+  @override
+  String get officineAccountChooseDate => 'Выбрать дату';
+
+  @override
+  String get officineAccountClearDuty => 'Удалить дату';
+
+  @override
+  String get officineAccountCounterPhones => 'Телефоны аптеки';
+
+  @override
+  String get officineAccountRing => 'Звонок при каждом рецепте';
+
+  @override
+  String get officineAccountRingHint => 'На этом телефоне';
+
+  @override
+  String get officineAccountClose => 'Временно закрыть';
+
+  @override
+  String get officineAccountCloseHint => 'Пациенты вас больше не видят';
+
+  @override
+  String get officineAccountCloseTitle => 'Временно закрыть аптеку?';
+
+  @override
+  String get officineAccountCloseBody =>
+      'Аптека исчезнет из каталога и не будет получать рецепты, пока вы её не откроете. Текущие заказы продолжаются.';
+
+  @override
+  String get officineAccountCloseYes => 'Закрыть';
+
+  @override
+  String get officineAccountLogout => 'Выйти на этом телефоне';
+
+  @override
+  String get officineAccountLogoutTitle => 'Выйти на этом телефоне?';
+
+  @override
+  String get officineAccountLogoutBody =>
+      'Этот телефон потеряет доступ к разделу аптеки. Владелец сможет добавить его снова.';
+
+  @override
+  String get officineAccountInfoTitle => 'Данные аптеки';
+
+  @override
+  String get officineAccountAddress => 'Адрес';
+
+  @override
+  String get officineAccountPhone => 'Телефон аптеки';
+
+  @override
+  String get officineAccountNameNote =>
+      'Название аптеки меняется через команду Pokou.';
+
+  @override
+  String get officineAccountSave => 'Сохранить';
+
+  @override
+  String get officineAccountSaved => 'Сохранено';
+
+  @override
+  String get officineAccountHoursHint => 'Пн–Сб, 8:00–21:00';
+
+  @override
+  String get officineAccountWalletTitle => 'Сменить кошелёк для оплаты';
+
+  @override
+  String get officineAccountWalletBody =>
+      'Новый номер должен быть оформлен на аптеку. Команда Pokou его проверит; до этого пациенты платят на текущий кошелёк.';
+
+  @override
+  String officineAccountWalletPending(String phone) {
+    return 'Новый кошелёк на проверке: $phone';
+  }
+
+  @override
+  String officineAccountWalletName(String phone) {
+    return '$phone · на имя аптеки';
+  }
+
+  @override
+  String get officineAccountTitulaireOnly =>
+      'Это может изменить только владелец аптеки.';
+
+  @override
+  String get officineAccountPhonesNote =>
+      'Каждый телефон аптеки получает рецепты и обрабатывает заказы. Номера скрыты.';
+
+  @override
+  String get officineAccountAddPhone => 'Добавить телефон';
+
+  @override
+  String get officineAccountAddPhoneHint => 'Номер аккаунта Pokou';
+
+  @override
+  String get officineAccountAdd => 'Добавить';
+
+  @override
+  String get officineAccountRemovePhone => 'Убрать этот телефон';
+
+  @override
+  String get officineAccountThisPhone => 'Этот телефон';
+
+  @override
+  String get officineAccountTitulaire => 'Владелец';
+
+  @override
+  String get officineAccountCollaborator => 'Сотрудник';
 }

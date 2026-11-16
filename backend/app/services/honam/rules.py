@@ -63,6 +63,20 @@ DEFAULT_CONTEST_HOURS = 48
 ORIGINAL_RETURN_HOURS = 24
 #: Maquette Coursiers 2 : le mode coursier est réservé aux 18 ans et plus.
 MIN_COURIER_AGE = 18
+#: Maquettes Officine 8 et 9 : la course est proposée aux coursiers à
+#: moins de 5 km de l'officine (hypothèse), puis, si l'officine élargit la
+#: zone, à moins de 8 km. Un coursier dont la position est inconnue reçoit
+#: toutes les courses de son pays, comme avant.
+DISPATCH_RADIUS_KM = 5.0
+WIDE_DISPATCH_RADIUS_KM = 8.0
+#: Une position de coursier plus vieille ne sert plus à situer les courses.
+COURIER_POSITION_TTL_MINUTES = 30
+#: Maquette Officine 9 : passé ce délai sans preneur, « Aucun coursier
+#: disponible ».
+NO_COURIER_MINUTES = 10
+#: Maquette Officine 10 : la discussion avec le coursier se ferme 24 heures
+#: après la livraison.
+COURIER_CHAT_HOURS = 24
 #: Maquette Coursiers 2 : la distance des courses proposées selon le moyen
 #: de transport (« jusqu'à 8 km »…), et l'allure qui sert à estimer une
 #: heure d'arrivée. Hypothèse pour l'allure : moto 25 km/h, vélo 12, à pied 5.
@@ -171,6 +185,9 @@ def pharmacy_accepts_orders(db: Session, pharmacy: Pharmacy, now: Optional[datet
     if pharmacy.subscription_until + timedelta(days=SUBSCRIPTION_GRACE_DAYS) < now:
         return False
     if pharmacy.credit_exhausted_at and pharmacy.credit_exhausted_at + timedelta(days=CREDIT_GRACE_DAYS) < now:
+        return False
+    # « Fermer temporairement » (maquette Officine 13).
+    if pharmacy.temporarily_closed_at is not None:
         return False
     return True
 
@@ -383,7 +400,8 @@ TRANSITIONS = {
     "QUOTED": {"ACCEPTED", "EXPIRED", "CANCELLED", "QUOTED"},
     "ACCEPTED": {"PAID", "CANCELLED"},
     "PAID": {"READY", "CANCELLED"},
-    "READY": {"IN_DELIVERY"},
+    # READY → DELIVERED : le retrait à l'officine, sans coursier.
+    "READY": {"IN_DELIVERY", "DELIVERED"},
     "IN_DELIVERY": {"DELIVERED", "READY"},
     "DELIVERED": set(),
     "REJECTED": set(),
@@ -401,6 +419,11 @@ def transition(db: Session, order: HonamOrder, status: str, actor_id: Optional[i
         raise TransitionError(f"Impossible de passer de {order.status} à {status}")
     order.status = status
     order.updated_at = datetime.utcnow()
+    if status == "READY":
+        # Prête (ou revenue prête après un défaut) : une nouvelle recherche
+        # de coursier commence.
+        order.dispatch_started_at = order.updated_at
+        order.dispatch_cancelled_at = None
     db.add(HonamOrderEvent(order_id=order.id, actor_id=actor_id, status=status, note=note))
     # Aucune donnée de santé dans le flux : ni ordonnance, ni médicament.
     record_event(db, EVENTS_TOPIC, f"honam.order.{status.lower()}", {
@@ -442,6 +465,16 @@ def eta_minutes(distance: Optional[float], transport: Optional[str]) -> Optional
         return None
     speed = TRANSPORTS.get(transport or "MOTO", TRANSPORTS["MOTO"])["speed_kmh"]
     return max(1, math.ceil(distance / speed * 60))
+
+
+def courier_chat_open(order: HonamOrder, now: Optional[datetime] = None) -> bool:
+    """La discussion avec le coursier (et l'appel relayé) : pendant la
+    course, puis 24 heures après la livraison (maquette Officine 10)."""
+    if order.courier_id is None or order.status not in ("READY", "IN_DELIVERY", "DELIVERED"):
+        return False
+    if order.status == "DELIVERED" and order.delivered_at is not None:
+        return order.delivered_at + timedelta(hours=COURIER_CHAT_HOURS) > (now or datetime.utcnow())
+    return True
 
 
 def new_delivery_code() -> str:

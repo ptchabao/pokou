@@ -14,7 +14,7 @@ voit ni l'ordonnance ni les médicaments.
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -208,6 +208,33 @@ class PackBody(BaseModel):
     pack: str
 
 
+class PickupProposeBody(BaseModel):
+    #: Le message à la patiente, rédigé dans sa langue par l'application.
+    message: Optional[str] = Field(None, max_length=1000)
+
+
+class CodeBody(BaseModel):
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class PharmacyUpdate(BaseModel):
+    """Compte de l'officine (maquette Officine 13). Le nom, enregistré
+    auprès de l'Ordre, ne se change qu'avec l'équipe Pokou."""
+    address: Optional[str] = Field(None, min_length=3, max_length=255)
+    phone: Optional[str] = Field(None, min_length=6, max_length=32)
+    opening_hours: Optional[str] = Field(None, max_length=255)
+    #: « Prochaine garde » ; `clear_next_duty` l'efface.
+    next_duty_on: Optional[date] = None
+    clear_next_duty: bool = False
+    temporarily_closed: Optional[bool] = None
+    #: Propre au téléphone (au compte) qui fait la demande.
+    ring_on_order: Optional[bool] = None
+
+
+class PhoneBody(BaseModel):
+    phone: str = Field(..., min_length=6, max_length=32)
+
+
 class PharmacyCreate(BaseModel):
     country: str = Field(..., min_length=2, max_length=2)
     name: str = Field(..., min_length=2, max_length=160)
@@ -396,6 +423,16 @@ def _order_json(db: Session, order: HonamOrder, viewer: str) -> dict:
             # Le wallet du coursier, pour lui payer la course : seulement
             # une fois la commande livrée, et seulement à l'officine.
             "courier_wallet_phone": _courier_wallet(db, order) if order.status == "DELIVERED" else None,
+            # L'appel relayé par Pokou (numéro masqué) tant que la
+            # discussion avec le coursier est ouverte (maquette Officine 10).
+            "courier_user_id": order.courier_id if rules.courier_chat_open(order) else None,
+            "courier_chat_closes_at": _iso(
+                order.delivered_at + timedelta(hours=rules.COURIER_CHAT_HOURS)
+            ) if order.courier_id and order.delivered_at else None,
+            "pickup_proposed_at": _iso(order.pickup_proposed_at),
+            "pickup_at_pharmacy": bool(order.pickup_at_pharmacy),
+            "delivery_distance_km": _delivery_distance(pharmacy, order),
+            "dispatch": _dispatch_json(db, pharmacy, order) if pharmacy else None,
         })
     if viewer == "courier":
         picked_up = (
@@ -435,6 +472,78 @@ def _courier_profile_of(db: Session, user_id: Optional[int]) -> Optional[Courier
     return db.query(CourierProfile).filter(CourierProfile.user_id == user_id).first()
 
 
+def _delivery_distance(pharmacy: Optional[Pharmacy], order: HonamOrder) -> Optional[float]:
+    """De l'officine à l'adresse de livraison, à vol d'oiseau (« 5,8 km »,
+    maquette Officine 8)."""
+    if pharmacy is None or order.delivery_latitude is None or order.delivery_longitude is None:
+        return None
+    return round(rules.distance_km(
+        pharmacy.latitude, pharmacy.longitude, order.delivery_latitude, order.delivery_longitude,
+    ), 1)
+
+
+def _courier_position(courier: CourierProfile, now: datetime) -> Optional[tuple]:
+    """La position récente d'un coursier disponible, ou rien."""
+    if courier.latitude is None or courier.longitude is None or courier.located_at is None:
+        return None
+    if courier.located_at + timedelta(minutes=rules.COURIER_POSITION_TTL_MINUTES) < now:
+        return None
+    return courier.latitude, courier.longitude
+
+
+def _within_radius(courier: CourierProfile, pharmacy: Pharmacy, radius_km: float, now: datetime) -> bool:
+    """Un coursier sans position connue n'est pas écarté : il reçoit les
+    courses de son pays, comme avant le rayon."""
+    position = _courier_position(courier, now)
+    if position is None:
+        return True
+    return rules.distance_km(position[0], position[1], pharmacy.latitude, pharmacy.longitude) <= radius_km
+
+
+def _dispatch_radius(order: HonamOrder) -> float:
+    return order.dispatch_radius_km or rules.DISPATCH_RADIUS_KM
+
+
+def _dispatch_json(db: Session, pharmacy: Pharmacy, order: HonamOrder) -> Optional[dict]:
+    """La recherche d'un coursier (maquettes Officine 8 et 9) : seulement
+    tant que la commande prête attend un coursier."""
+    if order.status != "READY" or order.courier_id is not None or order.pickup_at_pharmacy:
+        return None
+    now = datetime.utcnow()
+    radius = _dispatch_radius(order)
+    started = order.dispatch_started_at or order.updated_at
+    couriers = db.query(CourierProfile).filter(
+        CourierProfile.country == pharmacy.country,
+        CourierProfile.available.is_(True),
+        CourierProfile.status.in_(("TRIAL", "MEMBER")),
+        CourierProfile.user_id != order.patient_id,
+    ).all()
+    nearby = [c for c in couriers if _within_radius(c, pharmacy, radius, now)]
+    attached_ids = {
+        row[0] for row in db.query(PharmacyCourier.courier_id).filter(PharmacyCourier.pharmacy_id == pharmacy.id)
+    }
+    priority_over = started + timedelta(minutes=rules.ATTACHED_PRIORITY_MINUTES) <= now
+    # « Kodjo A. n'a pas répondu » : les livreurs habituels disponibles à
+    # qui la course a été proposée d'abord, une fois leur avance passée.
+    unanswered = [
+        _first_name(db, c.user_id) for c in couriers if c.id in attached_ids
+    ] if priority_over and order.dispatch_cancelled_at is None else []
+    area = (pharmacy.address or "").split(",")[0].strip() or None
+    return {
+        "started_at": _iso(started),
+        "cancelled_at": _iso(order.dispatch_cancelled_at),
+        "radius_km": radius,
+        "wide_radius_km": rules.WIDE_DISPATCH_RADIUS_KM,
+        "available_count": len(nearby),
+        "attached_count": len(attached_ids),
+        "attached_available_count": sum(1 for c in couriers if c.id in attached_ids),
+        "unanswered": [name for name in unanswered if name],
+        "priority_minutes": rules.ATTACHED_PRIORITY_MINUTES,
+        "no_courier_minutes": rules.NO_COURIER_MINUTES,
+        "area": area,
+    }
+
+
 def _order_message_json(db: Session, message: HonamOrderMessage) -> dict:
     sender = db.query(User).filter(User.id == message.sender_id).first() if message.sender_id else None
     return {
@@ -444,6 +553,7 @@ def _order_message_json(db: Session, message: HonamOrderMessage) -> dict:
         "sender_role": message.sender_role,
         "channel": message.channel,
         "body": message.body,
+        "read_at": _iso(message.read_at),
         "created_at": message.created_at.isoformat(),
     }
 
@@ -589,6 +699,14 @@ def order_messages(
         .limit(500)
         .all()
     )
+    # Accusé « Lu » (maquette Officine 10) : ouvrir le fil marque comme lus
+    # les messages de l'autre partie.
+    now = datetime.utcnow()
+    unread = [m for m in messages if m.read_at is None and m.sender_role != role]
+    for message in unread:
+        message.read_at = now
+    if unread:
+        db.commit()
     return {
         "channel": channel,
         "channels": honam_channels.channels_of(db, order, user.id),
@@ -606,6 +724,8 @@ def send_order_message(
     user = _user(db, current_user)
     order = db.query(HonamOrder).filter(HonamOrder.id == order_id).first()
     channel, role = _message_channel(db, order, user.id, body.channel)
+    if channel != honam_channels.PATIENT and not rules.courier_chat_open(order):
+        raise HTTPException(status_code=409, detail="La discussion s'est fermée 24 h après la livraison")
     message = HonamOrderMessage(
         order_id=order.id,
         sender_id=user.id,
@@ -747,11 +867,20 @@ def pharmacy_dashboard(current_user: dict = Depends(get_current_user), db: Sessi
         .group_by(HonamOrder.status).all()
     )
     prices = rules.pharmacy_prices(db, pharmacy.country)
+    staff = db.query(PharmacyStaff).filter(PharmacyStaff.user_id == current_user["user_id"]).first()
+    phones_count = db.query(func.count(PharmacyStaff.id)).filter(PharmacyStaff.pharmacy_id == pharmacy.id).scalar()
     db.commit()
     return {
         "pharmacy": {**_pharmacy_json(pharmacy), "wallet_phone": pharmacy.wallet_phone,
                      "wallet_verified": pharmacy.wallet_verified, "status": pharmacy.status,
-                     "suspension_reason": pharmacy.suspension_reason},
+                     "suspension_reason": pharmacy.suspension_reason,
+                     "wallet_phone_pending": pharmacy.wallet_phone_pending,
+                     "next_duty_on": pharmacy.next_duty_on.isoformat() if pharmacy.next_duty_on else None,
+                     "temporarily_closed": pharmacy.temporarily_closed_at is not None},
+        # Ce téléphone du comptoir : son rôle et sa sonnerie.
+        "staff": {"role": staff.role if staff else None,
+                  "ring_on_order": bool(staff.ring_on_order) if staff else True},
+        "phones_count": phones_count,
         "visible": rules.pharmacy_accepts_orders(db, pharmacy),
         "subscription": {
             "plan": pharmacy.subscription_plan,
@@ -922,6 +1051,141 @@ def report_courier_default(order_id: int, body: ReasonBody, current_user: dict =
     return {"courier_suspended": suspended, "order": _order_json(db, order, "pharmacy")}
 
 
+# ── Recherche d'un coursier et retrait à l'officine (Officine 8, 9) ─────
+
+
+def _searching_order(db: Session, order_id: int, pharmacy: Pharmacy) -> HonamOrder:
+    """Une commande prête qui attend un coursier."""
+    order = _pharmacy_order(db, order_id, pharmacy)
+    if order.status != "READY" or order.courier_id is not None:
+        raise HTTPException(status_code=409, detail="Un coursier a déjà accepté la course")
+    if order.pickup_at_pharmacy:
+        raise HTTPException(status_code=409, detail="La commande est retirée à l'officine")
+    return order
+
+
+def _relaunch(db: Session, order: HonamOrder, actor_id: int, note: str) -> None:
+    order.dispatch_started_at = datetime.utcnow()
+    order.dispatch_cancelled_at = None
+    order.pickup_proposed_at = None
+    db.add(HonamOrderEvent(order_id=order.id, actor_id=actor_id, status=order.status, note=note))
+
+
+@router.post("/pharmacy/orders/{order_id}/dispatch/relaunch")
+def relaunch_dispatch(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Relancer la recherche » (maquette Officine 9) : la course est
+    proposée de nouveau, d'abord aux livreurs habituels, puis à la zone."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _searching_order(db, order_id, pharmacy)
+    _relaunch(db, order, current_user["user_id"], "Recherche de coursier relancée")
+    db.commit()
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/dispatch/widen")
+def widen_dispatch(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Élargir la zone à 8 km » : la recherche repart sur un rayon plus
+    grand autour de l'officine."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _searching_order(db, order_id, pharmacy)
+    if _dispatch_radius(order) >= rules.WIDE_DISPATCH_RADIUS_KM:
+        raise HTTPException(status_code=409, detail="La zone est déjà élargie")
+    order.dispatch_radius_km = rules.WIDE_DISPATCH_RADIUS_KM
+    _relaunch(db, order, current_user["user_id"],
+              f"Zone de recherche élargie à {rules.WIDE_DISPATCH_RADIUS_KM:g} km")
+    db.commit()
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/dispatch/cancel")
+def cancel_dispatch(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Annuler la demande » (maquette Officine 8) : la course n'est plus
+    proposée aux coursiers. La commande reste prête ; l'officine peut
+    relancer la recherche ou proposer le retrait."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _searching_order(db, order_id, pharmacy)
+    if order.dispatch_cancelled_at is not None:
+        raise HTTPException(status_code=409, detail="La demande est déjà annulée")
+    order.dispatch_cancelled_at = datetime.utcnow()
+    db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                           note="Demande de coursier annulée"))
+    db.commit()
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/pickup/propose")
+def propose_pickup(order_id: int, body: PickupProposeBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Proposer le retrait à l'officine » (maquette Officine 9) : la
+    patiente est prévenue dans sa discussion avec l'officine, et la course
+    n'est plus proposée aux coursiers pendant qu'elle répond."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _searching_order(db, order_id, pharmacy)
+    now = datetime.utcnow()
+    order.pickup_proposed_at = now
+    order.dispatch_cancelled_at = now
+    db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                           note="Retrait à l'officine proposé à la patiente"))
+    message = None
+    text = (body.message or "").strip()
+    if text:
+        message = HonamOrderMessage(
+            order_id=order.id, sender_id=current_user["user_id"], sender_role="PHARMACY",
+            channel=honam_channels.PATIENT, body=text,
+        )
+        db.add(message)
+    db.commit()
+    if message is not None:
+        db.refresh(message)
+        notify_order_message(db, order, message)
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/pickup/confirm")
+def confirm_pickup(order_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """La patiente a accepté de venir : la commande passe en retrait à
+    l'officine, et l'officine lui rembourse la course (2 h, sur le numéro
+    qui a payé, comme tout remboursement)."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _searching_order(db, order_id, pharmacy)
+    if order.refund_sent_at is not None:
+        raise HTTPException(status_code=409, detail="Un remboursement est déjà en cours sur cette commande")
+    now = datetime.utcnow()
+    order.pickup_at_pharmacy = True
+    order.pickup_proposed_at = order.pickup_proposed_at or now
+    order.dispatch_cancelled_at = order.dispatch_cancelled_at or now
+    if order.delivery_price:
+        order.refund_due = (order.refund_due or 0) + order.delivery_price
+        order.refund_requested_at = order.refund_requested_at or now
+        order.refund_reason = order.refund_reason or "Retrait à l'officine : course remboursée"
+    order.updated_at = now
+    db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                           note="Retrait à l'officine accepté ; course à rembourser"))
+    _commit_order_change(db, order, current_user["user_id"])
+    return _order_json(db, order, "pharmacy")
+
+
+@router.post("/pharmacy/orders/{order_id}/pickup/hand-over")
+def hand_over_at_counter(order_id: int, body: CodeBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """La patiente retire sa commande au comptoir et donne son code de
+    remise, comme elle l'aurait donné au coursier."""
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    order = _pharmacy_order(db, order_id, pharmacy)
+    if order.status != "READY" or not order.pickup_at_pharmacy:
+        raise HTTPException(status_code=409, detail="Cette commande n'est pas en retrait à l'officine")
+    if (order.code_attempts or 0) >= rules.MAX_CODE_ATTEMPTS:
+        raise HTTPException(status_code=429, detail="Trop d'essais : contactez le support Pokou")
+    if body.code != order.delivery_code:
+        order.code_attempts = (order.code_attempts or 0) + 1
+        db.add(HonamOrderEvent(order_id=order.id, actor_id=current_user["user_id"], status=order.status,
+                               note=f"Code de remise refusé au comptoir (essai {order.code_attempts} sur {rules.MAX_CODE_ATTEMPTS})"))
+        db.commit()
+        raise HTTPException(status_code=422, detail="Code de remise incorrect")
+    order.delivered_at = datetime.utcnow()
+    _move(db, order, "DELIVERED", current_user["user_id"], "Retirée à l'officine")
+    _commit_order_change(db, order, current_user["user_id"])
+    return _order_json(db, order, "pharmacy")
+
+
 class RefundSentBody(BaseModel):
     reference: Optional[str] = Field(None, max_length=40)
 
@@ -1047,6 +1311,164 @@ def set_on_duty(body: OnDutyBody, current_user: dict = Depends(get_current_user)
     pharmacy.is_on_duty = body.on_duty
     db.commit()
     return _pharmacy_json(pharmacy)
+
+
+# ── Compte de l'officine (Officine 13) ──────────────────────────────────
+
+
+def _staff_row(db: Session, user_id: int) -> PharmacyStaff:
+    staff = db.query(PharmacyStaff).filter(PharmacyStaff.user_id == user_id).first()
+    if staff is None:
+        raise HTTPException(status_code=403, detail="Réservé à l'équipe d'une officine")
+    return staff
+
+
+def _titulaire(db: Session, user_id: int) -> PharmacyStaff:
+    staff = _staff_row(db, user_id)
+    if staff.role != "TITULAIRE":
+        raise HTTPException(status_code=403, detail="Réservé au pharmacien titulaire")
+    return staff
+
+
+def _phones_json(db: Session, pharmacy: Pharmacy, viewer_id: int) -> list:
+    """Les téléphones du comptoir : les comptes Pokou de l'équipe. Le
+    numéro est masqué (« 90 •• •• 12 »), comme partout dans l'espace."""
+    rows = (
+        db.query(PharmacyStaff, User)
+        .join(User, User.id == PharmacyStaff.user_id)
+        .filter(PharmacyStaff.pharmacy_id == pharmacy.id)
+        .order_by(PharmacyStaff.id)
+        .all()
+    )
+    return [
+        {
+            "id": staff.id,
+            "name": user.full_name,
+            "phone_masked": _masked(user.phone),
+            "role": staff.role,
+            "me": staff.user_id == viewer_id,
+        }
+        for staff, user in rows
+    ]
+
+
+def _masked(phone: Optional[str]) -> Optional[str]:
+    """« +22896 •• •• 12 », comme `officineMasked` dans l'application."""
+    if not phone or len(phone) < 8:
+        return None
+    return f"{phone[:-6]} •• •• {phone[-2:]}"
+
+
+@router.patch("/pharmacy/me")
+def update_pharmacy(body: PharmacyUpdate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Adresse, téléphone, horaires, prochaine garde, fermeture temporaire
+    et sonnerie. Fermée, l'officine sort de l'annuaire et ne reçoit plus
+    d'ordonnances (`rules.pharmacy_accepts_orders`)."""
+    staff = _staff_row(db, current_user["user_id"])
+    pharmacy = db.query(Pharmacy).filter(Pharmacy.id == staff.pharmacy_id).first()
+    if body.address is not None:
+        pharmacy.address = body.address.strip()
+    if body.phone is not None:
+        phone = normalize_e164(body.phone, pharmacy.country)
+        if not phone:
+            raise HTTPException(status_code=422, detail="Numéro invalide")
+        pharmacy.phone = phone
+    if body.opening_hours is not None:
+        pharmacy.opening_hours = body.opening_hours.strip() or None
+    if body.clear_next_duty:
+        pharmacy.next_duty_on = None
+    elif body.next_duty_on is not None:
+        if body.next_duty_on < date.today():
+            raise HTTPException(status_code=422, detail="La prochaine garde est à venir")
+        pharmacy.next_duty_on = body.next_duty_on
+    if body.temporarily_closed is not None:
+        pharmacy.temporarily_closed_at = (
+            (pharmacy.temporarily_closed_at or datetime.utcnow()) if body.temporarily_closed else None
+        )
+    if body.ring_on_order is not None:
+        staff.ring_on_order = body.ring_on_order
+    db.commit()
+    return pharmacy_dashboard(current_user, db)
+
+
+@router.post("/pharmacy/wallet")
+def change_wallet(body: PhoneBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Le titulaire demande un autre wallet de réception. L'ancien reçoit
+    les paiements jusqu'à ce que l'équipe vérifie le nouveau (BM-02) : un
+    wallet faux enverrait l'argent des patients ailleurs."""
+    staff = _titulaire(db, current_user["user_id"])
+    pharmacy = db.query(Pharmacy).filter(Pharmacy.id == staff.pharmacy_id).first()
+    phone = normalize_e164(body.phone, pharmacy.country)
+    if not phone:
+        raise HTTPException(status_code=422, detail="Numéro invalide")
+    if phone == pharmacy.wallet_phone:
+        pharmacy.wallet_phone_pending = None
+    else:
+        pharmacy.wallet_phone_pending = phone
+        rules.record_event(db, rules.EVENTS_TOPIC, "honam.pharmacy.wallet_change_requested",
+                           {"pharmacy_id": pharmacy.id}, key=f"pharmacy-{pharmacy.id}")
+    db.commit()
+    return pharmacy_dashboard(current_user, db)
+
+
+@router.get("/pharmacy/phones")
+def counter_phones(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    pharmacy = _staff_pharmacy(db, current_user["user_id"])
+    return {"items": _phones_json(db, pharmacy, current_user["user_id"])}
+
+
+@router.post("/pharmacy/phones", status_code=201)
+def add_counter_phone(body: PhoneBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Un téléphone du comptoir de plus : le compte Pokou d'un collaborateur
+    (« Téléphones du comptoir », maquette Officine 13)."""
+    staff = _titulaire(db, current_user["user_id"])
+    pharmacy = db.query(Pharmacy).filter(Pharmacy.id == staff.pharmacy_id).first()
+    phone = normalize_e164(body.phone, pharmacy.country)
+    user = db.query(User).filter(User.phone == phone).first() if phone else None
+    if user is None:
+        raise HTTPException(status_code=404, detail="Ce numéro n'a pas encore installé Pokou")
+    existing = db.query(PharmacyStaff).filter(PharmacyStaff.user_id == user.id).first()
+    if existing is not None:
+        detail = "Ce téléphone est déjà au comptoir" if existing.pharmacy_id == pharmacy.id else "Ce numéro appartient à une autre officine"
+        raise HTTPException(status_code=409, detail=detail)
+    db.add(PharmacyStaff(pharmacy_id=pharmacy.id, user_id=user.id, role="COLLABORATEUR", added_at=datetime.utcnow()))
+    db.commit()
+    return {"items": _phones_json(db, pharmacy, current_user["user_id"])}
+
+
+def _remove_staff(db: Session, staff: PharmacyStaff) -> None:
+    """Le dernier titulaire ne part pas : l'officine resterait sans
+    personne pour la gérer."""
+    if staff.role == "TITULAIRE":
+        others = db.query(PharmacyStaff.id).filter(
+            PharmacyStaff.pharmacy_id == staff.pharmacy_id, PharmacyStaff.role == "TITULAIRE",
+            PharmacyStaff.id != staff.id,
+        ).first()
+        if others is None:
+            raise HTTPException(status_code=409, detail="Le titulaire ne peut pas retirer son propre téléphone")
+    db.delete(staff)
+
+
+@router.delete("/pharmacy/phones/me")
+def leave_counter(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Se déconnecter de ce téléphone » : ce compte n'a plus accès à
+    l'espace officine. Le reste de l'équipe continue."""
+    staff = _staff_row(db, current_user["user_id"])
+    _remove_staff(db, staff)
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/pharmacy/phones/{staff_id}")
+def remove_counter_phone(staff_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    me = _titulaire(db, current_user["user_id"])
+    staff = db.query(PharmacyStaff).filter(PharmacyStaff.id == staff_id, PharmacyStaff.pharmacy_id == me.pharmacy_id).first()
+    if staff is None:
+        raise HTTPException(status_code=404, detail="Téléphone introuvable")
+    _remove_staff(db, staff)
+    db.commit()
+    pharmacy = db.query(Pharmacy).filter(Pharmacy.id == me.pharmacy_id).first()
+    return {"items": _phones_json(db, pharmacy, current_user["user_id"])}
 
 
 @router.post("/pharmacy/subscribe")
@@ -1444,6 +1866,9 @@ def courier_availability(body: AvailabilityBody, current_user: dict = Depends(ge
     if body.available and rules.refresh_courier_status(courier) in ("PENDING", "INCOMPLETE", "REJECTED", "SUSPENDED"):
         raise HTTPException(status_code=409, detail="Le mode coursier n'est pas actif")
     courier.available = body.available
+    if not body.available:
+        # À l'arrêt, plus de position gardée.
+        courier.latitude = courier.longitude = courier.located_at = None
     data = _courier_json(db, courier)
     db.commit()
     return data
@@ -1593,13 +2018,35 @@ def courier_referrals(current_user: dict = Depends(get_current_user), db: Sessio
 
 
 @router.get("/courier/rides")
-def available_rides(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+def available_rides(
+    lat: Optional[float] = Query(None, ge=-90, le=90),
+    lng: Optional[float] = Query(None, ge=-180, le=180),
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     user = _user(db, current_user)
     courier = _courier(db, user)
+    now = datetime.utcnow()
+    if lat is not None and lng is not None and courier.available:
+        # La position du coursier disponible : une seule, écrasée.
+        courier.latitude, courier.longitude, courier.located_at = lat, lng, now
+        db.commit()
     pharmacy_ids = db.query(Pharmacy.id).filter(Pharmacy.country == courier.country)
+    # Une recherche annulée par l'officine, ou une commande passée en
+    # retrait à l'officine, n'est plus proposée.
     open_rides = db.query(HonamOrder).filter(
         HonamOrder.status == "READY", HonamOrder.courier_id.is_(None), HonamOrder.pharmacy_id.in_(pharmacy_ids),
+        HonamOrder.dispatch_cancelled_at.is_(None), HonamOrder.pickup_at_pharmacy.is_(False),
     ).order_by(HonamOrder.updated_at).limit(100).all()
+    # Le rayon de chaque recherche autour de l'officine (5 km, 8 km si
+    # l'officine a élargi la zone).
+    pharmacies = {
+        p.id: p for p in db.query(Pharmacy).filter(Pharmacy.id.in_({o.pharmacy_id for o in open_rides} or {0}))
+    }
+    open_rides = [
+        o for o in open_rides
+        if o.pharmacy_id in pharmacies and _within_radius(courier, pharmacies[o.pharmacy_id], _dispatch_radius(o), now)
+    ]
     # Les livreurs habituels d'une officine voient ses courses en premier
     # (Officine 6) ; les autres coursiers, passé ce délai.
     attached_to = {
@@ -1610,10 +2057,12 @@ def available_rides(current_user: dict = Depends(get_current_user), db: Session 
             PharmacyCourier.pharmacy_id.in_({o.pharmacy_id for o in open_rides} or {0})
         )
     }
-    priority_cutoff = datetime.utcnow() - timedelta(minutes=rules.ATTACHED_PRIORITY_MINUTES)
+    priority_cutoff = now - timedelta(minutes=rules.ATTACHED_PRIORITY_MINUTES)
+    # L'avance des livreurs habituels repart de zéro à chaque relance.
     open_rides = [
         o for o in open_rides
-        if o.pharmacy_id in attached_to or o.pharmacy_id not in with_attached or o.updated_at < priority_cutoff
+        if o.pharmacy_id in attached_to or o.pharmacy_id not in with_attached
+        or (o.dispatch_started_at or o.updated_at) < priority_cutoff
     ][:50]
     open_rides.sort(key=lambda o: (o.pharmacy_id not in attached_to, o.updated_at))
     mine = db.query(HonamOrder).filter(
@@ -1646,6 +2095,8 @@ def accept_ride(order_id: int, current_user: dict = Depends(get_current_user), d
     order = db.query(HonamOrder).filter(HonamOrder.id == order_id).with_for_update().first()
     if order is None or order.status != "READY" or order.courier_id is not None:
         raise HTTPException(status_code=409, detail="Course déjà prise")
+    if order.dispatch_cancelled_at is not None or order.pickup_at_pharmacy:
+        raise HTTPException(status_code=409, detail="L'officine a retiré cette course")
     order.courier_id = user.id
     db.add(HonamOrderEvent(order_id=order.id, actor_id=user.id, status="READY", note="Coursier en route vers l'officine"))
     db.commit()
@@ -2120,6 +2571,11 @@ def verify_wallet(pharmacy_id: int, current_user: dict = Depends(require_permiss
     pharmacy = db.query(Pharmacy).filter(Pharmacy.id == pharmacy_id).first()
     if pharmacy is None:
         raise HTTPException(status_code=404, detail="Officine introuvable")
+    if pharmacy.wallet_phone_pending:
+        # Le nouveau wallet demandé par le titulaire devient celui des
+        # paiements, une fois vérifié.
+        pharmacy.wallet_phone = pharmacy.wallet_phone_pending
+        pharmacy.wallet_phone_pending = None
     pharmacy.wallet_verified = True
     from app.models import AuditLog
     db.add(AuditLog(user_id=current_user["user_id"], action="pharmacy_verify_wallet", entity_type="pharmacy",

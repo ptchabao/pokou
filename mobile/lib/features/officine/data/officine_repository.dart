@@ -88,6 +88,38 @@ class OfficineRepository {
   Future<void> setOnDuty(bool onDuty) =>
       _api.post('$_base/on-duty', body: {'on_duty': onDuty});
 
+  // ── Compte de l'officine (Officine 13) ────────────────────────────────
+
+  /// Adresse, téléphone, horaires, prochaine garde, fermeture temporaire,
+  /// sonnerie de ce téléphone : seuls les champs donnés changent.
+  Future<OfficineMe> updatePharmacy(Map<String, dynamic> fields) async =>
+      OfficineMe.fromJson(
+        await _api.patch('$_base/me', body: fields) as Map<String, dynamic>,
+      );
+
+  /// Un nouveau wallet de réception, vérifié ensuite par l'équipe.
+  Future<OfficineMe> changeWallet(String phone) async => OfficineMe.fromJson(
+    await _api.post('$_base/wallet', body: {'phone': phone})
+        as Map<String, dynamic>,
+  );
+
+  Future<List<CounterPhone>> phones() async =>
+      _phones(await _api.get('$_base/phones'));
+
+  Future<List<CounterPhone>> addPhone(String phone) async =>
+      _phones(await _api.post('$_base/phones', body: {'phone': phone}));
+
+  Future<List<CounterPhone>> removePhone(int id) async =>
+      _phones(await _api.delete('$_base/phones/$id'));
+
+  /// « Se déconnecter de ce téléphone » : ce compte quitte l'équipe.
+  Future<void> leaveCounter() => _api.delete('$_base/phones/me');
+
+  List<CounterPhone> _phones(Object? json) => [
+    for (final p in ((json as Map?)?['items'] as List? ?? const []))
+      CounterPhone.fromJson((p as Map).cast<String, dynamic>()),
+  ];
+
   /// Ouvre un paiement CashPay ; renvoie l'adresse de la page de paiement.
   Future<String?> subscribe(String plan) async {
     final json =

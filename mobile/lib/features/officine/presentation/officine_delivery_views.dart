@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
@@ -339,19 +340,23 @@ class _ProposalRow extends StatelessWidget {
 }
 
 /// Officine · 8. Demander un coursier, puis 9 « Aucun coursier
-/// disponible » passé dix minutes sans preneur.
+/// disponible » passé dix minutes sans preneur (ou après « Annuler la
+/// demande »).
 ///
 /// La course part d'abord aux livreurs habituels de l'officine, puis aux
-/// coursiers de la zone. Dès qu'un coursier accepte, l'écran passe de
-/// lui-même à la livraison (4).
+/// coursiers de la zone, dans un rayon autour de l'officine. Le serveur
+/// mène la recherche (`dispatch`) : relance, zone élargie, annulation.
+/// Dès qu'un coursier accepte, l'écran passe de lui-même à la livraison (4).
 class OfficineCourierSearchView extends ConsumerStatefulWidget {
   const OfficineCourierSearchView({
     super.key,
     required this.order,
+    required this.run,
     required this.busy,
   });
 
   final OfficineOrder order;
+  final OfficineRun run;
   final bool busy;
 
   @override
@@ -362,9 +367,6 @@ class OfficineCourierSearchView extends ConsumerStatefulWidget {
 class _OfficineCourierSearchViewState
     extends ConsumerState<OfficineCourierSearchView> {
   Timer? _tick;
-
-  /// Passé ce délai sans preneur : l'écran 9.
-  static const _noCourierAfter = Duration(minutes: 10);
 
   @override
   void initState() {
@@ -382,22 +384,58 @@ class _OfficineCourierSearchViewState
 
   OfficineOrder get order => widget.order;
 
+  OfficineDispatch? get dispatch => order.dispatch;
+
+  /// « 5,8 » : la distance à la manière du pays.
+  String _km(double km) => NumberFormat.decimalPattern(
+    Localizations.localeOf(context).toLanguageTag(),
+  ).format(km);
+
+  Future<void> _act(String action, {String? done}) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (await widget.run(action) && done != null) {
+      messenger.showSnackBar(SnackBar(content: Text(done)));
+    }
+  }
+
+  Future<void> _cancel() async {
+    final l = L.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.officineDispatchCancelTitle),
+        content: Text(l.officineDispatchCancelBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l.officineDispatchKeep),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l.officineDispatchCancel),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await _act('dispatch/cancel');
+  }
+
+  /// Le retrait à l'officine : la patiente est prévenue dans sa discussion
+  /// avec l'officine, et la course n'est plus proposée aux coursiers.
   Future<void> _proposePickup() async {
     final l = L.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final patient = officinePatient(context, order);
-    try {
-      await ref
-          .read(officineRepositoryProvider)
-          .sendMessage(
-            order.id,
-            l.offiPickupMessage(patient, fcfa(order.deliveryPrice)),
-          );
+    final sent = await widget.run(
+      'pickup/propose',
+      body: {
+        'message': l.offiPickupMessage(patient, fcfa(order.deliveryPrice)),
+      },
+    );
+    if (sent) {
       messenger.showSnackBar(
         SnackBar(content: Text(l.offiMessageSentTo(patient))),
       );
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(officineError(l, e))));
     }
   }
 
@@ -405,22 +443,44 @@ class _OfficineCourierSearchViewState
   Widget build(BuildContext context) {
     final l = L.of(context);
     final patient = officinePatient(context, order);
-    final since = order.stepTime('READY') ?? order.updatedAt ?? order.createdAt;
+    final since =
+        dispatch?.startedAt ??
+        order.stepTime('READY') ??
+        order.updatedAt ??
+        order.createdAt;
     final elapsed = DateTime.now().toUtc().difference(since.toUtc());
     final couriers = ref.watch(officineCouriersProvider).valueOrNull;
-    final priority = Duration(minutes: couriers?.priorityMinutes ?? 5);
-    final hasAttached = (couriers?.items.isNotEmpty ?? false);
+    final priority = Duration(
+      minutes: dispatch?.priorityMinutes ?? couriers?.priorityMinutes ?? 5,
+    );
+    final hasAttached =
+        (dispatch?.attachedCount ?? 0) > 0 ||
+        (couriers?.items.isNotEmpty ?? false);
     final pastPriority = !hasAttached || elapsed >= priority;
-    final nobody = elapsed >= _noCourierAfter;
-    final subtitle = l.offiOrderOf(patient, order.deliveryAddress);
+    final cancelled = dispatch?.cancelled ?? false;
+    final nobody =
+        cancelled ||
+        elapsed >= Duration(minutes: dispatch?.noCourierMinutes ?? 10);
+    final distance = order.deliveryDistanceKm;
+    final subtitle = distance == null
+        ? l.offiOrderOf(patient, order.deliveryAddress)
+        : l.officineDispatchSubtitle(
+            patient,
+            order.deliveryAddress,
+            _km(distance),
+          );
 
     void refresh() => refreshOfficine(ref, order.id);
 
     if (nobody) {
+      final proposed = order.pickupProposedAt != null;
+      final wide = dispatch?.wideRadiusKm ?? 8;
       return OfficinePage(
         actions: [OfficinePatientChatButton(order: order)],
-        title: l.offiNoCourierTitle,
-        subtitle: subtitle,
+        title: cancelled && !proposed
+            ? l.officineDispatchCancelledTitle
+            : l.offiNoCourierTitle,
+        subtitle: l.offiOrderOf(patient, order.deliveryAddress),
         onRefresh: () async => refresh(),
         primary: HonamPrimaryButton(
           label: l.offiBackToOrders,
@@ -433,15 +493,37 @@ class _OfficineCourierSearchViewState
           ),
           const SizedBox(height: 12),
           Text(
-            l.offiNoCourierBody(elapsed.inMinutes),
+            proposed
+                ? l.officineDispatchPickupProposed(patient)
+                : cancelled
+                ? l.officineDispatchCancelledBody
+                : l.offiNoCourierBody(elapsed.inMinutes),
             style: const TextStyle(fontSize: 15),
           ),
           const SizedBox(height: 12),
           OfficineOutlineButton(
-            label: l.offiRetrySearch,
+            label: l.officineDispatchRelaunch,
             icon: Icons.refresh,
-            onPressed: refresh,
+            onPressed: widget.busy
+                ? null
+                : () => _act(
+                    'dispatch/relaunch',
+                    done: l.officineDispatchRelaunched,
+                  ),
           ),
+          if (dispatch?.canWiden ?? false) ...[
+            officineGap,
+            OfficineOutlineButton(
+              label: l.officineDispatchWiden(_km(wide)),
+              icon: Icons.map_outlined,
+              onPressed: widget.busy
+                  ? null
+                  : () => _act(
+                      'dispatch/widen',
+                      done: l.officineDispatchWidened(_km(wide)),
+                    ),
+            ),
+          ],
           officineGap,
           ModuleCard(
             child: Column(
@@ -456,11 +538,24 @@ class _OfficineCourierSearchViewState
                   ),
                 ),
                 const SizedBox(height: 8),
-                OfficineOutlineButton(
-                  label: l.offiProposePickup,
-                  expanded: false,
-                  onPressed: _proposePickup,
-                ),
+                // Proposé : la patiente répond dans sa discussion avec
+                // l'officine ; son accord fait passer la commande au
+                // comptoir.
+                if (proposed)
+                  OfficineOutlineButton(
+                    label: l.officineDispatchPickupAccepted(patient),
+                    icon: Icons.storefront_outlined,
+                    expanded: false,
+                    onPressed: widget.busy
+                        ? null
+                        : () => _act('pickup/confirm'),
+                  )
+                else
+                  OfficineOutlineButton(
+                    label: l.offiProposePickup,
+                    expanded: false,
+                    onPressed: widget.busy ? null : _proposePickup,
+                  ),
               ],
             ),
           ),
@@ -480,11 +575,29 @@ class _OfficineCourierSearchViewState
       );
     }
 
+    final unanswered = dispatch?.unanswered ?? const <String>[];
+    final attachedHint = !pastPriority || unanswered.isEmpty
+        ? l.offiProposedAttachedHint(priority.inMinutes)
+        : unanswered.length == 1
+        ? l.officineDispatchNoAnswer(unanswered.single, priority.inMinutes)
+        : l.officineDispatchNoAnswerMany(unanswered.length, priority.inMinutes);
+    final available = dispatch?.availableCount;
+    final area = dispatch?.area;
+    final zoneHint = available == null
+        ? null
+        : area == null
+        ? l.officineDispatchAvailable(available)
+        : l.officineDispatchAvailableAround(available, area);
+
     return OfficinePage(
       actions: [OfficinePatientChatButton(order: order)],
       title: l.offiAskCourierTitle,
       subtitle: subtitle,
       onRefresh: () async => refresh(),
+      secondary: OfficineTextAction(
+        label: l.officineDispatchCancel,
+        onPressed: widget.busy ? null : _cancel,
+      ),
       children: [
         ModuleCard(
           child: Row(
@@ -533,12 +646,13 @@ class _OfficineCourierSearchViewState
               if (hasAttached)
                 OfficineStepRow(
                   title: l.offiProposedAttached,
-                  subtitle: l.offiProposedAttachedHint(priority.inMinutes),
+                  subtitle: attachedHint,
                   done: pastPriority,
                   current: !pastPriority,
                 ),
               OfficineStepRow(
                 title: l.offiProposedZone,
+                subtitle: zoneHint,
                 number: hasAttached ? 2 : 1,
                 current: pastPriority,
               ),
@@ -563,6 +677,111 @@ class _OfficineCourierSearchViewState
           ),
         ),
         OfficineNote(l.offiSealedNote(patient)),
+      ],
+    );
+  }
+}
+
+/// Le retrait à l'officine, accepté par la patiente (Officine 9) : elle
+/// vient au comptoir et donne son code de remise, comme au coursier. La
+/// course lui est remboursée (A2).
+class OfficinePickupView extends ConsumerStatefulWidget {
+  const OfficinePickupView({
+    super.key,
+    required this.order,
+    required this.run,
+    required this.busy,
+  });
+
+  final OfficineOrder order;
+  final OfficineRun run;
+  final bool busy;
+
+  @override
+  ConsumerState<OfficinePickupView> createState() => _OfficinePickupViewState();
+}
+
+class _OfficinePickupViewState extends ConsumerState<OfficinePickupView> {
+  final _code = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _code.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handOver() async {
+    final l = L.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await widget.run(
+      'pickup/hand-over',
+      body: {'code': _code.text.trim()},
+    );
+    if (ok) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.officineDispatchPickupDone)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final order = widget.order;
+    final patient = officinePatient(context, order);
+    final refundPending =
+        order.refundDue > 0 && order.refundConfirmedAt == null;
+    return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
+      title: l.officineDispatchPickupTitle,
+      subtitle: l.offiOrderOf(patient, order.deliveryAddress),
+      status: order.status,
+      onRefresh: () async => refreshOfficine(ref, order.id),
+      primary: HonamPrimaryButton(
+        label: l.officineDispatchPickupHandOver,
+        busy: widget.busy,
+        onPressed: _code.text.trim().length == 6 ? _handOver : null,
+      ),
+      children: [
+        Text(
+          l.officineDispatchPickupBody(patient),
+          style: const TextStyle(fontSize: 15),
+        ),
+        const SizedBox(height: 12),
+        OfficineCardTitle(l.officineDispatchPickupCode),
+        TextField(
+          controller: _code,
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          style: const TextStyle(fontSize: 22, letterSpacing: 6),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            counterText: '',
+          ),
+        ),
+        if (refundPending) ...[
+          officineGap,
+          OfficineNote(
+            l.officineDispatchPickupRefund(fcfa(order.deliveryPrice)),
+            tone: CalloutTone.amber,
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OfficineTextAction(
+              label: l.officineDispatchPickupRefundAction,
+              icon: Icons.undo,
+              onPressed: () =>
+                  openOfficineOrder(context, order.id, refund: true),
+            ),
+          ),
+        ],
       ],
     );
   }

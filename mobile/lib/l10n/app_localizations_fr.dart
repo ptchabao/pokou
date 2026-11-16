@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4056,8 +4057,7 @@ class LFr extends L {
       locale: localeName,
       other:
           '$count messages mis en attente par le Mode Bouclier — glisser vers le bas pour les afficher',
-      one:
-          '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
+      one: '1 message mis en attente par le Mode Bouclier — glisser vers le bas pour l\'afficher',
     );
     return '$_temp0';
   }
@@ -14684,4 +14684,260 @@ class LFr extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String officineDispatchSubtitle(
+    String patient,
+    String address,
+    String distance,
+  ) {
+    return 'Commande de $patient · $address · $distance km';
+  }
+
+  @override
+  String officineDispatchNoAnswer(String name, int minutes) {
+    return '$name n’a pas répondu en $minutes min';
+  }
+
+  @override
+  String officineDispatchNoAnswerMany(int count, int minutes) {
+    return '$count coursiers rattachés n’ont pas répondu en $minutes min';
+  }
+
+  @override
+  String officineDispatchAvailableAround(int count, String area) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count disponibles autour de $area',
+      one: '1 disponible autour de $area',
+      zero: 'Aucun disponible autour de $area',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String officineDispatchAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count disponibles dans la zone',
+      one: '1 disponible dans la zone',
+      zero: 'Aucun disponible dans la zone',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get officineDispatchCancel => 'Annuler la demande';
+
+  @override
+  String get officineDispatchCancelTitle => 'Annuler la demande de coursier ?';
+
+  @override
+  String get officineDispatchCancelBody =>
+      'La course ne sera plus proposée aux coursiers. Vous pourrez relancer la recherche ou proposer le retrait à l’officine.';
+
+  @override
+  String get officineDispatchKeep => 'Continuer la recherche';
+
+  @override
+  String get officineDispatchCancelledTitle => 'Demande annulée';
+
+  @override
+  String get officineDispatchCancelledBody =>
+      'La course n’est plus proposée aux coursiers.';
+
+  @override
+  String get officineDispatchRelaunch => 'Relancer la recherche';
+
+  @override
+  String get officineDispatchRelaunched => 'Recherche relancée';
+
+  @override
+  String officineDispatchWiden(String km) {
+    return 'Élargir la zone à $km km';
+  }
+
+  @override
+  String officineDispatchWidened(String km) {
+    return 'Zone élargie à $km km';
+  }
+
+  @override
+  String officineDispatchPickupProposed(String patient) {
+    return 'Retrait proposé à $patient. La recherche de coursier est suspendue en attendant sa réponse.';
+  }
+
+  @override
+  String officineDispatchPickupAccepted(String patient) {
+    return '$patient a accepté';
+  }
+
+  @override
+  String get officineDispatchPickupTitle => 'Retrait à l’officine';
+
+  @override
+  String officineDispatchPickupBody(String patient) {
+    return '$patient vient retirer sa commande au comptoir. Demandez son code de remise à 6 chiffres.';
+  }
+
+  @override
+  String get officineDispatchPickupCode => 'Code de remise';
+
+  @override
+  String get officineDispatchPickupHandOver => 'Remettre la commande';
+
+  @override
+  String get officineDispatchPickupDone => 'Commande remise au comptoir';
+
+  @override
+  String officineDispatchPickupRefund(String amount) {
+    return 'Remboursez la course de $amount sur le numéro qui a payé, sous 2 h.';
+  }
+
+  @override
+  String get officineDispatchPickupRefundAction => 'Rembourser la course';
+
+  @override
+  String officineDispatchChatNotice(String patient) {
+    return 'Discussion liée à la course de $patient. Elle se ferme 24 h après la livraison. Les numéros restent masqués.';
+  }
+
+  @override
+  String get officineDispatchChatClosed =>
+      'La discussion s’est fermée 24 h après la livraison.';
+
+  @override
+  String get officineDispatchChatRead => 'Lu';
+
+  @override
+  String officineDispatchCall(String name) {
+    return 'Appeler $name';
+  }
+
+  @override
+  String officineDispatchDefectNoteDelivered(String courier) {
+    return '$courier est prévenu et peut contester sous 48 h. Au 3e défaut confirmé, son compte coursier est suspendu.';
+  }
+
+  @override
+  String officineDispatchDefectNoteOngoing(String courier) {
+    return '$courier est prévenu et peut contester sous 48 h. La commande revient à « prête » pour un autre coursier. Au 3e défaut confirmé, son compte coursier est suspendu.';
+  }
+
+  @override
+  String get officineAccountNextDuty => 'Prochaine garde';
+
+  @override
+  String get officineAccountNextDutyNone => 'À définir';
+
+  @override
+  String get officineAccountChooseDate => 'Choisir la date';
+
+  @override
+  String get officineAccountClearDuty => 'Effacer la date';
+
+  @override
+  String get officineAccountCounterPhones => 'Téléphones du comptoir';
+
+  @override
+  String get officineAccountRing => 'Sonnerie à chaque ordonnance';
+
+  @override
+  String get officineAccountRingHint => 'Sur ce téléphone';
+
+  @override
+  String get officineAccountClose => 'Fermer temporairement';
+
+  @override
+  String get officineAccountCloseHint => 'Les patients ne vous voient plus';
+
+  @override
+  String get officineAccountCloseTitle => 'Fermer temporairement l’officine ?';
+
+  @override
+  String get officineAccountCloseBody =>
+      'Votre officine disparaît de l’annuaire et ne reçoit plus d’ordonnances tant que vous ne la rouvrez pas. Les commandes en cours continuent.';
+
+  @override
+  String get officineAccountCloseYes => 'Fermer';
+
+  @override
+  String get officineAccountLogout => 'Se déconnecter de ce téléphone';
+
+  @override
+  String get officineAccountLogoutTitle => 'Se déconnecter de ce téléphone ?';
+
+  @override
+  String get officineAccountLogoutBody =>
+      'Ce téléphone n’aura plus accès à l’espace officine. Le titulaire pourra l’ajouter de nouveau.';
+
+  @override
+  String get officineAccountInfoTitle => 'Informations de l’officine';
+
+  @override
+  String get officineAccountAddress => 'Adresse';
+
+  @override
+  String get officineAccountPhone => 'Téléphone de l’officine';
+
+  @override
+  String get officineAccountNameNote =>
+      'Le nom de l’officine se change avec l’équipe Pokou.';
+
+  @override
+  String get officineAccountSave => 'Enregistrer';
+
+  @override
+  String get officineAccountSaved => 'Enregistré';
+
+  @override
+  String get officineAccountHoursHint => 'Lun.–sam., 8 h–21 h';
+
+  @override
+  String get officineAccountWalletTitle => 'Changer de wallet de réception';
+
+  @override
+  String get officineAccountWalletBody =>
+      'Le nouveau numéro doit être au nom de l’officine. L’équipe Pokou le vérifie ; d’ici là, les patients paient sur le wallet actuel.';
+
+  @override
+  String officineAccountWalletPending(String phone) {
+    return 'Nouveau wallet en vérification : $phone';
+  }
+
+  @override
+  String officineAccountWalletName(String phone) {
+    return '$phone · au nom de l’officine';
+  }
+
+  @override
+  String get officineAccountTitulaireOnly =>
+      'Seul le pharmacien titulaire peut faire ce changement.';
+
+  @override
+  String get officineAccountPhonesNote =>
+      'Chaque téléphone du comptoir reçoit les ordonnances et traite les commandes. Les numéros restent masqués.';
+
+  @override
+  String get officineAccountAddPhone => 'Ajouter un téléphone';
+
+  @override
+  String get officineAccountAddPhoneHint => 'Le numéro d’un compte Pokou';
+
+  @override
+  String get officineAccountAdd => 'Ajouter';
+
+  @override
+  String get officineAccountRemovePhone => 'Retirer ce téléphone';
+
+  @override
+  String get officineAccountThisPhone => 'Ce téléphone';
+
+  @override
+  String get officineAccountTitulaire => 'Titulaire';
+
+  @override
+  String get officineAccountCollaborator => 'Collaborateur';
 }
