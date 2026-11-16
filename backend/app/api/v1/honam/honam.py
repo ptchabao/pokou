@@ -36,6 +36,7 @@ from app.models import (
     HonamOrderMessage,
     HonamWaitlistEntry,
     Pharmacy,
+    PharmacyApplication,
     PharmacyCourier,
     PharmacyStaff,
     User,
@@ -56,6 +57,10 @@ _PHARMACY_QUEUE = ("SUBMITTED", "ACCEPTED", "PAID", "READY", "IN_DELIVERY")
 #: Le suivi n'existe que pendant la course : de l'acceptation par le
 #: coursier à la remise.
 _TRACKABLE = ("READY", "IN_DELIVERY")
+
+#: « Le support de Pokou vérifie votre autorisation et votre wallet sous
+#: 48 h » (maquette Officine 16), comme un dossier Pokou certifié Pro.
+REGISTRATION_REVIEW_HOURS = 48
 
 #: Les jours et moments de disponibilité (maquette Coursiers 4).
 _DAYS = ("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
@@ -218,6 +223,32 @@ class PharmacyCreate(BaseModel):
     longitude: float
     wallet_phone: str
     titulaire_phone: str
+
+
+class PharmacyRegistrationBody(BaseModel):
+    """« Référencer votre officine » (maquettes Officine 14 et 15)."""
+    name: str = Field(..., min_length=2, max_length=160)
+    address: str = Field(..., min_length=3, max_length=255)
+    license_number: str = Field(..., min_length=2, max_length=64)
+    wallet_phone: str
+    #: L'arrêté d'autorisation d'ouverture (photo ou PDF), déjà téléversé.
+    #: Facultatif seulement au renvoi d'un dossier refusé : le précédent sert.
+    authorization_media_id: Optional[int] = None
+    plan: str = Field(..., pattern="^(WETRI|EPE)$")
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
+
+
+class RegistrationReviewBody(BaseModel):
+    decision: str = Field(..., pattern="^(APPROVE|REJECT)$")
+    note: Optional[str] = Field(None, max_length=500)
+    #: La position de l'officine, quand le téléphone ne l'a pas donnée ou
+    #: qu'elle est fausse : l'annuaire trie par distance.
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
+    #: Le téléphone de l'officine ; par défaut, celui du titulaire.
+    phone: Optional[str] = None
+    opening_hours: Optional[str] = Field(None, max_length=255)
 
 
 # ── Accès ───────────────────────────────────────────────────────────────
@@ -1077,6 +1108,96 @@ def pharmacy_buy_credit(body: CreditBody, current_user: dict = Depends(get_curre
     )
     db.commit()
     return payment_json(payment)
+
+
+# ── Référencement d'une officine (maquettes Officine 14 à 16) ──────────
+
+
+def _registration_json(db: Session, user: User, application: Optional[PharmacyApplication]) -> dict:
+    """L'état du dossier et les prix de la formule (écran 2/3). L'arrêté
+    lui-même ne repart jamais vers l'application."""
+    country = application.country if application else (country_of_phone(user.phone) or "TG")
+    prices = rules.pharmacy_prices(db, country)
+    has_pharmacy = db.query(PharmacyStaff.id).filter(PharmacyStaff.user_id == user.id).first() is not None
+    data = {
+        "status": application.status if application else "NONE",
+        "has_pharmacy": has_pharmacy,
+        "prices_ht": {"WETRI": prices["WETRI"], "EPE": prices["EPE"]},
+        "vat_rate": prices["vat_rate"],
+        "review_hours": REGISTRATION_REVIEW_HOURS,
+    }
+    if application is None:
+        return data
+    return {
+        **data,
+        "name": application.name,
+        "address": application.address,
+        "license_number": application.license_number,
+        "wallet_phone": application.wallet_phone,
+        "has_authorization": application.authorization_media_id is not None,
+        "plan": application.plan,
+        "review_note": application.review_note,
+        "submitted_at": application.submitted_at.isoformat(),
+        "review_due_at": application.review_due_at.isoformat(),
+        "reviewed_at": _iso(application.reviewed_at),
+        "pharmacy_id": application.pharmacy_id,
+    }
+
+
+@router.get("/pharmacy/registration")
+def pharmacy_registration(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Où en est le dossier : NONE (rien envoyé), PENDING (vérification en
+    cours, écran 3/3), APPROVED (l'officine existe) ou REJECTED (motif)."""
+    user = _user(db, current_user)
+    application = db.query(PharmacyApplication).filter(PharmacyApplication.user_id == user.id).first()
+    return _registration_json(db, user, application)
+
+
+@router.post("/pharmacy/registration", status_code=201)
+def submit_pharmacy_registration(
+    body: PharmacyRegistrationBody, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db),
+):
+    """Envoyer (ou renvoyer, après un refus) le dossier. Rien n'est payé
+    avant la vérification : la formule choisie se règle ensuite par CashPay
+    depuis l'espace officine."""
+    user = _user(db, current_user)
+    if db.query(PharmacyStaff.id).filter(PharmacyStaff.user_id == user.id).first() is not None:
+        raise HTTPException(status_code=409, detail="Ce compte appartient déjà à l'équipe d'une officine")
+    country = country_of_phone(user.phone) or "TG"
+    if not rules.pharmacy_prices(db, country).get(body.plan):
+        raise HTTPException(status_code=409, detail="Honam n'accueille pas encore d'officine dans votre pays")
+    application = db.query(PharmacyApplication).filter(PharmacyApplication.user_id == user.id).first()
+    if application is not None and application.status in ("PENDING", "APPROVED"):
+        raise HTTPException(status_code=409, detail="Un dossier est déjà en cours ou validé")
+    wallet = normalize_e164(body.wallet_phone, country)
+    if wallet is None:
+        raise HTTPException(status_code=422, detail="Numéro de wallet invalide")
+    authorization_id = _check_media(db, user, body.authorization_media_id) or (
+        application.authorization_media_id if application is not None else None
+    )
+    if authorization_id is None:
+        raise HTTPException(status_code=422, detail="L'autorisation d'ouverture est obligatoire")
+    now = datetime.utcnow()
+    if application is None:
+        application = PharmacyApplication(user_id=user.id)
+        db.add(application)
+    application.country = country
+    application.name = body.name.strip()
+    application.address = body.address.strip()
+    application.license_number = body.license_number.strip()
+    application.wallet_phone = wallet
+    application.authorization_media_id = authorization_id
+    application.plan = body.plan
+    application.latitude = body.latitude if body.latitude is not None else application.latitude
+    application.longitude = body.longitude if body.longitude is not None else application.longitude
+    application.status = "PENDING"
+    application.review_note = None
+    application.submitted_at = now
+    application.review_due_at = now + timedelta(hours=REGISTRATION_REVIEW_HOURS)
+    application.reviewed_at = None
+    application.reviewer_id = None
+    db.commit()
+    return _registration_json(db, user, application)
 
 
 # ── Coursier ────────────────────────────────────────────────────────────
@@ -2113,6 +2234,89 @@ def create_pharmacy(body: PharmacyCreate, current_user: dict = Depends(require_p
                     entity_id=pharmacy.id, changes={"name": pharmacy.name, "country": pharmacy.country}))
     db.commit()
     return {**_pharmacy_json(pharmacy), "status": pharmacy.status}
+
+
+def _application_admin_json(db: Session, a: PharmacyApplication) -> dict:
+    return {
+        "id": a.id, "user_id": a.user_id, "titulaire": _name(db, a.user_id), "titulaire_phone": _phone(db, a.user_id),
+        "country": a.country, "name": a.name, "address": a.address, "license_number": a.license_number,
+        "wallet_phone": a.wallet_phone, "authorization_media_id": a.authorization_media_id, "plan": a.plan,
+        "latitude": a.latitude, "longitude": a.longitude, "status": a.status, "review_note": a.review_note,
+        "submitted_at": a.submitted_at.isoformat(), "review_due_at": a.review_due_at.isoformat(),
+        "overdue": a.status == "PENDING" and a.review_due_at < datetime.utcnow(),
+        "reviewed_at": _iso(a.reviewed_at), "pharmacy_id": a.pharmacy_id,
+    }
+
+
+@admin_router.get("/pharmacy-applications")
+def pharmacy_applications(
+    status: str = "PENDING",
+    current_user: dict = Depends(require_permission_claims("honam.view")), db: Session = Depends(get_db),
+):
+    """Les dossiers « Référencer votre officine », le plus proche de son
+    échéance d'abord."""
+    query = db.query(PharmacyApplication)
+    if status != "ALL":
+        query = query.filter(PharmacyApplication.status == status.upper())
+    rows = query.order_by(PharmacyApplication.review_due_at).all()
+    return {"items": [_application_admin_json(db, a) for a in rows]}
+
+
+@admin_router.post("/pharmacy-applications/{application_id}/review")
+def review_pharmacy_application(
+    application_id: int, body: RegistrationReviewBody,
+    current_user: dict = Depends(require_permission_claims("honam.manage")), db: Session = Depends(get_db),
+):
+    """La décision du support, motivée en cas de refus. Valider crée
+    l'officine, son titulaire et le wallet vérifié — comme la création par
+    un commercial (`create_pharmacy`) ; l'officine reste hors de l'annuaire
+    jusqu'au paiement de sa formule."""
+    from app.models import AuditLog
+    from app.services.notifications.inbox import notify
+
+    application = db.query(PharmacyApplication).filter(PharmacyApplication.id == application_id).first()
+    if application is None or application.status != "PENDING":
+        raise HTTPException(status_code=404, detail="Dossier introuvable")
+    note = (body.note or "").strip() or None
+    if body.decision == "REJECT":
+        if note is None:
+            raise HTTPException(status_code=422, detail="Dites au pharmacien ce qui ne va pas")
+        application.status = "REJECTED"
+        message = f"Votre dossier d'officine n'a pas été retenu. Motif : « {note} »"
+    else:
+        latitude = body.latitude if body.latitude is not None else application.latitude
+        longitude = body.longitude if body.longitude is not None else application.longitude
+        if latitude is None or longitude is None:
+            raise HTTPException(status_code=422, detail="Indiquez la position de l'officine")
+        if db.query(PharmacyStaff.id).filter(PharmacyStaff.user_id == application.user_id).first() is not None:
+            raise HTTPException(status_code=409, detail="Ce compte appartient déjà à l'équipe d'une officine")
+        titulaire_phone = _phone(db, application.user_id)
+        phone = normalize_e164(body.phone, application.country) if body.phone else titulaire_phone
+        pharmacy = Pharmacy(
+            country=application.country, name=application.name, address=application.address,
+            phone=phone or titulaire_phone or "", opening_hours=body.opening_hours,
+            latitude=latitude, longitude=longitude,
+            wallet_phone=application.wallet_phone, wallet_verified=True,
+        )
+        db.add(pharmacy)
+        db.flush()
+        db.add(PharmacyStaff(pharmacy_id=pharmacy.id, user_id=application.user_id, role="TITULAIRE"))
+        application.status = "APPROVED"
+        application.pharmacy_id = pharmacy.id
+        application.latitude, application.longitude = latitude, longitude
+        db.add(AuditLog(user_id=current_user["user_id"], action="pharmacy_create", entity_type="pharmacy",
+                        entity_id=pharmacy.id, changes={"name": pharmacy.name, "country": pharmacy.country,
+                                                        "application_id": application.id}))
+        message = "Votre officine est validée : payez votre formule depuis l'espace officine pour l'ouvrir aux patients."
+    application.review_note = note
+    application.reviewed_at = datetime.utcnow()
+    application.reviewer_id = current_user["user_id"]
+    db.add(AuditLog(user_id=current_user["user_id"], action="pharmacy_application_review",
+                    entity_type="pharmacy_application", entity_id=application.id,
+                    changes={"decision": body.decision, "note": note}))
+    notify(db, [application.user_id], service="honam", title=application.name, body=message)
+    db.commit()
+    return _application_admin_json(db, application)
 
 
 @admin_router.post("/pharmacies/{pharmacy_id}/verify-wallet")

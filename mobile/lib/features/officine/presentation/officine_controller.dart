@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/sync/pokou_sync_engine.dart';
@@ -22,6 +23,40 @@ final officineMeProvider = FutureProvider.autoDispose<OfficineMe?>((ref) {
   _live(ref);
   return ref.watch(officineRepositoryProvider).me();
 });
+
+/// Le dossier « Référencer votre officine » (maquettes Officine 14 à 16),
+/// ou `null` si Honam est fermé dans le pays. Relu à chaque retour sur
+/// « Plus » : la décision du support arrive par une notification.
+final officineRegistrationProvider =
+    FutureProvider.autoDispose<OfficineRegistration?>((ref) {
+      return ref.watch(officineRepositoryProvider).registration();
+    });
+
+/// La position du téléphone à l'envoi du dossier, si elle est déjà permise :
+/// l'annuaire classe les officines par distance. Jamais de demande
+/// d'autorisation ici ; le support complète la position sinon.
+final officineRegistrationPositionProvider =
+    Provider<Future<({double latitude, double longitude})?> Function()>(
+      (ref) => () async {
+        try {
+          if (!await Geolocator.isLocationServiceEnabled()) return null;
+          final permission = await Geolocator.checkPermission();
+          if (permission != LocationPermission.always &&
+              permission != LocationPermission.whileInUse) {
+            return null;
+          }
+          final position = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.medium,
+              timeLimit: Duration(seconds: 8),
+            ),
+          );
+          return (latitude: position.latitude, longitude: position.longitude);
+        } catch (_) {
+          return null;
+        }
+      },
+    );
 
 /// La file en cours (tout sauf les commandes closes).
 final officineQueueProvider = FutureProvider.autoDispose<List<OfficineOrder>>((

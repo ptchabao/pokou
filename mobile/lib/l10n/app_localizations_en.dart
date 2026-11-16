@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14602,4 +14603,163 @@ class LEn extends L {
 
   @override
   String get assimeSoldBadge => 'Sold';
+
+  @override
+  String get officineRegEntryTitle => 'List my pharmacy';
+
+  @override
+  String get officineRegEntrySubtitle =>
+      'Receive prescriptions from nearby patients';
+
+  @override
+  String get officineRegEntryPending => 'Application under review';
+
+  @override
+  String get officineRegEntryRejected =>
+      'Application not accepted: correct it and send it again';
+
+  @override
+  String officineRegStep(int step) {
+    return 'Step $step of 3';
+  }
+
+  @override
+  String get officineRegInfoTitle => 'List your pharmacy';
+
+  @override
+  String get officineRegName => 'Pharmacy name';
+
+  @override
+  String get officineRegAddress => 'Address';
+
+  @override
+  String get officineRegLicense => 'Practice licence no.';
+
+  @override
+  String get officineRegLicenseHint => 'As shown on the official order';
+
+  @override
+  String get officineRegWallet => 'Receiving wallet';
+
+  @override
+  String get officineRegWalletHint => 'Mobile money number';
+
+  @override
+  String get officineRegWalletHelp =>
+      'Patients pay you on this number. It must be in the pharmacy’s name.';
+
+  @override
+  String get officineRegAuthorization => 'Opening authorisation';
+
+  @override
+  String get officineRegAuthorizationHint => 'Photo or PDF';
+
+  @override
+  String get officineRegAuthorizationAdded => 'Added';
+
+  @override
+  String get officineRegMobilePaymentNote =>
+      'Honam is reserved for pharmacies that accept mobile payment.';
+
+  @override
+  String get officineRegContinue => 'Continue';
+
+  @override
+  String officineRegRejected(String reason) {
+    return 'Application not accepted: $reason';
+  }
+
+  @override
+  String get officineRegPlanTitle => 'Choose your plan';
+
+  @override
+  String get officineRegPerMonth => 'per month';
+
+  @override
+  String officineRegAmountHt(String amount) {
+    return '$amount excl. VAT';
+  }
+
+  @override
+  String officineRegWetriCaption(String ttc, int vat) {
+    return '$ttc incl. VAT per month, $vat% VAT';
+  }
+
+  @override
+  String officineRegEpeCaption(String instead, String ttc) {
+    return 'instead of $instead, that is $ttc incl. VAT per year';
+  }
+
+  @override
+  String get officineRegBenefitVisible =>
+      'Your pharmacy visible to nearby patients';
+
+  @override
+  String get officineRegBenefitPrescriptions =>
+      'Prescriptions and quotes on your phone';
+
+  @override
+  String get officineRegBenefitCouriers => 'Honam couriers in your area';
+
+  @override
+  String get officineRegBenefitInvoices => 'CashPay invoices for your accounts';
+
+  @override
+  String get officineRegNoPaymentYet =>
+      'No payment before your pharmacy is verified. You then pay with CashPay: mobile money or card.';
+
+  @override
+  String get officineRegSend => 'Send for verification';
+
+  @override
+  String get officineRegPendingTitle => 'Verification in progress';
+
+  @override
+  String officineRegPendingText(int hours) {
+    return 'Pokou support checks your authorisation and your wallet within $hours h. You get a notification as soon as a decision is made.';
+  }
+
+  @override
+  String get officineRegStepSent => 'Application sent';
+
+  @override
+  String officineRegToday(String time) {
+    return 'Today, $time';
+  }
+
+  @override
+  String officineRegOn(String date, String time) {
+    return 'On $date at $time';
+  }
+
+  @override
+  String get officineRegStepReview => 'Verification by support';
+
+  @override
+  String officineRegDueBy(String date, String time) {
+    return 'By $date at $time at the latest';
+  }
+
+  @override
+  String officineRegStepPayment(String plan) {
+    return '$plan payment, then opening';
+  }
+
+  @override
+  String officineRegPaymentAmount(String amount) {
+    return '$amount incl. VAT via CashPay';
+  }
+
+  @override
+  String get officineRegPrepareNote =>
+      'In the meantime, get your counter ready: the QR poster and the list of your usual delivery riders.';
+
+  @override
+  String get officineRegDone => 'Done';
+
+  @override
+  String get officineRegPickPhoto => 'Choose a photo';
+
+  @override
+  String get officineRegPickPdf => 'Choose a PDF';
 }

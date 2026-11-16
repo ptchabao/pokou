@@ -88,18 +88,58 @@ class OfficineRepository {
   Future<void> setOnDuty(bool onDuty) =>
       _api.post('$_base/on-duty', body: {'on_duty': onDuty});
 
+  /// Le dossier « Référencer votre officine », ou `null` si Honam n'est
+  /// pas ouvert dans le pays du compte.
+  Future<OfficineRegistration?> registration() async {
+    try {
+      final json =
+          await _api.get('$_base/registration') as Map<String, dynamic>;
+      return OfficineRegistration.fromJson(json);
+    } on ApiException catch (e) {
+      if (e.statusCode == 403 || e.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  /// Envoie (ou renvoie, après un refus) le dossier ; [authorizationMediaId]
+  /// est l'arrêté déjà téléversé. Rien n'est payé avant la vérification.
+  Future<OfficineRegistration> register(
+    OfficineRegistrationDraft draft, {
+    required String plan,
+    int? authorizationMediaId,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final json = await _api.post(
+      '$_base/registration',
+      body: {
+        'name': draft.name,
+        'address': draft.address,
+        'license_number': draft.licenseNumber,
+        'wallet_phone': draft.walletPhone,
+        'plan': plan,
+        'authorization_media_id': ?authorizationMediaId,
+        'latitude': ?latitude,
+        'longitude': ?longitude,
+      },
+    ) as Map<String, dynamic>;
+    return OfficineRegistration.fromJson(json);
+  }
+
   /// Ouvre un paiement CashPay ; renvoie l'adresse de la page de paiement.
   Future<String?> subscribe(String plan) async {
-    final json =
-        await _api.post('$_base/subscribe', body: {'plan': plan})
-            as Map<String, dynamic>;
+    final json = await _api.post(
+      '$_base/subscribe',
+      body: {'plan': plan},
+    ) as Map<String, dynamic>;
     return json['payment_url'] as String?;
   }
 
   Future<String?> buyCredit(int amountHt) async {
-    final json =
-        await _api.post('$_base/credit', body: {'amount_ht': amountHt})
-            as Map<String, dynamic>;
+    final json = await _api.post(
+      '$_base/credit',
+      body: {'amount_ht': amountHt},
+    ) as Map<String, dynamic>;
     return json['payment_url'] as String?;
   }
 
@@ -124,9 +164,9 @@ class OfficineRepository {
     int orderId, {
     String channel = 'patient',
   }) async {
-    final json =
-        await _api.get('/honam/orders/$orderId/messages?channel=$channel')
-            as Map<String, dynamic>;
+    final json = await _api.get(
+      '/honam/orders/$orderId/messages?channel=$channel',
+    ) as Map<String, dynamic>;
     return [
       for (final m in (json['items'] as List? ?? const []))
         HonamOrderMessage.fromJson((m as Map).cast<String, dynamic>()),
@@ -141,9 +181,8 @@ class OfficineRepository {
     String channel = 'patient',
   }) async => HonamOrderMessage.fromJson(
     await _api.post(
-          '/honam/orders/$orderId/messages',
-          body: {'body': body, 'channel': channel},
-        )
-        as Map<String, dynamic>,
+      '/honam/orders/$orderId/messages',
+      body: {'body': body, 'channel': channel},
+    ) as Map<String, dynamic>,
   );
 }

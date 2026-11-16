@@ -156,6 +156,7 @@ from app.models.certified import (  # noqa: F401
 from app.models.honam import (  # noqa: F401
     Pharmacy,
     PharmacyStaff,
+    PharmacyApplication,
     HonamOrder,
     HonamOrderEvent,
     HonamOrderMessage,
