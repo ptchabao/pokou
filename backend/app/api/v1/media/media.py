@@ -180,6 +180,19 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
         ):
             return True
 
+    # Capture jointe à une demande de support : l'équipe qui lit les
+    # signalements, par permission comme le reste de la console. Pas de
+    # refus ici : la même image peut aussi avoir été envoyée en message,
+    # et les branches suivantes en décident alors.
+    from app.models.support import SupportTicket
+
+    if db.query(SupportTicket.id).filter(SupportTicket.screenshot_media_id == asset.id).first():
+        from app.core.permissions import permissions_of
+
+        viewer = db.query(User).filter(User.id == user_id).first()
+        if viewer is not None and "reports.view" in permissions_of(viewer):
+            return True
+
     # Tous les messages qui portent ce fichier et où l'on est partie
     # prenante, et non le premier trouvé : un même fichier est référencé par
     # autant de messages qu'il a été transféré, et il suffit qu'UN d'eux

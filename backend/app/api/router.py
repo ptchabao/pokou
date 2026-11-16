@@ -31,6 +31,7 @@ from app.api.v1.payments import webhooks as payment_webhooks
 from app.api.v1.modules import heart_league, hype_train, modules, social_tax, streak_lock, truth_market, vip_room
 from app.api.v1.safety import shield
 from app.api.v1.spark import spark, spark_admin, spark_dates
+from app.api.v1.support import support
 from app.core import metrics
 
 API_V1_PREFIX = "/api/v1"
@@ -96,6 +97,8 @@ for router in (
     certified.admin_router,
     honam.router,
     honam.admin_router,
+    support.router,
+    support.admin_router,
     # Après les routeurs d'administration des services : leurs chemins
     # fixes (« /couriers/pending », « /pro/pending ») passent avant les
     # chemins à identifiant de la console.

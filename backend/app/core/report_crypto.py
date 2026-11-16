@@ -11,6 +11,14 @@ Sans clé configurée, on REFUSE de stocker ces messages (le signalement
 passe sans eux) plutôt que de les garder en clair : c'est la seule
 dégradation acceptable.
 
+La même clé chiffre le texte des demandes de support et des problèmes
+signalés depuis Réglages › Aide et support (`encrypt_text`) : ce que la
+personne y raconte de son compte ne dort pas en clair non plus.
+
+La même clé chiffre le texte des demandes de support et des problèmes
+signalés depuis Réglages › Aide et support (`encrypt_text`) : ce que la
+personne y raconte de son compte ne dort pas en clair non plus.
+
 Générer une clé : ``python -c "from cryptography.fernet import Fernet;
 print(Fernet.generate_key().decode())"``.
 """
@@ -73,4 +81,52 @@ def decrypt_messages(token: Optional[str]) -> Optional[List[Any]]:
         return json.loads(fernet.decrypt(token.encode("ascii")).decode("utf-8"))
     except (InvalidToken, ValueError):
         logger.warning("Messages joints d'un signalement illisibles avec la clé actuelle")
+        return None
+
+
+def encrypt_text(text: str) -> Optional[str]:
+    """Le jeton chiffré d'un texte libre (demande de support), ou None si
+    aucune clé n'est configurée — l'appelant REFUSE alors de stocker."""
+    fernet = _fernet()
+    if fernet is None:
+        return None
+    return fernet.encrypt(text.encode("utf-8")).decode("ascii")
+
+
+def decrypt_text(token: Optional[str]) -> Optional[str]:
+    """Le texte en clair, ou None (absent, clé manquante ou changée) —
+    jamais d'exception vers l'écran qui le lit."""
+    if not token:
+        return None
+    fernet = _fernet()
+    if fernet is None:
+        return None
+    try:
+        return fernet.decrypt(token.encode("ascii")).decode("utf-8")
+    except (InvalidToken, ValueError):
+        logger.warning("Texte d'une demande de support illisible avec la clé actuelle")
+        return None
+
+
+def encrypt_text(text: str) -> Optional[str]:
+    """Le jeton chiffré d'un texte libre (demande de support), ou None si
+    aucune clé n'est configurée — l'appelant REFUSE alors de stocker."""
+    fernet = _fernet()
+    if fernet is None:
+        return None
+    return fernet.encrypt(text.encode("utf-8")).decode("ascii")
+
+
+def decrypt_text(token: Optional[str]) -> Optional[str]:
+    """Le texte en clair, ou None (absent, clé manquante ou changée) —
+    jamais d'exception vers l'écran qui le lit."""
+    if not token:
+        return None
+    fernet = _fernet()
+    if fernet is None:
+        return None
+    try:
+        return fernet.decrypt(token.encode("ascii")).decode("utf-8")
+    except (InvalidToken, ValueError):
+        logger.warning("Texte d'une demande de support illisible avec la clé actuelle")
         return None

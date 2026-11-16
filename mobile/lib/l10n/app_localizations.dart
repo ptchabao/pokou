@@ -11709,6 +11709,210 @@ abstract class L {
   /// **'Signaler un problème'**
   String get helpReport;
 
+  /// No description provided for @supportContactIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pose ta question : l’équipe Pokou te répond ici, dans l’application.'**
+  String get supportContactIntro;
+
+  /// No description provided for @supportMessageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton message'**
+  String get supportMessageHint;
+
+  /// No description provided for @supportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get supportSend;
+
+  /// No description provided for @supportSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message envoyé au support.'**
+  String get supportSent;
+
+  /// No description provided for @supportMyRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes demandes'**
+  String get supportMyRequests;
+
+  /// No description provided for @supportNoRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande pour l’instant.'**
+  String get supportNoRequests;
+
+  /// No description provided for @supportStatusOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get supportStatusOpen;
+
+  /// No description provided for @supportStatusAnswered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répondu'**
+  String get supportStatusAnswered;
+
+  /// No description provided for @supportStatusClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturé'**
+  String get supportStatusClosed;
+
+  /// No description provided for @supportKindQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Question au support'**
+  String get supportKindQuestion;
+
+  /// No description provided for @supportKindProblem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Problème signalé'**
+  String get supportKindProblem;
+
+  /// No description provided for @supportReplyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse de l’équipe'**
+  String get supportReplyLabel;
+
+  /// No description provided for @supportSentOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée le {date}'**
+  String supportSentOn(String date);
+
+  /// No description provided for @supportTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écris au moins 10 caractères.'**
+  String get supportTooShort;
+
+  /// No description provided for @supportTooMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as déjà envoyé plusieurs demandes. L’équipe y répond : réessaie plus tard.'**
+  String get supportTooMany;
+
+  /// No description provided for @supportFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi impossible. Vérifie ta connexion et réessaie.'**
+  String get supportFailed;
+
+  /// No description provided for @supportLoadFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger tes demandes.'**
+  String get supportLoadFailed;
+
+  /// No description provided for @supportProblemIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dis-nous ce qui ne marche pas : l’équipe Pokou s’en occupe.'**
+  String get supportProblemIntro;
+
+  /// No description provided for @supportCategoryLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get supportCategoryLabel;
+
+  /// No description provided for @supportCategoryAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte et connexion'**
+  String get supportCategoryAccount;
+
+  /// No description provided for @supportCategoryMessages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages'**
+  String get supportCategoryMessages;
+
+  /// No description provided for @supportCategoryCalls.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appels'**
+  String get supportCategoryCalls;
+
+  /// No description provided for @supportCategoryNotifications.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get supportCategoryNotifications;
+
+  /// No description provided for @supportCategoryCrash.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’application se ferme ou bloque'**
+  String get supportCategoryCrash;
+
+  /// No description provided for @supportCategoryOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get supportCategoryOther;
+
+  /// No description provided for @supportDescriptionLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Description'**
+  String get supportDescriptionLabel;
+
+  /// No description provided for @supportDescriptionHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que s’est-il passé ? Qu’attendais-tu ?'**
+  String get supportDescriptionHint;
+
+  /// No description provided for @supportScreenshotAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une capture d’écran'**
+  String get supportScreenshotAdd;
+
+  /// No description provided for @supportScreenshotOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif'**
+  String get supportScreenshotOptional;
+
+  /// No description provided for @supportScreenshotRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get supportScreenshotRemove;
+
+  /// No description provided for @supportDiagnosticsNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'La version de l’application et le système de ton téléphone sont joints, rien d’autre. Tes messages restent chiffrés : l’équipe ne les voit pas.'**
+  String get supportDiagnosticsNote;
+
+  /// No description provided for @supportProblemSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci, c’est transmis'**
+  String get supportProblemSentTitle;
+
+  /// No description provided for @supportProblemSentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Pokou va examiner ton signalement. Tu en suis l’état dans « Écrire au support ».'**
+  String get supportProblemSentBody;
+
+  /// No description provided for @supportDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get supportDone;
+
   /// No description provided for @helpNoResult.
   ///
   /// In fr, this message translates to:
@@ -12000,20 +12204,8 @@ abstract class L {
   /// No description provided for @pinForgotIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Deux façons de retrouver ton compte :'**
+  /// **'Sans ton code PIN, tu retrouves ton compte ainsi :'**
   String get pinForgotIntro;
-
-  /// No description provided for @pinForgotEmail.
-  ///
-  /// In fr, this message translates to:
-  /// **'Par e-mail'**
-  String get pinForgotEmail;
-
-  /// No description provided for @pinForgotEmailSub.
-  ///
-  /// In fr, this message translates to:
-  /// **'Si tu as ajouté une adresse : un lien de réinitialisation t’est envoyé'**
-  String get pinForgotEmailSub;
 
   /// No description provided for @pinForgotWait.
   ///
