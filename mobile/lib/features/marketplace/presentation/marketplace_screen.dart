@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/theme/app_colors.dart';
@@ -74,7 +75,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
@@ -136,11 +137,7 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
   @override
   Widget build(BuildContext context) {
     final productsState = ref.watch(marketplaceProductsProvider);
-    final mine = ref.watch(myProductsProvider);
     final myUserId = ref.watch(authControllerProvider).user?.id;
-    final selectedCategory = ref.watch(marketplaceCategoryProvider);
-    final certifiedOnly = ref.watch(marketplaceCertifiedOnlyProvider);
-    final config = ref.watch(marketplaceConfigProvider);
     final authUser = ref.watch(authControllerProvider).user;
     final sellerStatus = ref.watch(mySellerCertificationProvider).valueOrNull;
     final isVerified =
@@ -284,20 +281,30 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
               ],
             ),
             const SizedBox(height: 12),
+            // Accueil Assimé (p.15) : les catégories en tuiles ; dès qu'une
+            // recherche ou un filtre est posé, la barre « Filtres · n »,
+            // le nombre d'annonces et le tri (Assimé 1).
+            if (_isBrowsing(ref))
+              const _CategoryTiles()
+            else
+              const _FiltersRow(),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    'Mes annonces',
+                    L.of(context).assimeNearYou,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                // « Mes annonces » était écrit deux fois côte à côte (le
-                // titre et le bouton), et le bouton devenait illisible en
-                // sombre.
+                if (_isBrowsing(ref))
+                  TextButton(
+                    onPressed: () => showAssimeFilters(context),
+                    child: Text(L.of(context).assimeFilters),
+                  ),
                 TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.accentPrimaryDark,
@@ -305,129 +312,36 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const MyCatalogScreen()),
                   ),
-                  child: Text(L.of(context).homeSeeAll),
+                  child: Text(L.of(context).assimeMyListings),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                // Une ANNONCE (Assimé 5 à 7), pas une publicité payante :
-                // ce bouton ouvrait l'écran des campagnes publicitaires.
-                onPressed: () => editProduct(context, ref),
-                icon: const Icon(Icons.add),
-                label: Text(L.of(context).marketAddProduct),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const _FiltersRow(),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 38,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: config.filterSlugs.length + 1,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  if (index == config.filterSlugs.length) {
-                    return FilterChip(
-                      label: Text(L.of(context).marketCertifiedSellers),
-                      selected: certifiedOnly,
-                      onSelected: (selected) =>
-                          ref
-                                  .read(
-                                    marketplaceCertifiedOnlyProvider.notifier,
-                                  )
-                                  .state =
-                              selected,
-                      backgroundColor: AppColors.surfaceElevated,
-                      selectedColor: AppColors.accentPrimaryLight,
-                      side: BorderSide(
-                        color: certifiedOnly
-                            ? AppColors.accentPrimaryDark
-                            : AppColors.border,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      labelStyle: TextStyle(
-                        color: certifiedOnly
-                            ? Colors.white
-                            : AppColors.textSecondary,
-                        fontSize: 12,
-                        fontWeight: certifiedOnly
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                    );
-                  }
-                  final category = config.filterSlugs[index];
-                  return ChoiceChip(
-                    // Le LIBELLÉ vient de l'admin, la valeur reste le code :
-                    // la barre affichait « TELEPHONES » en capitales parce
-                    // qu'elle montrait l'identifiant enregistré en base.
-                    label: Text(
-                      category == 'TOUT'
-                          ? L.of(context).marketFilterAll
-                          : config.labelOf(category),
-                    ),
-                    selected: selectedCategory == category,
-                    backgroundColor: AppColors.surfaceElevated,
-                    selectedColor: AppColors.accentPrimaryLight,
-                    side: BorderSide(
-                      color: selectedCategory == category
-                          ? AppColors.accentPrimaryDark
-                          : AppColors.border,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    labelStyle: TextStyle(
-                      color: selectedCategory == category
-                          ? Colors.white
-                          : AppColors.textSecondary,
-                      fontSize: 12,
-                      fontWeight: selectedCategory == category
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                    ),
-                    onSelected: (_) =>
-                        ref.read(marketplaceCategoryProvider.notifier).state =
-                            category,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 18),
-            // ── Le catalogue AVANT la liste du marché ─────────────────
-            //
-            // Il était en dessous, et la liste du marché est devenue
-            // infinie : elle se recharge à l'approche du bas, si bien que
-            // le bas ne vient jamais. Le vendeur ne pouvait plus atteindre
-            // ses propres annonces en défilant — elles reculaient à chaque
-            // page chargée.
-            //
-            // Rien ne doit suivre une liste qui s'allonge toute seule.
-            _MyCatalogHorizontal(
-              mine: mine,
-              onEdit: (product) => editProduct(context, ref, product: product),
-              onDelete: (product) => deleteProduct(context, ref, product),
-              onBoost: (product) => boostProduct(context, ref, product),
-              myUserId: myUserId,
-            ),
-            const SizedBox(height: 26),
-            Text(
-              L.of(context).marketNearYou,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 10),
             _buildProductsList(productsState, myUserId, context, ref),
           ],
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+        child: FloatingActionButton.extended(
+          // Une ANNONCE (Assimé 5 à 7), pas une publicité payante : le
+          // bouton « Publier » ouvrait l'écran des campagnes publicitaires.
+          onPressed: () => editProduct(context, ref),
+          backgroundColor: AppColors.accentPrimary,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add),
+          label: Text(L.of(context).assimePublishCta),
+        ),
+      ),
     );
   }
+
+  /// Sans recherche ni filtre : l'accueil, avec ses tuiles de catégories.
+  bool _isBrowsing(WidgetRef ref) =>
+      ref.watch(marketplaceQueryProvider).trim().isEmpty &&
+      ref.watch(marketplaceCategoryProvider) == 'TOUT' &&
+      !ref.watch(marketplaceCertifiedOnlyProvider) &&
+      ref.watch(marketplaceFiltersProvider).isEmpty;
 
   Widget _buildProductsList(
     ProductsPaginationState state,
@@ -504,411 +418,269 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.66,
       ),
       itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return _MarketProductTile(
-          product: product,
-          onEdit: product.sellerId == myUserId
-              ? () => editProduct(context, ref, product: product)
-              : null,
-          onBoost:
-              product.sellerId == myUserId &&
-                  !product.isBoosted &&
-                  !boostingProductIds.contains(product.id)
-              ? () => boostProduct(context, ref, product)
-              : null,
-        );
-      },
+      itemBuilder: (context, index) => _MarketProductTile(
+        product: products[index],
+        isMine: products[index].sellerId == myUserId,
+      ),
     );
   }
 }
 
-class _MyCatalogHorizontal extends StatelessWidget {
-  const _MyCatalogHorizontal({
-    required this.mine,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onBoost,
-    required this.myUserId,
-  });
+/// Une icône par catégorie connue ; les autres prennent l'étiquette.
+IconData _categoryIcon(String slug) => switch (slug) {
+  'MODE' => Icons.checkroom_outlined,
+  'BEAUTE' => Icons.spa_outlined,
+  'MAISON' => Icons.home_outlined,
+  'ELECTRONIQUE' || 'TELEPHONES' => Icons.phone_android_outlined,
+  'VEHICULES' => Icons.directions_car_outlined,
+  'SERVICES' => Icons.handyman_outlined,
+  _ => Icons.sell_outlined,
+};
 
-  final AsyncValue<List<MarketplaceProduct>> mine;
-  final void Function(MarketplaceProduct) onEdit;
-  final void Function(MarketplaceProduct) onDelete;
-  final void Function(MarketplaceProduct) onBoost;
-  final int? myUserId;
+/// Accueil Assimé (p.15) : les catégories en tuiles, qui posent le filtre.
+class _CategoryTiles extends ConsumerWidget {
+  const _CategoryTiles();
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ── Le chevron mène quelque part ──────────────────────────────
-        //
-        // Il ne menait nulle part : une icône décorative, posée au bout d'un
-        // titre, qui promettait une suite inexistante. La bande horizontale
-        // était TOUT ce qu'un vendeur avait pour gérer ses annonces.
-        //
-        // Le titre entier devient la cible, et non la seule icône de 20
-        // points : c'est ce qu'on vise naturellement, et ça donne une zone
-        // tactile de toute la largeur. Le libellé « Tout voir » accompagne
-        // le chevron, parce qu'une flèche seule ne dit pas où elle va.
-        Semantics(
-          button: true,
-          label: L.of(context).marketCatalogueOpen,
-          child: InkWell(
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const MyCatalogScreen())),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      L.of(context).marketMyCatalogue,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    L.of(context).marketCatalogueSeeAll,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accentPrimaryDark,
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: AppColors.accentPrimaryDark,
-                  ),
-                ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(marketplaceConfigProvider);
+    return SizedBox(
+      height: 70,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: config.categories.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final category = config.categories[index];
+          return SizedBox(
+            width: 78,
+            child: Material(
+              color: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: AppColors.border),
               ),
-            ),
-          ),
-        ),
-        Text(
-          L.of(context).marketSwipeCatalogue,
-          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-        ),
-        const SizedBox(height: 12),
-        mine.when(
-          data: (items) {
-            if (items.isEmpty) {
-              return Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceElevated,
-                  borderRadius: AppRadius.card,
-                  border: Border.all(
-                    color: AppColors.border,
-                    style: BorderStyle.solid,
-                  ),
-                ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () =>
+                    ref.read(marketplaceCategoryProvider.notifier).state =
+                        category.slug,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.inventory_2_outlined,
-                      size: 32,
-                      color: AppColors.accentPrimaryDark,
+                      _categoryIcon(category.slug),
+                      color: AppColors.textPrimary,
+                      size: 22,
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
-                      L.of(context).marketCatalogueEmpty,
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      L.of(context).marketCatalogueEmptyBody,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
+                      category.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
-              );
-            }
-            return SizedBox(
-              height: 200,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final product = items[index];
-                  return _HorizontalProductCard(
-                    product: product,
-                    onEdit: () => onEdit(product),
-                    onDelete: product.sellerId == myUserId
-                        ? () => onDelete(product)
-                        : null,
-                    onBoost: product.sellerId == myUserId && !product.isBoosted
-                        ? () => onBoost(product)
-                        : null,
-                  );
-                },
               ),
-            );
-          },
-          loading: () => const SizedBox(
-            height: 200,
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (_, __) => const SizedBox.shrink(),
-        ),
-      ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
-/// Une action secondaire d'une carte produit — un carré, pas un bouton large.
-///
-/// `minimumSize: Size.zero` et `shrinkWrap` ne sont pas du réglage fin : un
-/// OutlinedButton réserve 64 points de large et 48 de haut par défaut, soit
-/// plus que la carte n'en a pour ses trois actions réunies. C'est ce qui
-/// poussait « Booster » à la ligne.
-///
-/// 32 points de côté, c'est en dessous des 44 recommandés pour une cible
-/// tactile. Compromis assumé sur une carte de 150 points de large : ces deux
-/// actions sont secondaires, elles portent une icône universelle, et la
-/// suppression demande de toute façon une confirmation.
-class _CardIconAction extends StatelessWidget {
-  const _CardIconAction({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-    this.color,
-    this.expanded = false,
-  });
+/// « Bè · aujourd'hui » : le quartier et la date de publication.
+String assimePlaceAndDate(L l, String locale, MarketplaceProduct product) {
+  final created = product.createdAt?.toLocal();
+  String? when;
+  if (created != null) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(created.year, created.month, created.day);
+    final diff = today.difference(day).inDays;
+    when = diff == 0
+        ? l.assimeToday
+        : diff == 1
+        ? l.assimeYesterday
+        : DateFormat('dd/MM', locale).format(created);
+  }
+  return [
+    if ((product.location ?? '').trim().isNotEmpty) product.location!.trim(),
+    ?when,
+  ].join(' · ');
+}
 
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-  final Color? color;
-  final bool expanded;
+/// Assimé 1 : une carte de résultat — la photo, avec « Sponsorisé » et le
+/// cœur posés dessus ; le prix, le titre, « quartier · date », le vendeur.
+class _MarketProductTile extends ConsumerStatefulWidget {
+  const _MarketProductTile({required this.product, required this.isMine});
+
+  final MarketplaceProduct product;
+  final bool isMine;
+
+  @override
+  ConsumerState<_MarketProductTile> createState() => _MarketProductTileState();
+}
+
+class _MarketProductTileState extends ConsumerState<_MarketProductTile> {
+  bool? _favorite;
+
+  Future<void> _toggle(bool current) async {
+    setState(() => _favorite = !current);
+    try {
+      await ref
+          .read(marketplaceRepositoryProvider)
+          .setFavorite(widget.product.id, !current);
+      ref.invalidate(favoritesProvider);
+    } catch (_) {
+      if (mounted) setState(() => _favorite = current);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final button = Tooltip(
-      message: tooltip,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          minimumSize: expanded ? const Size(0, 30) : const Size(32, 30),
-          fixedSize: expanded ? null : const Size(32, 30),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-          foregroundColor: color,
-        ),
-        child: Icon(icon, size: 15, color: color),
+    final l = L.of(context);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final product = widget.product;
+    final favorites = ref.watch(favoritesProvider).valueOrNull;
+    final favorite =
+        _favorite ?? (favorites?.any((f) => f.id == product.id) ?? false);
+    final image = product.coverImage;
+    final muted = TextStyle(fontSize: 11, color: AppColors.textSecondary);
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card,
+        side: BorderSide(color: AppColors.border),
       ),
-    );
-    return expanded ? Expanded(child: button) : button;
-  }
-}
-
-class _HorizontalProductCard extends ConsumerWidget {
-  const _HorizontalProductCard({
-    required this.product,
-    this.onEdit,
-    this.onDelete,
-    this.onBoost,
-  });
-
-  final MarketplaceProduct product;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-  final VoidCallback? onBoost;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => ProductDetailScreen(
-            product: product,
-            heroTag: 'market-mine-${product.id}',
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(
+              product: product,
+              heroTag: 'market-grid-${product.id}',
+            ),
           ),
         ),
-      ),
-      borderRadius: AppRadius.card,
-      child: Container(
-        width: 150,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: AppRadius.card,
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 3,
-              child: SizedBox(
-                width: double.infinity,
-                child: product.coverImage == null
-                    ? ColoredBox(
-                        color: AppColors.surfaceElevated,
-                        child: Icon(
-                          Icons.inventory_2_outlined,
-                          color: AppColors.accentPrimaryDark,
-                          size: 28,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  image == null
+                      ? ColoredBox(
+                          color: AppColors.surfaceElevated,
+                          child: Icon(
+                            Icons.inventory_2_outlined,
+                            color: AppColors.textMuted,
+                          ),
+                        )
+                      : Hero(
+                          tag: 'market-grid-${product.id}',
+                          child: MediaImage.meta(
+                            image,
+                            decodeWidth: 176,
+                            placeholder: ColoredBox(
+                              color: AppColors.surfaceElevated,
+                            ),
+                          ),
                         ),
-                      )
-                    : Hero(
-                        tag: 'market-mine-${product.id}',
-                        child: MediaImage.meta(
-                          product.coverImage!,
-                          decodeWidth: 150,
+                  if (product.isBoosted)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '☆ ${l.assimeSponsored}',
+                          style: const TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
+                    ),
+                  if (!widget.isMine)
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: IconButton(
+                        tooltip: favorite
+                            ? l.assimeRemoveFavorite
+                            : l.assimeAddFavorite,
+                        visualDensity: VisualDensity.compact,
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.surface,
+                        ),
+                        onPressed: () => _toggle(favorite),
+                        icon: Icon(
+                          favorite ? Icons.favorite : Icons.favorite_border,
+                          size: 16,
+                          color: favorite
+                              ? AppColors.feedbackDanger
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            if (product.isBoosted)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                color: AppColors.accentPrimaryDark.withOpacity(0.1),
-                child: Text(
-                  L.of(context).marketBoosted,
-                  style: TextStyle(
-                    color: AppColors.accentPrimaryDark,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
+                    '${product.price} ${product.currency}',
+                    style: const TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
                     product.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(fontSize: 12.5),
                   ),
-                  const SizedBox(height: 2),
-                  // Le prix en Outfit, en vert, la devise DÉTACHÉE et plus
-                  // discrète. C'est l'information qu'on cherche en premier
-                  // sur une carte : le montant doit se lire avant l'unité,
-                  // pas se noyer dedans.
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: product.price,
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.accentPrimary,
-                          ),
-                        ),
-                        TextSpan(
-                          text: '  ${product.currency}',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    assimePlaceAndDate(l, locale, product),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: muted,
                   ),
-                  const SizedBox(height: 6),
-                  // ── Les actions de la carte ────────────────────────
-                  //
-                  // La carte fait 150 points de large. Les trois boutons se
-                  // partageaient cet espace avec DEUX `Expanded`, ce qui
-                  // laissait une trentaine de points à « Booster » — le mot
-                  // passait à la ligne et la carte débordait.
-                  //
-                  // « Booster » prend donc tout l'espace restant : c'est la
-                  // seule action porteuse d'un LIBELLÉ, et la seule qui
-                  // rapporte. Modifier et retirer deviennent des carrés de
-                  // taille fixe — leurs icônes se comprennent sans texte.
-                  //
-                  // `minimumSize: Size.zero` et `shrinkWrap` sont
-                  // indispensables : un OutlinedButton réserve sinon 64
-                  // points de large par défaut, soit plus que la carte
-                  // n'en a pour ses trois boutons.
                   Row(
                     children: [
-                      if (onBoost != null) ...[
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: onBoost,
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              minimumSize: const Size(0, 30),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              visualDensity: VisualDensity.compact,
-                              side: BorderSide(
-                                color: AppColors.accentPrimaryDark,
-                              ),
-                            ),
-                            child: Text(
-                              L.of(context).marketBoost,
-                              maxLines: 1,
-                              // Garde-fou : même si la place venait à
-                              // manquer sur un écran très étroit, le mot
-                              // se tronque au lieu de casser la carte.
-                              overflow: TextOverflow.fade,
-                              softWrap: false,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.accentPrimaryDark,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
+                      Flexible(
+                        child: Text(
+                          product.sellerName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: muted,
                         ),
-                        const SizedBox(width: 4),
-                      ],
-                      _CardIconAction(
-                        icon: Icons.edit_outlined,
-                        tooltip: L.of(context).conversationEdit,
-                        onPressed: onEdit,
-                        // Sans « Booster », il n'y a que deux icônes : elles
-                        // s'étalent plutôt que de laisser un vide à droite.
-                        expanded: onBoost == null,
                       ),
-                      if (onDelete != null) ...[
-                        const SizedBox(width: 4),
-                        _CardIconAction(
-                          icon: Icons.delete_outline,
-                          tooltip: L.of(context).marketRemove,
-                          onPressed: onDelete,
-                          color: AppColors.semanticError,
-                          expanded: onBoost == null,
-                        ),
+                      if (product.sellerIsCertified || product.sellerIsPro) ...[
+                        const SizedBox(width: 3),
+                        const VerifiedBadge(size: 12),
                       ],
                     ],
                   ),
@@ -918,262 +690,6 @@ class _HorizontalProductCard extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MarketProductTile extends ConsumerWidget {
-  const _MarketProductTile({required this.product, this.onEdit, this.onBoost});
-
-  final MarketplaceProduct product;
-  final VoidCallback? onEdit;
-  final VoidCallback? onBoost;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return InkWell(
-      borderRadius: AppRadius.card,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => ProductDetailScreen(
-            product: product,
-            heroTag: 'market-grid-${product.id}',
-          ),
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: AppRadius.card,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SizedBox(
-                width: double.infinity,
-                child: product.coverImage == null
-                    ? ColoredBox(
-                        color: AppColors.surfaceElevated,
-                        child: Icon(
-                          Icons.inventory_2_outlined,
-                          color: AppColors.accentPrimaryDark,
-                          size: 30,
-                        ),
-                      )
-                    : Hero(
-                        tag: 'market-grid-${product.id}',
-                        child: MediaImage.meta(
-                          product.coverImage!,
-                          decodeWidth: 176,
-                          placeholder: ColoredBox(
-                            color: AppColors.surfaceElevated,
-                          ),
-                        ),
-                      ),
-              ),
-            ),
-            if (product.isBoosted)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 2,
-                  horizontal: 10,
-                ),
-                color: AppColors.accentPrimaryDark.withOpacity(0.1),
-                child: Text(
-                  L.of(context).marketBoosted48h,
-                  style: TextStyle(
-                    color: AppColors.accentPrimaryDark,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 2),
-                  // Le prix en Outfit, en vert, la devise DÉTACHÉE et plus
-                  // discrète. C'est l'information qu'on cherche en premier
-                  // sur une carte : le montant doit se lire avant l'unité,
-                  // pas se noyer dedans.
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: product.price,
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.accentPrimary,
-                          ),
-                        ),
-                        TextSpan(
-                          text: '  ${product.currency}',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  _SellerTrustLine(product: product),
-                  // Sur l'annonce de QUELQU'UN D'AUTRE, l'action utile
-                  // n'est pas de booster — c'est de parler au vendeur.
-                  //
-                  // Cette grille ne portait que « Booster », c'est-à-dire
-                  // une action de VENDEUR, payante, sur l'écran que
-                  // parcourent surtout des acheteurs. « Négocier » ouvre la
-                  // fiche produit, d'où part « Écrire au vendeur » avec le
-                  // produit épinglé dans la conversation.
-                  //
-                  // `onEdit` est le signe qu'on est chez soi : les deux ne
-                  // coexistent jamais, on ne négocie pas avec soi-même.
-                  if (onEdit == null) ...[
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ProductDetailScreen(
-                              product: product,
-                              heroTag: 'market-grid-${product.id}',
-                            ),
-                          ),
-                        ),
-                        style: FilledButton.styleFrom(
-                          // L'encre foncée et non le bleu d'action : ce
-                          // bouton porte un LIBELLÉ blanc (7,2:1 contre 2,96:1).
-                          backgroundColor: AppColors.accentPrimaryDark,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          minimumSize: const Size(0, 34),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppRadius.chip,
-                          ),
-                        ),
-                        icon: const Icon(Icons.forum_outlined, size: 15),
-                        label: Text(
-                          L.of(context).marketNegotiate,
-                          maxLines: 1,
-                          overflow: TextOverflow.fade,
-                          softWrap: false,
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (onEdit != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (onBoost != null)
-                          TextButton(
-                            onPressed: onBoost,
-                            child: Text(
-                              L.of(context).marketBoost,
-                              style: TextStyle(fontSize: 11),
-                            ),
-                          ),
-                        IconButton(
-                          onPressed: onEdit,
-                          icon: const Icon(Icons.edit_outlined, size: 17),
-                          visualDensity: VisualDensity.compact,
-
-                          tooltip: L.of(context).conversationEdit,
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SellerTrustLine extends StatelessWidget {
-  const _SellerTrustLine({required this.product});
-
-  final MarketplaceProduct product;
-
-  @override
-  Widget build(BuildContext context) {
-    final rating = product.sellerRating;
-    return Row(
-      children: [
-        if (product.sellerIsCertified) ...[
-          const VerifiedBadge(size: 13),
-          const SizedBox(width: 3),
-        ],
-        if (product.sellerIsPro) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-            decoration: BoxDecoration(
-              color: AppColors.accentPrimaryLight,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: const Text(
-              'PRO',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.3,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-        Flexible(
-          child: Text(
-            product.sellerName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-          ),
-        ),
-        const SizedBox(width: 6),
-        if (rating == null)
-          Text(
-            L.of(context).marketNoReviewYet,
-            style: TextStyle(color: AppColors.textMuted, fontSize: 11),
-          )
-        else ...[
-          Icon(Icons.star, size: 12, color: AppColors.accentPrimaryLight),
-          const SizedBox(width: 2),
-          Text(
-            '${rating.toStringAsFixed(1)} (${product.sellerReviewCount})',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ],
     );
   }
 }
@@ -1223,7 +739,7 @@ class _MarketplaceSearchFieldState
   Widget build(BuildContext context) {
     final query = ref.watch(marketplaceQueryProvider);
     return TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+      contextMenuBuilder: pokouContextMenuBuilder,
       controller: _controller,
       onChanged: _onChanged,
       textInputAction: TextInputAction.search,
@@ -1281,7 +797,9 @@ class _FiltersRow extends ConsumerWidget {
             size: 16,
             color: count > 0 ? Colors.white : AppColors.textSecondary,
           ),
-          label: Text(count > 0 ? l.assimeFiltersCount(count) : l.assimeFilters),
+          label: Text(
+            count > 0 ? l.assimeFiltersCount(count) : l.assimeFilters,
+          ),
           backgroundColor: count > 0
               ? AppColors.accentPrimary
               : AppColors.surfaceElevated,
