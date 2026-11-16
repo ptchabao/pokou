@@ -227,6 +227,9 @@ def confirm_payment(db: Session, provider_reference: str) -> dict[str, Any]:
             # modération avant d'apparaître. Les résultats n'attendent pas.
             status_moderation="PENDING" if days == 7 else None,
             city=product.location if product else None,
+            # Le bilan compare les discussions pendant la mise en avant à
+            # celles d'avant (Assimé 17).
+            contacts_before=(product.contacts_count or 0) if product else 0,
         )
         db.add(boost)
         db.flush()

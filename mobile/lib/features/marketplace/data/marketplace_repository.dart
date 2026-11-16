@@ -9,11 +9,15 @@ class PaginatedProducts {
     required this.items,
     required this.hasMore,
     this.nextOffset,
+    this.total,
   });
 
   final List<MarketplaceProduct> items;
   final bool hasMore;
   final int? nextOffset;
+
+  /// Assimé 1 : « 48 annonces » — `null` sur un serveur plus ancien.
+  final int? total;
 
   factory PaginatedProducts.fromJson(Map<String, dynamic> json) =>
       PaginatedProducts(
@@ -23,7 +27,53 @@ class PaginatedProducts {
             .toList(),
         hasMore: json['has_more'] as bool? ?? false,
         nextOffset: json['next_offset'] as int?,
+        total: json['total'] as int?,
       );
+}
+
+/// Les critères de la feuille « Filtres » (Assimé 2). La catégorie et
+/// « Vendeurs certifiés » gardent leurs propres providers, partagés avec
+/// la barre de puces.
+class MarketFilters {
+  const MarketFilters({
+    this.minPrice,
+    this.maxPrice,
+    this.conditions = const {},
+    this.publishedDays,
+    this.sort = 'recent',
+  });
+
+  final int? minPrice;
+  final int? maxPrice;
+  final Set<String> conditions;
+  final int? publishedDays;
+
+  /// recent | price_asc | price_desc
+  final String sort;
+
+  /// Le nombre de critères posés, pour la puce « Filtres · 2 ».
+  int get count =>
+      (minPrice != null || maxPrice != null ? 1 : 0) +
+      (conditions.isEmpty ? 0 : 1) +
+      (publishedDays != null ? 1 : 0);
+
+  bool get isEmpty => count == 0 && sort == 'recent';
+
+  MarketFilters copyWith({String? sort}) => MarketFilters(
+    minPrice: minPrice,
+    maxPrice: maxPrice,
+    conditions: conditions,
+    publishedDays: publishedDays,
+    sort: sort ?? this.sort,
+  );
+
+  List<String> get queryParams => [
+    if (minPrice != null) 'min_price=$minPrice',
+    if (maxPrice != null) 'max_price=$maxPrice',
+    if (conditions.isNotEmpty) 'condition=${conditions.join(',')}',
+    if (publishedDays != null) 'published_days=$publishedDays',
+    if (sort != 'recent') 'sort=$sort',
+  ];
 }
 
 class MarketplaceRepository {
@@ -40,6 +90,7 @@ class MarketplaceRepository {
     double? latitude,
     double? longitude,
     bool certifiedOnly = false,
+    MarketFilters filters = const MarketFilters(),
     int limit = 20,
     int offset = 0,
   }) async => PaginatedProducts.fromJson(
@@ -51,6 +102,7 @@ class MarketplaceRepository {
       latitude: latitude,
       longitude: longitude,
       certifiedOnly: certifiedOnly,
+      filters: filters,
       limit: limit,
       offset: offset,
     ),
@@ -66,10 +118,12 @@ class MarketplaceRepository {
     double? latitude,
     double? longitude,
     bool certifiedOnly = false,
+    MarketFilters filters = const MarketFilters(),
     int limit = 20,
     int offset = 0,
   }) async {
     final params = <String>[
+      ...filters.queryParams,
       if (sellerId != null) 'seller_id=$sellerId',
       if (query != null && query.trim().isNotEmpty)
         'q=${Uri.encodeQueryComponent(query.trim())}',
@@ -127,10 +181,14 @@ class MarketplaceRepository {
     required String currency,
     int? imageMediaId,
     List<int>? galleryMediaIds,
+    String? condition,
+    bool negotiable = false,
   }) async {
     final response = await _api.post(
       '/marketplace',
       body: {
+        'condition': ?condition,
+        'negotiable': negotiable,
         'name': name,
         'description': description,
         'category': category,
@@ -167,10 +225,14 @@ class MarketplaceRepository {
     required String currency,
     int? imageMediaId,
     List<int>? galleryMediaIds,
+    String? condition,
+    bool negotiable = false,
   }) async {
     final response = await _api.patch(
       '/marketplace/$id',
       body: {
+        'condition': ?condition,
+        'negotiable': negotiable,
         'name': name,
         'description': description,
         'category': category,
@@ -281,6 +343,73 @@ class MarketplaceRepository {
         .map(SellerReview.fromJson)
         .toList();
   }
+
+  /// Les avis et leur résumé : histogramme, points forts (Assimé 21).
+  Future<SellerReviews> sellerReviewsFull(int sellerId) async =>
+      SellerReviews.fromJson(
+        await _api.get('/marketplace/sellers/$sellerId/reviews')
+            as Map<String, dynamic>,
+      );
+
+  /// Le vendeur répond à un avis sur lui.
+  Future<void> replyToReview(int reviewId, String reply) =>
+      _api.put('/marketplace/reviews/$reviewId/reply', body: {'reply': reply});
+
+  /// « Signaler un avis » (Assimé 21).
+  Future<void> reportReview(int reviewId) =>
+      _api.post('/marketplace/reviews/$reviewId/report');
+
+  /// La fiche d'une annonce (compte une vue si elle n'est pas à moi).
+  Future<MarketplaceProduct> product(int productId) async =>
+      MarketplaceProduct.fromJson(
+        await _api.get('/marketplace/$productId') as Map<String, dynamic>,
+      );
+
+  /// « Signaler » sur le profil d'un vendeur (Assimé 22) : la file de
+  /// signalements de la messagerie, sans blocage.
+  Future<void> reportSeller(int sellerId) => _api.post(
+    '/conversations/report',
+    body: {
+      'contact_user_id': sellerId,
+      'reason': 'Assimé · vendeur signalé depuis son profil',
+    },
+  );
+
+  /// « Renouveler » (Assimé 9) : 30 jours de plus en ligne.
+  Future<void> renew(int productId) =>
+      _api.post('/marketplace/$productId/renew');
+
+  /// « Masquer cette annonce » (Assimé 16), pour moi seul.
+  Future<void> hideProduct(int productId) =>
+      _api.post('/marketplace/$productId/hide');
+
+  /// « Ne plus voir les annonces de ce vendeur » (Assimé 16).
+  Future<void> hideSeller(int sellerId) =>
+      _api.post('/marketplace/sellers/$sellerId/hide');
+
+  /// Les annonces d'un vendeur, vendues comprises (Assimé 22).
+  Future<List<MarketplaceProduct>> sellerProducts(int sellerId) async {
+    final json =
+        await _api.get('/marketplace/sellers/$sellerId/products')
+            as Map<String, dynamic>;
+    return (json['items'] as List? ?? const [])
+        .cast<Map<String, dynamic>>()
+        .map(MarketplaceProduct.fromJson)
+        .toList();
+  }
+
+  /// Couper ou rallumer une alerte (Assimé 12).
+  Future<void> setAlertPaused(int alertId, bool paused) =>
+      _api.patch('/marketplace/alerts/$alertId', body: {'paused': paused});
+
+  /// « Voir l'annonce » depuis le statut sponsorisé, compté pour le bilan.
+  Future<void> countSponsoredOpen(int boostId) =>
+      _api.post('/marketplace/boosts/$boostId/open');
+
+  /// Signaler une annonce (Assimé 11) : scam, forbidden, counterfeit,
+  /// misleading ou other.
+  Future<void> reportProduct(int productId, String reason) =>
+      _api.post('/marketplace/$productId/report', body: {'reason': reason});
 
   /// Pose OU remplace mon avis (PUT côté API : un seul avis par personne).
   Future<SellerReview> reviewSeller({
@@ -427,6 +556,8 @@ class AssimeSnapshot {
     required this.sellerName,
     this.location,
     this.imageMediaId,
+    this.sold = false,
+    this.createdAt,
   });
 
   final int id;
@@ -438,6 +569,10 @@ class AssimeSnapshot {
   final String? location;
   final int? imageMediaId;
 
+  /// Assimé 12 : un favori vendu reste, barré.
+  final bool sold;
+  final DateTime? createdAt;
+
   factory AssimeSnapshot.fromJson(Map<String, dynamic> json) => AssimeSnapshot(
     id: json['id'] as int,
     name: json['name'] as String? ?? '',
@@ -447,6 +582,10 @@ class AssimeSnapshot {
     sellerName: json['seller_name'] as String? ?? '',
     location: json['location'] as String?,
     imageMediaId: json['image_media_id'] as int?,
+    sold: json['sold'] as bool? ?? false,
+    createdAt: json['created_at'] is String
+        ? parseServerTime(json['created_at'] as String)
+        : null,
   );
 }
 
@@ -457,6 +596,8 @@ class AssimeAlert {
     this.category,
     this.maxPrice,
     this.matchesCount = 0,
+    this.location,
+    this.paused = false,
   });
 
   final int id;
@@ -464,6 +605,10 @@ class AssimeAlert {
   final String? category;
   final int? maxPrice;
   final int matchesCount;
+  final String? location;
+
+  /// « Alerte coupée » (Assimé 12).
+  final bool paused;
 
   factory AssimeAlert.fromJson(Map<String, dynamic> json) => AssimeAlert(
     id: json['id'] as int,
@@ -471,6 +616,8 @@ class AssimeAlert {
     category: json['category'] as String?,
     maxPrice: json['max_price'] as int?,
     matchesCount: json['matches_count'] as int? ?? 0,
+    location: json['location'] as String?,
+    paused: json['paused'] as bool? ?? false,
   );
 }
 
@@ -510,7 +657,21 @@ class BoostReport {
     required this.statusViews,
     required this.contacts,
     this.statusModeration,
+    this.opens = 0,
+    this.messages = 0,
+    this.messagesBefore = 0,
+    this.daily = const [],
   });
+
+  /// « Voir l'annonce » touché depuis le statut sponsorisé.
+  final int opens;
+
+  /// Messages reçus pendant la mise en avant, et avant elle.
+  final int messages;
+  final int messagesBefore;
+
+  /// Vues par jour : (jour, résultats, statuts).
+  final List<({DateTime day, int results, int status})> daily;
 
   final int? days;
   final DateTime startsAt;
@@ -530,5 +691,17 @@ class BoostReport {
     statusViews: json['status_views'] as int? ?? 0,
     contacts: json['contacts'] as int? ?? 0,
     statusModeration: json['status_moderation'] as String?,
+    opens: json['opens'] as int? ?? 0,
+    messages: json['messages'] as int? ?? 0,
+    messagesBefore: json['messages_before'] as int? ?? 0,
+    daily: [
+      for (final d in (json['daily'] as List? ?? const []))
+        if (d is Map && DateTime.tryParse('${d['day']}') != null)
+          (
+            day: DateTime.parse('${d['day']}'),
+            results: (d['results'] as num?)?.toInt() ?? 0,
+            status: (d['status'] as num?)?.toInt() ?? 0,
+          ),
+    ],
   );
 }

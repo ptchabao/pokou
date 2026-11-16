@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.rbac import require_admin_role
 from app.core.database import get_db
-from app.models import Contact, DirectMessage, MarketplaceProduct, MarketplaceProductImage, MarketplaceAd, MarketplaceBoost, MarketplacePayment, MediaAsset, MessageStatus, MessageType, SellerReview, SellerVerificationApplication, User, UserRole
+from app.models import AbuseReport, Contact, DirectMessage, MarketplaceFavorite, MarketplaceHidden, MarketplaceProduct, MarketplaceProductImage, MarketplaceAd, MarketplaceBoost, MarketplacePayment, MarketplaceReport, MediaAsset, MessageStatus, MessageType, SellerReview, SellerVerificationApplication, User, UserRole
 # Réutilise la livraison et la sérialisation des messages directs plutôt que
 # de les redéfinir : une fiche produit partagée EST un message, elle doit
 # arriver par le même WebSocket, le même push et la même forme sérialisée.
@@ -50,6 +50,30 @@ _MAX_RATING = 5
 
 _MAX_GALLERY_IMAGES = 8
 
+#: Assimé 6 : les états d'un article, des clés stables traduites par l'app.
+CONDITIONS = ("NEW", "VERY_GOOD", "GOOD", "TO_REPAIR")
+#: Assimé 7 : une annonce reste en ligne 30 jours, puis expire ; le vendeur
+#: la renouvelle d'un geste.
+LISTING_DAYS = 30
+#: Assimé 11 : une annonce signalée par autant de personnes différentes est
+#: masquée en attendant la revue de l'équipe.
+REPORTS_TO_HIDE = 3
+#: Assimé 11 : les motifs d'un signalement d'annonce, en clés stables.
+REPORT_REASONS = {
+    "scam": "Arnaque ou paiement demandé d'avance",
+    "forbidden": "Produit interdit",
+    "counterfeit": "Contrefaçon",
+    "misleading": "Annonce trompeuse ou déjà vendue",
+    "other": "Autre",
+}
+#: Assimé 8 : un titre de médicament renvoie vers Honam, quelle que soit la
+#: catégorie choisie. Des noms sans ambiguïté seulement : un « sirop » peut
+#: être de la grenadine.
+MEDICINE_WORDS = (
+    "médicament", "medicament", "paracétamol", "paracetamol", "doliprane",
+    "amoxicilline", "ibuprofène", "ibuprofene", "antibiotique", "efferalgan",
+)
+
 
 class ProductPayload(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -68,6 +92,9 @@ class ProductPayload(BaseModel):
     # distinction compte, sinon un PATCH qui ne parle pas d'images
     # effacerait la galerie.
     gallery_media_ids: Optional[List[int]] = None
+    #: Assimé 6 : l'état de l'article et « Prix à débattre ».
+    condition: Optional[str] = Field(None, pattern="^(NEW|VERY_GOOD|GOOD|TO_REPAIR)$")
+    negotiable: bool = False
     # `is_active` N'EST PAS ici, et c'est délibéré.
     #
     # Ce drapeau appartient à la modération : c'est lui que bascule
@@ -109,6 +136,14 @@ class ReviewPayload(BaseModel):
 
 #: ANN-19 : ce qui s'est bien passé — des clés stables, traduites par l'app.
 REVIEW_TAGS = {"as_described", "punctual", "fair_price", "friendly", "good_communication"}
+
+
+class ReportPayload(BaseModel):
+    reason: str = Field(..., pattern="^(scam|forbidden|counterfeit|misleading|other)$")
+
+
+class ReplyPayload(BaseModel):
+    reply: str = Field(..., min_length=1, max_length=500)
 
 
 class SoldPayload(BaseModel):
@@ -214,7 +249,68 @@ def _serialize(
         "gallery": [_media(image.media) for image in product.images if image.media is not None],
         "is_active": product.is_active,
         "sold_at": product.sold_at.isoformat() if product.sold_at else None,
+        # Assimé 3 et 6 : l'état, « à débattre », et la date de publication
+        # (« Bè · aujourd'hui »).
+        "condition": product.condition,
+        "negotiable": bool(product.negotiable),
+        "created_at": product.created_at.isoformat() if product.created_at else None,
+        "expires_at": product.expires_at.isoformat() if product.expires_at else None,
     }
+
+
+def _owner_stats(db: Session, products: List[MarketplaceProduct]) -> dict:
+    """Assimé 9 : vues, favoris, messages et mise en avant en cours, pour
+    le SEUL vendeur (« Les vues et les favoris ne sont visibles que de
+    toi »). Une requête groupée pour les favoris, une pour les boosts."""
+    ids = [p.id for p in products]
+    if not ids:
+        return {}
+    favorites = dict(
+        db.query(MarketplaceFavorite.product_id, func.count(MarketplaceFavorite.id))
+        .filter(MarketplaceFavorite.product_id.in_(ids))
+        .group_by(MarketplaceFavorite.product_id)
+        .all()
+    )
+    now = datetime.utcnow()
+    boosts: dict[int, MarketplaceBoost] = {}
+    for boost in db.query(MarketplaceBoost).filter(
+        MarketplaceBoost.product_id.in_(ids),
+        MarketplaceBoost.starts_at <= now,
+        MarketplaceBoost.expires_at > now,
+    ).all():
+        current = boosts.get(boost.product_id)
+        if current is None or boost.expires_at > current.expires_at:
+            boosts[boost.product_id] = boost
+    return {
+        p.id: {
+            "views": p.views_count or 0,
+            "favorites": favorites.get(p.id, 0),
+            "contacts": p.contacts_count or 0,
+            "boost_expires_at": boosts[p.id].expires_at.isoformat() if p.id in boosts else None,
+            "boost_days": boosts[p.id].days if p.id in boosts else None,
+        }
+        for p in products
+    }
+
+
+def _hidden_for(db: Session, user_id: int) -> tuple[set[int], set[int]]:
+    """Ce que la personne a choisi de ne plus voir (Assimé 16)."""
+    rows = db.query(MarketplaceHidden.product_id, MarketplaceHidden.seller_id).filter(
+        MarketplaceHidden.user_id == user_id
+    ).all()
+    return ({r[0] for r in rows if r[0] is not None}, {r[1] for r in rows if r[1] is not None})
+
+
+def _add_daily(boost: MarketplaceBoost, key: str, now: datetime) -> None:
+    """Assimé 17 : vues par jour, « results » ou « status ». Le JSON est
+    RÉAFFECTÉ, jamais modifié en place : SQLAlchemy ne verrait pas le
+    changement."""
+    day = now.date().isoformat()
+    daily = dict(boost.daily or {})
+    counts = dict(daily.get(day) or {})
+    counts[key] = int(counts.get(key, 0)) + 1
+    daily[day] = counts
+    boost.daily = daily
 
 
 def _short_name(full_name: Optional[str]) -> str:
@@ -238,6 +334,9 @@ def _serialize_review(review: SellerReview, viewer_id: int) -> dict:
         "tags": review.tags or [],
         "created_at": review.created_at.isoformat(),
         "is_mine": review.author_id == viewer_id,
+        # Assimé 21 : « Réponse de Boutique Mensah : … ».
+        "seller_reply": review.seller_reply,
+        "seller_replied_at": review.seller_replied_at.isoformat() if review.seller_replied_at else None,
     }
 
 
@@ -301,17 +400,40 @@ async def list_marketplace(
     limit: int = Query(40, ge=1, le=100),
     offset: int = Query(0, ge=0),
     certified_only: bool = Query(False, description="Filtre « Vendeurs certifiés »"),
+    # Assimé 2 : la feuille « Filtres ».
+    min_price: Optional[int] = Query(None, ge=0),
+    max_price: Optional[int] = Query(None, ge=0),
+    condition: Optional[str] = Query(None, max_length=64, description="États séparés par des virgules"),
+    published_days: Optional[int] = Query(None, ge=1, le=365, description="Publiée depuis moins de N jours"),
+    sort: str = Query("recent", pattern="^(recent|price_asc|price_desc)$"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
+    now = datetime.utcnow()
     query = db.query(MarketplaceProduct).options(*_load_options()).filter(
         MarketplaceProduct.is_active.is_(True),
         MarketplaceProduct.deleted_at.is_(None),
         # Une annonce vendue quitte le marché (ANN-18).
         MarketplaceProduct.sold_at.is_(None),
+        # Une annonce expirée aussi, jusqu'à ce que son vendeur la renouvelle.
+        or_(MarketplaceProduct.expires_at.is_(None), MarketplaceProduct.expires_at > now),
     )
     if seller_id is not None:
         query = query.filter(MarketplaceProduct.seller_id == seller_id)
+    if min_price is not None:
+        query = query.filter(MarketplaceProduct.price >= min_price)
+    if max_price is not None:
+        query = query.filter(MarketplaceProduct.price <= max_price)
+    conditions = [c for c in (condition or "").upper().split(",") if c in CONDITIONS]
+    if conditions:
+        query = query.filter(MarketplaceProduct.condition.in_(conditions))
+    if published_days is not None:
+        query = query.filter(MarketplaceProduct.created_at >= now - timedelta(days=published_days))
+    hidden_products, hidden_sellers = _hidden_for(db, current_user["user_id"])
+    if hidden_products:
+        query = query.filter(MarketplaceProduct.id.notin_(hidden_products))
+    if hidden_sellers:
+        query = query.filter(MarketplaceProduct.seller_id.notin_(hidden_sellers))
     if category and category.upper() != "TOUT":
         query = query.filter(MarketplaceProduct.category == category.upper())
     if location and location.strip():
@@ -344,7 +466,6 @@ async def list_marketplace(
             return 6371 * 2 * asin(sqrt(value))
 
         distances = {item.id: distance(item) for item in items}
-    now = datetime.utcnow()
     boosted_ids = {
         row[0]
         for row in db.query(MarketplaceBoost.product_id)
@@ -361,7 +482,15 @@ async def list_marketplace(
     # d'un écran à l'autre ; les autres annonces payées restent à leur place
     # ordinaire, sans mention. Un écran rempli d'annonces payées ne serait
     # plus un résultat de recherche.
-    items.sort(key=lambda item: (distances[item.id], -item.created_at.timestamp()))
+    if sort == "price_asc":
+        items.sort(key=lambda item: (item.price, -item.created_at.timestamp()))
+    elif sort == "price_desc":
+        items.sort(key=lambda item: (-item.price, -item.created_at.timestamp()))
+    elif latitude is not None and longitude is not None:
+        items.sort(key=lambda item: (distances[item.id], -item.created_at.timestamp()))
+    else:
+        # « Plus récentes » (Assimé 1) : la requête est déjà triée ainsi.
+        pass
     boosted = [item for item in items if item.id in boosted_ids]
     start = (offset // max(limit, 1)) * SPONSORED_PER_PAGE
     sponsored = [boosted[(start + i) % len(boosted)] for i in range(min(SPONSORED_PER_PAGE, len(boosted)))] if boosted else []
@@ -370,12 +499,15 @@ async def list_marketplace(
     page = sponsored + regular[offset:offset + max(limit - len(sponsored), 0)]
     boosted_ids = sponsored_ids
     if sponsored_ids:
-        # Bilan de la mise en avant : une impression par affichage en tête.
-        db.query(MarketplaceBoost).filter(
+        # Bilan de la mise en avant : une impression par affichage en tête,
+        # comptée aussi jour par jour (Assimé 17).
+        for boost in db.query(MarketplaceBoost).filter(
             MarketplaceBoost.product_id.in_(sponsored_ids),
             MarketplaceBoost.starts_at <= now,
             MarketplaceBoost.expires_at > now,
-        ).update({MarketplaceBoost.impressions: MarketplaceBoost.impressions + 1}, synchronize_session=False)
+        ).all():
+            boost.impressions = (boost.impressions or 0) + 1
+            _add_daily(boost, "results", now)
         db.commit()
     ratings = _rating_summary(db, [item.seller_id for item in page])
     pro_seller_ids = _pro_seller_ids(db, [item.seller_id for item in page])
@@ -389,6 +521,8 @@ async def list_marketplace(
             )
             for item in page
         ],
+        # Assimé 1 : « 48 annonces · Mode ».
+        "total": len(items),
         "has_more": offset + limit < len(items),
         "next_offset": offset + limit if offset + limit < len(items) else None,
     }
@@ -422,14 +556,18 @@ async def list_my_products(db: Session = Depends(get_db), current_user: dict = D
         )
         .all()
     }
+    stats = _owner_stats(db, items)
     return {
         "items": [
-            _serialize(
-                item,
-                ratings.get(item.seller_id),
-                item.id in boosted_ids,
-                item.seller_id in pro_seller_ids,
-            )
+            {
+                **_serialize(
+                    item,
+                    ratings.get(item.seller_id),
+                    item.id in boosted_ids,
+                    item.seller_id in pro_seller_ids,
+                ),
+                "stats": stats.get(item.id),
+            }
             for item in items
         ]
     }
@@ -450,10 +588,12 @@ async def marketplace_payment_status(
     return _payment_json(payment)
 
 
-def _refuse_medicines(category: Optional[str]) -> None:
+def _refuse_medicines(category: Optional[str], name: Optional[str] = None) -> None:
     """Assimé 8 « Produit interdit » : un médicament se commande avec
-    Honam, sur ordonnance, auprès d'une officine."""
-    if (category or "").upper() in MEDICINE_CATEGORIES:
+    Honam, sur ordonnance, auprès d'une officine — que le vendeur l'ait
+    rangé sous « Médicaments » ou l'ait seulement nommé dans le titre."""
+    title = (name or "").lower()
+    if (category or "").upper() in MEDICINE_CATEGORIES or any(word in title for word in MEDICINE_WORDS):
         raise HTTPException(
             status_code=422,
             detail={"code": "use_honam", "message": "Les médicaments ne se vendent pas sur Assimé : passez par Honam."},
@@ -470,8 +610,10 @@ async def create_product(payload: ProductPayload, db: Session = Depends(get_db),
     fields = payload.model_dump(exclude={"gallery_media_ids"})
     fields["currency"] = currency
     fields["category"] = marketplace_config_service.slug_categorie(db, payload.category)
-    _refuse_medicines(fields["category"])
-    item = MarketplaceProduct(seller_id=user_id, **fields)
+    _refuse_medicines(fields["category"], payload.name)
+    item = MarketplaceProduct(
+        seller_id=user_id, expires_at=datetime.utcnow() + timedelta(days=LISTING_DAYS), **fields
+    )
     db.add(item)
     db.flush()
     if payload.gallery_media_ids:
@@ -525,8 +667,8 @@ async def update_product(product_id: int, payload: ProductPayload, db: Session =
     # C'est la même règle que la galerie, qui la documentait déjà : absent
     # = inchangé, valeur explicite = appliquée.
     updates = payload.model_dump(exclude={"gallery_media_ids"}, exclude_unset=True)
-    if payload.category is not None:
-        _refuse_medicines(payload.category)
+    if payload.category is not None or "name" in payload.model_fields_set:
+        _refuse_medicines(payload.category, payload.name)
     if payload.category is None:
         updates.pop("category", None)
     else:
@@ -854,7 +996,18 @@ async def get_seller_profile(
     if not seller:
         raise HTTPException(status_code=404, detail="Vendeur introuvable")
     summary = _rating_summary(db, [seller_id]).get(seller_id) or {}
+    # Assimé 22 : « Amoutivé » — le quartier de sa dernière annonce, rien
+    # de plus précis.
+    latest = (
+        db.query(MarketplaceProduct.location)
+        .filter(MarketplaceProduct.seller_id == seller_id, MarketplaceProduct.deleted_at.is_(None),
+                MarketplaceProduct.location.isnot(None))
+        .order_by(MarketplaceProduct.created_at.desc())
+        .first()
+    )
     return {
+        "member_since": seller.created_at.isoformat() if getattr(seller, "created_at", None) else None,
+        "area": latest[0] if latest else None,
         "seller_id": seller.id,
         "seller_name": seller.full_name or seller.phone or "Vendeur",
         "is_certified": est_vendeur_verifie(seller),
@@ -886,10 +1039,19 @@ async def list_seller_reviews(
         .all()
     )
     summary = _rating_summary(db, [seller_id]).get(seller_id) or {}
+    # Assimé 21 : l'histogramme des notes et les points forts les plus cités.
+    histogram = {str(star): 0 for star in range(_MIN_RATING, _MAX_RATING + 1)}
+    tags: dict[str, int] = {}
+    for review in reviews:
+        histogram[str(review.rating)] = histogram.get(str(review.rating), 0) + 1
+        for tag in review.tags or []:
+            tags[tag] = tags.get(tag, 0) + 1
     return {
         "items": [_serialize_review(review, current_user["user_id"]) for review in reviews],
         "rating": summary.get("rating"),
         "review_count": summary.get("count", 0),
+        "histogram": histogram,
+        "tags": dict(sorted(tags.items(), key=lambda kv: -kv[1])),
     }
 
 
@@ -1055,6 +1217,9 @@ async def share_product(
         status=MessageStatus.SENT,
     )
     db.add(message)
+    if recipient_id == product.seller_id:
+        # Assimé 9 : « 6 messages » sur la ligne de l'annonce.
+        product.contacts_count = (product.contacts_count or 0) + 1
     db.commit()
     db.refresh(message)
 
@@ -1179,3 +1344,217 @@ async def sale_for_buyer(
         "sold_at": product.sold_at.isoformat(),
         "reviewed": already is not None,
     }
+
+
+# ─── Assimé, maquette : fiche, renouvellement, signalement, avis ──────────────
+
+@router.get("/{product_id:int}")
+async def get_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """La fiche d'une annonce (Assimé 3). Chaque ouverture par quelqu'un
+    d'autre que le vendeur compte une vue (Assimé 9) ; le vendeur reçoit
+    ses statistiques, personne d'autre."""
+    me = current_user["user_id"]
+    product = (
+        db.query(MarketplaceProduct)
+        .options(*_load_options())
+        .filter(MarketplaceProduct.id == product_id, MarketplaceProduct.deleted_at.is_(None))
+        .first()
+    )
+    if product is None or (product.seller_id != me and not product.is_active):
+        raise HTTPException(status_code=404, detail="Annonce introuvable")
+    if product.seller_id != me:
+        product.views_count = (product.views_count or 0) + 1
+        db.commit()
+        db.refresh(product)
+    now = datetime.utcnow()
+    boosted = db.query(MarketplaceBoost.id).filter(
+        MarketplaceBoost.product_id == product.id,
+        MarketplaceBoost.starts_at <= now,
+        MarketplaceBoost.expires_at > now,
+    ).first() is not None
+    body = _serialize(
+        product,
+        _rating_summary(db, [product.seller_id]).get(product.seller_id),
+        boosted,
+        product.seller_id in _pro_seller_ids(db, [product.seller_id]),
+    )
+    body["is_favorite"] = db.query(MarketplaceFavorite.id).filter(
+        MarketplaceFavorite.user_id == me, MarketplaceFavorite.product_id == product.id
+    ).first() is not None
+    if product.seller_id == me:
+        body["stats"] = _owner_stats(db, [product]).get(product.id)
+    return body
+
+
+@router.post("/{product_id:int}/renew")
+async def renew_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Renouveler » (Assimé 9) : 30 jours de plus en ligne, gratuitement."""
+    product = db.query(MarketplaceProduct).filter(
+        MarketplaceProduct.id == product_id,
+        MarketplaceProduct.seller_id == current_user["user_id"],
+        MarketplaceProduct.deleted_at.is_(None),
+    ).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Annonce introuvable")
+    if product.sold_at is not None:
+        raise HTTPException(status_code=409, detail="Une annonce vendue ne se renouvelle pas")
+    product.expires_at = datetime.utcnow() + timedelta(days=LISTING_DAYS)
+    db.commit()
+    return {"id": product.id, "expires_at": product.expires_at.isoformat()}
+
+
+@router.post("/{product_id:int}/report")
+async def report_product(
+    product_id: int,
+    payload: ReportPayload,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Signaler une annonce (Assimé 11). Le vendeur n'est pas prévenu. Le
+    signalement rejoint la file de l'équipe ; à partir de
+    `REPORTS_TO_HIDE` personnes différentes, l'annonce est masquée en
+    attendant la revue — c'est la modération qui la remet en ligne."""
+    me = current_user["user_id"]
+    product = db.query(MarketplaceProduct).filter(
+        MarketplaceProduct.id == product_id, MarketplaceProduct.deleted_at.is_(None)
+    ).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Annonce introuvable")
+    if product.seller_id == me:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas signaler votre propre annonce")
+    already = db.query(MarketplaceReport.id).filter(
+        MarketplaceReport.reporter_id == me, MarketplaceReport.product_id == product.id
+    ).first()
+    if already is None:
+        db.add(MarketplaceReport(reporter_id=me, product_id=product.id, reason=payload.reason))
+        db.add(AbuseReport(
+            reporter_id=me,
+            target_user_id=product.seller_id,
+            reason=f"Assimé · annonce n° {product.id} « {product.name[:120]} » : {REPORT_REASONS[payload.reason]}"[:280],
+        ))
+        db.flush()
+        reporters = db.query(func.count(func.distinct(MarketplaceReport.reporter_id))).filter(
+            MarketplaceReport.product_id == product.id
+        ).scalar() or 0
+        if reporters >= REPORTS_TO_HIDE:
+            product.is_active = False
+        db.commit()
+    return {"reported": True, "hidden": not product.is_active}
+
+
+@router.post("/{product_id:int}/hide")
+async def hide_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Masquer cette annonce » (Assimé 16), pour moi seul."""
+    me = current_user["user_id"]
+    if not db.query(MarketplaceHidden.id).filter(
+        MarketplaceHidden.user_id == me, MarketplaceHidden.product_id == product_id
+    ).first():
+        db.add(MarketplaceHidden(user_id=me, product_id=product_id))
+        db.commit()
+    return {"hidden": True}
+
+
+@router.post("/sellers/{seller_id}/hide")
+async def hide_seller(
+    seller_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Ne plus voir les annonces de ce vendeur » (Assimé 16)."""
+    me = current_user["user_id"]
+    if seller_id == me:
+        raise HTTPException(status_code=400, detail="Ce sont vos propres annonces")
+    if not db.query(MarketplaceHidden.id).filter(
+        MarketplaceHidden.user_id == me, MarketplaceHidden.seller_id == seller_id
+    ).first():
+        db.add(MarketplaceHidden(user_id=me, seller_id=seller_id))
+        db.commit()
+    return {"hidden": True}
+
+
+@router.get("/sellers/{seller_id}/products")
+async def seller_products(
+    seller_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Les annonces d'un vendeur sur son profil (Assimé 22), vendues
+    comprises : le badge « Vendu » fait partie de sa réputation."""
+    now = datetime.utcnow()
+    items = (
+        db.query(MarketplaceProduct)
+        .options(*_load_options())
+        .filter(
+            MarketplaceProduct.seller_id == seller_id,
+            MarketplaceProduct.is_active.is_(True),
+            MarketplaceProduct.deleted_at.is_(None),
+            or_(
+                MarketplaceProduct.sold_at.isnot(None),
+                MarketplaceProduct.expires_at.is_(None),
+                MarketplaceProduct.expires_at > now,
+            ),
+        )
+        .order_by(MarketplaceProduct.created_at.desc())
+        .limit(50)
+        .all()
+    )
+    ratings = _rating_summary(db, [seller_id])
+    pro = _pro_seller_ids(db, [seller_id])
+    return {"items": [_serialize(i, ratings.get(seller_id), False, seller_id in pro) for i in items]}
+
+
+@router.put("/reviews/{review_id}/reply")
+async def reply_to_review(
+    review_id: int,
+    payload: ReplyPayload,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Le vendeur répond à un avis sur lui (Assimé 21) — une réponse,
+    réécrite s'il la reprend."""
+    review = db.query(SellerReview).filter(
+        SellerReview.id == review_id, SellerReview.seller_id == current_user["user_id"]
+    ).first()
+    if review is None:
+        raise HTTPException(status_code=404, detail="Avis introuvable")
+    review.seller_reply = payload.reply.strip()
+    review.seller_replied_at = datetime.utcnow()
+    db.commit()
+    db.refresh(review)
+    return _serialize_review(review, current_user["user_id"])
+
+
+@router.post("/reviews/{review_id}/report")
+async def report_review(
+    review_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Signaler un avis » (Assimé 21) : rejoint la file de l'équipe."""
+    me = current_user["user_id"]
+    review = db.query(SellerReview).filter(SellerReview.id == review_id).first()
+    if review is None:
+        raise HTTPException(status_code=404, detail="Avis introuvable")
+    if not db.query(MarketplaceReport.id).filter(
+        MarketplaceReport.reporter_id == me, MarketplaceReport.review_id == review.id
+    ).first():
+        db.add(MarketplaceReport(reporter_id=me, review_id=review.id, reason="review"))
+        db.add(AbuseReport(
+            reporter_id=me,
+            target_user_id=review.author_id,
+            reason=f"Assimé · avis n° {review.id} sur le vendeur n° {review.seller_id}",
+        ))
+        db.commit()
+    return {"reported": True}

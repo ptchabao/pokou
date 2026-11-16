@@ -3574,7 +3574,7 @@
   "annRateStars": "{count} étoiles sur 5",
   "annRateWentWell": "Ce qui s’est bien passé",
   "annTagAsDescribed": "Conforme à l’annonce",
-  "annTagPunctual": "Ponctuel·le",
+  "annTagPunctual": "Ponctuelle",
   "annTagFairPrice": "Prix respecté",
   "annTagFriendly": "Aimable",
   "annTagCommunication": "Bonne communication",
@@ -8698,5 +8698,412 @@
         "type": "String"
       }
     }
-  }
+  },
+  "assimeFilters": "Filtres",
+  "assimeFiltersCount": "Filtres · {count}",
+  "@assimeFiltersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeFiltersClear": "Effacer",
+  "assimeFilterCategory": "Catégorie",
+  "assimeFilterPrice": "Prix",
+  "assimeFilterMin": "Minimum",
+  "assimeFilterMax": "Maximum",
+  "assimeFilterCondition": "État",
+  "assimeConditionNew": "Neuf",
+  "assimeConditionVeryGood": "Très bon état",
+  "assimeConditionGood": "Bon état",
+  "assimeConditionToRepair": "À réparer",
+  "assimeFilterPublished": "Publiée",
+  "assimeFilterPublishedAny": "Peu importe",
+  "assimeFilterPublishedDays": "Moins de {days} jours",
+  "@assimeFilterPublishedDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeFilterCertified": "Vendeurs certifiés seulement",
+  "assimeFilterCertifiedSub": "Badge Pokou certifié ou Pro",
+  "assimeFilterApply": "Voir les annonces",
+  "assimeResultsCount": "{count} annonces",
+  "@assimeResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeSortRecent": "Plus récentes",
+  "assimeSortPriceAsc": "Prix croissant",
+  "assimeSortPriceDesc": "Prix décroissant",
+  "assimeReportListing": "Signaler l’annonce",
+  "assimeReportScam": "Arnaque ou paiement demandé d’avance",
+  "assimeReportForbidden": "Produit interdit",
+  "assimeReportForbiddenSub": "Médicament, arme, animal protégé…",
+  "assimeReportCounterfeit": "Contrefaçon",
+  "assimeReportMisleading": "Annonce trompeuse ou déjà vendue",
+  "assimeReportOther": "Autre",
+  "assimeReportNote": "Le vendeur n’est pas prévenu de ton signalement. Une annonce signalée plusieurs fois est masquée en attendant la revue.",
+  "assimeReportSend": "Envoyer le signalement",
+  "assimeReportSent": "Merci, ton signalement est transmis à l’équipe Pokou.",
+  "assimeShareTitle": "Partager l’annonce",
+  "assimeShareChat": "Une discussion",
+  "assimeShareCopy": "Copier le lien",
+  "assimeShareOther": "Autres applis",
+  "assimeShareCopied": "Copié",
+  "assimeShareSent": "Annonce envoyée à {name}",
+  "@assimeShareSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeShareNote": "Hors de Pokou, le lien ouvre un aperçu limité : photo, titre, prix et quartier. Pour écrire au vendeur, il faut Pokou.",
+  "assimeShareText": "{name} · {price} sur Assimé, les petites annonces de Pokou : {link}",
+  "@assimeShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeShareNoContact": "Aucun contact sur Pokou pour l’instant.",
+  "assimePreviewTitle": "Aperçu",
+  "assimePublishStep": "Publier une annonce · étape {step} sur 3",
+  "@assimePublishStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "assimePreviewWhat": "Ce que verront les acheteurs.",
+  "assimePreviewExpiry": "En ligne 30 jours, puis l’annonce expire ; tu peux la renouveler.",
+  "assimePreviewPledge": "Mon annonce ne contient ni médicament, ni arme, ni contrefaçon, ni animal protégé.",
+  "assimePreviewBoost": "Mettre en avant",
+  "assimePreviewBoostSub": "Dès 600 FCFA pour 3 jours, en tête des résultats. Tu choisis après la publication.",
+  "assimePublishListing": "Publier l’annonce",
+  "assimeSeePreview": "Voir l’aperçu",
+  "assimeNegotiable": "Prix à débattre",
+  "assimeNegotiableSub": "Le prix s’affiche avec « à débattre »",
+  "assimeNegotiableTag": "à débattre",
+  "assimeForbiddenTitle": "Les médicaments ne se vendent pas sur Assimé",
+  "assimeForbiddenBody": "Pour un médicament, passe par Honam : une pharmacie te fait un devis et un coursier te le livre.",
+  "assimeGoHonam": "Aller sur Honam",
+  "assimeAlsoForbidden": "Aussi interdits sur Assimé",
+  "assimeForbiddenWeapons": "Armes et munitions",
+  "assimeForbiddenCounterfeit": "Contrefaçons",
+  "assimeForbiddenAnimals": "Animaux protégés",
+  "assimeChangeItem": "Changer d’article",
+  "assimeReviewsTitle": "Avis sur {name}",
+  "@assimeReviewsTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeReviewsCount": "{count} ventes notées",
+  "@assimeReviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeReviewReplyFrom": "Réponse de {name} : ",
+  "@assimeReviewReplyFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeReportReview": "Signaler un avis",
+  "assimeReviewReported": "Avis signalé à l’équipe Pokou.",
+  "assimeSeeReviews": "Voir les avis",
+  "assimeNoReviews": "Pas encore d’avis. Seul l’acheteur d’une vente confirmée par le vendeur peut noter.",
+  "assimeReplyAction": "Répondre",
+  "assimeReplyHint": "Ta réponse, visible de tous",
+  "assimeContactSeller": "Contacter le vendeur",
+  "assimeNoPaymentNotice": "Pokou n’encaisse aucun paiement sur Assimé. Vois l’article avant de payer, dans un lieu public.",
+  "assimeSellerListings": "{count} annonces",
+  "@assimeSellerListings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeRateInvite": "{seller} a indiqué que tu as acheté cet article pour {price}.",
+  "@assimeRateInvite": {
+    "placeholders": {
+      "seller": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeMyListings": "Mes annonces",
+  "assimeMyListingsSub": "{name} · {count} annonces",
+  "@assimeMyListingsSub": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeTabOnline": "En ligne · {count}",
+  "@assimeTabOnline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeTabSold": "Vendues · {count}",
+  "@assimeTabSold": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeTabExpired": "Expirées · {count}",
+  "@assimeTabExpired": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeBadgeSponsored": "Sponsorisée · {days} j",
+  "@assimeBadgeSponsored": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeBadgeExpiresIn": "Expire dans {days} jours",
+  "@assimeBadgeExpiresIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeBadgeOnline": "En ligne",
+  "assimeBadgeExpired": "Expirée",
+  "assimeBadgeSold": "Vendue",
+  "assimeStatsLine": "{views} vues · {favorites} favoris · {messages} messages",
+  "@assimeStatsLine": {
+    "placeholders": {
+      "views": {
+        "type": "int"
+      },
+      "favorites": {
+        "type": "int"
+      },
+      "messages": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeMarkSold": "Marquer vendue",
+  "assimeRenew": "Renouveler",
+  "assimeRenewed": "Annonce renouvelée pour 30 jours.",
+  "assimePromote": "Mettre en avant",
+  "assimeStatsPrivate": "Les vues et les favoris ne sont visibles que de toi.",
+  "assimePublishCta": "Publier une annonce",
+  "assimeNoneInTab": "Rien ici pour l’instant.",
+  "assimeDeleteTitle": "Supprimer l’annonce ?",
+  "assimeDeleteNotSelling": "Je ne la vends plus",
+  "assimeDeleteSoldPokou": "Vendue sur Pokou",
+  "assimeDeleteSoldPokouSub": "Choisis l’acheteur pour qu’il puisse noter",
+  "assimeDeleteSoldElsewhere": "Vendue ailleurs",
+  "assimeDeleteNote": "Les discussions liées restent dans tes Discussions. Cette action est définitive.",
+  "assimeDeleteAction": "Supprimer l’annonce",
+  "assimeEditTitle": "Modifier l’annonce",
+  "assimeSaveChanges": "Enregistrer les modifications",
+  "assimeTitleLabel": "Titre",
+  "assimeAreaLabel": "Ville et quartier",
+  "assimeSavedSearches": "Recherches enregistrées",
+  "assimeFavoriteListings": "Annonces favorites",
+  "assimeAlertFound": "{count} annonces trouvées",
+  "@assimeAlertFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeAlertPaused": "Alerte coupée",
+  "assimeWhyPrivacy": "Pokou ne lit jamais tes messages ni tes statuts pour choisir les annonces. Au plus un statut sponsorisé tous les 5 statuts.",
+  "assimeHideListing": "Masquer cette annonce",
+  "assimeHideSeller": "Ne plus voir les annonces de ce vendeur",
+  "assimeHidden": "Annonce masquée.",
+  "assimeSellerHidden": "Tu ne verras plus les annonces de ce vendeur.",
+  "assimeProfileTitle": "Profil",
+  "assimePrivateSince": "Particulier · sur Pokou depuis {date}",
+  "@assimePrivateSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeProSince": "Vendeur Pro · sur Pokou depuis {date}",
+  "@assimeProSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeRatedSales": "{count} ventes notées",
+  "@assimeRatedSales": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeMessage": "Message",
+  "assimeReport": "Signaler",
+  "assimeListingsOf": "Annonces de {name} · {count}",
+  "@assimeListingsOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeBadgeNote": "Le badge montre un nom vérifié par Pokou certifié. Un particulier n’a pas de badge Pro.",
+  "assimeBoostRunning": "Mise en avant en cours",
+  "assimeBoostEnded": "Mise en avant terminée",
+  "assimeBoostSub": "{name} · {days} jours",
+  "@assimeBoostSub": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeBoostDayOf": "Jour {day} sur {total}",
+  "@assimeBoostDayOf": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeBoostEnds": "fin {date}",
+  "@assimeBoostEnds": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeViewsResults": "Vues dans les résultats",
+  "assimeViewsStatus": "Vues en statut",
+  "assimeOpens": "« Voir l’annonce »",
+  "assimeMessagesReceived": "Messages reçus",
+  "assimeMessagesBefore": "contre {count} avant",
+  "@assimeMessagesBefore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeViewsPerDay": "Vues par jour",
+  "assimeLegendResults": "Résultats",
+  "assimeLegendStatus": "Statuts",
+  "assimeBoostNote": "Ces chiffres ne sont visibles que de toi. Pas de renouvellement automatique : tu choisiras à la fin.",
+  "assimeSeeListing": "Voir l’annonce",
+  "assimeBeforeBuying": "Avant d’acheter",
+  "assimeTipPublicPlace": "Retrouve le vendeur dans un lieu public, en journée.",
+  "assimeTipNoAdvance": "Ne paie jamais d’avance : vois l’article d’abord.",
+  "assimeTipNoCode": "Pokou n’encaisse aucun paiement et ne te demandera jamais ton code secret.",
+  "assimeNumberHidden": "Ton numéro n’est pas montré au vendeur.",
+  "assimeQuickPhotos": "D’autres photos ?",
+  "assimeQuickAvailable": "Toujours disponible ?",
+  "assimeQuickNegotiable": "Prix négociable ?",
+  "assimeSee": "Voir",
+  "assimePromoteDays": "{days} jours",
+  "@assimePromoteDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "assimePromoteTop": "En tête des résultats de sa catégorie, dans sa ville",
+  "assimePromoteStatus": "Une place parmi les statuts des acheteurs de sa ville",
+  "assimePromoteCheaper": "Moins cher par jour · badge payant requis pour les statuts",
+  "assimePromoteTtc": "Prix TTC. Ton annonce porte la mention « Sponsorisé ». Pas de renouvellement automatique.",
+  "assimePromoteStart": "Début",
+  "assimePromoteStartNow": "Dès la validation",
+  "assimePromoteEnd": "Fin",
+  "assimePromotePayment": "Paiement",
+  "assimePromotePaymentMm": "Mobile Money",
+  "assimePromoteModeration": "La place en statut est vérifiée par la modération avant la diffusion. Une catégorie interdite ne peut jamais être mise en avant.",
+  "assimePromotePay": "Payer {amount} FCFA",
+  "@assimePromotePay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "assimeAdAssime": "annonce Assimé",
+  "assimeWrite": "Écrire",
+  "assimeNextHint": "Passe au statut suivant en touchant à droite.",
+  "assimeCover": "Couverture",
+  "assimeAddPhotoShort": "Ajouter",
+  "assimePhotosHint": "{count} photos sur 5. La première sert de couverture. D’autres photos pourront être envoyées dans la discussion avec l’acheteur.",
+  "@assimePhotosHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assimeNumberNeverShown": "Ton numéro n’est jamais affiché : les acheteurs t’écrivent sur Pokou.",
+  "assimeContinue": "Continuer",
+  "assimeStep1Title": "Photos et catégorie",
+  "assimeStep2Title": "Prix, état et lieu",
+  "assimeToday": "aujourd’hui",
+  "assimeYesterday": "hier",
+  "assimeNearYou": "Près de chez toi",
+  "assimeSoldBadge": "Vendu"
 }

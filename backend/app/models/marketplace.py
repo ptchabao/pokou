@@ -45,6 +45,18 @@ class MarketplaceProduct(Base):
     sold_at = Column(DateTime, nullable=True, index=True)
     buyer_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     final_price = Column(Integer, nullable=True)
+    #: Assimé 6 : l'état de l'article — NEW, VERY_GOOD, GOOD ou TO_REPAIR.
+    #: Vide pour les annonces publiées avant la maquette.
+    condition = Column(String(16), nullable=True, index=True)
+    #: Assimé 6 : « Prix à débattre ».
+    negotiable = Column(Boolean, nullable=False, default=False)
+    #: Assimé 7 et 9 : en ligne 30 jours, puis l'annonce expire ; le vendeur
+    #: la renouvelle. Vide = annonce antérieure, traitée comme en ligne.
+    expires_at = Column(DateTime, nullable=True, index=True)
+    #: Assimé 9 : vues de la fiche et discussions ouvertes. Visibles du seul
+    #: vendeur.
+    views_count = Column(Integer, nullable=False, default=0)
+    contacts_count = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -98,6 +110,9 @@ class SellerReview(Base):
     #: ANN-19 : la vente notée, et « ce qui s'est bien passé ».
     product_id = Column(Integer, ForeignKey("marketplace_products.id", ondelete="SET NULL"), nullable=True)
     tags = Column(JSON, nullable=True)
+    #: Assimé 21 : la réponse du vendeur, une seule, modifiable.
+    seller_reply = Column(String(500), nullable=True)
+    seller_replied_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -153,6 +168,13 @@ class MarketplaceBoost(Base):
     impressions = Column(Integer, default=0, nullable=False)
     status_views = Column(Integer, default=0, nullable=False)
     contacts = Column(Integer, default=0, nullable=False)
+    #: « Voir l'annonce » touché depuis le statut sponsorisé.
+    opens = Column(Integer, default=0, nullable=False)
+    #: Discussions de l'annonce au début de la mise en avant : le bilan dit
+    #: « 14 messages reçus, contre 2 avant ».
+    contacts_before = Column(Integer, default=0, nullable=False)
+    #: Vues par jour : {"2026-11-05": {"results": 12, "status": 4}}.
+    daily = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
@@ -184,6 +206,43 @@ class MarketplaceAlert(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     last_matched_at = Column(DateTime, nullable=True)
     matches_count = Column(Integer, default=0, nullable=False)
+    #: Assimé 12 : « Alerte coupée » — gardée, mais sans notification.
+    paused = Column(Boolean, default=False, nullable=False)
+
+
+class MarketplaceReport(Base):
+    """Signalement d'une annonce (Assimé 11) ou d'un avis (Assimé 21).
+
+    Une personne ne signale qu'une fois la même chose. Le vendeur n'est pas
+    prévenu ; une annonce signalée par plusieurs personnes est masquée en
+    attendant la revue de l'équipe (voir marketplace.py)."""
+    __tablename__ = "marketplace_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    reporter_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("marketplace_products.id", ondelete="CASCADE"), nullable=True, index=True)
+    review_id = Column(Integer, ForeignKey("seller_reviews.id", ondelete="CASCADE"), nullable=True, index=True)
+    #: scam | forbidden | counterfeit | misleading | other (annonce) ;
+    #: review (avis).
+    reason = Column(String(24), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("reporter_id", "product_id", name="uq_marketplace_report_product"),
+        UniqueConstraint("reporter_id", "review_id", name="uq_marketplace_report_review"),
+    )
+
+
+class MarketplaceHidden(Base):
+    """« Masquer cette annonce » et « Ne plus voir les annonces de ce
+    vendeur » (Assimé 16) : un choix de la personne, pour elle seule."""
+    __tablename__ = "marketplace_hidden"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("marketplace_products.id", ondelete="CASCADE"), nullable=True)
+    seller_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
 class MarketplaceAd(Base):

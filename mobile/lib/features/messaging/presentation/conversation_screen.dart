@@ -45,6 +45,10 @@ import '../../calls/presentation/call_controller.dart';
 import '../../calls/presentation/call_screen.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../../marketplace/data/product_model.dart';
+import '../../marketplace/presentation/assime_contact_panel.dart';
+import '../../marketplace/presentation/assime_rate_invitation.dart';
+import '../../marketplace/presentation/marketplace_controller.dart'
+    show marketplaceRepositoryProvider;
 import '../../profile/presentation/contact_profile_screen.dart';
 import '../data/direct_message_model.dart';
 import 'attach_sheet.dart';
@@ -746,6 +750,32 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _scrollToBottom();
   }
 
+  /// Assimé 4 : « Contacter le vendeur » n'envoie plus rien d'office. La
+  /// fiche de l'annonce part avec le PREMIER message de l'acheteur, pour
+  /// que le vendeur sache de quoi on lui parle.
+  bool _assimeProductAttached = false;
+
+  Future<void> _attachAssimeProductOnce() async {
+    final product = widget.product;
+    if (product == null ||
+        _assimeProductAttached ||
+        product.sellerId == widget.myUserId ||
+        _productFromMessages(
+              ref.read(messagingControllerProvider(_key)).messages,
+            ) !=
+            null) {
+      return;
+    }
+    _assimeProductAttached = true;
+    try {
+      await ref
+          .read(marketplaceRepositoryProvider)
+          .shareProduct(productId: product.id);
+    } catch (_) {
+      // La discussion reste possible sans la fiche épinglée.
+    }
+  }
+
   Future<void> _send() async {
     // Le bouton d'envoi devient « confirmer » pendant une modification.
     if (_editingMessage != null) {
@@ -760,6 +790,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _inputController.clear();
     final replyToId = _replyingTo?.id;
     setState(() => _replyingTo = null);
+    await _attachAssimeProductOnce();
     try {
       await ref
           .read(messagingControllerProvider(_key).notifier)
@@ -1755,6 +1786,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     children: [
                       if (product != null) ...[
                         _PinnedProductCard(product: product),
+                        // Assimé 19 : l'acheteur d'une vente confirmée est
+                        // invité à la noter, ici et nulle part ailleurs.
+                        if (!isSeller)
+                          AssimeRateInvitationCard(productId: product.id),
                         if (isSeller)
                           _OrderActions(
                             currentStatus: _orderStatusFrom(state.messages),
@@ -2028,6 +2063,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Assimé 4 : conseils et réponses rapides,
+                            // tant que l'acheteur n'a encore rien écrit.
+                            if (product != null &&
+                                !isSeller &&
+                                state.messages.isEmpty)
+                              AssimeContactPanel(
+                                onQuickReply: (text) {
+                                  _inputController.text = text;
+                                  _inputFocus.requestFocus();
+                                },
+                              ),
                             // Discussions · 14 — en mode preuve, dire AVANT
                             // de confirmer que l'original restera visible.
                             if (_editingMessage?.proofMode == true)

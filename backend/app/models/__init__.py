@@ -92,6 +92,8 @@ from app.models.marketplace import (  # noqa: F401
     SellerVerificationApplication,
     MarketplaceFavorite,
     MarketplaceAlert,
+    MarketplaceReport,
+    MarketplaceHidden,
 )
 from app.models.modules import (  # noqa: F401
     AppModule,

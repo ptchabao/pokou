@@ -1,15 +1,17 @@
 import 'assime_extras.dart';
+import 'assime_reviews.dart';
+import 'assime_seller_profile.dart';
+import 'assime_sheets.dart';
+import '../../modules/shared/module_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/media/media_repository.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
 import '../../auth/presentation/auth_controller.dart';
-import '../../calls/presentation/call_controller.dart';
-import '../../calls/presentation/call_screen.dart';
 import '../../messaging/presentation/conversation_screen.dart';
 import '../data/product_model.dart';
 import 'marketplace_controller.dart';
@@ -17,7 +19,6 @@ import '../../../core/widgets/image_viewer.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../../core/widgets/pokou_icon.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
 
 /// Fiche détaillée d'un produit — la tuile de la liste ne menait nulle part.
 ///
@@ -44,7 +45,6 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   SellerProfile? _seller;
-  List<SellerReview>? _reviews;
   bool _contacting = false;
   bool _favorite = false;
 
@@ -129,13 +129,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     try {
       final repository = ref.read(marketplaceRepositoryProvider);
       final seller = await repository.sellerProfile(_product.sellerId);
-      final reviews = await repository.sellerReviews(_product.sellerId);
-      if (mounted) {
-        setState(() {
-          _seller = seller;
-          _reviews = reviews;
-        });
-      }
+      if (mounted) setState(() => _seller = seller);
     } catch (_) {
       // Best-effort : la fiche produit reste lisible sans la réputation du
       // vendeur, ce serait dommage de tout masquer pour ça.
@@ -147,18 +141,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   Future<void> _writeToSeller() async {
     setState(() => _contacting = true);
     try {
-      await ref
-          .read(marketplaceRepositoryProvider)
-          .shareProduct(
-            productId: _product.id,
-            message: L
-                .of(context)
-                .productInterestedMessage(
-                  _product.name,
-                  _product.price,
-                  _product.currency,
-                ),
-          );
+      // Assimé 4 : rien ne part d'office. La discussion s'ouvre sur la
+      // fiche épinglée et des réponses rapides ; la fiche est envoyée au
+      // vendeur avec le premier message de l'acheteur.
       final myUserId = ref.read(authControllerProvider).user?.id;
       if (!mounted || myUserId == null) return;
       await Navigator.of(context).push(
@@ -182,310 +167,310 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
   }
 
-  Future<void> _callSeller({required bool video}) async {
-    try {
-      final token = await ref.read(callRepositoryProvider).startCall([
-        _product.sellerId,
-      ], isVideo: video);
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => CallScreen(
-            livekitUrl: token.livekitUrl,
-            token: token.token,
-            room: token.room,
-            otherParticipantIds: [_product.sellerId],
-            startWithVideo: video,
-          ),
-        ),
-      );
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          // L'API refuse d'appeler quelqu'un hors du carnet d'adresses —
-          // contrairement à l'écriture, qui est ouverte pour permettre la
-          // mise en relation.
-          SnackBar(content: Text(L.of(context).productCallFirstWrite)),
-        );
-      }
-    }
-  }
-
-  Future<void> _rateSeller() async {
-    final mine = _reviews?.where((review) => review.isMine).firstOrNull;
-    var rating = mine?.rating ?? 5;
-    final commentController = TextEditingController(text: mine?.comment ?? '');
-
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (builderContext, setSheetState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(builderContext).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                mine == null
-                    ? L.of(context).productRateSeller
-                    : L.of(context).productEditReview,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                L.of(context).productReviewScope,
-                style: TextStyle(color: AppColors.textMuted, fontSize: 11),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var star = 1; star <= 5; star++)
-                    IconButton(
-                      onPressed: () => setSheetState(() => rating = star),
-                      icon: Icon(
-                        star <= rating ? Icons.star : Icons.star_border,
-                        color: AppColors.accentPrimary,
-                      ),
-
-                      tooltip: L.of(context).a11yRate,
-                    ),
-                ],
-              ),
-              TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
-                controller: commentController,
-                maxLines: 3,
-                maxLength: 1000,
-                decoration: InputDecoration(
-                  hintText: L.of(context).productReviewHint,
-                ),
-              ),
-              const SizedBox(height: 8),
-              FilledButton(
-                onPressed: () => Navigator.pop(sheetContext, true),
-                child: Text(L.of(context).actionSave),
-              ),
-              if (mine != null)
-                TextButton(
-                  onPressed: () => Navigator.pop(sheetContext, false),
-                  child: Text(
-                    L.of(context).productDeleteReview,
-                    style: const TextStyle(color: AppColors.semanticError),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-    final comment = commentController.text.trim();
-    commentController.dispose();
-    if (confirmed == null) return;
-
-    try {
-      final repository = ref.read(marketplaceRepositoryProvider);
-      if (confirmed) {
-        await repository.reviewSeller(
-          sellerId: _product.sellerId,
-          rating: rating,
-          comment: comment.isEmpty ? null : comment,
-        );
-      } else {
-        await repository.deleteMyReview(_product.sellerId);
-      }
-      await _loadSeller();
-      ref.invalidate(marketplaceProductsProvider);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          // 403 côté API si on tente de se noter soi-même.
-          SnackBar(content: Text(L.of(context).productReviewFailed)),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final images = _images;
     final seller = _seller;
-    final reviews = _reviews ?? const <SellerReview>[];
+    final l = L.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
-        title: Text(
-          L.of(context).productTitle,
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          if (_isMine)
-            IconButton(
-              tooltip: L.of(context).assimeReportTitle,
-              icon: const Icon(Icons.insights_outlined),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => BoostReportScreen(
-                    productId: _product.id,
-                    productName: _product.name,
-                  ),
-                ),
-              ),
-            )
-          else ...[
-            if (_product.isBoosted)
-              IconButton(
-                tooltip: L.of(context).assimeWhyTitle,
-                icon: const Icon(Icons.info_outline),
-                onPressed: () => showWhySponsored(context, ref, _product.id),
-              ),
-            IconButton(
-              tooltip: _favorite
-                  ? L.of(context).assimeRemoveFavorite
-                  : L.of(context).assimeAddFavorite,
-              icon: Icon(
-                _favorite ? Icons.favorite : Icons.favorite_border,
-                color: _favorite ? AppColors.feedbackDanger : null,
-              ),
-              onPressed: _toggleFavorite,
-            ),
-          ],
-        ],
-      ),
       bottomNavigationBar: _isMine
           ? null
           : SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: _contacting ? null : _writeToSeller,
-                        icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                        label: Text(
-                          _contacting
-                              ? L.of(context).productOpening
-                              : L.of(context).productDiscuss,
-                        ),
+                    // Assimé 3 : le cœur, puis « Contacter le vendeur ».
+                    IconButton.outlined(
+                      tooltip: _favorite
+                          ? l.assimeRemoveFavorite
+                          : l.assimeAddFavorite,
+                      onPressed: _toggleFavorite,
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(52, 52),
+                        side: BorderSide(color: AppColors.border),
+                      ),
+                      icon: Icon(
+                        _favorite ? Icons.favorite : Icons.favorite_border,
+                        color: _favorite
+                            ? AppColors.feedbackDanger
+                            : AppColors.accentPrimary,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      onPressed: () => _callSeller(video: false),
-                      icon: const Icon(Icons.call_outlined),
-                      tooltip: L.of(context).productCallAction,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ModuleActionButton(
+                        label: _contacting
+                            ? l.productOpening
+                            : l.assimeContactSeller,
+                        icon: Icons.arrow_forward,
+                        onPressed: _contacting ? null : _writeToSeller,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: [
-          if (images.isNotEmpty) ...[
-            Builder(
-              builder: (context) {
-                final index = _selectedImage.clamp(0, images.length - 1);
-                return GestureDetector(
-                  onTap: () => _openViewer(images, index),
-                  child: Hero(
-                    tag: _mainHeroTag(index),
-                    child: ClipRRect(
-                      borderRadius: AppRadius.card,
-                      child: _ProductImage(media: images[index], height: 240),
-                    ),
-                  ),
-                );
-              },
-            ),
-            if (images.length > 1) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 62,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: images.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 6),
-                  itemBuilder: (context, index) => InkWell(
-                    onTap: () => setState(() => _selectedImage = index),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 62,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: index == _selectedImage
-                              ? AppColors.accentPrimary
-                              : AppColors.border,
-                          width: index == _selectedImage ? 2 : 1,
+      body: AnnotatedRegion(
+        value: SystemUiOverlayStyle.light,
+        child: Stack(
+          children: [
+            ListView(
+              padding: const EdgeInsets.only(bottom: 24),
+              children: [
+                // Assimé 3 : la photo plein cadre, qu'on fait glisser.
+                SizedBox(
+                  height: 320,
+                  child: images.isEmpty
+                      ? ColoredBox(
+                          color: AppColors.surfaceElevated,
+                          child: Icon(
+                            Icons.inventory_2_outlined,
+                            size: 40,
+                            color: AppColors.textMuted,
+                          ),
+                        )
+                      : Stack(
+                          children: [
+                            PageView.builder(
+                              itemCount: images.length,
+                              onPageChanged: (i) =>
+                                  setState(() => _selectedImage = i),
+                              itemBuilder: (_, index) => GestureDetector(
+                                onTap: () => _openViewer(images, index),
+                                child: Hero(
+                                  tag: _mainHeroTag(index),
+                                  child: _ProductImage(
+                                    media: images[index],
+                                    height: 320,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (images.length > 1)
+                              Positioned(
+                                bottom: 10,
+                                left: 0,
+                                right: 0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    for (var i = 0; i < images.length; i++)
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: i == _selectedImage
+                                              ? Colors.white
+                                              : Colors.white54,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_product.isBoosted) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandOr.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            l.assimeSponsored,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      // Assimé 3 : le prix d'abord, puis le titre, puis « état · lieu ».
+                      Text(
+                        [
+                          '${_product.price} ${_product.currency}',
+                          if (_product.negotiable)
+                            L.of(context).assimeNegotiableTag,
+                        ].join(' · '),
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _ProductImage(media: images[index]),
-                    ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _product.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (_product.condition != null ||
+                          (_product.location ?? '').trim().isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          [
+                            if (_product.condition != null)
+                              assimeConditionLabel(
+                                L.of(context),
+                                _product.condition!,
+                              ),
+                            if ((_product.location ?? '').trim().isNotEmpty)
+                              _product.location!.trim(),
+                          ].join(' · '),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                      if (_product.description != null &&
+                          _product.description!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _product.description!,
+                          style: const TextStyle(fontSize: 14, height: 1.45),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      _SellerCard(
+                        name: seller?.sellerName ?? _product.sellerName,
+                        isCertified:
+                            seller?.isCertified ?? _product.sellerIsCertified,
+                        isPro: seller?.isPro ?? _product.sellerIsPro,
+                        rating: seller?.rating ?? _product.sellerRating,
+                        reviewCount:
+                            seller?.reviewCount ?? _product.sellerReviewCount,
+                        productCount: seller?.productCount,
+                        // « Noter ce vendeur » a quitté la fiche : pas de vente
+                        // confirmée, pas de note (Assimé 101). Les avis s'ouvrent ici.
+                        onProfile: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => AssimeSellerProfileScreen(
+                              sellerId: _product.sellerId,
+                              sellerName:
+                                  seller?.sellerName ?? _product.sellerName,
+                            ),
+                          ),
+                        ),
+                        onReviews: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => SellerReviewsScreen(
+                              sellerId: _product.sellerId,
+                              sellerName:
+                                  seller?.sellerName ?? _product.sellerName,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ModuleCallout(
+                        tone: CalloutTone.beige,
+                        text: L.of(context).assimeNoPaymentNotice,
+                      ),
+                    ],
                   ),
                 ),
+              ],
+            ),
+            _overlayActions(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Assimé 3 : retour, partager, favori et signaler, posés sur la photo.
+  Widget _overlayActions(BuildContext context) {
+    final l = L.of(context);
+    Widget round(
+      IconData icon,
+      String tooltip,
+      VoidCallback onTap, {
+      Color? color,
+    }) => Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onTap,
+        style: IconButton.styleFrom(backgroundColor: Colors.white),
+        icon: Icon(icon, size: 20, color: color ?? Colors.black87),
+      ),
+    );
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+          child: Row(
+            children: [
+              round(
+                Icons.chevron_left,
+                l.actionClose,
+                () => Navigator.of(context).maybePop(),
               ),
+              const Spacer(),
+              if (_isMine)
+                round(
+                  Icons.insights_outlined,
+                  l.assimeReportTitle,
+                  () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => BoostReportScreen(
+                        productId: _product.id,
+                        productName: _product.name,
+                      ),
+                    ),
+                  ),
+                )
+              else ...[
+                round(
+                  Icons.share_outlined,
+                  l.assimeShareTitle,
+                  () => showShareListing(context, ref, _product),
+                ),
+                if (_product.isBoosted)
+                  round(
+                    Icons.info_outline,
+                    l.assimeWhyTitle,
+                    () => showWhySponsored(
+                      context,
+                      ref,
+                      productId: _product.id,
+                      sellerId: _product.sellerId,
+                    ),
+                  ),
+                round(
+                  Icons.outlined_flag,
+                  l.assimeReportListing,
+                  () => showReportListing(context, ref, _product.id),
+                ),
+              ],
             ],
-            const SizedBox(height: 16),
-          ],
-          Text(
-            _product.name,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '${_product.price} ${_product.currency}',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.accentPrimaryDark,
-            ),
-          ),
-          if (_product.description != null &&
-              _product.description!.trim().isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              _product.description!,
-              style: const TextStyle(fontSize: 14, height: 1.45),
-            ),
-          ],
-          const SizedBox(height: 20),
-          _SellerCard(
-            name: seller?.sellerName ?? _product.sellerName,
-            isCertified: seller?.isCertified ?? _product.sellerIsCertified,
-            isPro: seller?.isPro ?? _product.sellerIsPro,
-            rating: seller?.rating ?? _product.sellerRating,
-            reviewCount: seller?.reviewCount ?? _product.sellerReviewCount,
-            productCount: seller?.productCount,
-            onRate: _isMine ? null : _rateSeller,
-          ),
-          if (reviews.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(
-              L.of(context).productReviews,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-            ),
-            const SizedBox(height: 8),
-            for (final review in reviews) _ReviewTile(review: review),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -499,8 +484,12 @@ class _SellerCard extends StatelessWidget {
     required this.rating,
     required this.reviewCount,
     required this.productCount,
-    required this.onRate,
+    required this.onReviews,
+    required this.onProfile,
   });
+
+  /// Assimé 3 → 22 : la carte vendeur ouvre son profil.
+  final VoidCallback onProfile;
 
   final String name;
   final bool isCertified;
@@ -508,16 +497,13 @@ class _SellerCard extends StatelessWidget {
   final double? rating;
   final int reviewCount;
   final int? productCount;
-  final VoidCallback? onRate;
+  final VoidCallback onReviews;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ModuleCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.card,
-      ),
+      onTap: onProfile,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -609,64 +595,16 @@ class _SellerCard extends StatelessWidget {
               style: TextStyle(color: AppColors.textMuted, fontSize: 11),
             ),
           ],
-          if (onRate != null) ...[
+          if (reviewCount > 0) ...[
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
-                onPressed: onRate,
+                onPressed: onReviews,
                 icon: const Icon(Icons.star_border, size: 16),
-                label: Text(L.of(context).productRateSeller),
+                label: Text(L.of(context).assimeSeeReviews),
               ),
             ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ReviewTile extends StatelessWidget {
-  const _ReviewTile({required this.review});
-
-  final SellerReview review;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.card,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  review.isMine
-                      ? L.of(context).productReviewMine
-                      : review.authorName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              for (var star = 1; star <= 5; star++)
-                Icon(
-                  star <= review.rating ? Icons.star : Icons.star_border,
-                  size: 13,
-                  color: AppColors.accentPrimary,
-                ),
-            ],
-          ),
-          if (review.comment != null && review.comment!.trim().isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(review.comment!, style: const TextStyle(fontSize: 13)),
           ],
         ],
       ),

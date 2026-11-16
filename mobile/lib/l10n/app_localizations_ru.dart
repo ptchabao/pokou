@@ -14114,4 +14114,600 @@ class LRu extends L {
   String offiPatientWriteToCourier(String courier) {
     return 'Écrire à $courier';
   }
+
+  @override
+  String get assimeFilters => 'Filtres';
+
+  @override
+  String assimeFiltersCount(int count) {
+    return 'Filtres · $count';
+  }
+
+  @override
+  String get assimeFiltersClear => 'Effacer';
+
+  @override
+  String get assimeFilterCategory => 'Catégorie';
+
+  @override
+  String get assimeFilterPrice => 'Prix';
+
+  @override
+  String get assimeFilterMin => 'Minimum';
+
+  @override
+  String get assimeFilterMax => 'Maximum';
+
+  @override
+  String get assimeFilterCondition => 'État';
+
+  @override
+  String get assimeConditionNew => 'Neuf';
+
+  @override
+  String get assimeConditionVeryGood => 'Très bon état';
+
+  @override
+  String get assimeConditionGood => 'Bon état';
+
+  @override
+  String get assimeConditionToRepair => 'À réparer';
+
+  @override
+  String get assimeFilterPublished => 'Publiée';
+
+  @override
+  String get assimeFilterPublishedAny => 'Peu importe';
+
+  @override
+  String assimeFilterPublishedDays(int days) {
+    return 'Moins de $days jours';
+  }
+
+  @override
+  String get assimeFilterCertified => 'Vendeurs certifiés seulement';
+
+  @override
+  String get assimeFilterCertifiedSub => 'Badge Pokou certifié ou Pro';
+
+  @override
+  String get assimeFilterApply => 'Voir les annonces';
+
+  @override
+  String assimeResultsCount(int count) {
+    return '$count annonces';
+  }
+
+  @override
+  String get assimeSortRecent => 'Plus récentes';
+
+  @override
+  String get assimeSortPriceAsc => 'Prix croissant';
+
+  @override
+  String get assimeSortPriceDesc => 'Prix décroissant';
+
+  @override
+  String get assimeReportListing => 'Signaler l’annonce';
+
+  @override
+  String get assimeReportScam => 'Arnaque ou paiement demandé d’avance';
+
+  @override
+  String get assimeReportForbidden => 'Produit interdit';
+
+  @override
+  String get assimeReportForbiddenSub => 'Médicament, arme, animal protégé…';
+
+  @override
+  String get assimeReportCounterfeit => 'Contrefaçon';
+
+  @override
+  String get assimeReportMisleading => 'Annonce trompeuse ou déjà vendue';
+
+  @override
+  String get assimeReportOther => 'Autre';
+
+  @override
+  String get assimeReportNote =>
+      'Le vendeur n’est pas prévenu de ton signalement. Une annonce signalée plusieurs fois est masquée en attendant la revue.';
+
+  @override
+  String get assimeReportSend => 'Envoyer le signalement';
+
+  @override
+  String get assimeReportSent =>
+      'Merci, ton signalement est transmis à l’équipe Pokou.';
+
+  @override
+  String get assimeShareTitle => 'Partager l’annonce';
+
+  @override
+  String get assimeShareChat => 'Une discussion';
+
+  @override
+  String get assimeShareCopy => 'Copier le lien';
+
+  @override
+  String get assimeShareOther => 'Autres applis';
+
+  @override
+  String get assimeShareCopied => 'Copié';
+
+  @override
+  String assimeShareSent(String name) {
+    return 'Annonce envoyée à $name';
+  }
+
+  @override
+  String get assimeShareNote =>
+      'Hors de Pokou, le lien ouvre un aperçu limité : photo, titre, prix et quartier. Pour écrire au vendeur, il faut Pokou.';
+
+  @override
+  String assimeShareText(String name, String price, String link) {
+    return '$name · $price sur Assimé, les petites annonces de Pokou : $link';
+  }
+
+  @override
+  String get assimeShareNoContact => 'Aucun contact sur Pokou pour l’instant.';
+
+  @override
+  String get assimePreviewTitle => 'Aperçu';
+
+  @override
+  String assimePublishStep(int step) {
+    return 'Publier une annonce · étape $step sur 3';
+  }
+
+  @override
+  String get assimePreviewWhat => 'Ce que verront les acheteurs.';
+
+  @override
+  String get assimePreviewExpiry =>
+      'En ligne 30 jours, puis l’annonce expire ; tu peux la renouveler.';
+
+  @override
+  String get assimePreviewPledge =>
+      'Mon annonce ne contient ni médicament, ni arme, ni contrefaçon, ni animal protégé.';
+
+  @override
+  String get assimePreviewBoost => 'Mettre en avant';
+
+  @override
+  String get assimePreviewBoostSub =>
+      'Dès 600 FCFA pour 3 jours, en tête des résultats. Tu choisis après la publication.';
+
+  @override
+  String get assimePublishListing => 'Publier l’annonce';
+
+  @override
+  String get assimeSeePreview => 'Voir l’aperçu';
+
+  @override
+  String get assimeNegotiable => 'Prix à débattre';
+
+  @override
+  String get assimeNegotiableSub => 'Le prix s’affiche avec « à débattre »';
+
+  @override
+  String get assimeNegotiableTag => 'à débattre';
+
+  @override
+  String get assimeForbiddenTitle =>
+      'Les médicaments ne se vendent pas sur Assimé';
+
+  @override
+  String get assimeForbiddenBody =>
+      'Pour un médicament, passe par Honam : une pharmacie te fait un devis et un coursier te le livre.';
+
+  @override
+  String get assimeGoHonam => 'Aller sur Honam';
+
+  @override
+  String get assimeAlsoForbidden => 'Aussi interdits sur Assimé';
+
+  @override
+  String get assimeForbiddenWeapons => 'Armes et munitions';
+
+  @override
+  String get assimeForbiddenCounterfeit => 'Contrefaçons';
+
+  @override
+  String get assimeForbiddenAnimals => 'Animaux protégés';
+
+  @override
+  String get assimeChangeItem => 'Changer d’article';
+
+  @override
+  String assimeReviewsTitle(String name) {
+    return 'Avis sur $name';
+  }
+
+  @override
+  String assimeReviewsCount(int count) {
+    return '$count ventes notées';
+  }
+
+  @override
+  String assimeReviewReplyFrom(String name) {
+    return 'Réponse de $name : ';
+  }
+
+  @override
+  String get assimeReportReview => 'Signaler un avis';
+
+  @override
+  String get assimeReviewReported => 'Avis signalé à l’équipe Pokou.';
+
+  @override
+  String get assimeSeeReviews => 'Voir les avis';
+
+  @override
+  String get assimeNoReviews =>
+      'Pas encore d’avis. Seul l’acheteur d’une vente confirmée par le vendeur peut noter.';
+
+  @override
+  String get assimeReplyAction => 'Répondre';
+
+  @override
+  String get assimeReplyHint => 'Ta réponse, visible de tous';
+
+  @override
+  String get assimeContactSeller => 'Contacter le vendeur';
+
+  @override
+  String get assimeNoPaymentNotice =>
+      'Pokou n’encaisse aucun paiement sur Assimé. Vois l’article avant de payer, dans un lieu public.';
+
+  @override
+  String assimeSellerListings(int count) {
+    return '$count annonces';
+  }
+
+  @override
+  String assimeRateInvite(String seller, String price) {
+    return '$seller a indiqué que tu as acheté cet article pour $price.';
+  }
+
+  @override
+  String get assimeMyListings => 'Mes annonces';
+
+  @override
+  String assimeMyListingsSub(String name, int count) {
+    return '$name · $count annonces';
+  }
+
+  @override
+  String assimeTabOnline(int count) {
+    return 'En ligne · $count';
+  }
+
+  @override
+  String assimeTabSold(int count) {
+    return 'Vendues · $count';
+  }
+
+  @override
+  String assimeTabExpired(int count) {
+    return 'Expirées · $count';
+  }
+
+  @override
+  String assimeBadgeSponsored(int days) {
+    return 'Sponsorisée · $days j';
+  }
+
+  @override
+  String assimeBadgeExpiresIn(int days) {
+    return 'Expire dans $days jours';
+  }
+
+  @override
+  String get assimeBadgeOnline => 'En ligne';
+
+  @override
+  String get assimeBadgeExpired => 'Expirée';
+
+  @override
+  String get assimeBadgeSold => 'Vendue';
+
+  @override
+  String assimeStatsLine(int views, int favorites, int messages) {
+    return '$views vues · $favorites favoris · $messages messages';
+  }
+
+  @override
+  String get assimeMarkSold => 'Marquer vendue';
+
+  @override
+  String get assimeRenew => 'Renouveler';
+
+  @override
+  String get assimeRenewed => 'Annonce renouvelée pour 30 jours.';
+
+  @override
+  String get assimePromote => 'Mettre en avant';
+
+  @override
+  String get assimeStatsPrivate =>
+      'Les vues et les favoris ne sont visibles que de toi.';
+
+  @override
+  String get assimePublishCta => 'Publier une annonce';
+
+  @override
+  String get assimeNoneInTab => 'Rien ici pour l’instant.';
+
+  @override
+  String get assimeDeleteTitle => 'Supprimer l’annonce ?';
+
+  @override
+  String get assimeDeleteNotSelling => 'Je ne la vends plus';
+
+  @override
+  String get assimeDeleteSoldPokou => 'Vendue sur Pokou';
+
+  @override
+  String get assimeDeleteSoldPokouSub =>
+      'Choisis l’acheteur pour qu’il puisse noter';
+
+  @override
+  String get assimeDeleteSoldElsewhere => 'Vendue ailleurs';
+
+  @override
+  String get assimeDeleteNote =>
+      'Les discussions liées restent dans tes Discussions. Cette action est définitive.';
+
+  @override
+  String get assimeDeleteAction => 'Supprimer l’annonce';
+
+  @override
+  String get assimeEditTitle => 'Modifier l’annonce';
+
+  @override
+  String get assimeSaveChanges => 'Enregistrer les modifications';
+
+  @override
+  String get assimeTitleLabel => 'Titre';
+
+  @override
+  String get assimeAreaLabel => 'Ville et quartier';
+
+  @override
+  String get assimeSavedSearches => 'Recherches enregistrées';
+
+  @override
+  String get assimeFavoriteListings => 'Annonces favorites';
+
+  @override
+  String assimeAlertFound(int count) {
+    return '$count annonces trouvées';
+  }
+
+  @override
+  String get assimeAlertPaused => 'Alerte coupée';
+
+  @override
+  String get assimeWhyPrivacy =>
+      'Pokou ne lit jamais tes messages ni tes statuts pour choisir les annonces. Au plus un statut sponsorisé tous les 5 statuts.';
+
+  @override
+  String get assimeHideListing => 'Masquer cette annonce';
+
+  @override
+  String get assimeHideSeller => 'Ne plus voir les annonces de ce vendeur';
+
+  @override
+  String get assimeHidden => 'Annonce masquée.';
+
+  @override
+  String get assimeSellerHidden =>
+      'Tu ne verras plus les annonces de ce vendeur.';
+
+  @override
+  String get assimeProfileTitle => 'Profil';
+
+  @override
+  String assimePrivateSince(String date) {
+    return 'Particulier · sur Pokou depuis $date';
+  }
+
+  @override
+  String assimeProSince(String date) {
+    return 'Vendeur Pro · sur Pokou depuis $date';
+  }
+
+  @override
+  String assimeRatedSales(int count) {
+    return '$count ventes notées';
+  }
+
+  @override
+  String get assimeMessage => 'Message';
+
+  @override
+  String get assimeReport => 'Signaler';
+
+  @override
+  String assimeListingsOf(String name, int count) {
+    return 'Annonces de $name · $count';
+  }
+
+  @override
+  String get assimeBadgeNote =>
+      'Le badge montre un nom vérifié par Pokou certifié. Un particulier n’a pas de badge Pro.';
+
+  @override
+  String get assimeBoostRunning => 'Mise en avant en cours';
+
+  @override
+  String get assimeBoostEnded => 'Mise en avant terminée';
+
+  @override
+  String assimeBoostSub(String name, int days) {
+    return '$name · $days jours';
+  }
+
+  @override
+  String assimeBoostDayOf(int day, int total) {
+    return 'Jour $day sur $total';
+  }
+
+  @override
+  String assimeBoostEnds(String date) {
+    return 'fin $date';
+  }
+
+  @override
+  String get assimeViewsResults => 'Vues dans les résultats';
+
+  @override
+  String get assimeViewsStatus => 'Vues en statut';
+
+  @override
+  String get assimeOpens => '« Voir l’annonce »';
+
+  @override
+  String get assimeMessagesReceived => 'Messages reçus';
+
+  @override
+  String assimeMessagesBefore(int count) {
+    return 'contre $count avant';
+  }
+
+  @override
+  String get assimeViewsPerDay => 'Vues par jour';
+
+  @override
+  String get assimeLegendResults => 'Résultats';
+
+  @override
+  String get assimeLegendStatus => 'Statuts';
+
+  @override
+  String get assimeBoostNote =>
+      'Ces chiffres ne sont visibles que de toi. Pas de renouvellement automatique : tu choisiras à la fin.';
+
+  @override
+  String get assimeSeeListing => 'Voir l’annonce';
+
+  @override
+  String get assimeBeforeBuying => 'Avant d’acheter';
+
+  @override
+  String get assimeTipPublicPlace =>
+      'Retrouve le vendeur dans un lieu public, en journée.';
+
+  @override
+  String get assimeTipNoAdvance =>
+      'Ne paie jamais d’avance : vois l’article d’abord.';
+
+  @override
+  String get assimeTipNoCode =>
+      'Pokou n’encaisse aucun paiement et ne te demandera jamais ton code secret.';
+
+  @override
+  String get assimeNumberHidden => 'Ton numéro n’est pas montré au vendeur.';
+
+  @override
+  String get assimeQuickPhotos => 'D’autres photos ?';
+
+  @override
+  String get assimeQuickAvailable => 'Toujours disponible ?';
+
+  @override
+  String get assimeQuickNegotiable => 'Prix négociable ?';
+
+  @override
+  String get assimeSee => 'Voir';
+
+  @override
+  String assimePromoteDays(int days) {
+    return '$days jours';
+  }
+
+  @override
+  String get assimePromoteTop =>
+      'En tête des résultats de sa catégorie, dans sa ville';
+
+  @override
+  String get assimePromoteStatus =>
+      'Une place parmi les statuts des acheteurs de sa ville';
+
+  @override
+  String get assimePromoteCheaper =>
+      'Moins cher par jour · badge payant requis pour les statuts';
+
+  @override
+  String get assimePromoteTtc =>
+      'Prix TTC. Ton annonce porte la mention « Sponsorisé ». Pas de renouvellement automatique.';
+
+  @override
+  String get assimePromoteStart => 'Début';
+
+  @override
+  String get assimePromoteStartNow => 'Dès la validation';
+
+  @override
+  String get assimePromoteEnd => 'Fin';
+
+  @override
+  String get assimePromotePayment => 'Paiement';
+
+  @override
+  String get assimePromotePaymentMm => 'Mobile Money';
+
+  @override
+  String get assimePromoteModeration =>
+      'La place en statut est vérifiée par la modération avant la diffusion. Une catégorie interdite ne peut jamais être mise en avant.';
+
+  @override
+  String assimePromotePay(String amount) {
+    return 'Payer $amount FCFA';
+  }
+
+  @override
+  String get assimeAdAssime => 'annonce Assimé';
+
+  @override
+  String get assimeWrite => 'Écrire';
+
+  @override
+  String get assimeNextHint => 'Passe au statut suivant en touchant à droite.';
+
+  @override
+  String get assimeCover => 'Couverture';
+
+  @override
+  String get assimeAddPhotoShort => 'Ajouter';
+
+  @override
+  String assimePhotosHint(int count) {
+    return '$count photos sur 5. La première sert de couverture. D’autres photos pourront être envoyées dans la discussion avec l’acheteur.';
+  }
+
+  @override
+  String get assimeNumberNeverShown =>
+      'Ton numéro n’est jamais affiché : les acheteurs t’écrivent sur Pokou.';
+
+  @override
+  String get assimeContinue => 'Continuer';
+
+  @override
+  String get assimeStep1Title => 'Photos et catégorie';
+
+  @override
+  String get assimeStep2Title => 'Prix, état et lieu';
+
+  @override
+  String get assimeToday => 'aujourd’hui';
+
+  @override
+  String get assimeYesterday => 'hier';
+
+  @override
+  String get assimeNearYou => 'Près de chez toi';
+
+  @override
+  String get assimeSoldBadge => 'Vendu';
 }
