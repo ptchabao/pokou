@@ -186,3 +186,6 @@ from app.models.moderation import (  # noqa: F401
 from app.models.banners import (  # noqa: F401
     HomeBanner,
 )
+from app.models.support import (  # noqa: F401
+    SupportTicket,
+)

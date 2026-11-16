@@ -9,10 +9,10 @@ import '../../../l10n/app_localizations.dart';
 
 /// REG-6 · Code PIN oublié (AUTH-11).
 ///
-/// Seul le délai de 7 jours est proposé : la réinitialisation par e-mail
-/// suppose une adresse vérifiée et un envoi de courriels, qui ne sont pas
-/// encore en place. Elle est affichée, désactivée, pour que l'écran dise
-/// la vérité sur ce qui existe.
+/// Une seule voie : le délai de 7 jours, puis la connexion par le code SMS.
+/// Pas de réinitialisation par e-mail, et il n'y en aura pas : une boîte
+/// aux lettres se prend plus facilement qu'une carte SIM, et le délai est
+/// justement ce qui protège d'un vol de compte.
 ///
 /// Deux portes : la connexion (avec le laissez-passer du code SMS) et
 /// Réglages › Compte et sécurité, où l'on est déjà connecté — sans
@@ -87,29 +87,42 @@ class _ForgotPinScreenState extends ConsumerState<ForgotPinScreen> {
                   Text(l.pinForgotIntro),
                   const SizedBox(height: 12),
                   Container(
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       border: Border.all(color: AppColors.border),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: RadioGroup<String>(
-                      groupValue: 'wait',
-                      onChanged: (_) {},
-                      child: Column(
-                        children: [
-                          RadioListTile<String>(
-                            value: 'email',
-                            enabled: false,
-                            title: Text(l.pinForgotEmail),
-                            subtitle: Text(l.pinForgotEmailSub),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.schedule_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.pinForgotWait,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l.pinForgotWaitSub,
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
-                          RadioListTile<String>(
-                            value: 'wait',
-                            title: Text(l.pinForgotWait),
-                            subtitle: Text(l.pinForgotWaitSub),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 12),

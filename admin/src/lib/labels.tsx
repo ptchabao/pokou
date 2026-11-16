@@ -39,7 +39,7 @@ const TONES: Record<string, "default" | "secondary" | "destructive" | "outline">
   ACTIONED: "secondary", DISMISSED: "outline", REJECTED: "outline", CLOSED: "outline",
   SUSPENDED: "destructive", EXCLUDED: "destructive", NAME_MISMATCH: "destructive", CORRECTION: "default",
   PAID: "default", TRIAL: "secondary", MEMBER: "secondary", CONFIRMED: "secondary", DECLARED: "default",
-  CURRENT: "default", FAILED: "destructive",
+  CURRENT: "default", FAILED: "destructive", ANSWERED: "secondary",
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -50,7 +50,7 @@ const STATUS_LABELS: Record<string, string> = {
   ACCEPTED: "Devis accepté", PAID: "Payé", READY: "Prête", IN_DELIVERY: "En livraison", EXPIRED: "Expiré",
   TRIAL: "Essai", MEMBER: "Membre", ENDED: "Essai fini", CORRECTION: "À corriger",
   NAME_MISMATCH: "Noms différents", DECLARED: "Déclarée", CONFIRMED: "Confirmé", UPCOMING: "À venir",
-  CURRENT: "En cours", DONE: "Terminé", FAILED: "Échoué",
+  CURRENT: "En cours", DONE: "Terminé", FAILED: "Échoué", ANSWERED: "Répondu",
 }
 
 export function StatusBadge({ status }: { status?: string | null }) {

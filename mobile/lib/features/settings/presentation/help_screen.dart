@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../chat/presentation/chat_controller.dart' show kNoMonitor;
 import '../../../core/widgets/pokou_context_menu.dart';
+import 'support_screens.dart';
 
 /// REG-10 · Aide et support (MSG-22).
 ///
@@ -55,8 +56,9 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
               )
               .toList();
 
-    void openBaba() =>
-        context.push('/chat/$kNoMonitor', extra: l.navBaba);
+    void openBaba() => context.push('/chat/$kNoMonitor', extra: l.navBaba);
+    void open(Widget screen) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -65,7 +67,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             onChanged: (v) => setState(() => _query = v),
             decoration: InputDecoration(
               hintText: l.helpSearchHint,
@@ -132,15 +134,15 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                   title: Text(l.helpSupport),
                   subtitle: Text(l.helpSupportSub),
                   trailing: const Icon(Icons.chevron_right),
-                  // Le support répond dans l'application, par l'assistant,
-                  // qui transmet à l'équipe ce qu'il ne sait pas résoudre.
-                  onTap: openBaba,
+                  // L'équipe Pokou, et non Baba : la demande part au support,
+                  // qui répond dans l'application (voir support_screens.dart).
+                  onTap: () => open(const SupportContactScreen()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.flag_outlined),
                   title: Text(l.helpReport),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: openBaba,
+                  onTap: () => open(const ReportProblemScreen()),
                 ),
               ],
             ),

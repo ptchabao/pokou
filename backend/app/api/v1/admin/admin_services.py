@@ -35,7 +35,7 @@ from app.models import (
     AbuseReport, AuditLog, CertifiedProApplication, CertifiedSubscription, CourierProfile, GroupMember,
     HonamOrder, HonamOrderEvent, KoryEntry, KoryInvite, KoryMember, KoryPot, KoryRound, MarketplaceAd,
     MarketplaceBoost, MarketplacePayment, MarketplaceProduct, Pharmacy, PharmacyCourier, PharmacyStaff,
-    SellerReview, SellerVerificationApplication, User, UserRole,
+    SellerReview, SellerVerificationApplication, SupportTicket, User, UserRole,
 )
 from app.services.notifications.inbox import notify
 
@@ -92,6 +92,9 @@ def queues(user: User = Depends(require_permission("dashboard.view")), db: Sessi
     add("reports", "Signalements ouverts",
         n(db.query(func.count(AbuseReport.id)).filter(AbuseReport.status == "OPEN")),
         "/reports/", "reports.view")
+    add("support", "Demandes de support",
+        n(db.query(func.count(SupportTicket.id)).filter(SupportTicket.status == "OPEN")),
+        "/support/", "reports.view")
     add("certified_pro", "Dossiers Pro à examiner",
         n(db.query(func.count(CertifiedProApplication.id)).filter(CertifiedProApplication.status == "PENDING")),
         "/certified/", "certified.view",

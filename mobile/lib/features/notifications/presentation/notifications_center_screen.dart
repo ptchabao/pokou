@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../honam/presentation/honam_order_screen.dart';
 import '../../kory/presentation/kory_pot_screen.dart';
 import '../../marketplace/presentation/assime_sale_screens.dart';
+import '../../settings/presentation/support_screens.dart';
 import '../data/service_notification.dart';
 import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/skeleton.dart';
@@ -42,6 +43,9 @@ void openServiceRoute(NavigatorState navigator, String? route) {
   } else if (parts.length == 3 && parts[0] == 'honam' && parts[1] == 'order') {
     final id = int.tryParse(parts[2]);
     if (id != null) screen = HonamOrderScreen(orderId: id);
+  } else if (route == 'support/tickets') {
+    // Réponse du support : « Mes demandes », où elle se lit.
+    screen = const SupportContactScreen();
   }
   if (screen != null) {
     navigator.push(MaterialPageRoute(builder: (_) => screen!));

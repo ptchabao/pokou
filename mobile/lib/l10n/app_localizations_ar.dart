@@ -6725,6 +6725,115 @@ class LAr extends L {
   String get helpReport => 'الإبلاغ عن مشكلة';
 
   @override
+  String get supportContactIntro =>
+      'اطرح سؤالك: يرد عليك فريق Pokou هنا، داخل التطبيق.';
+
+  @override
+  String get supportMessageHint => 'رسالتك';
+
+  @override
+  String get supportSend => 'إرسال';
+
+  @override
+  String get supportSent => 'أُرسلت الرسالة إلى الدعم.';
+
+  @override
+  String get supportMyRequests => 'طلباتي';
+
+  @override
+  String get supportNoRequests => 'لا توجد طلبات حتى الآن.';
+
+  @override
+  String get supportStatusOpen => 'قيد الانتظار';
+
+  @override
+  String get supportStatusAnswered => 'تم الرد';
+
+  @override
+  String get supportStatusClosed => 'مغلق';
+
+  @override
+  String get supportKindQuestion => 'سؤال إلى الدعم';
+
+  @override
+  String get supportKindProblem => 'مشكلة مُبلغ عنها';
+
+  @override
+  String get supportReplyLabel => 'رد الفريق';
+
+  @override
+  String supportSentOn(String date) {
+    return 'أُرسل في $date';
+  }
+
+  @override
+  String get supportTooShort => 'اكتب 10 أحرف على الأقل.';
+
+  @override
+  String get supportTooMany =>
+      'لقد أرسلت عدة طلبات بالفعل. الفريق يعمل عليها: حاول لاحقًا.';
+
+  @override
+  String get supportFailed => 'تعذّر الإرسال. تحقق من اتصالك وحاول مجددًا.';
+
+  @override
+  String get supportLoadFailed => 'تعذّر تحميل طلباتك.';
+
+  @override
+  String get supportProblemIntro =>
+      'أخبرنا بما لا يعمل: سيتولى فريق Pokou الأمر.';
+
+  @override
+  String get supportCategoryLabel => 'الفئة';
+
+  @override
+  String get supportCategoryAccount => 'الحساب وتسجيل الدخول';
+
+  @override
+  String get supportCategoryMessages => 'الرسائل';
+
+  @override
+  String get supportCategoryCalls => 'المكالمات';
+
+  @override
+  String get supportCategoryNotifications => 'الإشعارات';
+
+  @override
+  String get supportCategoryCrash => 'التطبيق يُغلق أو يتجمد';
+
+  @override
+  String get supportCategoryOther => 'أخرى';
+
+  @override
+  String get supportDescriptionLabel => 'الوصف';
+
+  @override
+  String get supportDescriptionHint => 'ماذا حدث؟ وماذا كنت تتوقع؟';
+
+  @override
+  String get supportScreenshotAdd => 'إضافة لقطة شاشة';
+
+  @override
+  String get supportScreenshotOptional => 'اختياري';
+
+  @override
+  String get supportScreenshotRemove => 'إزالة';
+
+  @override
+  String get supportDiagnosticsNote =>
+      'يُرفق إصدار التطبيق ونظام هاتفك فقط، لا شيء غير ذلك. تبقى رسائلك مشفّرة: لا يراها الفريق.';
+
+  @override
+  String get supportProblemSentTitle => 'شكرًا، تم الإرسال';
+
+  @override
+  String get supportProblemSentBody =>
+      'سيطّلع فريق Pokou على بلاغك. يمكنك متابعته في «مراسلة الدعم».';
+
+  @override
+  String get supportDone => 'تم';
+
+  @override
   String get helpNoResult => 'لا يوجد سؤال مطابق. اسأل بابا.';
 
   @override
@@ -6884,14 +6993,7 @@ class LAr extends L {
   String get changeNumberDone => 'تم تغيير رقمك.';
 
   @override
-  String get pinForgotIntro => 'طريقتان لاستعادة حسابك:';
-
-  @override
-  String get pinForgotEmail => 'عبر البريد الإلكتروني';
-
-  @override
-  String get pinForgotEmailSub =>
-      'إذا أضفت عنوانًا: يُرسل إليك رابط إعادة تعيين';
+  String get pinForgotIntro => 'من دون رمز PIN، تستعيد حسابك هكذا:';
 
   @override
   String get pinForgotWait => 'الانتظار 7 أيام';

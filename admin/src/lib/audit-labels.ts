@@ -21,6 +21,8 @@ export const AUDIT_ACTIONS: Record<string, string> = {
   report_dismiss: "Signalement classé",
   report_suspend: "Signalement : compte suspendu",
   report_warn: "Signalement : avertissement",
+  support_reply: "Support : réponse envoyée",
+  support_close: "Support : demande close",
   kory_close: "Collecte clôturée",
   kory_reopen: "Collecte rouverte",
   kory_freeze: "Collecte suspendue (vérification)",

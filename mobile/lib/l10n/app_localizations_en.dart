@@ -6734,6 +6734,116 @@ class LEn extends L {
   String get helpReport => 'Report a problem';
 
   @override
+  String get supportContactIntro =>
+      'Ask your question: the Pokou team replies here, in the app.';
+
+  @override
+  String get supportMessageHint => 'Your message';
+
+  @override
+  String get supportSend => 'Send';
+
+  @override
+  String get supportSent => 'Message sent to support.';
+
+  @override
+  String get supportMyRequests => 'My requests';
+
+  @override
+  String get supportNoRequests => 'No requests yet.';
+
+  @override
+  String get supportStatusOpen => 'Pending';
+
+  @override
+  String get supportStatusAnswered => 'Answered';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String get supportKindQuestion => 'Question to support';
+
+  @override
+  String get supportKindProblem => 'Problem reported';
+
+  @override
+  String get supportReplyLabel => 'Team reply';
+
+  @override
+  String supportSentOn(String date) {
+    return 'Sent on $date';
+  }
+
+  @override
+  String get supportTooShort => 'Write at least 10 characters.';
+
+  @override
+  String get supportTooMany =>
+      'You’ve already sent several requests. The team is on it: try again later.';
+
+  @override
+  String get supportFailed =>
+      'Couldn’t send. Check your connection and try again.';
+
+  @override
+  String get supportLoadFailed => 'Couldn’t load your requests.';
+
+  @override
+  String get supportProblemIntro =>
+      'Tell us what isn’t working: the Pokou team will look into it.';
+
+  @override
+  String get supportCategoryLabel => 'Category';
+
+  @override
+  String get supportCategoryAccount => 'Account and sign-in';
+
+  @override
+  String get supportCategoryMessages => 'Messages';
+
+  @override
+  String get supportCategoryCalls => 'Calls';
+
+  @override
+  String get supportCategoryNotifications => 'Notifications';
+
+  @override
+  String get supportCategoryCrash => 'The app closes or freezes';
+
+  @override
+  String get supportCategoryOther => 'Other';
+
+  @override
+  String get supportDescriptionLabel => 'Description';
+
+  @override
+  String get supportDescriptionHint => 'What happened? What did you expect?';
+
+  @override
+  String get supportScreenshotAdd => 'Add a screenshot';
+
+  @override
+  String get supportScreenshotOptional => 'Optional';
+
+  @override
+  String get supportScreenshotRemove => 'Remove';
+
+  @override
+  String get supportDiagnosticsNote =>
+      'The app version and your phone’s system are attached, nothing else. Your messages stay encrypted: the team can’t see them.';
+
+  @override
+  String get supportProblemSentTitle => 'Thanks, it’s been sent';
+
+  @override
+  String get supportProblemSentBody =>
+      'The Pokou team will look at your report. You can follow it in “Contact support”.';
+
+  @override
+  String get supportDone => 'Done';
+
+  @override
   String get helpNoResult => 'No matching question. Ask Baba.';
 
   @override
@@ -6895,14 +7005,8 @@ class LEn extends L {
   String get changeNumberDone => 'Your number has been changed.';
 
   @override
-  String get pinForgotIntro => 'Two ways to get your account back:';
-
-  @override
-  String get pinForgotEmail => 'By email';
-
-  @override
-  String get pinForgotEmailSub =>
-      'If you added an address: a reset link is sent to you';
+  String get pinForgotIntro =>
+      'Without your PIN, here’s how you get your account back:';
 
   @override
   String get pinForgotWait => 'Wait 7 days';

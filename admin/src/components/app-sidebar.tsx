@@ -11,6 +11,7 @@ import {
   IconFlag,
   IconHistory,
   IconKey,
+  IconLifebuoy,
   IconSettings,
   IconWorld,
   IconLogout,
@@ -45,6 +46,7 @@ export const NAV = [
   { group: "Communauté", items: [
     { title: "Utilisateurs", url: "/users/", icon: IconUsers, perm: "users.view" },
     { title: "Signalements", url: "/reports/", icon: IconFlag, perm: "reports.view" },
+    { title: "Support", url: "/support/", icon: IconLifebuoy, perm: "reports.view" },
   ] },
   { group: "Services", items: [
     { title: "Kory", url: "/kory/", icon: IconPigMoney, perm: "kory.view" },

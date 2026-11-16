@@ -6809,6 +6809,116 @@ class LRu extends L {
   String get helpReport => 'Сообщить о проблеме';
 
   @override
+  String get supportContactIntro =>
+      'Задай вопрос: команда Pokou ответит здесь, в приложении.';
+
+  @override
+  String get supportMessageHint => 'Твоё сообщение';
+
+  @override
+  String get supportSend => 'Отправить';
+
+  @override
+  String get supportSent => 'Сообщение отправлено в поддержку.';
+
+  @override
+  String get supportMyRequests => 'Мои обращения';
+
+  @override
+  String get supportNoRequests => 'Обращений пока нет.';
+
+  @override
+  String get supportStatusOpen => 'Ожидает ответа';
+
+  @override
+  String get supportStatusAnswered => 'Есть ответ';
+
+  @override
+  String get supportStatusClosed => 'Закрыто';
+
+  @override
+  String get supportKindQuestion => 'Вопрос в поддержку';
+
+  @override
+  String get supportKindProblem => 'Сообщение о проблеме';
+
+  @override
+  String get supportReplyLabel => 'Ответ команды';
+
+  @override
+  String supportSentOn(String date) {
+    return 'Отправлено $date';
+  }
+
+  @override
+  String get supportTooShort => 'Напиши хотя бы 10 символов.';
+
+  @override
+  String get supportTooMany =>
+      'Ты уже отправил несколько обращений. Команда их разбирает: попробуй позже.';
+
+  @override
+  String get supportFailed =>
+      'Не удалось отправить. Проверь соединение и попробуй ещё раз.';
+
+  @override
+  String get supportLoadFailed => 'Не удалось загрузить обращения.';
+
+  @override
+  String get supportProblemIntro =>
+      'Расскажи, что не работает: команда Pokou разберётся.';
+
+  @override
+  String get supportCategoryLabel => 'Категория';
+
+  @override
+  String get supportCategoryAccount => 'Аккаунт и вход';
+
+  @override
+  String get supportCategoryMessages => 'Сообщения';
+
+  @override
+  String get supportCategoryCalls => 'Звонки';
+
+  @override
+  String get supportCategoryNotifications => 'Уведомления';
+
+  @override
+  String get supportCategoryCrash => 'Приложение закрывается или зависает';
+
+  @override
+  String get supportCategoryOther => 'Другое';
+
+  @override
+  String get supportDescriptionLabel => 'Описание';
+
+  @override
+  String get supportDescriptionHint => 'Что произошло? Чего ты ожидал?';
+
+  @override
+  String get supportScreenshotAdd => 'Добавить снимок экрана';
+
+  @override
+  String get supportScreenshotOptional => 'Необязательно';
+
+  @override
+  String get supportScreenshotRemove => 'Убрать';
+
+  @override
+  String get supportDiagnosticsNote =>
+      'Прикладываются только версия приложения и система телефона. Твои сообщения остаются зашифрованными: команда их не видит.';
+
+  @override
+  String get supportProblemSentTitle => 'Спасибо, отправлено';
+
+  @override
+  String get supportProblemSentBody =>
+      'Команда Pokou рассмотрит твоё сообщение. Следить за ним можно в разделе «Написать в поддержку».';
+
+  @override
+  String get supportDone => 'Готово';
+
+  @override
   String get helpNoResult => 'Нет подходящих вопросов. Спроси Бабу.';
 
   @override
@@ -6970,14 +7080,7 @@ class LRu extends L {
   String get changeNumberDone => 'Твой номер изменён.';
 
   @override
-  String get pinForgotIntro => 'Два способа вернуть аккаунт:';
-
-  @override
-  String get pinForgotEmail => 'По e-mail';
-
-  @override
-  String get pinForgotEmailSub =>
-      'Если ты добавил адрес: тебе придёт ссылка для сброса';
+  String get pinForgotIntro => 'Без PIN-кода аккаунт можно вернуть так:';
 
   @override
   String get pinForgotWait => 'Подождать 7 дней';

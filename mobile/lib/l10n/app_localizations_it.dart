@@ -6777,6 +6777,116 @@ class LIt extends L {
   String get helpReport => 'Segnala un problema';
 
   @override
+  String get supportContactIntro =>
+      'Fai la tua domanda: il team Pokou ti risponde qui, nell’app.';
+
+  @override
+  String get supportMessageHint => 'Il tuo messaggio';
+
+  @override
+  String get supportSend => 'Invia';
+
+  @override
+  String get supportSent => 'Messaggio inviato all’assistenza.';
+
+  @override
+  String get supportMyRequests => 'Le mie richieste';
+
+  @override
+  String get supportNoRequests => 'Nessuna richiesta per ora.';
+
+  @override
+  String get supportStatusOpen => 'In attesa';
+
+  @override
+  String get supportStatusAnswered => 'Risposta inviata';
+
+  @override
+  String get supportStatusClosed => 'Chiusa';
+
+  @override
+  String get supportKindQuestion => 'Domanda all’assistenza';
+
+  @override
+  String get supportKindProblem => 'Problema segnalato';
+
+  @override
+  String get supportReplyLabel => 'Risposta del team';
+
+  @override
+  String supportSentOn(String date) {
+    return 'Inviata il $date';
+  }
+
+  @override
+  String get supportTooShort => 'Scrivi almeno 10 caratteri.';
+
+  @override
+  String get supportTooMany =>
+      'Hai già inviato diverse richieste. Il team ci sta lavorando: riprova più tardi.';
+
+  @override
+  String get supportFailed =>
+      'Invio non riuscito. Controlla la connessione e riprova.';
+
+  @override
+  String get supportLoadFailed => 'Impossibile caricare le tue richieste.';
+
+  @override
+  String get supportProblemIntro =>
+      'Dicci cosa non funziona: se ne occupa il team Pokou.';
+
+  @override
+  String get supportCategoryLabel => 'Categoria';
+
+  @override
+  String get supportCategoryAccount => 'Account e accesso';
+
+  @override
+  String get supportCategoryMessages => 'Messaggi';
+
+  @override
+  String get supportCategoryCalls => 'Chiamate';
+
+  @override
+  String get supportCategoryNotifications => 'Notifiche';
+
+  @override
+  String get supportCategoryCrash => 'L’app si chiude o si blocca';
+
+  @override
+  String get supportCategoryOther => 'Altro';
+
+  @override
+  String get supportDescriptionLabel => 'Descrizione';
+
+  @override
+  String get supportDescriptionHint => 'Cos’è successo? Cosa ti aspettavi?';
+
+  @override
+  String get supportScreenshotAdd => 'Aggiungi uno screenshot';
+
+  @override
+  String get supportScreenshotOptional => 'Facoltativo';
+
+  @override
+  String get supportScreenshotRemove => 'Rimuovi';
+
+  @override
+  String get supportDiagnosticsNote =>
+      'Vengono allegati la versione dell’app e il sistema del tuo telefono, nient’altro. I tuoi messaggi restano cifrati: il team non li vede.';
+
+  @override
+  String get supportProblemSentTitle => 'Grazie, è stato inviato';
+
+  @override
+  String get supportProblemSentBody =>
+      'Il team Pokou esaminerà la tua segnalazione. Puoi seguirla in «Scrivi all’assistenza».';
+
+  @override
+  String get supportDone => 'Fatto';
+
+  @override
   String get helpNoResult => 'Nessuna domanda corrisponde. Chiedi a Baba.';
 
   @override
@@ -6941,14 +7051,7 @@ class LIt extends L {
   String get changeNumberDone => 'Il tuo numero è stato cambiato.';
 
   @override
-  String get pinForgotIntro => 'Due modi per recuperare il tuo account:';
-
-  @override
-  String get pinForgotEmail => 'Via e-mail';
-
-  @override
-  String get pinForgotEmailSub =>
-      'Se hai aggiunto un indirizzo: ti viene inviato un link di reimpostazione';
+  String get pinForgotIntro => 'Senza il PIN, recuperi il tuo account così:';
 
   @override
   String get pinForgotWait => 'Attendi 7 giorni';
