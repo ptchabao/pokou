@@ -61,7 +61,12 @@ class KoryPot {
     this.cotisation,
     this.organizerId,
     this.participants = const [],
+    this.beneficiaryPays = true,
   });
+
+  /// Tontine : le bénéficiaire du tour mise aussi (levée = mise × membres).
+  /// `false` pour une tontine créée avant cette règle, qui la garde.
+  final bool beneficiaryPays;
 
   /// KOR-11 : les participants, vus du collecteur et de l'organisateur
   /// seulement (numéros masqués).
@@ -249,6 +254,7 @@ class KoryPot {
         ? KoryCotisation.fromJson(json['cotisation'] as Map<String, dynamic>)
         : null,
     organizerId: json['organizer_id'] as int?,
+    beneficiaryPays: json['beneficiary_pays'] as bool? ?? true,
     participants: [
       for (final p in (json['participants'] as List? ?? const []))
         KoryParticipantInfo.fromJson(p as Map<String, dynamic>),

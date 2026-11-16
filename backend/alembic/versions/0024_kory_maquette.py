@@ -25,10 +25,14 @@ def upgrade() -> None:
         )
     with op.batch_alter_table("kory_pots") as batch:
         batch.add_column(sa.Column("auto_reminder_key", sa.String(length=24), nullable=True))
+        # Règle de levée : les tontines existantes restent sans valeur
+        # (ancienne règle) ; les nouvelles reçoivent « ALL ».
+        batch.add_column(sa.Column("levee_rule", sa.String(length=8), nullable=True))
 
 
 def downgrade() -> None:
     with op.batch_alter_table("kory_pots") as batch:
+        batch.drop_column("levee_rule")
         batch.drop_column("auto_reminder_key")
     with op.batch_alter_table("kory_members") as batch:
         batch.drop_column("reminders_muted")

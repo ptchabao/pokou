@@ -285,9 +285,43 @@ def test_etat_du_tour_et_rapport(client):
     client.post(f"{url}/entries/{entry['id']}/review", json={"decision": "CONFIRM"}, headers=people[0][0])
     client.post(f"{url}/entries", json={"amount": 5000}, headers=people[2][0])
     current = client.get(url, headers=people[3][0]).json()["rounds"][0]
-    assert current["expected_count"] == 3 and current["confirmed_count"] == 1 and current["declared_count"] == 1
+    # Le bénéficiaire mise aussi (règle de levée du 15 nov. 2026) : 4 mises.
+    assert current["expected_count"] == 4 and current["confirmed_count"] == 1 and current["declared_count"] == 1
+    assert current["expected_total"] == 4 * 5000
     statuses = {c["user_id"]: c["status"] for c in current["contributors"]}
     assert statuses[people[1][1]] == "CONFIRMED" and statuses[people[3][1]] == "DUE"
+
+
+def test_levee_mise_fois_membres_le_beneficiaire_mise_aussi(client):
+    """Règle du 15 nov. 2026 : levée = mise × nombre de membres. Le
+    bénéficiaire du tour mise comme les autres ; sa propre mise lui revient,
+    elle est confirmée d'emblée."""
+    people, pot = _started(client, size=4)
+    url = f"/api/v1/kory/pots/{pot['id']}"
+    assert pot["beneficiary_pays"] is True
+    current = pot["rounds"][0]
+    assert current["expected_total"] == 4 * 5000 and current["expected_count"] == 4
+    # people[0] reçoit le tour 1 et mise quand même.
+    own = client.post(f"{url}/entries", json={"amount": 5000}, headers=people[0][0])
+    assert own.status_code == 201 and own.json()["status"] == "CONFIRMED"
+    seen = client.get(url, headers=people[0][0]).json()["rounds"][0]
+    assert seen["confirmed_count"] == 1 and seen["confirmed_total"] == 5000
+    assert {c["user_id"] for c in seen["contributors"]} == {uid for _, uid in people}
+
+
+def test_une_tontine_d_avant_la_regle_garde_l_ancienne_levee(client):
+    """Une tontine créée avant la mise à jour (sans règle enregistrée) garde
+    mise × (membres − 1) jusqu'au bout : rien ne change pour ses membres."""
+    people, pot = _started(client, size=4)
+    with TestingSessionLocal() as db:
+        db.get(KoryPot, pot["id"]).levee_rule = None
+        db.commit()
+    url = f"/api/v1/kory/pots/{pot['id']}"
+    seen = client.get(url, headers=people[0][0]).json()
+    assert seen["beneficiary_pays"] is False
+    assert seen["rounds"][0]["expected_total"] == 3 * 5000 and seen["rounds"][0]["expected_count"] == 3
+    refused = client.post(f"{url}/entries", json={"amount": 5000}, headers=people[0][0])
+    assert refused.status_code == 409
 
 
 def test_echange_de_mois_accepte_puis_valide(client):

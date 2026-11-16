@@ -1597,10 +1597,13 @@ class _KoryTontineReportScreenState
       );
     }
     final me = _me(ref);
-    // Mes mises : un tour commencé où je ne reçois pas, et ce que j'y ai fait.
+    // Mes mises : chaque tour commencé (y compris le mien, sauf dans une
+    // tontine de l'ancienne règle), et ce que j'y ai fait.
     final owed = [
       for (final r in pot.rounds)
-        if ((r.isCurrent || r.isDone) && r.beneficiaryId != me) r.number,
+        if ((r.isCurrent || r.isDone) &&
+            (pot.beneficiaryPays || r.beneficiaryId != me))
+          r.number,
     ];
     final paid = {
       for (final e in pot.entries)
