@@ -36,20 +36,33 @@ class HonamRepository {
     await _api.get('/honam/orders/$id') as Map<String, dynamic>,
   );
 
-  Future<List<HonamOrderMessage>> orderMessages(int id) async {
+  /// Les messages d'UN canal de la commande : `patient` (patiente ↔
+  /// officine), `coursier` (officine ↔ coursier) ou `livraison` (patiente ↔
+  /// coursier). Chacun ne lit que les siens.
+  Future<List<HonamOrderMessage>> orderMessages(
+    int id, {
+    String channel = 'patient',
+  }) async {
     final json =
-        await _api.get('/honam/orders/$id/messages') as Map<String, dynamic>;
+        await _api.get('/honam/orders/$id/messages?channel=$channel')
+            as Map<String, dynamic>;
     return [
       for (final item in (json['items'] as List? ?? const []))
         HonamOrderMessage.fromJson(item as Map<String, dynamic>),
     ];
   }
 
-  Future<HonamOrderMessage> sendOrderMessage(int id, String body) async =>
-      HonamOrderMessage.fromJson(
-        await _api.post('/honam/orders/$id/messages', body: {'body': body})
-            as Map<String, dynamic>,
-      );
+  Future<HonamOrderMessage> sendOrderMessage(
+    int id,
+    String body, {
+    String channel = 'patient',
+  }) async => HonamOrderMessage.fromJson(
+    await _api.post(
+          '/honam/orders/$id/messages',
+          body: {'body': body, 'channel': channel},
+        )
+        as Map<String, dynamic>,
+  );
 
   Future<HonamOrder> submit({
     required int pharmacyId,
@@ -132,45 +145,53 @@ class HonamRepository {
         as Map<String, dynamic>,
   );
 
-  Future<CourierOffer> courierOffer({String? code}) async =>
-      CourierOffer.fromJson(
-        await _api.get(
-              code == null
-                  ? '/honam/courier/offer'
-                  : '/honam/courier/offer?code=${Uri.encodeQueryComponent(code)}',
-            )
-            as Map<String, dynamic>,
-      );
+  Future<CourierOffer> courierOffer({
+    String? code,
+  }) async => CourierOffer.fromJson(
+    await _api.get(
+          code == null
+              ? '/honam/courier/offer'
+              : '/honam/courier/offer?code=${Uri.encodeQueryComponent(code)}',
+        )
+        as Map<String, dynamic>,
+  );
 
   Future<void> dismissCourierOffer() =>
       _api.post('/honam/courier/offer/dismiss', body: const {});
 
-  Future<void> walletSendCode(String phone) =>
-      _api.post('/honam/courier/wallet/send-code', body: {'wallet_phone': phone});
+  Future<void> walletSendCode(String phone) => _api.post(
+    '/honam/courier/wallet/send-code',
+    body: {'wallet_phone': phone},
+  );
 
   Future<void> walletVerify(String phone, String code) => _api.post(
     '/honam/courier/wallet/verify',
     body: {'wallet_phone': phone, 'code': code},
   );
 
-  Future<CourierStatus> courierIdentity({int? selfie, int? front, int? back}) async =>
-      CourierStatus.fromJson(
-        await _api.post(
-              '/honam/courier/identity',
-              body: {
-                'selfie_media_id': ?selfie,
-                'id_front_media_id': ?front,
-                'id_back_media_id': ?back,
-              },
-            )
-            as Map<String, dynamic>,
-      );
+  Future<CourierStatus> courierIdentity({
+    int? selfie,
+    int? front,
+    int? back,
+  }) async => CourierStatus.fromJson(
+    await _api.post(
+          '/honam/courier/identity',
+          body: {
+            'selfie_media_id': ?selfie,
+            'id_front_media_id': ?front,
+            'id_back_media_id': ?back,
+          },
+        )
+        as Map<String, dynamic>,
+  );
 
-  Future<CourierStatus> courierPost(String path, {Map<String, dynamic>? body}) async =>
-      CourierStatus.fromJson(
-        await _api.post('/honam/courier/$path', body: body ?? const {})
-            as Map<String, dynamic>,
-      );
+  Future<CourierStatus> courierPost(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async => CourierStatus.fromJson(
+    await _api.post('/honam/courier/$path', body: body ?? const {})
+        as Map<String, dynamic>,
+  );
 
   Future<CourierEarnings> earnings({String? month}) async =>
       CourierEarnings.fromJson(
@@ -183,21 +204,23 @@ class HonamRepository {
       );
 
   Future<List<CourierDefault>> defaults() async {
-    final json = await _api.get('/honam/courier/defaults') as Map<String, dynamic>;
+    final json =
+        await _api.get('/honam/courier/defaults') as Map<String, dynamic>;
     return [
       for (final d in (json['items'] as List? ?? const []))
         CourierDefault.fromJson(d as Map<String, dynamic>),
     ];
   }
 
-  Future<void> defaultAction(int id, String action, {String? note}) => _api.post(
-    '/honam/courier/defaults/$id/$action',
-    body: {'note': ?note},
-  );
+  Future<void> defaultAction(int id, String action, {String? note}) =>
+      _api.post('/honam/courier/defaults/$id/$action', body: {'note': ?note});
 
-  Future<({String? code, List<({String? name, String state, int? gift})> items})>
+  Future<
+    ({String? code, List<({String? name, String state, int? gift})> items})
+  >
   referrals() async {
-    final json = await _api.get('/honam/courier/referrals') as Map<String, dynamic>;
+    final json =
+        await _api.get('/honam/courier/referrals') as Map<String, dynamic>;
     return (
       code: json['code'] as String?,
       items: [
@@ -213,7 +236,9 @@ class HonamRepository {
 
   Future<int> waitlistCount(String city) async {
     final json =
-        await _api.get('/honam/waitlist/count?city=${Uri.encodeQueryComponent(city)}')
+        await _api.get(
+              '/honam/waitlist/count?city=${Uri.encodeQueryComponent(city)}',
+            )
             as Map<String, dynamic>;
     return json['count'] as int? ?? 0;
   }

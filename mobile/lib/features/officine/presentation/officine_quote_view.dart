@@ -12,6 +12,7 @@ import '../data/officine_models.dart';
 import 'officine_controller.dart';
 import 'officine_order_screen.dart';
 import 'officine_reject_screen.dart';
+import 'officine_courier_screens.dart';
 import 'officine_ui.dart';
 
 /// Une ligne du devis en cours d'écriture.
@@ -151,6 +152,7 @@ class _OfficineQuoteViewState extends ConsumerState<OfficineQuoteView> {
     ].join(' · ');
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiQuoteTitle(patient),
       subtitle: subtitle,
       status: order.status,

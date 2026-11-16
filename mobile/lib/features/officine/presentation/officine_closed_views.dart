@@ -7,6 +7,7 @@ import '../../honam/presentation/honam_ui.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/officine_models.dart';
 import 'officine_order_screen.dart';
+import 'officine_courier_screens.dart';
 import 'officine_ui.dart';
 
 /// La pastille ronde en tête d'une carte d'issue : coche verte, croix grise.
@@ -65,6 +66,7 @@ class OfficineRejectedView extends StatelessWidget {
     final expired = order.status == 'EXPIRED';
     final at = order.stepTime(order.status) ?? order.updatedAt;
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: expired ? l.offiExpiredTitle : l.offiRejectedTitle,
       subtitle: at == null
           ? patient
@@ -162,6 +164,7 @@ class _OfficineRefundViewState extends State<OfficineRefundView> {
     final at = order.refundRequestedAt ?? order.updatedAt;
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiRefundTitle(patient),
       subtitle: at == null
           ? null
@@ -285,6 +288,7 @@ class OfficineCancelledView extends StatelessWidget {
     final paid = order.stepTime('PAID') != null;
     final collected = paid ? order.collected : 0;
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiCancelledTitle,
       subtitle: at == null
           ? patient

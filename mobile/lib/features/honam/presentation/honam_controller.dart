@@ -35,10 +35,16 @@ final honamOrderProvider = FutureProvider.autoDispose.family<HonamOrder, int>((
   return ref.watch(honamRepositoryProvider).order(id);
 });
 
+/// Les messages d'un canal d'une commande (`patient`, `livraison`…).
 final honamOrderMessagesProvider = FutureProvider.autoDispose
-    .family<List<HonamOrderMessage>, int>((ref, id) {
+    .family<List<HonamOrderMessage>, ({int id, String channel})>((ref, key) {
       _liveHonam(ref);
-      return ref.watch(honamRepositoryProvider).orderMessages(id);
+      listenDurableEventTypes(ref, (type) {
+        if (type == 'honam:order_message') ref.invalidateSelf();
+      });
+      return ref
+          .watch(honamRepositoryProvider)
+          .orderMessages(key.id, channel: key.channel);
     });
 
 final honamEmergencyProvider = FutureProvider.autoDispose<Map<String, String>>((

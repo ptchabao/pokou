@@ -60,10 +60,16 @@ final officineCouriersProvider = FutureProvider.autoDispose<OfficineCouriers>((
   return ref.watch(officineRepositoryProvider).couriers();
 });
 
+/// Les messages d'un canal (`patient` ou `coursier`) d'une commande.
 final officineMessagesProvider = FutureProvider.autoDispose
-    .family<List<HonamOrderMessage>, int>((ref, id) {
+    .family<List<HonamOrderMessage>, ({int id, String channel})>((ref, key) {
       _live(ref);
-      return ref.watch(officineRepositoryProvider).messages(id);
+      listenDurableEventTypes(ref, (type) {
+        if (type == 'honam:order_message') ref.invalidateSelf();
+      });
+      return ref
+          .watch(officineRepositoryProvider)
+          .messages(key.id, channel: key.channel);
     });
 
 /// Après une action : la commande, la file et l'accueil se relisent.

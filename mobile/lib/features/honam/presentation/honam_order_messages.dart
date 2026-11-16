@@ -10,17 +10,30 @@ import '../../kory/presentation/kory_ui.dart';
 import '../data/honam_models.dart';
 import 'honam_controller.dart';
 
-/// « Écrire à la pharmacie » : la discussion liée à la commande, que seuls
-/// ses participants voient (patient, officine, coursier pendant la course).
+/// Une conversation d'une commande, sur UN canal : « Écrire à la
+/// pharmacie » (canal `patient`), ou la patiente et le coursier entre eux
+/// (canal `livraison`). Chacun ne voit que les canaux qui le concernent.
 class HonamOrderMessagesScreen extends ConsumerStatefulWidget {
   const HonamOrderMessagesScreen({
     super.key,
     required this.orderId,
     required this.title,
+    this.channel = 'patient',
+    this.myRole = 'PATIENT',
+    this.heading,
   });
 
   final int orderId;
   final String title;
+  final String channel;
+
+  /// Le rôle de la personne qui lit : ses messages s'alignent à droite.
+  final String myRole;
+
+  /// Le titre de l'écran ; « Écrire à la pharmacie » par défaut.
+  final String? heading;
+
+  ({int id, String channel}) get threadKey => (id: orderId, channel: channel);
 
   @override
   ConsumerState<HonamOrderMessagesScreen> createState() =>
@@ -45,9 +58,9 @@ class _HonamOrderMessagesScreenState
     try {
       await ref
           .read(honamRepositoryProvider)
-          .sendOrderMessage(widget.orderId, body);
+          .sendOrderMessage(widget.orderId, body, channel: widget.channel);
       _controller.clear();
-      ref.invalidate(honamOrderMessagesProvider(widget.orderId));
+      ref.invalidate(honamOrderMessagesProvider(widget.threadKey));
     } catch (_) {
       if (mounted) koryToast(context, L.of(context).honamFailed);
     } finally {
@@ -58,7 +71,7 @@ class _HonamOrderMessagesScreenState
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final messages = ref.watch(honamOrderMessagesProvider(widget.orderId));
+    final messages = ref.watch(honamOrderMessagesProvider(widget.threadKey));
     final Widget list;
     if (messages.hasValue) {
       final items = messages.requireValue;
@@ -71,7 +84,10 @@ class _HonamOrderMessagesScreenState
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               itemCount: items.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (_, index) => _MessageBlock(message: items[index]),
+              itemBuilder: (_, index) => _MessageBlock(
+                message: items[index],
+                mine: items[index].senderRole == widget.myRole,
+              ),
             );
     } else if (messages.hasError) {
       list = ListView(
@@ -94,7 +110,7 @@ class _HonamOrderMessagesScreenState
       );
     }
     return KoryPage(
-      title: l.honamPWriteToPharmacy,
+      title: widget.heading ?? l.honamPWriteToPharmacy,
       subtitle: widget.title,
       footer: KoryFooter(
         children: [
@@ -139,14 +155,14 @@ class _HonamOrderMessagesScreenState
 }
 
 class _MessageBlock extends StatelessWidget {
-  const _MessageBlock({required this.message});
+  const _MessageBlock({required this.message, required this.mine});
 
   final HonamOrderMessage message;
+  final bool mine;
 
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final mine = message.senderRole == 'PATIENT';
     return Align(
       alignment: mine
           ? AlignmentDirectional.centerEnd

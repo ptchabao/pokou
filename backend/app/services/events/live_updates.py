@@ -12,7 +12,10 @@ peut encore être annulé — on prévient les personnes concernées :
 
 - une cagnotte : son collecteur et ses membres → `kory:updated` ;
 - une commande : le patient, le coursier et le personnel de l'officine →
-  `honam:order_updated`.
+  `honam:order_updated` ;
+- un message de commande : les SEULS membres de son canal (voir
+  services/honam/channels.py) → `honam:order_message`. Le reste des
+  participants n'en apprend même pas l'existence.
 
 L'événement ne porte que l'identifiant : chacun relit par l'API, qui
 applique ses propres droits.
@@ -30,7 +33,7 @@ _KEY = "pokou_live_updates"
 
 
 def _bucket(session: Session) -> dict:
-    return session.info.setdefault(_KEY, {"kory": set(), "honam": set()})
+    return session.info.setdefault(_KEY, {"kory": set(), "honam": set(), "honam_messages": set()})
 
 
 def _collect(session: Session, flush_context=None, instances=None) -> None:
@@ -50,7 +53,7 @@ def _collect(session: Session, flush_context=None, instances=None) -> None:
 
 def _after_flush(session: Session, flush_context) -> None:
     # Les objets NOUVEAUX ont maintenant un identifiant.
-    from app.models import HonamOrder, KoryPot
+    from app.models import HonamOrder, HonamOrderMessage, KoryPot
 
     bucket = _bucket(session)
     for obj in session.identity_map.values():
@@ -58,6 +61,8 @@ def _after_flush(session: Session, flush_context) -> None:
             bucket["kory"].add(obj.id)
         elif isinstance(obj, HonamOrder) and obj in session.new:
             bucket["honam"].add(obj.id)
+        elif isinstance(obj, HonamOrderMessage) and obj in session.new:
+            bucket["honam_messages"].add(obj.id)
 
 
 _main_loop = None
@@ -75,9 +80,11 @@ def bind_loop() -> None:
 
 def _after_commit(session: Session) -> None:
     bucket = session.info.pop(_KEY, None)
-    if not bucket or not (bucket["kory"] or bucket["honam"]):
+    if not bucket or not (bucket["kory"] or bucket["honam"] or bucket["honam_messages"]):
         return
-    coro = _announce(session.get_bind(), set(bucket["kory"]), set(bucket["honam"]))
+    coro = _announce(
+        session.get_bind(), set(bucket["kory"]), set(bucket["honam"]), set(bucket["honam_messages"]),
+    )
     try:
         asyncio.get_running_loop().create_task(coro)
         return
@@ -110,7 +117,26 @@ def _available_couriers(db: Session, order) -> list:
     ]
 
 
-async def _announce(bind, pot_ids: Set[int], order_ids: Set[int]) -> None:
+def honam_message_sends(db: Session, message_ids: Set[int]) -> list:
+    """(destinataire, événement) pour chaque nouveau message : les membres
+    de son canal seulement."""
+    from app.models import HonamOrder, HonamOrderMessage
+    from app.services.honam.channels import message_recipients
+
+    sends = []
+    for message_id in message_ids:
+        message = db.get(HonamOrderMessage, message_id)
+        order = db.get(HonamOrder, message.order_id) if message else None
+        if order is None:
+            continue
+        sends += [
+            (u, {"type": "honam:order_message", "order_id": order.id, "channel": message.channel})
+            for u in message_recipients(db, order, message)
+        ]
+    return sends
+
+
+async def _announce(bind, pot_ids: Set[int], order_ids: Set[int], message_ids: Set[int] = frozenset()) -> None:
     from app.api.v1.messaging.ws import manager
     from app.models import HonamOrder, KoryMember, KoryPot, PharmacyStaff
 
@@ -148,6 +174,7 @@ async def _announce(bind, pot_ids: Set[int], order_ids: Set[int]) -> None:
                         (uid, {"type": "honam:ride_offered", "order_id": order_id})
                         for uid in _available_couriers(db, order)
                     ]
+            sends += honam_message_sends(db, set(message_ids))
         for user_id, payload in sends:
             try:
                 await manager.send_to_user(user_id, payload)

@@ -11181,1370 +11181,6 @@ class LEn extends L {
       'New number verified by code; everyone is notified';
 
   @override
-  String get offiEntryTitle => 'Pharmacy space';
-
-  @override
-  String offiEntryToDo(String pharmacy, int count) {
-    return '$pharmacy · $count to handle';
-  }
-
-  @override
-  String get offiNotStaffTitle => 'No pharmacy on this account';
-
-  @override
-  String get offiNotStaffBody =>
-      'This number is not part of any Honam pharmacy team.';
-
-  @override
-  String get offiTabOrders => 'Orders';
-
-  @override
-  String get offiTabHistory => 'History';
-
-  @override
-  String get offiTabSubscription => 'Subscription';
-
-  @override
-  String get offiTabAccount => 'Account';
-
-  @override
-  String get offiLeave => 'Leave the pharmacy space';
-
-  @override
-  String get offiOpen => 'Open';
-
-  @override
-  String get offiHidden => 'Not visible';
-
-  @override
-  String offiSuspended(String reason) {
-    return 'Pharmacy suspended: $reason';
-  }
-
-  @override
-  String get offiWalletNotVerified =>
-      'Patients cannot see you yet: your wallet must be verified by the Pokou team.';
-
-  @override
-  String get offiRenewToShow =>
-      'Patients can no longer see you: renew your subscription or credit.';
-
-  @override
-  String get offiPatient => 'Patient';
-
-  @override
-  String get offiAgoNow => 'just now';
-
-  @override
-  String offiAgoMinutes(int minutes) {
-    return '$minutes min ago';
-  }
-
-  @override
-  String offiAgoHours(int hours) {
-    return '$hours h ago';
-  }
-
-  @override
-  String get offiStepReceived => 'Received';
-
-  @override
-  String get offiStepQuote => 'Quote';
-
-  @override
-  String get offiStepPaid => 'Paid';
-
-  @override
-  String get offiStepReady => 'Ready';
-
-  @override
-  String get offiStepDelivered => 'Delivered';
-
-  @override
-  String offiStepSemantics(String step) {
-    return 'Current step: $step';
-  }
-
-  @override
-  String get offiTimelineQuoted => 'Quote sent';
-
-  @override
-  String get offiTimelineAccepted => 'Quote accepted';
-
-  @override
-  String get offiOrdersTitle => 'Orders';
-
-  @override
-  String offiSegToDo(int count) {
-    return 'To handle · $count';
-  }
-
-  @override
-  String offiSegOngoing(int count) {
-    return 'Ongoing · $count';
-  }
-
-  @override
-  String offiSegDelivered(int count) {
-    return 'Delivered · $count';
-  }
-
-  @override
-  String get offiEmptyToDo => 'Nothing to handle';
-
-  @override
-  String get offiEmptyOngoing => 'No ongoing order';
-
-  @override
-  String get offiEmptyDelivered => 'No delivered order';
-
-  @override
-  String get offiEmptyBody =>
-      'New prescriptions appear here as soon as a patient sends them to you.';
-
-  @override
-  String get offiTagNew => 'New prescription';
-
-  @override
-  String get offiTagQuoteSent => 'Quote sent';
-
-  @override
-  String get offiTagPaymentToConfirm => 'Payment to confirm';
-
-  @override
-  String get offiTagPaymentAwaited => 'Payment awaited';
-
-  @override
-  String get offiTagMissingChoice => 'Awaiting the patient’s choice';
-
-  @override
-  String get offiTagReadyToGo => 'Ready to go';
-
-  @override
-  String get offiTagSearching => 'Looking for a courier';
-
-  @override
-  String get offiTagCourierComing => 'Courier on the way';
-
-  @override
-  String get offiTagInDelivery => 'Out for delivery';
-
-  @override
-  String get offiTagCourseToPay => 'Ride to pay';
-
-  @override
-  String get offiTagDelivered => 'Delivered';
-
-  @override
-  String get offiTagCancelled => 'Cancelled';
-
-  @override
-  String get offiTagRejected => 'Rejected';
-
-  @override
-  String get offiTagExpired => 'Expired';
-
-  @override
-  String get offiTagRefunded => 'Refunded';
-
-  @override
-  String offiAwaitedOnWallet(String amount) {
-    return '$amount expected on your wallet';
-  }
-
-  @override
-  String offiPaidAt(String amount, String time) {
-    return 'Paid $amount at $time';
-  }
-
-  @override
-  String get offiNoCourierYet => 'No courier yet';
-
-  @override
-  String offiDeliveredBy(String time, String courier) {
-    return 'Delivered at $time · $courier';
-  }
-
-  @override
-  String get offiMakeQuote => 'Write the quote';
-
-  @override
-  String get offiCheckPayment => 'Check the payment';
-
-  @override
-  String get offiAskCourier => 'Request a courier';
-
-  @override
-  String offiQuoteTitle(String patient) {
-    return 'Quote for $patient';
-  }
-
-  @override
-  String offiReceivedAt(String time) {
-    return 'received at $time';
-  }
-
-  @override
-  String offiPrescriptionOf(String patient) {
-    return '$patient’s prescription';
-  }
-
-  @override
-  String get offiZoom => 'Enlarge';
-
-  @override
-  String get offiOriginalToCollect => 'Original prescription to collect';
-
-  @override
-  String offiOriginalNotice(String patient) {
-    return '$patient will be told: “Have your original prescription ready for the courier.” The courier brings it back to the pharmacy.';
-  }
-
-  @override
-  String get offiProducts => 'Products';
-
-  @override
-  String get offiAddProduct => 'Add a product';
-
-  @override
-  String get offiAddProductTitle => 'Add a product';
-
-  @override
-  String get offiEditProduct => 'Edit the product';
-
-  @override
-  String get offiRemoveProduct => 'Remove the product';
-
-  @override
-  String get offiProductName => 'Product';
-
-  @override
-  String get offiProductNameHint => 'e.g. Amoxicillin 500 mg, 12 capsules';
-
-  @override
-  String get offiProductQuantity => 'Quantity';
-
-  @override
-  String get offiProductUnitPrice => 'Unit price';
-
-  @override
-  String get offiAvailable => 'Available';
-
-  @override
-  String get offiUnavailable => 'Unavailable';
-
-  @override
-  String get offiAvailableHint =>
-      'An unavailable product stays on the quote without being charged.';
-
-  @override
-  String offiQuantity(int count) {
-    return '× $count';
-  }
-
-  @override
-  String get offiSave => 'Save';
-
-  @override
-  String get offiMedicines => 'Medicines';
-
-  @override
-  String get offiCourseAddedByHonam => 'Ride, added by Honam';
-
-  @override
-  String get offiOriginalReturn => 'Return of the original';
-
-  @override
-  String get offiTotalToPay => 'Total to pay';
-
-  @override
-  String get offiCourseNote =>
-      'The ride price is set by Honam for the country; you pay it to the courier after delivery.';
-
-  @override
-  String offiQuoteSend(String patient) {
-    return 'Send the quote to $patient';
-  }
-
-  @override
-  String get offiQuoteUpdate => 'Update the quote';
-
-  @override
-  String offiQuoteSent(String patient) {
-    return 'Quote sent to $patient';
-  }
-
-  @override
-  String get offiQuoteNothingAvailable =>
-      'No product available: reject the prescription instead.';
-
-  @override
-  String offiQuoteWaiting(String patient, String date) {
-    return 'Quote sent: $patient has until $date to accept it.';
-  }
-
-  @override
-  String get offiRejectPrescription => 'Reject the prescription';
-
-  @override
-  String get offiRejectTitle => 'Reject the prescription';
-
-  @override
-  String offiPatientReceivedAt(String patient, String time) {
-    return '$patient · received at $time';
-  }
-
-  @override
-  String get offiReason => 'Reason';
-
-  @override
-  String get offiReasonUnavailable => 'Products unavailable';
-
-  @override
-  String offiReasonUnavailableHint(String patient) {
-    return '$patient will see other pharmacies nearby';
-  }
-
-  @override
-  String get offiReasonIllegible => 'Prescription illegible or incomplete';
-
-  @override
-  String get offiReasonIllegibleHint => 'A new photo is often enough';
-
-  @override
-  String get offiReasonInPerson => 'Must be dispensed in person';
-
-  @override
-  String offiReasonInPersonHint(String patient) {
-    return '$patient can collect it at the pharmacy';
-  }
-
-  @override
-  String get offiReasonExpired => 'Prescription expired or doubtful';
-
-  @override
-  String get offiReasonExpiredHint => 'To be shown in person to a pharmacist';
-
-  @override
-  String get offiReasonOutOfZone => 'Outside your delivery area';
-
-  @override
-  String offiReasonOutOfZoneHint(String patient) {
-    return '$patient will see closer pharmacies';
-  }
-
-  @override
-  String get offiReasonOther => 'Other reason';
-
-  @override
-  String get offiReasonOtherHint => 'Explain it in the message';
-
-  @override
-  String offiMessageFor(String patient) {
-    return 'Message for $patient';
-  }
-
-  @override
-  String offiRejectMsgUnavailable(String patient) {
-    return 'Hello $patient, we don’t have all the products on your prescription today. Honam suggests nearby pharmacies that can serve you.';
-  }
-
-  @override
-  String offiRejectMsgIllegible(String patient) {
-    return 'Hello $patient, your prescription is illegible or incomplete in the photo. Could you send it again, flat and sharp?';
-  }
-
-  @override
-  String offiRejectMsgInPerson(String patient) {
-    return 'Hello $patient, this treatment must be dispensed in person. You can collect it at the pharmacy.';
-  }
-
-  @override
-  String offiRejectMsgExpired(String patient) {
-    return 'Hello $patient, this prescription has expired or we cannot validate it remotely. Please show it in person to a pharmacist.';
-  }
-
-  @override
-  String offiRejectMsgOutOfZone(String patient) {
-    return 'Hello $patient, your address is outside our delivery area. Honam suggests closer pharmacies.';
-  }
-
-  @override
-  String offiRejectMsgOther(String patient) {
-    return 'Hello $patient, we cannot fill this prescription: ';
-  }
-
-  @override
-  String get offiAskNewPhoto => 'Ask for a new photo instead';
-
-  @override
-  String offiAskPhotoMessage(String patient) {
-    return 'Hello $patient, the photo of your prescription is not readable. Could you send a new one, flat and sharp?';
-  }
-
-  @override
-  String offiMessageSentTo(String patient) {
-    return 'Message sent to $patient';
-  }
-
-  @override
-  String offiRejectAndNotify(String patient) {
-    return 'Reject and notify $patient';
-  }
-
-  @override
-  String get offiRejectedTitle => 'Prescription rejected';
-
-  @override
-  String get offiExpiredTitle => 'Quote expired';
-
-  @override
-  String get offiExpiredBody =>
-      'The quote was not accepted in time: the order is closed, with nothing to refund.';
-
-  @override
-  String offiPatientNotifiedAt(String patient, String time) {
-    return '$patient · notified at $time';
-  }
-
-  @override
-  String offiRejectedNothingPaid(String patient) {
-    return '$patient paid nothing: there is nothing to refund.';
-  }
-
-  @override
-  String offiMessageSentToTitle(String patient) {
-    return 'Message sent to $patient';
-  }
-
-  @override
-  String get offiWhatNext => 'What happens next';
-
-  @override
-  String offiNext1(String patient) {
-    return '$patient receives your message and the reason.';
-  }
-
-  @override
-  String get offiNext2 =>
-      'Honam suggests the nearest open pharmacies: she can resend her prescription in one tap.';
-
-  @override
-  String get offiNext3 => 'The order moves to your history, with its reason.';
-
-  @override
-  String offiPaymentTitle(String patient) {
-    return '$patient’s payment';
-  }
-
-  @override
-  String get offiPaymentPendingTitle => 'Payment pending';
-
-  @override
-  String offiQuoteSentAt(String time) {
-    return 'Quote sent at $time';
-  }
-
-  @override
-  String offiPatientRemindedAt(String patient, String time) {
-    return '$patient · reminded at $time';
-  }
-
-  @override
-  String get offiAmountAwaited => 'Amount expected';
-
-  @override
-  String offiOnYourWallet(String wallet) {
-    return 'On your wallet · $wallet';
-  }
-
-  @override
-  String get offiPending => 'Pending';
-
-  @override
-  String offiPatientDeclaredPaid(String patient, String time) {
-    return '$patient reported paying at $time';
-  }
-
-  @override
-  String get offiCheckBeforeValidating =>
-      'Check receipt in your Mobile Money app or the operator’s SMS before confirming. The money does not go through Pokou.';
-
-  @override
-  String get offiFollowUp => 'Timeline';
-
-  @override
-  String get offiOrder => 'Order';
-
-  @override
-  String get offiCourse => 'Ride';
-
-  @override
-  String offiOtherNumberNote(String patient) {
-    return 'If $patient paid to another number, only her operator can recover the money: it never goes through Pokou.';
-  }
-
-  @override
-  String get offiPaymentReceived => 'Payment received, I’ll prepare';
-
-  @override
-  String get offiPaymentFinallyReceived => 'Payment received after all';
-
-  @override
-  String get offiNotYetReceived => 'Not received yet';
-
-  @override
-  String get offiConfirmPaymentTitle => 'Payment received?';
-
-  @override
-  String offiConfirmPaymentBody(String amount) {
-    return 'Do you confirm you received $amount on your wallet? The order moves to preparation and 100 FCFA excl. VAT is taken from your credit.';
-  }
-
-  @override
-  String get offiConfirmPaymentYes => 'Yes, received';
-
-  @override
-  String get offiCancelOrder => 'Cancel the order';
-
-  @override
-  String get offiCancelOrderTitle => 'Cancel the order?';
-
-  @override
-  String get offiCancelOrderYes => 'Cancel the order';
-
-  @override
-  String get offiCancelUnpaidBody =>
-      'Nothing was received: the order is closed without refund, and the patient is notified.';
-
-  @override
-  String get offiCancelUnpaidReason => 'Payment not received by the pharmacy';
-
-  @override
-  String get offiPaymentMissingTitle => 'Payment not received';
-
-  @override
-  String offiPatientAwaits(String patient, String amount) {
-    return '$patient · $amount expected';
-  }
-
-  @override
-  String offiWhatPatientSaid(String patient) {
-    return 'What $patient reported';
-  }
-
-  @override
-  String get offiTime => 'Time';
-
-  @override
-  String get offiAmount => 'Amount';
-
-  @override
-  String get offiWhatYouSee => 'What you see';
-
-  @override
-  String get offiNothingReceived => 'Nothing received';
-
-  @override
-  String offiNothingReceivedHint(String patient) {
-    return '$patient must check the number and the amount';
-  }
-
-  @override
-  String get offiDifferentAmount => 'Different amount received';
-
-  @override
-  String offiDifferentAmountHint(String patient) {
-    return 'Enter it: $patient will have to pay the rest';
-  }
-
-  @override
-  String get offiAmountReceived => 'Amount received';
-
-  @override
-  String get offiDontPrepareYet =>
-      'Don’t prepare anything until the money shows on your account. A screenshot or a forwarded SMS does not prove a payment.';
-
-  @override
-  String offiNotifyPatient(String patient) {
-    return 'Notify $patient';
-  }
-
-  @override
-  String get offiWaitMore => 'Wait a little longer';
-
-  @override
-  String offiNotReceivedMessage(String patient, String amount, String wallet) {
-    return 'Hello $patient, the pharmacy has not received your $amount on $wallet. Please check the number and the amount, then send the payment reference again.';
-  }
-
-  @override
-  String offiDifferentAmountMessage(
-    String patient,
-    String received,
-    String expected,
-    String rest,
-  ) {
-    return 'Hello $patient, the pharmacy received $received instead of $expected. $rest is still due before we prepare your order.';
-  }
-
-  @override
-  String offiPreparationTitle(String patient) {
-    return 'Preparing $patient’s order';
-  }
-
-  @override
-  String get offiProductsToPrepare => 'Products to prepare';
-
-  @override
-  String get offiMissing => 'Missing';
-
-  @override
-  String get offiMissingProduct => 'Missing product';
-
-  @override
-  String offiMissingReason(String names) {
-    return 'Missing: $names';
-  }
-
-  @override
-  String offiHonamProposes(String patient) {
-    return 'Honam offers $patient';
-  }
-
-  @override
-  String get offiReceiveRest => 'Receive the rest';
-
-  @override
-  String get offiReceiveRestHint => 'The other products are delivered';
-
-  @override
-  String get offiCancelAll => 'Cancel everything';
-
-  @override
-  String get offiCancelAllHint => 'And order elsewhere';
-
-  @override
-  String get offiRefunded => 'refunded';
-
-  @override
-  String offiWaitingChoice(String patient) {
-    return 'Waiting for $patient’s choice';
-  }
-
-  @override
-  String get offiWaitingChoiceShort => 'Choice pending';
-
-  @override
-  String get offiPatientKeeps => 'Receives the rest';
-
-  @override
-  String offiRefundToDo(String amount, String patient) {
-    return 'Refund $amount to $patient';
-  }
-
-  @override
-  String offiRefundConfirmedShort(String amount) {
-    return 'Refund of $amount confirmed';
-  }
-
-  @override
-  String get offiNoCourierYetNote =>
-      'No courier has been called yet: one is only called once the order is ready. Report a missing product now, not later.';
-
-  @override
-  String get offiCancelWholeOrder => 'Cancel the whole order';
-
-  @override
-  String offiCancelPaidBody(String patient, String amount) {
-    return '$patient will be refunded $amount in full, within 2 h, only to the number that paid.';
-  }
-
-  @override
-  String get offiCancelPaidReason =>
-      'Order cancelled by the pharmacy; full refund';
-
-  @override
-  String offiRefundTitle(String patient) {
-    return 'Refund $patient';
-  }
-
-  @override
-  String offiCancelledAt(String time) {
-    return 'Order cancelled at $time';
-  }
-
-  @override
-  String offiRequestedAt(String time) {
-    return 'Requested at $time';
-  }
-
-  @override
-  String offiPatientKeepsRest(String patient) {
-    return '$patient receives the rest';
-  }
-
-  @override
-  String offiPatientCancelsAll(String patient) {
-    return '$patient prefers to cancel everything';
-  }
-
-  @override
-  String get offiToRefund => 'To refund';
-
-  @override
-  String offiOnTheirNumber(String phone) {
-    return 'To their number · $phone';
-  }
-
-  @override
-  String get offiTheNumberThatPaid => 'The number that paid you';
-
-  @override
-  String get offiCopyNumber => 'Copy the number';
-
-  @override
-  String get offiRefundOnlyThisNumber =>
-      'Refund only this number, even if someone gives you another one.';
-
-  @override
-  String get offiTransferReference => 'Transfer reference';
-
-  @override
-  String get offiTransferReferenceHint => 'It is in the confirmation SMS';
-
-  @override
-  String offiRefundBefore(String time, String patient, String amount) {
-    return 'To do before $time. $patient must receive $amount: any fees are on you.';
-  }
-
-  @override
-  String offiIRefunded(String patient) {
-    return 'I refunded $patient';
-  }
-
-  @override
-  String offiWaitingPatientConfirm(String patient) {
-    return 'Waiting for $patient to confirm';
-  }
-
-  @override
-  String get offiCancelledTitle => 'Order cancelled';
-
-  @override
-  String offiPatientCancelledAt(String patient, String time) {
-    return '$patient · cancelled at $time';
-  }
-
-  @override
-  String get offiRefundConfirmed => 'Refund confirmed';
-
-  @override
-  String offiRefundSentTo(String amount, String patient) {
-    return '$amount sent to $patient';
-  }
-
-  @override
-  String offiRefundSentToAt(String amount, String patient, String time) {
-    return '$amount sent to $patient at $time';
-  }
-
-  @override
-  String offiReference(String reference) {
-    return 'Ref. $reference';
-  }
-
-  @override
-  String offiPatientConfirmedAt(String patient, String time) {
-    return '$patient confirmed receipt at $time';
-  }
-
-  @override
-  String get offiCancelledNothingPaid =>
-      'Order cancelled before payment: nothing to refund.';
-
-  @override
-  String offiCollectedFrom(String patient) {
-    return 'Collected from $patient';
-  }
-
-  @override
-  String offiRefundedTo(String patient) {
-    return 'Refunded to $patient';
-  }
-
-  @override
-  String get offiCourseNoCourier => 'Ride, no courier called';
-
-  @override
-  String get offiLeftForPharmacy => 'Left for the pharmacy';
-
-  @override
-  String get offiWhatHonamKeeps => 'What Honam keeps';
-
-  @override
-  String offiKeptInHistory(String reason) {
-    return 'The order stays in your history with its reason: $reason';
-  }
-
-  @override
-  String get offiAskCourierTitle => 'Request a courier';
-
-  @override
-  String offiOrderOf(String patient, String address) {
-    return '$patient’s order · $address';
-  }
-
-  @override
-  String get offiSearching => 'Searching…';
-
-  @override
-  String offiSince(int minutes, int seconds) {
-    return 'For $minutes min $seconds';
-  }
-
-  @override
-  String get offiProposedAttached => 'Offered to your regular couriers';
-
-  @override
-  String offiProposedAttachedHint(int minutes) {
-    return 'They see it $minutes min before the others';
-  }
-
-  @override
-  String get offiProposedZone => 'Offered to couriers in the area';
-
-  @override
-  String get offiCourierAccepts => 'A courier accepts';
-
-  @override
-  String get offiCourierAcceptsHint =>
-      'You see their name, and the screen moves to delivery';
-
-  @override
-  String get offiCoursePaidToCourier => 'Ride paid to the courier';
-
-  @override
-  String get offiBy => 'By';
-
-  @override
-  String get offiByYourWallet => 'Your pharmacy, to their wallet';
-
-  @override
-  String offiSealedNote(String patient) {
-    return 'The parcel stays sealed, in $patient’s name. The courier sees neither the prescription nor the products.';
-  }
-
-  @override
-  String get offiNoCourierTitle => 'No courier available';
-
-  @override
-  String offiNoCourierBody(int minutes) {
-    return 'No courier has accepted the ride for $minutes minutes.';
-  }
-
-  @override
-  String get offiRetrySearch => 'Refresh the search';
-
-  @override
-  String get offiProposePickupTitle => 'Offer pickup at the pharmacy';
-
-  @override
-  String offiProposePickupBody(String patient, String amount) {
-    return '$patient is notified. If she agrees to come, you refund her the $amount ride.';
-  }
-
-  @override
-  String get offiProposePickup => 'Offer pickup';
-
-  @override
-  String offiPickupMessage(String patient, String amount) {
-    return 'Hello $patient, no courier is available right now. You can collect your order at the pharmacy: we will then refund the $amount ride.';
-  }
-
-  @override
-  String get offiInviteCouriers => 'Invite your regular couriers';
-
-  @override
-  String get offiBackToOrders => 'Back to orders';
-
-  @override
-  String offiDeliveryTitle(String patient) {
-    return '$patient’s delivery';
-  }
-
-  @override
-  String get offiVerifiedCourier => 'Verified courier';
-
-  @override
-  String offiAcceptedAt(String time) {
-    return 'Accepted the ride at $time.';
-  }
-
-  @override
-  String get offiWrite => 'Write';
-
-  @override
-  String get offiHandover => 'Parcel handover';
-
-  @override
-  String offiCheckSealed(String patient) {
-    return 'Bag sealed, in $patient’s name.';
-  }
-
-  @override
-  String get offiCheckDosage => 'Dosage written on each box';
-
-  @override
-  String get offiCheckPhoto => 'The person at the counter matches the photo';
-
-  @override
-  String get offiAfterDelivery => 'After delivery';
-
-  @override
-  String offiAfterDeliveryBody(String patient, String courier) {
-    return '$patient gives her code to $courier, who enters it in Honam: the order closes.';
-  }
-
-  @override
-  String offiCourseToPay(String courier) {
-    return 'Ride to pay to $courier';
-  }
-
-  @override
-  String offiHandedTo(String courier) {
-    return 'Parcel handed to $courier';
-  }
-
-  @override
-  String get offiFollowDelivery => 'Follow the delivery';
-
-  @override
-  String get offiReportDefault => 'Report a courier issue';
-
-  @override
-  String offiHandedAt(String courier, String time) {
-    return 'Parcel handed to $courier at $time';
-  }
-
-  @override
-  String get offiTrackingNote =>
-      'Position updated every 15 seconds, visible until the code is entered. It is not kept after delivery.';
-
-  @override
-  String offiDeliveredTo(String patient) {
-    return 'Delivered to $patient';
-  }
-
-  @override
-  String offiCodeEnteredBy(String courier, String time) {
-    return 'Code entered by $courier at $time';
-  }
-
-  @override
-  String get offiToSettle => 'To settle';
-
-  @override
-  String offiPayCourierOn(String courier) {
-    return 'Pay $courier on their wallet:';
-  }
-
-  @override
-  String get offiNoFeeOnPayment => 'Pokou takes nothing from this payment.';
-
-  @override
-  String offiPaidToCourier(String courier) {
-    return 'Ride paid to $courier';
-  }
-
-  @override
-  String offiIPaid(String courier) {
-    return 'I paid $courier';
-  }
-
-  @override
-  String offiWaitingCourierConfirm(String courier) {
-    return 'Waiting for $courier to confirm';
-  }
-
-  @override
-  String get offiOriginal => 'Original prescription';
-
-  @override
-  String get offiOriginalBack => 'Received';
-
-  @override
-  String offiOriginalCollected(String courier, String time) {
-    return 'Collected by $courier at $time, to bring back on their next visit.';
-  }
-
-  @override
-  String offiOriginalWithCourier(String courier) {
-    return 'With $courier, to bring back on their next visit.';
-  }
-
-  @override
-  String offiOriginalReturnedAt(String date) {
-    return 'Returned to the pharmacy on $date.';
-  }
-
-  @override
-  String get offiOriginalReceived => 'Original received';
-
-  @override
-  String get offiClosedTitle => 'Order closed';
-
-  @override
-  String offiPatientDeliveredAt(String patient, String time) {
-    return '$patient · delivered at $time';
-  }
-
-  @override
-  String get offiCourseSettled => 'Ride settled';
-
-  @override
-  String offiCourseSettledBody(String amount, String courier, String time) {
-    return '$amount paid to $courier; $courier confirmed receipt at $time.';
-  }
-
-  @override
-  String get offiReportDeliveryDefault => 'Report a delivery issue';
-
-  @override
-  String get offiCouriersTitle => 'Your couriers';
-
-  @override
-  String get offiInviteYourCouriers => 'Invite your regular couriers';
-
-  @override
-  String offiInviteYourCouriersBody(int minutes) {
-    return 'Your rides are offered to them first, for $minutes min, before other couriers in the area. They remain free to work for other pharmacies. They must be validated Pokou couriers.';
-  }
-
-  @override
-  String get offiNoAttachedCourier => 'No courier attached yet.';
-
-  @override
-  String offiDefaults(int count) {
-    return '$count issue(s)';
-  }
-
-  @override
-  String offiUnpaidCourses(int count) {
-    return '$count ride(s) to pay';
-  }
-
-  @override
-  String offiCoursesCount(int count) {
-    return '$count rides';
-  }
-
-  @override
-  String get offiAttached => 'Attached';
-
-  @override
-  String get offiCourierSuspended => 'Suspended';
-
-  @override
-  String get offiShareLink => 'Share the link';
-
-  @override
-  String get offiAttachByNumber => 'Attach';
-
-  @override
-  String get offiAttachHint =>
-      'The number of an already validated Pokou courier.';
-
-  @override
-  String get offiCourierNumber => 'Courier’s number';
-
-  @override
-  String get offiAttach => 'Attach';
-
-  @override
-  String get offiCourierAttached => 'Courier attached';
-
-  @override
-  String get offiCouriersNote =>
-      'Without an available attached courier, the ride goes to couriers in the area, as usual.';
-
-  @override
-  String get offiDetachHint => 'Long-press a courier to remove them.';
-
-  @override
-  String offiDetachTitle(String name) {
-    return 'Remove $name?';
-  }
-
-  @override
-  String get offiDetachBody => 'They will no longer see your rides first.';
-
-  @override
-  String get offiDetach => 'Remove';
-
-  @override
-  String offiCourierInviteText(String pharmacy) {
-    return 'Deliver for $pharmacy with Honam: install Pokou and become a courier';
-  }
-
-  @override
-  String offiChatSubtitle(String patient) {
-    return 'Verified courier · $patient’s ride';
-  }
-
-  @override
-  String offiChatNotice(String patient) {
-    return 'Conversation tied to $patient’s ride: the patient, the pharmacy and the courier write here. Numbers stay hidden.';
-  }
-
-  @override
-  String get offiQuickReady => 'The parcel is ready';
-
-  @override
-  String get offiQuickWhere => 'Where are you?';
-
-  @override
-  String get offiQuickThanks => 'Thank you';
-
-  @override
-  String offiWriteTo(String courier) {
-    return 'Write to $courier…';
-  }
-
-  @override
-  String get offiSend => 'Send';
-
-  @override
-  String get offiDefectTitle => 'Report an issue';
-
-  @override
-  String offiCourseOf(String courier, String date) {
-    return '$courier’s ride · $date';
-  }
-
-  @override
-  String get offiWhatHappened => 'What happened?';
-
-  @override
-  String get offiDefectNoShow => 'Courier never came';
-
-  @override
-  String get offiDefectLate => 'Very late, without notice';
-
-  @override
-  String get offiDefectDamaged => 'Parcel opened or damaged';
-
-  @override
-  String get offiDefectOriginal => 'Original prescription not returned';
-
-  @override
-  String get offiDefectBehaviour => 'Inappropriate behaviour';
-
-  @override
-  String get offiDetails => 'Details';
-
-  @override
-  String offiDefectNoteOngoing(String courier) {
-    return 'The issue counts against $courier and the order goes back to “ready” for another courier. At the 3rd issue, the courier account is suspended.';
-  }
-
-  @override
-  String offiDefectNoteDelivered(String courier) {
-    return 'The issue counts against $courier. At the 3rd issue, the courier account is suspended.';
-  }
-
-  @override
-  String get offiSendReport => 'Send the report';
-
-  @override
-  String get offiDefaultSent => 'Report sent';
-
-  @override
-  String get offiHistoryTitle => 'History';
-
-  @override
-  String get offiPreviousMonth => 'Previous month';
-
-  @override
-  String get offiNextMonth => 'Next month';
-
-  @override
-  String get offiStatDelivered => 'Delivered';
-
-  @override
-  String get offiStatCollected => 'Collected';
-
-  @override
-  String get offiStatCollectedHint => 'medicines and rides';
-
-  @override
-  String get offiStatCancelled => 'Cancelled';
-
-  @override
-  String get offiFilterAll => 'All';
-
-  @override
-  String get offiFilterDelivered => 'Delivered';
-
-  @override
-  String get offiFilterCancelled => 'Cancelled';
-
-  @override
-  String get offiHistoryEmpty => 'Nothing this month';
-
-  @override
-  String get offiHistoryEmptyBody =>
-      'Delivered, rejected or cancelled orders show up here.';
-
-  @override
-  String offiDeliveredAtShort(String time) {
-    return 'delivered at $time';
-  }
-
-  @override
-  String get offiExportMonth => 'Export the month as CSV';
-
-  @override
-  String get offiCsvDate => 'Date';
-
-  @override
-  String get offiCsvOrder => 'Order';
-
-  @override
-  String get offiCsvPatient => 'Patient';
-
-  @override
-  String get offiCsvStatus => 'Status';
-
-  @override
-  String get offiCsvMedicines => 'Medicines (FCFA)';
-
-  @override
-  String get offiCsvCourse => 'Ride (FCFA)';
-
-  @override
-  String get offiCsvTotal => 'Collected (FCFA)';
-
-  @override
-  String get offiCsvRefunded => 'Refunded (FCFA)';
-
-  @override
-  String get offiCsvCourier => 'Courier';
-
-  @override
-  String get offiSubscriptionTitle => 'Subscription';
-
-  @override
-  String get offiPlanWetri => 'Wétri HONAM';
-
-  @override
-  String get offiPlanEpe => 'ÉPÉ HONAM';
-
-  @override
-  String get offiActive => 'Active';
-
-  @override
-  String offiPerMonthHt(String amount) {
-    return '$amount excl. VAT per month';
-  }
-
-  @override
-  String offiTtcWithVat(String amount, int vat) {
-    return 'That is $amount incl. $vat% VAT';
-  }
-
-  @override
-  String offiNextPayment(String date) {
-    return 'Next payment on $date';
-  }
-
-  @override
-  String get offiRenewNow => 'Renew now';
-
-  @override
-  String get offiChoose => 'Choose this plan';
-
-  @override
-  String get offiPaidByCashPay => 'Paid with CashPay: mobile money or card';
-
-  @override
-  String offiFreeMonths(int months) {
-    return '$months months free';
-  }
-
-  @override
-  String offiEpePitch(String price, String instead, String ttc) {
-    return '$price excl. VAT per year instead of $instead, that is $ttc incl. VAT';
-  }
-
-  @override
-  String get offiSwitchToYearly => 'Switch to yearly';
-
-  @override
-  String get offiCreditTitle => 'Order credit';
-
-  @override
-  String get offiCreditSubtitle => '100 FCFA excl. VAT per paid order';
-
-  @override
-  String get offiCreditBalance => 'Credit excl. VAT';
-
-  @override
-  String offiOrdersLeft(int count) {
-    return 'That is $count paid orders';
-  }
-
-  @override
-  String get offiCreditLow => 'Credit running low';
-
-  @override
-  String offiBuyCredit(String ht, String ttc) {
-    return 'Buy $ht excl. VAT · $ttc incl. VAT';
-  }
-
-  @override
-  String get offiPricesHt =>
-      'Prices excl. VAT, local VAT added. Nothing is granted before the payment is confirmed.';
-
-  @override
-  String get offiPaymentPending =>
-      'Payment in progress: the subscription or credit shows as soon as it is confirmed.';
-
-  @override
-  String get offiAccountTitle => 'Account';
-
-  @override
-  String get offiOpeningHours => 'Opening hours';
-
-  @override
-  String get offiCounterPhone => 'Counter phone';
-
-  @override
-  String get offiReceivingWallet => 'Receiving wallet';
-
-  @override
-  String get offiWalletVerified => 'verified';
-
-  @override
-  String get offiWalletPending => 'verification pending';
-
-  @override
-  String offiAttachedCount(int count) {
-    return '$count attached';
-  }
-
-  @override
-  String get offiOnDuty => 'On-duty pharmacy';
-
-  @override
-  String get offiOnDutyHint =>
-      'Patients see the “On duty” label in the directory.';
-
-  @override
-  String get offiTeamNote =>
-      'To change the address, hours, wallet or add a team member, contact Pokou support.';
-
-  @override
   String get courierTransportMoto => 'motorbike';
 
   @override
@@ -13987,4 +12623,1386 @@ class LEn extends L {
   String courierByAt(String name, String when) {
     return '$name $when';
   }
+
+  @override
+  String get offiEntryTitle => 'Pharmacy space';
+
+  @override
+  String offiEntryToDo(String pharmacy, int count) {
+    return '$pharmacy · $count to handle';
+  }
+
+  @override
+  String get offiNotStaffTitle => 'No pharmacy on this account';
+
+  @override
+  String get offiNotStaffBody =>
+      'This number is not part of any Honam pharmacy team.';
+
+  @override
+  String get offiTabOrders => 'Orders';
+
+  @override
+  String get offiTabHistory => 'History';
+
+  @override
+  String get offiTabSubscription => 'Subscription';
+
+  @override
+  String get offiTabAccount => 'Account';
+
+  @override
+  String get offiLeave => 'Leave the pharmacy space';
+
+  @override
+  String get offiOpen => 'Open';
+
+  @override
+  String get offiHidden => 'Not visible';
+
+  @override
+  String offiSuspended(String reason) {
+    return 'Pharmacy suspended: $reason';
+  }
+
+  @override
+  String get offiWalletNotVerified =>
+      'Patients cannot see you yet: your wallet must be verified by the Pokou team.';
+
+  @override
+  String get offiRenewToShow =>
+      'Patients can no longer see you: renew your subscription or credit.';
+
+  @override
+  String get offiPatient => 'Patient';
+
+  @override
+  String get offiAgoNow => 'just now';
+
+  @override
+  String offiAgoMinutes(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String offiAgoHours(int hours) {
+    return '$hours h ago';
+  }
+
+  @override
+  String get offiStepReceived => 'Received';
+
+  @override
+  String get offiStepQuote => 'Quote';
+
+  @override
+  String get offiStepPaid => 'Paid';
+
+  @override
+  String get offiStepReady => 'Ready';
+
+  @override
+  String get offiStepDelivered => 'Delivered';
+
+  @override
+  String offiStepSemantics(String step) {
+    return 'Current step: $step';
+  }
+
+  @override
+  String get offiTimelineQuoted => 'Quote sent';
+
+  @override
+  String get offiTimelineAccepted => 'Quote accepted';
+
+  @override
+  String get offiOrdersTitle => 'Orders';
+
+  @override
+  String offiSegToDo(int count) {
+    return 'To handle · $count';
+  }
+
+  @override
+  String offiSegOngoing(int count) {
+    return 'Ongoing · $count';
+  }
+
+  @override
+  String offiSegDelivered(int count) {
+    return 'Delivered · $count';
+  }
+
+  @override
+  String get offiEmptyToDo => 'Nothing to handle';
+
+  @override
+  String get offiEmptyOngoing => 'No ongoing order';
+
+  @override
+  String get offiEmptyDelivered => 'No delivered order';
+
+  @override
+  String get offiEmptyBody =>
+      'New prescriptions appear here as soon as a patient sends them to you.';
+
+  @override
+  String get offiTagNew => 'New prescription';
+
+  @override
+  String get offiTagQuoteSent => 'Quote sent';
+
+  @override
+  String get offiTagPaymentToConfirm => 'Payment to confirm';
+
+  @override
+  String get offiTagPaymentAwaited => 'Payment awaited';
+
+  @override
+  String get offiTagMissingChoice => 'Awaiting the patient’s choice';
+
+  @override
+  String get offiTagReadyToGo => 'Ready to go';
+
+  @override
+  String get offiTagSearching => 'Looking for a courier';
+
+  @override
+  String get offiTagCourierComing => 'Courier on the way';
+
+  @override
+  String get offiTagInDelivery => 'Out for delivery';
+
+  @override
+  String get offiTagCourseToPay => 'Ride to pay';
+
+  @override
+  String get offiTagDelivered => 'Delivered';
+
+  @override
+  String get offiTagCancelled => 'Cancelled';
+
+  @override
+  String get offiTagRejected => 'Rejected';
+
+  @override
+  String get offiTagExpired => 'Expired';
+
+  @override
+  String get offiTagRefunded => 'Refunded';
+
+  @override
+  String offiAwaitedOnWallet(String amount) {
+    return '$amount expected on your wallet';
+  }
+
+  @override
+  String offiPaidAt(String amount, String time) {
+    return 'Paid $amount at $time';
+  }
+
+  @override
+  String get offiNoCourierYet => 'No courier yet';
+
+  @override
+  String offiDeliveredBy(String time, String courier) {
+    return 'Delivered at $time · $courier';
+  }
+
+  @override
+  String get offiMakeQuote => 'Write the quote';
+
+  @override
+  String get offiCheckPayment => 'Check the payment';
+
+  @override
+  String get offiAskCourier => 'Request a courier';
+
+  @override
+  String offiQuoteTitle(String patient) {
+    return 'Quote for $patient';
+  }
+
+  @override
+  String offiReceivedAt(String time) {
+    return 'received at $time';
+  }
+
+  @override
+  String offiPrescriptionOf(String patient) {
+    return '$patient’s prescription';
+  }
+
+  @override
+  String get offiZoom => 'Enlarge';
+
+  @override
+  String get offiOriginalToCollect => 'Original prescription to collect';
+
+  @override
+  String offiOriginalNotice(String patient) {
+    return '$patient will be told: “Have your original prescription ready for the courier.” The courier brings it back to the pharmacy.';
+  }
+
+  @override
+  String get offiProducts => 'Products';
+
+  @override
+  String get offiAddProduct => 'Add a product';
+
+  @override
+  String get offiAddProductTitle => 'Add a product';
+
+  @override
+  String get offiEditProduct => 'Edit the product';
+
+  @override
+  String get offiRemoveProduct => 'Remove the product';
+
+  @override
+  String get offiProductName => 'Product';
+
+  @override
+  String get offiProductNameHint => 'e.g. Amoxicillin 500 mg, 12 capsules';
+
+  @override
+  String get offiProductQuantity => 'Quantity';
+
+  @override
+  String get offiProductUnitPrice => 'Unit price';
+
+  @override
+  String get offiAvailable => 'Available';
+
+  @override
+  String get offiUnavailable => 'Unavailable';
+
+  @override
+  String get offiAvailableHint =>
+      'An unavailable product stays on the quote without being charged.';
+
+  @override
+  String offiQuantity(int count) {
+    return '× $count';
+  }
+
+  @override
+  String get offiSave => 'Save';
+
+  @override
+  String get offiMedicines => 'Medicines';
+
+  @override
+  String get offiCourseAddedByHonam => 'Ride, added by Honam';
+
+  @override
+  String get offiOriginalReturn => 'Return of the original';
+
+  @override
+  String get offiTotalToPay => 'Total to pay';
+
+  @override
+  String get offiCourseNote =>
+      'The ride price is set by Honam for the country; you pay it to the courier after delivery.';
+
+  @override
+  String offiQuoteSend(String patient) {
+    return 'Send the quote to $patient';
+  }
+
+  @override
+  String get offiQuoteUpdate => 'Update the quote';
+
+  @override
+  String offiQuoteSent(String patient) {
+    return 'Quote sent to $patient';
+  }
+
+  @override
+  String get offiQuoteNothingAvailable =>
+      'No product available: reject the prescription instead.';
+
+  @override
+  String offiQuoteWaiting(String patient, String date) {
+    return 'Quote sent: $patient has until $date to accept it.';
+  }
+
+  @override
+  String get offiRejectPrescription => 'Reject the prescription';
+
+  @override
+  String get offiRejectTitle => 'Reject the prescription';
+
+  @override
+  String offiPatientReceivedAt(String patient, String time) {
+    return '$patient · received at $time';
+  }
+
+  @override
+  String get offiReason => 'Reason';
+
+  @override
+  String get offiReasonUnavailable => 'Products unavailable';
+
+  @override
+  String offiReasonUnavailableHint(String patient) {
+    return '$patient will see other pharmacies nearby';
+  }
+
+  @override
+  String get offiReasonIllegible => 'Prescription illegible or incomplete';
+
+  @override
+  String get offiReasonIllegibleHint => 'A new photo is often enough';
+
+  @override
+  String get offiReasonInPerson => 'Must be dispensed in person';
+
+  @override
+  String offiReasonInPersonHint(String patient) {
+    return '$patient can collect it at the pharmacy';
+  }
+
+  @override
+  String get offiReasonExpired => 'Prescription expired or doubtful';
+
+  @override
+  String get offiReasonExpiredHint => 'To be shown in person to a pharmacist';
+
+  @override
+  String get offiReasonOutOfZone => 'Outside your delivery area';
+
+  @override
+  String offiReasonOutOfZoneHint(String patient) {
+    return '$patient will see closer pharmacies';
+  }
+
+  @override
+  String get offiReasonOther => 'Other reason';
+
+  @override
+  String get offiReasonOtherHint => 'Explain it in the message';
+
+  @override
+  String offiMessageFor(String patient) {
+    return 'Message for $patient';
+  }
+
+  @override
+  String offiRejectMsgUnavailable(String patient) {
+    return 'Hello $patient, we don’t have all the products on your prescription today. Honam suggests nearby pharmacies that can serve you.';
+  }
+
+  @override
+  String offiRejectMsgIllegible(String patient) {
+    return 'Hello $patient, your prescription is illegible or incomplete in the photo. Could you send it again, flat and sharp?';
+  }
+
+  @override
+  String offiRejectMsgInPerson(String patient) {
+    return 'Hello $patient, this treatment must be dispensed in person. You can collect it at the pharmacy.';
+  }
+
+  @override
+  String offiRejectMsgExpired(String patient) {
+    return 'Hello $patient, this prescription has expired or we cannot validate it remotely. Please show it in person to a pharmacist.';
+  }
+
+  @override
+  String offiRejectMsgOutOfZone(String patient) {
+    return 'Hello $patient, your address is outside our delivery area. Honam suggests closer pharmacies.';
+  }
+
+  @override
+  String offiRejectMsgOther(String patient) {
+    return 'Hello $patient, we cannot fill this prescription: ';
+  }
+
+  @override
+  String get offiAskNewPhoto => 'Ask for a new photo instead';
+
+  @override
+  String offiAskPhotoMessage(String patient) {
+    return 'Hello $patient, the photo of your prescription is not readable. Could you send a new one, flat and sharp?';
+  }
+
+  @override
+  String offiMessageSentTo(String patient) {
+    return 'Message sent to $patient';
+  }
+
+  @override
+  String offiRejectAndNotify(String patient) {
+    return 'Reject and notify $patient';
+  }
+
+  @override
+  String get offiRejectedTitle => 'Prescription rejected';
+
+  @override
+  String get offiExpiredTitle => 'Quote expired';
+
+  @override
+  String get offiExpiredBody =>
+      'The quote was not accepted in time: the order is closed, with nothing to refund.';
+
+  @override
+  String offiPatientNotifiedAt(String patient, String time) {
+    return '$patient · notified at $time';
+  }
+
+  @override
+  String offiRejectedNothingPaid(String patient) {
+    return '$patient paid nothing: there is nothing to refund.';
+  }
+
+  @override
+  String offiMessageSentToTitle(String patient) {
+    return 'Message sent to $patient';
+  }
+
+  @override
+  String get offiWhatNext => 'What happens next';
+
+  @override
+  String offiNext1(String patient) {
+    return '$patient receives your message and the reason.';
+  }
+
+  @override
+  String get offiNext2 =>
+      'Honam suggests the nearest open pharmacies: she can resend her prescription in one tap.';
+
+  @override
+  String get offiNext3 => 'The order moves to your history, with its reason.';
+
+  @override
+  String offiPaymentTitle(String patient) {
+    return '$patient’s payment';
+  }
+
+  @override
+  String get offiPaymentPendingTitle => 'Payment pending';
+
+  @override
+  String offiQuoteSentAt(String time) {
+    return 'Quote sent at $time';
+  }
+
+  @override
+  String offiPatientRemindedAt(String patient, String time) {
+    return '$patient · reminded at $time';
+  }
+
+  @override
+  String get offiAmountAwaited => 'Amount expected';
+
+  @override
+  String offiOnYourWallet(String wallet) {
+    return 'On your wallet · $wallet';
+  }
+
+  @override
+  String get offiPending => 'Pending';
+
+  @override
+  String offiPatientDeclaredPaid(String patient, String time) {
+    return '$patient reported paying at $time';
+  }
+
+  @override
+  String get offiCheckBeforeValidating =>
+      'Check receipt in your Mobile Money app or the operator’s SMS before confirming. The money does not go through Pokou.';
+
+  @override
+  String get offiFollowUp => 'Timeline';
+
+  @override
+  String get offiOrder => 'Order';
+
+  @override
+  String get offiCourse => 'Ride';
+
+  @override
+  String offiOtherNumberNote(String patient) {
+    return 'If $patient paid to another number, only her operator can recover the money: it never goes through Pokou.';
+  }
+
+  @override
+  String get offiPaymentReceived => 'Payment received, I’ll prepare';
+
+  @override
+  String get offiPaymentFinallyReceived => 'Payment received after all';
+
+  @override
+  String get offiNotYetReceived => 'Not received yet';
+
+  @override
+  String get offiConfirmPaymentTitle => 'Payment received?';
+
+  @override
+  String offiConfirmPaymentBody(String amount) {
+    return 'Do you confirm you received $amount on your wallet? The order moves to preparation and 100 FCFA excl. VAT is taken from your credit.';
+  }
+
+  @override
+  String get offiConfirmPaymentYes => 'Yes, received';
+
+  @override
+  String get offiCancelOrder => 'Cancel the order';
+
+  @override
+  String get offiCancelOrderTitle => 'Cancel the order?';
+
+  @override
+  String get offiCancelOrderYes => 'Cancel the order';
+
+  @override
+  String get offiCancelUnpaidBody =>
+      'Nothing was received: the order is closed without refund, and the patient is notified.';
+
+  @override
+  String get offiCancelUnpaidReason => 'Payment not received by the pharmacy';
+
+  @override
+  String get offiPaymentMissingTitle => 'Payment not received';
+
+  @override
+  String offiPatientAwaits(String patient, String amount) {
+    return '$patient · $amount expected';
+  }
+
+  @override
+  String offiWhatPatientSaid(String patient) {
+    return 'What $patient reported';
+  }
+
+  @override
+  String get offiTime => 'Time';
+
+  @override
+  String get offiAmount => 'Amount';
+
+  @override
+  String get offiWhatYouSee => 'What you see';
+
+  @override
+  String get offiNothingReceived => 'Nothing received';
+
+  @override
+  String offiNothingReceivedHint(String patient) {
+    return '$patient must check the number and the amount';
+  }
+
+  @override
+  String get offiDifferentAmount => 'Different amount received';
+
+  @override
+  String offiDifferentAmountHint(String patient) {
+    return 'Enter it: $patient will have to pay the rest';
+  }
+
+  @override
+  String get offiAmountReceived => 'Amount received';
+
+  @override
+  String get offiDontPrepareYet =>
+      'Don’t prepare anything until the money shows on your account. A screenshot or a forwarded SMS does not prove a payment.';
+
+  @override
+  String offiNotifyPatient(String patient) {
+    return 'Notify $patient';
+  }
+
+  @override
+  String get offiWaitMore => 'Wait a little longer';
+
+  @override
+  String offiNotReceivedMessage(String patient, String amount, String wallet) {
+    return 'Hello $patient, the pharmacy has not received your $amount on $wallet. Please check the number and the amount, then send the payment reference again.';
+  }
+
+  @override
+  String offiDifferentAmountMessage(
+    String patient,
+    String received,
+    String expected,
+    String rest,
+  ) {
+    return 'Hello $patient, the pharmacy received $received instead of $expected. $rest is still due before we prepare your order.';
+  }
+
+  @override
+  String offiPreparationTitle(String patient) {
+    return 'Preparing $patient’s order';
+  }
+
+  @override
+  String get offiProductsToPrepare => 'Products to prepare';
+
+  @override
+  String get offiMissing => 'Missing';
+
+  @override
+  String get offiMissingProduct => 'Missing product';
+
+  @override
+  String offiMissingReason(String names) {
+    return 'Missing: $names';
+  }
+
+  @override
+  String offiHonamProposes(String patient) {
+    return 'Honam offers $patient';
+  }
+
+  @override
+  String get offiReceiveRest => 'Receive the rest';
+
+  @override
+  String get offiReceiveRestHint => 'The other products are delivered';
+
+  @override
+  String get offiCancelAll => 'Cancel everything';
+
+  @override
+  String get offiCancelAllHint => 'And order elsewhere';
+
+  @override
+  String get offiRefunded => 'refunded';
+
+  @override
+  String offiWaitingChoice(String patient) {
+    return 'Waiting for $patient’s choice';
+  }
+
+  @override
+  String get offiWaitingChoiceShort => 'Choice pending';
+
+  @override
+  String get offiPatientKeeps => 'Receives the rest';
+
+  @override
+  String offiRefundToDo(String amount, String patient) {
+    return 'Refund $amount to $patient';
+  }
+
+  @override
+  String offiRefundConfirmedShort(String amount) {
+    return 'Refund of $amount confirmed';
+  }
+
+  @override
+  String get offiNoCourierYetNote =>
+      'No courier has been called yet: one is only called once the order is ready. Report a missing product now, not later.';
+
+  @override
+  String get offiCancelWholeOrder => 'Cancel the whole order';
+
+  @override
+  String offiCancelPaidBody(String patient, String amount) {
+    return '$patient will be refunded $amount in full, within 2 h, only to the number that paid.';
+  }
+
+  @override
+  String get offiCancelPaidReason =>
+      'Order cancelled by the pharmacy; full refund';
+
+  @override
+  String offiRefundTitle(String patient) {
+    return 'Refund $patient';
+  }
+
+  @override
+  String offiCancelledAt(String time) {
+    return 'Order cancelled at $time';
+  }
+
+  @override
+  String offiRequestedAt(String time) {
+    return 'Requested at $time';
+  }
+
+  @override
+  String offiPatientKeepsRest(String patient) {
+    return '$patient receives the rest';
+  }
+
+  @override
+  String offiPatientCancelsAll(String patient) {
+    return '$patient prefers to cancel everything';
+  }
+
+  @override
+  String get offiToRefund => 'To refund';
+
+  @override
+  String offiOnTheirNumber(String phone) {
+    return 'To their number · $phone';
+  }
+
+  @override
+  String get offiTheNumberThatPaid => 'The number that paid you';
+
+  @override
+  String get offiCopyNumber => 'Copy the number';
+
+  @override
+  String get offiRefundOnlyThisNumber =>
+      'Refund only this number, even if someone gives you another one.';
+
+  @override
+  String get offiTransferReference => 'Transfer reference';
+
+  @override
+  String get offiTransferReferenceHint => 'It is in the confirmation SMS';
+
+  @override
+  String offiRefundBefore(String time, String patient, String amount) {
+    return 'To do before $time. $patient must receive $amount: any fees are on you.';
+  }
+
+  @override
+  String offiIRefunded(String patient) {
+    return 'I refunded $patient';
+  }
+
+  @override
+  String offiWaitingPatientConfirm(String patient) {
+    return 'Waiting for $patient to confirm';
+  }
+
+  @override
+  String get offiCancelledTitle => 'Order cancelled';
+
+  @override
+  String offiPatientCancelledAt(String patient, String time) {
+    return '$patient · cancelled at $time';
+  }
+
+  @override
+  String get offiRefundConfirmed => 'Refund confirmed';
+
+  @override
+  String offiRefundSentTo(String amount, String patient) {
+    return '$amount sent to $patient';
+  }
+
+  @override
+  String offiRefundSentToAt(String amount, String patient, String time) {
+    return '$amount sent to $patient at $time';
+  }
+
+  @override
+  String offiReference(String reference) {
+    return 'Ref. $reference';
+  }
+
+  @override
+  String offiPatientConfirmedAt(String patient, String time) {
+    return '$patient confirmed receipt at $time';
+  }
+
+  @override
+  String get offiCancelledNothingPaid =>
+      'Order cancelled before payment: nothing to refund.';
+
+  @override
+  String offiCollectedFrom(String patient) {
+    return 'Collected from $patient';
+  }
+
+  @override
+  String offiRefundedTo(String patient) {
+    return 'Refunded to $patient';
+  }
+
+  @override
+  String get offiCourseNoCourier => 'Ride, no courier called';
+
+  @override
+  String get offiLeftForPharmacy => 'Left for the pharmacy';
+
+  @override
+  String get offiWhatHonamKeeps => 'What Honam keeps';
+
+  @override
+  String offiKeptInHistory(String reason) {
+    return 'The order stays in your history with its reason: $reason';
+  }
+
+  @override
+  String get offiAskCourierTitle => 'Request a courier';
+
+  @override
+  String offiOrderOf(String patient, String address) {
+    return '$patient’s order · $address';
+  }
+
+  @override
+  String get offiSearching => 'Searching…';
+
+  @override
+  String offiSince(int minutes, int seconds) {
+    return 'For $minutes min $seconds';
+  }
+
+  @override
+  String get offiProposedAttached => 'Offered to your regular couriers';
+
+  @override
+  String offiProposedAttachedHint(int minutes) {
+    return 'They see it $minutes min before the others';
+  }
+
+  @override
+  String get offiProposedZone => 'Offered to couriers in the area';
+
+  @override
+  String get offiCourierAccepts => 'A courier accepts';
+
+  @override
+  String get offiCourierAcceptsHint =>
+      'You see their name, and the screen moves to delivery';
+
+  @override
+  String get offiCoursePaidToCourier => 'Ride paid to the courier';
+
+  @override
+  String get offiBy => 'By';
+
+  @override
+  String get offiByYourWallet => 'Your pharmacy, to their wallet';
+
+  @override
+  String offiSealedNote(String patient) {
+    return 'The parcel stays sealed, in $patient’s name. The courier sees neither the prescription nor the products.';
+  }
+
+  @override
+  String get offiNoCourierTitle => 'No courier available';
+
+  @override
+  String offiNoCourierBody(int minutes) {
+    return 'No courier has accepted the ride for $minutes minutes.';
+  }
+
+  @override
+  String get offiRetrySearch => 'Refresh the search';
+
+  @override
+  String get offiProposePickupTitle => 'Offer pickup at the pharmacy';
+
+  @override
+  String offiProposePickupBody(String patient, String amount) {
+    return '$patient is notified. If she agrees to come, you refund her the $amount ride.';
+  }
+
+  @override
+  String get offiProposePickup => 'Offer pickup';
+
+  @override
+  String offiPickupMessage(String patient, String amount) {
+    return 'Hello $patient, no courier is available right now. You can collect your order at the pharmacy: we will then refund the $amount ride.';
+  }
+
+  @override
+  String get offiInviteCouriers => 'Invite your regular couriers';
+
+  @override
+  String get offiBackToOrders => 'Back to orders';
+
+  @override
+  String offiDeliveryTitle(String patient) {
+    return '$patient’s delivery';
+  }
+
+  @override
+  String get offiVerifiedCourier => 'Verified courier';
+
+  @override
+  String offiAcceptedAt(String time) {
+    return 'Accepted the ride at $time.';
+  }
+
+  @override
+  String get offiWrite => 'Write';
+
+  @override
+  String get offiHandover => 'Parcel handover';
+
+  @override
+  String offiCheckSealed(String patient) {
+    return 'Bag sealed, in $patient’s name.';
+  }
+
+  @override
+  String get offiCheckDosage => 'Dosage written on each box';
+
+  @override
+  String get offiCheckPhoto => 'The person at the counter matches the photo';
+
+  @override
+  String get offiAfterDelivery => 'After delivery';
+
+  @override
+  String offiAfterDeliveryBody(String patient, String courier) {
+    return '$patient gives her code to $courier, who enters it in Honam: the order closes.';
+  }
+
+  @override
+  String offiCourseToPay(String courier) {
+    return 'Ride to pay to $courier';
+  }
+
+  @override
+  String offiHandedTo(String courier) {
+    return 'Parcel handed to $courier';
+  }
+
+  @override
+  String get offiFollowDelivery => 'Follow the delivery';
+
+  @override
+  String get offiReportDefault => 'Report a courier issue';
+
+  @override
+  String offiHandedAt(String courier, String time) {
+    return 'Parcel handed to $courier at $time';
+  }
+
+  @override
+  String get offiTrackingNote =>
+      'Position updated every 15 seconds, visible until the code is entered. It is not kept after delivery.';
+
+  @override
+  String offiDeliveredTo(String patient) {
+    return 'Delivered to $patient';
+  }
+
+  @override
+  String offiCodeEnteredBy(String courier, String time) {
+    return 'Code entered by $courier at $time';
+  }
+
+  @override
+  String get offiToSettle => 'To settle';
+
+  @override
+  String offiPayCourierOn(String courier) {
+    return 'Pay $courier on their wallet:';
+  }
+
+  @override
+  String get offiNoFeeOnPayment => 'Pokou takes nothing from this payment.';
+
+  @override
+  String offiPaidToCourier(String courier) {
+    return 'Ride paid to $courier';
+  }
+
+  @override
+  String offiIPaid(String courier) {
+    return 'I paid $courier';
+  }
+
+  @override
+  String offiWaitingCourierConfirm(String courier) {
+    return 'Waiting for $courier to confirm';
+  }
+
+  @override
+  String get offiOriginal => 'Original prescription';
+
+  @override
+  String get offiOriginalBack => 'Received';
+
+  @override
+  String offiOriginalCollected(String courier, String time) {
+    return 'Collected by $courier at $time, to bring back on their next visit.';
+  }
+
+  @override
+  String offiOriginalWithCourier(String courier) {
+    return 'With $courier, to bring back on their next visit.';
+  }
+
+  @override
+  String offiOriginalReturnedAt(String date) {
+    return 'Returned to the pharmacy on $date.';
+  }
+
+  @override
+  String get offiOriginalReceived => 'Original received';
+
+  @override
+  String get offiClosedTitle => 'Order closed';
+
+  @override
+  String offiPatientDeliveredAt(String patient, String time) {
+    return '$patient · delivered at $time';
+  }
+
+  @override
+  String get offiCourseSettled => 'Ride settled';
+
+  @override
+  String offiCourseSettledBody(String amount, String courier, String time) {
+    return '$amount paid to $courier; $courier confirmed receipt at $time.';
+  }
+
+  @override
+  String get offiReportDeliveryDefault => 'Report a delivery issue';
+
+  @override
+  String get offiCouriersTitle => 'Your couriers';
+
+  @override
+  String get offiInviteYourCouriers => 'Invite your regular couriers';
+
+  @override
+  String offiInviteYourCouriersBody(int minutes) {
+    return 'Your rides are offered to them first, for $minutes min, before other couriers in the area. They remain free to work for other pharmacies. They must be validated Pokou couriers.';
+  }
+
+  @override
+  String get offiNoAttachedCourier => 'No courier attached yet.';
+
+  @override
+  String offiDefaults(int count) {
+    return '$count issue(s)';
+  }
+
+  @override
+  String offiUnpaidCourses(int count) {
+    return '$count ride(s) to pay';
+  }
+
+  @override
+  String offiCoursesCount(int count) {
+    return '$count rides';
+  }
+
+  @override
+  String get offiAttached => 'Attached';
+
+  @override
+  String get offiCourierSuspended => 'Suspended';
+
+  @override
+  String get offiShareLink => 'Share the link';
+
+  @override
+  String get offiAttachByNumber => 'Attach';
+
+  @override
+  String get offiAttachHint =>
+      'The number of an already validated Pokou courier.';
+
+  @override
+  String get offiCourierNumber => 'Courier’s number';
+
+  @override
+  String get offiAttach => 'Attach';
+
+  @override
+  String get offiCourierAttached => 'Courier attached';
+
+  @override
+  String get offiCouriersNote =>
+      'Without an available attached courier, the ride goes to couriers in the area, as usual.';
+
+  @override
+  String get offiDetachHint => 'Long-press a courier to remove them.';
+
+  @override
+  String offiDetachTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get offiDetachBody => 'They will no longer see your rides first.';
+
+  @override
+  String get offiDetach => 'Remove';
+
+  @override
+  String offiCourierInviteText(String pharmacy) {
+    return 'Deliver for $pharmacy with Honam: install Pokou and become a courier';
+  }
+
+  @override
+  String offiChatSubtitle(String patient) {
+    return 'Verified courier · $patient’s ride';
+  }
+
+  @override
+  String offiChatNotice(String patient) {
+    return 'Conversation between the pharmacy and the courier about $patient’s ride. The patient does not see it. Numbers stay hidden.';
+  }
+
+  @override
+  String get offiChatPatientSubtitle => 'Patient · order conversation';
+
+  @override
+  String offiChatPatientNotice(String patient) {
+    return 'Conversation between the pharmacy and $patient. The courier does not see it. Numbers stay hidden.';
+  }
+
+  @override
+  String offiChatWithPatient(String patient) {
+    return 'Write to $patient';
+  }
+
+  @override
+  String offiPatientWriteToCourier(String courier) {
+    return 'Write to $courier';
+  }
+
+  @override
+  String get offiQuickReady => 'The parcel is ready';
+
+  @override
+  String get offiQuickWhere => 'Where are you?';
+
+  @override
+  String get offiQuickThanks => 'Thank you';
+
+  @override
+  String offiWriteTo(String courier) {
+    return 'Write to $courier…';
+  }
+
+  @override
+  String get offiSend => 'Send';
+
+  @override
+  String get offiDefectTitle => 'Report an issue';
+
+  @override
+  String offiCourseOf(String courier, String date) {
+    return '$courier’s ride · $date';
+  }
+
+  @override
+  String get offiWhatHappened => 'What happened?';
+
+  @override
+  String get offiDefectNoShow => 'Courier never came';
+
+  @override
+  String get offiDefectLate => 'Very late, without notice';
+
+  @override
+  String get offiDefectDamaged => 'Parcel opened or damaged';
+
+  @override
+  String get offiDefectOriginal => 'Original prescription not returned';
+
+  @override
+  String get offiDefectBehaviour => 'Inappropriate behaviour';
+
+  @override
+  String get offiDetails => 'Details';
+
+  @override
+  String offiDefectNoteOngoing(String courier) {
+    return 'The issue counts against $courier and the order goes back to “ready” for another courier. At the 3rd issue, the courier account is suspended.';
+  }
+
+  @override
+  String offiDefectNoteDelivered(String courier) {
+    return 'The issue counts against $courier. At the 3rd issue, the courier account is suspended.';
+  }
+
+  @override
+  String get offiSendReport => 'Send the report';
+
+  @override
+  String get offiDefaultSent => 'Report sent';
+
+  @override
+  String get offiHistoryTitle => 'History';
+
+  @override
+  String get offiPreviousMonth => 'Previous month';
+
+  @override
+  String get offiNextMonth => 'Next month';
+
+  @override
+  String get offiStatDelivered => 'Delivered';
+
+  @override
+  String get offiStatCollected => 'Collected';
+
+  @override
+  String get offiStatCollectedHint => 'medicines and rides';
+
+  @override
+  String get offiStatCancelled => 'Cancelled';
+
+  @override
+  String get offiFilterAll => 'All';
+
+  @override
+  String get offiFilterDelivered => 'Delivered';
+
+  @override
+  String get offiFilterCancelled => 'Cancelled';
+
+  @override
+  String get offiHistoryEmpty => 'Nothing this month';
+
+  @override
+  String get offiHistoryEmptyBody =>
+      'Delivered, rejected or cancelled orders show up here.';
+
+  @override
+  String offiDeliveredAtShort(String time) {
+    return 'delivered at $time';
+  }
+
+  @override
+  String get offiExportMonth => 'Export the month as CSV';
+
+  @override
+  String get offiCsvDate => 'Date';
+
+  @override
+  String get offiCsvOrder => 'Order';
+
+  @override
+  String get offiCsvPatient => 'Patient';
+
+  @override
+  String get offiCsvStatus => 'Status';
+
+  @override
+  String get offiCsvMedicines => 'Medicines (FCFA)';
+
+  @override
+  String get offiCsvCourse => 'Ride (FCFA)';
+
+  @override
+  String get offiCsvTotal => 'Collected (FCFA)';
+
+  @override
+  String get offiCsvRefunded => 'Refunded (FCFA)';
+
+  @override
+  String get offiCsvCourier => 'Courier';
+
+  @override
+  String get offiSubscriptionTitle => 'Subscription';
+
+  @override
+  String get offiPlanWetri => 'Wétri HONAM';
+
+  @override
+  String get offiPlanEpe => 'ÉPÉ HONAM';
+
+  @override
+  String get offiActive => 'Active';
+
+  @override
+  String offiPerMonthHt(String amount) {
+    return '$amount excl. VAT per month';
+  }
+
+  @override
+  String offiTtcWithVat(String amount, int vat) {
+    return 'That is $amount incl. $vat% VAT';
+  }
+
+  @override
+  String offiNextPayment(String date) {
+    return 'Next payment on $date';
+  }
+
+  @override
+  String get offiRenewNow => 'Renew now';
+
+  @override
+  String get offiChoose => 'Choose this plan';
+
+  @override
+  String get offiPaidByCashPay => 'Paid with CashPay: mobile money or card';
+
+  @override
+  String offiFreeMonths(int months) {
+    return '$months months free';
+  }
+
+  @override
+  String offiEpePitch(String price, String instead, String ttc) {
+    return '$price excl. VAT per year instead of $instead, that is $ttc incl. VAT';
+  }
+
+  @override
+  String get offiSwitchToYearly => 'Switch to yearly';
+
+  @override
+  String get offiCreditTitle => 'Order credit';
+
+  @override
+  String get offiCreditSubtitle => '100 FCFA excl. VAT per paid order';
+
+  @override
+  String get offiCreditBalance => 'Credit excl. VAT';
+
+  @override
+  String offiOrdersLeft(int count) {
+    return 'That is $count paid orders';
+  }
+
+  @override
+  String get offiCreditLow => 'Credit running low';
+
+  @override
+  String offiBuyCredit(String ht, String ttc) {
+    return 'Buy $ht excl. VAT · $ttc incl. VAT';
+  }
+
+  @override
+  String get offiPricesHt =>
+      'Prices excl. VAT, local VAT added. Nothing is granted before the payment is confirmed.';
+
+  @override
+  String get offiPaymentPending =>
+      'Payment in progress: the subscription or credit shows as soon as it is confirmed.';
+
+  @override
+  String get offiAccountTitle => 'Account';
+
+  @override
+  String get offiOpeningHours => 'Opening hours';
+
+  @override
+  String get offiCounterPhone => 'Counter phone';
+
+  @override
+  String get offiReceivingWallet => 'Receiving wallet';
+
+  @override
+  String get offiWalletVerified => 'verified';
+
+  @override
+  String get offiWalletPending => 'verification pending';
+
+  @override
+  String offiAttachedCount(int count) {
+    return '$count attached';
+  }
+
+  @override
+  String get offiOnDuty => 'On-duty pharmacy';
+
+  @override
+  String get offiOnDutyHint =>
+      'Patients see the “On duty” label in the directory.';
+
+  @override
+  String get offiTeamNote =>
+      'To change the address, hours, wallet or add a team member, contact Pokou support.';
 }

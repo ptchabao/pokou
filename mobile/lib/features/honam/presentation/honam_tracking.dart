@@ -11,6 +11,7 @@ import '../../calls/presentation/call_screen.dart';
 import '../../kory/presentation/kory_ui.dart';
 import '../data/honam_models.dart';
 import 'honam_controller.dart';
+import 'honam_order_messages.dart';
 
 /// Un appel relayé par Pokou (maquettes « Suivi » et Coursiers 10) : un
 /// appel audio de l'application, jamais le numéro de l'autre.
@@ -21,9 +22,9 @@ Future<void> honamRelayedCall(
 ) async {
   final l = L.of(context);
   try {
-    final token = await ref
-        .read(callRepositoryProvider)
-        .startCall([userId], isVideo: false);
+    final token = await ref.read(callRepositoryProvider).startCall([
+      userId,
+    ], isVideo: false);
     if (!context.mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -82,7 +83,9 @@ class HonamTrackingBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        KoryCard(child: _EtaBlock(order: order, tracking: tracking)),
+        KoryCard(
+          child: _EtaBlock(order: order, tracking: tracking),
+        ),
         const SizedBox(height: 12),
         _CourierCard(order: order, tracking: tracking),
         if (order.deliveryCode != null) ...[
@@ -277,13 +280,35 @@ class _CourierCard extends ConsumerWidget {
       child: KoryPersonRow(
         name: courier,
         subtitle: line,
-        trailing: userId == null
-            ? null
-            : IconButton(
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Canal « livraison » : la patiente et le coursier, seuls.
+            IconButton(
+              tooltip: l.offiPatientWriteToCourier(courier),
+              icon: Icon(
+                Icons.chat_bubble_outline,
+                color: AppColors.accentPrimary,
+              ),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => HonamOrderMessagesScreen(
+                    orderId: order.id,
+                    title: courier,
+                    channel: 'livraison',
+                    heading: l.offiPatientWriteToCourier(courier),
+                  ),
+                ),
+              ),
+            ),
+            if (userId != null)
+              IconButton(
                 tooltip: l.honamPCallRelayed(courier),
                 icon: Icon(Icons.call_outlined, color: AppColors.accentPrimary),
                 onPressed: () => honamRelayedCall(context, ref, userId),
               ),
+          ],
+        ),
       ),
     );
   }
@@ -393,8 +418,8 @@ class HonamMapScreen extends ConsumerWidget {
                       if (tracking?.distanceKm != null)
                         l.honamPAtKm(tracking!.distanceKm!.toStringAsFixed(1)),
                     ].join(' · '),
-                    trailing: (tracking?.courierUserId ?? order.courierUserId) ==
-                            null
+                    trailing:
+                        (tracking?.courierUserId ?? order.courierUserId) == null
                         ? null
                         : IconButton(
                             tooltip: l.honamPCallRelayed(courier),
@@ -513,7 +538,10 @@ class HonamRouteMap extends StatelessWidget {
                 bottom: 4,
                 child: Text(
                   '© OpenStreetMap',
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -568,7 +596,11 @@ class _RoutePainter extends CustomPainter {
       final step = (b - a) / length;
       // Le trajet restant en pointillés, comme sur la maquette.
       for (var d = 0.0; d < length; d += 9) {
-        canvas.drawLine(a + step * d, a + step * math.min(d + 4, length), paint);
+        canvas.drawLine(
+          a + step * d,
+          a + step * math.min(d + 4, length),
+          paint,
+        );
       }
     }
   }
