@@ -9620,4 +9620,7 @@ class LEn extends L {
 
   @override
   String get assimeNearYou => 'Near you';
+
+  @override
+  String get assimeSoldBadge => 'Sold';
 }

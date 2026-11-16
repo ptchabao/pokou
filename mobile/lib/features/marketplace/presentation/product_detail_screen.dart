@@ -1,5 +1,6 @@
 import 'assime_extras.dart';
 import 'assime_reviews.dart';
+import 'assime_seller_profile.dart';
 import 'assime_sheets.dart';
 import '../../modules/shared/module_ui.dart';
 import 'package:flutter/material.dart';
@@ -249,7 +250,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               IconButton(
                 tooltip: L.of(context).assimeWhyTitle,
                 icon: const Icon(Icons.info_outline),
-                onPressed: () => showWhySponsored(context, ref, _product.id),
+                onPressed: () => showWhySponsored(
+                  context,
+                  ref,
+                  productId: _product.id,
+                  sellerId: _product.sellerId,
+                ),
               ),
             IconButton(
               tooltip: _favorite
@@ -392,6 +398,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             productCount: seller?.productCount,
             // « Noter ce vendeur » a quitté la fiche : pas de vente
             // confirmée, pas de note (Assimé 101). Les avis s'ouvrent ici.
+            onProfile: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AssimeSellerProfileScreen(
+                  sellerId: _product.sellerId,
+                  sellerName: seller?.sellerName ?? _product.sellerName,
+                ),
+              ),
+            ),
             onReviews: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => SellerReviewsScreen(
@@ -421,7 +435,11 @@ class _SellerCard extends StatelessWidget {
     required this.reviewCount,
     required this.productCount,
     required this.onReviews,
+    required this.onProfile,
   });
+
+  /// Assimé 3 → 22 : la carte vendeur ouvre son profil.
+  final VoidCallback onProfile;
 
   final String name;
   final bool isCertified;
@@ -435,7 +453,7 @@ class _SellerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ModuleCard(
       padding: const EdgeInsets.all(14),
-      onTap: onReviews,
+      onTap: onProfile,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -4,16 +4,19 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/media_image.dart';
+import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_icon.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../../core/widgets/status_halo.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../messaging/presentation/conversation_screen.dart';
 import '../../modules/shared/module_ui.dart';
 import '../data/marketplace_repository.dart';
+import '../data/product_model.dart';
+import 'assime_sheets.dart';
 import 'marketplace_controller.dart';
-import '../../../core/widgets/pokou_icon.dart';
-import '../../../core/widgets/pokou_context_menu.dart';
-import '../../../core/widgets/skeleton.dart';
+import 'product_detail_screen.dart';
 
 final favoritesProvider = FutureProvider.autoDispose<List<AssimeSnapshot>>(
   (ref) => ref.watch(marketplaceRepositoryProvider).favorites(),
@@ -36,89 +39,35 @@ final sponsoredStatusProvider = FutureProvider.autoDispose<SponsoredStatus?>((
   }
 });
 
-/// Favoris et alertes (maquette Assimé 12).
+/// Ouvre la fiche d'une annonce dont on ne connaît que l'identifiant
+/// (favori, statut sponsorisé) : la fiche complète vient du serveur.
+Future<void> openAssimeProduct(
+  BuildContext context,
+  WidgetRef ref,
+  int productId,
+) async {
+  final l = L.of(context);
+  final navigator = Navigator.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final product = await ref
+        .read(marketplaceRepositoryProvider)
+        .product(productId);
+    await navigator.push(
+      MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+    );
+  } catch (_) {
+    messenger.showSnackBar(SnackBar(content: Text(l.marketUnavailable)));
+  }
+}
+
+// ── Assimé 12 · Favoris et alertes ───────────────────────────────────────
+
+/// Une page, deux sections : les recherches enregistrées (bascule pour
+/// couper une alerte sans la perdre) et les annonces favorites (une annonce
+/// vendue reste, barrée, avec « Vendu »).
 class FavoritesAlertsScreen extends ConsumerWidget {
   const FavoritesAlertsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    return DefaultTabController(
-      length: 2,
-      child: ModuleScaffold(
-        title: l.assimeFavoritesAlerts,
-        child: Column(
-          children: [
-            TabBar(
-              tabs: [
-                Tab(text: l.assimeFavorites),
-                Tab(text: l.assimeAlerts),
-              ],
-            ),
-            const Expanded(
-              child: TabBarView(children: [_Favorites(), _Alerts()]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Favorites extends ConsumerWidget {
-  const _Favorites();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    return ref
-        .watch(favoritesProvider)
-        .when(
-          loading: () => const SkeletonCards(),
-          error: (_, _) => ModuleEmptyState(
-            icon: Icons.cloud_off,
-            title: l.honamFailed,
-            message: l.modulesCheckNetwork,
-          ),
-          data: (items) => items.isEmpty
-              ? ModuleEmptyState(
-                  icon: Icons.favorite_border,
-                  title: l.assimeNoFavorites,
-                  message: l.assimeFavoritesHint,
-                )
-              : ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    for (final item in items)
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: _Thumb(mediaId: item.imageMediaId),
-                        title: Text(item.name),
-                        subtitle: Text(
-                          '${item.price} ${item.currency}${item.location != null ? ' · ${item.location}' : ''}',
-                        ),
-                        trailing: IconButton(
-                          tooltip: l.assimeRemoveFavorite,
-                          icon: const Icon(
-                            Icons.favorite,
-                            color: AppColors.feedbackDanger,
-                          ),
-                          onPressed: () async {
-                            await ref
-                                .read(marketplaceRepositoryProvider)
-                                .setFavorite(item.id, false);
-                            ref.invalidate(favoritesProvider);
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-        );
-  }
-}
-
-class _Alerts extends ConsumerWidget {
-  const _Alerts();
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {
     final l = L.of(context);
@@ -132,13 +81,13 @@ class _Alerts extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: query,
               autofocus: true,
               decoration: InputDecoration(labelText: l.assimeAlertQuery),
             ),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: maxPrice,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: l.assimeAlertMaxPrice),
@@ -172,7 +121,7 @@ class _Alerts extends ConsumerWidget {
           .read(marketplaceRepositoryProvider)
           .createAlert(query: text, maxPrice: price);
       ref.invalidate(_alertsProvider);
-    } catch (error) {
+    } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -184,120 +133,335 @@ class _Alerts extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    return ref
-        .watch(_alertsProvider)
-        .when(
-          loading: () => const SkeletonCards(),
-          error: (_, _) => ModuleEmptyState(
-            icon: Icons.cloud_off,
-            title: l.honamFailed,
-            message: l.modulesCheckNetwork,
-          ),
-          data: (alerts) => ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              ModuleActionButton(
-                label: l.assimeNewAlert,
-                icon: Icons.notifications_active_outlined,
-                onPressed: () => _create(context, ref),
-              ),
-              const SizedBox(height: 12),
-              if (alerts.isEmpty)
-                Text(
-                  l.assimeNoAlerts,
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
-              for (final alert in alerts)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.notifications_outlined),
-                  title: Text(alert.query ?? alert.category ?? ''),
-                  subtitle: Text(
-                    [
-                      if (alert.maxPrice != null)
-                        l.assimeAlertUpTo('${alert.maxPrice}'),
-                      l.assimeAlertMatches('${alert.matchesCount}'),
-                    ].join(' · '),
-                  ),
-                  trailing: IconButton(
-                    tooltip: l.actionDelete,
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () async {
-                      await ref
-                          .read(marketplaceRepositoryProvider)
-                          .deleteAlert(alert.id);
-                      ref.invalidate(_alertsProvider);
-                    },
-                  ),
-                ),
-            ],
-          ),
-        );
-  }
-}
-
-class _Thumb extends StatelessWidget {
-  const _Thumb({required this.mediaId, this.size = 48});
-
-  final int? mediaId;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: mediaId == null
-            ? Container(
-                color: AppColors.surface,
-                child: const Icon(Icons.image_outlined),
-              )
-            : MediaImage(mediaId: mediaId!, fit: BoxFit.cover),
+    final alerts = ref.watch(_alertsProvider);
+    final favorites = ref.watch(favoritesProvider);
+    return ModuleScaffold(
+      title: l.assimeFavoritesAlerts,
+      actions: [
+        IconButton(
+          tooltip: l.assimeNewAlert,
+          icon: const Icon(Icons.add_alert_outlined),
+          onPressed: () => _create(context, ref),
+        ),
+      ],
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(_alertsProvider);
+          ref.invalidate(favoritesProvider);
+        },
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          children: [
+            ModuleSectionTitle(l.assimeSavedSearches),
+            alerts.when(
+              loading: () => const SkeletonCards(),
+              error: (_, _) => Text(l.modulesCheckNetwork),
+              data: (items) => items.isEmpty
+                  ? Text(
+                      l.assimeNoAlerts,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    )
+                  : ModuleCard(
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < items.length; i++) ...[
+                            if (i > 0)
+                              Divider(height: 1, color: AppColors.border),
+                            _AlertRow(alert: items[i]),
+                          ],
+                        ],
+                      ),
+                    ),
+            ),
+            ModuleSectionTitle(l.assimeFavoriteListings),
+            favorites.when(
+              loading: () => const SkeletonCards(),
+              error: (_, _) => Text(l.modulesCheckNetwork),
+              data: (items) => items.isEmpty
+                  ? Text(
+                      l.assimeFavoritesHint,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    )
+                  : GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 0.72,
+                      children: [
+                        for (final item in items) _FavoriteCard(item: item),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// « Pourquoi je vois ça » (Assimé 16).
-Future<void> showWhySponsored(
-  BuildContext context,
-  WidgetRef ref,
-  int productId,
-) async {
-  final l = L.of(context);
-  String? text;
-  try {
-    text = await ref
-        .read(marketplaceRepositoryProvider)
-        .whySponsored(productId);
-  } catch (_) {
-    text = null;
-  }
-  if (!context.mounted) return;
-  await showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: AppColors.surface,
-    builder: (sheetContext) => SafeArea(
+class _AlertRow extends ConsumerWidget {
+  const _AlertRow({required this.alert});
+
+  final AssimeAlert alert;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final title = [
+      if (alert.query != null) '« ${alert.query} »',
+      if (alert.category != null) alert.category!,
+      if (alert.location != null) alert.location!,
+      if (alert.maxPrice != null) l.assimeAlertUpTo('${alert.maxPrice}'),
+    ].join(' · ');
+    return Dismissible(
+      key: ValueKey('alert-${alert.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 16),
+        color: AppColors.feedbackDanger,
+        child: const Icon(Icons.delete_outline, color: Colors.white),
+      ),
+      onDismissed: (_) async {
+        await ref.read(marketplaceRepositoryProvider).deleteAlert(alert.id);
+        ref.invalidate(_alertsProvider);
+      },
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+        child: Row(
           children: [
-            Text(
-              l.assimeWhyTitle,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            Icon(Icons.search, color: AppColors.textSecondary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    alert.paused
+                        ? l.assimeAlertPaused
+                        : l.assimeAlertFound(alert.matchesCount),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(text ?? l.assimeWhyNotSponsored),
+            Switch(
+              value: !alert.paused,
+              onChanged: (on) async {
+                await ref
+                    .read(marketplaceRepositoryProvider)
+                    .setAlertPaused(alert.id, !on);
+                ref.invalidate(_alertsProvider);
+              },
+            ),
           ],
         ),
       ),
-    ),
-  );
+    );
+  }
 }
+
+class _FavoriteCard extends ConsumerWidget {
+  const _FavoriteCard({required this.item});
+
+  final AssimeSnapshot item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final muted = TextStyle(fontSize: 11, color: AppColors.textSecondary);
+    return ModuleCard(
+      padding: EdgeInsets.zero,
+      onTap: () => openAssimeProduct(context, ref, item.id),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: item.imageMediaId == null
+                      ? ColoredBox(color: AppColors.surfaceElevated)
+                      : MediaImage(
+                          mediaId: item.imageMediaId!,
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () async {
+                      await ref
+                          .read(marketplaceRepositoryProvider)
+                          .setFavorite(item.id, false);
+                      ref.invalidate(favoritesProvider);
+                    },
+                    child: CircleAvatar(
+                      radius: 13,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.favorite,
+                        size: 15,
+                        color: AppColors.feedbackDanger,
+                        semanticLabel: l.assimeRemoveFavorite,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${item.price} ${item.currency}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    decoration: item.sold ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                Text(
+                  [
+                    if (item.location != null) item.location!,
+                    if (item.sold) l.assimeSoldBadge,
+                  ].join(' · '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: muted,
+                ),
+                Text(
+                  item.sellerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: muted,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Assimé 16 · Pourquoi je vois ça ──────────────────────────────────────
+
+/// Ce que la personne voit d'une annonce payée, et ce qu'elle peut en
+/// faire : masquer l'annonce, ne plus voir le vendeur, la signaler.
+Future<void> showWhySponsored(
+  BuildContext context,
+  WidgetRef ref, {
+  required int productId,
+  required int sellerId,
+  String? whyText,
+}) async {
+  final l = L.of(context);
+  var text = whyText;
+  if (text == null) {
+    try {
+      text = await ref
+          .read(marketplaceRepositoryProvider)
+          .whySponsored(productId);
+    } catch (_) {
+      text = null;
+    }
+  }
+  if (!context.mounted) return;
+  final messenger = ScaffoldMessenger.of(context);
+  final repository = ref.read(marketplaceRepositoryProvider);
+  final choice = await showModuleSheet<String>(
+    context: context,
+    builder: (sheetContext) {
+      Widget row(IconData icon, String label, String value, {Color? color}) =>
+          ListTile(
+            leading: Icon(icon, color: color ?? AppColors.textPrimary),
+            title: Text(
+              label,
+              style: TextStyle(color: color, fontWeight: FontWeight.w600),
+            ),
+            onTap: () => Navigator.of(sheetContext).pop(value),
+          );
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ModuleSheetTitle(l.assimeWhyTitle, subtitle: text ?? l.assimeWhyNotSponsored),
+          const SizedBox(height: 12),
+          ModuleCallout(tone: CalloutTone.beige, text: l.assimeWhyPrivacy),
+          const SizedBox(height: 12),
+          ModuleCard(
+            padding: EdgeInsets.zero,
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                children: [
+                  row(Icons.visibility_outlined, l.assimeHideListing, 'hide'),
+                  row(Icons.block, l.assimeHideSeller, 'seller'),
+                  row(
+                    Icons.outlined_flag,
+                    l.assimeReportListing,
+                    'report',
+                    color: AppColors.feedbackDanger,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(sheetContext).pop(),
+            child: Text(l.actionClose),
+          ),
+        ],
+      );
+    },
+  );
+  try {
+    switch (choice) {
+      case 'hide':
+        await repository.hideProduct(productId);
+        messenger.showSnackBar(SnackBar(content: Text(l.assimeHidden)));
+      case 'seller':
+        await repository.hideSeller(sellerId);
+        messenger.showSnackBar(SnackBar(content: Text(l.assimeSellerHidden)));
+      case 'report':
+        if (context.mounted) await showReportListing(context, ref, productId);
+        return;
+      default:
+        return;
+    }
+    ref.read(marketplaceProductsProvider.notifier).invalidate();
+    ref.invalidate(sponsoredStatusProvider);
+  } catch (_) {
+    messenger.showSnackBar(SnackBar(content: Text(l.koryActionFailed)));
+  }
+}
+
+// ── Assimé 17 · Bilan de la mise en avant ────────────────────────────────
 
 final _boostReportProvider = FutureProvider.autoDispose
     .family<List<BoostReport>, int>(
@@ -305,7 +469,8 @@ final _boostReportProvider = FutureProvider.autoDispose
           ref.watch(marketplaceRepositoryProvider).boostReport(productId),
     );
 
-/// Le bilan de la mise en avant (Assimé 17), pour le seul vendeur.
+/// Le bilan, pour le seul vendeur : avancement, quatre chiffres, vues par
+/// jour (résultats et statuts).
 class BoostReportScreen extends ConsumerWidget {
   const BoostReportScreen({
     super.key,
@@ -321,190 +486,258 @@ class BoostReportScreen extends ConsumerWidget {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final report = ref.watch(_boostReportProvider(productId));
-    return ModuleScaffold(
-      title: l.assimeReportTitle,
-      subtitle: productName,
-      child: report.when(
-        loading: () => const SkeletonCards(),
-        error: (_, _) => ModuleEmptyState(
-          icon: Icons.cloud_off,
-          title: l.honamFailed,
-          message: l.modulesCheckNetwork,
-        ),
-        data: (items) => items.isEmpty
-            ? ModuleEmptyState(
+    final latest = report.valueOrNull?.firstOrNull;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: ModuleScaffold(
+        title: latest == null || latest.active
+            ? l.assimeBoostRunning
+            : l.assimeBoostEnded,
+        subtitle: latest?.days == null
+            ? productName
+            : l.assimeBoostSub(productName, latest!.days!),
+        child: report.when(
+          loading: () => const SkeletonCards(),
+          error: (_, _) => ModuleEmptyState(
+            icon: Icons.cloud_off,
+            title: l.honamFailed,
+            message: l.modulesCheckNetwork,
+          ),
+          data: (items) {
+            final b = items.firstOrNull;
+            if (b == null) {
+              return ModuleEmptyState(
                 icon: Icons.campaign_outlined,
                 title: l.assimeReportEmpty,
                 message: '',
-              )
-            : ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  for (final b in items)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ModuleCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.assimeReportPeriod(
-                                '${b.days ?? '?'}',
-                                DateFormat.MMMd(
-                                  locale,
-                                ).format(b.startsAt.toLocal()),
-                                DateFormat.MMMd(
-                                  locale,
-                                ).format(b.expiresAt.toLocal()),
-                              ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(l.assimeReportImpressions('${b.impressions}')),
-                            if (b.days == 7)
-                              Text(
-                                l.assimeReportStatusViews('${b.statusViews}'),
-                              ),
-                            Text(l.assimeReportContacts('${b.contacts}')),
-                            if (b.statusModeration == 'PENDING')
-                              Text(
-                                l.assimeStatusPending,
-                                style: const TextStyle(
-                                  color: AppColors.feedbackWarning,
-                                ),
-                              ),
-                            if (b.statusModeration == 'REJECTED')
-                              Text(
-                                l.assimeStatusRejected,
-                                style: const TextStyle(
-                                  color: AppColors.feedbackDanger,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-/// La place sponsorisée dans la bande des statuts : toujours dite
-/// « Sponsorisé », jamais déguisée en statut d'un ami.
-class SponsoredStatusTile extends ConsumerWidget {
-  const SponsoredStatusTile({super.key, required this.sponsored});
-
-  final SponsoredStatus sponsored;
-
-  Future<void> _open(BuildContext context, WidgetRef ref) async {
-    final l = L.of(context);
-    final product = sponsored.product;
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _Thumb(mediaId: product.imageMediaId, size: 72),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.assimeSponsored,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text('${product.price} ${product.currency}'),
-                        Text(
-                          product.sellerName,
-                          style: TextStyle(color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ModuleActionButton(
-                label: l.productDiscuss,
-                icon: Icons.chat_bubble_outline,
-                onPressed: () async {
-                  final repository = ref.read(marketplaceRepositoryProvider);
-                  final myUserId = ref.read(authControllerProvider).user?.id;
-                  Navigator.pop(sheetContext);
-                  try {
-                    await repository.countSponsoredContact(sponsored.boostId);
-                    await repository.shareProduct(productId: product.id);
-                  } catch (_) {
-                    // La discussion s'ouvre quand même : le vendeur reste
-                    // joignable même si la fiche n'a pas pu être épinglée.
-                  }
-                  if (!context.mounted || myUserId == null) return;
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ConversationScreen(
-                        myUserId: myUserId,
-                        contactUserId: product.sellerId,
-                        contactName: product.sellerName,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              TextButton(
-                onPressed: () => showModalBottomSheet<void>(
-                  context: sheetContext,
-                  backgroundColor: AppColors.surface,
-                  builder: (_) => SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.assimeWhyTitle,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(sponsored.why),
-                        ],
-                      ),
-                    ),
+              );
+            }
+            final total = b.days ?? b.expiresAt.difference(b.startsAt).inDays;
+            final day = (DateTime.now().difference(b.startsAt).inDays + 1)
+                .clamp(1, total < 1 ? 1 : total);
+            final end = DateFormat(
+              'EEEE d MMM à HH:mm',
+              locale,
+            ).format(b.expiresAt.toLocal());
+            Widget figure(String label, int value, [String? sub]) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                ),
+                Text(
+                  '$value',
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                child: Text(l.assimeWhyTitle),
-              ),
-            ],
+                if (sub != null)
+                  Text(
+                    sub,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            );
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              children: [
+                ModuleCard(
+                  backgroundColor: AppColors.surfaceElevated,
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l.assimeBoostDayOf(day, total),
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          Text(
+                            l.assimeBoostEnds(end),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ModuleProgressBar(
+                        value: total == 0 ? 1 : day / total,
+                        color: AppColors.accentPrimary,
+                        height: 6,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(child: figure(l.assimeViewsResults, b.impressions)),
+                    Expanded(child: figure(l.assimeViewsStatus, b.statusViews)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: figure(l.assimeOpens, b.opens)),
+                    Expanded(
+                      child: figure(
+                        l.assimeMessagesReceived,
+                        b.messages,
+                        l.assimeMessagesBefore(b.messagesBefore),
+                      ),
+                    ),
+                  ],
+                ),
+                if (b.statusModeration == 'PENDING') ...[
+                  const SizedBox(height: 10),
+                  ModuleCallout(tone: CalloutTone.amber, text: l.assimeStatusPending),
+                ],
+                if (b.statusModeration == 'REJECTED') ...[
+                  const SizedBox(height: 10),
+                  ModuleCallout(tone: CalloutTone.red, text: l.assimeStatusRejected),
+                ],
+                const SizedBox(height: 14),
+                ModuleCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.assimeViewsPerDay,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 12),
+                      _DailyChart(daily: b.daily, locale: locale),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _Legend(color: AppColors.accentPrimary, label: l.assimeLegendResults),
+                          const SizedBox(width: 12),
+                          _Legend(color: AppColors.brandOr, label: l.assimeLegendStatus),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  l.assimeBoostNote,
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: ModuleActionButton(
+            label: l.assimeSeeListing,
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ),
       ),
     );
   }
+}
+
+class _Legend extends StatelessWidget {
+  const _Legend({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 4),
+      Text(label, style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+    ],
+  );
+}
+
+/// Les barres jumelles du bilan : résultats en terre cuite, statuts en or.
+class _DailyChart extends StatelessWidget {
+  const _DailyChart({required this.daily, required this.locale});
+
+  final List<({DateTime day, int results, int status})> daily;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final max = daily.fold<int>(
+      1,
+      (m, d) => [m, d.results, d.status].reduce((a, b) => a > b ? a : b),
+    );
+    const height = 90.0;
+    Widget bar(int value, Color color) => Container(
+      width: 8,
+      height: value == 0 ? 2 : height * value / max,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+    return SizedBox(
+      height: height + 18,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          for (final d in daily.length > 7 ? daily.sublist(daily.length - 7) : daily)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    bar(d.results, AppColors.accentPrimary),
+                    const SizedBox(width: 3),
+                    bar(d.status, AppColors.brandOr),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  DateFormat.E(locale).format(d.day),
+                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Assimé 14-15 · Statut sponsorisé ─────────────────────────────────────
+
+/// La place sponsorisée dans la bande des statuts : un halo doré, toujours
+/// dite « Sponsorisé », jamais déguisée en statut d'un ami.
+class SponsoredStatusTile extends ConsumerWidget {
+  const SponsoredStatusTile({super.key, required this.sponsored});
+
+  final SponsoredStatus sponsored;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -514,7 +747,12 @@ class SponsoredStatusTile extends ConsumerWidget {
       label: '${l.assimeSponsored} · ${sponsored.product.name}',
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () => _open(context, ref),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (_) => SponsoredStatusViewer(sponsored: sponsored),
+          ),
+        ),
         child: SizedBox(
           width: 72,
           child: Column(
@@ -522,8 +760,8 @@ class SponsoredStatusTile extends ConsumerWidget {
               StatusHalo(
                 size: 60,
                 thickness: 3,
-                seenColor: AppColors.border,
                 seen: true,
+                seenColor: AppColors.brandOr,
                 child: ClipOval(
                   child: SizedBox(
                     width: 52,
@@ -545,7 +783,262 @@ class SponsoredStatusTile extends ConsumerWidget {
                 l.assimeSponsored,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Assimé 15 · le statut sponsorisé en plein écran : la photo, le vendeur
+/// et « Sponsorisé », « Voir l'annonce » et « Écrire ». Toucher à droite
+/// passe au statut suivant ; le ⋮ ouvre « Pourquoi je vois ça ».
+class SponsoredStatusViewer extends ConsumerStatefulWidget {
+  const SponsoredStatusViewer({super.key, required this.sponsored});
+
+  final SponsoredStatus sponsored;
+
+  @override
+  ConsumerState<SponsoredStatusViewer> createState() =>
+      _SponsoredStatusViewerState();
+}
+
+class _SponsoredStatusViewerState extends ConsumerState<SponsoredStatusViewer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _progress = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 6),
+  )..forward();
+
+  @override
+  void initState() {
+    super.initState();
+    _progress.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        Navigator.of(context).maybePop();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _progress.dispose();
+    super.dispose();
+  }
+
+  Future<void> _seeListing() async {
+    _progress.stop();
+    final repository = ref.read(marketplaceRepositoryProvider);
+    repository.countSponsoredOpen(widget.sponsored.boostId).ignore();
+    await openAssimeProduct(context, ref, widget.sponsored.product.id);
+  }
+
+  Future<void> _write() async {
+    _progress.stop();
+    final product = widget.sponsored.product;
+    final myUserId = ref.read(authControllerProvider).user?.id;
+    ref
+        .read(marketplaceRepositoryProvider)
+        .countSponsoredContact(widget.sponsored.boostId)
+        .ignore();
+    if (myUserId == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ConversationScreen(
+          myUserId: myUserId,
+          contactUserId: product.sellerId,
+          contactName: product.sellerName,
+          product: MarketplaceProduct(
+            id: product.id,
+            sellerId: product.sellerId,
+            sellerName: product.sellerName,
+            name: product.name,
+            description: null,
+            price: product.price,
+            currency: product.currency,
+            location: product.location,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final product = widget.sponsored.product;
+    final initials = product.sellerName
+        .split(' ')
+        .where((p) => p.isNotEmpty)
+        .take(2)
+        .map((p) => p[0].toUpperCase())
+        .join();
+    const white = TextStyle(color: Colors.white);
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapUp: (details) {
+          if (details.localPosition.dx > MediaQuery.sizeOf(context).width / 2) {
+            Navigator.of(context).maybePop();
+          }
+        },
+        onLongPressStart: (_) => _progress.stop(),
+        onLongPressEnd: (_) => _progress.forward(),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+                child: AnimatedBuilder(
+                  animation: _progress,
+                  builder: (_, _) => LinearProgressIndicator(
+                    value: _progress.value,
+                    minHeight: 2.5,
+                    backgroundColor: Colors.white24,
+                    valueColor: const AlwaysStoppedAnimation(Colors.white),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    tooltip: l.actionClose,
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  CircleAvatar(
+                    radius: 17,
+                    backgroundColor: Colors.white,
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.sellerName,
+                          style: white.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandOr,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            l.assimeSponsored,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l.assimeWhyTitle,
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                    onPressed: () async {
+                      _progress.stop();
+                      await showWhySponsored(
+                        context,
+                        ref,
+                        productId: product.id,
+                        sellerId: product.sellerId,
+                        whyText: widget.sponsored.why,
+                      );
+                      if (mounted) _progress.forward();
+                    },
+                  ),
+                ],
+              ),
+              Expanded(
+                child: product.imageMediaId == null
+                    ? const Center(
+                        child: PokouIcon(PokouModuleIcon.assime, size: 64),
+                      )
+                    : MediaImage(
+                        mediaId: product.imageMediaId!,
+                        fit: BoxFit.contain,
+                      ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${product.name} · ${product.price} ${product.currency}',
+                      style: white.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      [
+                        if (product.location != null) product.location!,
+                        l.assimeAdAssime,
+                      ].join(' · '),
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              minimumSize: const Size(0, 46),
+                            ),
+                            onPressed: _seeListing,
+                            icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                            label: Text(l.assimeSeeListing),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white54),
+                              minimumSize: const Size(0, 46),
+                            ),
+                            onPressed: _write,
+                            icon: const Icon(Icons.arrow_forward, size: 18),
+                            label: Text(l.assimeWrite),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l.assimeNextHint,
+                      style: const TextStyle(color: Colors.white54, fontSize: 11),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

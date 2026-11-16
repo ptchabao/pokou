@@ -2685,5 +2685,6 @@
   "assimeStep2Title": "Prix, état et lieu",
   "assimeToday": "aujourd’hui",
   "assimeYesterday": "hier",
-  "assimeNearYou": "Près de chez toi"
+  "assimeNearYou": "Près de chez toi",
+  "assimeSoldBadge": "Vendu"
 }

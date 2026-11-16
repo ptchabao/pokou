@@ -359,6 +359,22 @@ class MarketplaceRepository {
   Future<void> reportReview(int reviewId) =>
       _api.post('/marketplace/reviews/$reviewId/report');
 
+  /// La fiche d'une annonce (compte une vue si elle n'est pas à moi).
+  Future<MarketplaceProduct> product(int productId) async =>
+      MarketplaceProduct.fromJson(
+        await _api.get('/marketplace/$productId') as Map<String, dynamic>,
+      );
+
+  /// « Signaler » sur le profil d'un vendeur (Assimé 22) : la file de
+  /// signalements de la messagerie, sans blocage.
+  Future<void> reportSeller(int sellerId) => _api.post(
+    '/conversations/report',
+    body: {
+      'contact_user_id': sellerId,
+      'reason': 'Assimé · vendeur signalé depuis son profil',
+    },
+  );
+
   /// « Renouveler » (Assimé 9) : 30 jours de plus en ligne.
   Future<void> renew(int productId) =>
       _api.post('/marketplace/$productId/renew');

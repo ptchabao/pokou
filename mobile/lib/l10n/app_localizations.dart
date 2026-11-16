@@ -16225,6 +16225,12 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Près de chez toi'**
   String get assimeNearYou;
+
+  /// No description provided for @assimeSoldBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vendu'**
+  String get assimeSoldBadge;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

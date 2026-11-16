@@ -9608,4 +9608,7 @@ class LAr extends L {
 
   @override
   String get assimeNearYou => 'Près de chez toi';
+
+  @override
+  String get assimeSoldBadge => 'Vendu';
 }
