@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4055,8 +4056,7 @@ class LIt extends L {
       locale: localeName,
       other:
           '$count messaggi trattenuti dalla Modalità Scudo: scorri verso il basso per mostrarli',
-      one:
-          '1 messaggio trattenuto dalla Modalità Scudo: scorri verso il basso per mostrarlo',
+      one: '1 messaggio trattenuto dalla Modalità Scudo: scorri verso il basso per mostrarlo',
     );
     return '$_temp0';
   }
@@ -14680,4 +14680,12 @@ class LIt extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String get groupPollSendFailed => 'Sondaggio non inviato: riprova.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

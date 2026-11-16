@@ -26,7 +26,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import BabaMessage, CallLog, Community, CommunityMember, Contact, DeviceToken, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, MediaAsset, MessageReaction, PollVote, Status, StatusPrivacy, StatusPrivacyEntry, StatusView, Token, User
+from app.models import BabaMessage, CallLog, Community, CommunityMember, Contact, DeviceToken, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupPollVote, MediaAsset, MessageReaction, PollVote, Status, StatusPrivacy, StatusPrivacyEntry, StatusView, Token, User
 from app.services.media import media_storage
 from app.services.privacy import privacy_service
 from app.core.security import get_current_user, hash_password, verify_password
@@ -630,6 +630,10 @@ def erase_account(db: Session, user: User) -> dict:
     )
     votes_removed = (
         db.query(PollVote).filter(PollVote.user_id == user.id).delete(synchronize_session=False)
+    ) + (
+        db.query(GroupPollVote)
+        .filter(GroupPollVote.voter_id == user.id)
+        .delete(synchronize_session=False)
     )
     # Les mentions QUI ME DÉSIGNENT dans les messages d'autrui : le texte du
     # message reste le leur, mais l'index qui pointe sur mon compte n'a plus

@@ -51,6 +51,17 @@ class ConversationPreview {
   /// Libellé affichable dans la liste — un média sans légende doit dire CE
   /// QUE C'EST (WhatsApp affiche « 📷 Photo », jamais une ligne vide).
   String displayTextOf(L l) {
+    // Un sondage se reconnaît à son pictogramme, puis à sa question — en
+    // clair (discussion à deux) ou déchiffrée dans le cache (groupe). Sans
+    // question lisible, « Sondage ».
+    if (messageType == 'POLL') {
+      final question = [content, if (encrypted) localContent]
+          .whereType<String>()
+          .map((text) => text.trim())
+          .where((text) => text.isNotEmpty)
+          .firstOrNull;
+      return question == null ? l.mediaPoll : l.groupPollPreview(question);
+    }
     if (content != null && content!.trim().isNotEmpty) return content!;
 
     // Message chiffré : le serveur n'a rien pu envoyer, mais l'appareil a

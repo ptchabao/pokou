@@ -9105,5 +9105,15 @@
   "assimeToday": "aujourd’hui",
   "assimeYesterday": "hier",
   "assimeNearYou": "Près de chez toi",
-  "assimeSoldBadge": "Vendu"
+  "assimeSoldBadge": "Vendu",
+  "groupPollSendFailed": "Sondage non envoyé — réessaie.",
+  "groupPollPreview": "📊 {question}",
+  "@groupPollPreview": {
+    "description": "Aperçu d'un sondage dans la liste des discussions",
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -73,6 +73,9 @@ import '../../messaging/presentation/proof_export_screens.dart';
 import '../../messaging/presentation/proof_sheets.dart';
 import '../../messaging/presentation/proof_widgets.dart';
 import '../data/group_model.dart';
+import '../data/group_poll.dart';
+import 'group_poll_bubble.dart';
+import '../../messaging/presentation/poll_composer.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'group_controller.dart';
 import 'group_settings_screen.dart';
@@ -945,18 +948,16 @@ class _GroupConversationScreenState
     );
   }
 
-  /// Discussions · 2 — « Joindre à {nom} » : Galerie / Caméra / Document,
-  /// et « Cagnotte Kory » seulement dans un pays où Kory est ouvert (jamais
-  /// en Lot 1). La maquette propose aussi « Sondage » dans un groupe, mais
-  /// le serveur refuse encore les sondages de groupe (409) tant qu'ils ne
-  /// sont pas chiffrés comme le reste des messages : l'entrée resterait un
-  /// bouton qui échoue à chaque fois, donc elle n'est pas montrée ici (voir
-  /// GroupRepository.createPoll). Elle existe déjà côté discussion à deux.
+  /// Discussions · 2 — « Joindre à {nom} » : Galerie / Caméra / Document /
+  /// Sondage, et « Cagnotte Kory » seulement dans un pays où Kory est ouvert
+  /// (jamais en Lot 1). Le sondage de groupe est chiffré comme le reste des
+  /// messages (voir group_poll.dart).
   Future<void> _showAttachmentSheet() async {
     final hasKory = ref.read(currentCountryConfigProvider).has('kory');
     final choice = await showAttachSheet(
       context,
       targetName: widget.groupName,
+      offerPoll: true,
       offerKory: hasKory,
     );
     switch (choice) {
@@ -969,8 +970,34 @@ class _GroupConversationScreenState
       case AttachChoice.kory:
         if (mounted) await openKoryCreate(context, ref, groupId: widget.groupId);
       case AttachChoice.poll:
+        await _createPoll();
       case null:
         break;
+    }
+  }
+
+  /// Discussions · 20 — un sondage dans un groupe : même rédaction qu'en
+  /// discussion à deux (showPollComposer).
+  Future<void> _createPoll() async {
+    final draft = await showPollComposer(context);
+    if (draft == null || !mounted) return;
+    try {
+      await ref
+          .read(groupChatControllerProvider(widget.groupId).notifier)
+          .createPoll(
+            question: draft.question,
+            options: draft.options,
+            allowsMultiple: draft.allowsMultiple,
+          );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error is ApiException ? error.message : _l.groupPollSendFailed,
+          ),
+        ),
+      );
     }
   }
 
@@ -2358,6 +2385,16 @@ class _GroupBubbleState extends State<_GroupBubble> {
   Widget? _richContentWidget(L l, TextStyle textStyle) {
     switch (message.messageType) {
       case 'POLL':
+        // Sondage chiffré (le cas normal en groupe) : sa définition est dans
+        // le corps déchiffré du message.
+        final encrypted = GroupPollDefinition.fromPayload(message.payload);
+        if (encrypted != null) {
+          return GroupPollBubble(
+            groupId: message.groupId,
+            messageId: message.id,
+            poll: encrypted,
+          );
+        }
         final poll = message.poll;
         if (poll == null)
           return Text(message.content ?? l.mediaPoll, style: textStyle);

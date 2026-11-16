@@ -12,6 +12,7 @@ import '../../../core/storage/pokou_message_store.dart';
 import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, PollData, MessageReplyPreview;
 import 'group_invitation_model.dart';
+import 'group_poll.dart';
 import 'group_model.dart';
 import '../../../core/time/server_time.dart';
 
@@ -161,12 +162,10 @@ class GroupRepository {
   /// non publiées, réseau) est sauté au lieu de bloquer l'envoi : il la
   /// recevra au prochain envoi.
   Future<void> _ensureSenderKeyDistributed(Group group, int senderId) async {
-    final status =
-        await _api.get(
-              '/groups/${group.id}/sender-key-distributions/status'
-              '?epoch=${group.cryptoEpoch}',
-            )
-            as Map<String, dynamic>;
+    final status = await _api.get(
+      '/groups/${group.id}/sender-key-distributions/status'
+      '?epoch=${group.cryptoEpoch}',
+    ) as Map<String, dynamic>;
     final missing = [
       for (final id in (status['missing'] as List? ?? const []))
         if (id is int && id != senderId) id,
@@ -456,9 +455,9 @@ class GroupRepository {
   /// Supprimer pour tous. Renvoie le message conservé en mode preuve, ou
   /// `null` quand il a été effacé.
   Future<GroupMessage?> deleteMessage(int groupId, String messageId) async {
-    final response =
-        await _api.delete('/groups/$groupId/messages/$messageId')
-            as Map<String, dynamic>;
+    final response = await _api.delete(
+      '/groups/$groupId/messages/$messageId',
+    ) as Map<String, dynamic>;
     final kept = response['message'] as Map<String, dynamic>?;
     return response['kept_as_proof'] == true && kept != null
         ? GroupMessage.fromJson(kept)
@@ -622,9 +621,10 @@ class GroupRepository {
   /// Lève [GroupJoinPending] quand le groupe exige l'approbation d'un
   /// administrateur (DIS-26) : la demande est déposée, l'entrée viendra.
   Future<Group> joinByInvite(String code) async {
-    final response =
-        await _api.post('/groups/invite/$code/join', body: const {})
-            as Map<String, dynamic>;
+    final response = await _api.post(
+      '/groups/invite/$code/join',
+      body: const {},
+    ) as Map<String, dynamic>;
     if (response['pending_approval'] == true) {
       throw GroupJoinPending(response['name'] as String? ?? '');
     }
@@ -676,14 +676,103 @@ class GroupRepository {
     );
   }
 
+  /// Un sondage de groupe : un message POLL chiffré comme les autres, qui
+  /// porte la question, les réponses et la clé des votes (voir
+  /// group_poll.dart). Le contenu en clair est la question — c'est ce que
+  /// montrent la liste des discussions et une citation.
   Future<GroupMessage> createPoll({
-    required int groupId,
+    required Group group,
+    required int senderId,
     required String question,
     required List<String> options,
     required bool allowsMultiple,
+  }) {
+    final poll = GroupPollDefinition.create(
+      question: question,
+      options: options,
+      allowsMultiple: allowsMultiple,
+    );
+    return _sendEncrypted(
+      group: group,
+      senderId: senderId,
+      messageType: 'POLL',
+      body: {'content': question, 'payload': poll.toPayload()},
+    );
+  }
+
+  /// Les votes d'un sondage de groupe, ouverts : `votes[membre] = choix`.
+  /// Un vote qui ne s'ouvre pas est ignoré.
+  Future<Map<int, List<int>>> pollVotes({
+    required int groupId,
+    required String messageId,
+    required GroupPollDefinition poll,
   }) async {
-    throw UnsupportedError(
-      'Group polls are disabled until their schema is end-to-end encrypted.',
+    final response = await _api.get(
+      '/groups/$groupId/messages/$messageId/poll-votes',
+    ) as Map<String, dynamic>;
+    final votes = <int, List<int>>{};
+    for (final raw in (response['items'] as List? ?? const [])) {
+      final item = raw as Map<String, dynamic>;
+      final voterId = item['voter_id'] as int;
+      final choices = await openPollVote(
+        groupId: groupId,
+        messageId: messageId,
+        poll: poll,
+        vote: item,
+      );
+      if (choices != null) votes[voterId] = choices;
+    }
+    return votes;
+  }
+
+  /// Ouvre un vote tel que le serveur le décrit (`voter_id`, `encryption`,
+  /// `ciphertext`) — liste ou événement `group:poll:vote`.
+  Future<List<int>?> openPollVote({
+    required int groupId,
+    required String messageId,
+    required GroupPollDefinition poll,
+    required Map<String, dynamic> vote,
+  }) async {
+    final ciphertext = vote['ciphertext'];
+    if (vote['encryption'] != GroupPollVoteCipher.encryption ||
+        ciphertext is! String) {
+      return null;
+    }
+    return GroupPollVoteCipher.open(
+      key: poll.key,
+      groupId: groupId,
+      messageId: messageId,
+      voterId: vote['voter_id'] as int,
+      ciphertext: ciphertext,
+    );
+  }
+
+  /// Dépose (ou remplace) MON vote ; une liste vide le retire.
+  Future<void> setPollVote({
+    required int groupId,
+    required String messageId,
+    required int voterId,
+    required GroupPollDefinition poll,
+    required List<int> optionIds,
+  }) async {
+    final path = '/groups/$groupId/messages/$messageId/poll-vote';
+    if (optionIds.isEmpty) {
+      await _api.delete(path);
+      return;
+    }
+    final ciphertext = await GroupPollVoteCipher.seal(
+      key: poll.key,
+      groupId: groupId,
+      messageId: messageId,
+      voterId: voterId,
+      optionIds: optionIds,
+    );
+    await _api.put(
+      path,
+      body: {
+        'encryption': GroupPollVoteCipher.encryption,
+        'ciphertext': ciphertext,
+      },
     );
   }
 

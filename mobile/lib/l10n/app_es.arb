@@ -3992,5 +3992,7 @@
   "assimeToday": "aujourd’hui",
   "assimeYesterday": "hier",
   "assimeNearYou": "Près de chez toi",
-  "assimeSoldBadge": "Vendu"
+  "assimeSoldBadge": "Vendu",
+  "groupPollSendFailed": "Encuesta no enviada: inténtalo de nuevo.",
+  "groupPollPreview": "📊 {question}"
 }

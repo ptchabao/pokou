@@ -13,9 +13,8 @@ enum AttachChoice { gallery, camera, document, poll, kory }
 /// La même feuille pour la discussion à deux et le groupe, pour qu'elles ne
 /// divergent pas. Ce qui change d'un fil à l'autre est décidé par l'appelant :
 ///
-/// - [offerPoll] : le sondage. Proposé en discussion à deux. Pas encore en
-///   groupe : depuis le chiffrement de bout en bout, le serveur refuse les
-///   sondages de groupe (il devrait en tenir les votes en clair).
+/// - [offerPoll] : le sondage. Proposé en discussion à deux et en groupe
+///   (où il est chiffré de bout en bout : voir groups/data/group_poll.dart).
 /// - [offerKory] : la cagnotte Kory, seulement dans un groupe ET là où Kory
 ///   est ouvert. En lot 1, aucune mention de Kory n'apparaît.
 /// - [koryGroupsOnlyNote] : en discussion à deux là où Kory est ouvert, la

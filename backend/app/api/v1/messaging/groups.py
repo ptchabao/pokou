@@ -18,7 +18,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
+from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupPollVote, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
 from app.utils.editing import MESSAGE_EDIT_WINDOW_MINUTES
 from app.utils.identity import est_certifie, forme_du_badge, nom_certifie
 from app.services.messaging import group_invitation_service
@@ -117,6 +117,19 @@ class SenderKeyDistributionCreate(BaseModel):
 
 class GroupMessageReactionSet(BaseModel):
     emoji: str = Field(..., min_length=1, max_length=16)
+
+
+# Format du vote chiffré d'un sondage de groupe (voir GroupPollVote) : le
+# serveur ne l'ouvre pas, il refuse seulement ce qu'aucun client ne sait lire.
+GROUP_POLL_VOTE_ENCRYPTION = "poll-key-v1"
+
+
+class GroupPollVoteSet(BaseModel):
+    """L'ÉTAT voulu de mon vote, chiffré avec la clé du sondage : il remplace
+    le précédent. Retirer son vote passe par DELETE, pas par un chiffré vide
+    — le serveur ne saurait pas dire qu'il est vide."""
+    encryption: str = Field(..., pattern="^poll-key-v1$")
+    ciphertext: str = Field(..., min_length=1, max_length=4000)
 
 
 # ─── Sérialisation ────────────────────────────────────────────────────────────
@@ -1477,7 +1490,9 @@ async def send_group_message(
         raise HTTPException(status_code=400, detail="Type de message invalide")
 
     media_asset = None
-    if message_type == MessageType.TEXT:
+    # Un sondage n'a pas de pièce jointe : sa question, ses réponses et la
+    # clé de ses votes sont dans le chiffré (voir GroupPollVote).
+    if message_type in (MessageType.TEXT, MessageType.POLL):
         pass
     else:
         if not payload.media_asset_id:
@@ -1936,3 +1951,124 @@ async def remove_group_message_reaction(
             exclude_user_id=user_id,
         )
     return {"message_id": message.id, "reactions": _serialize_reactions(message, user_id)}
+
+
+# ─── Sondages ─────────────────────────────────────────────────────────────────
+#
+# Le sondage lui-même est un message de groupe ordinaire de type POLL, envoyé
+# par POST /{group_id}/messages : il passe donc par la même diffusion et les
+# mêmes notifications que n'importe quel message. Restent les votes, qui ne
+# peuvent pas être des messages (ils se remplacent, et ne doivent ni occuper
+# le fil ni sonner chez tout le monde) : une ligne chiffrée par membre.
+
+
+def _get_group_poll(db: Session, group_id: int, message_id: str) -> GroupMessage:
+    message = _get_group_message(db, group_id, message_id)
+    if message.message_type != MessageType.POLL:
+        raise HTTPException(status_code=400, detail="Ce message n'est pas un sondage")
+    return message
+
+
+def _serialize_poll_vote(vote: GroupPollVote) -> dict:
+    return {
+        "voter_id": vote.voter_id,
+        "encryption": vote.encryption,
+        "ciphertext": vote.ciphertext,
+        "updated_at": vote.updated_at.isoformat(),
+    }
+
+
+@router.get("/{group_id}/messages/{message_id}/poll-votes")
+async def list_group_poll_votes(
+    group_id: int,
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Les votes chiffrés d'un sondage, une entrée par membre qui a voté.
+    Le décompte se fait sur le téléphone, qui seul détient la clé."""
+    _require_membership(db, group_id, current_user["user_id"])
+    message = _get_group_poll(db, group_id, message_id)
+    votes = sorted(message.poll_votes, key=lambda vote: (vote.created_at, vote.id))
+    return {"message_id": message.id, "items": [_serialize_poll_vote(vote) for vote in votes]}
+
+
+@router.put("/{group_id}/messages/{message_id}/poll-vote")
+async def set_group_poll_vote(
+    group_id: int,
+    message_id: str,
+    payload: GroupPollVoteSet,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Voter, ou changer son vote. Une voix par membre (contrainte
+    uq_group_poll_vote) : revoter remplace le chiffré précédent.
+
+    Ouvert à tout membre, y compris là où seuls les admins écrivent — comme
+    une réaction, un vote n'occupe pas le fil."""
+    user_id = current_user["user_id"]
+    _require_membership(db, group_id, user_id)
+    message = _get_group_poll(db, group_id, message_id)
+    if message.deleted_at is not None:
+        raise HTTPException(status_code=409, detail="Ce sondage a été supprimé")
+
+    now = datetime.utcnow()
+    vote = db.query(GroupPollVote).filter(
+        GroupPollVote.message_id == message.id, GroupPollVote.voter_id == user_id
+    ).first()
+    if vote:
+        vote.encryption = payload.encryption
+        vote.ciphertext = payload.ciphertext
+        vote.updated_at = now
+    else:
+        vote = GroupPollVote(
+            message_id=message.id,
+            voter_id=user_id,
+            encryption=payload.encryption,
+            ciphertext=payload.ciphertext,
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(vote)
+    db.commit()
+    db.refresh(vote)
+
+    serialized = _serialize_poll_vote(vote)
+    await _broadcast(
+        db,
+        group_id,
+        {"type": "group:poll:vote", "group_id": group_id, "message_id": message.id, "vote": serialized},
+        exclude_user_id=user_id,
+    )
+    return {"message_id": message.id, "vote": serialized}
+
+
+@router.delete("/{group_id}/messages/{message_id}/poll-vote")
+async def remove_group_poll_vote(
+    group_id: int,
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Retirer son vote. Idempotent, comme le retrait d'une réaction."""
+    user_id = current_user["user_id"]
+    _require_membership(db, group_id, user_id)
+    message = _get_group_poll(db, group_id, message_id)
+    vote = db.query(GroupPollVote).filter(
+        GroupPollVote.message_id == message.id, GroupPollVote.voter_id == user_id
+    ).first()
+    if vote:
+        db.delete(vote)
+        db.commit()
+        await _broadcast(
+            db,
+            group_id,
+            {
+                "type": "group:poll:vote",
+                "group_id": group_id,
+                "message_id": message.id,
+                "vote": {"voter_id": user_id, "encryption": None, "ciphertext": None, "updated_at": None},
+            },
+            exclude_user_id=user_id,
+        )
+    return {"message_id": message.id, "vote": None}

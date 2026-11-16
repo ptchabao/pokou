@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14710,4 +14711,12 @@ class LRu extends L {
 
   @override
   String get assimeSoldBadge => 'Vendu';
+
+  @override
+  String get groupPollSendFailed => 'Опрос не отправлен — попробуйте ещё раз.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

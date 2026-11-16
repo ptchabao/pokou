@@ -11,10 +11,18 @@ import 'messaging_controller.dart' show messagingRepositoryProvider;
 /// Rendu d'un message de type POLL : question, options avec barre de
 /// progression proportionnelle au nombre de votes, mise en évidence de mon
 /// propre vote. Le vote/changement de vote appelle
-/// `POST /polls/{id}/vote` (voir MessagingRepository.votePoll) — même route
-/// qu'on soit dans une conversation 1:1 ou un groupe.
+/// `POST /polls/{id}/vote` (voir MessagingRepository.votePoll) — sauf si
+/// l'appelant fournit [castVote] : un sondage de GROUPE est chiffré, son vote
+/// part par une autre route (voir group_poll_bubble.dart). Le rendu, lui, est
+/// le même partout.
 class PollBubble extends ConsumerStatefulWidget {
-  const PollBubble({super.key, required this.poll, required this.onVoted});
+  const PollBubble({
+    super.key,
+    required this.poll,
+    required this.onVoted,
+    this.castVote,
+    this.voterName,
+  });
 
   final PollData poll;
 
@@ -22,6 +30,14 @@ class PollBubble extends ConsumerStatefulWidget {
   /// message affiché — ce widget ne connaît pas l'identifiant du MESSAGE
   /// porteur, seulement celui du sondage (`poll.id`).
   final void Function(PollData updated) onVoted;
+
+  /// Envoie l'état voulu de mon vote (liste vide = retrait) et renvoie le
+  /// sondage à jour. Absent : la route des sondages en clair.
+  final Future<PollData> Function(List<int> optionIds)? castVote;
+
+  /// Le nom d'un votant absent du carnet, quand l'appelant en connaît un
+  /// (un membre du groupe) ; `null` pour « Un membre ».
+  final String? Function(int userId)? voterName;
 
   @override
   ConsumerState<PollBubble> createState() => _PollBubbleState();
@@ -49,9 +65,12 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
 
     setState(() => _voting = true);
     try {
-      final updated = await ref
-          .read(messagingRepositoryProvider)
-          .votePoll(pollId: poll.id, optionIds: wanted.toList());
+      final castVote = widget.castVote;
+      final updated = castVote != null
+          ? await castVote(wanted.toList())
+          : await ref
+                .read(messagingRepositoryProvider)
+                .votePoll(pollId: poll.id, optionIds: wanted.toList());
       widget.onVoted(updated);
     } catch (_) {
       // Best-effort : si le vote échoue en silence, l'événement WS
@@ -75,7 +94,7 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
       for (final c in contacts) {
         if (c.contactUserId == userId) return c.displayName;
       }
-      return l.pollVoterUnknown;
+      return widget.voterName?.call(userId) ?? l.pollVoterUnknown;
     }
 
     await showModalBottomSheet<void>(

@@ -4048,5 +4048,7 @@
   "assimeToday": "today",
   "assimeYesterday": "yesterday",
   "assimeNearYou": "Near you",
-  "assimeSoldBadge": "Sold"
+  "assimeSoldBadge": "Sold",
+  "groupPollSendFailed": "Poll not sent — try again.",
+  "groupPollPreview": "📊 {question}"
 }
