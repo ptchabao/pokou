@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -17,6 +19,7 @@ import '../../settings/presentation/backup_screens.dart';
 import '../../status/presentation/status_strip.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/assistant_orb.dart';
+import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import '../../groups/presentation/group_invitation_card.dart';
 import '../../../core/widgets/verified_badge.dart';
@@ -522,9 +525,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      // Plus de bouton flottant : le crayon de l'en-tête ouvre « Nouvelle
-      // discussion », comme dans la maquette (écrire à un numéro non
-      // enregistré passe toujours par cet écran).
+      // Comme WhatsApp : la bulle « + » ouvre « Nouvelle discussion »
+      // (écrire à un numéro non enregistré passe toujours par cet écran),
+      // et Baba flotte juste au-dessus.
+      // La barre du bas de la coquille passe par-dessus le contenu
+      // (extendBody) : elle agrandit la marge du bas reçue ici sans toucher
+      // à celle du système, que le Scaffold compte déjà. L'écart des deux
+      // est la hauteur de la barre, que les boutons doivent enjamber.
+      floatingActionButton: _ChatsFabs(
+        lift: math.max(
+          0.0,
+          MediaQuery.paddingOf(context).bottom -
+              MediaQuery.viewPaddingOf(context).bottom,
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await forceContactSync(ref);
@@ -544,8 +558,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             // plus utile à afficher en permanence sur ce marché. Sans barre
             // ni trait : l'écran commence par son titre.
             // Maquettes p.14 et p.52 : l'icône et le logotype Pokou en tête,
-            // comme WhatsApp, puis l'appareil photo (Lot 1) et le crayon de
-            // « Nouvelle discussion ». La connexion ne s'affiche plus que
+            // comme WhatsApp, puis l'appareil photo (Lot 1) ou la loupe et
+            // la maison de l'Accueil. La connexion ne s'affiche plus que
             // quand elle manque. Modules et listes de diffusion sont passés
             // dans « Plus » / « Réglages ».
             PokouPageHeader(
@@ -562,23 +576,6 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               emphasized: true,
               showBell: false,
               showAvatar: false,
-              // Application complète : la barre du bas est ici celle de la
-              // messagerie ; la maison ramène à l'Accueil et à ses modules.
-              leading: lot1
-                  ? null
-                  : IconButton(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
-                      tooltip: L.of(context).navHome,
-                      icon: const PokouIcon(PokouModuleIcon.accueil),
-                      onPressed: () =>
-                          ref.read(pokouCurrentTabProvider.notifier).state =
-                              PokouTab.home,
-                    ),
               actions: [
                 if (lot1)
                   IconButton(
@@ -606,14 +603,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                     icon: Icon(_searchOpen ? Icons.close : Icons.search),
                     tooltip: L.of(context).chatsSearchHint,
                   ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const NewChatScreen()),
+                // Application complète : la barre du bas est ici celle de la
+                // messagerie ; la maison ramène à l'Accueil et à ses modules.
+                if (!lot1)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: L.of(context).navHome,
+                    icon: const PokouIcon(PokouModuleIcon.accueil),
+                    onPressed: () =>
+                        ref.read(pokouCurrentTabProvider.notifier).state =
+                            PokouTab.home,
                   ),
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: L.of(context).newChatTitle,
-                ),
               ],
             ),
             if (!lot1)
@@ -692,8 +692,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 children: [
                   // CNX-3 : la restauration en cours, sans bloquer l'écran.
                   const RestoreProgressCard(),
-                  const _PinnedMahizuTile(),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 4),
                   // Plus de sections « Communautés » et « Groupes » au-dessus
                   // de la liste : les deux sont désormais des LIGNES de cette
                   // liste, triées avec le reste par activité. Les garder en
@@ -1514,12 +1513,49 @@ class _UnreadBadge extends StatelessWidget {
   }
 }
 
-/// Épinglé en haut de l'onglet Contacts — donne accès au(x) moniteur(s)
-/// (Smart Contacts) liés au numéro de l'utilisateur, sans dédier un onglet
-/// "IA" séparé pour y accéder. S'il y a plusieurs moniteurs connectés, un
-/// petit tiroir permet de choisir lequel ouvrir.
-class _PinnedMahizuTile extends ConsumerWidget {
-  const _PinnedMahizuTile();
+/// Les deux boutons flottants des Discussions, comme WhatsApp : Baba en
+/// petit au-dessus, la bulle « + » de « Nouvelle discussion » dessous.
+class _ChatsFabs extends StatelessWidget {
+  const _ChatsFabs({required this.lift});
+
+  /// La hauteur de la barre du bas, à enjamber.
+  final double lift;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: lift),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const _BabaFab(),
+          const SizedBox(height: 14),
+          FloatingActionButton(
+            heroTag: 'chats-new',
+            tooltip: L.of(context).newChatTitle,
+            backgroundColor: AppColors.accentPrimary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const NewChatScreen())),
+            child: const Icon(Icons.add_comment, size: 26),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Baba, en petit bouton flottant au-dessus de « Nouvelle discussion » :
+/// donne accès au(x) moniteur(s) (Smart Contacts) liés au numéro de
+/// l'utilisateur, sans onglet « IA » à part. S'il y a plusieurs moniteurs
+/// connectés, un petit tiroir permet de choisir lequel ouvrir.
+class _BabaFab extends ConsumerWidget {
+  const _BabaFab();
 
   Future<void> _open(BuildContext context, WidgetRef ref) async {
     MinouStatus status;
@@ -1594,123 +1630,27 @@ class _PinnedMahizuTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
-    // Baba se présente comme sur l'Accueil : un visage (son orbe, qui
-    // respire), une phrase à la première personne, et les couleurs de
-    // l'écran. Il était posé sur une carte jaune, avec une étiquette
-    // « ASSISTANT IA » brune : une affiche collée au-dessus des
-    // conversations, que rien ne reliait au reste — ni la couleur, ni le
-    // ton. C'est le premier fil de la liste, pas une publicité.
-    Widget quick(IconData icon, String label) => Material(
-      color: AppColors.accentPrimary.withValues(alpha: 0.10),
-      shape: const StadiumBorder(),
-      child: InkWell(
-        customBorder: const StadiumBorder(),
-        onTap: () => _open(context, ref),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 15, color: AppColors.accentPrimaryDark),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accentPrimaryDark,
-                ),
-              ),
-            ],
-          ),
+    // La tête du vieil homme, sur un rond clair bordé : il se distingue de
+    // la bulle « + », plus grande et pleine, juste dessous.
+    return Semantics(
+      button: true,
+      label: L.of(context).navBaba,
+      child: Material(
+        color: AppColors.surface,
+        elevation: 2,
+        shape: const CircleBorder(
+          side: BorderSide(color: AppColors.brandOr, width: 1.5),
         ),
-      ),
-    );
-    return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.card,
-        side: BorderSide(color: AppColors.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _open(context, ref),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const ExcludeSemantics(child: AssistantOrb(size: 48)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            l.navBaba,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 17,
-                              height: 1.2,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentPrimary.withValues(
-                              alpha: 0.12,
-                            ),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            l.babaAssistantChip,
-                            style: TextStyle(
-                              fontSize: 10,
-                              letterSpacing: 0.6,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.accentPrimaryDark,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      l.homeBabaOffer,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                        height: 1.3,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        quick(Icons.translate, l.babaTranslate),
-                        quick(Icons.summarize_outlined, l.babaSummarize),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _open(context, ref),
+          child: const SizedBox(
+            width: 46,
+            height: 46,
+            child: Padding(
+              padding: EdgeInsets.all(3),
+              child: PokouIllustration(PokouIllustrations.baba, height: 40),
+            ),
           ),
         ),
       ),

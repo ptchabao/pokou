@@ -7048,9 +7048,6 @@ class LEs extends L {
   String get callEndAndAccept => 'Terminar y aceptar';
 
   @override
-  String get homeHelloOverline => 'Hola';
-
-  @override
   String get koryOverline => 'Ahorro solidario';
 
   @override
@@ -7796,13 +7793,6 @@ class LEs extends L {
   String get homeAssimeOverline => '«EN EL MERCADO»';
 
   @override
-  String get homeTrustOverline => 'CONFIANZA TOTAL';
-
-  @override
-  String get homeTrustBody =>
-      'Tus datos e intercambios están cifrados de extremo a extremo.';
-
-  @override
   String get homeKoryInProgress => 'KORY • BOTE';
 
   @override
@@ -7816,15 +7806,6 @@ class LEs extends L {
 
   @override
   String get statusMyStatus => 'Mi estado';
-
-  @override
-  String get babaAssistantChip => 'ASISTENTE IA';
-
-  @override
-  String get babaTranslate => 'Traducir';
-
-  @override
-  String get babaSummarize => 'Resumir';
 
   @override
   String get babaAlwaysThere =>
@@ -8333,9 +8314,6 @@ class LEs extends L {
 
   @override
   String get homeBabaHello => 'Hola, soy Baba.';
-
-  @override
-  String get homeBabaOffer => 'Dime qué necesitas y yo me encargo.';
 
   @override
   String get homeBabaCta => 'Hablar con Baba';

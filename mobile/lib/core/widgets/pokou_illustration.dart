@@ -25,7 +25,10 @@ enum PokouIllustrations {
   searchEmpty('search_empty'),
   allClear('all_clear'),
   team,
-  offline;
+  offline,
+
+  /// La tête de Baba, le vieil homme qui répond aux questions.
+  baba;
 
   const PokouIllustrations([this._file]);
 

@@ -7063,9 +7063,6 @@ class LIt extends L {
   String get callEndAndAccept => 'Termina e accetta';
 
   @override
-  String get homeHelloOverline => 'Ciao';
-
-  @override
   String get koryOverline => 'Risparmio solidale';
 
   @override
@@ -7815,12 +7812,6 @@ class LIt extends L {
   String get homeAssimeOverline => '«AL MERCATO»';
 
   @override
-  String get homeTrustOverline => 'FIDUCIA TOTALE';
-
-  @override
-  String get homeTrustBody => 'I tuoi dati e scambi sono cifrati end-to-end.';
-
-  @override
   String get homeKoryInProgress => 'KORY • RACCOLTA';
 
   @override
@@ -7834,15 +7825,6 @@ class LIt extends L {
 
   @override
   String get statusMyStatus => 'Il mio stato';
-
-  @override
-  String get babaAssistantChip => 'ASSISTENTE IA';
-
-  @override
-  String get babaTranslate => 'Traduci';
-
-  @override
-  String get babaSummarize => 'Riassumi';
 
   @override
   String get babaAlwaysThere =>
@@ -8351,9 +8333,6 @@ class LIt extends L {
 
   @override
   String get homeBabaHello => 'Ciao, sono Baba.';
-
-  @override
-  String get homeBabaOffer => 'Dimmi cosa ti serve, ci penso io.';
 
   @override
   String get homeBabaCta => 'Parla con Baba';

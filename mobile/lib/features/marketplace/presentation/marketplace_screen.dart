@@ -326,14 +326,14 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-        child: FloatingActionButton.extended(
-          // Une ANNONCE (Assimé 5 à 7), pas une publicité payante : le
-          // bouton « Publier » ouvrait l'écran des campagnes publicitaires.
+        child: FloatingActionButton(
+          // Une ANNONCE (Assimé 5 à 7), pas une publicité payante. Un « + »
+          // seul : le libellé reste pour les lecteurs d'écran.
           onPressed: () => editProduct(context, ref),
+          tooltip: L.of(context).assimePublishCta,
           backgroundColor: AppColors.accentPrimary,
           foregroundColor: Colors.white,
-          icon: const Icon(Icons.add),
-          label: Text(L.of(context).assimePublishCta),
+          child: const Icon(Icons.add, size: 28),
         ),
       ),
     );

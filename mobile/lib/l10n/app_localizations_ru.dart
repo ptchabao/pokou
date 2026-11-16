@@ -7093,9 +7093,6 @@ class LRu extends L {
   String get callEndAndAccept => 'Завершить и принять';
 
   @override
-  String get homeHelloOverline => 'Здравствуй';
-
-  @override
   String get koryOverline => 'Солидарные сбережения';
 
   @override
@@ -7841,13 +7838,6 @@ class LRu extends L {
   String get homeAssimeOverline => '«НА РЫНКЕ»';
 
   @override
-  String get homeTrustOverline => 'ПОЛНОЕ ДОВЕРИЕ';
-
-  @override
-  String get homeTrustBody =>
-      'Твои данные и переписка защищены сквозным шифрованием.';
-
-  @override
   String get homeKoryInProgress => 'KORY • СБОР';
 
   @override
@@ -7861,15 +7851,6 @@ class LRu extends L {
 
   @override
   String get statusMyStatus => 'Мой статус';
-
-  @override
-  String get babaAssistantChip => 'ИИ-АССИСТЕНТ';
-
-  @override
-  String get babaTranslate => 'Перевести';
-
-  @override
-  String get babaSummarize => 'Кратко';
 
   @override
   String get babaAlwaysThere =>
@@ -8381,9 +8362,6 @@ class LRu extends L {
 
   @override
   String get homeBabaHello => 'Привет, я Баба.';
-
-  @override
-  String get homeBabaOffer => 'Скажи, что тебе нужно, — я всё сделаю.';
 
   @override
   String get homeBabaCta => 'Написать Бабе';

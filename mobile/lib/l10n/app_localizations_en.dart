@@ -7016,9 +7016,6 @@ class LEn extends L {
   String get callEndAndAccept => 'End and accept';
 
   @override
-  String get homeHelloOverline => 'Hello';
-
-  @override
   String get koryOverline => 'Solidarity savings';
 
   @override
@@ -7761,13 +7758,6 @@ class LEn extends L {
   String get homeAssimeOverline => '“AT THE MARKET”';
 
   @override
-  String get homeTrustOverline => 'COMPLETE TRUST';
-
-  @override
-  String get homeTrustBody =>
-      'Your data and conversations are end-to-end encrypted.';
-
-  @override
   String get homeKoryInProgress => 'KORY • POT';
 
   @override
@@ -7781,15 +7771,6 @@ class LEn extends L {
 
   @override
   String get statusMyStatus => 'My status';
-
-  @override
-  String get babaAssistantChip => 'AI ASSISTANT';
-
-  @override
-  String get babaTranslate => 'Translate';
-
-  @override
-  String get babaSummarize => 'Summarize';
 
   @override
   String get babaAlwaysThere =>
@@ -8298,9 +8279,6 @@ class LEn extends L {
 
   @override
   String get homeBabaHello => 'Hi, I’m Baba.';
-
-  @override
-  String get homeBabaOffer => 'Tell me what you need and I’ll take care of it.';
 
   @override
   String get homeBabaCta => 'Talk to Baba';

@@ -13,11 +13,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../marketplace/presentation/marketplace_screen.dart';
 import '../data/home_banner.dart';
 
-/// Le carrousel du bas de l'Accueil.
-///
-/// Les bannières de la zone de la personne (pays, région), puis — toujours —
-/// le rappel du chiffrement : le carrousel n'est jamais vide, et la promesse
-/// de Pokou reste à l'écran même quand aucune campagne ne tourne.
+/// Le carrousel du haut de l'Accueil : les bannières de la zone de la
+/// personne (pays, région). Sans campagne en cours, il ne prend aucune
+/// place — plus de page fixe sur le chiffrement.
 ///
 /// Il avance seul toutes les six secondes, s'arrête dès qu'on y touche, et
 /// ne bouge pas si la personne a demandé moins d'animations.
@@ -31,13 +29,13 @@ class HomeCarousel extends ConsumerStatefulWidget {
 }
 
 class _HomeCarouselState extends ConsumerState<HomeCarousel> {
-  static const _height = 168.0;
+  static const _height = 120.0;
   static const _interval = Duration(seconds: 6);
 
   final _controller = PageController();
   Timer? _timer;
   int _page = 0;
-  int _count = 1;
+  int _count = 0;
 
   @override
   void dispose() {
@@ -88,7 +86,7 @@ class _HomeCarouselState extends ConsumerState<HomeCarousel> {
   Widget build(BuildContext context) {
     final banners =
         ref.watch(homeBannersProvider).valueOrNull ?? const <HomeBanner>[];
-    final count = banners.length + 1;
+    final count = banners.length;
     if (count != _count) {
       _count = count;
       if (_page >= count) _page = count - 1;
@@ -101,6 +99,7 @@ class _HomeCarouselState extends ConsumerState<HomeCarousel> {
       });
     }
 
+    if (count == 0) return const SizedBox.shrink();
     return Column(
       children: [
         SizedBox(
@@ -116,13 +115,11 @@ class _HomeCarouselState extends ConsumerState<HomeCarousel> {
               onPageChanged: (page) => setState(() => _page = page),
               itemBuilder: (context, index) => Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: index < banners.length
-                    ? _BannerSlide(
-                        banner: banners[index],
-                        tone: index,
-                        onTap: () => _open(banners[index]),
-                      )
-                    : const _TrustSlide(),
+                child: _BannerSlide(
+                  banner: banners[index],
+                  tone: index,
+                  onTap: () => _open(banners[index]),
+                ),
               ),
             ),
           ),
@@ -161,70 +158,6 @@ class _Dots extends StatelessWidget {
       ],
     ),
   );
-}
-
-/// Le rappel du chiffrement — la dernière page, toujours présente.
-class _TrustSlide extends StatelessWidget {
-  const _TrustSlide();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-      decoration: const BoxDecoration(
-        gradient: AppGradients.certified,
-        borderRadius: AppRadius.card,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  l.homeTrustOverline,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 0.8,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.brandOr,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  l.homeTrustBody,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.35,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFF9E5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.brandOr.withValues(alpha: 0.14),
-            ),
-            child: const Icon(
-              Icons.lock_outline,
-              color: AppColors.brandOr,
-              size: 26,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _BannerSlide extends StatelessWidget {
@@ -278,17 +211,16 @@ class _BannerSlide extends StatelessWidget {
               child: InkWell(
                 onTap: tappable ? onTap : null,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+                  // Une bannière basse : le texte à gauche, le bouton à
+                  // droite, centrés en hauteur.
+                  child: Row(
                     children: [
-                      // Le texte prend la place qui reste et se coupe
-                      // proprement : avec une grande taille de police, il
-                      // ne pousse jamais le bouton hors de la carte.
                       Expanded(
                         child: SingleChildScrollView(
                           physics: const NeverScrollableScrollPhysics(),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -305,7 +237,7 @@ class _BannerSlide extends StatelessWidget {
                               const SizedBox(height: 6),
                               Text(
                                 banner.title,
-                                maxLines: banner.body == null ? 3 : 1,
+                                maxLines: banner.body == null ? 2 : 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontFamily: 'Outfit',
@@ -320,7 +252,7 @@ class _BannerSlide extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   banner.body!,
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 13.5,
@@ -333,7 +265,7 @@ class _BannerSlide extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (tappable) const SizedBox(height: 8),
+                      if (tappable) const SizedBox(width: 10),
                       if (tappable)
                         Container(
                           padding: const EdgeInsets.symmetric(

@@ -7066,9 +7066,6 @@ class LFr extends L {
   String get callEndAndAccept => 'Terminer et accepter';
 
   @override
-  String get homeHelloOverline => 'Bonjour';
-
-  @override
   String get koryOverline => 'Épargne solidaire';
 
   @override
@@ -7818,13 +7815,6 @@ class LFr extends L {
   String get homeAssimeOverline => '« AU MARCHÉ »';
 
   @override
-  String get homeTrustOverline => 'CONFIANCE ABSOLUE';
-
-  @override
-  String get homeTrustBody =>
-      'Tes données et échanges sont chiffrés de bout en bout.';
-
-  @override
   String get homeKoryInProgress => 'KORY • CAGNOTTE';
 
   @override
@@ -7838,15 +7828,6 @@ class LFr extends L {
 
   @override
   String get statusMyStatus => 'Mon statut';
-
-  @override
-  String get babaAssistantChip => 'ASSISTANT IA';
-
-  @override
-  String get babaTranslate => 'Traduire';
-
-  @override
-  String get babaSummarize => 'Résumer';
 
   @override
   String get babaAlwaysThere =>
@@ -8356,9 +8337,6 @@ class LFr extends L {
 
   @override
   String get homeBabaHello => 'Moi, c’est Baba.';
-
-  @override
-  String get homeBabaOffer => 'Dis-moi ce qu’il te faut, je m’en occupe.';
 
   @override
   String get homeBabaCta => 'Parler à Baba';

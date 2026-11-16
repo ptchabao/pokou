@@ -12213,12 +12213,6 @@ abstract class L {
   /// **'Terminer et accepter'**
   String get callEndAndAccept;
 
-  /// No description provided for @homeHelloOverline.
-  ///
-  /// In fr, this message translates to:
-  /// **'Bonjour'**
-  String get homeHelloOverline;
-
   /// No description provided for @koryOverline.
   ///
   /// In fr, this message translates to:
@@ -13413,18 +13407,6 @@ abstract class L {
   /// **'« AU MARCHÉ »'**
   String get homeAssimeOverline;
 
-  /// No description provided for @homeTrustOverline.
-  ///
-  /// In fr, this message translates to:
-  /// **'CONFIANCE ABSOLUE'**
-  String get homeTrustOverline;
-
-  /// No description provided for @homeTrustBody.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tes données et échanges sont chiffrés de bout en bout.'**
-  String get homeTrustBody;
-
   /// No description provided for @homeKoryInProgress.
   ///
   /// In fr, this message translates to:
@@ -13454,24 +13436,6 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Mon statut'**
   String get statusMyStatus;
-
-  /// No description provided for @babaAssistantChip.
-  ///
-  /// In fr, this message translates to:
-  /// **'ASSISTANT IA'**
-  String get babaAssistantChip;
-
-  /// No description provided for @babaTranslate.
-  ///
-  /// In fr, this message translates to:
-  /// **'Traduire'**
-  String get babaTranslate;
-
-  /// No description provided for @babaSummarize.
-  ///
-  /// In fr, this message translates to:
-  /// **'Résumer'**
-  String get babaSummarize;
 
   /// No description provided for @babaAlwaysThere.
   ///
@@ -14276,12 +14240,6 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Moi, c’est Baba.'**
   String get homeBabaHello;
-
-  /// No description provided for @homeBabaOffer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Dis-moi ce qu’il te faut, je m’en occupe.'**
-  String get homeBabaOffer;
 
   /// No description provided for @homeBabaCta.
   ///

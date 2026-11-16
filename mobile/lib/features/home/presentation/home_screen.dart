@@ -8,7 +8,6 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../auth/presentation/auth_controller.dart';
 import '../../contacts/data/conversation_summary.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../contacts/presentation/open_discussion.dart';
@@ -44,8 +43,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(currentCountryConfigProvider);
-    final user = ref.watch(authControllerProvider).user;
-    final firstName = (user?.fullName ?? '').split(' ').first;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -60,11 +57,9 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 120),
           children: [
-            // ── En-tête (maquette p.14) : le logo, « Bonjour » et le
-            // prénom à gauche, la loupe et la cloche à droite.
-            _HomeHeader(firstName: firstName),
-            // ── Le carrousel, en haut : les annonces de ma zone, puis le
-            // rappel du chiffrement.
+            // ── En-tête : le logo à gauche, la loupe et la cloche à droite.
+            const _HomeHeader(),
+            // ── Le carrousel, en haut : les annonces de ma zone.
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: HomeCarousel(onOpenTab: onOpenTab),
@@ -92,13 +87,10 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// L'en-tête de l'Accueil (maquette p.14) : le logo Pokou, « Bonjour » en
-/// petit au-dessus du prénom, puis la loupe et la cloche. Pas de photo de
-/// profil ici : elle vit dans « Plus ».
+/// L'en-tête de l'Accueil : le logo Pokou, puis la loupe et la cloche. Ni
+/// salutation ni photo de profil : la photo vit dans « Plus ».
 class _HomeHeader extends ConsumerWidget {
-  const _HomeHeader({required this.firstName});
-
-  final String firstName;
+  const _HomeHeader();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -115,38 +107,7 @@ class _HomeHeader extends ConsumerWidget {
             height: 30,
             fit: BoxFit.contain,
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l.homeHelloOverline,
-                    style: TextStyle(
-                      fontSize: 12,
-                      height: 1.2,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  if (firstName.isNotEmpty)
-                    Text(
-                      firstName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 19,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+          const Spacer(),
           IconButton(
             tooltip: l.homeSearchEverything,
             icon: const Icon(Icons.search),

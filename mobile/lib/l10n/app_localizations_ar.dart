@@ -7004,9 +7004,6 @@ class LAr extends L {
   String get callEndAndAccept => 'إنهاء وقبول';
 
   @override
-  String get homeHelloOverline => 'مرحبًا';
-
-  @override
   String get koryOverline => 'ادخار تضامني';
 
   @override
@@ -7742,12 +7739,6 @@ class LAr extends L {
   String get homeAssimeOverline => '«في السوق»';
 
   @override
-  String get homeTrustOverline => 'ثقة تامة';
-
-  @override
-  String get homeTrustBody => 'بياناتك ومحادثاتك مشفّرة من طرف إلى طرف.';
-
-  @override
   String get homeKoryInProgress => 'KORY • صندوق';
 
   @override
@@ -7761,15 +7752,6 @@ class LAr extends L {
 
   @override
   String get statusMyStatus => 'حالتي';
-
-  @override
-  String get babaAssistantChip => 'مساعد ذكي';
-
-  @override
-  String get babaTranslate => 'ترجمة';
-
-  @override
-  String get babaSummarize => 'تلخيص';
 
   @override
   String get babaAlwaysThere =>
@@ -8281,9 +8263,6 @@ class LAr extends L {
 
   @override
   String get homeBabaHello => 'مرحبًا، أنا بابا.';
-
-  @override
-  String get homeBabaOffer => 'أخبرني بما تحتاجه وسأتولى الأمر.';
 
   @override
   String get homeBabaCta => 'تحدث إلى بابا';
