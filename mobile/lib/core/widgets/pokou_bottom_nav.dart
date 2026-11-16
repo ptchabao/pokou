@@ -163,8 +163,8 @@ class PokouBottomNav extends ConsumerWidget {
           backgroundColor: AppColors.navBackground,
           selectedItemColor: AppColors.accentPrimaryDark,
           unselectedItemColor: AppColors.navIconInactive,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
+          selectedFontSize: 11.5,
+          unselectedFontSize: 11.5,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
           // AUCUNE élévation : le système de design supprime les ombres
           // diffuses pour tenir la fréquence d'images sur les appareils
@@ -196,16 +196,10 @@ class PokouBottomNav extends ConsumerWidget {
   }
 }
 
-/// Un glyphe d'onglet, avec son trait d'activité.
-///
-/// Le système demande un trait de 2 points AU-DESSUS de l'onglet actif. Ce
-/// n'est pas une redondance avec la couleur : un trait se voit de plus loin
-/// et survit au soleil, là où la différence entre un vert et un gris
-/// s'estompe sur une dalle bon marché.
-///
-/// Le trait est présent dans LES DEUX états, transparent quand l'onglet est
-/// inactif. Sans cela, chaque changement d'onglet décalerait les glyphes de
-/// deux points vers le bas — un tressautement visible à chaque navigation.
+/// Un glyphe d'onglet, comme dans la maquette (p.14 et p.52) : l'icône
+/// seule, en trait au repos et pleine quand l'onglet est actif, sans trait
+/// ni pastille de fond. L'onglet actif se lit à l'icône pleine et au libellé
+/// terre cuite en gras ; la pastille ne sert qu'aux non-lus.
 class _Glyph extends StatelessWidget {
   const _Glyph({required this.icon, required this.active, this.badge = 0});
 
@@ -215,41 +209,14 @@ class _Glyph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          width: 32,
-          height: 2,
-          margin: const EdgeInsets.only(bottom: 4),
-          decoration: BoxDecoration(
-            color: active ? AppColors.accentPrimary : Colors.transparent,
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(3),
-            ),
-          ),
-        ),
-        // Maquette Figma : une pastille terre cuite claire sous l'icône
-        // active (38 × 28).
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          width: 44,
-          height: 28,
-          decoration: BoxDecoration(
-            color: active ? AppColors.terracottaTint : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Badge(
-            isLabelVisible: badge > 0,
-            backgroundColor: AppColors.accentPrimary,
-            label: Text(badge > 99 ? '99+' : '$badge'),
-            child: PokouIcon(icon, filled: active),
-          ),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 4, bottom: 3),
+      child: Badge(
+        isLabelVisible: badge > 0,
+        backgroundColor: AppColors.accentPrimary,
+        label: Text(badge > 99 ? '99+' : '$badge'),
+        child: PokouIcon(icon, filled: active),
+      ),
     );
   }
 }

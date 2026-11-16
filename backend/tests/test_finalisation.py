@@ -518,10 +518,9 @@ def test_tontine_en_rotation(client):
     assert pot["status"] == "OPEN"
     assert [r["beneficiary_id"] for r in pot["rounds"]] == [b_id, c_id, a_id]
     assert pot["current_round"] == 1 and pot["collector_id"] == b_id and pot["join_code"] is None
-    assert pot["rounds"][0]["expected_total"] == 10000
-
-    # Le bénéficiaire du tour reçoit, il ne mise pas.
-    assert client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 5000}, headers=b).status_code == 409
+    # Levée : mise × nombre de membres, le bénéficiaire mise aussi (règle
+    # des tontines créées depuis le 15 nov. 2026).
+    assert pot["rounds"][0]["expected_total"] == 15000
     entry = client.post(f"/api/v1/kory/pots/{pot['id']}/entries", json={"amount": 5000}, headers=c).json()
     assert entry["round_number"] == 1
 

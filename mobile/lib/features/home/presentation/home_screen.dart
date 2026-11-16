@@ -24,7 +24,6 @@ import '../../notifications/presentation/notifications_center_screen.dart';
 import '../data/home_banner.dart';
 import 'global_search_screen.dart';
 import 'home_carousel.dart';
-import 'pokou_page_header.dart';
 import '../../../core/widgets/pokou_icon.dart';
 
 /// Pokou · 1. Accueil (maquette p.14) :
@@ -44,17 +43,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = L.of(context);
     final config = ref.watch(currentCountryConfigProvider);
     final user = ref.watch(authControllerProvider).user;
     final firstName = (user?.fullName ?? '').split(' ').first;
-    final unreadMessages = ref.watch(
-      discussionsProvider.select(
-        (async) => (async.valueOrNull ?? const <ConversationSummary>[])
-            .where((d) => !d.isArchived)
-            .fold<int>(0, (sum, d) => sum + d.unreadCount),
-      ),
-    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -69,28 +60,14 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 120),
           children: [
-            // ── En-tête : la salutation à gauche, la loupe et la cloche à
-            // droite (maquette p.14 : pas de barre de recherche pleine
-            // largeur ici, elle vit sur sa propre icône).
-            PokouPageHeader(
-              title: firstName.isEmpty
-                  ? l.homeHelloOverline
-                  : l.homeGreeting(firstName),
-              subtitle: unreadMessages > 0
-                  ? l.homeUnreadSummary(unreadMessages)
-                  : l.homeTagline,
-              emphasized: unreadMessages > 0,
-              actions: [
-                IconButton(
-                  tooltip: l.homeSearchEverything,
-                  icon: const Icon(Icons.search),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const GlobalSearchScreen(),
-                    ),
-                  ),
-                ),
-              ],
+            // ── En-tête (maquette p.14) : le logo, « Bonjour » et le
+            // prénom à gauche, la loupe et la cloche à droite.
+            _HomeHeader(firstName: firstName),
+            // ── Le carrousel, en haut : les annonces de ma zone, puis le
+            // rappel du chiffrement.
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: HomeCarousel(onOpenTab: onOpenTab),
             ),
             _DiscussionsCard(onSeeAll: () => onOpenTab(PokouTab.discussions)),
             if (config.has('kory'))
@@ -99,7 +76,7 @@ class HomeScreen extends ConsumerWidget {
               _HonamCard(onSeeAll: () => onOpenTab(PokouTab.honam)),
             if (config.has('assime'))
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: _AssimeRow(
                   onTap: () => PokouTabPage.push(
                     context,
@@ -108,14 +85,94 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            // ── Le carrousel : les annonces de ma zone, puis le rappel du
-            // chiffrement.
-            Padding(
-              padding: const EdgeInsets.only(top: 24),
-              child: HomeCarousel(onOpenTab: onOpenTab),
-            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// L'en-tête de l'Accueil (maquette p.14) : le logo Pokou, « Bonjour » en
+/// petit au-dessus du prénom, puis la loupe et la cloche. Pas de photo de
+/// profil ici : elle vit dans « Plus ».
+class _HomeHeader extends ConsumerWidget {
+  const _HomeHeader({required this.firstName});
+
+  final String firstName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    final unread =
+        ref.watch(serviceNotificationsProvider).valueOrNull?.unread ?? 0;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 6, 0),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              'assets/brand/pokou_logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.homeHelloOverline,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.2,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (firstName.isNotEmpty)
+                    Text(
+                      firstName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 19,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: l.homeSearchEverything,
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+            ),
+          ),
+          IconButton(
+            tooltip: l.notifCenterTitle,
+            // La barre du bas reste, Accueil actif (maquette p.109).
+            onPressed: () => PokouTabPage.push(
+              context,
+              tab: PokouTab.home,
+              child: const NotificationsCenterScreen(),
+            ),
+            icon: Badge(
+              isLabelVisible: unread > 0,
+              backgroundColor: AppColors.accentPrimary,
+              label: Text(unread > 9 ? '9+' : '$unread'),
+              child: const Icon(Icons.notifications_none_outlined),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -166,8 +223,100 @@ class _AssimeRow extends StatelessWidget {
   }
 }
 
-/// La carte Discussions (maquette p.14) : titre, « Tout voir », et les deux
-/// dernières discussions — Baba compris si c'est la plus récente.
+/// L'en-tête d'une carte de module (maquette p.14) : l'icône, le titre, et
+/// « Tout voir » souligné à droite — DANS la carte, sur sa couleur.
+class _CardHeader extends StatelessWidget {
+  const _CardHeader({
+    required this.leading,
+    required this.title,
+    required this.ink,
+    required this.onSeeAll,
+  });
+
+  final Widget leading;
+  final String title;
+  final Color ink;
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      leading,
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontFamily: 'Outfit',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: ink,
+          ),
+        ),
+      ),
+      InkWell(
+        onTap: onSeeAll,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          child: Text(
+            L.of(context).homeSeeAll,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: ink,
+              decoration: TextDecoration.underline,
+              decorationColor: ink,
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Le fond coloré d'une carte de module, cliquable en entier.
+class _ModuleCard extends StatelessWidget {
+  const _ModuleCard({
+    required this.color,
+    required this.child,
+    this.border,
+    this.onTap,
+  });
+
+  final Color color;
+  final Color? border;
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: AppRadius.card,
+        border: border == null ? null : Border.all(color: border!),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: AppRadius.card,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 8, 12),
+            child: child,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// La carte Discussions (maquette p.14) : terre cuite, « Tout voir », et les
+/// deux dernières discussions — Baba compris si c'est la plus récente.
 class _DiscussionsCard extends ConsumerWidget {
   const _DiscussionsCard({required this.onSeeAll});
 
@@ -176,65 +325,47 @@ class _DiscussionsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    final discussions =
+    final recent =
         (ref.watch(discussionsProvider).valueOrNull ??
                 const <ConversationSummary>[])
             .where((d) => !d.isArchived)
+            .take(2)
             .toList();
-    final unread = discussions.fold<int>(0, (s, d) => s + d.unreadCount);
-    final recent = discussions.take(2).toList();
-    return Column(
-      children: [
-        _SectionHeader(
-          title: l.navChats,
-          trailing: TextButton(
-            onPressed: onSeeAll,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.accentPrimaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(44, 44),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    const ink = Colors.white;
+    return _ModuleCard(
+      color: AppColors.accentPrimary,
+      onTap: onSeeAll,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            leading: const Icon(
+              Icons.chat_bubble_outline,
+              size: 18,
+              color: ink,
             ),
-            child: Text(
-              unread > 0 ? l.homeSeeAllUnread('$unread') : l.homeSeeAll,
-            ),
+            title: l.navChats,
+            ink: ink,
+            onSeeAll: onSeeAll,
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _Card(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            onTap: recent.isEmpty ? onSeeAll : null,
-            child: recent.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Text(
-                      l.homeNoChats,
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      for (final (i, d) in recent.indexed) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1,
-                            indent: 72,
-                            color: AppColors.border,
-                          ),
-                        _DiscussionRow(discussion: d),
-                      ],
-                    ],
-                  ),
-          ),
-        ),
-      ],
+          if (recent.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 4),
+              child: Text(
+                l.homeNoChats,
+                style: TextStyle(color: ink.withValues(alpha: 0.86)),
+              ),
+            )
+          else
+            for (final d in recent) _DiscussionRow(discussion: d),
+        ],
+      ),
     );
   }
 }
 
-/// La carte Kory (maquette p.14) : « Kory · Cagnottes », « Tout voir », et
-/// la cagnotte ouverte la plus proche de son échéance, s'il y en a une.
+/// La carte Kory (maquette p.14) : ébène, « Kory · Cagnottes », « Tout
+/// voir », et la cagnotte ouverte la plus proche de son échéance.
 class _KoryCard extends ConsumerWidget {
   const _KoryCard({required this.onSeeAll});
 
@@ -245,33 +376,49 @@ class _KoryCard extends ConsumerWidget {
     final l = L.of(context);
     final pots = ref.watch(koryPotsProvider).valueOrNull ?? const <KoryPot>[];
     final pot = pots.where((p) => p.isOpen).firstOrNull;
-    return Column(
-      children: [
-        _SectionHeader(
-          title: '${l.navKory} · ${l.homeKoryCardSubtitle}',
-          trailing: TextButton(
-            onPressed: onSeeAll,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.accentPrimaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(44, 44),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    const ink = Color(0xFFFFF9E5);
+    return _ModuleCard(
+      color: AppColors.brandEbene,
+      onTap: pot == null
+          ? onSeeAll
+          : () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
             ),
-            child: Text(l.homeSeeAll),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            leading: const PokouIcon(
+              PokouModuleIcon.kory,
+              size: 18,
+              color: AppColors.brandOr,
+            ),
+            title: '${l.navKory} · ${l.homeKoryCardSubtitle}',
+            ink: ink,
+            onSeeAll: onSeeAll,
           ),
-        ),
-        if (pot != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _KoryInProgress(pot: pot),
-          ),
-      ],
+          if (pot == null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 4),
+              child: Text(
+                l.homeKoryEmpty,
+                style: TextStyle(color: ink.withValues(alpha: 0.8)),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _KoryInProgress(pot: pot, ink: ink),
+            ),
+        ],
+      ),
     );
   }
 }
 
-/// La carte Honam (maquette p.14) : « Honam · Pharmacies », « Tout voir »,
-/// et la commande en cours, s'il y en a une.
+/// La carte Honam (maquette p.14) : blanche, « Honam · Pharmacies », « Tout
+/// voir », la commande en cours s'il y en a une, et « Envoyer une
+/// ordonnance ».
 class _HonamCard extends ConsumerWidget {
   const _HonamCard({required this.onSeeAll});
 
@@ -283,72 +430,53 @@ class _HonamCard extends ConsumerWidget {
     final orders =
         ref.watch(honamOrdersProvider).valueOrNull ?? const <HonamOrder>[];
     final order = orders.where((o) => !o.isFinished).firstOrNull;
-    return Column(
-      children: [
-        _SectionHeader(
-          title: '${l.navHonam} · ${l.homeHonamCardSubtitle}',
-          trailing: TextButton(
-            onPressed: onSeeAll,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.accentPrimaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(44, 44),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return _ModuleCard(
+      color: AppColors.surface,
+      border: AppColors.border,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _CardHeader(
+            leading: const PokouModuleLogo(PokouModule.honam, size: 24),
+            title: '${l.navHonam} · ${l.homeHonamCardSubtitle}',
+            ink: AppColors.textPrimary,
+            onSeeAll: onSeeAll,
+          ),
+          if (order != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 6, bottom: 10),
+              child: _HonamInProgress(order: order),
             ),
-            child: Text(l.homeSeeAll),
-          ),
-        ),
-        if (order != null)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _HonamInProgress(order: order),
+            padding: const EdgeInsets.only(right: 6),
+            child: OutlinedButton.icon(
+              onPressed: onSeeAll,
+              icon: const Icon(Icons.photo_camera_outlined, size: 18),
+              label: Text(l.honamSend),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.accentPrimaryDark,
+                side: const BorderSide(color: AppColors.accentPrimary),
+                minimumSize: const Size.fromHeight(44),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing});
-
-  final String title;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 26, 12, 10),
-    // Le titre à gauche, le lien à droite, sur la MÊME ligne médiane : le
-    // lien flottait au-dessus du titre.
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 20,
-              height: 1.3,
-              letterSpacing: -0.2,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        if (trailing != null) trailing! else const SizedBox(width: 8),
-      ],
-    ),
-  );
 }
 
 /// Carte blanche « Terre de Confiance » : 18 pt et un filet — à plat, sans
 /// ombre. Les cartes ne flottent plus au-dessus du fond : elles y sont
 /// posées, comme les cartes de services.
 class _Card extends StatelessWidget {
-  const _Card({required this.child, this.onTap, this.padding});
+  const _Card({required this.child, this.onTap});
 
   final Widget child;
   final VoidCallback? onTap;
-  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -362,116 +490,23 @@ class _Card extends StatelessWidget {
       child: InkWell(
         borderRadius: AppRadius.card,
         onTap: onTap,
-        child: Padding(
-          padding: padding ?? const EdgeInsets.all(16),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(16), child: child),
       ),
     ),
-  );
-}
-
-/// Pastille de statut (« 65 % », « En livraison »).
-class _Chip extends StatelessWidget {
-  const _Chip(this.label, {required this.background, required this.ink});
-
-  final String label;
-  final Color background;
-  final Color ink;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: AppColors.isDark ? ink.withValues(alpha: 0.2) : background,
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        color: AppColors.isDark ? AppColors.textPrimary : ink,
-      ),
-    ),
-  );
-}
-
-/// Surtitre coloré + icône teintée, en tête des cartes de module.
-class _Overline extends StatelessWidget {
-  const _Overline({
-    required this.icon,
-    required this.tint,
-    required this.ink,
-    required this.overline,
-    required this.title,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final Color tint;
-  final Color ink;
-  final String overline;
-  final String title;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.isDark ? ink.withValues(alpha: 0.2) : tint,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, size: 22, color: ink),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              overline,
-              style: TextStyle(
-                fontSize: 11,
-                letterSpacing: 0.7,
-                fontWeight: FontWeight.w700,
-                color: ink,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-      ?trailing,
-    ],
   );
 }
 
 class _KoryInProgress extends StatelessWidget {
-  const _KoryInProgress({required this.pot});
+  const _KoryInProgress({required this.pot, required this.ink});
 
   final KoryPot pot;
+  final Color ink;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final progress = pot.progress;
     final due = pot.dueAt;
-    final daysLeft = due?.difference(DateTime.now()).inDays;
     final locale = Localizations.localeOf(context).toLanguageTag();
     String? dueLabel;
     if (due != null) {
@@ -481,157 +516,57 @@ class _KoryInProgress extends StatelessWidget {
         dueLabel = l.koryDue(DateFormat('d/M').format(due));
       }
     }
-    return _Card(
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Ligne du haut : le titre, et le temps qui reste en pastille.
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.homeKoryInProgress,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        letterSpacing: 0.7,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.accentPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      pot.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (daysLeft != null && daysLeft >= 0) ...[
-                const SizedBox(width: 8),
-                _Chip(
-                  l.homeDaysLeft(daysLeft),
-                  background: AppColors.terracottaTint,
-                  ink: AppColors.accentPrimaryDark,
-                ),
-              ],
-            ],
+    final soft = ink.withValues(alpha: 0.78);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          pot.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: ink,
           ),
-          const SizedBox(height: 14),
-          // Ligne du milieu : ce qui est réuni, et l'anneau de progression.
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      formatFcfa(pot.confirmedTotal),
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 22,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    if (pot.goalAmount != null)
-                      Text(
-                        l.koryOnGoal(formatFcfa(pot.goalAmount!)),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (progress != null) _ProgressRing(value: progress),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Ligne du bas : l'échéance, ou le rappel que l'argent ne passe
-          // pas par Pokou.
-          Row(
-            children: [
-              Icon(
-                dueLabel != null
-                    ? Icons.schedule
-                    : Icons.verified_user_outlined,
-                size: 16,
-                color: dueLabel != null
-                    ? AppColors.textMuted
-                    : AppColors.feedbackSuccess,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  dueLabel ?? l.homeKoryNoMoney,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-                ),
-              ),
-            ],
+        ),
+        const SizedBox(height: 2),
+        // L'échéance, ou le rappel que l'argent ne passe pas par Pokou.
+        Text(
+          [?pot.groupName, dueLabel ?? l.homeKoryNoMoney].join(' · '),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 12.5, color: soft),
+        ),
+        if (progress != null) ...[
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0, 1).toDouble(),
+              minHeight: 5,
+              backgroundColor: ink.withValues(alpha: 0.16),
+              color: AppColors.brandOr,
+            ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// L'avancement en anneau, le pourcentage au centre.
-class _ProgressRing extends StatelessWidget {
-  const _ProgressRing({required this.value});
-
-  final double value;
-
-  @override
-  Widget build(BuildContext context) {
-    final percent = (value.clamp(0, 1) * 100).round();
-    return Semantics(
-      label: '$percent %',
-      child: SizedBox(
-        width: 58,
-        height: 58,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox.expand(
-              child: CircularProgressIndicator(
-                value: value.clamp(0, 1).toDouble(),
-                strokeWidth: 6,
-                strokeCap: StrokeCap.round,
-                backgroundColor: AppColors.surfaceElevated,
-                color: AppColors.accentPrimary,
+        const SizedBox(height: 8),
+        Text.rich(
+          TextSpan(
+            style: TextStyle(fontSize: 13, color: soft),
+            children: [
+              TextSpan(text: '${l.koryTotalConfirmed} : '),
+              TextSpan(
+                text: formatFcfa(pot.confirmedTotal),
+                style: TextStyle(fontWeight: FontWeight.w700, color: ink),
               ),
-            ),
-            ExcludeSemantics(
-              child: Text(
-                '$percent%',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ),
-          ],
+              if (pot.goalAmount != null)
+                TextSpan(text: ' ${l.koryOnGoal(formatFcfa(pot.goalAmount!))}'),
+            ],
+          ),
+          style: const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
         ),
-      ),
+      ],
     );
   }
 }
@@ -644,21 +579,49 @@ class _HonamInProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    return _Card(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => HonamOrderScreen(orderId: order.id)),
-      ),
-      child: _Overline(
-        icon: Icons.delivery_dining_outlined,
-        tint: const Color(0xFFDCFCE7),
-        ink: AppColors.feedbackSuccess,
-        overline: l.homeHonamInProgress,
-        // Jamais un nom de médicament (HON-04) : la pharmacie et l'étape.
-        title: order.pharmacy?.name ?? l.navHonam,
-        trailing: _Chip(
-          honamStatusLabel(l, order.status),
-          background: const Color(0xFFFEF3C7),
-          ink: AppColors.warning,
+    return Material(
+      color: AppColors.isDark
+          ? AppColors.warning.withValues(alpha: 0.16)
+          : const Color(0xFFFBF0D3),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => HonamOrderScreen(orderId: order.id),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Jamais un nom de médicament (HON-04) : la pharmacie et
+              // l'étape.
+              Text(
+                order.pharmacy?.name ?? l.navHonam,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                honamStatusLabel(l, order.status),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: AppColors.isDark
+                      ? AppColors.textSecondary
+                      : AppColors.warning,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -676,14 +639,17 @@ class _DiscussionRow extends ConsumerWidget {
     final d = discussion;
     final last = d.lastMessage;
     final unread = d.unreadCount > 0;
+    const ink = Colors.white;
+    final soft = ink.withValues(alpha: 0.82);
     return InkWell(
+      borderRadius: BorderRadius.circular(10),
       onTap: () => openDiscussion(context, ref, d),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+        padding: const EdgeInsets.fromLTRB(0, 6, 6, 6),
         child: Row(
           children: [
-            ContactAvatar(avatar: d.avatar, displayName: d.name, size: 44),
-            const SizedBox(width: 14),
+            ContactAvatar(avatar: d.avatar, displayName: d.name, size: 36),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -692,10 +658,10 @@ class _DiscussionRow extends ConsumerWidget {
                     d.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                    style: const TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
+                      color: ink,
                     ),
                   ),
                   if (last != null)
@@ -703,12 +669,7 @@ class _DiscussionRow extends ConsumerWidget {
                       last.displayTextOf(l),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: unread
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
-                      ),
+                      style: TextStyle(fontSize: 12.5, color: soft),
                     ),
                 ],
               ),
@@ -720,31 +681,25 @@ class _DiscussionRow extends ConsumerWidget {
                 if (last != null)
                   Text(
                     DateFormat.Hm().format(last.createdAt.toLocal()),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: unread ? FontWeight.w600 : FontWeight.w400,
-                      color: unread
-                          ? AppColors.accentPrimary
-                          : AppColors.textMuted,
-                    ),
+                    style: TextStyle(fontSize: 11.5, color: soft),
                   ),
                 if (unread) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Container(
                     constraints: const BoxConstraints(
-                      minWidth: 20,
-                      minHeight: 20,
+                      minWidth: 18,
+                      minHeight: 18,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: AppColors.accentPrimary,
-                      borderRadius: BorderRadius.circular(10),
+                      color: ink,
+                      borderRadius: BorderRadius.circular(9),
                     ),
                     child: Text(
                       '${d.unreadCount}',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.accentPrimary,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),

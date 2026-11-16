@@ -53,6 +53,12 @@ class ContactsScreen extends ConsumerStatefulWidget {
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
+
+  /// Application complète (maquette p.14) : la recherche tient dans la loupe
+  /// de l'en-tête et ne prend une ligne que lorsqu'on l'ouvre. Au Lot 1
+  /// (maquette p.52), le champ reste affiché.
+  bool _searchOpen = false;
   String _query = '';
 
   /// Le filtre de la liste. Local à l'écran, et non dans un provider : il ne
@@ -78,6 +84,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -564,6 +571,21 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                     ),
                     icon: const Icon(Icons.photo_camera_outlined),
                     tooltip: L.of(context).navStatus,
+                  )
+                else
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      setState(() => _searchOpen = !_searchOpen);
+                      if (_searchOpen) {
+                        _searchFocus.requestFocus();
+                      } else {
+                        _searchController.clear();
+                        _searchFocus.unfocus();
+                      }
+                    },
+                    icon: Icon(_searchOpen ? Icons.close : Icons.search),
+                    tooltip: L.of(context).chatsSearchHint,
                   ),
                 IconButton(
                   visualDensity: VisualDensity.compact,
@@ -577,62 +599,62 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             ),
             if (!lot1)
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-                child: Text(
-                  L.of(context).navChats,
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    L.of(context).navChats,
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 22,
+                      height: 1.2,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ),
-            // Maquette « Discussions » : recherche en pastille blanche et
-            // « + » terracotta (nouvelle discussion), PUIS la bande des
-            // statuts, puis les filtres.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: AppColors.border),
+            // La recherche : une ligne basse (40 pt). Au Lot 1 elle reste
+            // affichée (maquette p.52) ; dans l'application complète elle
+            // ne s'ouvre que par la loupe de l'en-tête (maquette p.14).
+            if (lot1 || _searchOpen)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 2),
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    contextMenuBuilder: pokouContextMenuBuilder,
+                    controller: _searchController,
+                    focusNode: _searchFocus,
+                    textAlignVertical: TextAlignVertical.center,
+                    style: const TextStyle(fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: L.of(context).chatsSearchHint,
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.textMuted,
+                        size: 18,
                       ),
-                      child: TextField(
-                        contextMenuBuilder: pokouContextMenuBuilder,
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: L.of(context).chatsSearchHint,
-                          filled: false,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: AppColors.textMuted,
-                            size: 20,
-                          ),
-                          prefixIconConstraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 12,
-                          ),
-                          isDense: true,
-                        ),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
                       ),
+                      contentPadding: const EdgeInsets.only(right: 12),
+                      isDense: true,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
             // APP-2 : la bande des statuts (« Mon statut », puis les statuts
             // non vus), comme le cahier et la maquette Terre de Confiance.
             if (!lot1) const StatusStrip(),
@@ -757,7 +779,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             // Discussions · 12 — un écran dédié, pas un dépli sur place :
             // la note et l'encadré d'aide ont besoin de leur propre place.
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ArchivedDiscussionsScreen()),
+              MaterialPageRoute(
+                builder: (_) => const ArchivedDiscussionsScreen(),
+              ),
             ),
           ),
         // Terre de Confiance : les fils dans UNE carte blanche, séparés par
@@ -1985,7 +2009,9 @@ class ArchivedDiscussionsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Center(
                     child: Text(
-                      error is ApiException ? error.message : l.chatsConnectFailed,
+                      error is ApiException
+                          ? error.message
+                          : l.chatsConnectFailed,
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
@@ -2012,11 +2038,8 @@ class ArchivedDiscussionsScreen extends ConsumerWidget {
                               _DiscussionTile(
                                 discussion: discussion,
                                 myUserId: myUserId,
-                                onLongPress: () => _openArchivedMenu(
-                                  context,
-                                  ref,
-                                  discussion,
-                                ),
+                                onLongPress: () =>
+                                    _openArchivedMenu(context, ref, discussion),
                               ),
                           ],
                         ),

@@ -18,7 +18,7 @@ import 'story_viewer_screen.dart';
 class StatusStrip extends ConsumerWidget {
   const StatusStrip({super.key});
 
-  static const _avatar = 56.0;
+  static const _avatar = 48.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,39 +28,13 @@ class StatusStrip extends ConsumerWidget {
       ...(ref.watch(statusFeedProvider).valueOrNull ??
           const <StatusFeedItem>[]),
     ]..sort((a, b) => (b.hasUnseen ? 1 : 0) - (a.hasUnseen ? 1 : 0));
+    // Maquette p.14 : la bande seule, sans titre — elle ne doit pas
+    // repousser la liste des discussions.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 8, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l.discussionsStatusesNews,
-                  style: TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 0.8,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.accentPrimaryDark,
-                  visualDensity: VisualDensity.compact,
-                ),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const StatusListScreen()),
-                ),
-                child: Text(l.homeSeeAll),
-              ),
-            ],
-          ),
-        ),
         SizedBox(
-          height: 92,
+          height: 74,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -121,6 +95,25 @@ class StatusStrip extends ConsumerWidget {
                     ),
                   ),
                 ),
+              // Tous les statuts, vus compris : en bout de bande.
+              _Item(
+                label: l.homeSeeAll,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const StatusListScreen()),
+                ),
+                child: Container(
+                  width: _avatar,
+                  height: _avatar,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Icon(
+                    Icons.chevron_right,
+                    color: AppColors.accentPrimaryDark,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -141,17 +134,17 @@ class _Item extends StatelessWidget {
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
     child: SizedBox(
-      width: 72,
+      width: 62,
       child: Column(
         children: [
           const SizedBox(height: 4),
-          SizedBox(width: 56, height: 56, child: Center(child: child)),
-          const SizedBox(height: 6),
+          SizedBox(width: 48, height: 48, child: Center(child: child)),
+          const SizedBox(height: 4),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],
       ),
