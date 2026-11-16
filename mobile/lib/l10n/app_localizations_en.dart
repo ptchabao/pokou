@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -14602,4 +14603,146 @@ class LEn extends L {
 
   @override
   String get assimeSoldBadge => 'Sold';
+
+  @override
+  String get courierInviteCardLabel => 'Honam courier invitation';
+
+  @override
+  String courierInviteCardTitle(String name) {
+    return '$name invites you to deliver for Honam';
+  }
+
+  @override
+  String courierInviteCardTitleMine(String name) {
+    return 'You invite $name to deliver for Honam';
+  }
+
+  @override
+  String courierInviteCardCode(String code) {
+    return 'code $code';
+  }
+
+  @override
+  String get courierInviteSeeOffer => 'See the offer';
+
+  @override
+  String courierInviteHello(String name) {
+    return 'Hi $name!';
+  }
+
+  @override
+  String get courierInviteHelloAll => 'Hi!';
+
+  @override
+  String courierInviteBody(String amount, String code) {
+    return 'I deliver for Honam with Pokou: $amount per ride, close to home, whenever you want. Join me with my code $code.';
+  }
+
+  @override
+  String courierInviteBodyNoPrice(String code) {
+    return 'I deliver for Honam with Pokou: paid for every ride, close to home, whenever you want. Join me with my code $code.';
+  }
+
+  @override
+  String courierInviteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations were not sent. Try again.',
+      one: 'One invitation was not sent. Try again.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations sent',
+      one: 'Invitation sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteSendTo(String name) {
+    return 'Send to $name';
+  }
+
+  @override
+  String courierInviteSendToCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Send to $count contacts',
+      one: 'Send to 1 contact',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierInviteSearch => 'Search for a contact';
+
+  @override
+  String get courierInviteOnPokou => 'On Pokou';
+
+  @override
+  String get courierInviteBySms => 'Not on Pokou yet · invitation by SMS';
+
+  @override
+  String get courierInviteNoContact =>
+      'No contact found. With no contact ticked, your message goes through your phone’s share menu.';
+
+  @override
+  String get courierInviteCardAdded =>
+      'The “Become a Honam courier” card is added to the message.';
+
+  @override
+  String courierInviteFriendNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You get $count free rides when your friend completes their first delivery. The invitation only goes to people aged 18 and over, in a city where Honam is open.',
+      one: 'You get 1 free ride when your friend completes their first delivery. The invitation only goes to people aged 18 and over, in a city where Honam is open.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courierInviteCodeApplied(String code) {
+    return 'Code $code applied';
+  }
+
+  @override
+  String get courierInviteNeeds =>
+      'You need to be 18 or over, with an ID document, a smartphone and a mobile money wallet. A motorbike, a bike, or your feet for nearby rides.';
+
+  @override
+  String get courierInviteTrialCaption =>
+      'As soon as your registration is approved, with no membership or pack';
+
+  @override
+  String get courierInviteSimpleRides => 'Simple first rides';
+
+  @override
+  String get courierInviteSimpleRidesCaption =>
+      'Orders under 15,000 FCFA, while you find your bearings';
+
+  @override
+  String courierInviteRecommended(String name) {
+    return '$name recommended you';
+  }
+
+  @override
+  String courierInviteRecommendedCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'They get $count free rides when you complete your first delivery',
+      one: 'They get 1 free ride when you complete your first delivery',
+    );
+    return '$_temp0';
+  }
 }

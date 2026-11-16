@@ -7,7 +7,6 @@ import 'package:barcode/barcode.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/deeplink/invite_link_parser.dart' show pokouLinkBaseUrl;
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
@@ -16,6 +15,10 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../kory/presentation/kory_controller.dart' show formatFcfa;
 import '../../kory/presentation/kory_ui.dart';
 import '../../kory/presentation/kory_wallet.dart';
+import '../../contacts/data/contact_model.dart';
+import '../../contacts/presentation/contacts_controller.dart';
+import '../../messaging/presentation/messaging_controller.dart';
+import '../data/courier_invite_message.dart';
 import '../data/honam_models.dart';
 import 'courier_join_screen.dart';
 import 'courier_ride_screens.dart';
@@ -24,9 +27,6 @@ import 'honam_tracking.dart' show honamTransportLabel;
 import 'honam_ui.dart';
 
 export 'courier_ride_screens.dart' show CourierIncomingRideScreen, openInMaps;
-
-/// Le lien de parrainage d'un coursier, à partager (maquettes 15 et 23).
-String courierInviteLink(String code) => '$pokouLinkBaseUrl/honam/coursier/$code';
 
 /// Le mode coursier Win Pokou (BM-08) : un mode de l'application, pas une
 /// application à part. L'écran prend la forme de l'état du coursier :
@@ -1168,7 +1168,11 @@ class CourierReferralScreen extends ConsumerWidget {
             icon: Icons.person_add_alt_1_outlined,
             label: l.courierProposeToFriend,
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => CourierInviteFriendScreen(code: code)),
+              MaterialPageRoute(builder: (_) => CourierInviteFriendScreen(
+                code: code,
+                giftRides: status.referralGiftRides,
+              ),
+            ),
             ),
           ),
           TextButton.icon(
@@ -1256,44 +1260,182 @@ class CourierReferralScreen extends ConsumerWidget {
 
 // ── 23. Proposer à un ami ──
 
-/// Le coursier écrit son message et l'envoie par le partage du téléphone
-/// (SMS, Pokou, WhatsApp…). La carte « Devenir coursier Honam » dans la
-/// messagerie Pokou n'est pas encore faite : le lien en tient lieu.
-class CourierInviteFriendScreen extends StatefulWidget {
-  const CourierInviteFriendScreen({super.key, required this.code});
+/// Le coursier coche des contacts et envoie son message. Un contact sur
+/// Pokou reçoit l'invitation dans la discussion à deux, avec la carte
+/// « Devenir coursier Honam » (Coursiers 24, voir
+/// data/courier_invite_message.dart). Un contact qui n'a pas encore Pokou
+/// la reçoit par SMS, lien compris. Sans contact coché, le message part
+/// par le partage du téléphone.
+class CourierInviteFriendScreen extends ConsumerStatefulWidget {
+  const CourierInviteFriendScreen({
+    super.key,
+    required this.code,
+    this.giftRides = 0,
+  });
 
   final String code;
 
+  /// Les courses offertes au parrain quand l'ami termine sa première
+  /// livraison.
+  final int giftRides;
+
   @override
-  State<CourierInviteFriendScreen> createState() => _CourierInviteFriendScreenState();
+  ConsumerState<CourierInviteFriendScreen> createState() =>
+      _CourierInviteFriendScreenState();
 }
 
-class _CourierInviteFriendScreenState extends State<CourierInviteFriendScreen> {
-  TextEditingController? _controller;
+class _CourierInviteFriendScreenState
+    extends ConsumerState<CourierInviteFriendScreen> {
+  final _search = TextEditingController();
+  final _message = TextEditingController();
+  String _query = '';
 
-  /// Le texte de départ, posé une seule fois ; le coursier le modifie.
-  TextEditingController get _message => _controller ??=
-      TextEditingController(text: L.of(context).courierFriendMessage(widget.code));
+  /// Les contacts cochés, par identifiant, dans l'ordre où ils l'ont été.
+  final Map<int, PokouContact> _chosen = {};
+
+  /// Le texte proposé suit les contacts cochés (« Salut Komi ! ») tant que
+  /// le coursier ne l'a pas retouché ; ensuite, c'est le sien.
+  bool _edited = false;
+  bool _sending = false;
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _search.dispose();
+    _message.dispose();
     super.dispose();
+  }
+
+  static String _firstName(PokouContact c) =>
+      c.displayName.trim().split(RegExp(r'\s+')).first;
+
+  String _proposedMessage(L l, int? price) {
+    final hello = _chosen.length == 1
+        ? l.courierInviteHello(_firstName(_chosen.values.first))
+        : l.courierInviteHelloAll;
+    final body = price == null
+        ? l.courierInviteBodyNoPrice(widget.code)
+        : l.courierInviteBody(formatFcfa(price), widget.code);
+    return '$hello $body';
+  }
+
+  /// Le prix d'une course, lu dans l'offre : « 1 000 FCFA par course ».
+  int? _price;
+
+  /// Repose le texte proposé, s'il n'a pas été retouché.
+  void _propose() {
+    if (_edited) return;
+    _message.text = _proposedMessage(L.of(context), _price);
+  }
+
+  void _toggle(PokouContact c) => setState(() {
+    if (_chosen.remove(c.id) == null) _chosen[c.id] = c;
+    _propose();
+  });
+
+  Future<void> _send() async {
+    final l = L.of(context);
+    final text = _message.text.trim();
+    final link = courierInviteLink(widget.code);
+    if (text.isEmpty) return;
+    if (_chosen.isEmpty) {
+      await Share.share('$text\n$link');
+      return;
+    }
+    setState(() => _sending = true);
+    final onPokou = [
+      for (final c in _chosen.values)
+        if (c.isRegistered && c.contactUserId != null) c,
+    ];
+    final bySms = [
+      for (final c in _chosen.values)
+        if (!(c.isRegistered && c.contactUserId != null)) c,
+    ];
+    var failed = 0;
+    final repository = ref.read(messagingRepositoryProvider);
+    final store = ref.read(pokouMessageStoreProvider);
+    for (final c in onPokou) {
+      try {
+        // Un message à deux ordinaire, chiffré : la carte voyage dans le
+        // texte, le serveur n'en sait rien.
+        final sent = await repository.send(
+          recipientId: c.contactUserId!,
+          content: encodeCourierInvite(
+            title: l.courierInviteCardLabel,
+            code: widget.code,
+            text: text,
+          ),
+        );
+        await store.saveDirect([sent]);
+      } catch (_) {
+        failed++;
+      }
+    }
+    if (bySms.isNotEmpty) {
+      await _sms([for (final c in bySms) c.phone], '$text\n$link');
+    }
+    if (!mounted) return;
+    setState(() => _sending = false);
+    if (failed > 0) {
+      koryToast(context, l.courierInviteFailed(failed));
+      return;
+    }
+    koryToast(context, l.courierInviteSent(_chosen.length));
+    Navigator.of(context).maybePop();
+  }
+
+  /// L'application SMS, numéros et message remplis ; sans elle (tablette),
+  /// le partage du téléphone.
+  Future<void> _sms(List<String> phones, String body) async {
+    final uri = Uri.parse(
+      'sms:${phones.join(',')}?body=${Uri.encodeComponent(body)}',
+    );
+    var opened = false;
+    try {
+      opened = await launchUrl(uri);
+    } catch (_) {}
+    if (!opened) await Share.share(body);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final link = courierInviteLink(widget.code);
+    ref.listen(courierOfferProvider(null), (_, next) {
+      _price = next.valueOrNull?.deliveryPrice;
+      _propose();
+    });
+    // Premier affichage : le champ n'existe pas encore, on le remplit.
+    if (_message.text.isEmpty && !_edited) {
+      _price = ref.read(courierOfferProvider(null)).valueOrNull?.deliveryPrice;
+      _message.text = _proposedMessage(l, _price);
+    }
+    final contacts = [
+      ...?ref.watch(contactsProvider).valueOrNull,
+    ]..sort((a, b) {
+        final pokou = (b.isRegistered ? 1 : 0) - (a.isRegistered ? 1 : 0);
+        return pokou != 0
+            ? pokou
+            : a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
+      });
+    final shown = [
+      for (final c in contacts)
+        if (_query.isEmpty || c.displayName.toLowerCase().contains(_query)) c,
+    ];
+    final label = switch (_chosen.length) {
+      0 => l.courierSendInvite,
+      1 => l.courierInviteSendTo(_firstName(_chosen.values.first)),
+      final n => l.courierInviteSendToCount(n),
+    };
     return KoryPage(
       title: l.courierProposeToFriend,
       subtitle: l.courierYourCodeIs(widget.code),
       footer: KoryFooter(
         children: [
           KoryButton(
-            icon: Icons.send_outlined,
-            label: l.courierSendInvite,
-            onPressed: () => Share.share('${_message.text.trim()}\n$link'),
+            icon: Icons.arrow_forward,
+            label: label,
+            busy: _sending,
+            onPressed: _sending ? null : _send,
           ),
           TextButton.icon(
             onPressed: () async {
@@ -1308,16 +1450,94 @@ class _CourierInviteFriendScreenState extends State<CourierInviteFriendScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          KorySection(l.courierYourMessage),
           TextField(
             contextMenuBuilder: pokouContextMenuBuilder,
-            controller: _message,
-            minLines: 4,
-            maxLines: 8,
-            maxLength: 500,
+            controller: _search,
+            onChanged: (value) =>
+                setState(() => _query = value.trim().toLowerCase()),
+            decoration: InputDecoration(
+              hintText: l.courierInviteSearch,
+              prefixIcon: const Icon(Icons.search, size: 20),
+              isDense: true,
+              filled: true,
+              fillColor: AppColors.surfaceElevated,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(999),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          KoryNotice(icon: Icons.info_outline, text: l.courierFriendNotice),
+          const SizedBox(height: 12),
+          if (shown.isNotEmpty)
+            KoryCard(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: Column(
+                children: [
+                  for (final c in shown)
+                    KoryPersonRow(
+                      name: c.displayName,
+                      subtitle: c.isRegistered && c.contactUserId != null
+                          ? l.courierInviteOnPokou
+                          : l.courierInviteBySms,
+                      onTap: () => _toggle(c),
+                      trailing: Checkbox(
+                        value: _chosen.containsKey(c.id),
+                        activeColor: AppColors.accentPrimary,
+                        onChanged: (_) => _toggle(c),
+                      ),
+                    ),
+                ],
+              ),
+            )
+          else
+            KoryNotice(text: l.courierInviteNoContact),
+          const SizedBox(height: 12),
+          KoryCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.courierYourMessage,
+                  style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  contextMenuBuilder: pokouContextMenuBuilder,
+                  controller: _message,
+                  onChanged: (_) => _edited = true,
+                  minLines: 4,
+                  maxLines: 8,
+                  maxLength: 500,
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.two_wheeler,
+                      size: 16,
+                      color: AppColors.accentPrimary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l.courierInviteCardAdded,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          KoryNotice(
+            icon: Icons.info_outline,
+            text: widget.giftRides > 0
+                ? l.courierInviteFriendNotice(widget.giftRides)
+                : l.courierFriendNotice,
+          ),
         ],
       ),
     );

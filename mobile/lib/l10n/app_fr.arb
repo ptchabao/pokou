@@ -9105,5 +9105,132 @@
   "assimeToday": "aujourd’hui",
   "assimeYesterday": "hier",
   "assimeNearYou": "Près de chez toi",
-  "assimeSoldBadge": "Vendu"
+  "assimeSoldBadge": "Vendu",
+  "courierInviteCardLabel": "Invitation coursier Honam",
+  "courierInviteCardTitle": "{name} t’invite à livrer pour Honam",
+  "@courierInviteCardTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteCardTitleMine": "Tu invites {name} à livrer pour Honam",
+  "@courierInviteCardTitleMine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteCardCode": "code {code}",
+  "@courierInviteCardCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteSeeOffer": "Voir l’offre",
+  "courierInviteHello": "Salut {name} !",
+  "@courierInviteHello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteHelloAll": "Salut !",
+  "courierInviteBody": "Je livre pour Honam avec Pokou : {amount} par course, près de chez toi, quand tu veux. Rejoins-moi avec mon code {code}.",
+  "@courierInviteBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteBodyNoPrice": "Je livre pour Honam avec Pokou : payé à chaque course, près de chez toi, quand tu veux. Rejoins-moi avec mon code {code}.",
+  "@courierInviteBodyNoPrice": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteFailed": "{count, plural, =1{Une invitation n’est pas partie. Réessaie.} other{{count} invitations ne sont pas parties. Réessaie.}}",
+  "@courierInviteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierInviteSent": "{count, plural, =1{Invitation envoyée} other{{count} invitations envoyées}}",
+  "@courierInviteSent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierInviteSendTo": "Envoyer à {name}",
+  "@courierInviteSendTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteSendToCount": "{count, plural, =1{Envoyer à 1 contact} other{Envoyer à {count} contacts}}",
+  "@courierInviteSendToCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierInviteSearch": "Rechercher un contact",
+  "courierInviteOnPokou": "Sur Pokou",
+  "courierInviteBySms": "Pas encore sur Pokou · invitation par SMS",
+  "courierInviteNoContact": "Aucun contact trouvé. Sans contact coché, ton message part par le partage du téléphone.",
+  "courierInviteCardAdded": "La carte « Devenir coursier Honam » est ajoutée au message.",
+  "courierInviteFriendNotice": "{count, plural, =1{Tu reçois 1 course offerte quand ton ami termine sa première livraison. L’invitation part seulement vers les 18 ans et plus, dans une ville où Honam est ouvert.} other{Tu reçois {count} courses offertes quand ton ami termine sa première livraison. L’invitation part seulement vers les 18 ans et plus, dans une ville où Honam est ouvert.}}",
+  "@courierInviteFriendNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierInviteCodeApplied": "Code {code} appliqué",
+  "@courierInviteCodeApplied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteNeeds": "Il te faut 18 ans ou plus, une pièce d’identité, un smartphone et un wallet mobile money. Une moto, un vélo, ou tes pieds pour les courses proches.",
+  "courierInviteTrialCaption": "Dès la validation de ton inscription, sans adhésion ni pack",
+  "courierInviteSimpleRides": "Des premières courses simples",
+  "courierInviteSimpleRidesCaption": "Des commandes de moins de 15 000 FCFA, le temps de prendre tes repères",
+  "courierInviteRecommended": "{name} t’a recommandé",
+  "@courierInviteRecommended": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierInviteRecommendedCaption": "{count, plural, =1{Il reçoit 1 course offerte quand tu termines ta première livraison} other{Il reçoit {count} courses offertes quand tu termines ta première livraison}}",
+  "@courierInviteRecommendedCaption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

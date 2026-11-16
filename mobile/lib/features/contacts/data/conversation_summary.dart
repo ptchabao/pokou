@@ -1,6 +1,7 @@
 import '../../../core/media/media_repository.dart' show MediaMeta;
 import '../../../l10n/app_localizations.dart';
 import '../../../core/time/server_time.dart';
+import '../../honam/data/courier_invite_message.dart';
 
 /// Aperçu du dernier message d'une conversation — juste de quoi remplir une
 /// ligne de la liste (voir GET /conversations, api/app/routes/conversations.py
@@ -51,6 +52,13 @@ class ConversationPreview {
   /// Libellé affichable dans la liste — un média sans légende doit dire CE
   /// QUE C'EST (WhatsApp affiche « 📷 Photo », jamais une ligne vide).
   String displayTextOf(L l) {
+    final text = _rawTextOf(l);
+    // Une invitation coursier Honam se résume à sa carte, pas au marqueur
+    // et au lien qu'elle transporte.
+    return courierInvitePreviewOf(l, text) ?? text;
+  }
+
+  String _rawTextOf(L l) {
     if (content != null && content!.trim().isNotEmpty) return content!;
 
     // Message chiffré : le serveur n'a rien pu envoyer, mais l'appareil a

@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../l10n/app_localizations.dart';
 import 'notification_policy.dart';
 import '../time/server_time.dart';
+import '../../features/honam/data/courier_invite_message.dart';
 
 /// Les notifications de message, façon WhatsApp : UNE notification par
 /// conversation, qui se déroule sur ses derniers messages, toutes rangées
@@ -260,7 +261,11 @@ String messagePreviewLabel(L l, String messageType, String? text) {
     'LOCATION' => l.notifLocation,
     'CONTACT' => l.notifContact,
     'POLL' => l.notifPoll,
-    _ => trimmed.isEmpty ? l.notifNewMessage : trimmed,
+    _ =>
+      trimmed.isEmpty
+          ? l.notifNewMessage
+          // Une invitation coursier Honam : sa carte, pas son marqueur.
+          : courierInvitePreviewOf(l, trimmed) ?? trimmed,
   };
 }
 
