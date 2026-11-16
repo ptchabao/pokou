@@ -4086,5 +4086,7 @@
   "officineRegPrepareNote": "Nel frattempo, prepara il bancone: il cartello QR e l’elenco dei tuoi fattorini abituali.",
   "officineRegDone": "Fatto",
   "officineRegPickPhoto": "Scegli una foto",
-  "officineRegPickPdf": "Scegli un PDF"
+  "officineRegPickPdf": "Scegli un PDF",
+  "groupPollSendFailed": "Sondaggio non inviato: riprova.",
+  "groupPollPreview": "📊 {question}"
 }

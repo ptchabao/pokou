@@ -285,6 +285,8 @@ def _resolve_target(db: Session, kind: str, target_id: int, sender_id: int) -> _
         _require_can_post(group, membership)
         # Rich objects are currently modeled as server-readable rows. Never
         # route group polls, locations, or contact cards through those tables.
+        # Un sondage de groupe existe, mais chiffré : c'est un message POLL
+        # envoyé par groups.py, dont les votes vivent dans GroupPollVote.
         raise HTTPException(
             status_code=409,
             detail="Le contenu riche de groupe n'est pas encore pris en charge en E2EE",

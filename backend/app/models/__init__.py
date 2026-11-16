@@ -51,6 +51,7 @@ from app.models.groups import (  # noqa: F401
     GroupMessageReaction,
     GroupMessageMention,
     GroupMessage,
+    GroupPollVote,
     GroupSenderKeyDistribution,
 )
 from app.models.communities import (  # noqa: F401

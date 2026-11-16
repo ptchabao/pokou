@@ -166,6 +166,16 @@ void _encryptedPreviewSuite() {
     expect(preview(encrypted: true, type: 'AUDIO').displayTextOf(l), 'Note vocale');
   });
 
+  test('un sondage de groupe montre sa question déchiffrée, avec le pictogramme', () {
+    final p = preview(encrypted: true, type: 'POLL')..localContent = 'On mange où ?';
+    expect(p.displayTextOf(l), '📊 On mange où ?');
+    expect(preview(encrypted: true, type: 'POLL').displayTextOf(l), 'Sondage');
+    expect(
+      preview(encrypted: false, type: 'POLL', content: 'Samedi ?').displayTextOf(l),
+      '📊 Samedi ?',
+    );
+  });
+
   test("un message en clair n'est pas affecté", () {
     expect(
       preview(encrypted: false, content: 'Bonjour').displayTextOf(l),

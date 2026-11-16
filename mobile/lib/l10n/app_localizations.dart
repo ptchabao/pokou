@@ -24636,6 +24636,18 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Choisir un PDF'**
   String get officineRegPickPdf;
+
+  /// No description provided for @groupPollSendFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sondage non envoyé — réessaie.'**
+  String get groupPollSendFailed;
+
+  /// Aperçu d'un sondage dans la liste des discussions
+  ///
+  /// In fr, this message translates to:
+  /// **'📊 {question}'**
+  String groupPollPreview(String question);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

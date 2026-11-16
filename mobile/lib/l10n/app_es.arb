@@ -4086,5 +4086,7 @@
   "officineRegPrepareNote": "Mientras tanto, prepare su mostrador: el cartel QR y la lista de sus repartidores habituales.",
   "officineRegDone": "Listo",
   "officineRegPickPhoto": "Elegir una foto",
-  "officineRegPickPdf": "Elegir un PDF"
+  "officineRegPickPdf": "Elegir un PDF",
+  "groupPollSendFailed": "Encuesta no enviada: inténtalo de nuevo.",
+  "groupPollPreview": "📊 {question}"
 }

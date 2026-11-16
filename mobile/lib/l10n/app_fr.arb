@@ -3344,7 +3344,9 @@
   "supportSentOn": "Envoyée le {date}",
   "@supportSentOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "supportTooShort": "Écris au moins 10 caractères.",
@@ -9394,5 +9396,15 @@
   "officineRegPrepareNote": "En attendant, préparez votre comptoir : l’affiche QR et la liste de vos livreurs habituels.",
   "officineRegDone": "Terminé",
   "officineRegPickPhoto": "Choisir une photo",
-  "officineRegPickPdf": "Choisir un PDF"
+  "officineRegPickPdf": "Choisir un PDF",
+  "groupPollSendFailed": "Sondage non envoyé — réessaie.",
+  "groupPollPreview": "📊 {question}",
+  "@groupPollPreview": {
+    "description": "Aperçu d'un sondage dans la liste des discussions",
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -332,6 +332,37 @@ class GroupMessage(Base):
     poll = relationship("Poll")
     reactions = relationship("GroupMessageReaction", cascade="all, delete-orphan", backref="message")
     mentions = relationship("GroupMessageMention", cascade="all, delete-orphan", backref="message")
+    poll_votes = relationship("GroupPollVote", cascade="all, delete-orphan", backref="message")
+
+
+class GroupPollVote(Base):
+    """Le vote d'un membre sur un sondage de groupe, CHIFFRÉ.
+
+    Un sondage de groupe ne passe pas par `polls` / `poll_votes` : ces tables
+    tiennent la question, les réponses et les choix en clair, et un groupe
+    est chiffré de bout en bout. La question et les réponses voyagent donc
+    dans le message lui-même (chiffré avec la clé d'expéditeur, type POLL),
+    avec une clé propre au sondage tirée par son auteur ; chaque vote est
+    chiffré avec cette clé. Le serveur sait QUI a voté (il doit garantir une
+    voix par membre et prévenir les autres) mais pas POUR QUOI : le décompte
+    se fait sur les téléphones.
+
+    Une ligne par (message, membre) : revoter remplace le chiffré, retirer
+    son vote supprime la ligne — même règle « l'état voulu, pas un
+    incrément » que `PollVoteSet` en tête-à-tête."""
+    __tablename__ = "group_poll_votes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    message_id = Column(
+        String(36), ForeignKey("group_messages.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    voter_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    encryption = Column(String(24), nullable=False)
+    ciphertext = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("message_id", "voter_id", name="uq_group_poll_vote"),)
 
 
 class GroupSenderKeyDistribution(Base):

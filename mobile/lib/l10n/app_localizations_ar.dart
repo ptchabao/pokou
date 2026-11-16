@@ -14975,4 +14975,12 @@ class LAr extends L {
 
   @override
   String get officineRegPickPdf => 'اختر ملف PDF';
+
+  @override
+  String get groupPollSendFailed => 'لم يُرسَل الاستطلاع — أعد المحاولة.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

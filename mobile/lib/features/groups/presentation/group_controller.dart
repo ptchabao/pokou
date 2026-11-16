@@ -569,11 +569,14 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     required List<String> options,
     required bool allowsMultiple,
   }) async {
-    if (state.sending) return;
+    final group = state.group;
+    final myUserId = _myUserId;
+    if (state.sending || group == null || myUserId == null) return;
     state = state.copyWith(sending: true, error: null);
     try {
       final message = await _repository.createPoll(
-        groupId: groupId,
+        group: group,
+        senderId: myUserId,
         question: question,
         options: options,
         allowsMultiple: allowsMultiple,

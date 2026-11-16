@@ -15066,4 +15066,12 @@ class LIt extends L {
 
   @override
   String get officineRegPickPdf => 'Scegli un PDF';
+
+  @override
+  String get groupPollSendFailed => 'Sondaggio non inviato: riprova.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

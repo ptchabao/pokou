@@ -15106,4 +15106,12 @@ class LRu extends L {
 
   @override
   String get officineRegPickPdf => 'Выбрать PDF';
+
+  @override
+  String get groupPollSendFailed => 'Опрос не отправлен — попробуйте ещё раз.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

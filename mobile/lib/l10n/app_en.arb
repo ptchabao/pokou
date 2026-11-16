@@ -4142,5 +4142,7 @@
   "officineRegPrepareNote": "In the meantime, get your counter ready: the QR poster and the list of your usual delivery riders.",
   "officineRegDone": "Done",
   "officineRegPickPhoto": "Choose a photo",
-  "officineRegPickPdf": "Choose a PDF"
+  "officineRegPickPdf": "Choose a PDF",
+  "groupPollSendFailed": "Poll not sent — try again.",
+  "groupPollPreview": "📊 {question}"
 }

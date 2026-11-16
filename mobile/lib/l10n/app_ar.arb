@@ -4086,5 +4086,7 @@
   "officineRegPrepareNote": "في الأثناء، جهّز منضدتك: ملصق رمز QR وقائمة مندوبي التوصيل المعتادين لديك.",
   "officineRegDone": "تم",
   "officineRegPickPhoto": "اختر صورة",
-  "officineRegPickPdf": "اختر ملف PDF"
+  "officineRegPickPdf": "اختر ملف PDF",
+  "groupPollSendFailed": "لم يُرسَل الاستطلاع — أعد المحاولة.",
+  "groupPollPreview": "📊 {question}"
 }

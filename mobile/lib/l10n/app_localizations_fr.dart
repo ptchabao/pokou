@@ -15070,4 +15070,12 @@ class LFr extends L {
 
   @override
   String get officineRegPickPdf => 'Choisir un PDF';
+
+  @override
+  String get groupPollSendFailed => 'Sondage non envoyé — réessaie.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

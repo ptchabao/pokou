@@ -14986,4 +14986,12 @@ class LEn extends L {
 
   @override
   String get officineRegPickPdf => 'Choose a PDF';
+
+  @override
+  String get groupPollSendFailed => 'Poll not sent — try again.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

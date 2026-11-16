@@ -112,4 +112,30 @@ void main() {
     // Le vote retiré envoie une liste d'options vide, pas la même option.
     expect(repo.lastOptionIds, isEmpty);
   });
+
+  testWidgets('un sondage de groupe vote par castVote, jamais par la route en clair', (tester) async {
+    final repo = _FakeMessagingRepository(onVote: (_, _) async => _poll());
+    List<int>? cast;
+    PollData? votedResult;
+
+    await tester.pumpWidget(_wrap(
+      PollBubble(
+        poll: _poll(),
+        onVoted: (poll) => votedResult = poll,
+        castVote: (optionIds) async {
+          cast = optionIds;
+          return _poll();
+        },
+      ),
+      repo,
+    ));
+
+    await tester.tap(find.text('À la maison'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(cast, [2]);
+    expect(repo.lastPollId, isNull);
+    expect(votedResult, isNotNull);
+  });
 }

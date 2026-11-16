@@ -15045,4 +15045,12 @@ class LEs extends L {
 
   @override
   String get officineRegPickPdf => 'Elegir un PDF';
+
+  @override
+  String get groupPollSendFailed => 'Encuesta no enviada: inténtalo de nuevo.';
+
+  @override
+  String groupPollPreview(String question) {
+    return '📊 $question';
+  }
 }

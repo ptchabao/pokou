@@ -4086,5 +4086,7 @@
   "officineRegPrepareNote": "А пока подготовьте прилавок: плакат с QR-кодом и список ваших постоянных курьеров.",
   "officineRegDone": "Готово",
   "officineRegPickPhoto": "Выбрать фото",
-  "officineRegPickPdf": "Выбрать PDF"
+  "officineRegPickPdf": "Выбрать PDF",
+  "groupPollSendFailed": "Опрос не отправлен — попробуйте ещё раз.",
+  "groupPollPreview": "📊 {question}"
 }
