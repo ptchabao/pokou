@@ -6800,7 +6800,7 @@
       }
     }
   },
-  "offiChatNotice": "Discussion liée à la course de {patient} : la patiente, l’officine et le coursier y écrivent. Les numéros restent masqués.",
+  "offiChatNotice": "Discussion entre l’officine et le coursier, liée à la course de {patient}. La patiente ne la voit pas. Les numéros restent masqués.",
   "@offiChatNotice": {
     "placeholders": {
       "patient": {
@@ -8673,5 +8673,30 @@
       }
     }
   },
-  "groupLeaveLot1Note": "En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus."
+  "groupLeaveLot1Note": "En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus.",
+  "offiChatPatientSubtitle": "Patiente · discussion de la commande",
+  "offiChatPatientNotice": "Discussion entre l’officine et {patient}. Le coursier ne la voit pas. Les numéros restent masqués.",
+  "@offiChatPatientNotice": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      }
+    }
+  },
+  "offiChatWithPatient": "Écrire à {patient}",
+  "@offiChatWithPatient": {
+    "placeholders": {
+      "patient": {
+        "type": "String"
+      }
+    }
+  },
+  "offiPatientWriteToCourier": "Écrire à {courier}",
+  "@offiPatientWriteToCourier": {
+    "placeholders": {
+      "courier": {
+        "type": "String"
+      }
+    }
+  }
 }

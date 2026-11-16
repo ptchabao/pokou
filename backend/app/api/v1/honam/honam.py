@@ -42,7 +42,8 @@ from app.models import (
     UserRole,
 )
 from app.services.honam import rules
-from app.services.honam.order_notifications import notify_order_state_changed
+from app.services.honam import channels as honam_channels
+from app.services.honam.order_notifications import notify_order_message, notify_order_state_changed
 from app.utils.phone import normalize_e164
 
 router = APIRouter(prefix="/honam", tags=["HONAM"])
@@ -116,6 +117,8 @@ class MissingChoiceBody(BaseModel):
 
 class OrderMessageBody(BaseModel):
     body: str = Field(..., min_length=1, max_length=1000)
+    #: patient | coursier | livraison ; par défaut, le premier canal du rôle.
+    channel: Optional[str] = Field(None, max_length=10)
 
 
 class CourierApplication(BaseModel):
@@ -439,22 +442,27 @@ def _order_message_json(db: Session, message: HonamOrderMessage) -> dict:
         "sender_id": message.sender_id,
         "sender_name": sender.full_name if sender else None,
         "sender_role": message.sender_role,
+        "channel": message.channel,
         "body": message.body,
         "created_at": message.created_at.isoformat(),
     }
 
 
-def _order_message_role(db: Session, order: HonamOrder, user_id: int) -> Optional[str]:
-    if order.patient_id == user_id:
-        return "PATIENT"
-    if order.courier_id == user_id:
-        return "COURIER"
-    if db.query(PharmacyStaff.id).filter(
-        PharmacyStaff.pharmacy_id == order.pharmacy_id,
-        PharmacyStaff.user_id == user_id,
-    ).first():
-        return "PHARMACY"
-    return None
+def _message_channel(db: Session, order: Optional[HonamOrder], user_id: int, channel: Optional[str]) -> tuple:
+    """Le canal demandé (ou celui par défaut du rôle) et le rôle sous lequel
+    l'utilisateur y parle. 404 s'il n'en est pas membre : un canal qui ne le
+    concerne pas n'existe pas pour lui."""
+    if order is not None:
+        if channel is None:
+            roles = honam_channels.roles_of(db, order, user_id)
+            for role in ("PATIENT", "COURIER", "PHARMACY"):
+                if role in roles:
+                    channel = honam_channels.DEFAULT_FOR_ROLE[role]
+                    break
+        role = honam_channels.role_in(db, order, user_id, channel) if channel else None
+        if role is not None:
+            return channel, role
+    raise HTTPException(status_code=404, detail="Conversation introuvable")
 
 
 # ── Annuaire et configuration ───────────────────────────────────────────
@@ -567,21 +575,25 @@ def my_order(order_id: int, current_user: dict = Depends(get_current_user), db: 
 @router.get("/orders/{order_id}/messages")
 def order_messages(
     order_id: int,
+    channel: Optional[str] = None,
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Les messages d'UN canal de la commande (voir services/honam/channels)."""
     user = _user(db, current_user)
     order = db.query(HonamOrder).filter(HonamOrder.id == order_id).first()
-    if order is None or _order_message_role(db, order, user.id) is None:
-        raise HTTPException(status_code=404, detail="Commande introuvable")
+    channel, role = _message_channel(db, order, user.id, channel)
     messages = (
-        db.query(HonamOrderMessage)
-        .filter(HonamOrderMessage.order_id == order.id)
+        honam_channels.visible_messages(db, order, channel, role)
         .order_by(HonamOrderMessage.created_at, HonamOrderMessage.id)
         .limit(500)
         .all()
     )
-    return {"items": [_order_message_json(db, message) for message in messages]}
+    return {
+        "channel": channel,
+        "channels": honam_channels.channels_of(db, order, user.id),
+        "items": [_order_message_json(db, message) for message in messages],
+    }
 
 
 @router.post("/orders/{order_id}/messages", status_code=201)
@@ -593,13 +605,13 @@ def send_order_message(
 ):
     user = _user(db, current_user)
     order = db.query(HonamOrder).filter(HonamOrder.id == order_id).first()
-    role = _order_message_role(db, order, user.id) if order else None
-    if order is None or role is None:
-        raise HTTPException(status_code=404, detail="Commande introuvable")
+    channel, role = _message_channel(db, order, user.id, body.channel)
     message = HonamOrderMessage(
         order_id=order.id,
         sender_id=user.id,
         sender_role=role,
+        channel=channel,
+        courier_id=order.courier_id if channel != honam_channels.PATIENT else None,
         body=body.body.strip(),
     )
     if not message.body:
@@ -607,6 +619,7 @@ def send_order_message(
     db.add(message)
     db.commit()
     db.refresh(message)
+    notify_order_message(db, order, message)
     return _order_message_json(db, message)
 
 

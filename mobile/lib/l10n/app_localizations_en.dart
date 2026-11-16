@@ -11602,7 +11602,7 @@ class LEn extends L {
 
   @override
   String offiChatNotice(String patient) {
-    return 'Conversation tied to $patient’s ride: the patient, the pharmacy and the courier write here. Numbers stay hidden.';
+    return 'Conversation between the pharmacy and the courier about $patient’s ride. The patient does not see it. Numbers stay hidden.';
   }
 
   @override
@@ -13991,4 +13991,22 @@ class LEn extends L {
   @override
   String get groupLeaveLot1Note =>
       'Leaving the group keeps your messages with the other members. Admins are notified.';
+
+  @override
+  String get offiChatPatientSubtitle => 'Patient · order conversation';
+
+  @override
+  String offiChatPatientNotice(String patient) {
+    return 'Conversation between the pharmacy and $patient. The courier does not see it. Numbers stay hidden.';
+  }
+
+  @override
+  String offiChatWithPatient(String patient) {
+    return 'Write to $patient';
+  }
+
+  @override
+  String offiPatientWriteToCourier(String courier) {
+    return 'Write to $courier';
+  }
 }

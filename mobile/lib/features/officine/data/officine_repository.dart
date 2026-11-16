@@ -118,9 +118,14 @@ class OfficineRepository {
 
   // ── Discussion liée à la course (Officine 10) ─────────────────────────
 
-  Future<List<HonamOrderMessage>> messages(int orderId) async {
+  /// Canal `patient` (avec la patiente) ou `coursier` (avec le coursier) :
+  /// l'officine ne lit jamais ce que la patiente et le coursier s'écrivent.
+  Future<List<HonamOrderMessage>> messages(
+    int orderId, {
+    String channel = 'patient',
+  }) async {
     final json =
-        await _api.get('/honam/orders/$orderId/messages')
+        await _api.get('/honam/orders/$orderId/messages?channel=$channel')
             as Map<String, dynamic>;
     return [
       for (final m in (json['items'] as List? ?? const []))
@@ -128,9 +133,17 @@ class OfficineRepository {
     ];
   }
 
-  Future<HonamOrderMessage> sendMessage(int orderId, String body) async =>
-      HonamOrderMessage.fromJson(
-        await _api.post('/honam/orders/$orderId/messages', body: {'body': body})
-            as Map<String, dynamic>,
-      );
+  /// Par défaut au canal `patient` : les messages automatiques (paiement non
+  /// reçu, nouvelle photo, retrait proposé) s'adressent à la patiente.
+  Future<HonamOrderMessage> sendMessage(
+    int orderId,
+    String body, {
+    String channel = 'patient',
+  }) async => HonamOrderMessage.fromJson(
+    await _api.post(
+          '/honam/orders/$orderId/messages',
+          body: {'body': body, 'channel': channel},
+        )
+        as Map<String, dynamic>,
+  );
 }

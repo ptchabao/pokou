@@ -38,3 +38,22 @@ def notify_order_state_changed(
     }
     for user_id in recipient_ids:
         send_push(db, user_id, _TITLE, _BODY, data=payload)
+
+
+_MESSAGE_BODY = "Nouveau message dans le suivi de votre commande."
+
+
+def notify_order_message(db: Session, order: HonamOrder, message) -> None:
+    """Push d'un message : aux seuls membres de son canal, sans son texte
+    ni son auteur (aucune donnée de santé sur l'écran verrouillé)."""
+    from app.services.honam.channels import message_recipients
+
+    payload = {
+        "type": "honam_order_message",
+        "order_id": str(order.id),
+        "channel": message.channel,
+        "priority": "normal",
+        "muted": "0",
+    }
+    for user_id in message_recipients(db, order, message) - {message.sender_id}:
+        send_push(db, user_id, _TITLE, _MESSAGE_BODY, data=payload)

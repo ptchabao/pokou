@@ -172,6 +172,12 @@ class HonamOrderMessage(Base):
     order_id = Column(Integer, ForeignKey("honam_orders.id", ondelete="CASCADE"), nullable=False, index=True)
     sender_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     sender_role = Column(String(12), nullable=False)
+    #: patient (patiente ↔ officine) | coursier (officine ↔ coursier) |
+    #: livraison (patiente ↔ coursier) — voir services/honam/channels.py.
+    channel = Column(String(10), nullable=False, default="patient", server_default="patient", index=True)
+    #: Pour les canaux du coursier : le coursier de la course au moment du
+    #: message. Un coursier remplacé ne relit pas ce qui a suivi, ni l'autre.
+    courier_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     body = Column(String(1000), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 

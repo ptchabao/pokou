@@ -11701,7 +11701,7 @@ class LRu extends L {
 
   @override
   String offiChatNotice(String patient) {
-    return 'Discussion liée à la course de $patient : la patiente, l’officine et le coursier y écrivent. Les numéros restent masqués.';
+    return 'Discussion entre l’officine et le coursier, liée à la course de $patient. La patiente ne la voit pas. Les numéros restent masqués.';
   }
 
   @override
@@ -14096,4 +14096,22 @@ class LRu extends L {
   @override
   String get groupLeaveLot1Note =>
       'En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus.';
+
+  @override
+  String get offiChatPatientSubtitle => 'Patiente · discussion de la commande';
+
+  @override
+  String offiChatPatientNotice(String patient) {
+    return 'Discussion entre l’officine et $patient. Le coursier ne la voit pas. Les numéros restent masqués.';
+  }
+
+  @override
+  String offiChatWithPatient(String patient) {
+    return 'Écrire à $patient';
+  }
+
+  @override
+  String offiPatientWriteToCourier(String courier) {
+    return 'Écrire à $courier';
+  }
 }

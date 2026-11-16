@@ -265,14 +265,26 @@ class _PhoneSheetState extends State<_PhoneSheet> {
   }
 }
 
-/// Officine · 10. Écrire au coursier.
+/// Officine · 10. Écrire au coursier (canal `coursier`), et la même
+/// discussion avec la patiente (canal `patient`).
 ///
-/// La discussion est celle de la commande : la patiente, l'officine et le
-/// coursier y écrivent, sans qu'aucun numéro ne soit montré.
+/// Deux fils distincts : la patiente ne lit pas ce que l'officine dit au
+/// coursier, ni l'inverse ; aucun numéro n'est montré.
 class OfficineCourierChatScreen extends ConsumerStatefulWidget {
-  const OfficineCourierChatScreen({super.key, required this.order});
+  const OfficineCourierChatScreen({
+    super.key,
+    required this.order,
+    this.channel = 'coursier',
+  });
 
   final OfficineOrder order;
+
+  /// `coursier` ou `patient`.
+  final String channel;
+
+  bool get withPatient => channel == 'patient';
+
+  ({int id, String channel}) get threadKey => (id: order.id, channel: channel);
 
   @override
   ConsumerState<OfficineCourierChatScreen> createState() =>
@@ -299,9 +311,9 @@ class _OfficineCourierChatScreenState
     try {
       await ref
           .read(officineRepositoryProvider)
-          .sendMessage(widget.order.id, body);
+          .sendMessage(widget.order.id, body, channel: widget.channel);
       if (preset == null) _text.clear();
-      ref.invalidate(officineMessagesProvider(widget.order.id));
+      ref.invalidate(officineMessagesProvider(widget.threadKey));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(officineError(l, e))));
     } finally {
@@ -313,11 +325,15 @@ class _OfficineCourierChatScreenState
   Widget build(BuildContext context) {
     final l = L.of(context);
     final order = widget.order;
-    final courier = order.courierName ?? l.honamCourier;
     final patient = officinePatient(context, order);
-    final async = ref.watch(officineMessagesProvider(order.id));
+    final withPatient = widget.withPatient;
+    // L'interlocuteur : la patiente, ou le coursier de la course.
+    final courier = withPatient ? patient : order.courierName ?? l.honamCourier;
+    final async = ref.watch(officineMessagesProvider(widget.threadKey));
     final messages = async.valueOrNull ?? const <HonamOrderMessage>[];
-    final presets = [l.offiQuickReady, l.offiQuickWhere, l.offiQuickThanks];
+    final presets = withPatient
+        ? const <String>[]
+        : [l.offiQuickReady, l.offiQuickWhere, l.offiQuickThanks];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -356,7 +372,9 @@ class _OfficineCourierChatScreenState
                           ),
                         ),
                         Text(
-                          l.offiChatSubtitle(patient),
+                          withPatient
+                              ? l.offiChatPatientSubtitle
+                              : l.offiChatSubtitle(patient),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -373,7 +391,7 @@ class _OfficineCourierChatScreenState
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async =>
-                  ref.invalidate(officineMessagesProvider(order.id)),
+                  ref.invalidate(officineMessagesProvider(widget.threadKey)),
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -393,7 +411,9 @@ class _OfficineCourierChatScreenState
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            l.offiChatNotice(patient),
+                            withPatient
+                                ? l.offiChatPatientNotice(patient)
+                                : l.offiChatNotice(patient),
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -411,23 +431,24 @@ class _OfficineCourierChatScreenState
               ),
             ),
           ),
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                for (final preset in presets)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ActionChip(
-                      label: Text(preset),
-                      onPressed: () => _send(preset),
+          if (presets.isNotEmpty)
+            SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  for (final preset in presets)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(preset),
+                        onPressed: () => _send(preset),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
           SafeArea(
             top: false,
             minimum: const EdgeInsets.fromLTRB(12, 6, 12, 10),
@@ -649,4 +670,24 @@ class _OfficineDefectScreenState extends ConsumerState<OfficineDefectScreen> {
       ],
     );
   }
+}
+
+/// L'icône « Écrire à la patiente » de l'en-tête d'une commande (canal
+/// `patient`).
+class OfficinePatientChatButton extends StatelessWidget {
+  const OfficinePatientChatButton({super.key, required this.order});
+
+  final OfficineOrder order;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: L.of(context).offiChatWithPatient(officinePatient(context, order)),
+    icon: const Icon(Icons.chat_bubble_outline, color: AppColors.accentPrimary),
+    onPressed: () => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            OfficineCourierChatScreen(order: order, channel: 'patient'),
+      ),
+    ),
+  );
 }

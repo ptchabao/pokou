@@ -8,7 +8,7 @@ import '../../../core/providers.dart';
 import '../../status/presentation/status_controller.dart';
 import '../../status/presentation/status_privacy_screen.dart';
 import '../data/privacy_repository.dart';
-import 'blocked_contacts_screen.dart';
+import '../../contacts/presentation/blocked_contacts_screen.dart';
 import 'settings_widgets.dart';
 import 'storage_settings_screen.dart';
 

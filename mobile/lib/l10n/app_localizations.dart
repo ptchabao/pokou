@@ -19234,7 +19234,7 @@ abstract class L {
   /// No description provided for @offiChatNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Discussion liée à la course de {patient} : la patiente, l’officine et le coursier y écrivent. Les numéros restent masqués.'**
+  /// **'Discussion entre l’officine et le coursier, liée à la course de {patient}. La patiente ne la voit pas. Les numéros restent masqués.'**
   String offiChatNotice(String patient);
 
   /// No description provided for @offiQuickReady.
@@ -23028,6 +23028,30 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'En quittant le groupe, tes messages restent chez les autres membres. Les administrateurs sont prévenus.'**
   String get groupLeaveLot1Note;
+
+  /// No description provided for @offiChatPatientSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patiente · discussion de la commande'**
+  String get offiChatPatientSubtitle;
+
+  /// No description provided for @offiChatPatientNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion entre l’officine et {patient}. Le coursier ne la voit pas. Les numéros restent masqués.'**
+  String offiChatPatientNotice(String patient);
+
+  /// No description provided for @offiChatWithPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {patient}'**
+  String offiChatWithPatient(String patient);
+
+  /// No description provided for @offiPatientWriteToCourier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {courier}'**
+  String offiPatientWriteToCourier(String courier);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

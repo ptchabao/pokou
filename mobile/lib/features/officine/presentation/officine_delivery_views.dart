@@ -130,6 +130,7 @@ class _OfficinePreparationViewState
     }
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiPreparationTitle(patient),
       subtitle: paidAt == null
           ? null
@@ -417,6 +418,7 @@ class _OfficineCourierSearchViewState
 
     if (nobody) {
       return OfficinePage(
+        actions: [OfficinePatientChatButton(order: order)],
         title: l.offiNoCourierTitle,
         subtitle: subtitle,
         onRefresh: () async => refresh(),
@@ -479,6 +481,7 @@ class _OfficineCourierSearchViewState
     }
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiAskCourierTitle,
       subtitle: subtitle,
       onRefresh: () async => refresh(),
@@ -607,6 +610,7 @@ class _OfficineDeliveryViewState extends ConsumerState<OfficineDeliveryView> {
     ];
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiDeliveryTitle(patient),
       subtitle: paidAt == null
           ? null
@@ -790,6 +794,7 @@ class OfficineTrackingScreen extends StatelessWidget {
     final patient = officinePatient(context, order);
     final handedAt = order.stepTime('IN_DELIVERY');
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiDeliveryTitle(patient),
       subtitle: handedAt == null
           ? null
@@ -897,6 +902,7 @@ class OfficineDeliveredView extends ConsumerWidget {
 
     if (closed) {
       return OfficinePage(
+        actions: [OfficinePatientChatButton(order: order)],
         title: l.offiClosedTitle,
         subtitle: deliveredAt == null
             ? patient
@@ -966,6 +972,7 @@ class OfficineDeliveredView extends ConsumerWidget {
     }
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiDeliveredTo(patient),
       titleIcon: const Icon(
         Icons.check_circle,

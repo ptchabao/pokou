@@ -9,6 +9,7 @@ import '../../modules/shared/module_ui.dart';
 import '../data/officine_models.dart';
 import 'officine_controller.dart';
 import 'officine_order_screen.dart';
+import 'officine_courier_screens.dart';
 import 'officine_ui.dart';
 
 /// Officine · 3. Paiement, et P2 « Paiement en attente » une fois que
@@ -87,6 +88,7 @@ class OfficinePaymentView extends StatelessWidget {
     final declared = order.patientPaidDeclaredAt;
 
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: pending ? l.offiPaymentPendingTitle : l.offiPaymentTitle(patient),
       subtitle: pending
           ? l.offiPatientRemindedAt(
@@ -315,6 +317,7 @@ class _OfficinePaymentMissingScreenState
     final patient = officinePatient(context, order);
     final declared = order.patientPaidDeclaredAt;
     return OfficinePage(
+      actions: [OfficinePatientChatButton(order: order)],
       title: l.offiPaymentMissingTitle,
       subtitle: l.offiPatientAwaits(patient, fcfa(order.total)),
       primary: HonamPrimaryButton(

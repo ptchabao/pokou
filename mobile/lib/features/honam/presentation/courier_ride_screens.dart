@@ -46,7 +46,8 @@ final courierRideOfferListenerProvider = Provider<void>((ref) {
       rootNavigatorKey.currentState?.push(
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (_) => CourierIncomingRideScreen(order: order, incoming: true),
+          builder: (_) =>
+              CourierIncomingRideScreen(order: order, incoming: true),
         ),
       );
     } catch (_) {
@@ -135,7 +136,9 @@ Future<void> showPackExhaustedSheet(
   HonamOrder order,
 ) {
   final l = L.of(context);
-  final current = status.packs.where((p) => p.code == status.currentPack).firstOrNull;
+  final current = status.packs
+      .where((p) => p.code == status.currentPack)
+      .firstOrNull;
   final index = status.packs.indexWhere((p) => p.code == status.currentPack);
   final next = index >= 0 && index + 1 < status.packs.length
       ? status.packs[index + 1]
@@ -199,7 +202,9 @@ Future<void> showPackExhaustedSheet(
               KoryButton(
                 label: l.courierSwitchTo(
                   next.label,
-                  formatFcfa((next.upgradePriceHt * (1 + status.vatRate)).round()),
+                  formatFcfa(
+                    (next.upgradePriceHt * (1 + status.vatRate)).round(),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pop(sheet);
@@ -331,8 +336,9 @@ class _CourierIncomingRideScreenState
               value: _left / _seconds,
               strokeWidth: dark ? 6 : 4,
               color: dark ? Colors.white : AppColors.accentPrimaryDark,
-              backgroundColor: (dark ? Colors.white : AppColors.accentPrimaryDark)
-                  .withValues(alpha: 0.2),
+              backgroundColor:
+                  (dark ? Colors.white : AppColors.accentPrimaryDark)
+                      .withValues(alpha: 0.2),
             ),
           ),
           Text(
@@ -376,7 +382,8 @@ class _CourierIncomingRideScreenState
             ),
             subtitle: Text(
               [
-                if (length != null) l.courierKmAfterPickup(length.toStringAsFixed(1)),
+                if (length != null)
+                  l.courierKmAfterPickup(length.toStringAsFixed(1)),
                 if (order.patientName != null) order.patientName!,
               ].join(' · '),
               style: TextStyle(color: soft),
@@ -597,7 +604,9 @@ class _CourierDeliveryScreenState extends ConsumerState<CourierDeliveryScreen> {
   Future<void> _pickup() async {
     setState(() => _busy = true);
     try {
-      await ref.read(honamRepositoryProvider).rideAction(widget.orderId, 'pickup');
+      await ref
+          .read(honamRepositoryProvider)
+          .rideAction(widget.orderId, 'pickup');
       ref.invalidate(courierRidesProvider);
     } catch (_) {
       if (mounted) koryFailed(context);
@@ -628,11 +637,7 @@ class _CourierDeliveryScreenState extends ConsumerState<CourierDeliveryScreen> {
       footer: KoryFooter(
         children: [
           if (!picked)
-            KoryButton(
-              label: l.honamPickup,
-              busy: _busy,
-              onPressed: _pickup,
-            )
+            KoryButton(label: l.honamPickup, busy: _busy, onPressed: _pickup)
           else
             Row(
               children: [
@@ -896,7 +901,9 @@ class _CourierProblemScreenState extends ConsumerState<CourierProblemScreen> {
   Future<void> _return() async {
     setState(() => _busy = true);
     try {
-      await ref.read(honamRepositoryProvider).rideAction(widget.order.id, 'return');
+      await ref
+          .read(honamRepositoryProvider)
+          .rideAction(widget.order.id, 'return');
       ref.invalidate(courierRidesProvider);
       if (!mounted) return;
       koryToast(context, L.of(context).courierParcelReturned);
@@ -924,7 +931,11 @@ class _CourierProblemScreenState extends ConsumerState<CourierProblemScreen> {
     final minutes = math.min(waited.inMinutes, _wait.inMinutes);
     final options = [
       ('NO_ANSWER', l.courierNoAnswer(patient), l.courierNoAnswerBody),
-      ('ADDRESS', l.courierAddressNotFound, l.courierAddressNotFoundBody(patient)),
+      (
+        'ADDRESS',
+        l.courierAddressNotFound,
+        l.courierAddressNotFoundBody(patient),
+      ),
       ('CODE', l.courierCodeRefused, l.courierCodeRefusedBody(patient)),
       ('ACCIDENT', l.courierAccident, l.courierAccidentBody),
     ];
@@ -998,7 +1009,10 @@ class _CourierProblemScreenState extends ConsumerState<CourierProblemScreen> {
                   const SizedBox(height: 8),
                   Text(
                     l.courierNoAnswerReturn(pharmacy),
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -1013,6 +1027,9 @@ class _CourierProblemScreenState extends ConsumerState<CourierProblemScreen> {
                   builder: (_) => HonamOrderMessagesScreen(
                     orderId: order.id,
                     title: patient,
+                    channel: 'livraison',
+                    myRole: 'COURIER',
+                    heading: l.courierWriteToPatient(patient),
                   ),
                 ),
               ),
@@ -1052,7 +1069,8 @@ class _CourierDefaultScreenState extends ConsumerState<CourierDefaultScreen> {
           .defaultAction(widget.item.id, action, note: note);
       ref.invalidate(courierStatusProvider);
       if (!mounted) return;
-      if (action == 'contest') koryToast(context, L.of(context).courierContestSent);
+      if (action == 'contest')
+        koryToast(context, L.of(context).courierContestSent);
       Navigator.of(context).maybePop();
     } catch (_) {
       if (mounted) koryFailed(context);
@@ -1125,7 +1143,11 @@ class _CourierDefaultScreenState extends ConsumerState<CourierDefaultScreen> {
               pharmacy,
               honamWhen(context, item.orderDate ?? item.createdAt),
             ),
-            style: TextStyle(fontSize: 15, height: 1.4, color: AppColors.textPrimary),
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.4,
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -1145,7 +1167,9 @@ class _CourierDefaultScreenState extends ConsumerState<CourierDefaultScreen> {
                     label: l.courierContest,
                     value: item.contestUntil == null
                         ? '—'
-                        : l.courierUntil(honamWhen(context, item.contestUntil!)),
+                        : l.courierUntil(
+                            honamWhen(context, item.contestUntil!),
+                          ),
                   ),
                 ),
               ),
@@ -1158,10 +1182,16 @@ class _CourierDefaultScreenState extends ConsumerState<CourierDefaultScreen> {
               children: [
                 Text(
                   l.courierPharmacyWrote,
-                  style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 6),
-                Text('« ${item.reason} »', style: TextStyle(color: AppColors.textPrimary)),
+                Text(
+                  '« ${item.reason} »',
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
               ],
             ),
           ),
@@ -1190,7 +1220,10 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+      Text(
+        label,
+        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+      ),
       Text(
         value,
         style: TextStyle(
@@ -1200,14 +1233,22 @@ class _Tile extends StatelessWidget {
         ),
       ),
       if (caption != null)
-        Text(caption!, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        Text(
+          caption!,
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
     ],
   );
 }
 
 /// Une tuile chiffrée (gains, défauts, courses).
 class CourierTile extends StatelessWidget {
-  const CourierTile({super.key, required this.label, required this.value, this.caption});
+  const CourierTile({
+    super.key,
+    required this.label,
+    required this.value,
+    this.caption,
+  });
 
   final String label;
   final String value;
@@ -1273,11 +1314,17 @@ class _CourierLocationBeaconState extends ConsumerState<CourierLocationBeacon> {
         return;
       }
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
       final repository = ref.read(honamRepositoryProvider);
       for (final id in widget.orderIds) {
-        await repository.sendLocation(id, position.latitude, position.longitude);
+        await repository.sendLocation(
+          id,
+          position.latitude,
+          position.longitude,
+        );
       }
       if (mounted && _denied) setState(() => _denied = false);
     } catch (_) {
