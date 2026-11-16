@@ -129,7 +129,9 @@ void koryShare(BuildContext context, KoryPot pot) {
 bool koryCanContribute(KoryPot pot) =>
     !pot.isFrozen &&
     (pot.isOpen || (pot.myPledge?.remaining ?? 0) > 0) &&
-    !(pot.isTontine && pot.isCollector) &&
+    // Le bénéficiaire du tour mise aussi, sauf dans une tontine d'avant
+    // la règle « mise × membres ».
+    !(pot.isTontine && pot.isCollector && !pot.beneficiaryPays) &&
     !pot.isPending;
 
 // ── KOR-1 · Cagnotte ─────────────────────────────────────────────────────

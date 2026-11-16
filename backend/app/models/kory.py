@@ -89,6 +89,10 @@ class KoryPot(Base):
     #: Cotisation (KOR-21) : le dernier rappel automatique envoyé, sous la
     #: forme « 2026-12:J-2 » — un seul par échéance et par étape.
     auto_reminder_key = Column(String(24), nullable=True)
+    #: Tontine : la règle de levée. « ALL » (créées depuis le 15 nov. 2026) :
+    #: le bénéficiaire mise aussi, levée = mise × membres. Vide (tontines
+    #: plus anciennes) : levée = mise × (membres − 1). Fixée à la création.
+    levee_rule = Column(String(8), nullable=True)
 
 
 class KoryMember(Base):

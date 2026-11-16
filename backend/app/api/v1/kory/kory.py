@@ -531,6 +531,8 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         current = next((r for r in data["rounds"] if r["status"] == "CURRENT"), None)
         data["current_round"] = current["number"] if current else None
         data["draw_mode"] = pot.draw_mode
+        # La règle de levée de CETTE tontine (voir LEVEE_ALL).
+        data["beneficiary_pays"] = _beneficiary_pays(pot)
         data["draw_seal"] = pot.draw_seal
         data["drawn_at"] = pot.drawn_at.isoformat() if pot.drawn_at else None
         data["members"] = _tontine_members_json(db, pot)
@@ -671,17 +673,38 @@ def _tontine_member_ids(db: Session, pot: KoryPot, rounds: Optional[list] = None
     ]
 
 
+#: Règle de levée d'une tontine. « ALL » (tontines créées depuis le 15 nov.
+#: 2026) : chaque membre mise à chaque tour, le bénéficiaire compris — la
+#: levée vaut mise × nombre de membres. Sans valeur (tontines plus
+#: anciennes) : le bénéficiaire ne mise pas, la levée vaut mise × (membres
+#: − 1). Une tontine garde sa règle jusqu'au bout : rien ne change en
+#: cours de route pour ses membres.
+LEVEE_ALL = "ALL"
+
+
+def _beneficiary_pays(pot: KoryPot) -> bool:
+    return pot.levee_rule == LEVEE_ALL
+
+
+def _round_contributors(pot: KoryPot, members: List[int], beneficiary_id: int) -> List[int]:
+    """Qui mise à un tour : tous les membres, ou tous sauf le bénéficiaire
+    pour une tontine de l'ancienne règle."""
+    if _beneficiary_pays(pot):
+        return list(members)
+    return [uid for uid in members if uid != beneficiary_id]
+
+
 def _rounds_json(db: Session, pot: KoryPot) -> list:
     rounds = db.query(KoryRound).filter(KoryRound.pot_id == pot.id).order_by(KoryRound.number).all()
     members = _tontine_member_ids(db, pot, rounds)
-    # Chaque tour, chacun des autres membres mise : le bénéficiaire reçoit
-    # la mise de tous sauf la sienne.
-    expected = (pot.amount_per_member or 0) * max(len(members) - 1, 0)
+    # La levée : la mise de chacun de ceux qui misent (voir LEVEE_ALL).
+    payers = len(members) if _beneficiary_pays(pot) else max(len(members) - 1, 0)
+    expected = (pot.amount_per_member or 0) * payers
     now = datetime.utcnow()
     result = []
     for r in rounds:
         best = _round_counts(db, pot.id, r.number)
-        contributors = [uid for uid in members if uid != r.beneficiary_id]
+        contributors = _round_contributors(pot, members, r.beneficiary_id)
         started = r.status in ("CURRENT", "DONE")
         statuses = {}
         for uid in contributors:
@@ -801,6 +824,8 @@ def _create_tontine(db: Session, me: int, body: PotCreate) -> dict:
         amount_per_member=body.amount_per_member, period=period, join_code=_new_code(db),
         status="PENDING", draw_mode=draw_mode, deputy_id=body.deputy_id, due_at=start,
         amounts_visible=body.amounts_visible,
+        # Règle de levée du 15 nov. 2026 : le bénéficiaire mise aussi.
+        levee_rule=LEVEE_ALL,
     )
     db.add(pot)
     db.flush()
@@ -932,7 +957,8 @@ def declare_entry(
         current = _current_round(db, pot)
         if current is None:
             raise HTTPException(status_code=409, detail="Aucun tour en cours")
-        if current.beneficiary_id == me:
+        # Ancienne règle seulement : le bénéficiaire ne mise pas à son tour.
+        if current.beneficiary_id == me and not _beneficiary_pays(pot):
             raise HTTPException(status_code=409, detail="C'est votre tour : vous recevez, vous ne misez pas")
         round_number = current.number
     period_label = (body.period_label or "").strip() or None
@@ -962,8 +988,10 @@ def declare_entry(
         proof_media_id=proof_id,
     )
     # Le collecteur qui note ce qu'il a lui-même mis dans la cagnotte n'a
-    # personne à qui le faire confirmer : c'est confirmé d'emblée.
-    if me == pot.collector_id:
+    # personne à qui le faire confirmer : c'est confirmé d'emblée. De même
+    # pour le bénéficiaire d'un tour qui note sa propre mise : c'est à lui
+    # qu'elle revient.
+    if me == pot.collector_id or (round_number is not None and me == _entry_reviewer(db, pot, entry)):
         entry.status = "CONFIRMED"
         entry.reviewed_at = datetime.utcnow()
     db.add(entry)
@@ -1534,8 +1562,8 @@ def _remind_targets(db: Session, pot: KoryPot, now: datetime) -> set:
             return set()
         best = _round_counts(db, pot.id, current.number)
         return {
-            uid for uid in _tontine_member_ids(db, pot)
-            if uid != current.beneficiary_id and best.get(uid) not in ("CONFIRMED", "DECLARED")
+            uid for uid in _round_contributors(pot, _tontine_member_ids(db, pot), current.beneficiary_id)
+            if best.get(uid) not in ("CONFIRMED", "DECLARED")
         }
     if pot.kind == "COTISATION":
         return set(cotisation_service.late_member_ids(db, pot, now))

@@ -526,8 +526,8 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
                 if (stake > 0 && size > 1)
                   KoryLine(
                     l.koryXLeveePerRound,
-                    formatFcfa(stake * (size - 1)),
-                    caption: l.koryXLeveeCaption(size - 1, formatFcfa(stake)),
+                    formatFcfa(stake * size),
+                    caption: l.koryXLeveeCaption(size, formatFcfa(stake)),
                   ),
               ] else
                 Padding(
