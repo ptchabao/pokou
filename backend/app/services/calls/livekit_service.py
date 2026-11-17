@@ -9,7 +9,7 @@ de suivi d'état côté appels/messages temps réel au-delà de ce qui existe d�
 import logging
 import uuid
 from datetime import timedelta
-from typing import Optional
+from typing import List, Optional
 
 import aiohttp
 from livekit.api import AccessToken, ListParticipantsRequest, LiveKitAPI, VideoGrants
@@ -88,5 +88,42 @@ async def participant_count(room_name: str) -> Optional[int]:
     except Exception as exc:  # noqa: BLE001 — jamais bloquant
         if getattr(exc, "code", None) == "not_found":
             return 0
+        logger.warning("[Appels] présence LiveKit indisponible pour %s : %s", room_name, exc)
+        return None
+
+
+async def participant_ids(room_name: str) -> Optional[List[int]]:
+    """Les comptes RÉELLEMENT connectés à ce salon (identités LiveKit, qui
+    sont les identifiants Pokou — voir generate_token). `None` si LiveKit ne
+    répond pas : l'appelant retombe alors sur ce que le serveur sait."""
+    settings = get_settings()
+    if not (
+        settings.livekit_enabled
+        and settings.livekit_api_key
+        and settings.livekit_api_secret
+        and settings.livekit_url
+    ):
+        return None
+    try:
+        api = LiveKitAPI(
+            settings.livekit_url,
+            settings.livekit_api_key,
+            settings.livekit_api_secret,
+            timeout=aiohttp.ClientTimeout(total=3),
+        )
+        try:
+            response = await api.room.list_participants(ListParticipantsRequest(room=room_name))
+        finally:
+            await api.aclose()
+        ids = []
+        for participant in response.participants:
+            try:
+                ids.append(int(participant.identity))
+            except (TypeError, ValueError):
+                continue
+        return ids
+    except Exception as exc:  # noqa: BLE001 — jamais bloquant
+        if getattr(exc, "code", None) == "not_found":
+            return []
         logger.warning("[Appels] présence LiveKit indisponible pour %s : %s", room_name, exc)
         return None

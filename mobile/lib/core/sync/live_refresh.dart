@@ -41,6 +41,7 @@ final liveRefreshProvider = Provider<void>((ref) {
   void refreshCalls() {
     ref.invalidate(callLogProvider);
     ref.invalidate(activeGroupCallProvider);
+    ref.invalidate(ongoingGroupCallsProvider);
   }
 
   void refreshBell() => ref.invalidate(serviceNotificationsProvider);

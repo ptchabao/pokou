@@ -45,6 +45,36 @@ void main() {
   });
 
   gestures();
+
+  test(
+    'un message court n’est pas replié ; un long l’est, au dernier espace',
+    () {
+      expect(collapsedMessageText('Bonjour'), isNull);
+      final long = List.filled(200, 'mot').join(' ');
+      final cut = collapsedMessageText(long)!;
+      expect(cut.length, lessThanOrEqualTo(kMessageCollapseAt));
+      expect(cut.endsWith('mot'), isTrue);
+    },
+  );
+
+  testWidgets('« Voir plus » déroule un message long', (tester) async {
+    final long = '${List.filled(150, 'bonjour').join(' ')} FIN';
+    await tester.pumpWidget(
+      _app(
+        SingleChildScrollView(
+          child: LinkifiedText(
+            text: long,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+      ),
+    );
+    expect(find.textContaining('FIN', findRichText: true), findsNothing);
+    await tester.tapOnText(find.textRange.ofSubstring('Voir plus'));
+    await tester.pump();
+    expect(find.textContaining('FIN', findRichText: true), findsOneWidget);
+    expect(find.textContaining('Voir plus', findRichText: true), findsNothing);
+  });
 }
 
 // ── Gestes ──────────────────────────────────────────────────────────────

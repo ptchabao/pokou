@@ -557,6 +557,71 @@ def _join_existing(db: Session, call: CallLog, user_id: int) -> None:
     db.commit()
 
 
+@router.get("/ongoing")
+async def list_ongoing_group_calls(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Les appels de groupe EN COURS dans mes groupes, pour l'onglet Appels
+    (comme WhatsApp) : qui est dedans — photo et nom —, et de quoi les
+    rejoindre. Y compris l'appel que j'ai refusé ou quitté : tant qu'il y a
+    du monde, on peut y revenir.
+
+    La présence vient de LiveKit (qui est vraiment connecté) ; sans réponse
+    de LiveKit, de ce que le serveur sait (acceptés, pas encore partis)."""
+    user_id = current_user["user_id"]
+    group_ids = [gid for (gid,) in db.query(GroupMember.group_id).filter(GroupMember.user_id == user_id)]
+    items = []
+    for group_id in group_ids:
+        # Qu'il sonne encore ou soit en cours : s'il y a du monde dedans, on
+        # peut le rejoindre.
+        call = await _live_group_call(db, group_id)
+        if call is None:
+            continue
+        present = await livekit_service.participant_ids(call.room)
+        if present is None:
+            present = [
+                p.user_id for p in call.participants if p.status == "accepted" and p.left_at is None
+            ]
+            if call.caller_id not in present and not any(
+                p.user_id == call.caller_id and p.left_at is not None for p in call.participants
+            ):
+                present.append(call.caller_id)
+        present = list(dict.fromkeys(present))
+        if not present:
+            continue
+        group = db.get(Group, group_id)
+        people = []
+        for person in db.query(User).filter(User.id.in_(present)).all():
+            contact = db.query(Contact).filter(
+                Contact.owner_user_id == user_id, Contact.contact_user_id == person.id
+            ).first()
+            people.append({
+                "user_id": person.id,
+                "name": nom_affiche(person, contact.display_name if contact else None, repli="Pokou"),
+                # La photo, seulement si la personne la montre à celui qui
+                # regarde — même règle que le profil.
+                "avatar": (
+                    _serialize_avatar(person.avatar_media)
+                    if person.id == user_id or privacy_service.peut_voir(
+                        db, person.id, user_id, privacy_service.Aspect.PHOTO_DE_PROFIL, cible=person
+                    )
+                    else None
+                ),
+            })
+        items.append({
+            "room": call.room,
+            "group_id": group_id,
+            "group_name": group.name if group else None,
+            "group_avatar": _serialize_avatar(group.avatar_media) if group else None,
+            "is_video": call.is_video,
+            "started_at": call.created_at.isoformat(),
+            "in_call": people,
+            "i_am_in": user_id in present,
+        })
+    return {"items": items}
+
+
 @router.get("/active")
 async def get_active_group_call(
     group_id: int = Query(..., description="Groupe dont on cherche l'appel en cours"),

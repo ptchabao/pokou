@@ -33,6 +33,13 @@ final callLogProvider = StreamProvider.autoDispose<List<CallLogEntry>>((ref) {
   );
 });
 
+/// Les appels de groupe en cours dans mes groupes — la section « En cours »
+/// de l'onglet Appels.
+final ongoingGroupCallsProvider =
+    FutureProvider.autoDispose<List<OngoingGroupCall>>((ref) {
+      return ref.watch(callRepositoryProvider).ongoingGroupCalls();
+    });
+
 /// Appel de groupe en cours, pour le bandeau « Rejoindre » d'une conversation
 /// de groupe. Renvoie null quand il n'y a pas d'appel. À invalider quand un
 /// `call:invite` de ce groupe arrive (voir GroupConversationScreen).

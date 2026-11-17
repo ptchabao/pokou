@@ -4209,5 +4209,9 @@
   "officineAccountRemovePhone": "Remove this phone",
   "officineAccountThisPhone": "This phone",
   "officineAccountTitulaire": "Head pharmacist",
-  "officineAccountCollaborator": "Team member"
+  "officineAccountCollaborator": "Team member",
+  "messageReadMore": "Read more",
+  "callsOngoingSection": "ONGOING",
+  "callsInCallCount": "{count, plural, =1{One person in the call} other{{count} people in the call}}",
+  "callsYouAreIn": "You are in this call"
 }

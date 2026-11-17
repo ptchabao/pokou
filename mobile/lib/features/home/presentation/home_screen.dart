@@ -110,7 +110,7 @@ class _HomeHeader extends ConsumerWidget {
           const Spacer(),
           IconButton(
             tooltip: l.homeSearchEverything,
-            icon: const Icon(Icons.search),
+            icon: Icon(Icons.search, color: AppColors.accentPrimaryDark),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
             ),
@@ -127,7 +127,10 @@ class _HomeHeader extends ConsumerWidget {
               isLabelVisible: unread > 0,
               backgroundColor: AppColors.accentPrimary,
               label: Text(unread > 9 ? '9+' : '$unread'),
-              child: const Icon(Icons.notifications_none_outlined),
+              child: Icon(
+                Icons.notifications_none_outlined,
+                color: AppColors.accentPrimaryDark,
+              ),
             ),
           ),
         ],

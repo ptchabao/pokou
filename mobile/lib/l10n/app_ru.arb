@@ -4153,5 +4153,9 @@
   "officineAccountRemovePhone": "Убрать этот телефон",
   "officineAccountThisPhone": "Этот телефон",
   "officineAccountTitulaire": "Владелец",
-  "officineAccountCollaborator": "Сотрудник"
+  "officineAccountCollaborator": "Сотрудник",
+  "messageReadMore": "Показать ещё",
+  "callsOngoingSection": "ИДУТ СЕЙЧАС",
+  "callsInCallCount": "{count, plural, =1{Один человек в звонке} other{{count} человек в звонке}}",
+  "callsYouAreIn": "Ты в этом звонке"
 }

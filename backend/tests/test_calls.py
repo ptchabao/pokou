@@ -1226,3 +1226,61 @@ def test_le_balayage_clot_les_appels_de_groupe_desertes(client):
         assert all(p.left_at is not None for p in call.participants if p.status == "accepted")
     finally:
         db.close()
+
+
+# ── Onglet Appels : les appels de groupe en cours, et y revenir ────────────
+
+
+def test_un_membre_qui_a_refuse_voit_l_appel_en_cours_et_peut_le_rejoindre(client):
+    headers_a, user_id_a, _ = _signup(client, "+22893300001")
+    headers_b, user_id_b, _ = _signup(client, "+22893300002")
+    headers_c, user_id_c, _ = _signup(client, "+22893300003")
+    group = _make_group(client, headers_a, "Famille", [("+22893300002", user_id_b), ("+22893300003", user_id_c)])
+
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        room = _start_group_call(client, headers_a, group).json()["room"]
+        client.post("/api/v1/calls/signal", json={"room": room, "target_user_id": user_id_a, "event": "accept"},
+                    headers=headers_b)
+        # C refuse.
+        client.post("/api/v1/calls/signal", json={"room": room, "target_user_id": user_id_a, "event": "decline"},
+                    headers=headers_c)
+
+        with patch("app.services.calls.livekit_service.participant_ids", return_value=[user_id_a, user_id_b]), \
+             patch("app.services.calls.livekit_service.participant_count", return_value=2):
+            ongoing = client.get("/api/v1/calls/ongoing", headers=headers_c).json()["items"]
+        assert len(ongoing) == 1
+        call = ongoing[0]
+        assert call["room"] == room and call["group_id"] == group["id"] and call["group_name"] == "Famille"
+        assert sorted(p["user_id"] for p in call["in_call"]) == sorted([user_id_a, user_id_b])
+        assert call["i_am_in"] is False
+
+        # …et le rejoint quand même : sa clé lui est rendue.
+        with patch("app.services.calls.livekit_service.participant_count", return_value=2):
+            joined = client.post("/api/v1/calls/token", json={"room": room}, headers=headers_c)
+        assert joined.status_code == 200, joined.text
+        assert joined.json()["e2ee"] is True and joined.json()["sealed_key"] is not None
+
+
+def test_un_appel_vide_n_est_pas_propose(client):
+    headers_a, user_id_a, _ = _signup(client, "+22893300011")
+    headers_b, user_id_b, _ = _signup(client, "+22893300012")
+    group = _make_group(client, headers_a, "Vide", [("+22893300012", user_id_b)])
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        _start_group_call(client, headers_a, group)
+        with patch("app.services.calls.livekit_service.participant_ids", return_value=[]), \
+             patch("app.services.calls.livekit_service.participant_count", return_value=0):
+            assert client.get("/api/v1/calls/ongoing", headers=headers_b).json()["items"] == []
+
+
+def test_l_onglet_appels_ne_montre_pas_les_appels_des_autres_groupes(client):
+    headers_a, user_id_a, _ = _signup(client, "+22893300021")
+    headers_b, user_id_b, _ = _signup(client, "+22893300022")
+    headers_x, _, _ = _signup(client, "+22893300023")
+    group = _make_group(client, headers_a, "Privé", [("+22893300022", user_id_b)])
+    patch_service, patch_route = _patched_livekit()
+    with patch_service, patch_route:
+        _start_group_call(client, headers_a, group)
+        with patch("app.services.calls.livekit_service.participant_ids", return_value=[user_id_a]):
+            assert client.get("/api/v1/calls/ongoing", headers=headers_x).json()["items"] == []

@@ -4153,5 +4153,9 @@
   "officineAccountRemovePhone": "Quitar este teléfono",
   "officineAccountThisPhone": "Este teléfono",
   "officineAccountTitulaire": "Titular",
-  "officineAccountCollaborator": "Colaborador"
+  "officineAccountCollaborator": "Colaborador",
+  "messageReadMore": "Ver más",
+  "callsOngoingSection": "EN CURSO",
+  "callsInCallCount": "{count, plural, =1{Una persona en la llamada} other{{count} personas en la llamada}}",
+  "callsYouAreIn": "Estás en esta llamada"
 }

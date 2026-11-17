@@ -107,7 +107,11 @@ class PokouPageHeader extends ConsumerWidget {
                 ],
               ),
             ),
-            ...actions,
+            // Les icônes de l'en-tête en couleur d'accent : ce sont des
+            // actions, elles se distinguent du titre.
+            _AccentIcons(
+              child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+            ),
             if (showBell)
               IconButton(
                 tooltip: l.notifCenterTitle,
@@ -121,7 +125,10 @@ class PokouPageHeader extends ConsumerWidget {
                   isLabelVisible: unread > 0,
                   backgroundColor: AppColors.accentPrimary,
                   label: Text(unread > 9 ? '9+' : '$unread'),
-                  child: const Icon(Icons.notifications_none_outlined),
+                  child: Icon(
+                    Icons.notifications_none_outlined,
+                    color: AppColors.accentPrimaryDark,
+                  ),
                 ),
               ),
             if (showAvatar && user != null) ...[
@@ -152,6 +159,29 @@ class PokouPageHeader extends ConsumerWidget {
             const SizedBox(width: 8),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Les icônes d'en-tête en couleur d'accent. Les deux thèmes sont posés :
+/// en Material 3, un `IconButton` ne lit pas le thème des icônes autour de
+/// lui mais le sien — sans `IconButtonTheme`, ses glyphes restaient gris.
+class _AccentIcons extends StatelessWidget {
+  const _AccentIcons({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppColors.accentPrimaryDark;
+    return IconButtonTheme(
+      data: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: accent),
+      ),
+      child: IconTheme.merge(
+        data: IconThemeData(color: accent),
+        child: child,
       ),
     );
   }

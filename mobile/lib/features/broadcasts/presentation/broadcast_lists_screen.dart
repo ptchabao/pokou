@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pokou_back_button.dart';
+import '../../../core/widgets/pokou_fab.dart';
 import 'broadcast_controller.dart';
 import 'broadcast_editor_screen.dart';
 import 'broadcast_screen.dart';
@@ -23,17 +24,15 @@ class BroadcastListsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const BroadcastEditorScreen()),
-          );
-        },
-        // Bouton à libellé : l'encre foncée (7,2:1), pas le bleu d'action.
-        backgroundColor: AppColors.accentPrimaryDark,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.campaign_outlined),
-        label: Text(L.of(context).bcastNewList),
+      // Le bouton rond de l'app, comme « Nouvelle discussion » : une icône,
+      // le libellé en infobulle et pour les lecteurs d'écran. Le bouton à
+      // libellé débordait dans les langues longues et sur les petits écrans.
+      floatingActionButton: PokouFab(
+        icon: Icons.playlist_add_rounded,
+        tooltip: L.of(context).bcastNewList,
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const BroadcastEditorScreen()),
+        ),
       ),
       body: SafeArea(
         child: Column(

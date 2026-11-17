@@ -264,3 +264,39 @@ class CopyablePhone extends StatelessWidget {
     );
   }
 }
+
+/// Au-delà, un message s'affiche replié : le début, puis « Voir plus ».
+const kMessageCollapseAt = 600;
+
+/// Le début d'un message long, coupé au dernier espace avant la limite —
+/// jamais au milieu d'un mot ni d'un lien. `null` si le message est court.
+String? collapsedMessageText(String text) {
+  if (text.length <= kMessageCollapseAt + 120) return null;
+  var cut = text.lastIndexOf(RegExp(r'\s'), kMessageCollapseAt);
+  if (cut < kMessageCollapseAt ~/ 2) cut = kMessageCollapseAt;
+  return text.substring(0, cut).trimRight();
+}
+
+/// « … Voir plus », à la fin d'un message replié.
+TextSpan readMoreSpan(
+  BuildContext context,
+  TextStyle base,
+  VoidCallback onTap,
+  List<GestureRecognizer> recognizers,
+) {
+  final recognizer = TapGestureRecognizer()..onTap = onTap;
+  recognizers.add(recognizer);
+  return TextSpan(
+    children: [
+      TextSpan(text: '… ', style: base),
+      TextSpan(
+        text: L.of(context).messageReadMore,
+        style: base.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColors.accentPrimaryDark,
+        ),
+        recognizer: recognizer,
+      ),
+    ],
+  );
+}

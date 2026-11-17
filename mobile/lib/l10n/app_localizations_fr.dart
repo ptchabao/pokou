@@ -15334,4 +15334,24 @@ class LFr extends L {
 
   @override
   String get officineAccountCollaborator => 'Collaborateur';
+
+  @override
+  String get messageReadMore => 'Voir plus';
+
+  @override
+  String get callsOngoingSection => 'EN COURS';
+
+  @override
+  String callsInCallCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes dans l’appel',
+      one: 'Une personne dans l’appel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callsYouAreIn => 'Tu es dans cet appel';
 }

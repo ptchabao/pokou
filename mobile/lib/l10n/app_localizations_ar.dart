@@ -15238,4 +15238,24 @@ class LAr extends L {
 
   @override
   String get officineAccountCollaborator => 'معاون';
+
+  @override
+  String get messageReadMore => 'عرض المزيد';
+
+  @override
+  String get callsOngoingSection => 'جارية';
+
+  @override
+  String callsInCallCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أشخاص في المكالمة',
+      one: 'شخص واحد في المكالمة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callsYouAreIn => 'أنت في هذه المكالمة';
 }

@@ -1371,14 +1371,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           since: since,
           onCreate: (options) => exportDirectProof(
             contactName: widget.contactName,
-            myName: ref.read(authControllerProvider).user?.fullName ?? l.proofExportMe,
+            myName:
+                ref.read(authControllerProvider).user?.fullName ??
+                l.proofExportMe,
             myUserId: widget.myUserId,
             since: options.period == ProofExportPeriod.custom
                 ? options.customFrom!
                 : options.period == ProofExportPeriod.all
-                    ? messages.first.createdAt
-                    : since,
-            until: options.period == ProofExportPeriod.custom ? options.customTo : null,
+                ? messages.first.createdAt
+                : since,
+            until: options.period == ProofExportPeriod.custom
+                ? options.customTo
+                : null,
             includeMedia: options.includeMedia,
             messages: [for (final m in messages) _patches[m.id] ?? m],
             labels: ProofExportLabels(
@@ -1549,7 +1553,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             .maybeWhen(
               data: (contacts) {
                 for (final c in contacts) {
-                  if (c.contactUserId == widget.contactUserId) return c.isProBadge;
+                  if (c.contactUserId == widget.contactUserId)
+                    return c.isProBadge;
                 }
                 return false;
               },
@@ -1560,7 +1565,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             .maybeWhen(
               data: (discussions) {
                 for (final d in discussions) {
-                  if (d.kind == 'contact' && d.contactUserId == widget.contactUserId) {
+                  if (d.kind == 'contact' &&
+                      d.contactUserId == widget.contactUserId) {
                     return d.isProBadge;
                   }
                 }
@@ -1690,7 +1696,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         ),
                                         if (isContactVerified) ...[
                                           const SizedBox(width: 5),
-                                          VerifiedBadge(size: 15, pro: isContactPro),
+                                          VerifiedBadge(
+                                            size: 15,
+                                            pro: isContactPro,
+                                          ),
                                         ],
                                         if (isContactBot) ...[
                                           const SizedBox(width: 5),
@@ -1823,7 +1832,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           // À deux, qui peut couper est qui l'a activé.
                           activatedBy: _proof.enabled
                               ? (_proof.canDisable
-                                    ? (ref.read(authControllerProvider).user?.fullName ?? _l.proofExportMe)
+                                    ? (ref
+                                              .read(authControllerProvider)
+                                              .user
+                                              ?.fullName ??
+                                          _l.proofExportMe)
                                     : widget.contactName)
                               : null,
                           onLearnMore: () => showProofLearnMoreSheet(context),
@@ -1886,8 +1899,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         ),
                                       // Ma réponse à son statut : dire
                                       // qu'elle est arrivée ici, en privé.
-                                      if (message.senderId ==
-                                              widget.myUserId &&
+                                      if (message.senderId == widget.myUserId &&
                                           decodeStatusReply(
                                                 message.content,
                                                 _l,
@@ -1985,8 +1997,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                           ForwardPayload.fromDirect(
                                                             message,
                                                           ),
-                                                      myUserId:
-                                                          widget.myUserId,
+                                                      myUserId: widget.myUserId,
                                                     ),
                                               onSave: () => _saveMedia(message),
                                               onLongPress: () =>
@@ -1998,6 +2009,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                     ).notifier,
                                                   )
                                                   .retry(message.id),
+                                              quoted: _quotedOf(
+                                                message,
+                                                messages,
+                                              ),
                                               onTapReply:
                                                   message.replyToId == null
                                                   ? null
@@ -2111,6 +2126,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             else if (_replyingTo != null)
                               _ReplyingToBar(
                                 message: _replyingTo!,
+                                senderLabel:
+                                    _replyingTo!.senderId == widget.myUserId
+                                    ? L.of(context).callYou
+                                    : widget.contactName,
                                 onClose: () =>
                                     setState(() => _replyingTo = null),
                               ),
@@ -2439,7 +2458,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       return _l.messageInfoReadAt(hm.format(message.readAt!.toLocal()));
     }
     if (message.deliveredAt != null) {
-      return _l.messageInfoDeliveredAt(hm.format(message.deliveredAt!.toLocal()));
+      return _l.messageInfoDeliveredAt(
+        hm.format(message.deliveredAt!.toLocal()),
+      );
     }
     return _l.messageInfoSentOnly;
   }
@@ -2458,7 +2479,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             children: [
               Text(
                 _l.messageInfoTitle,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -2471,7 +2495,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   ),
                 ),
               if (message.readAt != null)
-                Text(_l.messageInfoReadAt(hm.format(message.readAt!.toLocal()))),
+                Text(
+                  _l.messageInfoReadAt(hm.format(message.readAt!.toLocal())),
+                ),
             ],
           ),
         ),
@@ -2896,7 +2922,10 @@ class _EditingBar extends StatelessWidget {
                   message.content ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -2913,17 +2942,36 @@ class _EditingBar extends StatelessWidget {
   }
 }
 
+/// Le message cité par [message], cherché dans la conversation affichée.
+DirectMessage? _quotedOf(DirectMessage message, List<DirectMessage> messages) {
+  final id = message.replyToId ?? message.replyTo?.id;
+  if (id == null) return null;
+  for (final candidate in messages) {
+    if (candidate.id == id) return candidate;
+  }
+  return null;
+}
+
+/// Au-dessus du champ, le message auquel on répond — sous la forme qu'il
+/// aura dans la bulle envoyée : l'auteur, l'extrait, la barre de citation.
+/// Il s'affichait comme une simple ligne grise, qu'on prenait pour un
+/// message ordinaire.
 class _ReplyingToBar extends StatelessWidget {
-  const _ReplyingToBar({required this.message, required this.onClose});
+  const _ReplyingToBar({
+    required this.message,
+    required this.senderLabel,
+    required this.onClose,
+  });
 
   final DirectMessage message;
+  final String senderLabel;
   final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(8, 6, 2, 6),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -2931,30 +2979,22 @@ class _ReplyingToBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.reply, size: 16, color: AppColors.chatActionGreen),
-          const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              message.content?.trim().isNotEmpty == true
-                  ? message.content!
-                  : switch (message.messageType) {
-                      'IMAGE' => L.of(context).mediaPhoto,
-                      'VIDEO' => L.of(context).mediaVideo,
-                      'AUDIO' => L.of(context).mediaVoiceNote,
-                      'DOCUMENT' => L.of(context).convAttachDocument,
-                      'STICKER' => L.of(context).stickerLabel,
-                      _ => L.of(context).mediaMessage,
-                    },
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            child: ReplyPreviewBanner(
+              preview: MessageReplyPreview(
+                id: message.id,
+                senderId: message.senderId,
+                messageType: message.messageType,
+                content: message.content,
+              ),
+              senderLabel: senderLabel,
+              isMine: false,
             ),
           ),
           IconButton(
             onPressed: onClose,
             icon: const Icon(Icons.close, size: 18),
             visualDensity: VisualDensity.compact,
-
             tooltip: L.of(context).actionClose,
           ),
         ],
@@ -2977,6 +3017,7 @@ class _Bubble extends StatefulWidget {
     required this.onPollVoted,
     required this.onSwipeReply,
     this.onTapReply,
+    this.quoted,
     this.onBotButton,
     this.onForward,
     this.onSave,
@@ -3015,6 +3056,10 @@ class _Bubble extends StatefulWidget {
   /// Défilement best-effort vers le message cité — `null` s'il n'y a pas de
   /// citation (le bandeau ne s'affiche alors pas non plus).
   final VoidCallback? onTapReply;
+
+  /// Le message cité, tel que CE téléphone l'a déchiffré — voir
+  /// `_quotedOf`. `null` s'il n'est pas (ou plus) dans la conversation.
+  final DirectMessage? quoted;
 
   /// Vue unique révélée par SON DESTINATAIRE — appelle
   /// `POST /messages/{id}/viewed` côté écran, sans savoir comment.
@@ -3134,10 +3179,12 @@ class _BubbleState extends State<_Bubble> {
       'IMAGE' => ImageMessageBubble(
         media: media,
         viewerTitle: isMine ? L.of(context).callYou : widget.contactName,
-        viewerSubtitle: L.of(context).viewerSubtitle(
-          widget.contactName,
-          DateFormat.MMMd().add_Hm().format(message.createdAt.toLocal()),
-        ),
+        viewerSubtitle: L
+            .of(context)
+            .viewerSubtitle(
+              widget.contactName,
+              DateFormat.MMMd().add_Hm().format(message.createdAt.toLocal()),
+            ),
         caption: message.content,
         viewerActions: ViewerActions(
           onReply: widget.onSwipeReply,
@@ -3366,8 +3413,25 @@ class _BubbleState extends State<_Bubble> {
   /// messages.py ne renvoie pas `sender_name` pour un aperçu 1:1 (contrairement
   /// à groups.py), ce widget le déduit donc lui-même.
   Widget? _replyBanner() {
-    final preview = message.replyTo;
-    if (preview == null) return null;
+    final original = message.replyTo;
+    if (original == null) return null;
+    // Le serveur ne connaît pas le texte d'un message chiffré : la citation
+    // arrivait vide, et la bulle disait « Message » au lieu du message tagué.
+    // Le texte vient du message cité tel que ce téléphone l'a déchiffré.
+    final quoted = widget.quoted;
+    final preview =
+        (original.content == null || original.content!.trim().isEmpty) &&
+            quoted != null &&
+            !quoted.isEncrypted
+        ? MessageReplyPreview(
+            id: original.id,
+            senderId: original.senderId,
+            messageType: quoted.messageType,
+            content: quoted.content,
+            senderName: original.senderName,
+            senderCertifiedName: original.senderCertifiedName,
+          )
+        : original;
     return ReplyPreviewBanner(
       preview: preview,
       senderLabel: preview.senderId == _myUserId

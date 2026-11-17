@@ -15374,4 +15374,24 @@ class LRu extends L {
 
   @override
   String get officineAccountCollaborator => 'Сотрудник';
+
+  @override
+  String get messageReadMore => 'Показать ещё';
+
+  @override
+  String get callsOngoingSection => 'ИДУТ СЕЙЧАС';
+
+  @override
+  String callsInCallCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count человек в звонке',
+      one: 'Один человек в звонке',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callsYouAreIn => 'Ты в этом звонке';
 }

@@ -165,7 +165,12 @@ class PokouAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       ],
                     ),
                   ),
-                  ...actions,
+                  _AccentIcons(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: actions,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -206,9 +211,32 @@ class PokouAppBarAction extends StatelessWidget {
           radius: 22,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            child: Icon(icon, color: AppColors.textSecondary, size: 22),
+            child: Icon(icon, color: AppColors.accentPrimaryDark, size: 22),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Les icônes d'en-tête en couleur d'accent. Les deux thèmes sont posés :
+/// en Material 3, un `IconButton` ne lit pas le thème des icônes autour de
+/// lui mais le sien — sans `IconButtonTheme`, ses glyphes restaient gris.
+class _AccentIcons extends StatelessWidget {
+  const _AccentIcons({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppColors.accentPrimaryDark;
+    return IconButtonTheme(
+      data: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: accent),
+      ),
+      child: IconTheme.merge(
+        data: IconThemeData(color: accent),
+        child: child,
       ),
     );
   }

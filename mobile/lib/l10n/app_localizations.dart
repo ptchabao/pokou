@@ -25042,6 +25042,30 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Collaborateur'**
   String get officineAccountCollaborator;
+
+  /// No description provided for @messageReadMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir plus'**
+  String get messageReadMore;
+
+  /// No description provided for @callsOngoingSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'EN COURS'**
+  String get callsOngoingSection;
+
+  /// No description provided for @callsInCallCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Une personne dans l’appel} other{{count} personnes dans l’appel}}'**
+  String callsInCallCount(int count);
+
+  /// No description provided for @callsYouAreIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu es dans cet appel'**
+  String get callsYouAreIn;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

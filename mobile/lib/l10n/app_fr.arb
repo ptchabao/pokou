@@ -9605,5 +9605,16 @@
   "officineAccountRemovePhone": "Retirer ce téléphone",
   "officineAccountThisPhone": "Ce téléphone",
   "officineAccountTitulaire": "Titulaire",
-  "officineAccountCollaborator": "Collaborateur"
+  "officineAccountCollaborator": "Collaborateur",
+  "messageReadMore": "Voir plus",
+  "callsOngoingSection": "EN COURS",
+  "callsInCallCount": "{count, plural, =1{Une personne dans l’appel} other{{count} personnes dans l’appel}}",
+  "@callsInCallCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callsYouAreIn": "Tu es dans cet appel"
 }

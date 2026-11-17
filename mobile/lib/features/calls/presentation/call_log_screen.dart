@@ -13,6 +13,7 @@ import '../../../core/widgets/verified_badge.dart';
 import '../data/call_repository.dart';
 import 'call_controller.dart';
 import 'call_screen.dart';
+import 'ongoing_calls_section.dart';
 import '../../../core/widgets/skeleton.dart';
 
 /// Journal d'appels — historique des appels passés/reçus, façon WhatsApp.
@@ -86,7 +87,10 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => ref.refresh(callLogProvider.future),
+                onRefresh: () {
+                  ref.invalidate(ongoingGroupCallsProvider);
+                  return ref.refresh(callLogProvider.future);
+                },
                 child: logAsync.when(
                   loading: () => const SkeletonList(avatarSize: 44),
                   error: (error, _) => ListView(
@@ -116,7 +120,9 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
                         .toList();
                     if (entries.isEmpty) {
                       return ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                         children: [
+                          const OngoingCallsSection(),
                           const SizedBox(height: 80),
                           Center(
                             child: Text(
@@ -137,7 +143,8 @@ class _CallLogScreenState extends ConsumerState<CallLogScreen> {
                     // Rangés par jour : « AUJOURD'HUI », « HIER », puis la
                     // date (Discussions · 21).
                     final l = L.of(context);
-                    final children = <Widget>[];
+                    // Les appels de groupe en cours d'abord, comme WhatsApp.
+                    final children = <Widget>[const OngoingCallsSection()];
                     String? currentDay;
                     for (final entry in entries) {
                       final day = _dayLabel(entry.createdAt, l, context);

@@ -597,13 +597,19 @@ class _GroupConversationScreenState
     Map<String, dynamic> status;
     List<Map<String, dynamic>> plans;
     try {
-      final results = await Future.wait([api.get('/certified/me'), api.get('/certified/offer')]);
+      final results = await Future.wait([
+        api.get('/certified/me'),
+        api.get('/certified/offer'),
+      ]);
       status = results[0] as Map<String, dynamic>;
-      plans = (((results[1] as Map<String, dynamic>)['plans'] as List?) ?? const [])
-          .cast<Map<String, dynamic>>();
+      plans =
+          (((results[1] as Map<String, dynamic>)['plans'] as List?) ?? const [])
+              .cast<Map<String, dynamic>>();
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l.honamFailed)));
       }
       return;
     }
@@ -614,13 +620,19 @@ class _GroupConversationScreenState
         .firstOrNull;
     final choice = await showProofDisableReservedSheet(
       context,
-      trialOrBadgeLabel: status['status'] == 'TRIAL' ? _l.proofReservedTrial : _l.proofReservedPaidBadge,
-      plan: plan ?? plans.where((p) => !(p['code'] as String).startsWith('PRO')).firstOrNull,
+      trialOrBadgeLabel: status['status'] == 'TRIAL'
+          ? _l.proofReservedTrial
+          : _l.proofReservedPaidBadge,
+      plan:
+          plan ??
+          plans
+              .where((p) => !(p['code'] as String).startsWith('PRO'))
+              .firstOrNull,
     );
     if (choice == ProofDisableReservedAction.pay && mounted && plan != null) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => CertifiedPayScreen(plan: plan)),
-      );
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => CertifiedPayScreen(plan: plan)));
     }
   }
 
@@ -635,19 +647,26 @@ class _GroupConversationScreenState
           since: group.proofModeSince ?? DateTime.now(),
           onCreate: (options) async {
             final params = <String, String>{
-              if (options.period == ProofExportPeriod.all) 'since': '1970-01-01T00:00:00',
-              if (options.period == ProofExportPeriod.custom && options.customFrom != null)
+              if (options.period == ProofExportPeriod.all)
+                'since': '1970-01-01T00:00:00',
+              if (options.period == ProofExportPeriod.custom &&
+                  options.customFrom != null)
                 'since': options.customFrom!.toUtc().toIso8601String(),
-              if (options.period == ProofExportPeriod.custom && options.customTo != null)
+              if (options.period == ProofExportPeriod.custom &&
+                  options.customTo != null)
                 'until': options.customTo!.toUtc().toIso8601String(),
               'include_media': '${options.includeMedia}',
             };
-            final bytes = await ref.read(apiClientProvider).getBytes(
+            final bytes = await ref
+                .read(apiClientProvider)
+                .getBytes(
                   '/groups/${widget.groupId}/proof-export?${Uri(queryParameters: params).query}',
                 );
             final dir = await getTemporaryDirectory();
             final stamp = DateFormat('yyyyMMdd-HHmm').format(DateTime.now());
-            final file = File('${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf');
+            final file = File(
+              '${dir.path}/pokou-preuve-${widget.groupId}-$stamp.pdf',
+            );
             return file.writeAsBytes(bytes, flush: true);
           },
         ),
@@ -968,7 +987,8 @@ class _GroupConversationScreenState
       case AttachChoice.camera:
         await _pickImage(ImageSource.camera);
       case AttachChoice.kory:
-        if (mounted) await openKoryCreate(context, ref, groupId: widget.groupId);
+        if (mounted)
+          await openKoryCreate(context, ref, groupId: widget.groupId);
       case AttachChoice.poll:
         await _createPoll();
       case null:
@@ -1029,7 +1049,6 @@ class _GroupConversationScreenState
       messageType: 'IMAGE',
     );
   }
-
 
   Future<void> _beginRecording() async {
     if (!await _ensurePermission(Permission.microphone)) {
@@ -1143,7 +1162,8 @@ class _GroupConversationScreenState
     // choisi ; les méthodes qui l'exécutent restent celles de cet écran.
     final action = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => GroupInfoScreen(group: group, myUserId: widget.myUserId),
+        builder: (_) =>
+            GroupInfoScreen(group: group, myUserId: widget.myUserId),
       ),
     );
 
@@ -1970,8 +1990,8 @@ class _GroupConversationScreenState
                         query: _mentionQuery!,
                         members: state.group!.members,
                         myUserId: widget.myUserId,
-                        onPick: (member) => _inputController.value =
-                            insertMention(
+                        onPick: (member) =>
+                            _inputController.value = insertMention(
                               _inputController.value,
                               member.displayName,
                             ),
@@ -2761,10 +2781,13 @@ class _GroupMessageTextState extends State<_GroupMessageText> {
     super.dispose();
   }
 
+  bool _expanded = false;
+
   @override
   Widget build(BuildContext context) {
     _disposeRecognizers();
-    final text = widget.text;
+    final collapsed = _expanded ? null : collapsedMessageText(widget.text);
+    final text = collapsed ?? widget.text;
 
     // Étendues des mentions : toutes les occurrences de "@Nom" par personne
     // citée — une mention peut apparaître plusieurs fois dans un long message.
@@ -2837,6 +2860,16 @@ class _GroupMessageTextState extends State<_GroupMessageText> {
     if (lastEnd < text.length)
       spans.add(TextSpan(text: text.substring(lastEnd)));
     if (spans.isEmpty) spans.add(TextSpan(text: text));
+    if (collapsed != null) {
+      spans.add(
+        readMoreSpan(
+          context,
+          widget.style,
+          () => setState(() => _expanded = true),
+          _recognizers,
+        ),
+      );
+    }
     return Text.rich(TextSpan(style: widget.style, children: spans));
   }
 }

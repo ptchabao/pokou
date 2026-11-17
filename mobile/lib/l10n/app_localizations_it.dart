@@ -15332,4 +15332,24 @@ class LIt extends L {
 
   @override
   String get officineAccountCollaborator => 'Collaboratore';
+
+  @override
+  String get messageReadMore => 'Mostra altro';
+
+  @override
+  String get callsOngoingSection => 'IN CORSO';
+
+  @override
+  String callsInCallCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count persone nella chiamata',
+      one: 'Una persona nella chiamata',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callsYouAreIn => 'Sei in questa chiamata';
 }

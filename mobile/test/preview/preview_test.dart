@@ -21,6 +21,9 @@ import 'package:pokou/core/widgets/pokou_bottom_nav.dart';
 import 'package:pokou/features/contacts/data/conversation_summary.dart';
 import 'package:pokou/features/contacts/presentation/discussions_controller.dart';
 import 'package:pokou/features/contacts/presentation/contacts_screen.dart';
+import 'package:pokou/features/calls/data/call_repository.dart';
+import 'package:pokou/features/calls/presentation/call_controller.dart';
+import 'package:pokou/features/calls/presentation/call_log_screen.dart';
 import 'package:pokou/features/home/data/home_banner.dart';
 import 'package:pokou/features/home/presentation/home_screen.dart';
 import 'package:pokou/features/honam/data/honam_models.dart';
@@ -301,6 +304,31 @@ void main() {
     await safe(
       'panel_dark',
       () => _shot(tester, 'panel_dark', _panel, brightness: Brightness.dark),
+    );
+    await safe(
+      'calls',
+      () => _shot(
+        tester,
+        'calls',
+        () => const CallLogScreen(),
+        overrides: [
+          ongoingGroupCallsProvider.overrideWith(
+            (ref) async => [
+              OngoingGroupCall.fromJson({
+                'room': 'r1',
+                'group_id': 4,
+                'group_name': 'Famille Mensah',
+                'is_video': true,
+                'in_call': [
+                  for (final (i, n) in ['Ama', 'Kofi', 'Afi', 'Yao', 'Séna', 'Komi'].indexed)
+                    {'user_id': 10 + i, 'name': n},
+                ],
+              }),
+            ],
+          ),
+          callLogProvider.overrideWith((ref) => Stream.value(const [])),
+        ],
+      ),
     );
     await safe(
       'discussions',

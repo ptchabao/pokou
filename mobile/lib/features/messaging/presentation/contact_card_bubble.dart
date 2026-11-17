@@ -141,11 +141,26 @@ class _LinkifiedTextState extends State<LinkifiedText> {
     return spans;
   }
 
+  /// Un message long se déroule d'un toucher sur « Voir plus ».
+  bool _expanded = false;
+
   @override
   Widget build(BuildContext context) {
     _disposeRecognizers();
-    final spans = _formatAndLinkify(widget.text, widget.style);
-    if (spans.isEmpty) spans.add(TextSpan(text: widget.text));
+    final collapsed = _expanded ? null : collapsedMessageText(widget.text);
+    final text = collapsed ?? widget.text;
+    final spans = _formatAndLinkify(text, widget.style);
+    if (spans.isEmpty) spans.add(TextSpan(text: text));
+    if (collapsed != null) {
+      spans.add(
+        readMoreSpan(
+          context,
+          widget.style,
+          () => setState(() => _expanded = true),
+          _recognizers,
+        ),
+      );
+    }
     return Text.rich(TextSpan(style: widget.style, children: spans));
   }
 }

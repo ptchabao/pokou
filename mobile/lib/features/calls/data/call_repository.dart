@@ -70,6 +70,50 @@ class ActiveGroupCall {
   }
 }
 
+/// Un appel de groupe en cours dans un de mes groupes (onglet Appels) :
+/// qui est dedans, et de quoi le rejoindre.
+class OngoingGroupCall {
+  const OngoingGroupCall({
+    required this.room,
+    required this.groupId,
+    required this.isVideo,
+    required this.inCall,
+    this.groupName,
+    this.groupAvatar,
+    this.iAmIn = false,
+  });
+
+  final String room;
+  final int groupId;
+  final String? groupName;
+  final MediaMeta? groupAvatar;
+  final bool isVideo;
+  final List<CallLogOther> inCall;
+  final bool iAmIn;
+
+  factory OngoingGroupCall.fromJson(Map<String, dynamic> json) {
+    final avatar = json['group_avatar'];
+    return OngoingGroupCall(
+      room: json['room'] as String,
+      groupId: json['group_id'] as int,
+      groupName: json['group_name'] as String?,
+      groupAvatar: avatar is Map<String, dynamic>
+          ? MediaMeta.fromJson(avatar)
+          : null,
+      isVideo: json['is_video'] as bool? ?? false,
+      iAmIn: json['i_am_in'] as bool? ?? false,
+      inCall: [
+        for (final p in (json['in_call'] as List? ?? const []))
+          CallLogOther.fromJson({
+            'id': (p as Map<String, dynamic>)['user_id'],
+            'display_name': p['name'] ?? 'Pokou',
+            'avatar': p['avatar'],
+          }),
+      ],
+    );
+  }
+}
+
 class CallLogOther {
   const CallLogOther({
     required this.id,
@@ -607,6 +651,15 @@ class CallRepository {
         .cast<Map<String, dynamic>>()
         .map(CallLogEntry.fromJson)
         .toList();
+  }
+
+  /// Les appels de groupe en cours dans mes groupes, avec qui est dedans.
+  Future<List<OngoingGroupCall>> ongoingGroupCalls() async {
+    final response = await _api.get('/calls/ongoing');
+    return [
+      for (final item in (response['items'] as List? ?? const []))
+        OngoingGroupCall.fromJson(item as Map<String, dynamic>),
+    ];
   }
 
   Future<List<dynamic>> getLogRaw() async {

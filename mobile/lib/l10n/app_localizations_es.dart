@@ -15310,4 +15310,24 @@ class LEs extends L {
 
   @override
   String get officineAccountCollaborator => 'Colaborador';
+
+  @override
+  String get messageReadMore => 'Ver más';
+
+  @override
+  String get callsOngoingSection => 'EN CURSO';
+
+  @override
+  String callsInCallCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas en la llamada',
+      one: 'Una persona en la llamada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callsYouAreIn => 'Estás en esta llamada';
 }

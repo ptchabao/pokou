@@ -15250,4 +15250,24 @@ class LEn extends L {
 
   @override
   String get officineAccountCollaborator => 'Team member';
+
+  @override
+  String get messageReadMore => 'Read more';
+
+  @override
+  String get callsOngoingSection => 'ONGOING';
+
+  @override
+  String callsInCallCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people in the call',
+      one: 'One person in the call',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callsYouAreIn => 'You are in this call';
 }
