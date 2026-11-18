@@ -118,6 +118,7 @@ class ConversationSummary {
     required this.isMuted,
     required this.isArchived,
     this.isFavorite = false,
+    this.priorityTag,
     required this.isUnknownContact,
     required this.contactUserId,
     required this.lastMessage,
@@ -143,6 +144,10 @@ class ConversationSummary {
   /// Dans le filtre « Favoris » — un choix de MA liste, que les autres ne
   /// voient pas.
   final bool isFavorite;
+
+  /// L'étiquette que j'ai posée sur ce contact (BUSINESS, CLIENT…), ou
+  /// `null`. Conversations à deux seulement.
+  final String? priorityTag;
 
   /// Personne qui m'a écrit sans figurer dans mon carnet — façon WhatsApp,
   /// elle apparaît quand même. Le client ne doit pas proposer les actions
@@ -194,6 +199,7 @@ class ConversationSummary {
       isMuted: json['is_muted'] as bool? ?? false,
       isArchived: json['is_archived'] as bool? ?? false,
       isFavorite: json['is_favorite'] as bool? ?? false,
+      priorityTag: json['priority_tag'] as String?,
       isUnknownContact: json['is_unknown_contact'] as bool? ?? false,
       isVerified: json['is_verified'] as bool? ?? false,
       badge: json['badge'] as String?,

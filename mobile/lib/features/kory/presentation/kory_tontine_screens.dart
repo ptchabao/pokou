@@ -19,6 +19,7 @@ import 'kory_pot_screen.dart';
 import 'kory_review_screen.dart';
 import 'kory_screen.dart';
 import 'kory_ui.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Mon identifiant, pour savoir quel tour est le mien.
 int? _me(WidgetRef ref) => ref.watch(authControllerProvider).user?.id;
@@ -214,7 +215,7 @@ class _KoryTontineMembersScreenState
       for (final id in _order)
         if (!_chosen.contains(id) && id != _me(ref)) id,
     ];
-    final picked = await showModalBottomSheet<int>(
+    final picked = await showPokouSheet<int>(
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
@@ -247,7 +248,8 @@ class _KoryTontineMembersScreenState
   /// Toucher un membre : le désigner suppléant, ou le retirer.
   Future<void> _manage(int id) async {
     final l = L.of(context);
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(

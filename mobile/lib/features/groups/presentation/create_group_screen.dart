@@ -17,6 +17,7 @@ import '../../contacts/presentation/contacts_controller.dart';
 import 'group_controller.dart';
 import 'group_conversation_screen.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Discussions · 6 — Nouveau groupe.
 ///
@@ -161,7 +162,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   /// « + Ajouter » : les contacts Pokou, à cocher.
   Future<void> _pickMembers(List<PokouContact> contacts) async {
     final picked = {..._selected};
-    final done = await showModalBottomSheet<bool>(
+    final done = await showPokouSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,

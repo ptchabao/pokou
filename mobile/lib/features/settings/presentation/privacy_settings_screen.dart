@@ -11,6 +11,7 @@ import '../data/privacy_repository.dart';
 import '../../contacts/presentation/blocked_contacts_screen.dart';
 import 'settings_widgets.dart';
 import 'storage_settings_screen.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Réglages › Confidentialité (REG-1) : qui peut voir, accusés de lecture,
 /// groupes et inconnus, bloqués, puis le raccourci vers le stockage.
@@ -142,9 +143,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           SettingsRow(
             label: l.privacyStatuses,
             trailing: SettingsValue(
-              statusAudience == null
-                  ? ''
-                  : statusAudience.audience.labelOf(l),
+              statusAudience == null ? '' : statusAudience.audience.labelOf(l),
             ),
             onTap: () async {
               await Navigator.of(context).push(
@@ -208,7 +207,9 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
             trailing: SettingsValue(blocked == null ? '' : '${blocked.length}'),
             onTap: () async {
               await Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const BlockedContactsScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const BlockedContactsScreen(),
+                ),
               );
               ref.invalidate(blockedContactsProvider);
             },
@@ -223,7 +224,9 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
             trailing: SettingsValue(cache == null ? '' : formatBytes(cache)),
             onTap: () async {
               await Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const StorageSettingsScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const StorageSettingsScreen(),
+                ),
               );
               ref.invalidate(_cacheSizeProvider);
             },
@@ -283,7 +286,8 @@ class _LigneAudience extends StatelessWidget {
   }
 
   Future<void> _choisir(BuildContext context, L l) async {
-    final choix = await showModalBottomSheet<PrivacyAudience>(
+    final choix = await showPokouSheet<PrivacyAudience>(
+      scrollable: true,
       context: context,
       builder: (feuille) => SafeArea(
         child: Column(

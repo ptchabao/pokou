@@ -15352,4 +15352,92 @@ class LIt extends L {
 
   @override
   String get callsYouAreIn => 'Sei in questa chiamata';
+
+  @override
+  String get tagBusiness => 'Business';
+
+  @override
+  String get tagSupplier => 'Fornitore';
+
+  @override
+  String get tagClient => 'Cliente';
+
+  @override
+  String get tagBoss => 'Capo';
+
+  @override
+  String get tagFriend => 'Amico';
+
+  @override
+  String get msgPinAction => 'Fissa';
+
+  @override
+  String get msgPinUnpin => 'Rimuovi dai fissati';
+
+  @override
+  String get msgPinDurationTitle =>
+      'Per quanto tempo fissare questo messaggio?';
+
+  @override
+  String get msgPinDurationHint =>
+      'Tutti nella chat lo vedranno in alto. Puoi rimuoverlo dai fissati in qualsiasi momento.';
+
+  @override
+  String get msgPin24h => '24 ore';
+
+  @override
+  String get msgPin7d => '7 giorni';
+
+  @override
+  String get msgPin30d => '30 giorni';
+
+  @override
+  String get msgPinReplaceNote =>
+      'Ci sono già tre messaggi fissati: il più vecchio verrà sostituito.';
+
+  @override
+  String get msgPinDone => 'Messaggio fissato';
+
+  @override
+  String get msgPinRemoved => 'Messaggio rimosso dai fissati';
+
+  @override
+  String get msgPinFailed =>
+      'Impossibile modificare il messaggio fissato. Controlla la connessione e riprova.';
+
+  @override
+  String get msgPinForbidden =>
+      'In questo gruppo solo gli amministratori possono fissare i messaggi.';
+
+  @override
+  String get msgPinBannerLabel => 'Messaggio fissato';
+
+  @override
+  String msgPinCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get msgStarAction => 'Aggiungi agli importanti';
+
+  @override
+  String get msgStarRemove => 'Rimuovi dagli importanti';
+
+  @override
+  String get msgStarTitle => 'Messaggi importanti';
+
+  @override
+  String get msgStarEmpty =>
+      'Ancora nessun messaggio importante. Tieni premuto un messaggio e scegli «Aggiungi agli importanti» per ritrovarlo qui.';
+
+  @override
+  String get msgStarOnlyHere => 'Visibile solo su questo telefono.';
+
+  @override
+  String get msgStarA11y => 'Importante';
+
+  @override
+  String msgStarFrom(String author, String conversation) {
+    return '$author · $conversation';
+  }
 }

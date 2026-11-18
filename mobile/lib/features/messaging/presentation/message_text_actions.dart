@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Copier, sélectionner et partager le texte d'un message — les gestes
 /// qu'on attend d'une bulle, partagés par la discussion à deux et le groupe.
@@ -46,7 +47,7 @@ Future<void> shareMessageText(BuildContext context, String text) async {
 /// Le message en grand, sélectionnable mot par mot.
 Future<void> showSelectableMessage(BuildContext context, String text) {
   final l = L.of(context);
-  return showModalBottomSheet<void>(
+  return showPokouSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,

@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../contacts/data/conversations_repository.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../../contacts/presentation/discussions_controller.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Les motifs proposés, dans l'ordre de la maquette (Discussions · 16).
 enum ReportReason { scam, impersonation, spam, shocking, other }
@@ -50,9 +51,7 @@ Future<ReportOutcome?> showReportSheet(
   final messenger = ScaffoldMessenger.of(context);
   final l = L.of(context);
   final choice =
-      await showModalBottomSheet<
-        ({ReportReason reason, bool block, bool attach})
-      >(
+      await showPokouSheet<({ReportReason reason, bool block, bool attach})>(
         context: context,
         isScrollControlled: true,
         backgroundColor: AppColors.surface,

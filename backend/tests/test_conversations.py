@@ -904,3 +904,17 @@ def test_une_communaute_sans_message_se_range_quand_meme(client):
     assert row["last_message"] is None
     # La ligne existe malgré tout : c'est le compte de groupes qui la remplit.
     assert row["group_count"] >= 1
+
+
+def test_l_etiquette_d_un_contact_apparait_dans_la_liste_des_discussions(client):
+    headers_a, _ = _signup(client, "+22889500701")
+    headers_b, user_b = _signup(client, "+22889500702")
+    contact = _add_contact(client, headers_a, "+22889500702", "Awa")
+    _send_direct(client, headers_a, user_b)
+
+    tagged = client.put(f"/api/v1/contacts/{contact['id']}", json={"priority_tag": "client"}, headers=headers_a)
+    assert tagged.status_code == 200, tagged.text
+
+    items = client.get("/api/v1/conversations", headers=headers_a).json()["items"]
+    row = next(i for i in items if i["kind"] == "contact" and i["id"] == contact["id"])
+    assert row["priority_tag"] == "CLIENT"

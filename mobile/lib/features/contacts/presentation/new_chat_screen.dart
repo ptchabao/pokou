@@ -180,7 +180,7 @@ class _NewChatScreenState extends ConsumerState<NewChatScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
                 child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _filterController,
                   style: const TextStyle(fontSize: 14),
                   onChanged: (value) =>

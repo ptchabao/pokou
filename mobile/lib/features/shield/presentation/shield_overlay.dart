@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import 'shield_controller.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Enveloppe un écran de conversation avec l'indicateur du Mode Bouclier et
 /// le geste "swipe to override" (glisser vers la droite n'importe où pour
@@ -32,7 +33,8 @@ class _ShieldOverlayState extends ConsumerState<ShieldOverlay> {
         .read(shieldControllerProvider.notifier)
         .revealDeferredMessages();
     if (deferred.isEmpty) return;
-    showModalBottomSheet(
+    showPokouSheet(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),

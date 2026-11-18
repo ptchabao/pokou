@@ -46,8 +46,20 @@ import 'discussions_controller.dart';
 import '../data/conversation_summary.dart';
 import '../../../core/sharing/invite_sharing.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 const _kPriorityTags = ['BUSINESS', 'FOURNISSEUR', 'CLIENT', 'BOSS', 'AMI'];
+
+/// Le libellé d'une étiquette dans la langue de l'app (le serveur garde le
+/// code en majuscules).
+String priorityTagLabel(L l, String tag) => switch (tag) {
+  'BUSINESS' => l.tagBusiness,
+  'FOURNISSEUR' => l.tagSupplier,
+  'CLIENT' => l.tagClient,
+  'BOSS' => l.tagBoss,
+  'AMI' => l.tagFriend,
+  _ => tag,
+};
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -101,7 +113,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     required String displayName,
     String? currentTag,
   }) async {
-    final chosen = await showModalBottomSheet<String>(
+    final chosen = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -121,7 +134,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             ),
             for (final tag in _kPriorityTags)
               ListTile(
-                title: Text(tag),
+                title: Text(priorityTagLabel(L.of(context), tag)),
                 trailing: currentTag == tag
                     ? Icon(Icons.check, color: AppColors.accentPrimaryDark)
                     : null,
@@ -164,7 +177,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     final id = discussion.id;
     if (id == null) return;
     final l = L.of(context);
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -327,7 +341,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           await _pickMuteDuration(discussion.kind, id);
         }
       case 'tag':
-        await _pickPriorityTag(contactId: id, displayName: discussion.name);
+        await _pickPriorityTag(
+          contactId: id,
+          displayName: discussion.name,
+          currentTag: discussion.priorityTag,
+        );
       case 'block':
         await _confirmBlock(discussion);
     }
@@ -337,7 +355,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   /// MUTE_FOREVER_SECONDS côté API — pas de colonne booléenne séparée,
   /// `muted_until` étant déjà une date).
   Future<void> _pickMuteDuration(String kind, int id) async {
-    final seconds = await showModalBottomSheet<int>(
+    final seconds = await showPokouSheet<int>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -404,7 +423,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   /// quoi le faire entrer dans le carnet, ou couper court.
   Future<void> _openUnknownContactMenu(ConversationSummary discussion) async {
     final contactUserId = discussion.contactUserId;
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -1393,6 +1413,35 @@ class _DiscussionTile extends ConsumerWidget {
                               ),
                             ),
                           ),
+                          // L'étiquette posée par « Étiqueter » : elle se voit
+                          // dans la liste — sans elle, le geste semblait
+                          // n'avoir rien fait.
+                          if (discussion.priorityTag != null) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.accentPrimary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                priorityTagLabel(
+                                  L.of(context),
+                                  discussion.priorityTag!,
+                                ),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.accentPrimaryDark,
+                                ),
+                              ),
+                            ),
+                          ],
                           if (discussion.isPinned) ...[
                             const SizedBox(width: 6),
                             const Icon(
@@ -1590,7 +1639,8 @@ class _BabaFab extends ConsumerWidget {
       return;
     }
 
-    final chosen = await showModalBottomSheet<MinouMonitor>(
+    final chosen = await showPokouSheet<MinouMonitor>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -2029,7 +2079,8 @@ class ArchivedDiscussionsScreen extends ConsumerWidget {
     final id = discussion.id;
     if (id == null) return;
     final l = L.of(context);
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),

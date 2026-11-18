@@ -17,6 +17,7 @@ import 'status_controller.dart';
 import 'status_time.dart';
 import 'status_viewers_sheet.dart';
 import '../../messaging/presentation/messaging_controller.dart';
+import '../../contacts/presentation/discussions_controller.dart';
 import '../../messaging/presentation/status_reply.dart';
 import '../../messaging/presentation/report_sheet.dart';
 import '../../contacts/data/conversations_repository.dart' show ReportedMessage;
@@ -97,18 +98,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     final l = L.of(context);
     setState(() => _sendingReply = true);
     try {
-      await ref
-          .read(messagingRepositoryProvider)
-          .send(
-            recipientId: widget.item.userId,
-            // La citation du statut voyage DANS le message chiffré (voir
-            // messaging/presentation/status_reply.dart) : la discussion
-            // l'affiche en carte « {Nom} · Statut ».
-            content: encodeStatusReply(
-              caption: _replyCaption(l),
-              text: text,
-            ),
-          );
+      await _sendToAuthor(text, l);
       if (!mounted) return;
       _reply.clear();
       _replyFocus.unfocus();
@@ -221,6 +211,29 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
     return _liked.contains(status.id) || status.likedByMe;
   }
 
+  /// Envoie à l'auteur du statut un message qui le cite — une réponse, ou
+  /// le cœur — et le range dans NOTRE conversation avec lui.
+  ///
+  /// Le message part chiffré : le serveur ne peut pas en rendre le texte à
+  /// son expéditeur. Sans ce rangement local, la réponse arrivait bien chez
+  /// l'auteur, mais l'échange paraissait vide de notre côté.
+  Future<void> _sendToAuthor(String text, L l) async {
+    final saved = await ref
+        .read(messagingRepositoryProvider)
+        .send(
+          recipientId: widget.item.userId,
+          // La citation du statut voyage DANS le message chiffré (voir
+          // messaging/presentation/status_reply.dart) : la discussion
+          // l'affiche en carte « {Nom} · Statut ».
+          content: encodeStatusReply(caption: _replyCaption(l), text: text),
+        );
+    final store = ref.read(pokouMessageStoreProvider);
+    await store.saveDirect([saved]);
+    // Une conversation ouverte avec l'auteur l'affiche aussitôt.
+    store.announceRecovered(group: false, message: saved.toJson());
+    ref.invalidate(discussionsProvider);
+  }
+
   Future<void> _toggleLike() async {
     final status = widget.item.statuses[_index];
     final next = !_liking;
@@ -231,8 +244,18 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
         _liked.remove(status.id);
       }
     });
+    final l = L.of(context);
     try {
       await ref.read(statusRepositoryProvider).like(status.id, liked: next);
+      // Le cœur apparaît aussi dans la conversation avec l'auteur, comme
+      // une réaction au statut (WhatsApp) — seulement quand on l'ajoute.
+      if (next) {
+        try {
+          await _sendToAuthor('❤️', l);
+        } catch (_) {
+          // Le cœur est posé ; seul le message n'a pas pu partir.
+        }
+      }
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -370,10 +393,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                       // La progression continue pendant la feuille : on la
                       // met en pause, sinon le statut défile derrière elle.
                       _controller.stop();
-                      StatusViewersSheet.show(
-                        context,
-                        status: status,
-                      ).then((deleted) {
+                      StatusViewersSheet.show(context, status: status).then((
+                        deleted,
+                      ) {
                         if (deleted == true && mounted) {
                           ref.invalidate(statusFeedProvider);
                           Navigator.of(context).maybePop();
@@ -445,7 +467,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                       children: [
                         Expanded(
                           child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                            contextMenuBuilder: pokouContextMenuBuilder,
                             controller: _reply,
                             focusNode: _replyFocus,
                             onTap: _controller.stop,

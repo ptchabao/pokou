@@ -15354,4 +15354,91 @@ class LFr extends L {
 
   @override
   String get callsYouAreIn => 'Tu es dans cet appel';
+
+  @override
+  String get tagBusiness => 'Business';
+
+  @override
+  String get tagSupplier => 'Fournisseur';
+
+  @override
+  String get tagClient => 'Client';
+
+  @override
+  String get tagBoss => 'Patron';
+
+  @override
+  String get tagFriend => 'Ami';
+
+  @override
+  String get msgPinAction => 'Épingler';
+
+  @override
+  String get msgPinUnpin => 'Désépingler';
+
+  @override
+  String get msgPinDurationTitle => 'Combien de temps épingler ce message ?';
+
+  @override
+  String get msgPinDurationHint =>
+      'Tout le monde dans la discussion le verra en haut. Tu peux le désépingler à tout moment.';
+
+  @override
+  String get msgPin24h => '24 heures';
+
+  @override
+  String get msgPin7d => '7 jours';
+
+  @override
+  String get msgPin30d => '30 jours';
+
+  @override
+  String get msgPinReplaceNote =>
+      'Trois messages sont déjà épinglés : le plus ancien sera remplacé.';
+
+  @override
+  String get msgPinDone => 'Message épinglé';
+
+  @override
+  String get msgPinRemoved => 'Message désépinglé';
+
+  @override
+  String get msgPinFailed =>
+      'Impossible de modifier l\'épingle. Vérifie ta connexion et réessaie.';
+
+  @override
+  String get msgPinForbidden =>
+      'Dans ce groupe, seuls les administrateurs peuvent épingler des messages.';
+
+  @override
+  String get msgPinBannerLabel => 'Message épinglé';
+
+  @override
+  String msgPinCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get msgStarAction => 'Marquer comme important';
+
+  @override
+  String get msgStarRemove => 'Retirer des importants';
+
+  @override
+  String get msgStarTitle => 'Messages importants';
+
+  @override
+  String get msgStarEmpty =>
+      'Aucun message important pour l\'instant. Appuie longuement sur un message puis choisis « Marquer comme important » pour le retrouver ici.';
+
+  @override
+  String get msgStarOnlyHere => 'Visible uniquement sur ce téléphone.';
+
+  @override
+  String get msgStarA11y => 'Important';
+
+  @override
+  String msgStarFrom(String author, String conversation) {
+    return '$author · $conversation';
+  }
 }

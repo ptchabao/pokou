@@ -14,6 +14,7 @@ import '../data/status_model.dart';
 import '../data/status_text_style.dart';
 import 'status_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 enum _Mode { text, mediaPreview }
 
@@ -78,7 +79,7 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
   Future<void> _chooseAudience() async {
     final l = L.of(context);
     final current = _audience ?? StatusAudience.contacts;
-    final choice = await showModalBottomSheet<StatusAudience>(
+    final choice = await showPokouSheet<StatusAudience>(
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheet) => SafeArea(
@@ -114,7 +115,8 @@ class _PostStatusScreenState extends ConsumerState<PostStatusScreen> {
   }
 
   Future<void> _chooseSource({required bool video}) async {
-    final source = await showModalBottomSheet<ImageSource>(
+    final source = await showPokouSheet<ImageSource>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(

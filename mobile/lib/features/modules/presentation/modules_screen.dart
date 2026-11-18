@@ -11,6 +11,7 @@ import 'module_controller.dart';
 import 'module_routes.dart';
 import '../../../core/widgets/pokou_illustration.dart';
 import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// La galerie des modules.
 ///
@@ -447,7 +448,7 @@ class _ModuleTile extends StatelessWidget {
           );
           return;
         }
-        showModalBottomSheet<void>(
+        showPokouSheet<void>(
           context: context,
           backgroundColor: AppColors.surface,
           shape: const RoundedRectangleBorder(

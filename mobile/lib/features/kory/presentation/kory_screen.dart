@@ -17,6 +17,7 @@ import 'kory_invite_screen.dart';
 import 'kory_journal_screen.dart';
 import 'kory_pot_screen.dart';
 import 'kory_ui.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Kory — l'entrée du module (écran APP-3).
 ///
@@ -372,7 +373,7 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
       );
       return;
     }
-    final picked = await showModalBottomSheet<KoryPot>(
+    final picked = await showPokouSheet<KoryPot>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,

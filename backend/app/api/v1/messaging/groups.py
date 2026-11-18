@@ -18,13 +18,14 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupPollVote, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
+from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessagePin, GroupMessageReaction, GroupPollVote, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
 from app.utils.editing import MESSAGE_EDIT_WINDOW_MINUTES
 from app.utils.identity import est_certifie, forme_du_badge, nom_certifie
 from app.services.messaging import group_invitation_service
 from app.services.privacy import privacy_service
 from app.core.security import get_current_user
 from app.api.v1.messaging.ws import manager
+from app.api.v1.messaging.messages import MAX_PINS, PIN_DURATIONS
 from app.services.messaging import notification_policy
 from app.services.media import sticker_service
 from app.services.notifications.push_service import send_push
@@ -113,6 +114,10 @@ class SenderKeyEnvelope(BaseModel):
 class SenderKeyDistributionCreate(BaseModel):
     epoch: int
     distributions: List[SenderKeyEnvelope] = Field(default_factory=list, max_length=500)
+
+
+class GroupPinSet(BaseModel):
+    duration_seconds: int = 604800
 
 
 class GroupMessageReactionSet(BaseModel):
@@ -1180,6 +1185,7 @@ async def delete_group(
         db.query(GroupMessageMention).filter(
             GroupMessageMention.message_id.in_(message_ids)
         ).delete(synchronize_session=False)
+    db.query(GroupMessagePin).filter(GroupMessagePin.group_id == group_id).delete(synchronize_session=False)
     db.query(GroupMessage).filter(GroupMessage.group_id == group_id).delete(synchronize_session=False)
     db.query(GroupInvitation).filter(GroupInvitation.group_id == group_id).delete(synchronize_session=False)
     db.query(GroupSenderKeyDistribution).filter(
@@ -1452,6 +1458,8 @@ async def list_group_messages(
         "items": [_serialize_message(message, user_id) for message in messages],
         "total": len(messages),
         "has_more": has_more,
+        # Épingles en cours, avec la page la plus récente seulement.
+        "pins": _group_pins_payload(db, group_id) if before is None else None,
     }
 
 
@@ -1857,15 +1865,143 @@ async def delete_group_message(
         if message.deleted_at is None:
             message.deleted_at = datetime.utcnow()
             message.deleted_by = user_id
+            _unpin_group_message(db, message.id)
             db.commit()
             db.refresh(message)
         event = {"type": "group:message:edited", "group_id": group_id, "message": _serialize_message(message)}
         await _broadcast(db, group_id, event)
         return {"deleted": True, "kept_as_proof": True, "message": _serialize_message(message, user_id)}
+    _unpin_group_message(db, message.id)
     db.delete(message)
     db.commit()
     await _broadcast(db, group_id, {"type": "group:message:deleted", "group_id": group_id, "message_id": message_id})
     return {"deleted": True, "kept_as_proof": False, "message_id": message_id}
+
+
+# ─── Épingles ─────────────────────────────────────────────────────────────────
+#
+# Qui épingle : la règle des réglages du groupe, comme WhatsApp (« Modifier
+# les infos du groupe » y gouverne aussi l'épinglage). Les administrateurs
+# toujours ; les membres si `members_can_edit_info` est activé. Le
+# téléphone lit la même règle dans `can_edit_info` (_serialize_group_for).
+# Limite et durées : celles des discussions à deux (messages.py).
+
+
+def _require_can_pin(db: Session, group_id: int, user_id: int) -> Group:
+    membership = _require_membership(db, group_id, user_id)
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if membership.role in _MANAGER_ROLES or group.members_can_edit_info:
+        return group
+    raise HTTPException(
+        status_code=403,
+        detail="Seuls les administrateurs peuvent épingler des messages dans ce groupe",
+    )
+
+
+def _active_group_pins(db: Session, group_id: int) -> List[GroupMessagePin]:
+    """Épingles en cours, la plus récente d'abord ; l'échéance (de l'épingle
+    comme du message éphémère) et la suppression en mode preuve se filtrent
+    à la lecture."""
+    now = datetime.utcnow()
+    return (
+        db.query(GroupMessagePin)
+        .join(GroupMessage, GroupMessage.id == GroupMessagePin.message_id)
+        .filter(
+            GroupMessagePin.group_id == group_id,
+            GroupMessagePin.expires_at > now,
+            or_(GroupMessage.expires_at.is_(None), GroupMessage.expires_at > now),
+            GroupMessage.deleted_at.is_(None),
+        )
+        .order_by(GroupMessagePin.pinned_at.desc(), GroupMessagePin.id.desc())
+        .all()
+    )
+
+
+def _group_pins_payload(db: Session, group_id: int) -> List[dict]:
+    """Identifiants et dates seulement — le contenu est chiffré."""
+    return [
+        {
+            "message_id": pin.message_id,
+            "pinned_by": pin.pinned_by,
+            "pinned_at": pin.pinned_at.isoformat() if pin.pinned_at else None,
+            "expires_at": pin.expires_at.isoformat() if pin.expires_at else None,
+        }
+        for pin in _active_group_pins(db, group_id)
+    ]
+
+
+def _unpin_group_message(db: Session, message_id: str) -> bool:
+    return bool(
+        db.query(GroupMessagePin)
+        .filter(GroupMessagePin.message_id == message_id)
+        .delete(synchronize_session=False)
+    )
+
+
+async def _broadcast_pins(db: Session, group_id: int) -> List[dict]:
+    """La liste entière, à tous les membres (y compris les autres appareils
+    de celui qui a agi) : chaque téléphone remplace la sienne."""
+    pins = _group_pins_payload(db, group_id)
+    await _broadcast(db, group_id, {"type": "group:message:pinned", "group_id": group_id, "pins": pins})
+    return pins
+
+
+@router.get("/{group_id}/pins")
+async def list_group_pins(
+    group_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_membership(db, group_id, current_user["user_id"])
+    return {"items": _group_pins_payload(db, group_id)}
+
+
+@router.put("/{group_id}/messages/{message_id}/pin")
+async def pin_group_message(
+    group_id: int,
+    message_id: str,
+    payload: GroupPinSet,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Épingle un message pour tout le groupe. Au-delà de trois, la plus
+    ancienne épingle cède sa place ; épingler de nouveau change la durée."""
+    if payload.duration_seconds not in PIN_DURATIONS:
+        raise HTTPException(status_code=400, detail="Durée d'épinglage non proposée")
+    user_id = current_user["user_id"]
+    _require_can_pin(db, group_id, user_id)
+    message = _get_group_message(db, group_id, message_id)
+    now = datetime.utcnow()
+    if message.deleted_at is not None or _is_expired(message, now):
+        raise HTTPException(status_code=404, detail="Message introuvable")
+
+    pin = db.query(GroupMessagePin).filter(GroupMessagePin.message_id == message.id).first()
+    if pin is None:
+        pin = GroupMessagePin(message_id=message.id, group_id=group_id)
+        db.add(pin)
+    pin.pinned_by = user_id
+    pin.pinned_at = now
+    pin.expires_at = now + timedelta(seconds=payload.duration_seconds)
+    db.flush()
+    for stale in _active_group_pins(db, group_id)[MAX_PINS:]:
+        db.delete(stale)
+    db.commit()
+    return {"items": await _broadcast_pins(db, group_id)}
+
+
+@router.delete("/{group_id}/messages/{message_id}/pin")
+async def unpin_group_message(
+    group_id: int,
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    _require_can_pin(db, group_id, user_id)
+    message = _get_group_message(db, group_id, message_id)
+    _unpin_group_message(db, message.id)
+    db.commit()
+    return {"items": await _broadcast_pins(db, group_id)}
 
 
 @router.put("/{group_id}/messages/{message_id}/reaction")

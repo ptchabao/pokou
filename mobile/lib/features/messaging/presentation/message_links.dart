@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import 'contact_card_bubble.dart' show findPhoneMatches, handlePhoneTap;
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Ce qu'un message peut contenir de « touchable ».
 enum MessageLinkKind { url, email, ussd, phone }
@@ -176,7 +177,8 @@ Future<void> _sheet(
   List<(IconData, String, Future<Object?> Function())> actions,
 ) async {
   final l = L.of(context);
-  final chosen = await showModalBottomSheet<int>(
+  final chosen = await showPokouSheet<int>(
+    scrollable: true,
     context: context,
     backgroundColor: AppColors.surface,
     showDragHandle: true,

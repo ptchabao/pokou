@@ -20,6 +20,7 @@ import 'change_number_screen.dart';
 import 'delete_account_screen.dart';
 import 'devices_screen.dart';
 import 'settings_widgets.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// REG-3 · Compte et sécurité : le code PIN du compte, la sauvegarde, le
 /// changement de numéro, les appareils, l'export des données et la
@@ -38,9 +39,8 @@ class AccountSecurityScreen extends ConsumerStatefulWidget {
 class _AccountSecurityScreenState extends ConsumerState<AccountSecurityScreen> {
   bool _exporting = false;
 
-  Future<T?> _push<T>(Widget screen) => Navigator.of(
-    context,
-  ).push<T>(MaterialPageRoute(builder: (_) => screen));
+  Future<T?> _push<T>(Widget screen) =>
+      Navigator.of(context).push<T>(MaterialPageRoute(builder: (_) => screen));
 
   Future<void> _openPin(bool enabled) async {
     if (!enabled) {
@@ -48,7 +48,8 @@ class _AccountSecurityScreenState extends ConsumerState<AccountSecurityScreen> {
       return;
     }
     final l = L.of(context);
-    final choice = await showModalBottomSheet<String>(
+    final choice = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheet) => SafeArea(

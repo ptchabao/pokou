@@ -80,7 +80,12 @@ import '../../contacts/presentation/discussions_controller.dart';
 import 'group_controller.dart';
 import 'group_settings_screen.dart';
 import '../../messaging/presentation/message_text_actions.dart';
+import '../../messaging/pins/message_pins.dart';
+import '../../messaging/pins/pinned_banner.dart';
+import '../../messaging/starred/starred_messages.dart';
+import '../../../core/storage/pokou_message_store.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Conversation de groupe — pendant de ConversationScreen. Différences
 /// assumées : pas de Mode Bouclier (il note une conversation par contact),
@@ -97,11 +102,15 @@ class GroupConversationScreen extends ConsumerStatefulWidget {
     required this.myUserId,
     required this.groupId,
     required this.groupName,
+    this.initialMessageId,
   });
 
   final int myUserId;
   final int groupId;
   final String groupName;
+
+  /// Ouvre le groupe à ce message (depuis « Messages importants »).
+  final String? initialMessageId;
 
   @override
   ConsumerState<GroupConversationScreen> createState() =>
@@ -175,6 +184,12 @@ class _GroupConversationScreenState
     });
     _inputController.addListener(_onInputChanged);
     _scrollController.addListener(_maybeLoadOlder);
+    final initial = widget.initialMessageId;
+    if (initial != null) {
+      Future<void>.delayed(const Duration(milliseconds: 700), () {
+        if (mounted) _revealMessage(initial);
+      });
+    }
     // Le bandeau « Appel en cours » doit apparaître dès qu'un membre lance un
     // appel, sans attendre une réouverture de l'écran.
     _callWatch = ref.read(wsClientProvider).events.listen((event) {
@@ -291,6 +306,82 @@ class _GroupConversationScreenState
     return null;
   }
 
+  DateTime? _holdScrollUntil;
+
+  /// Voir conversation_screen.dart::_revealMessage — même mécanique.
+  Future<void> _revealMessage(String messageId) async {
+    _holdScrollUntil = DateTime.now().add(const Duration(seconds: 3));
+    for (var attempt = 0; attempt < 3; attempt++) {
+      if (!mounted) return;
+      if (_bubbleKeys[messageId]?.currentContext != null) {
+        _scrollToMessage(messageId);
+        return;
+      }
+      final messages = ref
+          .read(groupChatControllerProvider(widget.groupId))
+          .messages;
+      final index = messages.indexWhere((m) => m.id == messageId);
+      if (index < 0 || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      _scrollController.jumpTo(
+        (position.maxScrollExtent * index / messages.length).clamp(
+          0,
+          position.maxScrollExtent,
+        ),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+    }
+  }
+
+  StarKey get _starKey => StarKey(StarScope.group, widget.groupId);
+
+  PinScope get _pinScope => PinScope.group(widget.groupId);
+
+  String _pinExcerpt(String messageId) {
+    final message = _findMessage(messageId);
+    return messageExcerpt(
+      _l,
+      content: message?.content,
+      messageType: message?.messageType,
+      locked: message?.isEncrypted ?? true,
+    );
+  }
+
+  Future<void> _togglePin(GroupMessage message) async {
+    final pins = ref.read(pinsControllerProvider(_pinScope).notifier);
+    final pinned = pins.isPinned(message.id);
+    int? seconds;
+    if (!pinned) {
+      seconds = await showPinDurationSheet(
+        context,
+        replacesOldest: pins.active.length >= maxPins,
+      );
+      if (seconds == null || !mounted) return;
+    }
+    final outcome = pinned
+        ? await pins.unpin(message.id)
+        : await pins.pin(message.id, seconds!);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(pinOutcomeMessage(_l, outcome, pinned: !pinned))),
+    );
+  }
+
+  Future<void> _openStarred() async {
+    final messageId = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => StarredMessagesScreen(
+          myUserId: widget.myUserId,
+          scope: StarScope.group,
+          conversationId: widget.groupId,
+        ),
+      ),
+    );
+    if (messageId == null || !mounted) return;
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    if (mounted) await _revealMessage(messageId);
+  }
+
   void _scrollToMessage(String messageId) {
     final ctx = _bubbleKeys[messageId]?.currentContext;
     if (ctx == null) return;
@@ -332,7 +423,8 @@ class _GroupConversationScreenState
   }
 
   Future<void> _showReactionSheet(GroupMessage message) async {
-    await showModalBottomSheet<void>(
+    await showPokouSheet<void>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -385,6 +477,70 @@ class _GroupConversationScreenState
                 context: context,
                 text: text,
                 close: () => Navigator.pop(sheetContext),
+              ),
+            // Épingler : la règle des réglages du groupe (« modifier les
+            // infos » — admins, ou tous si le groupe l'autorise), la même
+            // que le serveur applique.
+            if (!PokouMessageStore.isLocalId(message.id) &&
+                message.deletedAt == null &&
+                (ref
+                        .read(groupChatControllerProvider(widget.groupId))
+                        .group
+                        ?.canEditInfo ??
+                    false))
+              ListTile(
+                leading: Icon(
+                  ref
+                          .read(pinsControllerProvider(_pinScope).notifier)
+                          .isPinned(message.id)
+                      ? Icons.push_pin
+                      : Icons.push_pin_outlined,
+                ),
+                title: Text(
+                  ref
+                          .read(pinsControllerProvider(_pinScope).notifier)
+                          .isPinned(message.id)
+                      ? _l.msgPinUnpin
+                      : _l.msgPinAction,
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _togglePin(message);
+                },
+              ),
+            if (!PokouMessageStore.isLocalId(message.id) &&
+                message.deletedAt == null)
+              ListTile(
+                leading: Icon(
+                  ref
+                          .read(starredControllerProvider(_starKey))
+                          .contains(message.id)
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
+                ),
+                title: Text(
+                  ref
+                          .read(starredControllerProvider(_starKey))
+                          .contains(message.id)
+                      ? _l.msgStarRemove
+                      : _l.msgStarAction,
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  ref
+                      .read(starredControllerProvider(_starKey).notifier)
+                      .toggle(
+                        message.id,
+                        conversationName:
+                            ref
+                                .read(
+                                  groupChatControllerProvider(widget.groupId),
+                                )
+                                .group
+                                ?.name ??
+                            widget.groupName,
+                      );
+                },
               ),
             if (ref
                 .read(groupChatControllerProvider(widget.groupId).notifier)
@@ -840,6 +996,9 @@ class _GroupConversationScreenState
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
+      // Voir conversation_screen.dart::_holdScrollUntil.
+      final hold = _holdScrollUntil;
+      if (hold != null && DateTime.now().isBefore(hold)) return;
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 200),
@@ -1208,6 +1367,8 @@ class _GroupConversationScreenState
           ),
         );
       }
+    } else if (action == 'starred') {
+      await _openStarred();
     } else if (action == 'manage') {
       // « Gérer le groupe » peut rendre la main avec un geste qui vit ici
       // (lien d'invitation, mode preuve).
@@ -1252,7 +1413,7 @@ class _GroupConversationScreenState
 
   Future<void> _renameGroup(Group group) async {
     final controller = TextEditingController(text: group.name);
-    final newName = await showModalBottomSheet<String>(
+    final newName = await showPokouSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -1298,7 +1459,8 @@ class _GroupConversationScreenState
   }
 
   Future<void> _changeGroupPhoto() async {
-    final source = await showModalBottomSheet<ImageSource>(
+    final source = await showPokouSheet<ImageSource>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -1358,7 +1520,8 @@ class _GroupConversationScreenState
     if (code == null || !mounted) return;
 
     final link = inviteLinkFor(code);
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -1486,7 +1649,7 @@ class _GroupConversationScreenState
     }
 
     final picked = <int>{};
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showPokouSheet<bool>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -1630,6 +1793,11 @@ class _GroupConversationScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(groupChatControllerProvider(widget.groupId));
     final group = state.group;
+    final starredIds = ref.watch(starredControllerProvider(_starKey));
+    ref.watch(pinsControllerProvider(_pinScope));
+    final activePins = ref
+        .read(pinsControllerProvider(_pinScope).notifier)
+        .active;
     // Pendant que le clavier est là — c'est le seul moment où sa hauteur
     // est lisible, et le panneau en aura besoin une fois qu'il aura
     // disparu.
@@ -1765,6 +1933,11 @@ class _GroupConversationScreenState
                 onJoin: _startingCall
                     ? null
                     : () => _startOrJoinCall(withVideo: false),
+              ),
+              PinnedMessagesBanner(
+                pins: activePins,
+                excerptFor: _pinExcerpt,
+                onOpen: _revealMessage,
               ),
               Expanded(
                 child: !state.initialCacheLoaded
@@ -1922,6 +2095,7 @@ class _GroupConversationScreenState
                                             ).notifier,
                                           )
                                           .retry(message.id),
+                                      starred: starredIds.contains(message.id),
                                       onLongPress: () =>
                                           _showReactionSheet(message),
                                       onReactionPick: (emoji) =>
@@ -2326,9 +2500,13 @@ class _GroupBubble extends StatefulWidget {
     this.onTapReply,
     this.isPending = false,
     this.isFailed = false,
+    this.starred = false,
   });
 
   final GroupMessage message;
+
+  /// Marqué « important » sur ce téléphone.
+  final bool starred;
 
   /// Le nom à afficher au-dessus de la bulle — résolu par l'écran, qui
   /// connaît le carnet (voir `_authorName`).
@@ -2553,6 +2731,8 @@ class _GroupBubbleState extends State<_GroupBubble> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (widget.starred)
+                    StarredMark(color: AppColors.chatTimestamp),
                   Text(
                     DateFormat.Hm().format(message.createdAt),
                     style: TextStyle(

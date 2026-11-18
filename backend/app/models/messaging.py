@@ -257,3 +257,29 @@ class DirectProofMode(Base):
     since = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (UniqueConstraint("user_low_id", "user_high_id", name="uq_direct_proof_pair"),)
+
+
+class DirectMessagePin(Base):
+    """Message épinglé en haut d'une discussion à deux, visible des deux côtés.
+
+    Le serveur ne garde que l'IDENTIFIANT du message : le texte est chiffré
+    de bout en bout, chaque téléphone affiche l'extrait qu'il a lui-même
+    déchiffré. La paire est rangée `user_low_id` < `user_high_id`, comme
+    DirectProofMode : l'épingle vaut pour la conversation, pas pour un côté.
+
+    Une épingle échue n'est pas purgée : elle est filtrée à la lecture
+    (`expires_at`), comme les messages éphémères.
+    """
+    __tablename__ = "direct_message_pins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_low_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_high_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    message_id = Column(
+        String(36), ForeignKey("direct_messages.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    pinned_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    pinned_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = Column(DateTime, nullable=False, index=True)
+
+    __table_args__ = (UniqueConstraint("message_id", name="uq_direct_message_pin"),)

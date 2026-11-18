@@ -38,6 +38,7 @@ from app.models.messaging import (  # noqa: F401
     BroadcastListMember,
     BroadcastMessage,
     DirectProofMode,
+    DirectMessagePin,
 )
 from app.models.groups import (  # noqa: F401
     Group,
@@ -53,6 +54,7 @@ from app.models.groups import (  # noqa: F401
     GroupMessage,
     GroupPollVote,
     GroupSenderKeyDistribution,
+    GroupMessagePin,
 )
 from app.models.communities import (  # noqa: F401
     Community,

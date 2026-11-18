@@ -11,6 +11,7 @@ import '../../../core/push/push_service.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/theme/app_colors.dart';
 import 'settings_widgets.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Les services dont le push se coupe module par module. Réglage du COMPTE
 /// et non de l'appareil : c'est le serveur qui n'envoie pas (inbox.py), ce
@@ -61,9 +62,9 @@ class NotificationsSettingsScreen extends ConsumerWidget {
             .put('/notifications/preferences', body: {service: enabled});
       } catch (_) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l.privacySaveFailed)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l.privacySaveFailed)));
         }
       }
       ref.invalidate(servicePushPreferencesProvider);
@@ -214,7 +215,8 @@ class NotificationsSettingsScreen extends ConsumerWidget {
   /// plutôt que de proposer un choix qui n'existe pas.
   Future<void> _chooseRingtone(BuildContext context) {
     final l = L.of(context);
-    return showModalBottomSheet<void>(
+    return showPokouSheet<void>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheet) => SafeArea(

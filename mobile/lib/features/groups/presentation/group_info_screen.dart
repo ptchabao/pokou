@@ -7,6 +7,7 @@ import '../../../core/widgets/identity_avatar.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../data/group_model.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Discussions · 8 — Infos du groupe.
 ///
@@ -164,6 +165,11 @@ class GroupInfoScreen extends ConsumerWidget {
                     title: Text(l.proofExport),
                     onTap: () => act('proof:export'),
                   ),
+                ListTile(
+                  leading: const Icon(Icons.star_outline_rounded),
+                  title: Text(l.msgStarTitle),
+                  onTap: () => act('starred'),
+                ),
                 if (group.canManage)
                   ListTile(
                     leading: const Icon(Icons.link),
@@ -316,7 +322,8 @@ class GroupInfoScreen extends ConsumerWidget {
   Future<void> _memberMenu(BuildContext context, GroupMember member) async {
     final l = L.of(context);
     final navigator = Navigator.of(context);
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(

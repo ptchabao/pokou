@@ -12,6 +12,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'settings_widgets.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// La place totale et libre du téléphone (canal natif, Android). `null`
 /// ailleurs — iOS, web, tests : la jauge montre alors Pokou seul.
@@ -106,7 +107,7 @@ class _StorageSettingsScreenState extends ConsumerState<StorageSettingsScreen> {
   /// après confirmation : ils se retéléchargeront si on les rouvre.
   Future<void> _free(String label, Set<int> ids, int bytes) async {
     final l = L.of(context);
-    final ok = await showModalBottomSheet<bool>(
+    final ok = await showPokouSheet<bool>(
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheet) => SafeArea(
@@ -284,7 +285,7 @@ extension on _StorageSettingsScreenState {
     required bool wifi,
     required AutoDownload current,
   }) async {
-    final picked = await showModalBottomSheet<AutoDownload>(
+    final picked = await showPokouSheet<AutoDownload>(
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(

@@ -7,6 +7,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../data/direct_message_model.dart';
 import 'messaging_controller.dart' show messagingRepositoryProvider;
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Rendu d'un message de type POLL : question, options avec barre de
 /// progression proportionnelle au nombre de votes, mise en évidence de mon
@@ -97,7 +98,7 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
       return widget.voterName?.call(userId) ?? l.pollVoterUnknown;
     }
 
-    await showModalBottomSheet<void>(
+    await showPokouSheet<void>(
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,

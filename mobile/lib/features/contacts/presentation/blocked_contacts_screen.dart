@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/conversations_repository.dart';
 import 'contacts_controller.dart';
 import 'discussions_controller.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Les personnes que j'ai bloquées (GET /conversations/blocked).
 final blockedContactsProvider =
@@ -150,7 +151,7 @@ class BlockedContactsScreen extends ConsumerWidget {
         if (c.contactUserId != null && !already.contains(c.contactUserId)) c,
     ];
     if (!context.mounted) return;
-    final chosen = await showModalBottomSheet<int>(
+    final chosen = await showPokouSheet<int>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -195,7 +196,9 @@ class BlockedContactsScreen extends ConsumerWidget {
     } catch (exc) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(exc is ApiException ? exc.message : l.chatsActionFailed),
+          content: Text(
+            exc is ApiException ? exc.message : l.chatsActionFailed,
+          ),
         ),
       );
     }
@@ -226,7 +229,9 @@ class _BlockedCard extends ConsumerWidget {
     } catch (exc) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(exc is ApiException ? exc.message : l.chatsActionFailed),
+          content: Text(
+            exc is ApiException ? exc.message : l.chatsActionFailed,
+          ),
         ),
       );
     }

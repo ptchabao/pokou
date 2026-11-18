@@ -10,6 +10,7 @@ import '../../groups/presentation/group_controller.dart';
 import 'community_controller.dart';
 import 'community_detail_screen.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Créer une communauté.
 ///
@@ -37,7 +38,7 @@ Future<void> showCreateCommunitySheet(
 }) async {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
-  final confirmed = await showModalBottomSheet<bool>(
+  final confirmed = await showPokouSheet<bool>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
@@ -68,7 +69,7 @@ Future<void> showCreateCommunitySheet(
           ),
           const SizedBox(height: 16),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: nameController,
             autofocus: true,
             maxLength: 255,
@@ -79,7 +80,7 @@ Future<void> showCreateCommunitySheet(
           ),
           const SizedBox(height: 8),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: descriptionController,
             maxLength: 2000,
             maxLines: 2,

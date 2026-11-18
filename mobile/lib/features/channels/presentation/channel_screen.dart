@@ -28,6 +28,7 @@ import 'channel_controller.dart';
 import 'channel_editor_screen.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Écran d'une chaîne — le fil de ses publications, façon chaînes WhatsApp :
 /// diffusion à SENS UNIQUE. Les abonnés lisent et réagissent par emoji, ils
@@ -36,11 +37,7 @@ import '../../../core/widgets/pokou_context_menu.dart';
 /// Lisible SANS être abonné : on juge une chaîne sur son contenu avant de la
 /// suivre (l'API l'autorise explicitement, voir channels.py::list_posts).
 class ChannelScreen extends ConsumerStatefulWidget {
-  const ChannelScreen({
-    super.key,
-    required this.channel,
-    this.targetPostId,
-  });
+  const ChannelScreen({super.key, required this.channel, this.targetPostId});
 
   final PokouChannel channel;
   final int? targetPostId;
@@ -213,7 +210,7 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> {
   }
 
   Future<void> _publish() async {
-    final result = await showModalBottomSheet<_DraftPost>(
+    final result = await showPokouSheet<_DraftPost>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -250,7 +247,7 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(L.of(context).channelEditPost),
         content: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: controller,
           maxLines: 5,
           autofocus: true,
@@ -337,14 +334,18 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> {
           .regenerateInviteLink(_channel.id);
       if (!mounted) return;
 
-      final action = await showModalBottomSheet<String>(
+      final action = await showPokouSheet<String>(
+        scrollable: true,
         context: context,
         builder: (sheetContext) => SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.share_outlined, color: AppColors.accentPrimaryDark),
+                leading: Icon(
+                  Icons.share_outlined,
+                  color: AppColors.accentPrimaryDark,
+                ),
                 title: Text(L.of(context).actionShare),
                 onTap: () => Navigator.pop(sheetContext, 'share'),
               ),
@@ -650,7 +651,9 @@ class _PostCardState extends State<_PostCard> {
   void _sharePost() {
     final post = widget.post;
     final inviteCode = widget.channelInviteCode;
-    final url = inviteCode != null ? channelPostLinkFor(inviteCode, post.id) : null;
+    final url = inviteCode != null
+        ? channelPostLinkFor(inviteCode, post.id)
+        : null;
     final buffer = StringBuffer();
     if (widget.channelName != null) {
       buffer.writeln('${widget.channelName} sur Pokou Messenger :');
@@ -1012,7 +1015,7 @@ class _PostComposerState extends ConsumerState<_PostComposer> {
               ),
             ),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: _controller,
             maxLines: 5,
             minLines: 2,
@@ -1025,7 +1028,7 @@ class _PostComposerState extends ConsumerState<_PostComposer> {
           const SizedBox(height: 10),
           if (_pollMode) ...[
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: _pollQuestion,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
@@ -1041,7 +1044,7 @@ class _PostComposerState extends ConsumerState<_PostComposer> {
                   children: [
                     Expanded(
                       child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                        contextMenuBuilder: pokouContextMenuBuilder,
                         controller: _pollOptions[index],
                         onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(

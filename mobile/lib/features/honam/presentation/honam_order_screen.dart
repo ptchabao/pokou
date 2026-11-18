@@ -22,6 +22,7 @@ import 'honam_pay_screen.dart';
 import 'honam_send_screen.dart' show currentPosition, honamPharmacyLine;
 import 'honam_tracking.dart';
 import 'honam_ui.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Le détail d'une commande, côté patient (maquettes Honam patient 2 à 7 et
 /// « Suivi sans carte »). Un seul écran qui prend la forme de l'étape : en
@@ -74,9 +75,9 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
       current = accepted;
     }
     if (!mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => HonamPayScreen(order: current)),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => HonamPayScreen(order: current)));
   }
 
   Future<void> _resend(HonamOrder order, Pharmacy pharmacy) async {
@@ -96,7 +97,7 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
     ),
   );
 
-  void _openTimeline(HonamOrder order) => showModalBottomSheet<void>(
+  void _openTimeline(HonamOrder order) => showPokouSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
@@ -442,7 +443,8 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
             busy: _busy,
             onPressed: _missingChoice == null
                 ? null
-                : () => _run('missing-choice', body: {'choice': _missingChoice}),
+                : () =>
+                      _run('missing-choice', body: {'choice': _missingChoice}),
           ),
         ],
       ),
@@ -503,11 +505,12 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
   // ── Maquette Honam patient 7 : ordonnance refusée ─────────────────────
 
   Widget _refusedPage(L l, HonamOrder order, String pharmacy) {
-    final others = (ref.watch(honamOtherPharmaciesProvider).valueOrNull ??
-            const <Pharmacy>[])
-        .where((p) => p.id != order.pharmacy?.id)
-        .take(5)
-        .toList();
+    final others =
+        (ref.watch(honamOtherPharmaciesProvider).valueOrNull ??
+                const <Pharmacy>[])
+            .where((p) => p.id != order.pharmacy?.id)
+            .take(5)
+            .toList();
     final chosen =
         others.where((p) => p.id == _otherPharmacyId).firstOrNull ??
         others.firstOrNull;
@@ -542,7 +545,10 @@ class _HonamOrderScreenState extends ConsumerState<HonamOrderScreen> {
               children: [
                 Text(
                   l.honamPReason,
-                  style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Container(
@@ -610,7 +616,9 @@ class _PrescriptionThumb extends ConsumerWidget {
     const fallback = HonamThumb(child: Icon(Icons.description_outlined));
     if (id == null) return fallback;
     return FutureBuilder<File>(
-      future: ref.read(mediaRepositoryProvider).resolveLocalFile(id, largeur: 96),
+      future: ref
+          .read(mediaRepositoryProvider)
+          .resolveLocalFile(id, largeur: 96),
       builder: (context, snapshot) => snapshot.hasData
           ? ClipRRect(
               borderRadius: BorderRadius.circular(10),
@@ -715,9 +723,16 @@ class _Totals extends StatelessWidget {
       child: Column(
         children: [
           KoryLine(l.honamMedicines, formatFcfa(order.medicinesTotal ?? 0)),
-          KoryLine(l.honamPDeliveryByHonam, formatFcfa(order.deliveryPrice ?? 0)),
+          KoryLine(
+            l.honamPDeliveryByHonam,
+            formatFcfa(order.deliveryPrice ?? 0),
+          ),
           Divider(height: 16, color: AppColors.border),
-          KoryLine(l.honamPTotalToPay, formatFcfa(order.total ?? 0), strong: true),
+          KoryLine(
+            l.honamPTotalToPay,
+            formatFcfa(order.total ?? 0),
+            strong: true,
+          ),
         ],
       ),
     );
@@ -751,7 +766,11 @@ class _PaymentSteps extends StatelessWidget {
         paid ? l.honamUiHeadPaid : l.honamPOnItsWallet,
         paid,
       ),
-      (l.honamPStepPreparing, l.honamPStepPreparingBody, order.status == 'READY'),
+      (
+        l.honamPStepPreparing,
+        l.honamPStepPreparingBody,
+        order.status == 'READY',
+      ),
     ];
     return KoryCard(
       child: Column(
@@ -819,7 +838,6 @@ TextStyle get _hintStyle =>
     TextStyle(fontSize: 13, height: 1.35, color: AppColors.textSecondary);
 
 const _figures = [FontFeature.tabularFigures()];
-
 
 /// « Suivi de livraison » : la frise des étapes, la plus récente en haut.
 class _TimelineSheet extends StatelessWidget {

@@ -15330,4 +15330,92 @@ class LEs extends L {
 
   @override
   String get callsYouAreIn => 'Estás en esta llamada';
+
+  @override
+  String get tagBusiness => 'Negocios';
+
+  @override
+  String get tagSupplier => 'Proveedor';
+
+  @override
+  String get tagClient => 'Cliente';
+
+  @override
+  String get tagBoss => 'Jefe';
+
+  @override
+  String get tagFriend => 'Amigo';
+
+  @override
+  String get msgPinAction => 'Fijar';
+
+  @override
+  String get msgPinUnpin => 'Dejar de fijar';
+
+  @override
+  String get msgPinDurationTitle =>
+      '¿Durante cuánto tiempo fijar este mensaje?';
+
+  @override
+  String get msgPinDurationHint =>
+      'Todos en el chat lo verán arriba. Puedes dejar de fijarlo en cualquier momento.';
+
+  @override
+  String get msgPin24h => '24 horas';
+
+  @override
+  String get msgPin7d => '7 días';
+
+  @override
+  String get msgPin30d => '30 días';
+
+  @override
+  String get msgPinReplaceNote =>
+      'Ya hay tres mensajes fijados: se reemplazará el más antiguo.';
+
+  @override
+  String get msgPinDone => 'Mensaje fijado';
+
+  @override
+  String get msgPinRemoved => 'Mensaje desfijado';
+
+  @override
+  String get msgPinFailed =>
+      'No se pudo cambiar el mensaje fijado. Comprueba tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get msgPinForbidden =>
+      'En este grupo, solo los administradores pueden fijar mensajes.';
+
+  @override
+  String get msgPinBannerLabel => 'Mensaje fijado';
+
+  @override
+  String msgPinCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get msgStarAction => 'Destacar';
+
+  @override
+  String get msgStarRemove => 'Quitar de destacados';
+
+  @override
+  String get msgStarTitle => 'Mensajes destacados';
+
+  @override
+  String get msgStarEmpty =>
+      'Aún no hay mensajes destacados. Mantén pulsado un mensaje y elige «Destacar» para encontrarlo aquí.';
+
+  @override
+  String get msgStarOnlyHere => 'Solo visible en este teléfono.';
+
+  @override
+  String get msgStarA11y => 'Destacado';
+
+  @override
+  String msgStarFrom(String author, String conversation) {
+    return '$author · $conversation';
+  }
 }

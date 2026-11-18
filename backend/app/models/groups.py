@@ -400,3 +400,23 @@ class GroupJoinRequest(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     user = relationship("User", foreign_keys=[user_id])
+
+
+class GroupMessagePin(Base):
+    """Message épinglé en haut d'un groupe, visible de tous les membres.
+
+    Comme DirectMessagePin : l'identifiant seul, jamais le contenu (chiffré
+    de bout en bout), et l'échéance filtrée à la lecture.
+    """
+    __tablename__ = "group_message_pins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"), nullable=False, index=True)
+    message_id = Column(
+        String(36), ForeignKey("group_messages.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    pinned_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    pinned_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = Column(DateTime, nullable=False, index=True)
+
+    __table_args__ = (UniqueConstraint("message_id", name="uq_group_message_pin"),)

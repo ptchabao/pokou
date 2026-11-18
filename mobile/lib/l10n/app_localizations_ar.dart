@@ -15258,4 +15258,91 @@ class LAr extends L {
 
   @override
   String get callsYouAreIn => 'أنت في هذه المكالمة';
+
+  @override
+  String get tagBusiness => 'أعمال';
+
+  @override
+  String get tagSupplier => 'مورّد';
+
+  @override
+  String get tagClient => 'عميل';
+
+  @override
+  String get tagBoss => 'المدير';
+
+  @override
+  String get tagFriend => 'صديق';
+
+  @override
+  String get msgPinAction => 'تثبيت';
+
+  @override
+  String get msgPinUnpin => 'إلغاء التثبيت';
+
+  @override
+  String get msgPinDurationTitle => 'ما مدة تثبيت هذه الرسالة؟';
+
+  @override
+  String get msgPinDurationHint =>
+      'سيراها الجميع في أعلى المحادثة. يمكنك إلغاء التثبيت في أي وقت.';
+
+  @override
+  String get msgPin24h => '24 ساعة';
+
+  @override
+  String get msgPin7d => '7 أيام';
+
+  @override
+  String get msgPin30d => '30 يومًا';
+
+  @override
+  String get msgPinReplaceNote =>
+      'هناك ثلاث رسائل مثبتة بالفعل: سيتم استبدال أقدمها.';
+
+  @override
+  String get msgPinDone => 'تم تثبيت الرسالة';
+
+  @override
+  String get msgPinRemoved => 'تم إلغاء تثبيت الرسالة';
+
+  @override
+  String get msgPinFailed =>
+      'تعذّر تعديل التثبيت. تحقق من اتصالك وأعد المحاولة.';
+
+  @override
+  String get msgPinForbidden =>
+      'في هذه المجموعة، يمكن للمشرفين فقط تثبيت الرسائل.';
+
+  @override
+  String get msgPinBannerLabel => 'رسالة مثبتة';
+
+  @override
+  String msgPinCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get msgStarAction => 'تمييز بنجمة';
+
+  @override
+  String get msgStarRemove => 'إزالة النجمة';
+
+  @override
+  String get msgStarTitle => 'الرسائل المميزة بنجمة';
+
+  @override
+  String get msgStarEmpty =>
+      'لا توجد رسائل مميزة بنجمة بعد. اضغط مطولًا على رسالة واختر «تمييز بنجمة» لتجدها هنا.';
+
+  @override
+  String get msgStarOnlyHere => 'مرئية على هذا الهاتف فقط.';
+
+  @override
+  String get msgStarA11y => 'مميز بنجمة';
+
+  @override
+  String msgStarFrom(String author, String conversation) {
+    return '$author · $conversation';
+  }
 }

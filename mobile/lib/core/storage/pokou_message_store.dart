@@ -89,13 +89,14 @@ class PokouMessageStore {
   Future<Database> _openDatabase(String path, String password) => openDatabase(
     path,
     password: password,
-    version: 4,
+    version: 5,
     onCreate: (db, version) => createSchema(db),
     // Existing databases are migrated rather than silently recreated.
     onUpgrade: (db, oldVersion, newVersion) async {
       if (oldVersion < 2) await _createConversationsTable(db);
       if (oldVersion < 3) await _createPendingActionsTable(db);
       if (oldVersion < 4) await _createSyncTables(db);
+      if (oldVersion < 5) await _createStarredTable(db);
     },
   );
 
@@ -193,6 +194,141 @@ class PokouMessageStore {
     await _createConversationsTable(db);
     await _createPendingActionsTable(db);
     await _createSyncTables(db);
+    await _createStarredTable(db);
+  }
+
+  /// Messages marqués « importants » (l'étoile de WhatsApp).
+  ///
+  /// ── Pourquoi sur le téléphone, et pas sur le serveur ────────────────
+  ///
+  /// C'est une préférence PERSONNELLE : personne d'autre ne la voit, et le
+  /// serveur n'en a besoin pour rien. La lui confier ajouterait une trace
+  /// de plus de ce qui compte pour quelqu'un, dans une messagerie chiffrée
+  /// de bout en bout dont le serveur ne doit savoir que le strict
+  /// nécessaire. Et le texte affiché dans « Messages importants » vient de
+  /// toute façon de ce cache-ci, le seul endroit où il existe en clair.
+  ///
+  /// Le nom de la discussion est retenu au moment du marquage : la liste
+  /// des importants se lit sans aller chercher le carnet ni les groupes.
+  static Future<void> _createStarredTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS starred_messages (
+        message_id TEXT PRIMARY KEY,
+        scope TEXT NOT NULL,
+        conversation_id INTEGER NOT NULL,
+        conversation_name TEXT NOT NULL,
+        starred_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_starred_conversation '
+      'ON starred_messages(scope, conversation_id)',
+    );
+  }
+
+  // ── Messages importants ──────────────────────────────────────────────
+
+  /// Marque (ou démarque) un message comme important.
+  Future<void> setStarred({
+    required String messageId,
+    required StarScope scope,
+    required int conversationId,
+    required String conversationName,
+    required bool starred,
+  }) async {
+    final db = await _database;
+    if (!starred) {
+      await db.delete(
+        'starred_messages',
+        where: 'message_id = ?',
+        whereArgs: [messageId],
+      );
+      return;
+    }
+    await db.insert('starred_messages', {
+      'message_id': messageId,
+      'scope': scope.name,
+      'conversation_id': conversationId,
+      'conversation_name': conversationName,
+      'starred_at': DateTime.now().toUtc().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  /// Les identifiants marqués importants dans une discussion.
+  Future<Set<String>> starredIds(StarScope scope, int conversationId) async {
+    final db = await _database;
+    final rows = await db.query(
+      'starred_messages',
+      columns: ['message_id'],
+      where: 'scope = ? AND conversation_id = ?',
+      whereArgs: [scope.name, conversationId],
+    );
+    return {for (final row in rows) row['message_id'] as String};
+  }
+
+  /// Les messages importants, le plus récemment marqué d'abord, avec le
+  /// message tel que ce téléphone l'a déchiffré.
+  ///
+  /// Un message qui n'est plus dans le cache (supprimé pour tous, éphémère
+  /// échu) ou supprimé en mode preuve n'y figure plus : il n'y a plus rien
+  /// d'important à relire.
+  Future<List<StarredEntry>> starredMessages({
+    StarScope? scope,
+    int? conversationId,
+  }) async {
+    final db = await _database;
+    final where = <String>[];
+    final args = <Object>[];
+    if (scope != null) {
+      where.add('s.scope = ?');
+      args.add(scope.name);
+    }
+    if (conversationId != null) {
+      where.add('s.conversation_id = ?');
+      args.add(conversationId);
+    }
+    final rows = await db.rawQuery('''
+      SELECT s.message_id, s.scope, s.conversation_id, s.conversation_name,
+             s.starred_at, d.payload AS direct_payload,
+             g.payload AS group_payload
+      FROM starred_messages s
+      LEFT JOIN direct_messages d
+        ON s.scope = 'direct' AND d.id = s.message_id
+      LEFT JOIN group_messages g
+        ON s.scope = 'group' AND g.id = s.message_id
+      ${where.isEmpty ? '' : 'WHERE ${where.join(' AND ')}'}
+      ORDER BY s.starred_at DESC
+    ''', args);
+    final entries = <StarredEntry>[];
+    for (final row in rows) {
+      final directPayload = row['direct_payload'] as String?;
+      final groupPayload = row['group_payload'] as String?;
+      final direct = directPayload == null
+          ? null
+          : DirectMessage.fromJson(
+              jsonDecode(directPayload) as Map<String, dynamic>,
+              fromCache: true,
+            );
+      final group = groupPayload == null
+          ? null
+          : GroupMessage.fromJson(
+              jsonDecode(groupPayload) as Map<String, dynamic>,
+            );
+      if (direct == null && group == null) continue;
+      if (direct?.deletedAt != null || group?.deletedAt != null) continue;
+      entries.add(
+        StarredEntry(
+          messageId: row['message_id'] as String,
+          scope: StarScope.values.byName(row['scope'] as String),
+          conversationId: row['conversation_id'] as int,
+          conversationName: row['conversation_name'] as String,
+          starredAt: DateTime.parse(row['starred_at'] as String),
+          direct: direct,
+          group: group,
+        ),
+      );
+    }
+    return entries;
   }
 
   /// La liste d'accueil, telle que le serveur l'a renvoyée la dernière fois.
@@ -1356,6 +1492,7 @@ class PokouMessageStore {
     await db.delete('sync_state');
     await db.delete('sync_inbox');
     await db.delete('sync_outbox');
+    await db.delete('starred_messages');
 
     if (_injectedDb != null) return;
 
@@ -1545,4 +1682,30 @@ extension PendingActionsStore on PokouMessageStore {
       whereArgs: [targetId],
     );
   }
+}
+
+/// Où vit un message marqué important : discussion à deux ou groupe.
+enum StarScope { direct, group }
+
+/// Un message important, avec sa version déchiffrée du cache.
+class StarredEntry {
+  const StarredEntry({
+    required this.messageId,
+    required this.scope,
+    required this.conversationId,
+    required this.conversationName,
+    required this.starredAt,
+    this.direct,
+    this.group,
+  });
+
+  final String messageId;
+  final StarScope scope;
+
+  /// L'autre personne (discussion à deux) ou le groupe.
+  final int conversationId;
+  final String conversationName;
+  final DateTime starredAt;
+  final DirectMessage? direct;
+  final GroupMessage? group;
 }

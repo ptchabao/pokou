@@ -75,7 +75,7 @@ class _AddContactScreenState extends ConsumerState<AddContactScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _nameController,
                   decoration: InputDecoration(
                     hintText: L.of(context).addContactName,
@@ -83,7 +83,7 @@ class _AddContactScreenState extends ConsumerState<AddContactScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(

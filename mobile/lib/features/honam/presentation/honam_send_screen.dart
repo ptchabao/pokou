@@ -16,6 +16,7 @@ import '../data/honam_models.dart';
 import 'honam_controller.dart';
 import 'honam_order_screen.dart';
 import 'honam_ui.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// La position, demandée au moment où elle sert : trier les officines et
 /// guider le coursier. Refusée, l'annuaire reste dans l'ordre alphabétique.
@@ -139,7 +140,8 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
 
   Future<void> _choosePhoto() async {
     final l = L.of(context);
-    final source = await showModalBottomSheet<ImageSource>(
+    final source = await showPokouSheet<ImageSource>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -165,13 +167,12 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
   }
 
   Future<void> _editAddress() async {
-    final result = await showModalBottomSheet<(String, String)>(
+    final result = await showPokouSheet<(String, String)>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
-      builder: (_) =>
-          _AddressSheet(address: _address, landmark: _landmark),
+      builder: (_) => _AddressSheet(address: _address, landmark: _landmark),
     );
     if (result != null) {
       setState(() {

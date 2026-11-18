@@ -18,6 +18,7 @@ import 'kory_pot_screen.dart';
 import 'kory_tontine_screens.dart';
 import 'kory_ui.dart';
 import 'kory_wallet.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Ouvre la création, puis la collecte créée. `groupId` la rattache au
 /// groupe d'où l'on vient (NAV-03).
@@ -145,7 +146,7 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
   Future<void> _pickGroup() async {
     final l = L.of(context);
     final groups = ref.read(myGroupsProvider).valueOrNull ?? const <Group>[];
-    final picked = await showModalBottomSheet<(Group?,)>(
+    final picked = await showPokouSheet<(Group?,)>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,

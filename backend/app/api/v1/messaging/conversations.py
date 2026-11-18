@@ -916,6 +916,9 @@ async def list_conversations(
             "is_bot": bool(contact.contact_user.is_bot) if contact.contact_user else False,
             "is_pinned": bool(contact.is_pinned),
             "is_favorite": bool(contact.is_favorite),
+            # L'étiquette posée par MOI sur ce contact (Mode Bouclier) : la
+            # liste l'affiche, sans quoi « Étiqueter » semblait sans effet.
+            "priority_tag": contact.priority_tag,
             "is_muted": _is_muted(contact.muted_until),
             "muted_until": contact.muted_until.isoformat() if contact.muted_until else None,
             "is_archived": bool(contact.is_archived),

@@ -11,6 +11,7 @@ import 'kory_screen.dart';
 import 'kory_ui.dart';
 import 'kory_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Un participant en attente d'ajout : quelqu'un de Pokou (par son compte)
 /// ou un numéro, qui recevra un SMS d'invitation.
@@ -91,7 +92,7 @@ class _KoryParticipantsScreenState
         (ref.read(contactsProvider).valueOrNull ?? const <PokouContact>[])
             .where((c) => c.contactUserId != null)
             .toList();
-    final picked = await showModalBottomSheet<PokouContact>(
+    final picked = await showPokouSheet<PokouContact>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,

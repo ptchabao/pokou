@@ -18,6 +18,7 @@ import 'marketplace_controller.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Le formulaire d'annonce — création et modification.
 ///
@@ -163,7 +164,8 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
   }
 
   Future<ImageSource?> _askSource() {
-    return showModalBottomSheet<ImageSource>(
+    return showPokouSheet<ImageSource>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
+import 'pokou_sheet.dart';
 
 /// Une photo de la visionneuse.
 class ViewerImage {
@@ -380,7 +381,7 @@ class _ImageViewerState extends State<ImageViewer>
   /// La barre rapide de réactions, la même que sur une bulle.
   Future<void> _pickReaction(ValueChanged<String> onReact) async {
     const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-    final emoji = await showModalBottomSheet<String>(
+    final emoji = await showPokouSheet<String>(
       context: context,
       builder: (sheetContext) => SafeArea(
         child: Padding(

@@ -10,7 +10,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, MarketplaceProduct, DirectMessage, DirectProofMode, GroupMember, MediaAsset, MessageReaction, MessageStatus, MessageType, Poll, PollOption, User
+from app.models import Contact, MarketplaceProduct, DirectMessage, DirectMessagePin, DirectProofMode, GroupMember, MediaAsset, MessageReaction, MessageStatus, MessageType, Poll, PollOption, User
 from app.services.media import sticker_service
 from app.services.auth.otp_service import OTPInvalidError, normalize_phone
 from app.utils.editing import MESSAGE_EDIT_WINDOW, MESSAGE_EDIT_WINDOW_MINUTES
@@ -86,6 +86,19 @@ class MessageEdit(BaseModel):
 
 class ReactionSet(BaseModel):
     emoji: str = Field(..., min_length=1, max_length=16)
+
+
+#: Durées d'épinglage proposées par WhatsApp : 24 h, 7 jours, 30 jours.
+PIN_DURATIONS = (86400, 604800, 2592000)
+
+#: Au plus trois épingles par conversation. Au-delà, la plus ANCIENNE cède
+#: sa place (comportement de WhatsApp) plutôt qu'un refus : celui qui épingle
+#: veut voir SON message en haut, pas devoir choisir quoi désépingler.
+MAX_PINS = 3
+
+
+class PinSet(BaseModel):
+    duration_seconds: int = 604800
 
 
 class DisappearingUpdate(BaseModel):
@@ -941,7 +954,138 @@ async def get_conversation(
         "total": total,
         "skip": skip,
         "limit": limit,
+        # Épingles en cours, avec la première page seulement : le bandeau
+        # s'affiche à l'ouverture, les pages plus anciennes n'en ont pas
+        # besoin.
+        "pins": _pins_payload(db, user_id, contact_user_id) if skip == 0 else None,
     }
+
+
+# ─── Épingles ─────────────────────────────────────────────────────────────────
+
+def _pair_ids(user_a: int, user_b: int) -> tuple[int, int]:
+    return (user_a, user_b) if user_a < user_b else (user_b, user_a)
+
+
+def _active_pins(db: Session, user_a: int, user_b: int) -> List[DirectMessagePin]:
+    """Épingles en cours d'une conversation, la plus récente d'abord.
+
+    L'échéance se filtre ici, à la lecture, sans purge : même raisonnement
+    que `_not_expired`. Un message éphémère échu ou supprimé (mode preuve)
+    perd aussi son épingle à la lecture."""
+    low, high = _pair_ids(user_a, user_b)
+    now = datetime.utcnow()
+    return (
+        db.query(DirectMessagePin)
+        .join(DirectMessage, DirectMessage.id == DirectMessagePin.message_id)
+        .filter(
+            DirectMessagePin.user_low_id == low,
+            DirectMessagePin.user_high_id == high,
+            DirectMessagePin.expires_at > now,
+            or_(DirectMessage.expires_at.is_(None), DirectMessage.expires_at > now),
+            DirectMessage.deleted_at.is_(None),
+        )
+        .order_by(DirectMessagePin.pinned_at.desc(), DirectMessagePin.id.desc())
+        .all()
+    )
+
+
+def _serialize_pin(pin: DirectMessagePin) -> dict:
+    """Identifiants et dates seulement : jamais de contenu, le message est
+    chiffré et chaque téléphone en affiche son propre extrait."""
+    return {
+        "message_id": pin.message_id,
+        "pinned_by": pin.pinned_by,
+        "pinned_at": pin.pinned_at.isoformat() if pin.pinned_at else None,
+        "expires_at": pin.expires_at.isoformat() if pin.expires_at else None,
+    }
+
+
+def _pins_payload(db: Session, user_a: int, user_b: int) -> List[dict]:
+    return [_serialize_pin(pin) for pin in _active_pins(db, user_a, user_b)]
+
+
+def _unpin_message(db: Session, message_id: str) -> bool:
+    """Retire l'épingle d'un message (suppression pour tous). Explicite et
+    non laissé au seul ON DELETE CASCADE : SQLite ne l'applique pas sans
+    PRAGMA, et le mode preuve ne supprime pas la ligne du message."""
+    return bool(
+        db.query(DirectMessagePin)
+        .filter(DirectMessagePin.message_id == message_id)
+        .delete(synchronize_session=False)
+    )
+
+
+async def _push_pins(db: Session, actor_id: int, other_id: int) -> List[dict]:
+    """Annonce la nouvelle liste d'épingles aux deux parties : l'autre, et
+    les autres appareils de celui qui a agi. La liste ENTIÈRE plutôt qu'un
+    delta : le téléphone remplace la sienne, sans rien recalculer."""
+    pins = _pins_payload(db, actor_id, other_id)
+    for receiver, peer in ((other_id, actor_id), (actor_id, other_id)):
+        await manager.send_to_user(
+            receiver, {"type": "message:pinned", "peer_id": peer, "pins": pins}
+        )
+    return pins
+
+
+@router.get("/{contact_user_id}/pins")
+async def list_pins(
+    contact_user_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    return {"items": _pins_payload(db, current_user["user_id"], contact_user_id)}
+
+
+@router.put("/{message_id}/pin")
+async def pin_message(
+    message_id: str,
+    payload: PinSet,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Épingle un message pour les deux côtés. L'un ou l'autre participant
+    peut le faire ; un tiers reçoit 404 (voir _get_participating_message).
+    Épingler de nouveau un message déjà épinglé change sa durée."""
+    if payload.duration_seconds not in PIN_DURATIONS:
+        raise HTTPException(status_code=400, detail="Durée d'épinglage non proposée")
+    user_id = current_user["user_id"]
+    message = _get_participating_message(db, message_id, user_id)
+    now = datetime.utcnow()
+    if message.deleted_at is not None or (message.expires_at and message.expires_at <= now):
+        raise HTTPException(status_code=404, detail="Message introuvable")
+    other_id = message.recipient_id if message.sender_id == user_id else message.sender_id
+    low, high = _pair_ids(user_id, other_id)
+
+    pin = db.query(DirectMessagePin).filter(DirectMessagePin.message_id == message.id).first()
+    if pin is None:
+        pin = DirectMessagePin(message_id=message.id, user_low_id=low, user_high_id=high)
+        db.add(pin)
+    pin.pinned_by = user_id
+    pin.pinned_at = now
+    pin.expires_at = now + timedelta(seconds=payload.duration_seconds)
+    db.flush()
+    # Au-delà de MAX_PINS, la plus ancienne cède sa place.
+    for stale in _active_pins(db, user_id, other_id)[MAX_PINS:]:
+        db.delete(stale)
+    db.commit()
+    return {"items": await _push_pins(db, user_id, other_id)}
+
+
+@router.delete("/{message_id}/pin")
+async def unpin_message(
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Désépingler : l'un ou l'autre participant. Désépingler un message qui
+    ne l'est pas n'est pas une erreur (bascule côté client)."""
+    user_id = current_user["user_id"]
+    message = _get_participating_message(db, message_id, user_id)
+    other_id = message.recipient_id if message.sender_id == user_id else message.sender_id
+    _unpin_message(db, message.id)
+    db.commit()
+    return {"items": await _push_pins(db, user_id, other_id)}
 
 
 @router.get("/{contact_user_id}/disappearing")
@@ -1305,6 +1449,7 @@ async def delete_message(
         # serveur, lui, n'a jamais eu le texte d'un message chiffré.
         if message.deleted_at is None:
             message.deleted_at = datetime.utcnow()
+        _unpin_message(db, message_id)
         kept_event = {
             "type": "message:deleted",
             "message_id": message_id,
@@ -1318,6 +1463,7 @@ async def delete_message(
         return {"deleted": True, "kept_as_proof": True, "message": _serialize(message, current_user["user_id"])}
     deleted_event = {"type": "message:deleted", "message_id": message_id}
     sync_event = append_sync_event(db, recipient_id, deleted_event)
+    _unpin_message(db, message_id)
     db.delete(message)
     db.commit()
     if sync_event is not None:

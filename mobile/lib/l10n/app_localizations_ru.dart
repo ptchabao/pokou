@@ -15394,4 +15394,91 @@ class LRu extends L {
 
   @override
   String get callsYouAreIn => 'Ты в этом звонке';
+
+  @override
+  String get tagBusiness => 'Бизнес';
+
+  @override
+  String get tagSupplier => 'Поставщик';
+
+  @override
+  String get tagClient => 'Клиент';
+
+  @override
+  String get tagBoss => 'Начальник';
+
+  @override
+  String get tagFriend => 'Друг';
+
+  @override
+  String get msgPinAction => 'Закрепить';
+
+  @override
+  String get msgPinUnpin => 'Открепить';
+
+  @override
+  String get msgPinDurationTitle => 'На сколько закрепить это сообщение?';
+
+  @override
+  String get msgPinDurationHint =>
+      'Все в чате увидят его вверху. Открепить можно в любой момент.';
+
+  @override
+  String get msgPin24h => '24 часа';
+
+  @override
+  String get msgPin7d => '7 дней';
+
+  @override
+  String get msgPin30d => '30 дней';
+
+  @override
+  String get msgPinReplaceNote =>
+      'Уже закреплены три сообщения: самое старое будет заменено.';
+
+  @override
+  String get msgPinDone => 'Сообщение закреплено';
+
+  @override
+  String get msgPinRemoved => 'Сообщение откреплено';
+
+  @override
+  String get msgPinFailed =>
+      'Не удалось изменить закрепление. Проверь соединение и попробуй ещё раз.';
+
+  @override
+  String get msgPinForbidden =>
+      'В этой группе закреплять сообщения могут только администраторы.';
+
+  @override
+  String get msgPinBannerLabel => 'Закреплённое сообщение';
+
+  @override
+  String msgPinCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get msgStarAction => 'Отметить как важное';
+
+  @override
+  String get msgStarRemove => 'Убрать из важных';
+
+  @override
+  String get msgStarTitle => 'Важные сообщения';
+
+  @override
+  String get msgStarEmpty =>
+      'Важных сообщений пока нет. Нажми и удерживай сообщение, затем выбери «Отметить как важное», чтобы найти его здесь.';
+
+  @override
+  String get msgStarOnlyHere => 'Видно только на этом телефоне.';
+
+  @override
+  String get msgStarA11y => 'Важное';
+
+  @override
+  String msgStarFrom(String author, String conversation) {
+    return '$author · $conversation';
+  }
 }

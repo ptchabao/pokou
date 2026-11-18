@@ -29,6 +29,7 @@ import '../../../core/widgets/identity_avatar.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Fiche contact, façon WhatsApp Business — accessible en tapant le nom ou
 /// l'avatar dans l'en-tête d'une conversation : ce qu'on a échangé (médias,
@@ -216,7 +217,8 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
       ref.invalidate(discussionsProvider);
       return;
     }
-    final seconds = await showModalBottomSheet<int>(
+    final seconds = await showPokouSheet<int>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
@@ -437,7 +439,10 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                         ),
                         if (profile?.isVerified == true) ...[
                           const SizedBox(width: 6),
-                          VerifiedBadge(size: 20, pro: profile?.isProBadge ?? false),
+                          VerifiedBadge(
+                            size: 20,
+                            pro: profile?.isProBadge ?? false,
+                          ),
                         ],
                       ],
                     ),

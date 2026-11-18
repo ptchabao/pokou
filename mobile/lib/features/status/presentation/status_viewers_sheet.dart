@@ -11,6 +11,7 @@ import '../../../core/widgets/contact_avatar.dart';
 import '../../messaging/presentation/day_separator.dart';
 import '../data/status_model.dart';
 import 'status_controller.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// « Vu par » d'un statut — qui l'a vu, à quelle heure, et le cœur qu'il a
 /// posé dessus.
@@ -31,8 +32,11 @@ class StatusViewersSheet extends ConsumerStatefulWidget {
 
   /// Ouvre la feuille — enveloppé ici pour que les appelants n'aient pas à
   /// répéter la forme et la couleur du conteneur.
-  static Future<bool?> show(BuildContext context, {required PokouStatus status}) {
-    return showModalBottomSheet<bool>(
+  static Future<bool?> show(
+    BuildContext context, {
+    required PokouStatus status,
+  }) {
+    return showPokouSheet<bool>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -165,10 +169,16 @@ class _StatusViewersSheetState extends ConsumerState<StatusViewersSheet> {
               ),
             if (viewers != null && viewers.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 16,
+                ),
                 child: Text(
                   l.statusNobodySeen,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             if (viewers != null && viewers.isNotEmpty)

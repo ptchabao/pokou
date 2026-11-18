@@ -16,6 +16,7 @@ import '../../modules/shared/module_ui.dart';
 import '../data/officine_models.dart';
 import 'officine_controller.dart';
 import 'officine_ui.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// « Référencer votre officine » en trois écrans (maquettes p.94 et p.95,
 /// Officine 14, 15 et 16) : les informations et l'arrêté, la formule, puis
@@ -73,7 +74,8 @@ class _OfficineRegistrationInfoScreenState
   /// L'arrêté : une photo de la galerie ou un PDF.
   Future<void> _pick() async {
     final l = L.of(context);
-    final pdf = await showModalBottomSheet<bool>(
+    final pdf = await showPokouSheet<bool>(
+      scrollable: true,
       context: context,
       showDragHandle: true,
       builder: (context) => SafeArea(

@@ -14,6 +14,7 @@ import '../data/community_model.dart';
 import 'community_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Détail d'une communauté : son groupe d'annonces en tête, puis ses autres
 /// groupes. Les actions d'administration n'apparaissent que si le serveur
@@ -54,7 +55,7 @@ class CommunityDetailScreen extends ConsumerWidget {
     final descriptionController = TextEditingController(
       text: community.description ?? '',
     );
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showPokouSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -76,7 +77,7 @@ class CommunityDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: nameController,
               autofocus: true,
               maxLength: 255,
@@ -87,7 +88,7 @@ class CommunityDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: descriptionController,
               maxLength: 2000,
               maxLines: 3,
@@ -146,7 +147,7 @@ class CommunityDetailScreen extends ConsumerWidget {
           orElse: () => const [],
         );
 
-    final choice = await showModalBottomSheet<String>(
+    final choice = await showPokouSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -212,7 +213,7 @@ class CommunityDetailScreen extends ConsumerWidget {
 
     if (choice == 'new') {
       final controller = TextEditingController();
-      final name = await showModalBottomSheet<String>(
+      final name = await showPokouSheet<String>(
         context: context,
         isScrollControlled: true,
         backgroundColor: AppColors.surface,
@@ -236,7 +237,7 @@ class CommunityDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                contextMenuBuilder: pokouContextMenuBuilder,
                 controller: controller,
                 autofocus: true,
                 maxLength: 255,
@@ -345,7 +346,8 @@ class CommunityDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     final link = communityInviteLinkFor(code);
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -384,7 +386,10 @@ class CommunityDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             ListTile(
-              leading: Icon(Icons.share_outlined, color: AppColors.accentPrimaryDark),
+              leading: Icon(
+                Icons.share_outlined,
+                color: AppColors.accentPrimaryDark,
+              ),
               title: Text(L.of(context).actionShare),
               onTap: () => Navigator.pop(sheetContext, 'share'),
             ),

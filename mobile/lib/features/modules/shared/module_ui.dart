@@ -5,6 +5,7 @@ import '../../../core/theme/app_elevation.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/pokou_back_button.dart';
 import '../../../core/widgets/pokou_illustration.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Le vocabulaire visuel des écrans de module.
 ///
@@ -487,7 +488,7 @@ Future<T?> showModuleSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
 }) {
-  return showModalBottomSheet<T>(
+  return showPokouSheet<T>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,

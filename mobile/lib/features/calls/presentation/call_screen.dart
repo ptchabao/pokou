@@ -23,6 +23,7 @@ import 'call_session.dart';
 import 'ringtone_player.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../contacts/presentation/discussions_controller.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Écran d'appel — audio/vidéo 1:1 ou de groupe selon le nombre de
 /// participants réellement connectés au salon LiveKit. `startWithVideo`
@@ -251,7 +252,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     }
 
     final picked = <int>{};
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showPokouSheet<bool>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),

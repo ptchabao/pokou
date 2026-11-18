@@ -87,7 +87,11 @@ import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../contacts/presentation/discussions_controller.dart';
 import 'message_text_actions.dart';
+import '../pins/message_pins.dart';
+import '../pins/pinned_banner.dart';
+import '../starred/starred_messages.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 class ConversationScreen extends ConsumerStatefulWidget {
   const ConversationScreen({
@@ -97,11 +101,15 @@ class ConversationScreen extends ConsumerStatefulWidget {
     required this.contactName,
     this.contactPhone,
     this.product,
+    this.initialMessageId,
   });
 
   final int myUserId;
   final int contactUserId;
   final String contactName;
+
+  /// Ouvre la discussion à ce message (depuis « Messages importants »).
+  final String? initialMessageId;
 
   /// Renseigné quand on ouvre une discussion avec quelqu'un qui n'est PAS
   /// dans le carnet — depuis « Nouvelle discussion », un numéro reçu, une
@@ -403,6 +411,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         .read(wsClientProvider)
         .events
         .listen(_onRichContentEvent);
+    final initial = widget.initialMessageId;
+    if (initial != null) {
+      // Après le chargement du cache et de la première page : la bulle
+      // n'existe pas avant.
+      Future<void>.delayed(const Duration(milliseconds: 700), () {
+        if (mounted) _revealMessage(initial);
+      });
+    }
   }
 
   @override
@@ -595,6 +611,86 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (mounted) _scrollToMessage(messageId);
   }
 
+  DateTime? _holdScrollUntil;
+
+  /// Conduit jusqu'à un message même s'il est loin dans le fil : la liste
+  /// ne construit que les bulles visibles, donc on saute d'abord à sa
+  /// position estimée, puis on l'ajuste quand sa bulle existe.
+  Future<void> _revealMessage(String messageId) async {
+    _holdScrollUntil = DateTime.now().add(const Duration(seconds: 3));
+    for (var attempt = 0; attempt < 3; attempt++) {
+      if (!mounted) return;
+      if (_bubbleKeys[messageId]?.currentContext != null) {
+        _scrollToMessage(messageId);
+        return;
+      }
+      final messages = ref.read(messagingControllerProvider(_key)).messages;
+      final index = messages.indexWhere((m) => m.id == messageId);
+      if (index < 0 || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      _scrollController.jumpTo(
+        (position.maxScrollExtent * index / messages.length).clamp(
+          0,
+          position.maxScrollExtent,
+        ),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+    }
+  }
+
+  /// Les messages importants de CETTE discussion ; toucher l'un d'eux
+  /// revient ici, à lui.
+  Future<void> _openStarred() async {
+    final messageId = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => StarredMessagesScreen(
+          myUserId: widget.myUserId,
+          scope: StarScope.direct,
+          conversationId: widget.contactUserId,
+        ),
+      ),
+    );
+    if (messageId == null || !mounted) return;
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    if (mounted) await _revealMessage(messageId);
+  }
+
+  StarKey get _starKey => StarKey(StarScope.direct, widget.contactUserId);
+
+  PinScope get _pinScope => PinScope.direct(widget.contactUserId);
+
+  /// L'extrait du message épinglé, tel que CE téléphone l'a déchiffré.
+  String _pinExcerpt(String messageId) {
+    final message = _findMessage(messageId);
+    return messageExcerpt(
+      _l,
+      content: message?.content,
+      messageType: message?.messageType,
+      locked: message?.isEncrypted ?? true,
+    );
+  }
+
+  Future<void> _togglePin(DirectMessage message, {required bool pinned}) async {
+    final pins = ref.read(pinsControllerProvider(_pinScope).notifier);
+    final int? seconds;
+    if (pinned) {
+      seconds = null;
+    } else {
+      seconds = await showPinDurationSheet(
+        context,
+        replacesOldest: pins.active.length >= maxPins,
+      );
+      if (seconds == null || !mounted) return;
+    }
+    final outcome = pinned
+        ? await pins.unpin(message.id)
+        : await pins.pin(message.id, seconds!);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(pinOutcomeMessage(_l, outcome, pinned: !pinned))),
+    );
+  }
+
   /// Best-effort : ne fait rien si le message cité n'est plus construit (voir
   /// _bubbleKeys). Aucune erreur affichée — un aperçu de réponse reste utile
   /// même quand on ne peut pas y sauter.
@@ -735,6 +831,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
+      // Juste après avoir conduit l'œil vers un message (épingle, message
+      // important), une reconstruction ne doit pas le renvoyer en bas.
+      final hold = _holdScrollUntil;
+      if (hold != null && DateTime.now().isBefore(hold)) return;
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 200),
@@ -1405,7 +1505,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     bool proofOn,
     List<DirectMessage> messages,
   ) async {
-    final action = await showModalBottomSheet<String>(
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
@@ -1423,6 +1524,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               leading: const Icon(Icons.search),
               title: Text(_l.actionSearch),
               onTap: () => Navigator.pop(sheetContext, 'search'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_outline_rounded),
+              title: Text(_l.msgStarTitle),
+              onTap: () => Navigator.pop(sheetContext, 'starred'),
             ),
             ListTile(
               leading: const Icon(Icons.gavel_outlined),
@@ -1463,6 +1569,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (!mounted) return;
     if (action == 'info') _openContactProfile();
     if (action == 'search') await _openSearch();
+    if (action == 'starred') await _openStarred();
     if (action == 'block') await _confirmBlockFromMenu();
     if (action == 'report') await _reportUnknownSender();
     if (action == 'toggle') {
@@ -1499,6 +1606,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Widget build(BuildContext context) {
     _rememberKeyboardHeight(context);
     final state = ref.watch(messagingControllerProvider(_key));
+    final starredIds = ref.watch(starredControllerProvider(_starKey));
+    ref.watch(pinsControllerProvider(_pinScope));
+    final activePins = ref
+        .read(pinsControllerProvider(_pinScope).notifier)
+        .active;
     final proofOn = _proofOn(state.messages);
     final product = widget.product ?? _productFromMessages(state.messages);
     final isSeller = product?.sellerId == widget.myUserId;
@@ -1841,6 +1953,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               : null,
                           onLearnMore: () => showProofLearnMoreSheet(context),
                         ),
+                      PinnedMessagesBanner(
+                        pins: activePins,
+                        excerptFor: _pinExcerpt,
+                        onOpen: _revealMessage,
+                      ),
                       Expanded(
                         child: !state.initialCacheLoaded
                             // L'attente a la forme d'une conversation — et seulement
@@ -1971,6 +2088,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 index == messages.length - 1,
                                             child: _Bubble(
                                               message: message,
+                                              starred: starredIds.contains(
+                                                message.id,
+                                              ),
                                               onBotButton: isContactBot
                                                   ? (title) => _sendBotButton(
                                                       message,
@@ -2308,7 +2428,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   /// supprimerait une capacité réelle sans rien y substituer.
   Future<void> _showMessageActions(DirectMessage message) async {
     final controller = ref.read(messagingControllerProvider(_key).notifier);
-    final action = await showModalBottomSheet<String>(
+    // Épingler et marquer : seulement un message que le serveur connaît
+    // (pas un message en attente d'envoi) et qui existe encore.
+    final canMark =
+        !PokouMessageStore.isLocalId(message.id) && message.deletedAt == null;
+    final pinned = ref
+        .read(pinsControllerProvider(_pinScope).notifier)
+        .isPinned(message.id);
+    final starred = ref
+        .read(starredControllerProvider(_starKey))
+        .contains(message.id);
+    final action = await showPokouSheet<String>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
@@ -2355,6 +2486,22 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 text: text,
                 close: () => Navigator.pop(sheetContext),
               ),
+            if (canMark) ...[
+              ListTile(
+                leading: Icon(
+                  pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                ),
+                title: Text(pinned ? _l.msgPinUnpin : _l.msgPinAction),
+                onTap: () => Navigator.pop(sheetContext, 'pin'),
+              ),
+              ListTile(
+                leading: Icon(
+                  starred ? Icons.star_rounded : Icons.star_outline_rounded,
+                ),
+                title: Text(starred ? _l.msgStarRemove : _l.msgStarAction),
+                onTap: () => Navigator.pop(sheetContext, 'star'),
+              ),
+            ],
             // « Enregistrer sur le téléphone » — seulement pour un média.
             // Absent de la maquette simplifiée, gardé : c'est le seul moyen
             // de garder une photo reçue au-delà du cache temporaire.
@@ -2417,6 +2564,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         _startEditing(message);
       case 'info':
         _showMessageInfo(message);
+      case 'pin':
+        await _togglePin(message, pinned: pinned);
+      case 'star':
+        await ref
+            .read(starredControllerProvider(_starKey).notifier)
+            .toggle(message.id, conversationName: widget.contactName);
       case 'delete':
         await _deleteMessage(message);
       case 'forward':
@@ -2467,7 +2620,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   void _showMessageInfo(DirectMessage message) {
     final hm = DateFormat.Hm();
-    showModalBottomSheet<void>(
+    showPokouSheet<void>(
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
@@ -3023,10 +3176,15 @@ class _Bubble extends StatefulWidget {
     this.onSave,
     this.isPending = false,
     this.isFailed = false,
+    this.starred = false,
   });
 
   final DirectMessage message;
   final bool isMine;
+
+  /// Marqué « important » sur ce téléphone : une petite étoile près de
+  /// l'heure.
+  final bool starred;
 
   /// Transférer / Enregistrer depuis la visionneuse photo (Discussions · 25).
   final VoidCallback? onForward;
@@ -3378,6 +3536,8 @@ class _BubbleState extends State<_Bubble> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (widget.starred)
+                    StarredMark(color: AppColors.chatTimestamp),
                   Text(
                     DateFormat.Hm().format(message.createdAt),
                     style: TextStyle(

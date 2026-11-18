@@ -31,6 +31,7 @@ import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
 import '../../../core/widgets/pokou_icon.dart';
+import '../../messaging/starred/starred_messages.dart';
 
 /// « Plus » (écran APP-6) ou « Réglages » au lot 1 (écran LOT-4).
 ///
@@ -369,6 +370,17 @@ class MoreScreen extends ConsumerWidget {
         // des Discussions suit la maquette : gardés ici, en dernier.
         _Section(
           rows: [
+            if (user != null)
+              _Row(
+                Icons.star_outline_rounded,
+                l.msgStarTitle,
+                // Sa propre barre de titre (retour compris) : pas de _Pushed.
+                () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => StarredMessagesScreen(myUserId: user.id),
+                  ),
+                ),
+              ),
             _Row(
               Icons.campaign_outlined,
               l.navBroadcasts,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Ce qu'on peut joindre (Discussions · 2).
 enum AttachChoice { gallery, camera, document, poll, kory }
@@ -29,7 +30,7 @@ Future<AttachChoice?> showAttachSheet(
   bool offerKory = false,
   bool koryGroupsOnlyNote = false,
 }) {
-  return showModalBottomSheet<AttachChoice>(
+  return showPokouSheet<AttachChoice>(
     context: context,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),

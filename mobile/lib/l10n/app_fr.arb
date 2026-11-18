@@ -9616,5 +9616,51 @@
       }
     }
   },
-  "callsYouAreIn": "Tu es dans cet appel"
+  "callsYouAreIn": "Tu es dans cet appel",
+  "tagBusiness": "Business",
+  "tagSupplier": "Fournisseur",
+  "tagClient": "Client",
+  "tagBoss": "Patron",
+  "tagFriend": "Ami",
+  "msgPinAction": "Épingler",
+  "msgPinUnpin": "Désépingler",
+  "msgPinDurationTitle": "Combien de temps épingler ce message ?",
+  "msgPinDurationHint": "Tout le monde dans la discussion le verra en haut. Tu peux le désépingler à tout moment.",
+  "msgPin24h": "24 heures",
+  "msgPin7d": "7 jours",
+  "msgPin30d": "30 jours",
+  "msgPinReplaceNote": "Trois messages sont déjà épinglés : le plus ancien sera remplacé.",
+  "msgPinDone": "Message épinglé",
+  "msgPinRemoved": "Message désépinglé",
+  "msgPinFailed": "Impossible de modifier l'épingle. Vérifie ta connexion et réessaie.",
+  "msgPinForbidden": "Dans ce groupe, seuls les administrateurs peuvent épingler des messages.",
+  "msgPinBannerLabel": "Message épinglé",
+  "msgPinCounter": "{current}/{total}",
+  "@msgPinCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "msgStarAction": "Marquer comme important",
+  "msgStarRemove": "Retirer des importants",
+  "msgStarTitle": "Messages importants",
+  "msgStarEmpty": "Aucun message important pour l'instant. Appuie longuement sur un message puis choisis « Marquer comme important » pour le retrouver ici.",
+  "msgStarOnlyHere": "Visible uniquement sur ce téléphone.",
+  "msgStarA11y": "Important",
+  "msgStarFrom": "{author} · {conversation}",
+  "@msgStarFrom": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "conversation": {
+        "type": "String"
+      }
+    }
+  }
 }

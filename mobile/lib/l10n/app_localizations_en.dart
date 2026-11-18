@@ -15270,4 +15270,90 @@ class LEn extends L {
 
   @override
   String get callsYouAreIn => 'You are in this call';
+
+  @override
+  String get tagBusiness => 'Business';
+
+  @override
+  String get tagSupplier => 'Supplier';
+
+  @override
+  String get tagClient => 'Customer';
+
+  @override
+  String get tagBoss => 'Boss';
+
+  @override
+  String get tagFriend => 'Friend';
+
+  @override
+  String get msgPinAction => 'Pin';
+
+  @override
+  String get msgPinUnpin => 'Unpin';
+
+  @override
+  String get msgPinDurationTitle => 'How long should this message stay pinned?';
+
+  @override
+  String get msgPinDurationHint =>
+      'Everyone in the chat will see it at the top. You can unpin it at any time.';
+
+  @override
+  String get msgPin24h => '24 hours';
+
+  @override
+  String get msgPin7d => '7 days';
+
+  @override
+  String get msgPin30d => '30 days';
+
+  @override
+  String get msgPinReplaceNote =>
+      'Three messages are already pinned: the oldest one will be replaced.';
+
+  @override
+  String get msgPinDone => 'Message pinned';
+
+  @override
+  String get msgPinRemoved => 'Message unpinned';
+
+  @override
+  String get msgPinFailed =>
+      'Couldn\'t update the pin. Check your connection and try again.';
+
+  @override
+  String get msgPinForbidden => 'In this group, only admins can pin messages.';
+
+  @override
+  String get msgPinBannerLabel => 'Pinned message';
+
+  @override
+  String msgPinCounter(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get msgStarAction => 'Star';
+
+  @override
+  String get msgStarRemove => 'Unstar';
+
+  @override
+  String get msgStarTitle => 'Starred messages';
+
+  @override
+  String get msgStarEmpty =>
+      'No starred messages yet. Long-press a message and choose \"Star\" to find it here.';
+
+  @override
+  String get msgStarOnlyHere => 'Only visible on this phone.';
+
+  @override
+  String get msgStarA11y => 'Starred';
+
+  @override
+  String msgStarFrom(String author, String conversation) {
+    return '$author · $conversation';
+  }
 }

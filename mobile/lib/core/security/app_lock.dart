@@ -10,6 +10,7 @@ import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../../core/widgets/pokou_context_menu.dart';
+import '../widgets/pokou_sheet.dart';
 
 /// Verrouillage de l'application par code (Profil > Confidentialité &
 /// Sécurité). Un code à 4-8 chiffres gardé dans le Keystore/Keychain, pas de
@@ -21,7 +22,11 @@ import '../../core/widgets/pokou_context_menu.dart';
 /// base locale avec un accès physique à l'appareil. C'est la même garantie
 /// que le verrou de conversation de WhatsApp, et rien de plus.
 class AppLockState {
-  const AppLockState({this.enabled = false, this.locked = false, this.loaded = false});
+  const AppLockState({
+    this.enabled = false,
+    this.locked = false,
+    this.loaded = false,
+  });
 
   final bool enabled;
 
@@ -32,7 +37,8 @@ class AppLockState {
   /// app déverrouillée au démarrage alors qu'un code existe.
   final bool loaded;
 
-  AppLockState copyWith({bool? enabled, bool? locked, bool? loaded}) => AppLockState(
+  AppLockState copyWith({bool? enabled, bool? locked, bool? loaded}) =>
+      AppLockState(
         enabled: enabled ?? this.enabled,
         locked: locked ?? this.locked,
         loaded: loaded ?? this.loaded,
@@ -41,8 +47,8 @@ class AppLockState {
 
 class AppLockController extends StateNotifier<AppLockState> {
   AppLockController({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage(),
-        super(const AppLockState()) {
+    : _storage = storage ?? const FlutterSecureStorage(),
+      super(const AppLockState()) {
     _load();
   }
 
@@ -119,7 +125,9 @@ class AppLockController extends StateNotifier<AppLockState> {
   }
 }
 
-final appLockProvider = StateNotifierProvider<AppLockController, AppLockState>((ref) {
+final appLockProvider = StateNotifierProvider<AppLockController, AppLockState>((
+  ref,
+) {
   return AppLockController();
 });
 
@@ -135,7 +143,8 @@ class AppLockGate extends ConsumerStatefulWidget {
   ConsumerState<AppLockGate> createState() => _AppLockGateState();
 }
 
-class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingObserver {
+class _AppLockGateState extends ConsumerState<AppLockGate>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -193,7 +202,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
   /// api/app/services/otp_service.py). La déconnexion reste proposée en
   /// dernier recours dans cette feuille, pour un numéro devenu injoignable.
   Future<void> _recoverForgottenPin() async {
-    await showModalBottomSheet<void>(
+    await showPokouSheet<void>(
       context: context,
       isScrollControlled: true,
       isDismissible: true,
@@ -227,23 +236,35 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_outline, size: 40, color: AppColors.accentPrimaryDark),
+                Icon(
+                  Icons.lock_outline,
+                  size: 40,
+                  color: AppColors.accentPrimaryDark,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   L.of(context).lockScreenTitle,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _wrong ? L.of(context).lockWrongCode : L.of(context).lockEnterToContinue,
+                  _wrong
+                      ? L.of(context).lockWrongCode
+                      : L.of(context).lockEnterToContinue,
                   style: TextStyle(
                     fontSize: 13,
-                    color: _wrong ? AppColors.semanticError : AppColors.textSecondary,
+                    color: _wrong
+                        ? AppColors.semanticError
+                        : AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
                 TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _controller,
                   autofocus: true,
                   obscureText: true,
@@ -251,7 +272,10 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                   textAlign: TextAlign.center,
                   maxLength: 8,
                   style: const TextStyle(fontSize: 22, letterSpacing: 8),
-                  decoration: const InputDecoration(counterText: '', hintText: '••••'),
+                  decoration: const InputDecoration(
+                    counterText: '',
+                    hintText: '••••',
+                  ),
                   onSubmitted: (_) => _submit(),
                 ),
                 const SizedBox(height: 16),
@@ -260,7 +284,9 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                   child: ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
-                      shape: const RoundedRectangleBorder(borderRadius: AppRadius.card),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: AppRadius.card,
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: Text(L.of(context).lockUnlock),
@@ -340,19 +366,16 @@ class _ForgottenPinSheetState extends ConsumerState<_ForgottenPinSheet> {
     try {
       // Rend aussi une session fraîche : le compte est le même, et le jeton
       // en cours a pu expirer pendant que l'app était verrouillée.
-      await ref.read(authControllerProvider.notifier).verifyOtp(
-            phone: phone,
-            code: _codeController.text.trim(),
-          );
+      await ref
+          .read(authControllerProvider.notifier)
+          .verifyOtp(phone: phone, code: _codeController.text.trim());
       await ref.read(appLockProvider.notifier).resetAfterPhoneVerification();
       if (!mounted) return;
       // Messager capturé AVANT le pop : après, ce contexte n'est plus monté.
       final messenger = ScaffoldMessenger.of(context);
       Navigator.of(context).pop();
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(L.of(context).lockRemovedToast),
-        ),
+        SnackBar(content: Text(L.of(context).lockRemovedToast)),
       );
     } on ApiException catch (exc) {
       if (mounted) setState(() => _error = exc.message);
@@ -370,8 +393,14 @@ class _ForgottenPinSheetState extends ConsumerState<_ForgottenPinSheet> {
         title: Text(L.of(context).lockLogoutQuestion),
         content: Text(L.of(context).lockLogoutBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(L.of(context).actionCancel)),
-          TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: Text(L.of(context).lockLogout)),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(L.of(context).actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(L.of(context).lockLogout),
+          ),
         ],
       ),
     );
@@ -398,38 +427,55 @@ class _ForgottenPinSheetState extends ConsumerState<_ForgottenPinSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(L.of(context).lockForgotTitle,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+          Text(
+            L.of(context).lockForgotTitle,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          ),
           const SizedBox(height: 6),
           Text(
             phone == null
                 ? L.of(context).lockNoPhoneOnDevice
                 : _codeSent
-                    ? L.of(context).lockEnterSentCode(phone)
-                    : L.of(context).lockForgotExplain(phone),
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                ? L.of(context).lockEnterSentCode(phone)
+                : L.of(context).lockForgotExplain(phone),
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
           ),
           if (_codeSent) ...[
             const SizedBox(height: 16),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: _codeController,
               autofocus: true,
               keyboardType: TextInputType.number,
               maxLength: 8,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 20, letterSpacing: 6),
-              decoration: const InputDecoration(counterText: '', hintText: '000000'),
+              decoration: const InputDecoration(
+                counterText: '',
+                hintText: '000000',
+              ),
               onSubmitted: (_) => _verifyCode(),
             ),
           ],
           if (_error != null) ...[
             const SizedBox(height: 8),
-            Text(_error!, style: const TextStyle(color: AppColors.semanticError, fontSize: 12)),
+            Text(
+              _error!,
+              style: const TextStyle(
+                color: AppColors.semanticError,
+                fontSize: 12,
+              ),
+            ),
           ],
           const SizedBox(height: 12),
           ElevatedButton(
-            onPressed: _busy || phone == null ? null : (_codeSent ? _verifyCode : _sendCode),
+            onPressed: _busy || phone == null
+                ? null
+                : (_codeSent ? _verifyCode : _sendCode),
             style: ElevatedButton.styleFrom(
               shape: const RoundedRectangleBorder(borderRadius: AppRadius.card),
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -438,14 +484,24 @@ class _ForgottenPinSheetState extends ConsumerState<_ForgottenPinSheet> {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
-                : Text(_codeSent ? L.of(context).lockLift : L.of(context).lockSendCode),
+                : Text(
+                    _codeSent
+                        ? L.of(context).lockLift
+                        : L.of(context).lockSendCode,
+                  ),
           ),
           if (_codeSent)
             TextButton(
               onPressed: _busy ? null : _sendCode,
-              child: Text(L.of(context).lockResendCode, style: const TextStyle(fontSize: 13)),
+              child: Text(
+                L.of(context).lockResendCode,
+                style: const TextStyle(fontSize: 13),
+              ),
             ),
           TextButton(
             onPressed: _busy ? null : _logoutInstead,

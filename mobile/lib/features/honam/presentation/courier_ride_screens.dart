@@ -20,6 +20,7 @@ import 'honam_controller.dart';
 import 'honam_order_messages.dart';
 import 'honam_tracking.dart' show honamRelayedCall;
 import 'honam_ui.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Les courses du coursier : disponibles et à lui.
 final courierRidesProvider =
@@ -143,7 +144,7 @@ Future<void> showPackExhaustedSheet(
   final next = index >= 0 && index + 1 < status.packs.length
       ? status.packs[index + 1]
       : null;
-  return showModalBottomSheet<void>(
+  return showPokouSheet<void>(
     context: context,
     backgroundColor: AppColors.surface,
     showDragHandle: true,

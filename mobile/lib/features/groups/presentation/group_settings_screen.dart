@@ -9,6 +9,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../messaging/presentation/report_sheet.dart';
 import '../data/group_model.dart';
 import 'group_controller.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// DIS-26 · Gérer le groupe — réservé aux administrateurs.
 ///
@@ -77,7 +78,9 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            e is ApiException ? e.message : L.of(context).groupSettingsSaveFailed,
+            e is ApiException
+                ? e.message
+                : L.of(context).groupSettingsSaveFailed,
           ),
         ),
       );
@@ -161,7 +164,8 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
   Future<void> _showAdmins(Group group) async {
     final l = L.of(context);
     final myUserId = ref.read(authControllerProvider).user?.id;
-    await showModalBottomSheet<void>(
+    await showPokouSheet<void>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       builder: (sheetContext) => SafeArea(
@@ -402,7 +406,9 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                         ),
                         title: Text(
                           l.reportGroup,
-                          style: const TextStyle(color: AppColors.semanticError),
+                          style: const TextStyle(
+                            color: AppColors.semanticError,
+                          ),
                         ),
                         onTap: () => _reportGroup(group),
                       ),

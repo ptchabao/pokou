@@ -55,9 +55,9 @@ Future<void> openDiscussion(
   }
   final contactUserId = discussion.contactUserId;
   if (contactUserId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L.of(context).chatsProfileMissing)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(L.of(context).chatsProfileMissing)));
     return;
   }
   // Fonctionne aussi pour un inconnu : GET /messages/{id} n'exige que

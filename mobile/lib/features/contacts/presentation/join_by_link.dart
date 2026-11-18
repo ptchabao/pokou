@@ -15,6 +15,7 @@ import '../../groups/presentation/group_controller.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
 import 'discussions_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Rejoindre un groupe ou une communauté par lien — **une seule porte**.
 ///
@@ -34,7 +35,7 @@ Future<void> showJoinByLinkSheet(
   required int myUserId,
 }) async {
   final controller = TextEditingController();
-  final input = await showModalBottomSheet<String>(
+  final input = await showPokouSheet<String>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
@@ -61,7 +62,7 @@ Future<void> showJoinByLinkSheet(
           ),
           const SizedBox(height: 16),
           TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+            contextMenuBuilder: pokouContextMenuBuilder,
             controller: controller,
             autofocus: true,
             decoration: const InputDecoration(

@@ -10,6 +10,7 @@ import '../../auth/presentation/auth_controller.dart';
 import 'conversation_screen.dart';
 import 'message_links.dart';
 import 'messaging_controller.dart' show messagingRepositoryProvider;
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Motif reconnaissant un numéro plausible dans du texte libre : un `+`
 /// optionnel, un chiffre, puis une suite de chiffres/espaces/tirets/points/
@@ -219,7 +220,8 @@ Future<void> handlePhoneTap(BuildContext context, String rawPhone) async {
 }
 
 Future<void> _showInviteSheet(BuildContext context, String phone) async {
-  final action = await showModalBottomSheet<String>(
+  final action = await showPokouSheet<String>(
+    scrollable: true,
     context: context,
     backgroundColor: AppColors.surface,
     builder: (sheetContext) => SafeArea(

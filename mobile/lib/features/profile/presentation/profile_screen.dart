@@ -37,6 +37,7 @@ import '../../settings/presentation/storage_settings_screen.dart';
 import '../../status/presentation/status_privacy_screen.dart';
 import '../data/profile_repository.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   return ProfileRepository(apiClient: ref.watch(apiClientProvider));
@@ -108,7 +109,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _changeAvatar() async {
-    final source = await showModalBottomSheet<ImageSource>(
+    final source = await showPokouSheet<ImageSource>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
@@ -185,7 +187,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _editProfile() async {
     final nameController = TextEditingController(text: _fullName ?? '');
     final aboutController = TextEditingController(text: _about ?? '');
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showPokouSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -207,7 +209,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: nameController,
               decoration: InputDecoration(
                 hintText: L.of(context).profileFullName,
@@ -215,7 +217,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: aboutController,
               maxLength: 140,
               decoration: InputDecoration(hintText: L.of(context).profileAbout),
@@ -284,7 +286,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       return;
     }
 
-    final chosen = await showModalBottomSheet<MinouMonitor>(
+    final chosen = await showPokouSheet<MinouMonitor>(
+      scrollable: true,
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),

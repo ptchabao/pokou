@@ -7,6 +7,7 @@ import '../../../core/security/app_lock.dart';
 import '../../../core/theme/app_colors.dart';
 import 'settings_widgets.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Profil > Verrouillage de l'application. Activation, changement et
 /// désactivation du code — la vérification et le verrou lui-même vivent dans
@@ -28,7 +29,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
     final secondController = TextEditingController();
     String? error;
 
-    final pin = await showModalBottomSheet<String>(
+    final pin = await showPokouSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -55,7 +56,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                contextMenuBuilder: pokouContextMenuBuilder,
                 controller: firstController,
                 autofocus: true,
                 obscureText: true,
@@ -68,7 +69,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
               ),
               const SizedBox(height: 8),
               TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                contextMenuBuilder: pokouContextMenuBuilder,
                 controller: secondController,
                 obscureText: true,
                 keyboardType: TextInputType.number,
@@ -118,7 +119,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
   /// sinon quiconque tient l'app déverrouillée pourrait le lever.
   Future<String?> _askCurrentPin(String title) async {
     final controller = TextEditingController();
-    final pin = await showModalBottomSheet<String>(
+    final pin = await showPokouSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
@@ -139,7 +140,7 @@ class _AppLockSettingsScreenState extends ConsumerState<AppLockSettingsScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+              contextMenuBuilder: pokouContextMenuBuilder,
               controller: controller,
               autofocus: true,
               obscureText: true,

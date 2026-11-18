@@ -10,6 +10,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import 'country_names.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/widgets/pokou_sheet.dart';
 
 /// Un pays au sens « indicatif téléphonique ».
 ///
@@ -156,7 +157,7 @@ Future<PhoneCountry?> showPhoneCountryPicker(
   BuildContext context, {
   required PhoneCountry current,
 }) {
-  return showModalBottomSheet<PhoneCountry>(
+  return showPokouSheet<PhoneCountry>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
@@ -230,7 +231,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                contextMenuBuilder: pokouContextMenuBuilder,
                 controller: _searchController,
                 autofocus: true,
                 onChanged: (value) => setState(() => _query = value),

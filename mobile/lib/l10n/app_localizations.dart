@@ -25066,6 +25066,162 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Tu es dans cet appel'**
   String get callsYouAreIn;
+
+  /// No description provided for @tagBusiness.
+  ///
+  /// In fr, this message translates to:
+  /// **'Business'**
+  String get tagBusiness;
+
+  /// No description provided for @tagSupplier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fournisseur'**
+  String get tagSupplier;
+
+  /// No description provided for @tagClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client'**
+  String get tagClient;
+
+  /// No description provided for @tagBoss.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patron'**
+  String get tagBoss;
+
+  /// No description provided for @tagFriend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ami'**
+  String get tagFriend;
+
+  /// No description provided for @msgPinAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épingler'**
+  String get msgPinAction;
+
+  /// No description provided for @msgPinUnpin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désépingler'**
+  String get msgPinUnpin;
+
+  /// No description provided for @msgPinDurationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien de temps épingler ce message ?'**
+  String get msgPinDurationTitle;
+
+  /// No description provided for @msgPinDurationHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout le monde dans la discussion le verra en haut. Tu peux le désépingler à tout moment.'**
+  String get msgPinDurationHint;
+
+  /// No description provided for @msgPin24h.
+  ///
+  /// In fr, this message translates to:
+  /// **'24 heures'**
+  String get msgPin24h;
+
+  /// No description provided for @msgPin7d.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours'**
+  String get msgPin7d;
+
+  /// No description provided for @msgPin30d.
+  ///
+  /// In fr, this message translates to:
+  /// **'30 jours'**
+  String get msgPin30d;
+
+  /// No description provided for @msgPinReplaceNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trois messages sont déjà épinglés : le plus ancien sera remplacé.'**
+  String get msgPinReplaceNote;
+
+  /// No description provided for @msgPinDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message épinglé'**
+  String get msgPinDone;
+
+  /// No description provided for @msgPinRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message désépinglé'**
+  String get msgPinRemoved;
+
+  /// No description provided for @msgPinFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de modifier l\'épingle. Vérifie ta connexion et réessaie.'**
+  String get msgPinFailed;
+
+  /// No description provided for @msgPinForbidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans ce groupe, seuls les administrateurs peuvent épingler des messages.'**
+  String get msgPinForbidden;
+
+  /// No description provided for @msgPinBannerLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message épinglé'**
+  String get msgPinBannerLabel;
+
+  /// No description provided for @msgPinCounter.
+  ///
+  /// In fr, this message translates to:
+  /// **'{current}/{total}'**
+  String msgPinCounter(int current, int total);
+
+  /// No description provided for @msgStarAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme important'**
+  String get msgStarAction;
+
+  /// No description provided for @msgStarRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer des importants'**
+  String get msgStarRemove;
+
+  /// No description provided for @msgStarTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages importants'**
+  String get msgStarTitle;
+
+  /// No description provided for @msgStarEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun message important pour l\'instant. Appuie longuement sur un message puis choisis « Marquer comme important » pour le retrouver ici.'**
+  String get msgStarEmpty;
+
+  /// No description provided for @msgStarOnlyHere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible uniquement sur ce téléphone.'**
+  String get msgStarOnlyHere;
+
+  /// No description provided for @msgStarA11y.
+  ///
+  /// In fr, this message translates to:
+  /// **'Important'**
+  String get msgStarA11y;
+
+  /// No description provided for @msgStarFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'{author} · {conversation}'**
+  String msgStarFrom(String author, String conversation);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
