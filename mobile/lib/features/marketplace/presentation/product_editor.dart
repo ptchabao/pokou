@@ -19,6 +19,7 @@ import '../../../core/widgets/media_image.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 import '../../../core/widgets/pokou_sheet.dart';
+import '../../../core/location/pokou_location.dart';
 
 /// Le formulaire d'annonce — création et modification.
 ///
@@ -242,39 +243,27 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
   Future<void> _useMyGpsLocation() async {
     setState(() => _fetchingLocation = true);
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(L.of(context).marketLocationOff)),
-        );
-        return;
-      }
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied)
-        permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(L.of(context).marketGpsDenied)));
-        return;
-      }
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-        ),
+      // Demande propre : si la localisation est coupée ou refusée, une
+      // fenêtre propose de l'activer (voir core/location/pokou_location.dart).
+      final position = await obtainPosition(context);
+      if (position == null || !mounted) return;
+      // Les coordonnées restent pour la distance ; on affiche le quartier
+      // et la ville — jamais « 6.1319, 1.2228 ».
+      final place = await placeLabel(
+        ref.read(apiClientProvider),
+        position.latitude,
+        position.longitude,
       );
       if (!mounted) return;
+      final l = L.of(context);
       setState(() {
         _latitude = position.latitude;
         _longitude = position.longitude;
-        _location.text =
-            '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+        if (place != null) _location.text = place;
       });
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(L.of(context).marketGpsSaved)));
+      ).showSnackBar(SnackBar(content: Text(l.locSaved(place ?? l.locNear))));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -565,15 +554,23 @@ class ProductEditorState extends ConsumerState<ProductEditor> {
         ),
       ],
     ),
+    // Position enregistrée : une coche, jamais des coordonnées.
     if (_latitude != null && _longitude != null)
       Padding(
         padding: const EdgeInsets.only(top: 6),
-        child: Text(
-          l.marketGpsCoords(
-            _latitude!.toStringAsFixed(4),
-            _longitude!.toStringAsFixed(4),
-          ),
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+        child: Row(
+          children: [
+            Icon(
+              Icons.check_circle,
+              size: 14,
+              color: AppColors.feedbackSuccess,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              l.marketGpsSaved,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+          ],
         ),
       ),
   ];

@@ -15356,4 +15356,29 @@ class LEn extends L {
   String msgStarFrom(String author, String conversation) {
     return '$author · $conversation';
   }
+
+  @override
+  String get locOffTitle => 'Turn on location';
+
+  @override
+  String get locOffBody =>
+      'Your phone’s location is off. Turn it on to fill in your area automatically.';
+
+  @override
+  String get locDeniedTitle => 'Allow location';
+
+  @override
+  String get locDeniedBody =>
+      'Pokou needs your location to find what’s near you. Allow it in your phone settings.';
+
+  @override
+  String get locOpenSettings => 'Open settings';
+
+  @override
+  String get locNear => 'Near you';
+
+  @override
+  String locSaved(String place) {
+    return 'Location saved: $place';
+  }
 }

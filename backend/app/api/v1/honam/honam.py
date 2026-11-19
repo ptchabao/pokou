@@ -1881,6 +1881,12 @@ def courier_offer(code: Optional[str] = None, current_user: dict = Depends(get_c
     user = db.query(User).filter(User.id == current_user["user_id"]).first()
     country = country_of_phone(user.phone if user else None) or "TG"
     prices = rules.pharmacy_prices(db, country)
+    # Un pays sans tarif Honam (numéro étranger, pays pas encore lancé) :
+    # l'offre est celle du marché de lancement. Sans ce repli, l'écran
+    # disait « Tu gagnes 0 FCFA par course » et l'estimation était fausse.
+    if not prices.get("delivery_price"):
+        country = "TG"
+        prices = rules.pharmacy_prices(db, country)
     vat = prices["vat_rate"]
     inviter = None
     if code:

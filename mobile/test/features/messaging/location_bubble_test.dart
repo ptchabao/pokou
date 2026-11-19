@@ -1,20 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokou/core/api/api_client.dart';
+import 'package:pokou/core/providers.dart';
 
 import '../../helpers/localized_harness.dart';
 import 'package:pokou/features/messaging/presentation/location_bubble.dart';
 import 'package:pokou/core/time/server_time.dart';
 
-Widget _wrap(Widget child) => localizedHarness(child);
+/// Le serveur traduit la position en nom de lieu.
+class _GeoApi extends ApiClient {
+  _GeoApi() : super(baseUrl: 'https://unused');
+
+  @override
+  Future<dynamic> get(String path, {bool authenticated = true}) async =>
+      {'label': 'Bè, Lomé'};
+}
+
+Widget _wrap(Widget child) => ProviderScope(
+  overrides: [apiClientProvider.overrideWithValue(_GeoApi())],
+  child: localizedHarness(child),
+);
 
 void main() {
-  testWidgets('affiche l\'étiquette, les coordonnées et le bouton Maps', (tester) async {
+  testWidgets('affiche l\'étiquette, le lieu (jamais les coordonnées) et le bouton Maps', (tester) async {
     await tester.pumpWidget(_wrap(const LocationBubble(
       payload: {'latitude': 6.1319, 'longitude': 1.2228, 'label': 'Grand marché', 'live_until': null},
     )));
+    await tester.pump();
 
     expect(find.text('Grand marché'), findsOneWidget);
-    expect(find.text('6.13190, 1.22280'), findsOneWidget);
+    expect(find.text('Bè, Lomé'), findsOneWidget);
+    expect(find.textContaining('6.13'), findsNothing);
     expect(find.text('Ouvrir dans Maps'), findsOneWidget);
     expect(find.textContaining('En direct'), findsNothing);
   });

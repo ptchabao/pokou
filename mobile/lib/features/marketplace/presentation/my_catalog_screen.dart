@@ -249,7 +249,9 @@ class _ListingRow extends StatelessWidget {
     return ModuleCard(
       padding: const EdgeInsets.all(12),
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,7 +367,11 @@ class _ListingRow extends StatelessWidget {
 }
 
 class _RowAction extends StatelessWidget {
-  const _RowAction({required this.label, required this.onTap, this.filled = false});
+  const _RowAction({
+    required this.label,
+    required this.onTap,
+    this.filled = false,
+  });
 
   final String label;
   final VoidCallback? onTap;

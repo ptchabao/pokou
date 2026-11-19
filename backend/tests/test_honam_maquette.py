@@ -216,3 +216,21 @@ def test_liste_d_attente_compte_les_inscrits(client):
     joined = client.post("/api/v1/honam/waitlist", json={"city": "kara", "role": "PATIENT"}, headers=b).json()
     assert joined["count"] == 2
     assert client.get("/api/v1/honam/waitlist/count?city=KARA", headers=a).json()["count"] == 2
+
+
+def test_l_offre_coursier_annonce_toujours_un_vrai_gain(client):
+    """Un numéro d'un pays sans tarif Honam (+33) voyait « Tu gagnes 0 FCFA
+    par course ». L'offre reprend alors celle du marché de lancement."""
+    togo, _ = _signup(client)
+    assert client.get("/api/v1/honam/courier/offer", headers=togo).json()["delivery_price"] == 1000
+
+    phone = "+33612345678"
+    with patch.object(otp_service.sms_service, "send_sms", return_value=True) as send:
+        client.post("/api/v1/auth/phone/request-otp", json={"phone": phone})
+    code = re.search(r"\b(\d{6})\b", send.call_args.args[2]).group(1)
+    body = client.post("/api/v1/auth/phone/verify-otp", json={"phone": phone, "code": code}).json()
+    client.cookies.clear()
+    abroad = {"Authorization": f"Bearer {body['access_token']}"}
+    offer = client.get("/api/v1/honam/courier/offer", headers=abroad).json()
+    assert offer["delivery_price"] == 1000 and offer["country"] == "TG"
+    assert offer["served_cities"] == ["Lomé"]

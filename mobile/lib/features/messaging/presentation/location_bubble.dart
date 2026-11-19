@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/location/pokou_location.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/time/server_time.dart';
 
@@ -13,16 +16,19 @@ import '../../../core/time/server_time.dart';
 /// avec l'étiquette éventuelle, les coordonnées et un bouton qui ouvre l'app
 /// de cartes du téléphone. `payload` est la charge utile brute du message
 /// (voir api/app/routes/polls.py::_location_payload).
-class LocationBubble extends StatefulWidget {
+class LocationBubble extends ConsumerStatefulWidget {
   const LocationBubble({super.key, required this.payload});
 
   final Map<String, dynamic> payload;
 
   @override
-  State<LocationBubble> createState() => _LocationBubbleState();
+  ConsumerState<LocationBubble> createState() => _LocationBubbleState();
 }
 
-class _LocationBubbleState extends State<LocationBubble> {
+class _LocationBubbleState extends ConsumerState<LocationBubble> {
+  /// Le nom du lieu résolu par le serveur, quand la position n'en porte
+  /// pas : on montre un quartier et une ville, pas des coordonnées.
+  String? _place;
   Timer? _ticker;
 
   double? get _latitude => (widget.payload['latitude'] as num?)?.toDouble();
@@ -42,6 +48,7 @@ class _LocationBubbleState extends State<LocationBubble> {
   @override
   void initState() {
     super.initState();
+    _resolvePlace();
     // Le compte à rebours "En direct" doit avancer même si rien d'autre ne
     // reconstruit cette bulle (aucun nouvel événement WS entre deux points).
     if (_isLive) {
@@ -79,6 +86,14 @@ class _LocationBubbleState extends State<LocationBubble> {
       Uri.parse('https://maps.google.com/?q=$lat,$lon'),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  Future<void> _resolvePlace() async {
+    final lat = _latitude;
+    final lon = _longitude;
+    if (lat == null || lon == null) return;
+    final place = await placeLabel(ref.read(apiClientProvider), lat, lon);
+    if (mounted && place != null) setState(() => _place = place);
   }
 
   @override
@@ -144,11 +159,9 @@ class _LocationBubbleState extends State<LocationBubble> {
               _label!,
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
-          if (lat != null && lon != null)
-            Text(
-              '${lat.toStringAsFixed(5)}, ${lon.toStringAsFixed(5)}',
-              style: TextStyle(color: mutedColor, fontSize: 12),
-            ),
+          if (_place != null &&
+              (_label == null || _label!.trim().isEmpty || _label != _place))
+            Text(_place!, style: TextStyle(color: mutedColor, fontSize: 12)),
           const SizedBox(height: 6),
           InkWell(
             onTap: (lat == null || lon == null) ? null : _openInMaps,

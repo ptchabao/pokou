@@ -4183,5 +4183,12 @@
   "msgStarEmpty": "Aún no hay mensajes destacados. Mantén pulsado un mensaje y elige «Destacar» para encontrarlo aquí.",
   "msgStarOnlyHere": "Solo visible en este teléfono.",
   "msgStarA11y": "Destacado",
-  "msgStarFrom": "{author} · {conversation}"
+  "msgStarFrom": "{author} · {conversation}",
+  "locOffTitle": "Activar la ubicación",
+  "locOffBody": "La ubicación del teléfono está desactivada. Actívala para indicar tu barrio automáticamente.",
+  "locDeniedTitle": "Permitir la ubicación",
+  "locDeniedBody": "Pokou necesita tu ubicación para encontrar lo que está cerca. Permítela en los ajustes del teléfono.",
+  "locOpenSettings": "Abrir ajustes",
+  "locNear": "Cerca de ti",
+  "locSaved": "Ubicación guardada: {place}"
 }

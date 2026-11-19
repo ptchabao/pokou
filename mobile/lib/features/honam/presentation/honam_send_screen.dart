@@ -17,6 +17,7 @@ import 'honam_controller.dart';
 import 'honam_order_screen.dart';
 import 'honam_ui.dart';
 import '../../../core/widgets/pokou_sheet.dart';
+import '../../../core/location/pokou_location.dart';
 
 /// La position, demandée au moment où elle sert : trier les officines et
 /// guider le coursier. Refusée, l'annuaire reste dans l'ordre alphabétique.
@@ -103,7 +104,14 @@ class _HonamSendScreenState extends ConsumerState<HonamSendScreen> {
         });
       }
     } catch (_) {}
-    _position = await currentPosition();
+    // Au moment d'envoyer une ordonnance, la raison est évidente : si la
+    // localisation est coupée ou refusée, on propose de l'activer (au lieu
+    // d'un annuaire silencieusement non trié).
+    try {
+      _position = mounted ? await obtainPosition(context) : null;
+    } catch (_) {
+      _position = null;
+    }
     try {
       final items = await ref
           .read(honamRepositoryProvider)

@@ -9662,5 +9662,19 @@
         "type": "String"
       }
     }
+  },
+  "locOffTitle": "Activer la localisation",
+  "locOffBody": "La localisation du téléphone est coupée. Active-la pour indiquer ton quartier automatiquement.",
+  "locDeniedTitle": "Autoriser la localisation",
+  "locDeniedBody": "Pokou a besoin de ta position pour trouver ce qui est près de toi. Autorise-la dans les réglages du téléphone.",
+  "locOpenSettings": "Ouvrir les réglages",
+  "locNear": "Près de toi",
+  "locSaved": "Position enregistrée : {place}",
+  "@locSaved": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -18,7 +18,8 @@ import 'honam_ui.dart';
 /// dit qui invite (maquette Coursiers 25).
 final courierOfferProvider = FutureProvider.autoDispose
     .family<CourierOffer, String?>(
-      (ref, code) => ref.watch(honamRepositoryProvider).courierOffer(code: code),
+      (ref, code) =>
+          ref.watch(honamRepositoryProvider).courierOffer(code: code),
     );
 
 /// Où l'offre apparaît (maquette Coursiers 0) : le bandeau de l'onglet
@@ -44,9 +45,9 @@ class CourierOfferPrompt extends ConsumerWidget {
         offer.dismissed) {
       return const SizedBox.shrink();
     }
-    void open() => Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const CourierOfferScreen()),
-    );
+    void open() => Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CourierOfferScreen()));
     if (deliveredBy == null) {
       return KoryCard(
         padding: EdgeInsets.zero,
@@ -145,11 +146,15 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
   }
 
   Widget _body(L l, CourierOffer offer) {
-    final price = offer.deliveryPrice ?? 0;
+    // Prix inconnu : on ne montre ni « 0 FCFA » ni une estimation fausse.
+    final knownPrice = offer.deliveryPrice;
+    final price = knownPrice ?? 0;
     final rides = _ridesPerMonth.round();
     // Le pack qui couvre ce rythme : le premier qui a assez de courses.
     final pack =
-        offer.packs.where((p) => p.rides == null || p.rides! >= rides).firstOrNull ??
+        offer.packs
+            .where((p) => p.rides == null || p.rides! >= rides)
+            .firstOrNull ??
         offer.packs.lastOrNull;
     final cost = offer.launchPeriod || pack == null
         ? 0
@@ -183,7 +188,7 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
                 style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               Text(
-                l.courierPerRide(formatFcfa(price)),
+                knownPrice == null ? '—' : l.courierPerRide(formatFcfa(price)),
                 style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 26,
@@ -207,7 +212,7 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
           KoryNotice(icon: Icons.info_outline, text: l.courierInviteNeeds),
           KorySection(l.courierWhatItCosts),
           _costs(l, offer),
-        ] else ...[
+        ] else if (knownPrice != null) ...[
           KoryCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,26 +259,30 @@ class _CourierOfferScreenState extends ConsumerState<CourierOfferScreen> {
               ],
             ),
           ),
-        KorySection(l.courierWhatItCosts),
-        _costs(l, offer),
-        KorySection(l.courierYouNeed),
-        for (final need in [l.courierNeedAge, l.courierNeedVehicle, l.courierNeedPhone])
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.check, size: 18, color: green),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    need,
-                    style: TextStyle(color: AppColors.textPrimary),
+          KorySection(l.courierWhatItCosts),
+          _costs(l, offer),
+          KorySection(l.courierYouNeed),
+          for (final need in [
+            l.courierNeedAge,
+            l.courierNeedVehicle,
+            l.courierNeedPhone,
+          ])
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check, size: 18, color: green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      need,
+                      style: TextStyle(color: AppColors.textPrimary),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ],
     );
@@ -377,7 +386,10 @@ class _Perk extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 caption,
-                style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -406,19 +418,18 @@ class _CourierWaitlistScreenState extends ConsumerState<CourierWaitlistScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(honamRepositoryProvider).waitlistCount(widget.city).then(
-      (count) {
-        if (mounted) setState(() => _count = count);
-      },
-      onError: (_) {},
-    );
+    ref.read(honamRepositoryProvider).waitlistCount(widget.city).then((count) {
+      if (mounted) setState(() => _count = count);
+    }, onError: (_) {});
   }
 
   Future<void> _join() async {
     setState(() => _busy = true);
     try {
       await ref.read(honamRepositoryProvider).joinWaitlist(widget.city);
-      final count = await ref.read(honamRepositoryProvider).waitlistCount(widget.city);
+      final count = await ref
+          .read(honamRepositoryProvider)
+          .waitlistCount(widget.city);
       if (mounted) {
         setState(() {
           _joined = true;
@@ -561,7 +572,8 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
     if (birth == null) return false;
     final now = DateTime.now();
     var age = now.year - birth.year;
-    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) {
+    if (now.month < birth.month ||
+        (now.month == birth.month && now.day < birth.day)) {
       age--;
     }
     return age >= 18;
@@ -569,7 +581,10 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
 
   bool get _canContinue => switch (_step) {
     1 => _adult && _city != null,
-    2 => _front != null && (_docType == 'PASSPORT' || _back != null) && _selfie != null,
+    2 =>
+      _front != null &&
+          (_docType == 'PASSPORT' || _back != null) &&
+          _selfie != null,
     3 => _zones.isNotEmpty && _days.isNotEmpty && _moments.isNotEmpty,
     4 => _walletVerified,
     5 => _quizDone,
@@ -607,7 +622,9 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
   Future<void> _sendCode() async {
     setState(() => _busy = true);
     try {
-      await ref.read(honamRepositoryProvider).walletSendCode(_wallet.text.trim());
+      await ref
+          .read(honamRepositoryProvider)
+          .walletSendCode(_wallet.text.trim());
       if (mounted) setState(() => _codeSent = true);
     } on ApiException catch (error) {
       if (mounted) koryToast(context, error.message);
@@ -621,7 +638,9 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
   Future<void> _verifyCode(String code) async {
     setState(() => _busy = true);
     try {
-      await ref.read(honamRepositoryProvider).walletVerify(_wallet.text.trim(), code);
+      await ref
+          .read(honamRepositoryProvider)
+          .walletVerify(_wallet.text.trim(), code);
       if (mounted) setState(() => _walletVerified = true);
     } on ApiException catch (error) {
       _code.clear();
@@ -790,9 +809,14 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
             Expanded(
               child: KoryCard(
                 onTap: () => setState(() => _transport = code),
-                borderColor: _transport == code ? AppColors.accentPrimary : null,
+                borderColor: _transport == code
+                    ? AppColors.accentPrimary
+                    : null,
                 color: _transport == code ? AppColors.terracottaTint : null,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 6,
+                ),
                 child: Column(
                   children: [
                     Icon(icon, color: AppColors.accentPrimaryDark),
@@ -806,10 +830,9 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
                     if (widget.offer.transports[code] != null)
                       Text(
                         l.courierUpToKm(
-                          widget.offer.transports[code]!
-                              .toStringAsFixed(
-                                widget.offer.transports[code]! % 1 == 0 ? 0 : 1,
-                              ),
+                          widget.offer.transports[code]!.toStringAsFixed(
+                            widget.offer.transports[code]! % 1 == 0 ? 0 : 1,
+                          ),
                         ),
                         style: TextStyle(
                           fontSize: 11.5,
@@ -927,7 +950,9 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
                 if (id != null) setState(() => _selfie = id);
               },
         icon: Icon(_selfie != null ? Icons.check : Icons.photo_camera_outlined),
-        label: Text(_selfie != null ? l.courierSelfieDone : l.courierTakeSelfie),
+        label: Text(
+          _selfie != null ? l.courierSelfieDone : l.courierTakeSelfie,
+        ),
         style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
       ),
       const SizedBox(height: 12),
@@ -946,7 +971,9 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
       showCheckmark: false,
       selectedColor: AppColors.accentPrimaryDark,
       labelStyle: TextStyle(
-        color: selected ? AppColors.actionButtonForeground : AppColors.textPrimary,
+        color: selected
+            ? AppColors.actionButtonForeground
+            : AppColors.textPrimary,
         fontWeight: FontWeight.w600,
       ),
       onSelected: (_) => onTap(),
@@ -1010,7 +1037,10 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
         children: [
           for (final (i, code) in _dayCodes.indexed)
             chip(dayLabels[i], _days.contains(code), () {
-              setState(() => _days.contains(code) ? _days.remove(code) : _days.add(code));
+              setState(
+                () =>
+                    _days.contains(code) ? _days.remove(code) : _days.add(code),
+              );
             }),
         ],
       ),
@@ -1022,7 +1052,9 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
           for (final (i, code) in _momentCodes.indexed)
             chip(momentLabels[i], _moments.contains(code), () {
               setState(
-                () => _moments.contains(code) ? _moments.remove(code) : _moments.add(code),
+                () => _moments.contains(code)
+                    ? _moments.remove(code)
+                    : _moments.add(code),
               );
             }),
         ],
@@ -1054,7 +1086,11 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
       ),
     if (_codeSent && !_walletVerified) ...[
       KorySection(l.courierSmsCode),
-      HonamCodeBoxes(controller: _code, autofocus: true, onCompleted: _verifyCode),
+      HonamCodeBoxes(
+        controller: _code,
+        autofocus: true,
+        onCompleted: _verifyCode,
+      ),
     ],
     if (_walletVerified) ...[
       const SizedBox(height: 12),
@@ -1103,7 +1139,10 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
                     ),
                     Text(
                       body,
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -1126,7 +1165,10 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
                 children: [
                   Text(
                     l.courierQuestionOf(_question + 1, quiz.length),
-                    style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   Text(
                     question,
@@ -1206,7 +1248,9 @@ List<Widget> courierApplicationSteps(
     (l.courierSentStep1, honamWhen(context, applied), true),
     (
       l.courierSentStep2,
-      l.courierAtTheLatest(honamWhen(context, applied.add(const Duration(hours: 48)))),
+      l.courierAtTheLatest(
+        honamWhen(context, applied.add(const Duration(hours: 48))),
+      ),
       false,
     ),
     (l.courierSentStep3, l.courierSentStep3Body, false),
@@ -1243,7 +1287,11 @@ List<Widget> courierApplicationSteps(
                     child: done
                         ? const Icon(Icons.check, size: 16, color: Colors.white)
                         : index == 1
-                        ? Icon(Icons.history, size: 16, color: AppColors.securityWarning)
+                        ? Icon(
+                            Icons.history,
+                            size: 16,
+                            color: AppColors.securityWarning,
+                          )
                         : Text('${index + 1}'),
                   ),
                   const SizedBox(width: 12),
@@ -1260,7 +1308,10 @@ List<Widget> courierApplicationSteps(
                         ),
                         Text(
                           subtitle,
-                          style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),

@@ -4183,5 +4183,12 @@
   "msgStarEmpty": "لا توجد رسائل مميزة بنجمة بعد. اضغط مطولًا على رسالة واختر «تمييز بنجمة» لتجدها هنا.",
   "msgStarOnlyHere": "مرئية على هذا الهاتف فقط.",
   "msgStarA11y": "مميز بنجمة",
-  "msgStarFrom": "{author} · {conversation}"
+  "msgStarFrom": "{author} · {conversation}",
+  "locOffTitle": "تفعيل الموقع",
+  "locOffBody": "موقع الهاتف معطّل. فعّله لتحديد حيّك تلقائيًا.",
+  "locDeniedTitle": "السماح بالموقع",
+  "locDeniedBody": "يحتاج Pokou إلى موقعك ليجد ما هو قريب منك. اسمح به في إعدادات الهاتف.",
+  "locOpenSettings": "فتح الإعدادات",
+  "locNear": "بالقرب منك",
+  "locSaved": "تم حفظ الموقع: {place}"
 }

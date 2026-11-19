@@ -25222,6 +25222,48 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'{author} · {conversation}'**
   String msgStarFrom(String author, String conversation);
+
+  /// No description provided for @locOffTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer la localisation'**
+  String get locOffTitle;
+
+  /// No description provided for @locOffBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'La localisation du téléphone est coupée. Active-la pour indiquer ton quartier automatiquement.'**
+  String get locOffBody;
+
+  /// No description provided for @locDeniedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser la localisation'**
+  String get locDeniedTitle;
+
+  /// No description provided for @locDeniedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou a besoin de ta position pour trouver ce qui est près de toi. Autorise-la dans les réglages du téléphone.'**
+  String get locDeniedBody;
+
+  /// No description provided for @locOpenSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir les réglages'**
+  String get locOpenSettings;
+
+  /// No description provided for @locNear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de toi'**
+  String get locNear;
+
+  /// No description provided for @locSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position enregistrée : {place}'**
+  String locSaved(String place);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

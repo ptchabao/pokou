@@ -15345,4 +15345,28 @@ class LAr extends L {
   String msgStarFrom(String author, String conversation) {
     return '$author · $conversation';
   }
+
+  @override
+  String get locOffTitle => 'تفعيل الموقع';
+
+  @override
+  String get locOffBody => 'موقع الهاتف معطّل. فعّله لتحديد حيّك تلقائيًا.';
+
+  @override
+  String get locDeniedTitle => 'السماح بالموقع';
+
+  @override
+  String get locDeniedBody =>
+      'يحتاج Pokou إلى موقعك ليجد ما هو قريب منك. اسمح به في إعدادات الهاتف.';
+
+  @override
+  String get locOpenSettings => 'فتح الإعدادات';
+
+  @override
+  String get locNear => 'بالقرب منك';
+
+  @override
+  String locSaved(String place) {
+    return 'تم حفظ الموقع: $place';
+  }
 }

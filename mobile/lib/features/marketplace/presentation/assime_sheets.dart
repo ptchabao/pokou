@@ -282,7 +282,9 @@ Future<void> showReportListing(
   );
   if (reason == null) return;
   try {
-    await ref.read(marketplaceRepositoryProvider).reportProduct(productId, reason);
+    await ref
+        .read(marketplaceRepositoryProvider)
+        .reportProduct(productId, reason);
     messenger.showSnackBar(SnackBar(content: Text(l.assimeReportSent)));
   } catch (_) {
     messenger.showSnackBar(SnackBar(content: Text(l.koryActionFailed)));

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart' show IsoCode;
 
@@ -28,6 +27,8 @@ import 'seller_verification_screen.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+import '../../../core/location/pokou_location.dart';
+import '../../../core/providers.dart';
 
 const _kAdEvery = 8;
 
@@ -90,29 +91,16 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen>
             OutlinedButton.icon(
               onPressed: () async {
                 try {
-                  if (!await Geolocator.isLocationServiceEnabled()) {
-                    if (dialogContext.mounted) {
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        SnackBar(
-                          content: Text(L.of(context).marketLocationCleared),
-                        ),
-                      );
-                    }
-                    return;
-                  }
-                  var perm = await Geolocator.checkPermission();
-                  if (perm == LocationPermission.denied)
-                    perm = await Geolocator.requestPermission();
-                  if (perm == LocationPermission.denied ||
-                      perm == LocationPermission.deniedForever)
-                    return;
-                  final pos = await Geolocator.getCurrentPosition(
-                    locationSettings: const LocationSettings(
-                      accuracy: LocationAccuracy.medium,
-                    ),
+                  // La ville ou le quartier, jamais des coordonnées ; et si
+                  // la localisation est coupée, on propose de l'activer.
+                  final pos = await obtainPosition(dialogContext);
+                  if (pos == null) return;
+                  final place = await placeLabel(
+                    ref.read(apiClientProvider),
+                    pos.latitude,
+                    pos.longitude,
                   );
-                  controller.text =
-                      '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}';
+                  if (place != null) controller.text = place;
                 } catch (_) {}
               },
               icon: const Icon(Icons.my_location, size: 18),

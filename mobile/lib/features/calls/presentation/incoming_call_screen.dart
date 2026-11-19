@@ -463,7 +463,11 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
               if (!_responding) ...[
                 Text(
                   l.callReplyWithMessage,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Padding(
@@ -478,16 +482,33 @@ class _IncomingCallScreenState extends ConsumerState<IncomingCallScreen> {
                         l.callReplyCantTalk,
                         l.callReplyWriteMe,
                       ])
-                        ActionChip(
-                          label: Text(text),
-                          labelStyle: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                        // Pastille dessinée à la main : un `ActionChip`
+                        // Material 3 ignore le fond demandé et reprend la
+                        // surface claire du thème — le texte blanc devenait
+                        // illisible sur fond blanc.
+                        Material(
+                          color: Colors.black.withValues(alpha: 0.35),
+                          shape: const StadiumBorder(
+                            side: BorderSide(color: Colors.white54),
                           ),
-                          backgroundColor: Colors.transparent,
-                          side: const BorderSide(color: Colors.white38),
-                          shape: const StadiumBorder(),
-                          onPressed: () => _replyWithMessage(text),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _replyWithMessage(text),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 9,
+                              ),
+                              child: Text(
+                                text,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                     ],
                   ),

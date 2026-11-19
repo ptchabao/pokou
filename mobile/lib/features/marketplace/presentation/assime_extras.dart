@@ -410,7 +410,10 @@ Future<void> showWhySponsored(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ModuleSheetTitle(l.assimeWhyTitle, subtitle: text ?? l.assimeWhyNotSponsored),
+          ModuleSheetTitle(
+            l.assimeWhyTitle,
+            subtitle: text ?? l.assimeWhyNotSponsored,
+          ),
           const SizedBox(height: 12),
           ModuleCallout(tone: CalloutTone.beige, text: l.assimeWhyPrivacy),
           const SizedBox(height: 12),
@@ -524,7 +527,10 @@ class BoostReportScreen extends ConsumerWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 Text(
                   '$value',
@@ -557,7 +563,9 @@ class BoostReportScreen extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               l.assimeBoostDayOf(day, total),
-                              style: const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                           Text(
@@ -581,7 +589,9 @@ class BoostReportScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    Expanded(child: figure(l.assimeViewsResults, b.impressions)),
+                    Expanded(
+                      child: figure(l.assimeViewsResults, b.impressions),
+                    ),
                     Expanded(child: figure(l.assimeViewsStatus, b.statusViews)),
                   ],
                 ),
@@ -601,11 +611,17 @@ class BoostReportScreen extends ConsumerWidget {
                 ),
                 if (b.statusModeration == 'PENDING') ...[
                   const SizedBox(height: 10),
-                  ModuleCallout(tone: CalloutTone.amber, text: l.assimeStatusPending),
+                  ModuleCallout(
+                    tone: CalloutTone.amber,
+                    text: l.assimeStatusPending,
+                  ),
                 ],
                 if (b.statusModeration == 'REJECTED') ...[
                   const SizedBox(height: 10),
-                  ModuleCallout(tone: CalloutTone.red, text: l.assimeStatusRejected),
+                  ModuleCallout(
+                    tone: CalloutTone.red,
+                    text: l.assimeStatusRejected,
+                  ),
                 ],
                 const SizedBox(height: 14),
                 ModuleCard(
@@ -621,9 +637,15 @@ class BoostReportScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          _Legend(color: AppColors.accentPrimary, label: l.assimeLegendResults),
+                          _Legend(
+                            color: AppColors.accentPrimary,
+                            label: l.assimeLegendResults,
+                          ),
                           const SizedBox(width: 12),
-                          _Legend(color: AppColors.brandOr, label: l.assimeLegendStatus),
+                          _Legend(
+                            color: AppColors.brandOr,
+                            label: l.assimeLegendStatus,
+                          ),
                         ],
                       ),
                     ],
@@ -632,7 +654,10 @@ class BoostReportScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Text(
                   l.assimeBoostNote,
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             );
@@ -672,7 +697,10 @@ class _Legend extends StatelessWidget {
         ),
       ),
       const SizedBox(width: 4),
-      Text(label, style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+      Text(
+        label,
+        style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+      ),
     ],
   );
 }
@@ -705,7 +733,8 @@ class _DailyChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          for (final d in daily.length > 7 ? daily.sublist(daily.length - 7) : daily)
+          for (final d
+              in daily.length > 7 ? daily.sublist(daily.length - 7) : daily)
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -720,7 +749,10 @@ class _DailyChart extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   DateFormat.E(locale).format(d.day),
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -1000,7 +1032,10 @@ class _SponsoredStatusViewerState extends ConsumerState<SponsoredStatusViewer>
                         if (product.location != null) product.location!,
                         l.assimeAdAssime,
                       ].join(' · '),
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -1013,7 +1048,10 @@ class _SponsoredStatusViewerState extends ConsumerState<SponsoredStatusViewer>
                               minimumSize: const Size(0, 46),
                             ),
                             onPressed: _seeListing,
-                            icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 18,
+                            ),
                             label: Text(l.assimeSeeListing),
                           ),
                         ),
@@ -1035,7 +1073,10 @@ class _SponsoredStatusViewerState extends ConsumerState<SponsoredStatusViewer>
                     const SizedBox(height: 8),
                     Text(
                       l.assimeNextHint,
-                      style: const TextStyle(color: Colors.white54, fontSize: 11),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),

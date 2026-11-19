@@ -126,7 +126,10 @@ class AssimeSellerProfileScreen extends ConsumerWidget {
                       ? l.assimeProSince(since)
                       : l.assimePrivateSince(since),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
               const SizedBox(height: 2),
               InkWell(
@@ -145,9 +148,7 @@ class AssimeSellerProfileScreen extends ConsumerWidget {
                       Icon(Icons.star, size: 14, color: AppColors.brandOr),
                       const SizedBox(width: 3),
                       Text(
-                        profile.rating!
-                            .toStringAsFixed(1)
-                            .replaceAll('.', ','),
+                        profile.rating!.toStringAsFixed(1).replaceAll('.', ','),
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       const Text(' · '),
@@ -218,7 +219,10 @@ class AssimeSellerProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Text(
                   l.assimeBadgeNote,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ],

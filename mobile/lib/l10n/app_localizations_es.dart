@@ -15418,4 +15418,29 @@ class LEs extends L {
   String msgStarFrom(String author, String conversation) {
     return '$author · $conversation';
   }
+
+  @override
+  String get locOffTitle => 'Activar la ubicación';
+
+  @override
+  String get locOffBody =>
+      'La ubicación del teléfono está desactivada. Actívala para indicar tu barrio automáticamente.';
+
+  @override
+  String get locDeniedTitle => 'Permitir la ubicación';
+
+  @override
+  String get locDeniedBody =>
+      'Pokou necesita tu ubicación para encontrar lo que está cerca. Permítela en los ajustes del teléfono.';
+
+  @override
+  String get locOpenSettings => 'Abrir ajustes';
+
+  @override
+  String get locNear => 'Cerca de ti';
+
+  @override
+  String locSaved(String place) {
+    return 'Ubicación guardada: $place';
+  }
 }

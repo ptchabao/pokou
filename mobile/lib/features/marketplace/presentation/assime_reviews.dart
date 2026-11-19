@@ -268,7 +268,9 @@ class _Summary extends StatelessWidget {
               children: [
                 for (final entry in reviews.tags.entries)
                   Chip(
-                    label: Text('${assimeTagLabel(l, entry.key)} · ${entry.value}'),
+                    label: Text(
+                      '${assimeTagLabel(l, entry.key)} · ${entry.value}',
+                    ),
                     backgroundColor: AppColors.surface,
                     side: BorderSide(color: AppColors.border),
                     shape: const StadiumBorder(),

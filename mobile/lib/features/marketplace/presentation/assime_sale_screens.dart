@@ -146,7 +146,7 @@ class _AssimeMarkSoldScreenState extends ConsumerState<AssimeMarkSoldScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _price,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -362,7 +362,7 @@ class _AssimeRateSaleScreenState extends ConsumerState<AssimeRateSaleScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                  contextMenuBuilder: pokouContextMenuBuilder,
                   controller: _comment,
                   maxLines: 3,
                   maxLength: 1000,

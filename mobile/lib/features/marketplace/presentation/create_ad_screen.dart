@@ -194,7 +194,7 @@ class _CreateAdScreenState extends ConsumerState<CreateAdScreen> {
                   const SizedBox(height: 20),
                   FieldLabel(L.of(context).commonTitle),
                   TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                    contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _titleController,
                     maxLength: 120,
                     decoration: InputDecoration(
@@ -203,7 +203,7 @@ class _CreateAdScreenState extends ConsumerState<CreateAdScreen> {
                   ),
                   FieldLabel(L.of(context).mediaMessage),
                   TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+                    contextMenuBuilder: pokouContextMenuBuilder,
                     controller: _bodyController,
                     maxLines: 3,
                     maxLength: 500,

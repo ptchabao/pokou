@@ -15441,4 +15441,29 @@ class LFr extends L {
   String msgStarFrom(String author, String conversation) {
     return '$author · $conversation';
   }
+
+  @override
+  String get locOffTitle => 'Activer la localisation';
+
+  @override
+  String get locOffBody =>
+      'La localisation du téléphone est coupée. Active-la pour indiquer ton quartier automatiquement.';
+
+  @override
+  String get locDeniedTitle => 'Autoriser la localisation';
+
+  @override
+  String get locDeniedBody =>
+      'Pokou a besoin de ta position pour trouver ce qui est près de toi. Autorise-la dans les réglages du téléphone.';
+
+  @override
+  String get locOpenSettings => 'Ouvrir les réglages';
+
+  @override
+  String get locNear => 'Près de toi';
+
+  @override
+  String locSaved(String place) {
+    return 'Position enregistrée : $place';
+  }
 }

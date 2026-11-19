@@ -15481,4 +15481,29 @@ class LRu extends L {
   String msgStarFrom(String author, String conversation) {
     return '$author · $conversation';
   }
+
+  @override
+  String get locOffTitle => 'Включить геолокацию';
+
+  @override
+  String get locOffBody =>
+      'Геолокация телефона выключена. Включи её, чтобы район определился автоматически.';
+
+  @override
+  String get locDeniedTitle => 'Разрешить геолокацию';
+
+  @override
+  String get locDeniedBody =>
+      'Pokou нужна твоя геопозиция, чтобы найти то, что рядом. Разреши её в настройках телефона.';
+
+  @override
+  String get locOpenSettings => 'Открыть настройки';
+
+  @override
+  String get locNear => 'Рядом с тобой';
+
+  @override
+  String locSaved(String place) {
+    return 'Местоположение сохранено: $place';
+  }
 }

@@ -15440,4 +15440,29 @@ class LIt extends L {
   String msgStarFrom(String author, String conversation) {
     return '$author · $conversation';
   }
+
+  @override
+  String get locOffTitle => 'Attiva la posizione';
+
+  @override
+  String get locOffBody =>
+      'La posizione del telefono è disattivata. Attivala per indicare la tua zona automaticamente.';
+
+  @override
+  String get locDeniedTitle => 'Consenti la posizione';
+
+  @override
+  String get locDeniedBody =>
+      'Pokou ha bisogno della tua posizione per trovare ciò che è vicino. Consentila nelle impostazioni del telefono.';
+
+  @override
+  String get locOpenSettings => 'Apri impostazioni';
+
+  @override
+  String get locNear => 'Vicino a te';
+
+  @override
+  String locSaved(String place) {
+    return 'Posizione salvata: $place';
+  }
 }

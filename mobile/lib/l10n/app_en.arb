@@ -4239,5 +4239,12 @@
   "msgStarEmpty": "No starred messages yet. Long-press a message and choose \"Star\" to find it here.",
   "msgStarOnlyHere": "Only visible on this phone.",
   "msgStarA11y": "Starred",
-  "msgStarFrom": "{author} · {conversation}"
+  "msgStarFrom": "{author} · {conversation}",
+  "locOffTitle": "Turn on location",
+  "locOffBody": "Your phone’s location is off. Turn it on to fill in your area automatically.",
+  "locDeniedTitle": "Allow location",
+  "locDeniedBody": "Pokou needs your location to find what’s near you. Allow it in your phone settings.",
+  "locOpenSettings": "Open settings",
+  "locNear": "Near you",
+  "locSaved": "Location saved: {place}"
 }

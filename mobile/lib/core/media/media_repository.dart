@@ -207,6 +207,18 @@ class MediaRepository {
         }
       }
     }
+    // Une vignette est demandée, mais l'ORIGINAL est déjà sur l'appareil —
+    // typiquement chez l'expéditeur, qui vient de l'envoyer : il sert tout
+    // de suite (l'affichage le décode à la bonne taille). Sans ce repli,
+    // l'aperçu de sa propre photo tournait en attendant une vignette que le
+    // serveur venait à peine de pouvoir produire.
+    if (largeur != null) {
+      final original = fichierEnCache(mediaAssetId, extension: extension);
+      if (original != null) {
+        _resolus[cle] = original;
+        return original;
+      }
+    }
     return null;
   }
 
@@ -451,11 +463,15 @@ class MediaRepository {
     final dir = await _repertoire();
     final file = File('${dir.path}/$cle');
     if (!await file.exists()) {
-      final bytes = await _api.getBytes(
-        largeur == null
-            ? '/media/$mediaAssetId'
-            : '/media/$mediaAssetId?w=$largeur',
-      );
+      // Borné dans le temps : un réseau bloqué affiche une erreur (et laisse
+      // réessayer) au lieu d'un rond qui tourne indéfiniment.
+      final bytes = await _api
+          .getBytes(
+            largeur == null
+                ? '/media/$mediaAssetId'
+                : '/media/$mediaAssetId?w=$largeur',
+          )
+          .timeout(const Duration(seconds: 90));
       // Déchiffré AVANT l'écriture : un bloc altéré ne doit jamais atterrir
       // dans le cache, où il serait relu tel quel au prochain affichage.
       final clear = mediaKey == null

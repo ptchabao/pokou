@@ -4183,5 +4183,12 @@
   "msgStarEmpty": "Ancora nessun messaggio importante. Tieni premuto un messaggio e scegli «Aggiungi agli importanti» per ritrovarlo qui.",
   "msgStarOnlyHere": "Visibile solo su questo telefono.",
   "msgStarA11y": "Importante",
-  "msgStarFrom": "{author} · {conversation}"
+  "msgStarFrom": "{author} · {conversation}",
+  "locOffTitle": "Attiva la posizione",
+  "locOffBody": "La posizione del telefono è disattivata. Attivala per indicare la tua zona automaticamente.",
+  "locDeniedTitle": "Consenti la posizione",
+  "locDeniedBody": "Pokou ha bisogno della tua posizione per trovare ciò che è vicino. Consentila nelle impostazioni del telefono.",
+  "locOpenSettings": "Apri impostazioni",
+  "locNear": "Vicino a te",
+  "locSaved": "Posizione salvata: {place}"
 }
