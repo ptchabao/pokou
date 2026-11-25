@@ -50,7 +50,7 @@ def test_privacy_policy_page_is_complete():
     assert response.status_code == 200
     text = response.text
     assert "<h1>Politique de confidentialité de Pokou</h1>" in text
-    for needed in ("confidentialite@pokou.app", "Supprimer votre compte", "Vos droits",
+    for needed in ("support@pokou.app", "Supprimer votre compte", "Vos droits",
                    "donnée de santé", "Les enfants", "pokou.app/compte/suppression/"):
         assert needed in text, needed
 

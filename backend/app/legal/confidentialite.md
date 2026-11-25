@@ -13,8 +13,8 @@ Kory, HONAM et Assimé, ainsi qu'à Baba, l'assistant de l'application.
 Pokou, éditeur de l'application Pokou et du site pokou.app, est
 responsable du traitement de vos données.
 
-Pour toute question sur vos données ou pour exercer vos droits, écrivez à
-**confidentialite@pokou.app**. Pour l'aide générale : **support@pokou.app**.
+Pour toute question sur vos données, pour exercer vos droits ou pour
+toute aide, écrivez au support : **support@pokou.app**.
 
 ## 2. Les données que nous utilisons
 
@@ -213,7 +213,7 @@ Vous pouvez à tout moment :
   téléphone ;
 - vous **opposer** à un usage fondé sur notre intérêt légitime.
 
-Écrivez à **confidentialite@pokou.app**. Nous répondons dans un délai d'un
+Écrivez à **support@pokou.app**. Nous répondons dans un délai d'un
 mois. Vous pouvez aussi saisir l'autorité de protection des données de
 votre pays : au Togo, l'Instance de protection des données à caractère
 personnel (IPDCP) ; en Côte d'Ivoire, l'Autorité de régulation des
