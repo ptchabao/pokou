@@ -2,24 +2,13 @@
   --terracotta: #B4532A;
   --terracotta-deep: #8E3F1F;
   --gold: #D9A441;
-  --cream: #FBF5EC;
-  --sand: #F3E7D6;
+  --cream: #FFFFFF;
+  --sand: #FBF5EC;
   --ink: #2A1E18;
   --muted: #6E5D52;
-  --line: #E6D6C2;
+  --line: #EFE4D6;
   --card: #FFFFFF;
-  color-scheme: light dark;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --cream: #1A1615;
-    --sand: #241D1A;
-    --ink: #F4EADF;
-    --muted: #BFAE9F;
-    --line: #3A2F29;
-    --card: #2A221F;
-    --terracotta-deep: #E08A5F;
-  }
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -51,7 +40,7 @@ h2 { font-size: clamp(1.5rem, 3.4vw, 2.2rem); }
 /* En-tête */
 .top {
   position: sticky; top: 0; z-index: 10;
-  background: color-mix(in srgb, var(--cream) 92%, transparent);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
@@ -72,12 +61,13 @@ h2 { font-size: clamp(1.5rem, 3.4vw, 2.2rem); }
 .hero__art img { border-radius: 28px; width: 100%; max-height: 520px; object-fit: cover; object-position: 30% 20%; box-shadow: 0 24px 60px -30px rgba(80, 35, 15, 0.45); }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; scroll-margin-top: 90px; }
 .store {
-  display: inline-flex; flex-direction: column; justify-content: center;
-  min-width: 170px; padding: 10px 20px;
-  border-radius: 14px; background: var(--ink); color: var(--cream);
+  display: inline-flex; align-items: center; gap: 12px;
+  min-width: 180px; padding: 10px 20px 10px 16px;
+  border-radius: 14px; background: #111111; color: #FFFFFF;
   font-weight: 700; font-size: 1.05rem; line-height: 1.2;
-  opacity: 0.92;
 }
+.store__logo { width: 26px; height: 26px; flex: none; }
+.store__text { display: flex; flex-direction: column; }
 .store small { font-weight: 500; font-size: 0.75rem; opacity: 0.8; }
 .sign { color: var(--terracotta); font-weight: 600; margin: 0; }
 @media (max-width: 860px) {
