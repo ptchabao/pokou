@@ -52,3 +52,28 @@ def test_la_phrase_du_jour_efface_tout_une_seule_fois(tmp_path, monkeypatch):
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY)"))
     assert reset_database.main() == 0
     assert inspect(engine).get_table_names() == ["users"]
+
+
+def test_une_deuxieme_remise_a_zero_le_meme_jour(tmp_path, monkeypatch):
+    engine, media = _setup(tmp_path, monkeypatch)
+    monkeypatch.setenv("POKOU_RESET_DATABASE", _today())
+    reset_database.main()
+    with engine.begin() as conn:
+        conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY)"))
+    # « -2 » : une autre phrase, donc une autre marque — elle efface.
+    monkeypatch.setenv("POKOU_RESET_DATABASE", _today() + "-2")
+    assert reset_database.main() == 0
+    assert inspect(engine).get_table_names() == []
+    # Et elle aussi ne sert qu'une fois.
+    with engine.begin() as conn:
+        conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY)"))
+    reset_database.main()
+    assert inspect(engine).get_table_names() == ["users"]
+
+
+def test_un_suffixe_quelconque_est_refuse(tmp_path, monkeypatch):
+    engine, media = _setup(tmp_path, monkeypatch)
+    for phrase in (_today() + "x", _today() + "-10", _today() + "-1", _today() + "-2-2"):
+        monkeypatch.setenv("POKOU_RESET_DATABASE", phrase)
+        reset_database.main()
+        assert len(inspect(engine).get_table_names()) == 2, phrase

@@ -21,6 +21,7 @@ Procédure : docs/DOCUMENTATION-OFFICIELLE.md § 11, « Remettre la production
     python -m scripts.reset_database
 """
 import os
+import re
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -136,8 +137,12 @@ def main() -> int:
     phrase = os.environ.get("POKOU_RESET_DATABASE", "").strip()
     if not phrase:
         return 0
-    if phrase != _expected():
-        print(f"Remise à zéro REFUSÉE : POKOU_RESET_DATABASE doit valoir « {_expected()} » aujourd'hui.")
+    # Une deuxième remise à zéro le même jour : « …-AAAA-MM-JJ-2 », « -3 »…
+    # Chaque phrase garde sa propre marque, donc ne sert toujours qu'une fois.
+    suffix = phrase[len(_expected()):]
+    if not phrase.startswith(_expected()) or (suffix and not re.fullmatch(r"-[2-9]", suffix)):
+        print(f"Remise à zéro REFUSÉE : POKOU_RESET_DATABASE doit valoir « {_expected()} » "
+              f"(ou « {_expected()}-2 » pour une deuxième fois) aujourd'hui.")
         return 0
     marker = _marker(phrase)
     if marker.exists():
