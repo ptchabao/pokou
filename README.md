@@ -89,7 +89,7 @@ Comptes et services à ouvrir avant : [docs/mise-en-service.md](docs/mise-en-ser
 
 ## Administration
 
-Console de l'équipe : `https://apipokou.cabinet-p-et-associes.com/console/`
+Console de l'équipe : `https://extranet.pokou.app/console/`
 (code dans `admin/`). Connexion par e-mail et mot de passe, rôles,
 super-administrateur créé au déploiement :
 [docs/administration.md](docs/administration.md).
@@ -99,7 +99,7 @@ super-administrateur créé au déploiement :
 Voir `mobile/README.md`. Clé de signature, builds Play Store, App Store et
 APK : [docs/publication-mobile.md](docs/publication-mobile.md). L'API visée se règle au build :
 `--dart-define=API_BASE_URL=…` (défaut
-`https://apipokou.cabinet-p-et-associes.com/api/v1`).
+`https://api.pokou.app/api/v1`).
 
 ## Pokou et Mahizu
 

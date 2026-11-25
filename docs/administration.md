@@ -7,7 +7,7 @@ avec son numéro de téléphone.
 
 | | |
 |---|---|
-| Adresse | `https://apipokou.cabinet-p-et-associes.com/console/` |
+| Adresse | `https://extranet.pokou.app/console/` |
 | Code | `admin/` (Next.js 15, shadcn/ui « dashboard-01 », Tailwind 4) |
 | API | `/api/v1/admin/*` (`backend/app/api/v1/admin/admin.py`) |
 | Droits | `backend/app/core/permissions.py` |
@@ -59,7 +59,7 @@ Le mot de passe aléatoire est écrit **une seule fois** dans les journaux du
 déploiement qui crée le compte (Kubero → `pokou-api` → Logs) :
 
 ```
-Console d'administration : https://apipokou.cabinet-p-et-associes.com/console/
+Console d'administration : https://extranet.pokou.app/console/
 Super-administrateur     : admin@pokou.app (créé)
 Mot de passe             : ••••••••••••••••
 → affiché une seule fois : change-le dès la première connexion.
@@ -143,7 +143,7 @@ signalement règle aussi les autres signalements ouverts du même compte.
 ```bash
 cd admin
 npm install
-NEXT_PUBLIC_API_BASE=https://apipokou.cabinet-p-et-associes.com npm run dev   # http://localhost:3000/console/
+NEXT_PUBLIC_API_BASE=https://api.pokou.app npm run dev   # http://localhost:3000/console/
 npm run publish     # build + copie de l'export dans backend/app/console
 ```
 

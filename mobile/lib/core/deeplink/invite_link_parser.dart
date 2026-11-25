@@ -20,11 +20,14 @@ enum DeepLinkInviteKind {
 /// court sans toucher au code. Les liens de l'API restent reconnus.
 const pokouLinkHost = String.fromEnvironment(
   'POKOU_LINK_HOST',
-  defaultValue: pokouApiLinkHost,
+  defaultValue: 'deep.pokou.app',
 );
-const pokouApiLinkHost = 'apipokou.cabinet-p-et-associes.com';
+const pokouApiLinkHost = 'api.pokou.app';
 const pokouLinkBaseUrl = 'https://$pokouLinkHost';
 const _legacyLinkHost = 'pok.app';
+
+/// L'ancien domaine (avant pokou.app) : les liens déjà partagés restent lus.
+const _previousLinkHost = 'apipokou.cabinet-p-et-associes.com';
 
 /// Intention extraite d'un lien — invitation, ouverture de ressource ou post.
 class PendingInvite {
@@ -63,6 +66,7 @@ PendingInvite? parseInviteLink(Uri uri) {
   if (uri.scheme != 'https' ||
       (host != pokouLinkHost &&
           host != pokouApiLinkHost &&
+          host != _previousLinkHost &&
           host != _legacyLinkHost)) {
     return null;
   }

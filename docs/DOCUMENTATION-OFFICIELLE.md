@@ -98,11 +98,11 @@ local.
 
 | Quoi | Adresse |
 |---|---|
-| API | `https://apipokou.cabinet-p-et-associes.com` (préfixe `/api/v1`) |
+| API | `https://api.pokou.app` (préfixe `/api/v1`) |
 | État de l'API | `/health` (200 attendu) ; documentation interactive `/docs` |
-| Console d'administration | `https://apipokou.cabinet-p-et-associes.com/console/` |
-| Espace officine (pharmacies) | `https://apipokou.cabinet-p-et-associes.com/officine/` |
-| Appels (signalisation LiveKit) | `wss://rtc.cabinet-p-et-associes.com` |
+| Console d'administration | `https://extranet.pokou.app/console/` |
+| Espace officine (pharmacies) | `https://extranet.pokou.app/officine/` |
+| Appels (signalisation LiveKit) | `wss://calls.pokou.app` |
 | Appels (médias) | `169.58.195.18` : 7881/TCP, 7882/UDP, relais TURN 3478/UDP |
 | Plateforme d'hébergement | Kubero : `https://kubero.169.58.195.18.sslip.io` |
 | Dépôt | GitHub, branche `main` |
@@ -481,7 +481,7 @@ Réglages au moment du build (`--dart-define`) :
 
 | Nom | Rôle | Défaut |
 |---|---|---|
-| `API_BASE_URL` | adresse de l'API | `https://apipokou.cabinet-p-et-associes.com/api/v1` |
+| `API_BASE_URL` | adresse de l'API | `https://api.pokou.app/api/v1` |
 | `POKOU_VERSION` | version affichée dans « À propos » | — |
 | `POKOU_LINK_HOST` | domaine des liens d'invitation | celui de l'API |
 | `MAHIZU_API_BASE_URL` | ancien service d'assistant (reliquat, § 14) | `https://api.mahizu.com/api/v1` |
@@ -708,7 +708,7 @@ Ils ne sont pas utilisés aujourd'hui. Guide :
 git push origin main
 # puis redémarrer l'app pokou-api : interface Kubero → pokou-api → Restart
 # ou POST /api/apps/pokou/production/pokou-api/restart (jeton Kubero)
-curl -s https://apipokou.cabinet-p-et-associes.com/health        # 200
+curl -s https://api.pokou.app/health        # 200
 ```
 
 Vérifier dans les journaux Kubero : « Migrations applied. », la ligne du seed,

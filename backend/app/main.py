@@ -119,6 +119,15 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
 
 
 @app.middleware("http")
+async def route_site_hosts(request: Request, call_next):
+    """pokou.app sert le site, www redirige, extranet mène à l'officine."""
+    from app.api.public.site import site_redirect
+
+    response = site_redirect(request)
+    return response if response is not None else await call_next(request)
+
+
+@app.middleware("http")
 async def add_trace_id_and_metrics(request: Request, call_next):
     """Ajoute un X-Trace-ID à chaque réponse et alimente les métriques."""
     # Les routes synchrones (pool de threads) poussent le temps réel dans

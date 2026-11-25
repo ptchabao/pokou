@@ -722,7 +722,7 @@ lines = [
     ("", None),
     ("Ce qu'il faut pour tester", "h"),
     ("Application Android : le fichier pokou-v1.28.1+50-testeurs-mise-a-jour.apk (se met à jour par-dessus une version déjà installée) ou pokou-v1.28.1+50-universal-release.apk (nouvelle installation).", None),
-    ("Serveur : https://apipokou.cabinet-p-et-associes.com — console : https://apipokou.cabinet-p-et-associes.com/console/", None),
+    ("Serveur : https://api.pokou.app — console : https://extranet.pokou.app/console/", None),
     ("Au moins deux téléphones et deux comptes (A et B) ; trois pour les groupes et les appels de groupe. Un compte = un numéro de téléphone qui reçoit les SMS.", None),
     ("Pour la console : un compte d'équipe par rôle, créé par un super-administrateur (Équipe et rôles → Ajouter).", None),
     ("", None),

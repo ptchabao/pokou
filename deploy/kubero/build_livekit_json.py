@@ -25,7 +25,7 @@ for line in open("secrets.env", encoding="utf-8"):
         env[k] = v
 
 NODE_IP = "169.58.195.18"
-HOST = "rtc.cabinet-p-et-associes.com"
+HOST = "calls.pokou.app"
 
 config = f"""port: 7880
 rtc:

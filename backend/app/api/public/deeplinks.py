@@ -6,7 +6,7 @@ vérification de domaine — elle marche — mais dans le fait que **rien ne
 servait ces URL**.
 
 `assetlinks.json` dit à Android que Pokou a le droit d'ouvrir
-`https://apipokou.cabinet-p-et-associes.com/invite/…`. Il ne rend pas cette adresse existante
+`https://deep.pokou.app/invite/…`. Il ne rend pas cette adresse existante
 pour autant. Dès qu'un lien n'est PAS intercepté par l'application — parce
 qu'elle n'est pas installée, parce qu'on a choisi « ouvrir dans le
 navigateur » une fois, ou parce que le lien est ouvert dans le navigateur

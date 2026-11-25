@@ -133,7 +133,7 @@ def seed_superadmin(db) -> None:
         ).update({Token.revoked_at: datetime.utcnow()}, synchronize_session=False)
     db.commit()
 
-    base = os.environ.get("PUBLIC_LINK_BASE_URL", "https://apipokou.cabinet-p-et-associes.com").rstrip("/")
+    base = os.environ.get("CONSOLE_BASE_URL", "https://extranet.pokou.app").rstrip("/")
     print("─" * 64)
     print(f"Console d'administration : {base}/console/")
     print(f"Super-administrateur     : {email}" + (" (créé)" if created else ""))

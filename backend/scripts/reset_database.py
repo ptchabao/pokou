@@ -1,4 +1,4 @@
-"""Remise à zéro COMPLÈTE de Pokou : base, médias MinIO, médias sur disque.
+"""Remise à zéro COMPLÈTE de Pokou : base, médias MinIO, médias sur disque, Redis.
 
 IRRÉVERSIBLE. Aucune sauvegarde n'est faite.
 
@@ -118,6 +118,20 @@ def wipe_local_media() -> str:
     return f"disque {root} : {files} fichiers supprimés"
 
 
+def wipe_redis() -> str:
+    """Présence, limites de débit, caches : tout ce qui y reste parle des
+    anciens comptes, dont les identifiants vont être réattribués."""
+    url = settings.redis_url
+    if not url or url.startswith("redis://localhost"):
+        return "redis : non configuré"
+    import redis
+
+    client = redis.Redis.from_url(url, socket_timeout=10)
+    keys = client.dbsize()
+    client.flushdb()
+    return f"redis : {keys} clés supprimées"
+
+
 def main() -> int:
     phrase = os.environ.get("POKOU_RESET_DATABASE", "").strip()
     if not phrase:
@@ -132,7 +146,7 @@ def main() -> int:
 
     print("═" * 64)
     print(f"REMISE À ZÉRO DE POKOU ({phrase})")
-    for step in (wipe_database, wipe_object_storage, wipe_local_media):
+    for step in (wipe_database, wipe_object_storage, wipe_local_media, wipe_redis):
         try:
             print("  " + step())
         except Exception as exc:  # noqa: BLE001 — on dit tout, puis on arrête

@@ -9,7 +9,11 @@ for line in open("secrets.env", encoding="utf-8"):
         k, v = line.split("=", 1)
         env[k] = v
 
-HOST = "apipokou.cabinet-p-et-associes.com"
+HOST = "api.pokou.app"
+# Tous les noms servis par l'API : le site (pokou.app, www), les liens
+# d'invitation (deep), l'officine et la console (extranet). C'est le nom
+# demandé qui décide de la page (app/api/public/site.py).
+HOSTS = [HOST, "pokou.app", "www.pokou.app", "deep.pokou.app", "extranet.pokou.app"]
 sc_root = {"allowPrivilegeEscalation": False, "readOnlyRootFilesystem": False,
            "runAsNonRoot": False, "runAsUser": 0, "runAsGroup": 0, "capabilities": {"add": [], "drop": []}}
 sc_run = {"allowPrivilegeEscalation": False, "readOnlyRootFilesystem": True,
@@ -23,6 +27,7 @@ app_env = {
     "DB_POOL_SIZE": "5",
     "DB_MAX_OVERFLOW": "5",
     "PUBLIC_API_URL": f"https://{HOST}",
+    "PUBLIC_LINK_BASE_URL": "https://deep.pokou.app",
     # Pas de stockage objet sur ce cluster : les pièces jointes vont sur un
     # volume persistant (local-path).
     "MEDIA_STORAGE_DIR": "/data/media",
@@ -40,7 +45,7 @@ app_env = {
 if env.get("LIVEKIT_API_KEY") and env.get("LIVEKIT_API_SECRET"):
     app_env.update({
         "LIVEKIT_ENABLED": "true",
-        "LIVEKIT_URL": "wss://rtc.cabinet-p-et-associes.com",
+        "LIVEKIT_URL": "wss://calls.pokou.app",
         "LIVEKIT_API_KEY": env["LIVEKIT_API_KEY"],
         "LIVEKIT_API_SECRET": env["LIVEKIT_API_SECRET"],
     })
@@ -133,8 +138,8 @@ app = {
         "enabled": True,
         "className": "traefik",
         "annotations": {"cert-manager.io/cluster-issuer": "letsencrypt-prod", "kubernetes.io/tls-acme": "true"},
-        "hosts": [{"host": HOST, "paths": [{"path": "/", "pathType": "Prefix"}]}],
-        "tls": [{"hosts": [HOST], "secretName": "pokou-api-tls"}],
+        "hosts": [{"host": h, "paths": [{"path": "/", "pathType": "Prefix"}]} for h in HOSTS],
+        "tls": [{"hosts": HOSTS, "secretName": "pokou-app-tls"}],
     },
     "addons": [
         {"id": "kubero-operator", "kind": "KuberoAddonPostgres", "displayName": "PostgreSQL",

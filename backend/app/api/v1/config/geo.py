@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/geo", tags=["Pokou configuration"])
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
-_USER_AGENT = "Pokou/1.0 (+https://apipokou.cabinet-p-et-associes.com)"
+_USER_AGENT = "Pokou/1.0 (+https://pokou.app)"
 _CACHE_MAX = 5000
 _cache: "OrderedDict[tuple, Optional[dict]]" = OrderedDict()
 _lock = asyncio.Lock()

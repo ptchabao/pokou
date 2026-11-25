@@ -148,10 +148,14 @@ class Settings(BaseSettings):
 
     # Adresse publique de cette API, telle que la joignent les tiers : sert à
     # construire les URL de rappel des paiements (voir semoa_client).
-    public_api_url: str = "https://api.pok.app"
+    public_api_url: str = "https://api.pokou.app"
 
     # Domaine public des invitations et liens profonds, servi par l'API.
-    public_link_base_url: str = "https://apipokou.cabinet-p-et-associes.com"
+    public_link_base_url: str = "https://deep.pokou.app"
+
+    # Le site officiel et l'extranet (officine, console) : voir api/public/site.py.
+    site_host: str = "pokou.app"
+    extranet_host: str = "extranet.pokou.app"
 
     # API Configuration
     debug: bool = True

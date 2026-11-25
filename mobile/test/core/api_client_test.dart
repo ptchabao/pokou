@@ -69,7 +69,7 @@ void main() {
 
       expect(
         client.baseUrl,
-        'https://apipokou.cabinet-p-et-associes.com/api/v1',
+        'https://api.pokou.app/api/v1',
       );
     });
 

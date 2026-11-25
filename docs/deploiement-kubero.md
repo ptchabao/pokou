@@ -191,10 +191,10 @@ restent compatibles avec la version précédente.
 |---|---|
 | Kubero | `https://kubero.169.58.195.18.sslip.io` (v3.1.1, k3s, un nœud, Ingress Traefik) |
 | Pipeline / phase / namespace | `pokou` / `production` / `pokou-production` |
-| API | `https://apipokou.cabinet-p-et-associes.com` (Cloudflare devant, certificat Let's Encrypt à l'origine) |
+| API | `https://api.pokou.app` (Cloudflare devant, certificat Let's Encrypt à l'origine) |
 | Addons | PostgreSQL 17 `pokou-postgres:5432` (base et utilisateur `pokou`), Redis 8 `pokou-redis:6379`, Kafka 3.4 `pokou-kafka:9092` (PLAINTEXT, interne au cluster) |
-| Appels (LiveKit) | App `livekit` : signalisation `wss://rtc.cabinet-p-et-associes.com`, médias en direct sur `169.58.195.18` : 7881/TCP et 7882/UDP, relais TURN 3478/UDP |
-| Console d'administration | `https://apipokou.cabinet-p-et-associes.com/console/` (servie par l'API, voir [administration.md](administration.md)) |
+| Appels (LiveKit) | App `livekit` : signalisation `wss://calls.pokou.app`, médias en direct sur `169.58.195.18` : 7881/TCP et 7882/UDP, relais TURN 3478/UDP |
+| Console d'administration | `https://extranet.pokou.app/console/` (servie par l'API, voir [administration.md](administration.md)) |
 | Pièces jointes | Volume `pokou-media` (10 Gi, local-path) monté sur `/data`, pas de S3 sur ce cluster |
 | Secrets | `deploy/kubero/secrets.env` sur le poste qui a déployé, jamais versionné |
 
@@ -244,7 +244,7 @@ symétrique) empêchent le média direct vers 7881/7882 : l'appel se connecte
 mais le son ne passe pas. LiveKit embarque un relais TURN, activé sur
 3478/UDP : bloc `turn:` de `LIVEKIT_CONFIG` et port `turn-udp` du Service
 `livekit-rtc`. Le relais est annoncé aux téléphones **sous l'IP du nœud**
-(`domain: 169.58.195.18`) et non sous `rtc.cabinet-p-et-associes.com` : ce
+(`domain: 169.58.195.18`) et non sous `calls.pokou.app` : ce
 nom passe par le proxy Cloudflare, qui ne relaie pas l'UDP, et le relais y
 serait injoignable. Le TURN sur TLS (réseaux qui ne laissent passer que du
 HTTPS) demanderait un nom hors proxy et le certificat monté dans le pod.
@@ -281,10 +281,68 @@ les requêtes : une route toute neuve peut répondre 404 le temps de la
 bascule. Vérifier ensuite :
 
 ```bash
-curl -s https://apipokou.cabinet-p-et-associes.com/health                  # 200
-curl -s -o /dev/null -w '%{http_code}' https://apipokou.cabinet-p-et-associes.com/console/login/   # 200
+curl -s https://api.pokou.app/health                  # 200
+curl -s -o /dev/null -w '%{http_code}' https://extranet.pokou.app/console/login/   # 200
 ```
 
 La console est un export statique committé dans `backend/app/console/` :
 après une modification de `admin/`, lancer `npm run publish` et committer le
 résultat **avant** de redéployer.
+
+## 11. Les domaines pokou.app (25 novembre 2026)
+
+Tous les noms pointent sur le nœud `169.58.195.18`, derrière Cloudflare
+(proxifiés), sauf `hermes` qui doit être en « DNS only ».
+
+| Nom | Sert | Où |
+|---|---|---|
+| `pokou.app` | Le site officiel, `/conditions`, `/confidentialite`, `/compte/suppression/` | App `pokou-api` (`backend/app/site/`, `api/public/site.py`) |
+| `www.pokou.app` | Redirection 301 vers `pokou.app` | App `pokou-api` |
+| `api.pokou.app` | L'API (`/api/v1`), adresse par défaut de l'application mobile | App `pokou-api` |
+| `deep.pokou.app` | Liens d'invitation et de partage, `assetlinks.json`, `apple-app-site-association` | App `pokou-api` |
+| `extranet.pokou.app` | Console d'administration (racine → `/console/`) et espace officine (`/officine/`) | App `pokou-api` |
+| `calls.pokou.app` | Signalisation LiveKit (`wss://`) ; les médias vont toujours en direct sur l'IP | App `livekit` |
+| `hermes.pokou.app` | Messagerie Mailu : webmail `/webmail`, administration `/admin` | App `mailu` |
+| `storage.pokou.app` | Réservé : le stockage objet reste privé, les médias passent par l'API qui vérifie les droits | — |
+
+Un seul Ingress (`build_app_json.py`, `HOSTS`) et un seul certificat
+(`pokou-app-tls`) couvrent les cinq noms de l'API. La console n'est servie
+que sous `extranet` : `/console/` demandé sous un autre nom de pokou.app y
+est redirigé.
+
+## 12. Messagerie (Mailu, hermes.pokou.app)
+
+`deploy/kubero/build_mailu_json.py` construit l'app Kubero `mailu` : Redis
+dans l'app elle-même, et les autres composants de Mailu 2024.06 (front,
+admin, imap, smtp, antispam, webmail, résolveur DNSSEC) en objets passés
+par les addons. Les secrets (`MAILU_*`) sont dans `secrets.env`.
+
+```bash
+cd deploy/kubero
+python3 build_mailu_json.py > mailu.json     # contient les secrets : ignoré par git
+# création : POST /api/apps/pokou/production/new ; mise à jour : PUT /api/apps/pokou/production/mailu/<resourceVersion>
+```
+
+Points propres à ce déploiement :
+
+- **`MAILU_HELM_CHART=true`** : sans elle, l'admin de Mailu refuse de démarrer
+  hors de docker compose (« Your system is not supported »).
+- **Adresses fixes** : chaque composant a un Service à IP fixe
+  (`10.43.200.x`), et les pods n'utilisent que le résolveur unbound
+  (`10.43.200.53`), qui valide DNSSEC comme Mailu l'exige.
+- **Journaux** : les Deployments s'appellent `mailu-kuberoapp-web-*` et leur
+  conteneur `kuberoapp-web`, pour apparaître dans les journaux de l'app
+  `mailu` de Kubero.
+- **Ports mail** 25, 465, 587 et 993 : Service `mailu-mail` (LoadBalancer),
+  publié sur l'IP du nœud. Ils doivent être ouverts dans le pare-feu de
+  l'hébergeur.
+- **Certificat** : celui de l'Ingress (`mailu-certs`, cert-manager), monté
+  dans front pour les ports mail.
+- **API d'administration** : `https://hermes.pokou.app/api/v1`, jeton
+  `MAILU_API_TOKEN` (en-tête `Authorization: Bearer …`). Cloudflare refuse
+  les clients sans User-Agent de navigateur ou de curl (erreur 1010).
+
+DNS à poser chez Cloudflare : `hermes` en A **DNS only**, MX, SPF, DKIM,
+DMARC — valeurs données par `GET /api/v1/domain/pokou.app`. Reverse DNS de
+`169.58.195.18` vers `hermes.pokou.app` chez l'hébergeur. Si l'hébergeur
+bloque le port 25 sortant, renseigner `MAILU_RELAYHOST` (relais SMTP).

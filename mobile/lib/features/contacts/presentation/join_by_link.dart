@@ -66,7 +66,7 @@ Future<void> showJoinByLinkSheet(
             controller: controller,
             autofocus: true,
             decoration: const InputDecoration(
-              hintText: 'https://apipokou.cabinet-p-et-associes.com/invite/…',
+              hintText: 'https://deep.pokou.app/g/…',
             ),
             onSubmitted: (value) => Navigator.pop(sheetContext, value),
           ),

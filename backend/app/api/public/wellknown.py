@@ -44,10 +44,10 @@ D'où cette liste, et la commande qui va avec.
 
 Vérification, dans l'ordre — la première qui échoue est la cause :
 
-    dig +short apipokou.cabinet-p-et-associes.com
-    curl -sS https://apipokou.cabinet-p-et-associes.com/.well-known/assetlinks.json | jq .
+    dig +short deep.pokou.app
+    curl -sS https://deep.pokou.app/.well-known/assetlinks.json | jq .
     curl -sS "https://digitalassetlinks.googleapis.com/v1/statements:list\
-?source.web.site=https://apipokou.cabinet-p-et-associes.com\
+?source.web.site=https://deep.pokou.app\
 &relation=delegate_permission/common.handle_all_urls" | jq .
 
 La troisième est le vérificateur de Google lui-même : c'est exactement ce que
