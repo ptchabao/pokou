@@ -146,6 +146,8 @@ def markdown_to_html(source: str) -> str:
     return "\n".join(blocks)
 
 
+# `email_off` : Cloudflare remplace sinon chaque adresse par « [email protected] »
+# et compte sur un script pour la rétablir — que notre CSP interdit.
 def _legal_page(name: str) -> HTMLResponse:
     source = (_LEGAL / _DOCS[name]).read_text(encoding="utf-8")
     title = html.escape(source.splitlines()[0].lstrip("# ").strip())
@@ -160,12 +162,14 @@ def _legal_page(name: str) -> HTMLResponse:
   <link rel="stylesheet" href="/site/site.css">
 </head>
 <body>
+<!--email_off-->
   <main class="doc">
     <div class="wrap narrow">
       <a class="back" href="/">← Pokou</a>
       {body}
     </div>
   </main>
+<!--/email_off-->
 </body>
 </html>"""
     headers = dict(_HEADERS)
