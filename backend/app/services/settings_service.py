@@ -6,8 +6,6 @@ from sqlalchemy.orm import Session
 from app.models import SystemSetting
 
 SMS_GATEWAY_KEYS = [
-    "ngh_api_key",
-    "ngh_api_secret",
     "semoa_webhook_secret",
     "semoa_login",
     "semoa_api_key",
@@ -42,18 +40,12 @@ def _mask(value: Optional[str]) -> Optional[str]:
 
 
 def get_sms_gateway_settings_masked(db: Session) -> dict[str, Any]:
-    ngh_key = get_setting(db, "ngh_api_key")
-    ngh_secret = get_setting(db, "ngh_api_secret")
     webhook_secret = get_setting(db, "semoa_webhook_secret")
     semoa_login = get_setting(db, "semoa_login")
     semoa_api_key = get_setting(db, "semoa_api_key")
     semoa_api_reference = get_setting(db, "semoa_api_reference")
     semoa_gateway_id = get_setting(db, "semoa_gateway_id")
     return {
-        "ngh_api_key": _mask(ngh_key),
-        "ngh_api_key_configured": bool(ngh_key),
-        "ngh_api_secret": _mask(ngh_secret),
-        "ngh_api_secret_configured": bool(ngh_secret),
         "semoa_webhook_secret": _mask(webhook_secret),
         "semoa_webhook_secret_configured": bool(webhook_secret),
         # Identifiants "Cashpay Auth" pour authentifier NOS appels SORTANTS

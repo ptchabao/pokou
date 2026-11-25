@@ -180,16 +180,16 @@ def test_reglages_secrets_jamais_renvoyes(client):
     admin, _ = _signup(client, "+22890600005", UserRole.ADMIN)
     support, _ = _signup(client, "+22890600006", UserRole.SUPPORT)
     assert client.get("/api/v1/admin/settings", headers=support).status_code == 403
-    assert client.put("/api/v1/admin/settings/ngh_api_key", json={"value": "abcd1234"}, headers=support).status_code == 403
+    assert client.put("/api/v1/admin/settings/semoa_api_key", json={"value": "abcd1234"}, headers=support).status_code == 403
 
-    done = client.put("/api/v1/admin/settings/ngh_api_key", json={"value": "cle-tres-secrete-42"}, headers=admin)
+    done = client.put("/api/v1/admin/settings/semoa_api_key", json={"value": "cle-tres-secrete-42"}, headers=admin)
     assert done.status_code == 200 and done.json()["value"] is None and done.json()["configured"] is True
     listing = client.get("/api/v1/admin/settings", headers=admin)
     assert "cle-tres-secrete-42" not in listing.text
     audit = _last_audit()
     assert audit.action == "setting_update" and "cle-tres-secrete-42" not in json.dumps(audit.changes)
     with TestingSessionLocal() as db:
-        assert db.query(SystemSetting).filter(SystemSetting.key == "ngh_api_key").one().value == "cle-tres-secrete-42"
+        assert db.query(SystemSetting).filter(SystemSetting.key == "semoa_api_key").one().value == "cle-tres-secrete-42"
 
     plain = client.put("/api/v1/admin/settings/semoa_gateway_id", json={"value": "12"}, headers=admin)
     assert plain.status_code == 200 and plain.json()["value"] == "12"

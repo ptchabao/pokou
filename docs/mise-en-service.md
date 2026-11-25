@@ -37,9 +37,10 @@ Ce que le code ne peut pas faire seul. À cocher avant la première publication.
       `TWILIO_SMS_FROM` (numéro Twilio ou identifiant alphanumérique POKOU,
       à faire enregistrer chez Twilio pour le Togo et la Côte d'Ivoire) ou
       `TWILIO_MESSAGING_SERVICE_SID`. En local dans `backend/.env`, en
-      production dans le Secret. Le code est valable 50 secondes.
-- [ ] Secours facultatif : identifiants NGH et `SMS_SENDER_ID` déclaré chez
-      l'opérateur.
+      production dans le Secret. Le code est valable 10 minutes (nouveau code
+      possible au bout de 50 secondes). Aucune autre passerelle SMS.
+- [ ] Expéditeur `POKOU` enregistré auprès de Twilio pour chaque pays
+      (sans quoi certains opérateurs, au Togo notamment, ne livrent pas).
 - [ ] WhatsApp : passerelle ou Twilio.
 - [ ] Firebase : compte de service (`FIREBASE_CREDENTIALS_JSON`), `FCM_ENABLED=true`.
 - [x] LiveKit auto-hébergé sur Kubero, avec relais TURN (voir

@@ -1,5 +1,5 @@
 """Inscription/connexion par numéro de téléphone, façon WhatsApp : pas de
-mot de passe, juste un code à usage unique envoyé par SMS (passerelle NGH,
+mot de passe, juste un code à usage unique envoyé par SMS (Twilio,
 voir services/notifications/sms_service.py) ET par WhatsApp (voir
 _send_whatsapp_otp), pour que le code arrive même sans réseau SMS."""
 import logging

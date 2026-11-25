@@ -1,4 +1,4 @@
-"""SMS des codes : Twilio d'abord, NGH en secours."""
+"""SMS des codes : Twilio uniquement, aucune autre passerelle."""
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -39,21 +39,24 @@ def test_service_de_messagerie_a_la_place_de_l_expediteur(monkeypatch):
     assert "From" not in post.call_args.kwargs["data"]
 
 
-def test_refus_twilio_bascule_sur_ngh(monkeypatch):
+def test_refus_twilio_rien_d_autre_n_est_essaye(monkeypatch):
     monkeypatch.setattr(sms_service, "get_settings", lambda: _settings())
-    with patch.object(sms_service.httpx, "post", return_value=_response(400, {"code": 21211, "message": "invalid"})), \
-         patch.object(sms_service, "_send_via_ngh", return_value=True) as ngh:
-        assert sms_service.send_sms(MagicMock(), "+22890000000", "x", "POKOU") is True
-    ngh.assert_called_once()
-
-
-def test_sans_twilio_c_est_ngh(monkeypatch):
-    monkeypatch.setattr(sms_service, "get_settings", lambda: _settings(twilio_account_sid=""))
-    with patch.object(sms_service, "_send_via_ngh", return_value=False) as ngh, \
-         patch.object(sms_service, "_send_via_twilio") as twilio:
+    with patch.object(sms_service.httpx, "post", return_value=_response(400, {"code": 21211, "message": "invalid"})) as post:
         assert sms_service.send_sms(MagicMock(), "+22890000000", "x", "POKOU") is False
-    twilio.assert_not_called()
-    ngh.assert_called_once()
+    assert post.call_count == 1
+    assert "twilio.com" in post.call_args.args[0]
+
+
+def test_sans_twilio_aucun_envoi(monkeypatch):
+    monkeypatch.setattr(sms_service, "get_settings", lambda: _settings(twilio_account_sid=""))
+    with patch.object(sms_service.httpx, "post") as post:
+        assert sms_service.send_sms(MagicMock(), "+22890000000", "x", "POKOU") is False
+    post.assert_not_called()
+
+
+def test_aucune_autre_passerelle_dans_le_code():
+    import inspect
+    assert "ngh" not in inspect.getsource(sms_service).lower()
 
 
 def test_le_code_expire_en_50_secondes():

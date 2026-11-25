@@ -28,8 +28,6 @@ type Pricing = {
 
 /** Mêmes formats que ceux que l'API exige. */
 const PATTERNS: Record<string, { re: RegExp; hint: string }> = {
-  ngh_api_key: { re: /^\S{4,255}$/, hint: "4 caractères au moins, sans espace" },
-  ngh_api_secret: { re: /^\S{4,255}$/, hint: "4 caractères au moins, sans espace" },
   semoa_login: { re: /^\S{1,255}$/, hint: "Sans espace" },
   semoa_api_key: { re: /^\S{4,255}$/, hint: "4 caractères au moins, sans espace" },
   semoa_api_reference: { re: /^\S{1,255}$/, hint: "Sans espace" },

@@ -209,13 +209,6 @@ def reset_country(
 # catégories, devises, formules) ont leur propre route d'administration.
 
 _SETTINGS: list[dict[str, Any]] = [
-    {"key": "ngh_api_key", "group": "SMS (NGH)", "label": "Clé d'API NGH", "secret": True,
-     "pattern": r"^\S{4,255}$",
-     "help": "Clé de la passerelle SMS NGH (codes de connexion envoyés par SMS). "
-             "À défaut, la variable d'environnement NGH_API_KEY est utilisée."},
-    {"key": "ngh_api_secret", "group": "SMS (NGH)", "label": "Secret d'API NGH", "secret": True,
-     "pattern": r"^\S{4,255}$",
-     "help": "Secret associé à la clé NGH. À défaut, la variable d'environnement NGH_API_SECRET est utilisée."},
     {"key": "semoa_login", "group": "Paiements (Semoa)", "label": "Identifiant Semoa", "secret": False,
      "pattern": r"^\S{1,255}$",
      "help": "Identifiant « Cashpay Auth » qui signe nos appels vers Semoa (paiements Mobile Money)."},
@@ -258,8 +251,6 @@ def _env_overrides(key: str) -> bool:
 
 def _env_fallback(key: str) -> bool:
     from app.core.config import get_settings
-    if key in ("ngh_api_key", "ngh_api_secret"):
-        return bool(getattr(get_settings(), key, "") or "")
     return False
 
 

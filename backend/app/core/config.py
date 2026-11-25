@@ -227,9 +227,6 @@ class Settings(BaseSettings):
     twilio_verify_enabled: bool = True
     twilio_verify_service_sid: str = ""
 
-    # Passerelle SMS NGH (canal principal des codes de connexion)
-    ngh_api_key: str = ""
-    ngh_api_secret: str = ""
     # Identifiant d'expéditeur affiché sur les SMS. Il doit être DÉCLARÉ chez
     # l'opérateur avant usage : un identifiant inconnu fait refuser l'envoi.
     sms_sender_id: str = "POKOU"

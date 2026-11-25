@@ -33,7 +33,7 @@ Avec Kubero plutôt que des manifestes : [`deploiement-kubero.md`](deploiement-k
    └────────────────────────────────────┘
 ```
 
-Hors du cluster : FCM (push), LiveKit Cloud (appels), Twilio (SMS des codes, NGH en secours),
+Hors du cluster : FCM (push), LiveKit Cloud (appels), Twilio (SMS des codes),
 Semoa / CashPay (paiements).
 
 | Composant | Choix | Pourquoi |
