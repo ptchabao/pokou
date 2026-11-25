@@ -32,3 +32,13 @@ mobile/ios/Runner/GoogleService-Info.plist
 deploy/kubero/livekit.json
 .verif/
 besoins/
+
+# Jamais dans le dépôt : copies de travail des agents, médias locaux,
+# bases de test, maquettes de travail.
+.claude/
+media_storage/
+*.db
+honam model/
+stitch_google_design_system_interface/
+stitch_maquettes_compl_tes_d_interface/
+Guide_logos_Honam_Kory_Assime.pdf
