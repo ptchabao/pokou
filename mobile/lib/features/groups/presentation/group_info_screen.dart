@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/avatar_edit_badge.dart';
 import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/identity_avatar.dart';
+import '../../../core/widgets/profile_photo_viewer.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../contacts/presentation/contacts_controller.dart';
 import '../data/group_model.dart';
@@ -83,11 +85,25 @@ class GroupInfoScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [
+            // La photo du groupe (elle n'apparaissait pas), avec son crayon
+            // pour qui peut la changer.
             Center(
-              child: ContactAvatar(
-                avatar: null,
-                displayName: group.name,
+              child: AvatarEditBadge(
                 size: 88,
+                tooltip: l.chatXChangePhoto,
+                onEdit: group.canEditInfo ? () => act('photo') : null,
+                onTap: group.avatar == null
+                    ? (group.canEditInfo ? () => act('photo') : null)
+                    : () => openProfilePhoto(
+                        context,
+                        avatar: group.avatar!,
+                        title: group.name,
+                      ),
+                child: ContactAvatar(
+                  avatar: group.avatar,
+                  displayName: group.name,
+                  size: 88,
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -170,6 +186,11 @@ class GroupInfoScreen extends ConsumerWidget {
                   title: Text(l.msgStarTitle),
                   onTap: () => act('starred'),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.wallpaper_outlined),
+                  title: Text(l.wallpaperMenu),
+                  onTap: () => act('wallpaper'),
+                ),
                 if (group.canManage)
                   ListTile(
                     leading: const Icon(Icons.link),
@@ -232,10 +253,15 @@ class GroupInfoScreen extends ConsumerWidget {
                             ),
                           )
                         : null,
-                    // Toucher un membre : écrire, ou (admin) gérer son rôle.
+                    // Toucher un membre : écrire à deux (le serveur
+                    // l'autorise, un groupe commun suffit). Qui gère le
+                    // groupe a en plus son rôle et son éviction : la
+                    // feuille, qui commence par « Écrire ».
                     onTap: member.userId == myUserId
                         ? null
-                        : () => _memberMenu(context, member),
+                        : group.canManage
+                        ? () => _memberMenu(context, member)
+                        : () => act('dm:${member.userId}'),
                   ),
               ],
             ),

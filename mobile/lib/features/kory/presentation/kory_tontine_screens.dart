@@ -6,6 +6,8 @@ import '../../../core/widgets/pokou_context_menu.dart';
 import '../../modules/shared/module_payment.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../groups/data/group_model.dart';
+import '../../groups/presentation/group_controller.dart';
 import '../data/kory_model.dart';
 import 'kory_controller.dart';
 import 'kory_cotisation_screens.dart';
@@ -15,6 +17,7 @@ import 'kory_export.dart';
 import 'kory_home_widgets.dart';
 import 'kory_journal_screen.dart';
 import 'kory_pay_screens.dart';
+import 'kory_people_picker.dart';
 import 'kory_pot_screen.dart';
 import 'kory_review_screen.dart';
 import 'kory_screen.dart';
@@ -208,41 +211,28 @@ class _KoryTontineMembersScreenState
   }
 
   /// « Ajouter » : les membres de la discussion qui ne sont pas encore dans
-  /// la tontine.
+  /// la tontine, plusieurs à la fois, avec une recherche.
   Future<void> _add() async {
     final l = L.of(context);
-    final others = [
-      for (final id in _order)
-        if (!_chosen.contains(id) && id != _me(ref)) id,
-    ];
-    final picked = await showPokouSheet<int>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          children: [
-            KorySection(l.koryMqAddMember),
-            if (others.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  l.koryMqEveryoneIn,
-                  style: TextStyle(color: AppColors.textSecondary),
+    final me = _me(ref);
+    final picked = await Navigator.of(context).push<List<KoryPickable>>(
+      MaterialPageRoute(
+        builder: (_) => KoryPeoplePicker(
+          title: l.koryTPickGroupMembers,
+          people: [
+            for (final id in _order)
+              if (id != me)
+                KoryPickable(
+                  name: widget.draft.nameOf(id),
+                  userId: id,
+                  already: _chosen.contains(id),
                 ),
-              ),
-            for (final id in others)
-              KoryPersonRow(
-                name: widget.draft.nameOf(id),
-                subtitle: l.koryMqOnPokou,
-                onTap: () => Navigator.pop(sheetContext, id),
-              ),
           ],
         ),
       ),
     );
-    if (picked != null) setState(() => _chosen = {..._chosen, picked});
+    if (picked == null || !mounted) return;
+    setState(() => _chosen = {..._chosen, for (final p in picked) ?p.userId});
   }
 
   /// Toucher un membre : le désigner suppléant, ou le retirer.
@@ -600,6 +590,50 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
     if (mounted) setState(() => _busy = false);
   }
 
+  /// Inviter d'autres membres du groupe dans la tontine en attente.
+  Future<void> _addMembers() async {
+    final l = L.of(context);
+    final pot = widget.pot;
+    final Group group;
+    try {
+      group = await ref.read(groupRepositoryProvider).getGroup(pot.groupId!);
+    } catch (_) {
+      if (mounted) koryFailed(context);
+      return;
+    }
+    if (!mounted) return;
+    final inside = {for (final m in pot.members) m.userId};
+    final picked = await Navigator.of(context).push<List<KoryPickable>>(
+      MaterialPageRoute(
+        builder: (_) => KoryPeoplePicker(
+          title: l.koryTPickGroupMembers,
+          people: [
+            for (final m in group.members)
+              KoryPickable(
+                name: m.displayName,
+                userId: m.userId,
+                already: inside.contains(m.userId),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || picked.isEmpty || !mounted) return;
+    setState(() => _busy = true);
+    await _run(
+      context,
+      ref,
+      pot.id,
+      () => ref
+          .read(koryRepositoryProvider)
+          .addParticipants(
+            pot.id,
+            userIds: [for (final p in picked) ?p.userId],
+          ),
+    );
+    if (mounted) setState(() => _busy = false);
+  }
+
   Future<void> _remind() async {
     final l = L.of(context);
     setState(() => _busy = true);
@@ -709,6 +743,17 @@ class _PendingAdminViewState extends ConsumerState<_PendingAdminView> {
             ],
             const SizedBox(height: 10),
             _AcceptedCard(pot: pot),
+            // Tant que l'ordre n'est pas tiré, d'autres membres du groupe
+            // peuvent encore entrer.
+            if (pot.groupId != null) ...[
+              const SizedBox(height: 10),
+              KoryActionRow(
+                icon: Icons.group_add_outlined,
+                title: l.koryTAddGroupMembers,
+                subtitle: l.koryTAddGroupMembersHint,
+                onTap: _busy ? () {} : _addMembers,
+              ),
+            ],
             const SizedBox(height: 12),
             KoryNotice(
               text: declined > 0

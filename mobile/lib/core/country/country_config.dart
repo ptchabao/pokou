@@ -17,7 +17,17 @@ class CountryConfig {
     this.deliveryPrice,
     this.emergencyNumbers = const {},
     this.koryPlusFeeHt,
+    this.testOnly = false,
+    this.discoverVideoUrl,
   });
+
+  /// Pays ouvert pour les testeurs seulement (la France) : paiements
+  /// simulés, officines de démonstration.
+  final bool testOnly;
+
+  /// « Découvrir Pokou » (Accueil) : la vidéo de présentation, réglée depuis
+  /// la console. `null` : l'entrée ne s'affiche pas.
+  final String? discoverVideoUrl;
 
   /// Kory Plus : les frais d'ouverture d'une tontine, HT, par membre
   /// (`null` si le serveur ne les a pas donnés).
@@ -41,6 +51,11 @@ class CountryConfig {
     vatRate: (json['vat_rate'] as num?)?.toDouble() ?? 0,
     deliveryPrice: json['delivery_price'] as int?,
     koryPlusFeeHt: json['kory_plus_fee_ht'] as int?,
+    testOnly: json['test_only'] as bool? ?? false,
+    discoverVideoUrl: switch ((json['discover_video_url'] as String?)?.trim()) {
+      final url? when url.startsWith('https://') => url,
+      _ => null,
+    },
     emergencyNumbers: {
       for (final e in ((json['emergency_numbers'] as Map?) ?? const {}).entries)
         e.key as String: e.value as String,
@@ -73,6 +88,23 @@ class CountryConfig {
         modules: {'discussions', 'kory', 'kory_plus', 'honam', 'assime'},
         vatRate: 0.18,
         deliveryPrice: 1500,
+      );
+    }
+    // Pays de TEST (backend/app/core/countries.py) : les testeurs en France.
+    if (phone != null && phone.startsWith('+33')) {
+      return const CountryConfig(
+        country: 'FR',
+        modules: {
+          'discussions',
+          'kory',
+          'kory_plus',
+          'honam',
+          'assime',
+          'certified',
+        },
+        vatRate: 0.18,
+        deliveryPrice: 1000,
+        testOnly: true,
       );
     }
     return const CountryConfig(

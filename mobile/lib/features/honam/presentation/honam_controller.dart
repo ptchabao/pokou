@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers.dart';
 import '../../../core/sync/pokou_sync_engine.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../modules/shared/module_payment.dart' show isTestPayment;
 import '../data/honam_models.dart';
 import '../data/honam_repository.dart';
 
@@ -47,10 +48,8 @@ final honamOrderMessagesProvider = FutureProvider.autoDispose
           .orderMessages(key.id, channel: key.channel);
     });
 
-final honamEmergencyProvider = FutureProvider.autoDispose<Map<String, String>>((
-  ref,
-) {
-  return ref.watch(honamRepositoryProvider).emergencyNumbers();
+final honamEmergencyProvider = FutureProvider.autoDispose<EmergencyInfo>((ref) {
+  return ref.watch(honamRepositoryProvider).emergency();
 });
 
 String honamStatusLabel(L l, String status) => switch (status) {
@@ -67,15 +66,26 @@ String honamStatusLabel(L l, String status) => switch (status) {
 };
 
 /// Ouvre la page de paiement CashPay dans le navigateur.
-Future<void> openPayment(BuildContext context, Future<String?> payment) async {
+/// [payment] : l'adresse de la passerelle, ou la réponse entière du serveur
+/// (`payment_url`, `test_mode`…). Renvoie `true` quand le paiement a été
+/// SIMULÉ (pays de test) : son effet est déjà acquis.
+Future<bool> openPayment(BuildContext context, Future<Object?> payment) async {
   final l = L.of(context);
   final messenger = ScaffoldMessenger.of(context);
   try {
-    final url = await payment;
+    final result = await payment;
+    if (isTestPayment(result)) {
+      messenger.showSnackBar(SnackBar(content: Text(l.hnxTestPaymentDone)));
+      return true;
+    }
+    final url = result is Map
+        ? result['payment_url'] as String?
+        : result as String?;
     if (url == null) throw Exception();
     messenger.showSnackBar(SnackBar(content: Text(l.honamPaymentLinkOpened)));
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   } catch (_) {
     messenger.showSnackBar(SnackBar(content: Text(l.honamFailed)));
   }
+  return false;
 }

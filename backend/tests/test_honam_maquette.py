@@ -219,12 +219,13 @@ def test_liste_d_attente_compte_les_inscrits(client):
 
 
 def test_l_offre_coursier_annonce_toujours_un_vrai_gain(client):
-    """Un numéro d'un pays sans tarif Honam (+33) voyait « Tu gagnes 0 FCFA
-    par course ». L'offre reprend alors celle du marché de lancement."""
+    """Un numéro d'un pays sans tarif Honam (+44 ; la France, +33, est
+    devenue pays de test avec ses tarifs) voyait « Tu gagnes 0 FCFA par
+    course ». L'offre reprend alors celle du marché de lancement."""
     togo, _ = _signup(client)
     assert client.get("/api/v1/honam/courier/offer", headers=togo).json()["delivery_price"] == 1000
 
-    phone = "+33612345678"
+    phone = "+447911123456"
     with patch.object(otp_service.sms_service, "send_sms", return_value=True) as send:
         client.post("/api/v1/auth/phone/request-otp", json={"phone": phone})
     code = re.search(r"\b(\d{6})\b", send.call_args.args[2]).group(1)

@@ -7109,8 +7109,14 @@ class LAr extends L {
   String get koryOverline => 'ادخار تضامني';
 
   @override
-  String koryActiveCount(String count) {
-    return '$count نشطة';
+  String koryActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نشطة',
+      one: '1 نشطة',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -15369,4 +15375,557 @@ class LAr extends L {
   String locSaved(String place) {
     return 'تم حفظ الموقع: $place';
   }
+
+  @override
+  String get wallpaperTitle => 'خلفية المحادثات';
+
+  @override
+  String get wallpaperMenu => 'الخلفية';
+
+  @override
+  String wallpaperOnlyFor(String name) {
+    return 'فقط لـ «$name»';
+  }
+
+  @override
+  String get wallpaperAllChatsHint =>
+      'تنطبق على المحادثات التي ليس لها خلفية خاصة. يبقى هذا الاختيار على هذا الهاتف.';
+
+  @override
+  String get wallpaperFamilyUnis => 'ألوان سادة';
+
+  @override
+  String get wallpaperFamilyMotifs => 'زخارف';
+
+  @override
+  String get wallpaperFamilyPaysages => 'مناظر طبيعية';
+
+  @override
+  String get wallpaperFamilyFetes => 'أعياد';
+
+  @override
+  String get wallpaperIntensity => 'الشدة';
+
+  @override
+  String get wallpaperUseDefault => 'استخدام الخلفية الافتراضية';
+
+  @override
+  String get wallpaperUseDefaultHint =>
+      'الخلفية المختارة في الإعدادات لكل المحادثات';
+
+  @override
+  String get wallpaperDefaultBadge => 'افتراضي';
+
+  @override
+  String get wallpaperSelected => 'محدد';
+
+  @override
+  String get wallpaperPreviewReceived => 'هل رأيت الخلفية الجديدة؟';
+
+  @override
+  String get wallpaperPreviewSent => 'نعم، إنها رائعة!';
+
+  @override
+  String get wallpaperFeastsEmpty =>
+      'تظهر خلفيات الأعياد هنا قبل كل عيد ببضعة أيام.';
+
+  @override
+  String get koryTSearch => 'بحث';
+
+  @override
+  String get koryTSearchHint => 'ابحث عن جمع';
+
+  @override
+  String get koryTSearchPrompt => 'اكتب اسم صندوق أو اشتراك أو تونتين.';
+
+  @override
+  String get koryTSearchInArchives => 'في الأرشيف';
+
+  @override
+  String get koryTArchives => 'الأرشيف';
+
+  @override
+  String get koryTArchivesHint => 'عمليات الجمع المنتهية التي رتّبتها';
+
+  @override
+  String get koryTArchivesEmptyTitle => 'لا يوجد أرشيف';
+
+  @override
+  String get koryTArchivesEmptyBody =>
+      'يمكن ترتيب جمع منتهٍ أو منقضٍ هنا من قائمتك. يبقى متاحاً للاطلاع، ويمكنك إخراجه في أي وقت.';
+
+  @override
+  String get koryTArchive => 'أرشفة';
+
+  @override
+  String get koryTUnarchive => 'إلغاء الأرشفة';
+
+  @override
+  String get koryTArchivedToast => 'نُقل الجمع إلى أرشيفك';
+
+  @override
+  String get koryTUnarchivedToast => 'أُعيد الجمع إلى قائمتك';
+
+  @override
+  String get koryTUndo => 'تراجع';
+
+  @override
+  String get koryTSectionAll => 'عمليات الجمع الخاصة بي';
+
+  @override
+  String get koryTSectionCotisations => 'اشتراكاتي';
+
+  @override
+  String get koryTSectionTontines => 'التونتينات الخاصة بي';
+
+  @override
+  String get koryTSectionOpen => 'عمليات الجمع الجارية';
+
+  @override
+  String get koryTSectionClosed => 'عمليات الجمع المغلقة';
+
+  @override
+  String get koryTDescCagnotte =>
+      'أنشئ صندوقاً سريعاً لتنظيم مناسبات بين المقرّبين. بلا رسوم. لا تلمس Pokou المال. يرسل كل شخص مساهمته بحرية ومباشرة إلى محفظة الجامع.';
+
+  @override
+  String get koryTDescCotisation =>
+      'أنشئ جمعاً للأموال بمبلغ ثابت وموعد استحقاق ودورية. بلا رسوم. لا تلمس Pokou المال. عند كل استحقاق يرسل كل شخص مساهمته مباشرة إلى محفظة الجامع.';
+
+  @override
+  String get koryTDescTontine =>
+      'أنشئ تونتين حقيقياً بمبالغ ثابتة وأدوار جمع ودورية. تُطبَّق رسوم Kory Plus على كل مشارك.';
+
+  @override
+  String get koryTPickContacts => 'اختر من جهات اتصالي';
+
+  @override
+  String get koryTPickGroupMembers => 'أعضاء المجموعة';
+
+  @override
+  String get koryTPickSearch => 'ابحث عن اسم أو رقم';
+
+  @override
+  String get koryTPickOnPokou => 'على Pokou';
+
+  @override
+  String get koryTPickBySms => 'ليس على Pokou بعد · دعوة عبر رسالة قصيرة';
+
+  @override
+  String get koryTPickAlready => 'موجود في الجمع بالفعل';
+
+  @override
+  String koryTPickConfirm(String count) {
+    return 'إضافة · $count';
+  }
+
+  @override
+  String get koryTPickNoMatch => 'لا توجد جهة اتصال تطابق بحثك.';
+
+  @override
+  String get koryTPickEmpty => 'لا أحد لإضافته حالياً.';
+
+  @override
+  String get koryTAddGroupMembers => 'إضافة أعضاء من المجموعة';
+
+  @override
+  String get koryTAddGroupMembersHint =>
+      'يُدعَون مثل الآخرين: يبدأ التونتين عندما يقبل الجميع.';
+
+  @override
+  String get koryTActSomeone => 'أحد الأعضاء';
+
+  @override
+  String koryTActCreatedCagnotte(String name, String title) {
+    return 'فتح $name الصندوق «$title»';
+  }
+
+  @override
+  String koryTActCreatedCotisation(String name, String title) {
+    return 'فتح $name الاشتراك «$title»';
+  }
+
+  @override
+  String koryTActCreatedTontine(String name, String title) {
+    return 'فتح $name التونتين «$title»';
+  }
+
+  @override
+  String koryTActContribution(String name) {
+    return 'تأكدت مساهمة $name';
+  }
+
+  @override
+  String koryTActContributionAmount(String name, String amount) {
+    return 'تأكدت مساهمة $name: $amount';
+  }
+
+  @override
+  String koryTActTotal(String total) {
+    return 'المجموع المؤكد: $total';
+  }
+
+  @override
+  String koryTActStarted(String name) {
+    return 'يبدأ التونتين. الدور 1: يستلم $name.';
+  }
+
+  @override
+  String koryTActRound(String round, String rounds, String name) {
+    return 'الدور $round من $rounds: يستلم $name.';
+  }
+
+  @override
+  String koryTActClosed(String title) {
+    return 'أُغلق «$title»';
+  }
+
+  @override
+  String koryTActDissolved(String title) {
+    return 'حُلّ التونتين «$title»';
+  }
+
+  @override
+  String koryTActReminder(String name, String title) {
+    return 'أرسل $name تذكيراً بخصوص «$title»';
+  }
+
+  @override
+  String get koryTActOpen => 'عرض في Kory';
+
+  @override
+  String get koryTActNoMoney => 'من محفظة إلى محفظة · لا تلمس Pokou المال';
+
+  @override
+  String get msgFixViewOncePhoto => 'صورة';
+
+  @override
+  String get msgFixViewOnceVideo => 'فيديو';
+
+  @override
+  String get msgFixViewOnceOpened => 'تم الفتح';
+
+  @override
+  String get msgFixViewOnceUnavailable =>
+      'تعذّر فتح هذا العرض لمرة واحدة. أعد المحاولة مع اتصال.';
+
+  @override
+  String get msgFixViewOnceLabel => 'عرض لمرة واحدة';
+
+  @override
+  String get msgFixMediaRetry => 'المس لإعادة المحاولة';
+
+  @override
+  String msgFixPollEditableFor(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'يمكن تعديلها لمدة $count دقيقة أخرى',
+      one: 'يمكن تعديلها لمدة دقيقة أخرى',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get msgFixPollFinal => 'إجابة نهائية';
+
+  @override
+  String get msgFixPollSingleChoice => 'إجابة واحدة فقط';
+
+  @override
+  String get msgFixPollMultipleChoice => 'عدة إجابات';
+
+  @override
+  String get msgFixPollChoiceRule =>
+      'يمكن للمصوّتين تغيير رأيهم لمدة 15 دقيقة.';
+
+  @override
+  String get msgFixPollVoteRefused => 'تعذّر تسجيل تصويتك.';
+
+  @override
+  String get hnxEmergencyGendarmerie => 'الدرك';
+
+  @override
+  String get hnxEmergencyUnique => 'الرقم الموحد';
+
+  @override
+  String get hnxEmergencyOthers => 'خدمات طوارئ أخرى';
+
+  @override
+  String hnxEmergencyAlternatives(String numbers) {
+    return 'أيضًا: $numbers';
+  }
+
+  @override
+  String get hnxEmergencyLowReliability =>
+      'موثوقية ضعيفة: ليست كل هذه الأرقام مؤكدة. احتفظ أيضًا بالأرقام المحلية.';
+
+  @override
+  String get hnxEmergencyNone => 'لا يوجد رقم طوارئ معروف لبلدك.';
+
+  @override
+  String hnxEmergencyCall(String number) {
+    return 'اتصل بالرقم $number';
+  }
+
+  @override
+  String get hnxCourierRestart => 'البدء من جديد';
+
+  @override
+  String get hnxCourierRestartTitle => 'هل تريد إعادة الطلب من البداية؟';
+
+  @override
+  String get hnxCourierRestartBody =>
+      'ستُمحى كل الخطوات التي أدخلتها، وكذلك الطلب المرسل إن كان لا يزال بانتظار المصادقة. ستبدأ من الخطوة 1.';
+
+  @override
+  String get hnxCourierRestartConfirm => 'مسح الكل';
+
+  @override
+  String get hnxCourierRestarted => 'تم مسح الطلب: عدت إلى الخطوة 1.';
+
+  @override
+  String get hnxTestPaymentDone =>
+      'وضع الاختبار: دفع محاكى، دون أي خصم. تم التفعيل.';
+
+  @override
+  String get hnxTestPaymentNote =>
+      'بلد اختبار: الدفع محاكى، بدون Mobile Money ولا خصم.';
+
+  @override
+  String get hnxPriceUnset => 'لم يُحدَّد السعر بعد لهذا البلد';
+
+  @override
+  String get homeXSearchContacts => 'جهات الاتصال';
+
+  @override
+  String get homeXSearchGroups => 'المجموعات';
+
+  @override
+  String get homeXSearchKory => 'صناديق Kory';
+
+  @override
+  String get homeXSearchPharmacies => 'صيدليات Honam';
+
+  @override
+  String get homeXSearchAds => 'إعلانات Assimé';
+
+  @override
+  String get homeXOnDuty => 'مناوبة';
+
+  @override
+  String get homeXDiscoverTitle => 'اكتشف Pokou';
+
+  @override
+  String get homeXDiscoverSubtitle => 'فيديو التعريف';
+
+  @override
+  String get homeXCertUnavailable => 'Pokou الموثَّق غير متاح بعد في بلدك.';
+
+  @override
+  String get assXInPersonTitle => 'بيع يدًا بيد';
+
+  @override
+  String get assXInPersonInfo =>
+      'في Assimé يلتقي المشتري والبائع: يُسلَّم الغرض يدًا بيد. أمام المشتري، يضغط البائع «تم تأكيد الطلب وتسليمه»؛ فيتلقى المشتري رمزًا يعطيه للبائع لإتمام البيع.';
+
+  @override
+  String get assXDelivered => 'تم تأكيد الطلب وتسليمه';
+
+  @override
+  String get assXCodeLabel => 'الرمز الذي أعطاه المشتري';
+
+  @override
+  String get assXCloseSale => 'إتمام البيع';
+
+  @override
+  String assXAskCode(String buyer, String minutes) {
+    return 'اطلب من $buyer الرمز الذي وصله للتو في Pokou. صالح لمدة $minutes دقيقة.';
+  }
+
+  @override
+  String assXWrongCode(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'رمز غير صحيح: تبقّت $count محاولة.',
+      few: 'رمز غير صحيح: تبقّت $count محاولات.',
+      two: 'رمز غير صحيح: تبقّت محاولتان.',
+      one: 'رمز غير صحيح: تبقّت محاولة واحدة.',
+      zero: 'رمز غير صحيح.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assXNewCode => 'إنشاء رمز جديد';
+
+  @override
+  String get assXCancelHandover => 'إلغاء التسليم';
+
+  @override
+  String assXSaleClosed(String buyer) {
+    return 'تم إتمام البيع. دُعي $buyer لتقييمك.';
+  }
+
+  @override
+  String get assXOutsideNoCode =>
+      'المشتري خارج Pokou: يُعلَّم الإعلان كمبيع فقط، دون رمز.';
+
+  @override
+  String get assXCodeTitle => 'رمز التسليم الخاص بك';
+
+  @override
+  String assXCodeBody(String seller) {
+    return 'أعطِ هذا الرمز إلى $seller عندما يصبح الغرض بين يديك. ليس قبل ذلك.';
+  }
+
+  @override
+  String assXCodeUntil(String time) {
+    return 'صالح حتى $time';
+  }
+
+  @override
+  String get assXCodeExpired =>
+      'لم يعد هذا الرمز صالحًا: اطلب من البائع إنشاء رمز جديد.';
+
+  @override
+  String get assXCodeDone => 'تم إتمام البيع. كيف كانت المعاملة؟';
+
+  @override
+  String get assXNoHandover => 'لا يوجد تسليم جارٍ لهذا الغرض.';
+
+  @override
+  String get assXShowCode => 'عرض رمزي';
+
+  @override
+  String assXCodeReady(String seller) {
+    return 'أكّد $seller التسليم: رمزك جاهز.';
+  }
+
+  @override
+  String get chatXAttachLocation => 'الموقع';
+
+  @override
+  String get chatXAttachContact => 'جهة اتصال';
+
+  @override
+  String get chatXChangePhoto => 'تغيير الصورة';
+
+  @override
+  String get chatXDeleteDiscussion => 'حذف المحادثة';
+
+  @override
+  String get chatXDeleteDiscussionAction => 'حذف';
+
+  @override
+  String chatXDeleteDiscussionTitle(String name) {
+    return 'حذف المحادثة مع $name؟';
+  }
+
+  @override
+  String get chatXDeleteDiscussionBody =>
+      'تختفي المحادثة ورسائلها من هاتفك. يحتفظ الطرف الآخر برسائله.';
+
+  @override
+  String get chatXDeleteDiscussionDone => 'تم حذف المحادثة';
+
+  @override
+  String get chatXDeleteDiscussionOffline =>
+      'لا يوجد اتصال: لم يتم حذف المحادثة.';
+
+  @override
+  String get chatXDeleteDiscussionFailed => 'تعذّر حذف المحادثة.';
+
+  @override
+  String get chatXLearnMore => 'اعرف المزيد';
+
+  @override
+  String get chatXLocationCurrent => 'موقعي الحالي';
+
+  @override
+  String get chatXLocationNearYou => 'بالقرب منك';
+
+  @override
+  String get chatXLocationEncrypted =>
+      'يُرسل موقعك مشفّرًا من طرف إلى طرف: لا يراه إلا المستلمون.';
+
+  @override
+  String get chatXLocationSend => 'إرسال موقعي';
+
+  @override
+  String get chatXLocationFailed => 'تعذّر تحديد موقعك حاليًا. حاول مرة أخرى.';
+
+  @override
+  String get chatXMediaEmpty => 'لا شيء متبادل هنا بعد.';
+
+  @override
+  String get chatXMediaTabMedia => 'الوسائط';
+
+  @override
+  String get chatXMediaTabDocs => 'المستندات';
+
+  @override
+  String get chatXMediaTabLinks => 'الروابط';
+
+  @override
+  String get chatXMore => 'المزيد';
+
+  @override
+  String get chatXOnPokou => 'على Pokou';
+
+  @override
+  String get chatXPhoneHidden => 'الرقم مخفي';
+
+  @override
+  String get chatXPrivacyPhone => 'رقم هاتفي';
+
+  @override
+  String get chatXPrivacyPhoneSub => 'لا يظهر أبدًا في المجموعات';
+
+  @override
+  String get chatXPrivacyPhoneBody =>
+      'من يمكنه رؤية رقمك في ملفك. لا يراه أعضاء المجموعات أبدًا: يتواصلون معك عبر المجموعة.';
+
+  @override
+  String get chatXPrivacyPhoneContacts => 'مرئي لجهات اتصالي';
+
+  @override
+  String get chatXPrivacyPhoneHidden => 'مخفي';
+
+  @override
+  String get chatXPrivacyPhoneHiddenSub =>
+      'باستثناء جهات الاتصال التي تسمح لها';
+
+  @override
+  String get chatXPrivacyPhoneAllowed => 'جهات الاتصال المسموح لها';
+
+  @override
+  String get chatXSeeMedia => 'عرض الوسائط';
+
+  @override
+  String get chatXShareAction => 'مشاركة';
+
+  @override
+  String get chatXShareContactTitle => 'مشاركة جهة الاتصال هذه؟';
+
+  @override
+  String get chatXShareContactBody =>
+      'أنت على وشك مشاركة رقم شخص آخر. تأكّد من موافقته قبل إرساله. أنت مسؤول عن المعلومات التي تشاركها على Pokou.';
+
+  @override
+  String get chatXShareContactPick => 'مشاركة جهة اتصال';
+
+  @override
+  String get chatXShareContactSearch => 'ابحث عن اسم أو رقم';
+
+  @override
+  String get chatXShareContactEmpty => 'لا توجد جهات اتصال';
+
+  @override
+  String get chatXShareFromPhoneBook => 'كل دفتر عناوين الهاتف';
+
+  @override
+  String get chatXShareFromPhoneBookRefused =>
+      'تم رفض الوصول إلى دفتر العناوين: اسمح به من إعدادات الهاتف.';
 }

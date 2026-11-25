@@ -26,7 +26,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import BabaMessage, CallLog, Community, CommunityMember, Contact, DeviceToken, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupPollVote, MediaAsset, MessageReaction, PollVote, Status, StatusPrivacy, StatusPrivacyEntry, StatusView, Token, User
+from app.models import BabaMessage, CallLog, Community, CommunityMember, Contact, DeviceToken, DirectConversationClear, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageMention, GroupMessageReaction, GroupPollVote, MediaAsset, MessageReaction, PhoneVisibilityException, PollVote, Status, StatusPrivacy, StatusPrivacyEntry, StatusView, Token, User
 from app.services.media import media_storage
 from app.services.privacy import privacy_service
 from app.core.security import get_current_user, hash_password, verify_password
@@ -158,6 +158,39 @@ class ReglagesConfidentialite(BaseModel):
     read_receipts: Optional[bool] = None
     presence_reciprocal: Optional[bool] = None
     silence_unknown_calls: Optional[bool] = None
+    #: « Mon numéro de téléphone » : CONTACTS ou HIDDEN.
+    phone_number: Optional[str] = None
+
+
+class ExceptionsNumero(BaseModel):
+    """Qui voit mon numéro alors qu'il est masqué — la liste ENTIÈRE."""
+    user_ids: list[int] = Field(default_factory=list, max_length=500)
+
+
+@router.get("/privacy/phone-exceptions")
+async def get_phone_exceptions(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    return {"user_ids": privacy_service.exceptions_numero(db, current_user["user_id"])}
+
+
+@router.put("/privacy/phone-exceptions")
+async def set_phone_exceptions(
+    payload: ExceptionsNumero,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Remplace la liste. Seules des personnes que je connais (carnet, dans
+    un sens ou dans l'autre) peuvent y être : sinon cette route servirait à
+    vérifier qu'un identifiant au hasard existe."""
+    try:
+        ids = privacy_service.remplacer_exceptions_numero(
+            db, current_user["user_id"], payload.user_ids
+        )
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Seuls vos contacts peuvent être autorisés")
+    return {"user_ids": ids}
 
 
 @router.get("/privacy")
@@ -190,7 +223,8 @@ async def update_privacy_settings(
         # valide avant d'affecter.
         raise HTTPException(
             status_code=422,
-            detail="Valeur de confidentialité inconnue — attendu EVERYONE, CONTACTS ou NOBODY",
+            detail="Valeur de confidentialité inconnue — attendu EVERYONE, CONTACTS ou NOBODY "
+            "(CONTACTS ou HIDDEN pour le numéro)",
         )
 
 
@@ -596,6 +630,17 @@ def erase_account(db: Session, user: User) -> dict:
     db.query(StatusPrivacy).filter(StatusPrivacy.user_id == user.id).delete(
         synchronize_session=False
     )
+    # Qui voyait mon numéro masqué, et les discussions que j'avais effacées
+    # pour moi : des réglages de ce compte, rien à garder.
+    db.query(PhoneVisibilityException).filter(
+        or_(
+            PhoneVisibilityException.owner_user_id == user.id,
+            PhoneVisibilityException.allowed_user_id == user.id,
+        )
+    ).delete(synchronize_session=False)
+    db.query(DirectConversationClear).filter(
+        DirectConversationClear.user_id == user.id
+    ).delete(synchronize_session=False)
 
     contacts_removed = (
         db.query(Contact)

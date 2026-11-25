@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/text/emoji_only.dart';
+
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -148,8 +150,11 @@ class _LinkifiedTextState extends State<LinkifiedText> {
   @override
   Widget build(BuildContext context) {
     _disposeRecognizers();
-    final collapsed = _expanded ? null : collapsedMessageText(widget.text);
-    final text = collapsed ?? widget.text;
+    // Les symboles « texte par défaut » (❤ ☺ ✌…) en couleur, comme leurs
+    // voisins — voir withEmojiPresentation.
+    final source = withEmojiPresentation(widget.text);
+    final collapsed = _expanded ? null : collapsedMessageText(source);
+    final text = collapsed ?? source;
     final spans = _formatAndLinkify(text, widget.style);
     if (spans.isEmpty) spans.add(TextSpan(text: text));
     if (collapsed != null) {

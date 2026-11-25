@@ -125,6 +125,7 @@ class MediaSender {
           mediaKey: mediaKey,
           caption: fichier.caption,
           forwardScore: enAttente.forwardScore,
+          viewOnce: enAttente.viewOnce,
         );
         await _store.confirmGroup(enAttente.id, envoye);
       },

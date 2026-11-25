@@ -693,6 +693,69 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
     }
   }
 
+  /// « Recommencer » : efface tout ce qui a été saisi — et, côté serveur, la
+  /// candidature encore en attente et le wallet vérifié pendant
+  /// l'inscription. Un coursier déjà validé n'est jamais touché (le serveur
+  /// refuse, et le message s'affiche).
+  Future<void> _restart() async {
+    final l = L.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(l.hnxCourierRestartTitle),
+        content: Text(l.hnxCourierRestartBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialog, false),
+            child: Text(l.actionCancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.feedbackDanger,
+            ),
+            onPressed: () => Navigator.pop(dialog, true),
+            child: Text(l.hnxCourierRestartConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(honamRepositoryProvider).restartCourierApplication();
+      ref.invalidate(courierStatusProvider);
+      if (!mounted) return;
+      setState(() {
+        _step = 1;
+        _birth = null;
+        _city = widget.offer.servedCities.firstOrNull;
+        _transport = 'MOTO';
+        _docType = 'CNI';
+        _front = null;
+        _back = null;
+        _selfie = null;
+        _zoneField.clear();
+        _zones.clear();
+        _days.clear();
+        _moments.clear();
+        _wallet.text = ref.read(authControllerProvider).user?.phone ?? '';
+        _code.clear();
+        _codeSent = false;
+        _walletVerified = false;
+        _question = 0;
+        _answer = null;
+        _quizDone = false;
+      });
+      koryToast(context, l.hnxCourierRestarted);
+    } on ApiException catch (error) {
+      if (mounted) koryToast(context, error.message);
+    } catch (_) {
+      if (mounted) koryFailed(context);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   static const _dayCodes = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
   static const _momentCodes = ['MORNING', 'NOON', 'AFTERNOON', 'EVENING'];
 
@@ -716,6 +779,13 @@ class _CourierJoinScreenState extends ConsumerState<CourierJoinScreen> {
       child: KoryPage(
         title: titles[_step - 1],
         subtitle: l.courierStepOf(_step, _steps),
+        actions: [
+          IconButton(
+            tooltip: l.hnxCourierRestart,
+            icon: const Icon(Icons.restart_alt),
+            onPressed: _busy ? null : _restart,
+          ),
+        ],
         footer: KoryFooter(
           children: [
             KoryButton(

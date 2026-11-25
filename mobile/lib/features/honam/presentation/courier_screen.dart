@@ -946,6 +946,15 @@ class CourierPacksScreen extends ConsumerStatefulWidget {
 class _CourierPacksScreenState extends ConsumerState<CourierPacksScreen> {
   late String? _pack = widget.preselect ?? widget.status.recommendedPack;
 
+  /// Pays de test : le paiement simulé est déjà acquis, l'écran se met à
+  /// jour tout de suite.
+  Future<void> _pay(Future<Object?> payment) async {
+    if (await openPayment(context, payment)) {
+      ref.invalidate(courierStatusProvider);
+      if (mounted) Navigator.of(context).maybePop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
@@ -968,11 +977,10 @@ class _CourierPacksScreenState extends ConsumerState<CourierPacksScreen> {
             onPressed: member
                 ? (pack == null || pack.code == status.currentPack
                       ? null
-                      : () => openPayment(
-                          context,
+                      : () => _pay(
                           repository.pay('/honam/courier/pack', body: {'pack': pack.code}),
                         ))
-                : () => openPayment(context, repository.pay('/honam/courier/membership')),
+                : () => _pay(repository.pay('/honam/courier/membership')),
           ),
         ],
       ),

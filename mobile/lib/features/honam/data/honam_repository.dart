@@ -6,13 +6,15 @@ class HonamRepository {
 
   final ApiClient _api;
 
-  Future<Map<String, String>> emergencyNumbers() async {
-    final json = await _api.get('/honam/config') as Map<String, dynamic>;
-    return {
-      for (final e in ((json['emergency_numbers'] as Map?) ?? const {}).entries)
-        e.key as String: e.value as String,
-    };
-  }
+  /// Les numéros d'urgence du pays de la personne (selon son numéro).
+  Future<EmergencyInfo> emergency() async => EmergencyInfo.fromConfig(
+    await _api.get('/honam/config') as Map<String, dynamic>,
+  );
+
+  /// Efface la candidature coursier en attente (« Recommencer »). Le
+  /// serveur refuse (409) pour un coursier déjà validé.
+  Future<void> restartCourierApplication() =>
+      _api.delete('/honam/courier/application');
 
   Future<List<Pharmacy>> pharmacies({double? lat, double? lng}) async {
     final query = lat != null && lng != null ? '?lat=$lat&lng=$lng' : '';
@@ -295,10 +297,11 @@ class HonamRepository {
     Map<String, dynamic>? body,
   }) => _api.post('/honam/courier/rides/$id/$action', body: body ?? const {});
 
-  /// Ouvre un paiement CashPay ; renvoie l'adresse de la page de paiement.
-  Future<String?> pay(String path, {Map<String, dynamic>? body}) async {
-    final json =
-        await _api.post(path, body: body ?? const {}) as Map<String, dynamic>;
-    return json['payment_url'] as String?;
-  }
+  /// Ouvre un paiement CashPay ; renvoie la réponse du serveur
+  /// (`payment_url`, ou `test_mode` pour un paiement simulé).
+  Future<Map<String, dynamic>> pay(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async =>
+      await _api.post(path, body: body ?? const {}) as Map<String, dynamic>;
 }

@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+import '../../../core/platform/secure_screen.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,6 +67,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   @override
   void initState() {
     super.initState();
+    // Pas de capture d'écran d'un statut pendant qu'on le regarde
+    // (FLAG_SECURE sur Android, le canal de la vue unique).
+    unawaited(SecureScreen.acquire());
     _controller = AnimationController(vsync: this, duration: _kStoryDuration)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) _next();
@@ -72,6 +79,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
 
   @override
   void dispose() {
+    unawaited(SecureScreen.release());
     _controller.dispose();
     _reply.dispose();
     _replyFocus.dispose();

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exceptions.dart';
@@ -212,6 +214,7 @@ class MessagingController extends StateNotifier<MessagingState> {
       // illisible. Il sera chargé une fois le message ouvert.
       if (message.media != null &&
           !message.isEncrypted &&
+          !message.viewOnce &&
           (message.messageType == 'IMAGE' || message.messageType == 'VIDEO')) {
         unawaited(
           _media.resolveLocalFile(
@@ -258,6 +261,7 @@ class MessagingController extends StateNotifier<MessagingState> {
         // qu'un bloc opaque, qu'il ne faut ni télécharger ni afficher.
         if (m.media != null &&
             !m.isEncrypted &&
+            !m.viewOnce &&
             (m.messageType == 'IMAGE' || m.messageType == 'VIDEO')) {
           unawaited(
             _media.resolveLocalFile(
@@ -337,10 +341,7 @@ class MessagingController extends StateNotifier<MessagingState> {
     if (confirmed != null) {
       if (!_belongsToConversation(confirmed)) return;
       state = state.copyWith(
-        messages: [
-          for (final m in state.messages)
-            if (m.id == update.localId) confirmed else m,
-        ],
+        messages: replaceConfirmed(state.messages, update.localId, confirmed),
         pendingIds: state.pendingIds.difference({update.localId}),
       );
       return;
@@ -422,6 +423,18 @@ class MessagingController extends StateNotifier<MessagingState> {
       return;
     }
 
+    // Une réaction, ou une vue unique ouverte : seuls les champs du serveur
+    // changent. Écrits dans le cache — ils n'y allaient jamais, et une
+    // réaction reçue disparaissait à la réouverture — puis affichés.
+    if (type == 'message:reaction' || type == 'message:viewed') {
+      final raw = event['message'];
+      if (raw is! Map<String, dynamic>) return;
+      final server = DirectMessage.fromJson(raw);
+      if (!_belongsToConversation(server)) return;
+      await applyServerUpdate(server);
+      return;
+    }
+
     if (type != 'message:new' && type != 'message:status') return;
 
     final received = DirectMessage.fromJson(
@@ -469,6 +482,7 @@ class MessagingController extends StateNotifier<MessagingState> {
       // Pré-téléchargement immédiat des images reçues (expérience WhatsApp)
       if (message.media != null &&
           !message.isEncrypted &&
+          !message.viewOnce &&
           (message.messageType == 'IMAGE' || message.messageType == 'VIDEO')) {
         unawaited(
           _media.resolveLocalFile(
@@ -492,6 +506,61 @@ class MessagingController extends StateNotifier<MessagingState> {
       );
     }
   }
+
+  /// La version du serveur d'un message déjà affiché (réaction, vue) : ses
+  /// réactions et sa date d'ouverture remplacent les nôtres, le clair reste.
+  Future<void> applyServerUpdate(DirectMessage server) async {
+    final stored = await _store.patchDirectServerFields(server);
+    if (!mounted) return;
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          if (m.id == server.id)
+            stored ??
+                m.copyWith(
+                  reactions: server.reactions,
+                  viewedAt: server.viewedAt,
+                )
+          else
+            m,
+      ],
+    );
+  }
+
+  /// Une vue unique que J'OUVRE, maintenant. Marquée ouverte sur l'appareil
+  /// AVANT tout réseau — un second appui, un redémarrage, une coupure ne
+  /// doivent jamais la rouvrir — puis annoncée au serveur, qui cesse alors
+  /// de servir le fichier. Hors ligne, l'annonce part à la reconnexion.
+  ///
+  /// `false` si elle était déjà ouverte : l'appelant ne l'affiche pas.
+  Future<bool> openViewOnce(DirectMessage message) async {
+    if (message.senderId == _key.myUserId || message.isViewed) return false;
+    if (!_openingViewOnce.add(message.id)) return false;
+    final current = state.messages.where((m) => m.id == message.id).firstOrNull;
+    if (current != null && current.isViewed) return false;
+    final at = DateTime.now().toUtc();
+    final stored = await _store.markDirectViewed(message.id, at);
+    if (mounted) {
+      state = state.copyWith(
+        messages: [
+          for (final m in state.messages)
+            if (m.id == message.id) stored ?? m.copyWith(viewedAt: at) else m,
+        ],
+      );
+    }
+    try {
+      final server = await _repository.markViewOnceViewed(message.id);
+      await applyServerUpdate(server);
+    } on NetworkException {
+      await _store.enqueueAction(kind: 'message:viewed', targetId: message.id);
+    } catch (_) {
+      // Refus du serveur (message supprimé) : rien à rejouer, et l'état
+      // local « ouvert » reste juste.
+    }
+    return true;
+  }
+
+  final Set<String> _openingViewOnce = {};
 
   /// Le message apparaît tout de suite et est écrit sur l'appareil AVANT
   /// toute tentative réseau : c'est ce qui permet d'écrire hors ligne et de
@@ -722,6 +791,38 @@ class MessagingController extends StateNotifier<MessagingState> {
     }
   }
 
+  /// Une position ou une fiche contact, chiffrée (voir
+  /// sealed_rich_content.dart). Renvoie le motif d'un refus, ou `null`.
+  ///
+  /// Pas de file d'attente hors ligne, comme un sondage : une position
+  /// envoyée une heure plus tard ne dit plus où l'on est.
+  Future<String?> shareRich({
+    required String messageType,
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final message = await _repository.sendRich(
+        recipientId: _key.contactUserId,
+        recipientPhone: _key.contactPhone,
+        messageType: messageType,
+        payload: payload,
+      );
+      await _store.saveDirect([message]);
+      if (!mounted) return null;
+      state = state.copyWith(messages: [...state.messages, message]);
+      _onConversationChanged();
+      return null;
+    } on EncryptionUnavailableException {
+      return _l.convAttachmentFailed;
+    } on NetworkException {
+      return _l.convOfflineAttachment;
+    } on ApiException catch (exc) {
+      return exc.message;
+    } catch (_) {
+      return _l.convAttachmentFailed;
+    }
+  }
+
   /// « Supprimer pour moi seulement » en mode preuve (maquette 6) : le
   /// message continue d'exister — gardé chez l'autre, et la trace du mode
   /// preuve ne bouge pas — mais disparaît de CET écran.
@@ -917,6 +1018,37 @@ class MessagingController extends StateNotifier<MessagingState> {
     _connectionSubscription?.cancel();
     super.dispose();
   }
+}
+
+/// [messages] où la ligne provisoire [localId] devient [confirmed].
+///
+/// Toute AUTRE entrée portant déjà l'identifiant confirmé est retirée : un
+/// rechargement d'historique arrivé pendant l'envoi avait pu y glisser la
+/// copie chiffrée du serveur. On voyait alors deux bulles — la bonne, et
+/// une seconde « En attente de ce message… » ou sans image.
+@visibleForTesting
+List<DirectMessage> replaceConfirmed(
+  List<DirectMessage> messages,
+  String localId,
+  DirectMessage confirmed,
+) {
+  final hasLocal = messages.any((m) => m.id == localId);
+  final result = <DirectMessage>[];
+  var placed = false;
+  for (final m in messages) {
+    if (m.id == localId) {
+      result.add(confirmed);
+      placed = true;
+    } else if (m.id == confirmed.id) {
+      if (!hasLocal && !placed) {
+        result.add(confirmed);
+        placed = true;
+      }
+    } else {
+      result.add(m);
+    }
+  }
+  return result;
 }
 
 final messagingControllerProvider = StateNotifierProvider.autoDispose

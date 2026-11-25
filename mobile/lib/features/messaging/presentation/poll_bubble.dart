@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+import '../../../core/api/api_exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -44,12 +48,60 @@ class PollBubble extends ConsumerStatefulWidget {
   ConsumerState<PollBubble> createState() => _PollBubbleState();
 }
 
+/// « Modifiable encore 12 min », « Réponse définitive », ou rien (pas de
+/// vote). Les minutes sont arrondies AU-DESSUS : « 0 min » alors qu'on peut
+/// encore changer serait faux.
+String? pollAnswerStatus(L l, PollData poll, DateTime now) {
+  final locksAt = poll.myLocksAt;
+  if (locksAt == null || !poll.options.any((o) => o.mine)) {
+    return poll.isFinalAt(now) ? l.msgFixPollFinal : null;
+  }
+  if (poll.isFinalAt(now)) return l.msgFixPollFinal;
+  final seconds = locksAt.difference(now).inSeconds;
+  return l.msgFixPollEditableFor(((seconds + 59) ~/ 60).clamp(1, 1 << 20));
+}
+
 class _PollBubbleState extends ConsumerState<PollBubble> {
   bool _voting = false;
+
+  /// Le temps qui reste s'affiche à la minute : l'écran se redessine une
+  /// fois par minute tant qu'une fenêtre est ouverte, pas davantage.
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleTick();
+  }
+
+  @override
+  void didUpdateWidget(PollBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleTick();
+  }
+
+  void _scheduleTick() {
+    _tick?.cancel();
+    final locksAt = widget.poll.myLocksAt;
+    if (locksAt == null || !DateTime.now().isBefore(locksAt)) return;
+    _tick = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      setState(() {});
+      if (!DateTime.now().isBefore(locksAt)) _tick?.cancel();
+    });
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
 
   Future<void> _toggle(PollOptionData option) async {
     if (_voting) return;
     final poll = widget.poll;
+    // Réponse définitive : le serveur refuserait, l'écran ne le propose pas.
+    if (poll.isFinalAt(DateTime.now())) return;
     final Set<int> wanted;
     if (poll.allowsMultiple) {
       wanted = {
@@ -73,10 +125,26 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
                 .read(messagingRepositoryProvider)
                 .votePoll(pollId: poll.id, optionIds: wanted.toList());
       widget.onVoted(updated);
+    } on ApiException catch (exc) {
+      // Refus du serveur (réponse devenue définitive, choix unique) : le
+      // DIRE, au lieu de laisser croire que le geste a été pris.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              exc.message.isNotEmpty
+                  ? exc.message
+                  : L.of(context).msgFixPollVoteRefused,
+            ),
+          ),
+        );
+      }
     } catch (_) {
-      // Best-effort : si le vote échoue en silence, l'événement WS
-      // `poll:vote` d'un autre participant ou un futur rechargement de la
-      // conversation rattraperont l'état réel.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(L.of(context).msgFixPollVoteRefused)),
+        );
+      }
     } finally {
       if (mounted) setState(() => _voting = false);
     }
@@ -136,6 +204,9 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
     final totalVoters = poll.totalVoters == 0 ? 1 : poll.totalVoters;
     final textColor = AppColors.chatTextReceived;
     final mutedColor = AppColors.chatIconMuted;
+    final now = DateTime.now();
+    final locked = poll.isFinalAt(now);
+    final status = pollAnswerStatus(l, poll, now);
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 220),
@@ -164,10 +235,30 @@ class _PollBubbleState extends ConsumerState<PollBubble> {
             _PollOptionRow(
               option: option,
               totalVoters: totalVoters,
-              enabled: !_voting,
+              enabled: !_voting && !locked,
               onTap: () => _toggle(option),
             ),
             const SizedBox(height: 6),
+          ],
+          if (status != null) ...[
+            Row(
+              children: [
+                Icon(
+                  locked ? Icons.lock_outline : Icons.timer_outlined,
+                  size: 12,
+                  color: mutedColor,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    status,
+                    key: const ValueKey('poll-answer-status'),
+                    style: TextStyle(fontSize: 11, color: mutedColor),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
           ],
           // « 8 votes · Voir les votes » — le lien seulement quand le
           // sondage montre ses votants et qu'il y en a.

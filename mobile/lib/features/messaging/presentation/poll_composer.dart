@@ -5,7 +5,11 @@ import '../../../l10n/app_localizations.dart';
 
 /// Ce qu'on a rédigé : la question, au moins deux réponses, et si l'on peut
 /// en cocher plusieurs.
-typedef PollDraft = ({String question, List<String> options, bool allowsMultiple});
+typedef PollDraft = ({
+  String question,
+  List<String> options,
+  bool allowsMultiple,
+});
 
 /// Rédiger un sondage (entrée « Sondage » de la feuille Joindre).
 ///
@@ -77,12 +81,31 @@ Future<PollDraft?> showPollComposer(BuildContext context) async {
                       label: Text(l.pollAddAnswer),
                     ),
                   ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l.pollMultiple),
-                  value: allowsMultiple,
-                  onChanged: (value) =>
-                      setDialogState(() => allowsMultiple = value),
+                // Un CHOIX explicite, et non un interrupteur qu'on oublie :
+                // le serveur l'impose ensuite aux votants.
+                const SizedBox(height: 4),
+                SegmentedButton<bool>(
+                  key: const ValueKey('poll-choice-mode'),
+                  segments: [
+                    ButtonSegment(
+                      value: false,
+                      icon: const Icon(Icons.radio_button_checked, size: 18),
+                      label: Text(l.msgFixPollSingleChoice),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      icon: const Icon(Icons.check_box_outlined, size: 18),
+                      label: Text(l.msgFixPollMultipleChoice),
+                    ),
+                  ],
+                  selected: {allowsMultiple},
+                  onSelectionChanged: (choice) =>
+                      setDialogState(() => allowsMultiple = choice.first),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l.msgFixPollChoiceRule,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),

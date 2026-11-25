@@ -24,8 +24,9 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from sqlalchemy.orm.attributes import flag_modified
 
-from app.models import Group, GroupMember, KoryEntry, KoryInvite, KoryMember, KoryPot, KoryRound, User
+from app.models import Group, GroupMember, KoryArchive, KoryEntry, KoryInvite, KoryMember, KoryPot, KoryRound, User
 from app.models.kory import KorySwap
+from app.services.kory import activity as kory_activity
 from app.services.kory import cotisation as cotisation_service
 from app.services.events.outbox import record_event
 from app.services.notifications.inbox import notify
@@ -165,6 +166,32 @@ PLEDGE_EDIT_WINDOW = timedelta(hours=8)
 
 class JoinBody(BaseModel):
     code: str = Field(..., min_length=4, max_length=12)
+
+
+class ArchiveBody(BaseModel):
+    archived: bool
+
+
+def _is_finished(pot: KoryPot, now: datetime) -> bool:
+    """Terminée (clôturée, dissoute) ou expirée : une cagnotte dont la date
+    de fin est passée, une cotisation dont la dernière échéance est passée.
+    Seule une collecte finie se range dans les archives — on n'archive pas
+    ce qui attend encore quelque chose de soi."""
+    if pot.status == "FROZEN":
+        return False
+    if pot.status == "CLOSED" or pot.dissolved_at is not None:
+        return True
+    if pot.status != "OPEN":
+        return False
+    if pot.kind == "CAGNOTTE":
+        return pot.due_at is not None and pot.due_at <= now
+    if pot.kind == "COTISATION":
+        return pot.ends_at is not None and pot.ends_at <= now
+    return False
+
+
+def _archived_ids(db: Session, user_id: int) -> set:
+    return {pid for (pid,) in db.query(KoryArchive.pot_id).filter(KoryArchive.user_id == user_id)}
 
 
 def _me(current_user: dict) -> int:
@@ -309,6 +336,21 @@ def _emit(db: Session, pot: KoryPot, event_type: str, **data) -> None:
         event_type,
         {"pot_id": pot.id, "group_id": pot.group_id, "kind": pot.kind, **data},
         key=f"pot-{pot.id}",
+    )
+
+
+def _activity_contribution(db: Session, pot: KoryPot, actor_id: int, entry: KoryEntry) -> None:
+    """Une contribution CONFIRMÉE, racontée dans le fil du groupe : qui, et
+    combien si les montants de chacun sont visibles ; le total confirmé."""
+    db.flush()
+    kory_activity.post(
+        db, pot, actor_id, "contribution",
+        contributor_id=entry.contributor_id,
+        contributor_name=_name(db, entry.contributor_id),
+        amount=entry.amount,
+        total=_confirmed_total(db, pot.id),
+        goal=pot.goal_amount,
+        round=entry.round_number,
     )
 
 
@@ -504,6 +546,12 @@ def _pot_json(db: Session, pot: KoryPot, viewer_id: int, *, with_entries: bool =
         "reminded_at": pot.reminded_at.isoformat() if pot.reminded_at else None,
         "participants_count": len(_participants(db, pot)),
     }
+    # L'archive est à MOI : un réglage par membre, pas un état de la collecte.
+    finished = _is_finished(pot, datetime.utcnow())
+    data["archivable"] = finished
+    data["archived"] = finished and db.query(KoryArchive.id).filter(
+        KoryArchive.pot_id == pot.id, KoryArchive.user_id == viewer_id
+    ).first() is not None
     # KOR-11 : les participants, numéros masqués (KORY-15).
     if viewer_id in (pot.organizer_id, pot.collector_id):
         data["participants"] = _participants_json(db, pot)
@@ -633,6 +681,11 @@ def create_pot(
     for uid in selected or []:
         db.add(KoryMember(pot_id=pot.id, user_id=uid))
     _emit(db, pot, "kory.pot.created", organizer_id=me, collector_id=collector_id)
+    kory_activity.post(
+        db, pot, me, "created",
+        goal=pot.goal_amount, amount_per_member=pot.amount_per_member, period=pot.period,
+        due_at=pot.due_at.isoformat() if pot.due_at else None,
+    )
     if pot.group_id:
         # « Les membres sont prévenus dans la discussion » (KOR-15, 19).
         _notify(db, pot, _participants(db, pot) - {me}, f"{_name(db, me) or 'Un membre'} a ouvert « {pot.title} ».")
@@ -834,6 +887,10 @@ def _create_tontine(db: Session, me: int, body: PotCreate) -> dict:
         db.add(KoryMember(pot_id=pot.id, user_id=uid, position=index, accepted_at=now if uid == me else None))
     db.flush()
     _emit(db, pot, "kory.pot.created", organizer_id=me, members=len(rotation), draw_mode=draw_mode)
+    kory_activity.post(
+        db, pot, me, "created",
+        amount_per_member=pot.amount_per_member, period=pot.period, members=len(rotation),
+    )
     _notify(
         db, pot, set(rotation) - {me},
         f"{_name(db, me) or 'Un membre'} t’invite dans la tontine « {pot.title} ». Accepte pour qu’elle démarre.",
@@ -869,6 +926,11 @@ def _start_tontine(db: Session, pot: KoryPot) -> None:
     pot.status = "OPEN"
     db.flush()
     _emit(db, pot, "kory.tontine.started", rounds=len(order), draw_mode=pot.draw_mode, seal=pot.draw_seal)
+    kory_activity.post(
+        db, pot, pot.organizer_id, "started",
+        round=1, rounds=len(order),
+        beneficiary_id=order[0], beneficiary_name=_name(db, order[0]),
+    )
     _notify(
         db, pot, set(order),
         "Tout le monde a accepté : la tontine démarre. Le calendrier des tours est prêt.",
@@ -878,9 +940,13 @@ def _start_tontine(db: Session, pot: KoryPot) -> None:
 @router.get("/pots")
 def list_pots(
     group_id: Optional[int] = None,
+    archived: bool = False,
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Mes collectes. Celles que J'AI archivées n'y sont plus (`archived`
+    les donne seules). La vue d'un groupe (`group_id`) les montre toutes :
+    l'archive range ma liste, pas la discussion."""
     me = _me(current_user)
     _require_kory_open(db, me)
     my_groups = db.query(GroupMember.group_id).filter(GroupMember.user_id == me)
@@ -895,8 +961,47 @@ def list_pots(
     )
     if group_id is not None:
         query = query.filter(KoryPot.group_id == group_id)
+    if group_id is None:
+        mine = _archived_ids(db, me)
+        now = datetime.utcnow()
+        if archived:
+            query = query.filter(KoryPot.id.in_(sorted(mine) or [-1]))
+        elif mine:
+            # Une collecte archivée puis ROUVERTE (prolongée) revient dans la
+            # liste : on n'archive que ce qui est fini.
+            still_finished = {
+                pot.id for pot in db.query(KoryPot).filter(KoryPot.id.in_(mine)) if _is_finished(pot, now)
+            }
+            if still_finished:
+                query = query.filter(KoryPot.id.notin_(sorted(still_finished)))
     pots = query.order_by(KoryPot.status.desc(), KoryPot.created_at.desc()).limit(100).all()
+    if group_id is None and archived:
+        pots = [pot for pot in pots if _is_finished(pot, datetime.utcnow())]
     return {"items": [_pot_json(db, pot, me) for pot in pots]}
+
+
+@router.put("/pots/{pot_id}/archive")
+def set_archive(
+    pot_id: int,
+    body: ArchiveBody,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Ranger une collecte terminée ou expirée dans MES archives, ou l'en
+    sortir. Personne d'autre n'en est affecté."""
+    me = _me(current_user)
+    _require_kory_open(db, me)
+    pot = _get_visible_pot(db, pot_id, me)
+    row = db.query(KoryArchive).filter(KoryArchive.pot_id == pot.id, KoryArchive.user_id == me).first()
+    if body.archived:
+        if not _is_finished(pot, datetime.utcnow()):
+            raise HTTPException(status_code=409, detail="Seule une collecte terminée ou expirée s'archive")
+        if row is None:
+            db.add(KoryArchive(pot_id=pot.id, user_id=me))
+    elif row is not None:
+        db.delete(row)
+    db.commit()
+    return _pot_json(db, pot, me)
 
 
 @router.get("/summary")
@@ -1000,6 +1105,8 @@ def declare_entry(
         db, pot, "kory.entry.declared",
         entry_id=entry.id, contributor_id=me, amount=entry.amount, status=entry.status,
     )
+    if entry.status == "CONFIRMED":
+        _activity_contribution(db, pot, me, entry)
     if entry.status == "DECLARED":
         reviewer = _entry_reviewer(db, pot, entry)
         _notify(db, pot, [reviewer], f"{_name(db, me) or 'Un membre'} a déclaré {_fcfa(entry.amount)}. À confirmer.")
@@ -1040,6 +1147,8 @@ def review_entry(
         db, pot, f"kory.entry.{entry.status.lower()}",
         entry_id=entry.id, contributor_id=entry.contributor_id, amount=entry.amount,
     )
+    if entry.status == "CONFIRMED":
+        _activity_contribution(db, pot, me, entry)
     reviewer_name = _name(db, me) or "Le collecteur"
     _notify(
         db, pot, [entry.contributor_id],
@@ -1075,10 +1184,18 @@ def next_round(pot_id: int, current_user: dict = Depends(get_current_user), db: 
         pot.status = "CLOSED"
         pot.closed_at = now
         _emit(db, pot, "kory.pot.closed", rounds=current.number)
+        kory_activity.post(db, pot, me, "closed", rounds=current.number, total=_confirmed_total(db, pot.id))
     else:
         following.status = "CURRENT"
         pot.collector_id = following.beneficiary_id
         _emit(db, pot, "kory.round.started", number=following.number, beneficiary_id=following.beneficiary_id)
+        kory_activity.post(
+            db, pot, me, "round",
+            round=following.number,
+            rounds=db.query(func.count(KoryRound.id)).filter(KoryRound.pot_id == pot.id).scalar(),
+            beneficiary_id=following.beneficiary_id,
+            beneficiary_name=_name(db, following.beneficiary_id),
+        )
     db.commit()
     return _pot_json(db, pot, me, with_entries=True)
 
@@ -1094,6 +1211,7 @@ def close_pot(pot_id: int, current_user: dict = Depends(get_current_user), db: S
         pot.status = "CLOSED"
         pot.closed_at = datetime.utcnow()
         _emit(db, pot, "kory.pot.closed", confirmed_total=_confirmed_total(db, pot.id))
+        kory_activity.post(db, pot, me, "closed", total=_confirmed_total(db, pot.id), goal=pot.goal_amount)
         # KOR-16 : chacun est prévenu, avec ce qu'il lui reste à verser.
         closer = _name(db, me) or "Le collecteur"
         now = datetime.utcnow()
@@ -1263,6 +1381,8 @@ def add_participants(
     me = _me(current_user)
     _require_kory_open(db, me)
     pot = _get_visible_pot(db, pot_id, me)
+    if pot.kind == "TONTINE":
+        return _add_tontine_members(db, pot, me, body)
     if me not in (pot.organizer_id, pot.collector_id):
         raise HTTPException(status_code=403, detail="Seul l'organisateur ajoute des participants")
     if pot.status != "OPEN":
@@ -1305,6 +1425,46 @@ def add_participants(
     db.flush()
     if added:
         _notify(db, pot, added, f"{organizer} t’a ajouté·e à la cagnotte. Tu peux t’y engager.")
+    db.commit()
+    return _pot_json(db, pot, me, with_entries=True)
+
+
+def _add_tontine_members(db: Session, pot: KoryPot, me: int, body: ParticipantsBody) -> dict:
+    """Une tontine en attente accueille d'autres membres DU GROUPE, invités
+    comme les premiers : chacun accepte (et règle ses frais Kory Plus) avant
+    le démarrage. Une fois l'ordre des tours tiré, plus personne n'entre :
+    c'est la promesse faite à ceux qui reçoivent en dernier."""
+    if not _is_admin(pot, me):
+        raise HTTPException(status_code=403, detail="Seul l'administrateur ajoute des membres")
+    if pot.status != "PENDING":
+        raise HTTPException(status_code=409, detail="La tontine a démarré : l'ordre des tours est fixé")
+    if body.phones:
+        raise HTTPException(status_code=422, detail="Une tontine réunit des membres du groupe")
+    if any(not _is_group_member(db, pot.group_id, uid) for uid in body.user_ids):
+        raise HTTPException(status_code=422, detail="Chaque membre doit être dans le groupe")
+    rows = db.query(KoryMember).filter(KoryMember.pot_id == pot.id).all()
+    known = {m.user_id: m for m in rows}
+    position = max((m.position or 0 for m in rows), default=-1) + 1
+    added = []
+    for uid in dict.fromkeys(body.user_ids):
+        member = known.get(uid)
+        if member is not None:
+            if member.declined_at is not None:
+                # Il avait refusé : on peut l'inviter de nouveau.
+                member.declined_at = None
+                added.append(uid)
+            continue
+        if len(known) + len(added) >= MAX_ROUNDS:
+            raise HTTPException(status_code=422, detail="Une tontine compte au plus 50 tours")
+        db.add(KoryMember(pot_id=pot.id, user_id=uid, position=position))
+        position += 1
+        added.append(uid)
+    db.flush()
+    if added:
+        _notify(
+            db, pot, added,
+            f"{_name(db, me) or 'Un membre'} t’invite dans la tontine « {pot.title} ». Accepte pour qu’elle démarre.",
+        )
     db.commit()
     return _pot_json(db, pot, me, with_entries=True)
 
@@ -1596,6 +1756,7 @@ def remind(pot_id: int, current_user: dict = Depends(get_current_user), db: Sess
         _notify(db, pot, targets, body)
         pot.reminded_at = now
         _emit(db, pot, "kory.reminded", count=len(targets))
+        kory_activity.post(db, pot, me, "reminder", count=len(targets))
     db.commit()
     return {"reminded": len(targets), "reminded_at": pot.reminded_at.isoformat() if pot.reminded_at else None}
 
@@ -1793,6 +1954,7 @@ def dissolve_tontine(
     pot.dissolved_at = now
     pot.dissolve_reason = reason
     _emit(db, pot, "kory.tontine.dissolved", cancelled_rounds=cancelled)
+    kory_activity.post(db, pot, me, "dissolved")
     members = set(_tontine_member_ids(db, pot)) | {
         m.user_id for m in db.query(KoryMember).filter(KoryMember.pot_id == pot.id)
     }
@@ -1842,6 +2004,7 @@ def change_cotisation(
         if current is None or current[1] > now:
             pot.status = "CLOSED"
             pot.closed_at = now
+        kory_activity.post(db, pot, me, "closed", total=_confirmed_total(db, pot.id))
         message = f"{actor} a arrêté la cotisation. Ce qui est dû reste dû."
     elif action == "COLLECTOR":
         members = cotisation_service.member_ids(db, pot)

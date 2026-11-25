@@ -7,6 +7,7 @@ from app.models.user import (  # noqa: F401
     UserRole,
     PrivacyAudience,
     User,
+    PhoneVisibilityException,
 )
 from app.models.auth import (  # noqa: F401
     Token,
@@ -39,6 +40,7 @@ from app.models.messaging import (  # noqa: F401
     BroadcastMessage,
     DirectProofMode,
     DirectMessagePin,
+    DirectConversationClear,
 )
 from app.models.groups import (  # noqa: F401
     Group,
@@ -55,6 +57,8 @@ from app.models.groups import (  # noqa: F401
     GroupPollVote,
     GroupSenderKeyDistribution,
     GroupMessagePin,
+    GroupMessageView,
+    PollVoteWindow,
 )
 from app.models.communities import (  # noqa: F401
     Community,
@@ -97,6 +101,7 @@ from app.models.marketplace import (  # noqa: F401
     MarketplaceAlert,
     MarketplaceReport,
     MarketplaceHidden,
+    MarketplaceHandover,
 )
 from app.models.modules import (  # noqa: F401
     AppModule,
@@ -148,6 +153,7 @@ from app.models.kory import (  # noqa: F401
     KoryEntry,
     KoryRound,
     KoryInvite,
+    KoryArchive,
 )
 from app.models.events import (  # noqa: F401
     OutboxEvent,

@@ -446,6 +446,38 @@ class MarketplaceRepository {
         body: {'buyer_id': buyerId, 'final_price': ?finalPrice},
       );
 
+  /// Vente en main propre — le vendeur, en face de l'acheteur : « Commande
+  /// validée et livrée ». Le serveur envoie un code à l'ACHETEUR seulement.
+  Future<Map<String, dynamic>> startHandover(
+    int productId, {
+    required int buyerId,
+    int? finalPrice,
+  }) async =>
+      await _api.post(
+            '/marketplace/$productId/handover',
+            body: {'buyer_id': buyerId, 'final_price': ?finalPrice},
+          )
+          as Map<String, dynamic>;
+
+  /// La remise en cours (ou la dernière). Pour l'acheteur, avec le `code`.
+  Future<Map<String, dynamic>> handover(int productId) async =>
+      await _api.get('/marketplace/$productId/handover')
+          as Map<String, dynamic>;
+
+  /// « Clôturer la vente » avec le code que l'acheteur a donné.
+  Future<Map<String, dynamic>> confirmHandover(
+    int productId,
+    String code,
+  ) async =>
+      await _api.post(
+            '/marketplace/$productId/handover/confirm',
+            body: {'code': code},
+          )
+          as Map<String, dynamic>;
+
+  Future<void> cancelHandover(int productId) =>
+      _api.delete('/marketplace/$productId/handover');
+
   /// ANN-19 : la vente que l'acheteur va noter.
   Future<Map<String, dynamic>> sale(int productId) async =>
       await _api.get('/marketplace/$productId/sale') as Map<String, dynamic>;

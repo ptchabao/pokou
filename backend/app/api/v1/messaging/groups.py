@@ -18,15 +18,16 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessagePin, GroupMessageReaction, GroupPollVote, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, User
+from app.models import Contact, Group, GroupInvitation, GroupJoinRequest, GroupMember, GroupMessage, GroupMessageMention, GroupMessagePin, GroupMessageReaction, GroupMessageView, GroupPollVote, GroupSenderKeyDistribution, MediaAsset, MessageType, Poll, PollOption, PollVoteWindow, User
 from app.utils.editing import MESSAGE_EDIT_WINDOW_MINUTES
-from app.utils.identity import est_certifie, forme_du_badge, nom_certifie
+from app.utils.identity import est_certifie, forme_du_badge, nom_certifie, nom_sans_numero
+from app.services.kory import activity as kory_activity
 from app.services.messaging import group_invitation_service
 from app.services.privacy import privacy_service
 from app.core.security import get_current_user
 from app.api.v1.messaging.ws import manager
-from app.api.v1.messaging.messages import MAX_PINS, PIN_DURATIONS
-from app.services.messaging import notification_policy
+from app.api.v1.messaging.messages import MAX_PINS, PIN_DURATIONS, VIEW_ONCE_TYPES, reaction_push_body
+from app.services.messaging import notification_policy, poll_window
 from app.services.media import sticker_service
 from app.services.notifications.push_service import send_push
 
@@ -95,6 +96,11 @@ class GroupMessageCreate(BaseModel):
     #: Transfert : compte de transferts du message d'origine + 1, annoncé
     #: par l'appareil (le serveur ne lit pas le chiffré).
     forward_score: int = Field(0, ge=0, le=1000)
+    #: Photo ou vidéo à vue unique : chaque membre l'ouvre une fois.
+    view_once: bool = False
+    #: Sondage : l'auteur annonce en clair « plusieurs réponses » (vrai) ou
+    #: « une seule » (faux). Le reste du sondage est dans le chiffré.
+    poll_allows_multiple: Optional[bool] = None
 
 
 class GroupMessageEdit(BaseModel):
@@ -135,6 +141,10 @@ class GroupPollVoteSet(BaseModel):
     — le serveur ne saurait pas dire qu'il est vide."""
     encryption: str = Field(..., pattern="^poll-key-v1$")
     ciphertext: str = Field(..., min_length=1, max_length=4000)
+    #: Le NOMBRE de réponses cochées — pas lesquelles, qui restent chiffrées.
+    #: Suffit au serveur pour refuser deux réponses à un sondage à réponse
+    #: unique. Absent chez les versions antérieures.
+    choice_count: Optional[int] = Field(None, ge=1, le=12)
 
 
 # ─── Sérialisation ────────────────────────────────────────────────────────────
@@ -149,9 +159,8 @@ def _serialize_media(asset: MediaAsset) -> dict:
 
 
 def _display_name(user: Optional[User]) -> str:
-    if not user:
-        return "Inconnu"
-    return user.full_name or user.phone or f"#{user.id}"
+    # Jamais le numéro en clair : voir identity.nom_sans_numero.
+    return nom_sans_numero(user)
 
 
 def _serialize_member(member: GroupMember) -> dict:
@@ -343,14 +352,30 @@ def _serialize_message(message: GroupMessage, viewer_id: Optional[int] = None) -
         # position de groupe perdait sa charge utile dès que la conversation
         # était relue via GET /groups/{id}/messages (seul l'événement WebSocket
         # initial de polls.py la portait).
-        "payload": None,
+        # Seule exception au tout-chiffré : l'activité Kory, écrite par le
+        # SERVEUR avec ce qu'il sait déjà (services/kory/activity.py).
+        "payload": message.payload if kory_activity.is_kory_activity(message) else None,
         "poll": None,
         # Mode preuve : le message supprimé reste lisible, et le client le
         # barre. Hors mode preuve, une suppression efface la ligne.
         "deleted_at": message.deleted_at.isoformat() if message.deleted_at else None,
         "deleted_by": message.deleted_by,
         "original_content": None,
+        # Vue unique : ouverte UNE fois par chaque membre. `viewed_at` est
+        # celle du LECTEUR — chacun la consomme pour soi.
+        "view_once": bool(message.view_once),
+        "viewed_at": _viewed_at(message, viewer_id),
+        "poll_allows_multiple": message.poll_allows_multiple,
     }
+
+
+def _viewed_at(message: GroupMessage, viewer_id: Optional[int]) -> Optional[str]:
+    if not message.view_once or viewer_id is None:
+        return None
+    for view in message.views:
+        if view.user_id == viewer_id:
+            return view.viewed_at.isoformat()
+    return None
 
 
 # ─── Autorisation ─────────────────────────────────────────────────────────────
@@ -1500,7 +1525,16 @@ async def send_group_message(
     media_asset = None
     # Un sondage n'a pas de pièce jointe : sa question, ses réponses et la
     # clé de ses votes sont dans le chiffré (voir GroupPollVote).
-    if message_type in (MessageType.TEXT, MessageType.POLL):
+    if message_type == MessageType.CONTACT:
+        # Partager le numéro d'un tiers à tout un groupe, c'est le donner à
+        # des gens qu'il ne connaît pas : réservé aux discussions à deux.
+        raise HTTPException(
+            status_code=400,
+            detail="Le partage de contact n'est possible que dans une discussion à deux",
+        )
+    if message_type in (MessageType.TEXT, MessageType.POLL, MessageType.LOCATION):
+        # Une position de groupe, comme un sondage, est tout entière dans le
+        # chiffré : coordonnées et nom du lieu.
         pass
     else:
         if not payload.media_asset_id:
@@ -1521,6 +1555,11 @@ async def send_group_message(
             raise HTTPException(status_code=404, detail="Pièce jointe introuvable")
         if message_type != MessageType.STICKER and media_asset.mime_type != "application/octet-stream":
             raise HTTPException(status_code=400, detail="Les fichiers de groupe doivent être chiffrés")
+
+    if payload.view_once and message_type not in VIEW_ONCE_TYPES:
+        raise HTTPException(status_code=400, detail="Seules une photo ou une vidéo peuvent être à vue unique")
+    if payload.poll_allows_multiple is not None and message_type != MessageType.POLL:
+        raise HTTPException(status_code=400, detail="Seul un sondage choisit une ou plusieurs réponses")
 
     if payload.reply_to_id:
         # Le message cité doit appartenir à CE groupe : sans cette
@@ -1561,6 +1600,10 @@ async def send_group_message(
         media_asset_id=media_asset.id if media_asset else None,
         reply_to_id=payload.reply_to_id,
         forward_score=payload.forward_score,
+        view_once=payload.view_once,
+        poll_allows_multiple=(
+            bool(payload.poll_allows_multiple) if message_type == MessageType.POLL else None
+        ),
         # Échéance figée à l'envoi, jamais recalculée à la lecture : c'est ce
         # qui fait qu'un changement de réglage plus tard n'efface pas le passé
         # et ne prolonge pas ce qui devait disparaître.
@@ -2004,6 +2047,77 @@ async def unpin_group_message(
     return {"items": await _broadcast_pins(db, group_id)}
 
 
+def _push_group_reaction(db: Session, message: GroupMessage, *, reactor_id: int, emoji: str) -> None:
+    """Prévient l'AUTEUR du message — et lui seul, pas tout le groupe — qu'un
+    membre y a réagi. Le nom et l'emoji, jamais le contenu (chiffré). Un
+    groupe en sourdine ne sonne pas pour une réaction (notification_policy)."""
+    group = db.query(Group).filter(Group.id == message.group_id).first()
+    if group is None:
+        return
+    decision = notification_policy.decide(
+        db,
+        recipient_id=message.sender_id,
+        event=notification_policy.NotificationEvent.REACTION,
+        group_id=group.id,
+    )
+    if not decision.deliver:
+        return
+    reactor = db.query(User).filter(User.id == reactor_id).first()
+    reactor_name = _display_name(reactor)
+    send_push(
+        db,
+        message.sender_id,
+        title=group.name,
+        body=reaction_push_body(reactor_name, emoji),
+        data={
+            "type": notification_policy.NotificationEvent.REACTION.value,
+            "group_id": str(group.id),
+            "group_name": group.name,
+            "message_id": str(message.id),
+            "emoji": emoji,
+            **decision.as_payload(),
+        },
+    )
+
+
+@router.post("/{group_id}/messages/{message_id}/viewed")
+async def mark_group_view_once_viewed(
+    group_id: int,
+    message_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Un membre a ouvert une vue unique. Idempotent : seul le PREMIER appel
+    horodate, et la ligne écrite est ce que media.py::_can_access relit pour
+    ne plus lui servir le fichier. L'expéditeur n'a rien à consommer."""
+    user_id = current_user["user_id"]
+    _require_membership(db, group_id, user_id)
+    message = _get_group_message(db, group_id, message_id)
+    if not message.view_once:
+        raise HTTPException(status_code=400, detail="Ce message n'est pas à vue unique")
+    if message.sender_id == user_id:
+        raise HTTPException(status_code=400, detail="L'expéditeur n'ouvre pas sa propre vue unique")
+    view = db.query(GroupMessageView).filter(
+        GroupMessageView.message_id == message.id, GroupMessageView.user_id == user_id
+    ).first()
+    if view is None:
+        db.add(GroupMessageView(message_id=message.id, user_id=user_id))
+        db.commit()
+        db.refresh(message)
+        # L'auteur apprend qu'un membre l'a ouverte (« Ouvert »), sans
+        # savoir quoi d'autre : il n'y a rien d'autre.
+        await manager.send_to_user(
+            message.sender_id,
+            {
+                "type": "group:message:viewed",
+                "group_id": group_id,
+                "message_id": message.id,
+                "viewer_id": user_id,
+            },
+        )
+    return _serialize_message(message, user_id)
+
+
 @router.put("/{group_id}/messages/{message_id}/reaction")
 async def set_group_message_reaction(
     group_id: int,
@@ -2032,12 +2146,15 @@ async def set_group_message_reaction(
         GroupMessageReaction.message_id == message.id,
         GroupMessageReaction.user_id == user_id,
     ).first()
+    changed = existing is None or existing.emoji != emoji
     if existing:
         existing.emoji = emoji
     else:
         db.add(GroupMessageReaction(message_id=message.id, user_id=user_id, emoji=emoji))
     db.commit()
     db.refresh(message)
+    if changed and message.sender_id != user_id:
+        _push_group_reaction(db, message, reactor_id=user_id, emoji=emoji)
 
     await _broadcast(
         db,
@@ -2126,7 +2243,15 @@ async def list_group_poll_votes(
     _require_membership(db, group_id, current_user["user_id"])
     message = _get_group_poll(db, group_id, message_id)
     votes = sorted(message.poll_votes, key=lambda vote: (vote.created_at, vote.id))
-    return {"message_id": message.id, "items": [_serialize_poll_vote(vote) for vote in votes]}
+    windows = db.query(PollVoteWindow).filter(
+        PollVoteWindow.poll_key == message.id,
+        PollVoteWindow.user_id == current_user["user_id"],
+    ).all()
+    return {
+        "message_id": message.id,
+        "items": [_serialize_poll_vote(vote) for vote in votes],
+        **poll_window.serialize_for(windows, current_user["user_id"]),
+    }
 
 
 @router.put("/{group_id}/messages/{message_id}/poll-vote")
@@ -2147,8 +2272,14 @@ async def set_group_poll_vote(
     message = _get_group_poll(db, group_id, message_id)
     if message.deleted_at is not None:
         raise HTTPException(status_code=409, detail="Ce sondage a été supprimé")
+    # « Une seule réponse » : le serveur ne lit pas les choix, mais leur
+    # nombre lui suffit. Les téléphones, eux, ne comptent jamais qu'un choix
+    # d'un vote qui en porterait plusieurs (voir group_poll.dart::tally).
+    if message.poll_allows_multiple is False and (payload.choice_count or 1) > 1:
+        raise HTTPException(status_code=400, detail="Ce sondage n'accepte qu'une seule réponse")
 
     now = datetime.utcnow()
+    poll_window.enforce(db, message.id, user_id, casting=True, now=now)
     vote = db.query(GroupPollVote).filter(
         GroupPollVote.message_id == message.id, GroupPollVote.voter_id == user_id
     ).first()
@@ -2176,7 +2307,12 @@ async def set_group_poll_vote(
         {"type": "group:poll:vote", "group_id": group_id, "message_id": message.id, "vote": serialized},
         exclude_user_id=user_id,
     )
-    return {"message_id": message.id, "vote": serialized}
+    window = poll_window.window_of(db, message.id, user_id)
+    return {
+        "message_id": message.id,
+        "vote": serialized,
+        **poll_window.serialize_for([window] if window else [], user_id),
+    }
 
 
 @router.delete("/{group_id}/messages/{message_id}/poll-vote")
@@ -2194,6 +2330,9 @@ async def remove_group_poll_vote(
         GroupPollVote.message_id == message.id, GroupPollVote.voter_id == user_id
     ).first()
     if vote:
+        # Se rétracter, c'est changer sa réponse : la même fenêtre de 15
+        # minutes s'applique.
+        poll_window.enforce(db, message.id, user_id, casting=False)
         db.delete(vote)
         db.commit()
         await _broadcast(

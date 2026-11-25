@@ -210,6 +210,14 @@ class Poll(Base):
 
     creator = relationship("User")
     options = relationship("PollOption", cascade="all, delete-orphan", backref="poll", order_by="PollOption.position")
+    # Le premier vote de chacun — la fin de sa fenêtre de modification. Lu
+    # par les sérialiseurs (messages.py, polls.py) pour dire au votant
+    # jusqu'à quand il peut changer d'avis.
+    vote_windows = relationship(
+        "PollVoteWindow",
+        primaryjoin="Poll.id == foreign(PollVoteWindow.poll_key)",
+        viewonly=True,
+    )
 
 
 class PollOption(Base):
@@ -324,6 +332,15 @@ class GroupMessage(Base):
     # Transfert : 0 = message d'origine, n = transféré n fois de proche en
     # proche. Voir DirectMessage.forward_score.
     forward_score = Column(Integer, default=0, nullable=False)
+    # Photo ou vidéo à VUE UNIQUE : chaque membre l'ouvre une fois, puis le
+    # fichier ne lui est plus servi (voir GroupMessageView et
+    # media.py::_can_access). L'expéditeur, lui, ne l'ouvre pas.
+    view_once = Column(Boolean, default=False, nullable=False, server_default=text("false"))
+    # Sondage : « une seule réponse » (faux) ou « plusieurs réponses » (vrai),
+    # annoncé EN CLAIR par l'auteur à la création. Les choix sont chiffrés,
+    # mais leur NOMBRE accompagne chaque vote : c'est ce qui permet au
+    # serveur d'imposer la règle sans rien lire. Nul hors sondage.
+    poll_allows_multiple = Column(Boolean, nullable=True)
 
     group = relationship("Group")
     sender = relationship("User", foreign_keys=[sender_id])
@@ -333,6 +350,7 @@ class GroupMessage(Base):
     reactions = relationship("GroupMessageReaction", cascade="all, delete-orphan", backref="message")
     mentions = relationship("GroupMessageMention", cascade="all, delete-orphan", backref="message")
     poll_votes = relationship("GroupPollVote", cascade="all, delete-orphan", backref="message")
+    views = relationship("GroupMessageView", cascade="all, delete-orphan", backref="message")
 
 
 class GroupPollVote(Base):
@@ -363,6 +381,46 @@ class GroupPollVote(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (UniqueConstraint("message_id", "voter_id", name="uq_group_poll_vote"),)
+
+
+class GroupMessageView(Base):
+    """Un membre a ouvert une photo ou une vidéo à vue unique.
+
+    Une ligne par (message, membre) : la vue unique d'un groupe se consomme
+    PERSONNE PAR PERSONNE. Le premier qui l'ouvre ne la retire pas aux
+    autres ; chacun la voit une fois."""
+    __tablename__ = "group_message_views"
+
+    id = Column(Integer, primary_key=True)
+    message_id = Column(
+        String(36), ForeignKey("group_messages.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("message_id", "user_id", name="uq_group_message_view"),)
+
+
+class PollVoteWindow(Base):
+    """Le PREMIER vote d'une personne sur un sondage, et donc la fin de sa
+    fenêtre de modification (15 minutes après).
+
+    Une table à part, et non la date des votes eux-mêmes : retirer son vote
+    supprime la ligne de vote, et revoter aurait rouvert une fenêtre neuve —
+    on pouvait alors changer d'avis sans limite. Celle-ci n'est jamais
+    effacée par un retrait.
+
+    `poll_key` : l'identifiant du sondage en tête-à-tête (`polls.id`), ou
+    celui du MESSAGE pour un sondage de groupe, chiffré, qui n'a pas de ligne
+    dans `polls`. Deux UUID tirés du même espace."""
+    __tablename__ = "poll_vote_windows"
+
+    id = Column(Integer, primary_key=True)
+    poll_key = Column(String(36), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    first_voted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("poll_key", "user_id", name="uq_poll_vote_window"),)
 
 
 class GroupSenderKeyDistribution(Base):

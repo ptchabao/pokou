@@ -1,0 +1,129 @@
+{
+  "$description": "POKOU — Design tokens v2.0 (format W3C Design Tokens / DTCG). Source de vérité unique pour Android (Compose/XML), iOS (SwiftUI), Flutter et web. Valeurs marquées 'proposition' : à valider par le porteur de projet. Contrastes calculés selon WCAG 2.2 (voir cahier des charges, section 7).",
+  "color": {
+    "brand": {
+      "terracotta-100": { "$type": "color", "$value": "#F5DCCB", "$description": "Fond de puce sélectionnée, surbrillance légère (proposition)" },
+      "terracotta-500": { "$type": "color", "$value": "#A65527", "$description": "Couleur d'action principale. Texte sur crème 5,00:1 ; blanc sur terracotta 5,32:1" },
+      "terracotta-700": { "$type": "color", "$value": "#8A4520", "$description": "État appuyé, liens sur fond beige (5,74:1) (proposition)" },
+      "cuivre-500": { "$type": "color", "$value": "#B86D3B", "$description": "Illustrations, icônes décoratives, grands titres uniquement (3,74:1 sur crème) — jamais pour du texte courant" },
+      "or-500": { "$type": "color", "$value": "#D4AF37", "$description": "Décoration uniquement sur fond clair (1,98:1 sur crème). Utilisable en texte sur ébène (8,54:1)" },
+      "ebene-900": { "$type": "color", "$value": "#1A1615", "$description": "Texte principal (16,90:1 sur crème)" }
+    },
+    "neutral": {
+      "white": { "$type": "color", "$value": "#FFFFFF" },
+      "creme-50": { "$type": "color", "$value": "#FFF7EC", "$description": "Fond principal (proposition)" },
+      "beige-100": { "$type": "color", "$value": "#F2E5D5", "$description": "Surfaces secondaires, cartes (proposition). Terracotta-500 en texte dessus = 4,29:1 : interdit en texte courant" },
+      "sable-200": { "$type": "color", "$value": "#E4D3BF", "$description": "Séparateurs décoratifs uniquement (1,38:1)" },
+      "taupe-500": { "$type": "color", "$value": "#8C7D73", "$description": "Bordure de champ (3,73:1 sur crème, exigence 3:1 composants)" },
+      "taupe-600": { "$type": "color", "$value": "#6B5E57", "$description": "Texte secondaire (5,88:1 sur crème ; 5,04:1 sur beige)" }
+    },
+    "feedback": {
+      "danger-500": { "$type": "color", "$value": "#B3261E", "$description": "Erreurs, urgence HONAM. Blanc dessus 6,54:1" },
+      "danger-50": { "$type": "color", "$value": "#FBE4E1" },
+      "success-500": { "$type": "color", "$value": "#1E7A46", "$description": "5,03:1 sur crème" },
+      "success-50": { "$type": "color", "$value": "#E3F2E8" },
+      "warning-500": { "$type": "color", "$value": "#8A5A00", "$description": "5,58:1 sur crème" },
+      "warning-50": { "$type": "color", "$value": "#FBF0D9" },
+      "info-500": { "$type": "color", "$value": "#245C9E", "$description": "6,38:1 sur crème" },
+      "info-50": { "$type": "color", "$value": "#E3ECF7" }
+    },
+    "semantic-light": {
+      "bg": { "$type": "color", "$value": "{color.neutral.creme-50}" },
+      "surface": { "$type": "color", "$value": "{color.neutral.white}" },
+      "surface-alt": { "$type": "color", "$value": "{color.neutral.beige-100}" },
+      "text-primary": { "$type": "color", "$value": "{color.brand.ebene-900}" },
+      "text-secondary": { "$type": "color", "$value": "{color.neutral.taupe-600}" },
+      "text-on-primary": { "$type": "color", "$value": "{color.neutral.white}" },
+      "action-primary": { "$type": "color", "$value": "{color.brand.terracotta-500}" },
+      "action-primary-pressed": { "$type": "color", "$value": "{color.brand.terracotta-700}" },
+      "border-input": { "$type": "color", "$value": "{color.neutral.taupe-500}" },
+      "border-subtle": { "$type": "color", "$value": "{color.neutral.sable-200}" },
+      "bubble-sent-bg": { "$type": "color", "$value": "{color.brand.terracotta-500}" },
+      "bubble-sent-text": { "$type": "color", "$value": "{color.neutral.white}", "$description": "Horodatage et statut aussi en blanc 100 % (blanc 80 % = 4,02:1, insuffisant)" },
+      "bubble-received-bg": { "$type": "color", "$value": "{color.neutral.white}" },
+      "bubble-received-text": { "$type": "color", "$value": "{color.brand.ebene-900}" },
+      "emergency": { "$type": "color", "$value": "{color.feedback.danger-500}" }
+    },
+    "semantic-dark": {
+      "$description": "Mode sombre — proposition à arbitrer (section 7.9)",
+      "bg": { "$type": "color", "$value": "#1A1615" },
+      "surface": { "$type": "color", "$value": "#2A2320" },
+      "text-primary": { "$type": "color", "$value": "#FFF7EC", "$description": "14,54:1 sur surface" },
+      "text-secondary": { "$type": "color", "$value": "#B8AAA0", "$description": "6,84:1 sur surface" },
+      "action-primary": { "$type": "color", "$value": "#E8A57C", "$description": "8,64:1 sur bg ; texte ébène dessus 8,64:1" },
+      "text-on-primary": { "$type": "color", "$value": "#1A1615" }
+    }
+  },
+  "font": {
+    "family": {
+      "ui": { "$type": "fontFamily", "$value": ["Inter", "Roboto", "SF Pro Text", "sans-serif"], "$description": "Inter couvre ɖ ɛ ƒ ɣ ŋ ɔ ʋ, les tons combinants et l'espace fine insécable U+202F (vérifié). Poppins et Lora ne les couvrent pas." },
+      "brand": { "$type": "fontFamily", "$value": ["Inter Display", "Inter", "sans-serif"], "$description": "Titres marketing uniquement" }
+    },
+    "weight": {
+      "regular": { "$type": "fontWeight", "$value": 400 },
+      "medium": { "$type": "fontWeight", "$value": 500 },
+      "semibold": { "$type": "fontWeight", "$value": 600 }
+    }
+  },
+  "typography": {
+    "display": { "$type": "typography", "$value": { "fontFamily": "{font.family.brand}", "fontWeight": 600, "fontSize": "32px", "lineHeight": "40px", "letterSpacing": "-0.2px" } },
+    "h1": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 600, "fontSize": "24px", "lineHeight": "32px", "letterSpacing": "0px" } },
+    "h2": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 600, "fontSize": "20px", "lineHeight": "28px", "letterSpacing": "0px" } },
+    "title": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 600, "fontSize": "17px", "lineHeight": "24px", "letterSpacing": "0px" } },
+    "body": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 400, "fontSize": "16px", "lineHeight": "24px", "letterSpacing": "0px" } },
+    "body-sm": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 400, "fontSize": "14px", "lineHeight": "20px", "letterSpacing": "0px" } },
+    "label": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 500, "fontSize": "15px", "lineHeight": "20px", "letterSpacing": "0.1px" } },
+    "caption": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 400, "fontSize": "12px", "lineHeight": "16px", "letterSpacing": "0.2px" } },
+    "overline": { "$type": "typography", "$value": { "fontFamily": "{font.family.ui}", "fontWeight": 500, "fontSize": "11px", "lineHeight": "16px", "letterSpacing": "0.6px" } }
+  },
+  "space": {
+    "0": { "$type": "dimension", "$value": "0px" },
+    "1": { "$type": "dimension", "$value": "4px" },
+    "2": { "$type": "dimension", "$value": "8px" },
+    "3": { "$type": "dimension", "$value": "12px" },
+    "4": { "$type": "dimension", "$value": "16px" },
+    "5": { "$type": "dimension", "$value": "20px" },
+    "6": { "$type": "dimension", "$value": "24px" },
+    "8": { "$type": "dimension", "$value": "32px" },
+    "10": { "$type": "dimension", "$value": "40px" },
+    "12": { "$type": "dimension", "$value": "48px" }
+  },
+  "radius": {
+    "xs": { "$type": "dimension", "$value": "4px" },
+    "sm": { "$type": "dimension", "$value": "8px" },
+    "md": { "$type": "dimension", "$value": "12px", "$description": "Champs, cartes" },
+    "lg": { "$type": "dimension", "$value": "16px", "$description": "Feuilles modales, bulles de message" },
+    "xl": { "$type": "dimension", "$value": "20px", "$description": "Grandes surfaces (carte cagnotte)" },
+    "pill": { "$type": "dimension", "$value": "999px", "$description": "Boutons, puces, recherche" }
+  },
+  "size": {
+    "touch-min-android": { "$type": "dimension", "$value": "48px", "$description": "48 dp" },
+    "touch-min-ios": { "$type": "dimension", "$value": "44px", "$description": "44 pt" },
+    "button-height": { "$type": "dimension", "$value": "48px" },
+    "input-height": { "$type": "dimension", "$value": "52px" },
+    "app-bar": { "$type": "dimension", "$value": "56px" },
+    "bottom-nav": { "$type": "dimension", "$value": "64px", "$description": "Hors zone de sécurité système" },
+    "icon-sm": { "$type": "dimension", "$value": "20px" },
+    "icon-md": { "$type": "dimension", "$value": "24px" },
+    "avatar-sm": { "$type": "dimension", "$value": "32px" },
+    "avatar-md": { "$type": "dimension", "$value": "48px" },
+    "avatar-lg": { "$type": "dimension", "$value": "56px" },
+    "avatar-xl": { "$type": "dimension", "$value": "96px" }
+  },
+  "shadow": {
+    "level-1": { "$type": "shadow", "$value": { "color": "#1A161514", "offsetX": "0px", "offsetY": "1px", "blur": "2px", "spread": "0px" } },
+    "level-2": { "$type": "shadow", "$value": { "color": "#1A16151A", "offsetX": "0px", "offsetY": "4px", "blur": "12px", "spread": "0px" } },
+    "level-3": { "$type": "shadow", "$value": { "color": "#1A161524", "offsetX": "0px", "offsetY": "8px", "blur": "24px", "spread": "0px" } }
+  },
+  "motion": {
+    "duration-fast": { "$type": "duration", "$value": "120ms" },
+    "duration-base": { "$type": "duration", "$value": "200ms" },
+    "duration-slow": { "$type": "duration", "$value": "300ms" },
+    "easing-standard": { "$type": "cubicBezier", "$value": [0.2, 0, 0, 1] },
+    "easing-decelerate": { "$type": "cubicBezier", "$value": [0.05, 0.7, 0.1, 1] }
+  },
+  "opacity": {
+    "disabled": { "$type": "number", "$value": 0.38 },
+    "pattern": { "$type": "number", "$value": 0.06, "$description": "Motifs géométriques : 0,04 à 0,08, jamais derrière du texte" }
+  }
+}

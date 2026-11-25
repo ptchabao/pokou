@@ -65,4 +65,6 @@ def payment_json(payment: MarketplacePayment) -> dict:
         "amount": payment.amount,
         "currency": payment.currency,
         "payment_url": payment.payment_url,
+        # Pays de test : paiement simulé, déjà confirmé, sans page à ouvrir.
+        "test_mode": bool((payment.metadata_json or {}).get("test_mode")),
     }

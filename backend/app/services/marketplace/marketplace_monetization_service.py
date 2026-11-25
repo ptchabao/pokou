@@ -92,6 +92,9 @@ def create_payment(
     """
     if not user.phone:
         raise ValueError("Un numéro de téléphone est nécessaire pour Mobile Money")
+    test_mode = is_test_payment(db, user, kind)
+    if test_mode:
+        metadata = {**metadata, **_test_payer(user, metadata, kind)}
     payment = MarketplacePayment(
         user_id=user.id,
         kind=kind,
@@ -102,6 +105,17 @@ def create_payment(
     )
     db.add(payment)
     db.flush()
+    if test_mode:
+        # PAYS DE TEST : aucun appel à Semoa, aucun débit. Le paiement est
+        # confirmé ici, par le même chemin que le webhook signé — l'effet
+        # (abonnement, crédit, badge) est donc exactement celui d'un vrai
+        # paiement. `test_mode` le signale à l'app, qui l'affiche.
+        payment.provider_reference = f"test-payment-{payment.id}"
+        db.flush()
+        logger.warning("Paiement SIMULÉ (pays de test) %s : %s, %s FCFA", payment.id, kind, amount)
+        confirm_payment(db, payment.provider_reference)
+        db.refresh(payment)
+        return payment
     try:
         body = semoa_client.create_order(
             db,
@@ -121,6 +135,38 @@ def create_payment(
     db.commit()
     db.refresh(payment)
     return payment
+
+
+#: Les paiements qu'un pays de test peut SIMULER : ceux des parcours que les
+#: testeurs doivent pouvoir mener jusqu'au bout (abonnement et crédit d'une
+#: officine, adhésion et packs coursier, Pokou certifié). Les autres passent
+#: par Semoa comme partout.
+TEST_MODE_KINDS = frozenset({
+    "HONAM_PHARMACY_SUB",
+    "HONAM_CREDIT",
+    "HONAM_COURIER_MEMBERSHIP",
+    "HONAM_COURIER_PACK",
+    "CERTIFIED_SUBSCRIPTION",
+})
+
+
+def is_test_payment(db: Session, user: User, kind: str) -> bool:
+    """Vrai seulement dans un pays de test aux paiements simulés — jamais
+    au Togo ni en Côte d'Ivoire (voir `simulated_payments_enabled`)."""
+    from app.core.countries import country_of_phone, simulated_payments_enabled
+
+    return kind in TEST_MODE_KINDS and simulated_payments_enabled(db, country_of_phone(user.phone))
+
+
+def _test_payer(user: User, metadata: dict[str, Any], kind: str) -> dict[str, Any]:
+    """Ce que le webhook de Semoa aurait apporté. Pour Pokou certifié, le
+    titulaire du wallet est le nom déclaré : sans lui, le badge resterait
+    bloqué sur « noms différents », sans moyen d'en sortir."""
+    extra: dict[str, Any] = {"test_mode": True}
+    if kind == "CERTIFIED_SUBSCRIPTION":
+        extra["payer_name"] = metadata.get("declared_name") or user.full_name or user.phone
+        extra["payer_operator"] = "Mode test"
+    return extra
 
 
 #: Un paiement de module et le fichier qui sait quoi en faire.

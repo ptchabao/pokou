@@ -32,6 +32,7 @@ import '../../communities/presentation/community_detail_screen.dart';
 import '../../presence/presentation/typing_controller.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
 import '../../messaging/presentation/conversation_screen.dart';
+import '../../messaging/presentation/delete_discussion.dart';
 import 'add_contact_screen.dart';
 import 'contacts_controller.dart';
 import '../../../core/country/country_config.dart';
@@ -265,6 +266,18 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 ),
                 onTap: () => Navigator.pop(sheetContext, 'block'),
               ),
+              // Pour moi seulement : l'autre garde la discussion.
+              ListTile(
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.semanticError,
+                ),
+                title: Text(
+                  l.chatXDeleteDiscussion,
+                  style: const TextStyle(color: AppColors.semanticError),
+                ),
+                onTap: () => Navigator.pop(sheetContext, 'delete'),
+              ),
             ],
             const SizedBox(height: 4),
             TextButton(
@@ -348,7 +361,22 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         );
       case 'block':
         await _confirmBlock(discussion);
+      case 'delete':
+        await _deleteDiscussion(discussion);
     }
+  }
+
+  Future<void> _deleteDiscussion(ConversationSummary discussion) async {
+    final me = ref.read(authControllerProvider).user?.id;
+    final other = discussion.contactUserId;
+    if (me == null || other == null) return;
+    await confirmAndDeleteDirectDiscussion(
+      context,
+      ref,
+      myUserId: me,
+      contactUserId: other,
+      name: discussion.name,
+    );
   }
 
   /// Durées de WhatsApp : 8h, 1 semaine, toujours (~100 ans, voir
@@ -451,11 +479,26 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 ),
                 onTap: () => Navigator.pop(sheetContext, 'block'),
               ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete_outline,
+                color: AppColors.semanticError,
+              ),
+              title: Text(
+                L.of(context).chatXDeleteDiscussion,
+                style: const TextStyle(color: AppColors.semanticError),
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'delete'),
+            ),
           ],
         ),
       ),
     );
     if (action == null || !mounted) return;
+    if (action == 'delete') {
+      await _deleteDiscussion(discussion);
+      return;
+    }
     if (action == 'add') {
       await Navigator.of(
         context,

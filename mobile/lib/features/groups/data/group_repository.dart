@@ -11,6 +11,7 @@ import '../../../core/crypto/media_cipher.dart';
 import '../../../core/storage/pokou_message_store.dart';
 import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, PollData, MessageReplyPreview;
+import '../../messaging/data/sealed_rich_content.dart';
 import 'group_invitation_model.dart';
 import 'group_poll.dart';
 import 'group_model.dart';
@@ -229,6 +230,8 @@ class GroupRepository {
     String? replyToId,
     int? mediaAssetId,
     int forwardScore = 0,
+    bool viewOnce = false,
+    bool? pollAllowsMultiple,
   }) async {
     await _ensureSenderKeyDistributed(group, senderId);
     final ciphertext = await _senderKeys.encrypt(
@@ -243,6 +246,11 @@ class GroupRepository {
         'message_type': messageType,
         'media_asset_id': ?mediaAssetId,
         'reply_to_id': ?replyToId,
+        // En clair, et rien de plus : le serveur doit savoir qu'une photo
+        // est à vue unique (pour ne plus la servir après ouverture) et
+        // qu'un sondage n'accepte qu'une réponse (pour le faire respecter).
+        if (viewOnce) 'view_once': true,
+        'poll_allows_multiple': ?pollAllowsMultiple,
         'encryption': 'sender-key-v1',
         'ciphertext': ciphertext,
         'crypto_epoch': group.cryptoEpoch,
@@ -275,6 +283,14 @@ class GroupRepository {
   }
 
   static const _encryptedMediaTypes = {'IMAGE', 'VIDEO', 'AUDIO', 'DOCUMENT'};
+
+  static GroupMessage? _tryParse(Object? raw) {
+    try {
+      return GroupMessage.fromJson(raw as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
 
   Future<List<GroupMessage>> decryptMessages(
     Group group,
@@ -394,6 +410,7 @@ class GroupRepository {
     return known.copyWith(
       deletedAt: message.deletedAt,
       reactions: message.reactions,
+      viewedAt: message.viewedAt,
     );
   }
 
@@ -649,7 +666,12 @@ class GroupRepository {
     );
     final items = (response['items'] as List).cast<Map<String, dynamic>>();
     return (
-      items: items.map(GroupMessage.fromJson).toList(),
+      // Un message illisible est écarté, il ne fait plus échouer la page —
+      // voir messaging_repository.dart::parseHistoryItems.
+      items: [
+        for (final item in items)
+          if (_tryParse(item) case final message?) message,
+      ],
       hasMore: response['has_more'] as bool? ?? false,
     );
   }
@@ -696,7 +718,35 @@ class GroupRepository {
       group: group,
       senderId: senderId,
       messageType: 'POLL',
+      pollAllowsMultiple: allowsMultiple,
       body: {'content': question, 'payload': poll.toPayload()},
+    );
+  }
+
+  /// Une position partagée dans le groupe : un message LOCATION chiffré
+  /// comme les autres — coordonnées et nom du lieu dans le corps (voir
+  /// messaging/data/sealed_rich_content.dart). Le serveur n'en voit que le
+  /// type.
+  Future<GroupMessage> shareLocation({
+    required Group group,
+    required int senderId,
+    required double latitude,
+    required double longitude,
+    String? label,
+  }) {
+    final payload = SealedRichContent.location(
+      latitude: latitude,
+      longitude: longitude,
+      label: label,
+    );
+    return _sendEncrypted(
+      group: group,
+      senderId: senderId,
+      messageType: 'LOCATION',
+      body: {
+        'content': SealedRichContent.captionOf('LOCATION', payload) ?? '',
+        'payload': payload,
+      },
     );
   }
 
@@ -706,10 +756,32 @@ class GroupRepository {
     required int groupId,
     required String messageId,
     required GroupPollDefinition poll,
+  }) async => (await pollVoteState(
+    groupId: groupId,
+    messageId: messageId,
+    poll: poll,
+  )).votes;
+
+  /// Les votes ouverts ET l'instant où MA réponse devient définitive (nul
+  /// si je n'ai jamais voté) — voir api poll_window.py.
+  Future<({Map<int, List<int>> votes, DateTime? locksAt})> pollVoteState({
+    required int groupId,
+    required String messageId,
+    required GroupPollDefinition poll,
   }) async {
     final response = await _api.get(
       '/groups/$groupId/messages/$messageId/poll-votes',
     ) as Map<String, dynamic>;
+    final votes = await _openVotes(groupId, messageId, poll, response);
+    return (votes: votes, locksAt: tryParseServerTime(response['my_locks_at']));
+  }
+
+  Future<Map<int, List<int>>> _openVotes(
+    int groupId,
+    String messageId,
+    GroupPollDefinition poll,
+    Map<String, dynamic> response,
+  ) async {
     final votes = <int, List<int>>{};
     for (final raw in (response['items'] as List? ?? const [])) {
       final item = raw as Map<String, dynamic>;
@@ -748,7 +820,8 @@ class GroupRepository {
   }
 
   /// Dépose (ou remplace) MON vote ; une liste vide le retire.
-  Future<void> setPollVote({
+  /// Renvoie l'instant où ma réponse devient définitive.
+  Future<DateTime?> setPollVote({
     required int groupId,
     required String messageId,
     required int voterId,
@@ -758,7 +831,7 @@ class GroupRepository {
     final path = '/groups/$groupId/messages/$messageId/poll-vote';
     if (optionIds.isEmpty) {
       await _api.delete(path);
-      return;
+      return null;
     }
     final ciphertext = await GroupPollVoteCipher.seal(
       key: poll.key,
@@ -767,13 +840,30 @@ class GroupRepository {
       voterId: voterId,
       optionIds: optionIds,
     );
-    await _api.put(
+    final response = await _api.put(
       path,
       body: {
         'encryption': GroupPollVoteCipher.encryption,
         'ciphertext': ciphertext,
+        // Le NOMBRE de choix, jamais lesquels : de quoi faire respecter
+        // « une seule réponse » côté serveur.
+        'choice_count': optionIds.length,
       },
     );
+    return response is Map ? tryParseServerTime(response['my_locks_at']) : null;
+  }
+
+  /// Une vue unique de groupe que j'ouvre : le serveur cesse ensuite de me
+  /// servir le fichier (une fois par membre).
+  Future<DateTime?> markViewOnceViewed({
+    required int groupId,
+    required String messageId,
+  }) async {
+    final response = await _api.post(
+      '/groups/$groupId/messages/$messageId/viewed',
+      body: const {},
+    );
+    return response is Map ? tryParseServerTime(response['viewed_at']) : null;
   }
 
   Future<GroupMessage> sendMedia({
@@ -784,6 +874,7 @@ class GroupRepository {
     MediaKey? mediaKey,
     String? caption,
     int forwardScore = 0,
+    bool viewOnce = false,
   }) async {
     return _sendEncrypted(
       group: group,
@@ -791,6 +882,7 @@ class GroupRepository {
       messageType: messageType,
       mediaAssetId: mediaAssetId,
       forwardScore: forwardScore,
+      viewOnce: viewOnce,
       body: {
         'content': caption,
         if (mediaKey != null)

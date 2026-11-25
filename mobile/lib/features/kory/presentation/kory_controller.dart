@@ -34,9 +34,18 @@ final koryPotProvider = FutureProvider.autoDispose.family<KoryPot, int>((
   return ref.watch(koryRepositoryProvider).pot(potId);
 });
 
+/// « Archives » : les collectes finies que J'AI rangées.
+final koryArchivedPotsProvider = FutureProvider.autoDispose<List<KoryPot>>((
+  ref,
+) {
+  _liveKory(ref);
+  return ref.watch(koryRepositoryProvider).pots(archived: true);
+});
+
 /// Relit tout ce qui affiche un total après une écriture.
 void refreshKory(WidgetRef ref, {int? potId}) {
   ref.invalidate(koryPotsProvider);
+  ref.invalidate(koryArchivedPotsProvider);
   ref.invalidate(korySummaryProvider);
   if (potId != null) ref.invalidate(koryPotProvider(potId));
 }

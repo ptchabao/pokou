@@ -71,7 +71,13 @@
         android:allowBackup="false"
         android:label="Pokou"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
+        <!-- Ni showWhenLocked ni turnScreenOn ici : déclarés sur l'activité,
+             ils mettaient TOUTE l'application par-dessus l'écran de
+             verrouillage, à chaque ouverture et pendant tout l'appel — d'où
+             « l'appli s'ouvre par-dessus tout ». MainActivity les pose le
+             temps d'un appel entrant seulement (voir lockScreenFor). -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -81,8 +87,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
             android:supportsPictureInPicture="true"
             android:resizeableActivity="true">
             <!-- Specifies an Android theme to apply to this Activity as soon as
@@ -144,7 +148,7 @@
              (application tuée), comme celles que Pokou affiche. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/pokou_notification_accent" />
+            android:resource="@color/pokou_terracotta" />
         <!-- Et son icône : la silhouette du logo, en blanc. L'icône de
              l'application, en couleur, s'afficherait en carré blanc. -->
         <meta-data

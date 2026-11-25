@@ -381,6 +381,19 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
               }),
             ),
           ),
+          // Ce qu'est le type choisi, et ce qu'il coûte : rien pour une
+          // cagnotte ou une cotisation, des frais Kory Plus pour la tontine.
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: KoryNotice(
+              tone: tontine ? KoryTone.warning : KoryTone.neutral,
+              text: switch (d.kind) {
+                'COTISATION' => l.koryTDescCotisation,
+                'TONTINE' => l.koryTDescTontine,
+                _ => l.koryTDescCagnotte,
+              },
+            ),
+          ),
           _Field(
             label: tontine ? l.koryXName : l.koryFieldTitle,
             child: TextField(
@@ -593,23 +606,19 @@ class _KoryCreateScreenState extends ConsumerState<KoryCreateScreen> {
             const SizedBox(height: 10),
             KoryNotice(tone: KoryTone.danger, text: _error!),
           ],
-          const SizedBox(height: 12),
-          if (tontine && feeHt != null && feeHt > 0)
+          // La tontine : le montant exact des frais, et qui reçoit. Pour
+          // la cagnotte et la cotisation, l'encadré du haut a tout dit.
+          if (tontine) ...[
+            const SizedBox(height: 12),
             KoryNotice(
-              tone: KoryTone.warning,
-              text: l.koryMqPlusFeeNotice(
-                formatFcfa(feeHt),
-                formatFcfa((feeHt * (1 + country.vatRate)).round()),
-              ),
-            )
-          else
-            KoryNotice(
-              text: tontine
-                  ? l.koryTontineNote
-                  : cotisation
-                  ? l.koryMqFreeNoticeDue
-                  : l.koryXFreeNotice,
+              text: feeHt != null && feeHt > 0
+                  ? l.koryMqPlusFeeNotice(
+                      formatFcfa(feeHt),
+                      formatFcfa((feeHt * (1 + country.vatRate)).round()),
+                    )
+                  : l.koryTontineNote,
             ),
+          ],
         ],
       ),
     );

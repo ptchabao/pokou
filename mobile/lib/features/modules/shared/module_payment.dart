@@ -34,3 +34,35 @@ Future<bool> openPaymentGateway(
   );
   return opened;
 }
+
+/// Le paiement vient d'être SIMULÉ par le serveur (pays de test) : déjà
+/// confirmé, sans page de passerelle à ouvrir.
+bool isTestPayment(Object? payment) =>
+    payment is Map &&
+    payment['test_mode'] == true &&
+    payment['status'] == 'confirmed';
+
+/// Ouvre ce que le serveur a renvoyé pour un paiement : la passerelle
+/// Mobile Money, ou — dans un pays de test — rien du tout, avec un message
+/// qui dit clairement que le paiement a été simulé.
+///
+/// Renvoie `true` quand l'effet est DÉJÀ acquis (paiement simulé) : l'écran
+/// peut se rafraîchir tout de suite.
+Future<bool> openPaymentResponse(
+  BuildContext context,
+  Map<String, dynamic> payment, {
+  required String pendingMessage,
+}) async {
+  if (isTestPayment(payment)) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(L.of(context).hnxTestPaymentDone)));
+    return true;
+  }
+  await openPaymentGateway(
+    context,
+    payment['payment_url'] as String?,
+    pendingMessage: pendingMessage,
+  );
+  return false;
+}

@@ -23,115 +23,6 @@ String formatFileSize(int bytes) {
   return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} Mo';
 }
 
-/// Verrou "vue unique" façon WhatsApp, posé devant une IMAGE/VIDEO dont
-/// `message.viewOnce` est vrai. Trois états : jamais ouvert (icône "1", tap
-/// pour révéler), déjà consulté (grisé, plus jamais le contenu), ou envoyé
-/// par MOI (toujours visible — je n'ai rien à "consommer" chez mon propre
-/// envoi, seul le destinataire passe par la révélation).
-///
-/// La révélation reste locale au widget une fois déclenchée : `viewed`
-/// passera à vrai après confirmation serveur (voir
-/// conversation_screen.dart::_markViewOnceViewed), mais ce média doit rester
-/// affiché pour CETTE session d'écran — seule une réouverture ultérieure de
-/// la conversation doit retomber sur l'état grisé "consultée".
-class ViewOnceGate extends StatefulWidget {
-  const ViewOnceGate({
-    super.key,
-    required this.viewed,
-    required this.isMine,
-    required this.onReveal,
-    required this.builder,
-  });
-
-  final bool viewed;
-  final bool isMine;
-  final VoidCallback onReveal;
-  final WidgetBuilder builder;
-
-  @override
-  State<ViewOnceGate> createState() => _ViewOnceGateState();
-}
-
-class _ViewOnceGateState extends State<ViewOnceGate> {
-  bool _revealedLocally = false;
-
-  void _reveal() {
-    if (_revealedLocally) return;
-    setState(() => _revealedLocally = true);
-    widget.onReveal();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.isMine || _revealedLocally) return widget.builder(context);
-
-    if (widget.viewed) {
-      return Container(
-        width: 200,
-        height: 120,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.chatBubbleReceived,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.visibility_off_outlined,
-              color: AppColors.chatIconMuted,
-              size: 28,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              L.of(context).viewOnceSeen,
-              style: const TextStyle(
-                color: AppColors.chatIconMuted,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return GestureDetector(
-      onTap: _reveal,
-      child: Container(
-        width: 200,
-        height: 120,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.black87,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.white24,
-              child: Text(
-                '1',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              L.of(context).viewOnceTapToSee,
-              style: const TextStyle(color: Colors.white70, fontSize: 11),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Note vocale — lecture via just_audio, source mise en cache localement par
 /// MediaRepository (l'API exige un Bearer token, donc pas d'URL directe).
 AudioPlayer? _activeAudioPlayer;
@@ -232,9 +123,7 @@ class _AudioMessageBubbleState extends ConsumerState<AudioMessageBubble> {
     });
     try {
       final file = await _fetch();
-      await _player
-          .setFilePath(file.path)
-          .timeout(const Duration(seconds: 15));
+      await _player.setFilePath(file.path).timeout(const Duration(seconds: 15));
       _startPlayback();
     } catch (_) {
       if (mounted) setState(() => _error = L.of(context).audioPlayFailed);
@@ -383,9 +272,17 @@ class ImageMessageBubble extends ConsumerStatefulWidget {
     this.viewerSubtitle,
     this.caption,
     this.viewerActions,
+    this.mediaKey,
   });
 
   final MediaMeta media;
+
+  /// La clé d'une photo chiffrée, portée par le message. Passée EXPLICITEMENT
+  /// au dépôt de médias : s'en remettre au seul trousseau de session
+  /// (MediaKeyRing) laissait un téléchargement partir sans elle si la bulle
+  /// se construisait avant que le message n'y ait déposé sa clé — et c'est
+  /// le CHIFFRÉ qui atterrissait dans le cache, sous le nom de la photo.
+  final MediaKey? mediaKey;
 
   /// Ce que la visionneuse affiche en tête et en bas (Discussions · 25).
   final String? viewerTitle;
@@ -423,10 +320,12 @@ class _ImageMessageBubbleState extends ConsumerState<ImageMessageBubble> {
   }
 
   File? _fichierLocal() {
-    return ref.read(mediaRepositoryProvider).fichierEnCache(
-      widget.media.id,
-      extension: mediaExtension(widget.media),
-    );
+    return ref
+        .read(mediaRepositoryProvider)
+        .fichierEnCache(
+          widget.media.id,
+          extension: mediaExtension(widget.media),
+        );
   }
 
   Future<File> _resolve() => ref
@@ -434,7 +333,40 @@ class _ImageMessageBubbleState extends ConsumerState<ImageMessageBubble> {
       .resolveLocalFile(
         widget.media.id,
         extension: mediaExtension(widget.media),
+        mediaKey: widget.mediaKey,
       );
+
+  /// Le fichier en cache s'est révélé illisible (tronqué, ou d'une version
+  /// qui y rangeait le chiffré) : il est effacé et retéléchargé UNE fois.
+  /// Sans ça, la photo restait une case vide pour toujours.
+  bool _retriedCorrupt = false;
+
+  void _onUnreadable() {
+    if (_retriedCorrupt) return;
+    _retriedCorrupt = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await ref
+          .read(mediaRepositoryProvider)
+          .oublier(widget.media.id, extension: mediaExtension(widget.media));
+      if (!mounted) return;
+      setState(() {
+        _cachedFile = null;
+        _download = _resolve();
+        _download!.then((f) {
+          if (mounted) setState(() => _cachedFile = f);
+        }, onError: (_) {});
+      });
+    });
+  }
+
+  void _retry() => setState(() {
+    final fut = _resolve();
+    fut.then((f) {
+      if (mounted) setState(() => _cachedFile = f);
+    }, onError: (_) {});
+    _download = fut;
+  });
 
   /// En économie de données, une photo pas encore sur l'appareil attend un
   /// geste explicite. Une photo DÉJÀ en cache s'affiche directement : il n'y
@@ -508,10 +440,28 @@ class _ImageMessageBubbleState extends ConsumerState<ImageMessageBubble> {
               borderRadius: BorderRadius.circular(14),
             ),
             child: snapshot.hasError
-                ? const Icon(
-                    Icons.broken_image_outlined,
-                    color: AppColors.chatIconMuted,
-                    size: 32,
+                // Un échec se RETENTE : l'icône seule laissait la photo
+                // cassée jusqu'à la réouverture de la conversation.
+                ? GestureDetector(
+                    onTap: _retry,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.refresh_rounded,
+                          color: AppColors.chatIconMuted,
+                          size: 32,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          L.of(context).msgFixMediaRetry,
+                          style: const TextStyle(
+                            color: AppColors.chatIconMuted,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : const SizedBox(
                     width: 26,
@@ -573,6 +523,20 @@ class _ImageMessageBubbleState extends ConsumerState<ImageMessageBubble> {
             fit: BoxFit.cover,
             gaplessPlayback: true,
             cacheWidth: _thumbnailCacheWidth(context),
+            errorBuilder: (context, _, _) {
+              _onUnreadable();
+              return Container(
+                width: 220,
+                height: 180,
+                color: AppColors.chatBubbleReceived,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  color: AppColors.chatIconMuted,
+                  size: 32,
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -633,9 +597,12 @@ class _Placeholder extends StatelessWidget {
 
 /// Vidéo — lecture inline avec contrôles minimaux.
 class VideoMessageBubble extends ConsumerStatefulWidget {
-  const VideoMessageBubble({super.key, required this.media});
+  const VideoMessageBubble({super.key, required this.media, this.mediaKey});
 
   final MediaMeta media;
+
+  /// Voir ImageMessageBubble.mediaKey.
+  final MediaKey? mediaKey;
 
   @override
   ConsumerState<VideoMessageBubble> createState() => _VideoMessageBubbleState();
@@ -656,6 +623,7 @@ class _VideoMessageBubbleState extends ConsumerState<VideoMessageBubble> {
           .resolveLocalFile(
             widget.media.id,
             extension: mediaExtension(widget.media),
+            mediaKey: widget.mediaKey,
           );
       final controller = VideoPlayerController.file(file);
       await controller.initialize();

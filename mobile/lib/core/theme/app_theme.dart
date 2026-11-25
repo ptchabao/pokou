@@ -25,15 +25,19 @@ class AppTheme {
     // Inter is the design system's UI and heading family. The explicit
     // fallback list preserves Arabic and other script coverage.
     const fallback = <String>[
+      // Les EMOJI (et les drapeaux) EN TÊTE de la chaîne de repli. Placés
+      // derrière Roboto et Noto Sans, ils perdaient chaque symbole que ces
+      // polices de TEXTE dessinent aussi (❤ ☺ ✌ ☀ ✔ ☎ ✈…) : le cœur
+      // arrivait en noir et blanc, à une autre taille que les autres emoji
+      // — « pas comme sur WhatsApp ». Inter reste la police principale :
+      // les lettres et les chiffres ne passent jamais par ce repli.
+      'Apple Color Emoji',
+      'Noto Color Emoji',
       // Noms Android ; sur iOS ils sont ignorés et le moteur retombe sur sa
       // propre chaîne, qui couvre l'arabe.
       'Roboto',
       'Noto Sans Arabic',
       'Noto Sans',
-      // Les EMOJI (et les drapeaux) : sans eux dans la chaîne, iOS affichait
-      // des carrés « ? » à la place.
-      'Apple Color Emoji',
-      'Noto Color Emoji',
     ];
 
     final applied = base.textTheme.apply(

@@ -16,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:flutter/gestures.dart';
 
+import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../core/text/emoji_only.dart';
 import '../../../core/media/image_cropper.dart';
@@ -24,6 +25,7 @@ import '../../../core/crypto/call_keys.dart' show CallEncryptionException;
 import '../../../core/country/country_config.dart';
 import '../../../core/providers.dart';
 import '../../kory/presentation/kory_create_screen.dart';
+import '../../kory/presentation/kory_activity_row.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/notifications/active_conversation.dart';
 import '../../messaging/presentation/message_links.dart';
@@ -35,6 +37,8 @@ import '../../messaging/presentation/composer/voice_recording.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/chat_wallpaper.dart';
+import '../../../core/wallpaper/wallpaper_settings.dart';
+import '../../settings/presentation/chat_wallpaper_screen.dart';
 import '../../calls/presentation/call_controller.dart';
 import '../../calls/presentation/call_screen.dart';
 import '../../contacts/presentation/contacts_controller.dart';
@@ -49,11 +53,15 @@ import '../../messaging/presentation/day_separator.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../home/presentation/certified_screen.dart';
 import '../../messaging/presentation/media_bubble.dart';
+import '../../messaging/presentation/media_composer_screen.dart';
+import '../../messaging/presentation/view_once.dart';
 import '../../messaging/presentation/poll_bubble.dart';
 import '../../messaging/presentation/composer/composer_input.dart';
 import '../../messaging/presentation/composer/composer_panel.dart';
 import '../../messaging/presentation/message_appear.dart';
 import '../../messaging/presentation/attach_sheet.dart';
+import '../../messaging/presentation/share_sheets.dart'
+    show pickLocationToShare;
 import '../../messaging/presentation/forward_screen.dart';
 import '../../messaging/presentation/offline_banner.dart';
 import '../../messaging/presentation/report_sheet.dart';
@@ -454,7 +462,8 @@ class _GroupConversationScreenState
             ),
             // Un message resté chiffré n'a rien à transférer : on ne le lit
             // pas soi-même (voir Discussions · 3, audit « en groupe aussi »).
-            if (!message.isEncrypted)
+            // Une vue unique ne se transfère jamais.
+            if (!message.isEncrypted && !message.viewOnce)
               ListTile(
                 leading: const Icon(Icons.forward),
                 title: Text(_l.conversationForward),
@@ -467,13 +476,14 @@ class _GroupConversationScreenState
                   );
                 },
               ),
-            if (copyableText(
-                  message.content,
-                  deleted: message.deletedAt != null,
-                  locked: message.isEncrypted,
-                )
-                case final text?)
-              ...messageTextActionTiles(
+            if (!message.viewOnce)
+              if (copyableText(
+                    message.content,
+                    deleted: message.deletedAt != null,
+                    locked: message.isEncrypted,
+                  )
+                  case final text?)
+                ...messageTextActionTiles(
                 context: context,
                 text: text,
                 close: () => Navigator.pop(sheetContext),
@@ -1044,6 +1054,8 @@ class _GroupConversationScreenState
     required String filename,
     required String mimeType,
     required String messageType,
+    String? caption,
+    bool viewOnce = false,
   }) async {
     await ref
         .read(groupChatControllerProvider(widget.groupId).notifier)
@@ -1053,6 +1065,8 @@ class _GroupConversationScreenState
           filename: filename,
           mimeType: mimeType,
           messageType: messageType,
+          caption: caption,
+          viewOnce: viewOnce,
         );
     _scrollToBottom();
   }
@@ -1115,14 +1129,26 @@ class _GroupConversationScreenState
       source: source,
       imageQuality: ref.read(appSettingsProvider).imageUploadQuality,
     );
-    if (picked == null) return;
-    final bytes = await picked.readAsBytes();
+    if (picked == null || !mounted) return;
+    // L'écran de préparation, comme en tête-à-tête : légende et VUE UNIQUE
+    // (chaque membre l'ouvrira une fois). Revenir en arrière annule.
+    final prepared = await Navigator.of(context).push<PreparedMedia>(
+      MaterialPageRoute(
+        builder: (_) => MediaComposerScreen(
+          file: File(picked.path),
+          recipientName: widget.groupName,
+        ),
+      ),
+    );
+    if (prepared == null) return;
     await _sendMediaFile(
-      path: picked.path,
-      bytes: bytes,
+      path: prepared.file.path,
+      bytes: await prepared.file.readAsBytes(),
       filename: picked.name,
       mimeType: lookupMimeType(picked.name) ?? 'image/jpeg',
       messageType: 'IMAGE',
+      caption: prepared.caption,
+      viewOnce: prepared.viewOnce,
     );
   }
 
@@ -1150,8 +1176,52 @@ class _GroupConversationScreenState
           await openKoryCreate(context, ref, groupId: widget.groupId);
       case AttachChoice.poll:
         await _createPoll();
+      case AttachChoice.location:
+        await _shareLocation();
+      // Jamais proposé dans un groupe (offerContact reste faux).
+      case AttachChoice.contact:
       case null:
         break;
+    }
+  }
+
+  /// Écrire à un membre, à deux. Le serveur l'autorise : partager un
+  /// groupe suffit pour joindre quelqu'un (messages.py::_require_reachable,
+  /// règle 4). Son numéro, lui, ne vient jamais du groupe.
+  Future<void> _messageMember(int userId, String name) async {
+    if (userId == widget.myUserId || !mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ConversationScreen(
+          myUserId: widget.myUserId,
+          contactUserId: userId,
+          contactName: name,
+        ),
+      ),
+    );
+  }
+
+  /// Ma position actuelle dans le groupe, chiffrée comme un texte.
+  Future<void> _shareLocation() async {
+    final place = await pickLocationToShare(context, ref);
+    if (place == null || !mounted) return;
+    try {
+      await ref
+          .read(groupChatControllerProvider(widget.groupId).notifier)
+          .shareLocation(
+            latitude: place.latitude,
+            longitude: place.longitude,
+            label: place.label,
+          );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error is ApiException ? error.message : _l.chatXLocationFailed,
+          ),
+        ),
+      );
     }
   }
 
@@ -1357,18 +1427,19 @@ class _GroupConversationScreenState
       final userId = int.tryParse(action.substring(3));
       final member = group.members.where((m) => m.userId == userId).firstOrNull;
       if (userId != null && member != null && mounted) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ConversationScreen(
-              myUserId: widget.myUserId,
-              contactUserId: userId,
-              contactName: member.displayName,
-            ),
-          ),
-        );
+        await _messageMember(userId, member.displayName);
       }
     } else if (action == 'starred') {
       await _openStarred();
+    } else if (action == 'wallpaper') {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => ChatWallpaperScreen(
+            scope: scopeForGroup(widget.groupId),
+            chatName: group.name,
+          ),
+        ),
+      );
     } else if (action == 'manage') {
       // « Gérer le groupe » peut rendre la main avec un geste qui vit ici
       // (lien d'invitation, mode preuve).
@@ -1807,6 +1878,7 @@ class _GroupConversationScreenState
     return Scaffold(
       backgroundColor: AppColors.chatBackground,
       body: ChatWallpaper(
+        scope: scopeForGroup(widget.groupId),
         // Même traitement qu'en 1:1 : la barre gère l'encoche elle-même pour
         // que son blanc monte jusqu'en haut, sinon le motif réapparaît dans
         // la bande de statut au-dessus d'elle.
@@ -1838,19 +1910,27 @@ class _GroupConversationScreenState
                           onTap: () => _showGroupSheet(group),
                           child: Row(
                             children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.surfaceElevated,
-                                ),
-                                child: Icon(
-                                  Icons.groups,
-                                  size: 20,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
+                              // La photo du groupe : elle n'apparaissait
+                              // pas, l'en-tête montrait toujours l'icône.
+                              group?.avatar != null
+                                  ? ContactAvatar(
+                                      avatar: group!.avatar,
+                                      displayName: group.name,
+                                      size: 36,
+                                    )
+                                  : Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: AppColors.surfaceElevated,
+                                      ),
+                                      child: Icon(
+                                        Icons.groups,
+                                        size: 20,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
@@ -2009,6 +2089,10 @@ class _GroupConversationScreenState
                                   onCallBack: ({required video}) =>
                                       _startOrJoinCall(withVideo: video),
                                 )
+                              // La vie d'une collecte Kory du groupe :
+                              // écrite par le serveur, en carte discrète.
+                              else if (isKoryActivity(message.payload))
+                                KoryActivityRow(payload: message.payload!)
                               else if ((message.payload?['kind']) ==
                                   'proof_mode')
                                 ProofModeNotice(
@@ -2060,6 +2144,15 @@ class _GroupConversationScreenState
                                     isMine: message.senderId == widget.myUserId,
                                     isLast: index == messages.length - 1,
                                     child: _GroupBubble(
+                                      onSenderTap: () => _messageMember(
+                                        message.senderId,
+                                        _authorName(
+                                          message.senderId,
+                                          message.senderName,
+                                          certifiedName:
+                                              message.senderCertifiedName,
+                                        ),
+                                      ),
                                       message: message,
                                       senderDisplayName: _authorName(
                                         message.senderId,
@@ -2098,6 +2191,13 @@ class _GroupConversationScreenState
                                       starred: starredIds.contains(message.id),
                                       onLongPress: () =>
                                           _showReactionSheet(message),
+                                      onViewOnceOpen: () => ref
+                                          .read(
+                                            groupChatControllerProvider(
+                                              widget.groupId,
+                                            ).notifier,
+                                          )
+                                          .openViewOnce(message),
                                       onReactionPick: (emoji) =>
                                           _reactTo(message, emoji),
                                       onTapReply: message.replyToId == null
@@ -2501,9 +2601,18 @@ class _GroupBubble extends StatefulWidget {
     this.isPending = false,
     this.isFailed = false,
     this.starred = false,
+    this.onViewOnceOpen,
+    this.onSenderTap,
   });
 
   final GroupMessage message;
+
+  /// Toucher le nom au-dessus de la bulle : écrire à son auteur, à deux.
+  final VoidCallback? onSenderTap;
+
+  /// Vue unique de groupe ouverte par MOI (une fois) — voir
+  /// GroupChatController.openViewOnce.
+  final Future<bool> Function()? onViewOnceOpen;
 
   /// Marqué « important » sur ce téléphone.
   final bool starred;
@@ -2548,10 +2657,15 @@ class _GroupBubbleState extends State<_GroupBubble> {
   GroupMessage get message => widget.message;
   bool get isMine => widget.isMine;
 
+  bool get _isViewOnce =>
+      message.viewOnce &&
+      (message.messageType == 'IMAGE' || message.messageType == 'VIDEO');
+
   bool get _isFlushMedia {
     if (message.media == null) return false;
     if (message.messageType != 'IMAGE' && message.messageType != 'VIDEO')
       return false;
+    if (message.viewOnce) return false;
     return message.content == null || message.content!.trim().isEmpty;
   }
 
@@ -2566,17 +2680,34 @@ class _GroupBubbleState extends State<_GroupBubble> {
   /// dimension selon qu'on écrit à une personne ou à un groupe.
   static const double _stickerSize = 128;
 
-  Widget _mediaWidget(MediaMeta media) => switch (message.messageType) {
-    'STICKER' => StickerImage(mediaId: media.id, size: _stickerSize),
-    'AUDIO' => AudioMessageBubble(
-      media: media,
-      isMine: isMine,
-      mediaKey: message.mediaKey,
-    ),
-    'IMAGE' => ImageMessageBubble(media: media),
-    'VIDEO' => VideoMessageBubble(media: media),
-    _ => DocumentMessageBubble(media: media, isMine: isMine),
-  };
+  Widget _mediaWidget(MediaMeta media) => _isViewOnce
+      // Même pastille qu'en tête-à-tête, jamais l'image : chaque membre
+      // l'ouvre une fois (le serveur cesse ensuite de la lui servir).
+      ? ViewOnceBubble(
+          media: media,
+          mediaKey: message.mediaKey,
+          isVideo: message.messageType == 'VIDEO',
+          isMine: isMine,
+          opened: message.isViewed,
+          onOpen: widget.onViewOnceOpen ?? () async => false,
+        )
+      : switch (message.messageType) {
+          'STICKER' => StickerImage(mediaId: media.id, size: _stickerSize),
+          'AUDIO' => AudioMessageBubble(
+            media: media,
+            isMine: isMine,
+            mediaKey: message.mediaKey,
+          ),
+          'IMAGE' => ImageMessageBubble(
+            media: media,
+            mediaKey: message.mediaKey,
+          ),
+          'VIDEO' => VideoMessageBubble(
+            media: media,
+            mediaKey: message.mediaKey,
+          ),
+          _ => DocumentMessageBubble(media: media, isMine: isMine),
+        };
 
   /// POLL/LOCATION/CONTACT n'ont pas de pièce jointe — voir le pendant 1:1
   /// dans conversation_screen.dart::_richContentWidget.
@@ -2651,7 +2782,7 @@ class _GroupBubbleState extends State<_GroupBubble> {
       final emojis = emojiOnlyCount(message.content);
       if (emojis != null) {
         return Text(
-          message.content!.trim(),
+          withEmojiPresentation(message.content!.trim()),
           style: emojiOnlyStyle(textStyle, emojis),
         );
       }
@@ -2666,7 +2797,9 @@ class _GroupBubbleState extends State<_GroupBubble> {
     }
 
     final mediaWidget = _mediaWidget(media);
-    if (message.content == null || message.content!.trim().isEmpty)
+    if (_isViewOnce ||
+        message.content == null ||
+        message.content!.trim().isEmpty)
       return mediaWidget;
 
     return Column(
@@ -2773,28 +2906,32 @@ class _GroupBubbleState extends State<_GroupBubble> {
     // bulles reçues : dans un groupe, savoir qui parle est indispensable,
     // mais le répéter à chaque bulle consécutive alourdit la lecture.
     final senderLabel = !isMine && widget.isFirstInGroup
-        ? Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 3),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    widget.senderDisplayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.authorName(message.senderId),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+        ? GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onSenderTap,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 3),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.senderDisplayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.authorName(message.senderId),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-                if (message.senderIsVerified) ...[
-                  const SizedBox(width: 3),
-                  const VerifiedBadge(size: 13),
+                  if (message.senderIsVerified) ...[
+                    const SizedBox(width: 3),
+                    const VerifiedBadge(size: 13),
+                  ],
                 ],
-              ],
+              ),
             ),
           )
         : null;

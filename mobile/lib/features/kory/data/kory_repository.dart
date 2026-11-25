@@ -6,9 +6,15 @@ class KoryRepository {
 
   final ApiClient _api;
 
-  Future<List<KoryPot>> pots({int? groupId}) async {
+  /// Mes collectes, sans celles que j'ai archivées ; [archived] ne donne
+  /// QUE celles-là. La vue d'un groupe ([groupId]) les montre toutes.
+  Future<List<KoryPot>> pots({int? groupId, bool archived = false}) async {
     final response = await _api.get(
-      groupId == null ? '/kory/pots' : '/kory/pots?group_id=$groupId',
+      groupId != null
+          ? '/kory/pots?group_id=$groupId'
+          : archived
+          ? '/kory/pots?archived=true'
+          : '/kory/pots',
     );
     final items =
         (response as Map<String, dynamic>)['items'] as List? ?? const [];
@@ -63,6 +69,15 @@ class KoryRepository {
         'deputy_id': ?deputyId,
         'draw_mode': ?drawMode,
       },
+    );
+    return KoryPot.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Ranger une collecte terminée dans mes archives, ou l'en sortir.
+  Future<KoryPot> setArchived(int potId, {required bool archived}) async {
+    final response = await _api.put(
+      '/kory/pots/$potId/archive',
+      body: {'archived': archived},
     );
     return KoryPot.fromJson(response as Map<String, dynamic>);
   }

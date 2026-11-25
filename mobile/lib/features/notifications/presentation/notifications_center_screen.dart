@@ -40,6 +40,12 @@ void openServiceRoute(NavigatorState navigator, String? route) {
       parts[1] == 'review') {
     final id = int.tryParse(parts[2]);
     if (id != null) screen = AssimeRateSaleScreen(productId: id);
+  } else if (parts.length == 3 &&
+      parts[0] == 'assime' &&
+      parts[1] == 'handover') {
+    // Vente en main propre : le code à donner au vendeur.
+    final id = int.tryParse(parts[2]);
+    if (id != null) screen = AssimeHandoverCodeScreen(productId: id);
   } else if (parts.length == 3 && parts[0] == 'honam' && parts[1] == 'order') {
     final id = int.tryParse(parts[2]);
     if (id != null) screen = HonamOrderScreen(orderId: id);

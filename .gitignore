@@ -31,3 +31,4 @@ mobile/ios/Runner/GoogleService-Info.plist
 # Contient la clé secrète LiveKit
 deploy/kubero/livekit.json
 .verif/
+besoins/

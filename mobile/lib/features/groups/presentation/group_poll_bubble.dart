@@ -34,6 +34,9 @@ class GroupPollBubble extends ConsumerStatefulWidget {
 
 class _GroupPollBubbleState extends ConsumerState<GroupPollBubble> {
   Map<int, List<int>> _votes = const {};
+
+  /// Quand MA réponse devient définitive (serveur) — voir PollData.myLocksAt.
+  DateTime? _locksAt;
   StreamSubscription<Map<String, dynamic>>? _events;
 
   int? get _myUserId => ref.read(authControllerProvider).user?.id;
@@ -53,14 +56,19 @@ class _GroupPollBubbleState extends ConsumerState<GroupPollBubble> {
 
   Future<void> _load() async {
     try {
-      final votes = await ref
+      final state = await ref
           .read(groupRepositoryProvider)
-          .pollVotes(
+          .pollVoteState(
             groupId: widget.groupId,
             messageId: widget.messageId,
             poll: widget.poll,
           );
-      if (mounted) setState(() => _votes = votes);
+      if (mounted) {
+        setState(() {
+          _votes = state.votes;
+          _locksAt = state.locksAt;
+        });
+      }
     } catch (_) {
       // Hors ligne : le sondage s'affiche sans votes, l'événement suivant
       // ou la prochaine ouverture les rattrapera.
@@ -96,16 +104,14 @@ class _GroupPollBubbleState extends ConsumerState<GroupPollBubble> {
     });
   }
 
-  PollData _tally() => widget.poll.tally(
-    messageId: widget.messageId,
-    votes: _votes,
-    myUserId: _myUserId,
-  );
+  PollData _tally() => widget.poll
+      .tally(messageId: widget.messageId, votes: _votes, myUserId: _myUserId)
+      .withLocksAt(_locksAt);
 
   Future<PollData> _castVote(List<int> optionIds) async {
     final myUserId = _myUserId;
     if (myUserId == null) return _tally();
-    await ref
+    final locksAt = await ref
         .read(groupRepositoryProvider)
         .setPollVote(
           groupId: widget.groupId,
@@ -119,6 +125,7 @@ class _GroupPollBubbleState extends ConsumerState<GroupPollBubble> {
         final next = Map<int, List<int>>.of(_votes);
         optionIds.isEmpty ? next.remove(myUserId) : next[myUserId] = optionIds;
         _votes = next;
+        _locksAt = locksAt ?? _locksAt;
       });
     }
     return _tally();

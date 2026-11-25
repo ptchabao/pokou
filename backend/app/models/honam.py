@@ -59,6 +59,11 @@ class Pharmacy(Base):
     #: Un nouveau wallet demandé par le titulaire. L'ancien reste celui des
     #: paiements jusqu'à ce que l'équipe vérifie le nouveau (BM-02).
     wallet_phone_pending = Column(String(32), nullable=True)
+    #: Officine de DÉMONSTRATION, créée par le seed pour les testeurs
+    #: (« Démo » dans son nom). Visible seulement là où le réglage pays
+    #: `honam_demo_pharmacies` est ouvert ; retirée par
+    #: `python -m scripts.honam_demo_pharmacies remove`.
+    is_demo = Column(Boolean, default=False, nullable=False, server_default="0")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 

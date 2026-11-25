@@ -377,7 +377,13 @@ List<Override> _base() => [
   ),
   honamRepositoryProvider.overrideWithValue(_FakeRepository()),
   honamEmergencyProvider.overrideWith(
-    (ref) async => {'samu': '8200', 'pompiers': '118', 'police': '117'},
+    (ref) async => const EmergencyInfo(
+      services: [
+        EmergencyNumber(key: 'police', number: '117'),
+        EmergencyNumber(key: 'pompiers', number: '118'),
+        EmergencyNumber(key: 'samu', number: '8200'),
+      ],
+    ),
   ),
   honamNearbyProvider.overrideWith((ref) async => _pharmacies()),
   honamOrderMessagesProvider.overrideWith(

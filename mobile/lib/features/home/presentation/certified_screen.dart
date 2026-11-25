@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/api/api_exceptions.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/verified_badge.dart';
@@ -38,23 +39,56 @@ final _certifiedProvider =
 /// écran séparé, et les mélanger dans une seule liste qui s'allonge ou se
 /// raccourcit (comme le faisait l'ancienne version) cache le fait que
 /// « Badge en pause » n'a RIEN à voir avec l'offre qui s'affiche en dessous.
-class CertifiedScreen extends ConsumerWidget {
+class CertifiedScreen extends ConsumerStatefulWidget {
   const CertifiedScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CertifiedScreen> createState() => _CertifiedScreenState();
+}
+
+class _CertifiedScreenState extends ConsumerState<CertifiedScreen> {
+  /// Au retour de la page de paiement (CashPay s'ouvre HORS de l'app),
+  /// l'état est relu : sans cela, l'écran restait sur l'offre après un
+  /// paiement réussi — « je ne peux pas avancer », disaient les testeurs.
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(
+      onResume: () => ref.invalidate(_certifiedProvider),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = L.of(context);
     final data = ref.watch(_certifiedProvider);
 
     return data.when(
-      loading: () => ModuleScaffold(title: l.certTitle, child: const SkeletonCards()),
-      error: (_, _) => ModuleScaffold(
+      loading: () =>
+          ModuleScaffold(title: l.certTitle, child: const SkeletonCards()),
+      // 404 : le module n'est pas ouvert dans ce pays. Le dire, plutôt
+      // qu'un « vérifie ta connexion » qui laissait croire à une panne.
+      error: (error, _) => ModuleScaffold(
         title: l.certTitle,
-        child: ModuleEmptyState(
-          icon: Icons.cloud_off,
-          title: l.honamFailed,
-          message: l.modulesCheckNetwork,
-        ),
+        child: error is ApiException && error.statusCode == 404
+            ? ModuleEmptyState(
+                icon: Icons.public_off_outlined,
+                title: l.certTitle,
+                message: l.homeXCertUnavailable,
+              )
+            : ModuleEmptyState(
+                icon: Icons.cloud_off,
+                title: l.honamFailed,
+                message: l.modulesCheckNetwork,
+              ),
       ),
       data: (data) {
         final status = data.status;
@@ -62,7 +96,8 @@ class CertifiedScreen extends ConsumerWidget {
         // La formule Pro a son propre parcours : justificatif d'abord,
         // paiement après validation (maquettes Pro).
         final plans = [
-          for (final plan in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
+          for (final plan
+              in (data.offer['plans'] as List).cast<Map<String, dynamic>>())
             if (!(plan['code'] as String).startsWith('PRO')) plan,
         ];
         void refresh() {
@@ -71,10 +106,16 @@ class CertifiedScreen extends ConsumerWidget {
         }
 
         if (state == 'PAUSED') {
-          return _BadgePausedScreen(status: status, plans: plans, onChanged: refresh);
+          return _BadgePausedScreen(
+            status: status,
+            plans: plans,
+            onChanged: refresh,
+          );
         }
         if (state == 'NAME_MISMATCH') {
-          final plan = plans.where((p) => p['code'] == status['plan']).firstOrNull ?? plans.firstOrNull;
+          final plan =
+              plans.where((p) => p['code'] == status['plan']).firstOrNull ??
+              plans.firstOrNull;
           return CertifiedPayScreen(
             plan: plan ?? const {'code': 'PARTICULIER_MONTHLY', 'label': ''},
             nameMismatch: true,
@@ -132,7 +173,9 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
       widget.onTrialStarted();
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.honamFailed)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.honamFailed)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -142,9 +185,16 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final plan = widget.plans.firstWhere((p) => p['code'] == _planCode, orElse: () => widget.plans.first);
-    final yearly = widget.plans.where((p) => p['code'].toString().contains('YEARLY')).firstOrNull;
-    final monthly = widget.plans.where((p) => p['code'].toString().contains('MONTHLY')).firstOrNull;
+    final plan = widget.plans.firstWhere(
+      (p) => p['code'] == _planCode,
+      orElse: () => widget.plans.first,
+    );
+    final yearly = widget.plans
+        .where((p) => p['code'].toString().contains('YEARLY'))
+        .firstOrNull;
+    final monthly = widget.plans
+        .where((p) => p['code'].toString().contains('MONTHLY'))
+        .firstOrNull;
 
     return ModuleScaffold(
       title: l.certTitle,
@@ -159,15 +209,30 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
               Expanded(
                 child: Text(
                   l.certPitch,
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 18),
-          _advantage(Icons.person_outline, l.certAdvantageNameTitle, l.certAdvantageNameBody),
-          _advantage(Icons.schedule, l.certAdvantageProofTitle, l.certAdvantageProofBody),
-          _advantage(Icons.description_outlined, l.certAdvantageExportTitle, l.certAdvantageExportBody),
+          _advantage(
+            Icons.person_outline,
+            l.certAdvantageNameTitle,
+            l.certAdvantageNameBody,
+          ),
+          _advantage(
+            Icons.schedule,
+            l.certAdvantageProofTitle,
+            l.certAdvantageProofBody,
+          ),
+          _advantage(
+            Icons.description_outlined,
+            l.certAdvantageExportTitle,
+            l.certAdvantageExportBody,
+          ),
           const SizedBox(height: 10),
           ModuleSectionTitle(l.certFormulaLabel),
           if (monthly != null)
@@ -181,9 +246,12 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
               // « Deux mois offerts » se DÉDUIT des deux prix de l'API.
               badge: monthly == null
                   ? null
-                  : switch (((monthly['price_ht'] as int) * 12 - (yearly['price_ht'] as int)) ~/
+                  : switch (((monthly['price_ht'] as int) * 12 -
+                            (yearly['price_ht'] as int)) ~/
                         (monthly['price_ht'] as int)) {
-                      final months when months > 0 => l.certMonthsOffered(months),
+                      final months when months > 0 => l.certMonthsOffered(
+                        months,
+                      ),
                       _ => null,
                     },
             ),
@@ -220,9 +288,15 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
           ],
           Center(
             child: TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => CertifiedPayScreen(plan: plan)),
-              ),
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => CertifiedPayScreen(plan: plan),
+                  ),
+                );
+                // Payé (ou simulé en pays de test) : l'état a changé.
+                widget.onTrialStarted();
+              },
               child: Text(l.certPayNowShowBadge),
             ),
           ),
@@ -232,26 +306,30 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
   }
 
   Widget _advantage(IconData icon, String title, String body) => Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 22, color: AppColors.accentPrimary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                  Text(body, style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                ],
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 22, color: AppColors.accentPrimary),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                body,
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
-  Widget _planChoice(Map<String, dynamic> p, String title, {String? badge}) => Padding(
+  Widget _planChoice(Map<String, dynamic> p, String title, {String? badge}) =>
+      Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: ModuleCard(
           onTap: () => setState(() => _planCode = p['code'] as String),
@@ -268,16 +346,28 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
                   children: [
                     Row(
                       children: [
-                        Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        Text(
+                          title,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                         if (badge != null) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.terracottaTint,
                               borderRadius: BorderRadius.circular(999),
                             ),
-                            child: Text(badge, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                            child: Text(
+                              badge,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ],
                       ],
@@ -285,7 +375,10 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
                     Text('${formatFcfa(p['price_ht'] as int)} HT'),
                     Text(
                       l10nTtcLine(context, p),
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -300,7 +393,11 @@ class _OfferScreenState extends ConsumerState<_OfferScreen> {
 /// formules ni la carte Pro en dessous — sinon la personne croit devoir
 /// re-choisir une formule alors qu'elle en a déjà une.
 class _BadgePausedScreen extends StatelessWidget {
-  const _BadgePausedScreen({required this.status, required this.plans, required this.onChanged});
+  const _BadgePausedScreen({
+    required this.status,
+    required this.plans,
+    required this.onChanged,
+  });
 
   final Map<String, dynamic> status;
   final List<Map<String, dynamic>> plans;
@@ -310,15 +407,20 @@ class _BadgePausedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
-    String date(String? iso) =>
-        iso == null ? '' : DateFormat.yMMMd(locale).format(parseServerTime(iso));
+    String date(String? iso) => iso == null
+        ? ''
+        : DateFormat.yMMMd(locale).format(parseServerTime(iso));
 
     return ModuleScaffold(
       title: l.certPausedScreenTitle,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
         children: [
-          const Icon(Icons.warning_amber_rounded, size: 40, color: AppColors.feedbackWarning),
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 40,
+            color: AppColors.feedbackWarning,
+          ),
           const SizedBox(height: 14),
           _BadgePaused(
             status: status,
@@ -347,7 +449,9 @@ class _BadgePausedScreen extends StatelessWidget {
 String l10nTtcLine(BuildContext context, Map<String, dynamic> plan) {
   final l = L.of(context);
   final ttc = formatFcfa(plan['price_ttc'] as int);
-  return (plan['days'] as int? ?? 30) >= 365 ? l.certTtcPerYear(ttc) : l.certTtcPerMonth(ttc);
+  return (plan['days'] as int? ?? 30) >= 365
+      ? l.certTtcPerYear(ttc)
+      : l.certTtcPerMonth(ttc);
 }
 
 class _BadgePaused extends StatelessWidget {

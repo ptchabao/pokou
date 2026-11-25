@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#fff8f6;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary-container": "#fed65b", "surface-container-high": "#f0e6e4", "primary": "#853a14", "ink-muted": "#8C7D73", "outline-variant": "#dbc1b7", "on-secondary-container": "#745c00", "outline": "#88736a", "secondary-fixed": "#ffe088", "tertiary": "#005d30", "border-hairline": "#EADED2", "background": "#fff8f6", "tertiary-container": "#1a7743", "status-warning": "#8A5A00", "surface-tile": "#F3EAE1", "primary-fixed": "#ffdbcd", "dark-surface": "#2A2320", "on-primary-container": "#ffe3d8", "on-tertiary-fixed-variant": "#00522a", "inverse-primary": "#ffb597", "surface": "#fff8f6", "tertiary-fixed-dim": "#81d99b", "surface-card": "#FFFFFF", "on-tertiary-container": "#a2fcbb", "dark-primary": "E8A57C", "surface-bright": "#fff8f6", "on-primary-fixed": "#360f00", "secondary": "#735c00", "info-assime": "#245C9E", "surface-cream": "#FBF7F2", "inverse-on-surface": "#f8efec", "on-primary-fixed-variant": "#79310b", "ink-secondary": "#6B5E57", "on-surface": "#1f1b1a", "terracotta-dark": "#7F3D1E", "surface-container-highest": "#eae0de", "secondary-fixed-dim": "#e9c349", "terracotta-light": "#F7E2D4", "on-tertiary": "#ffffff", "primary-fixed-dim": "#ffb597", "error-container": "#ffdad6", "inverse-surface": "#342f2e", "on-primary": "#ffffff", "status-danger": "#B3261E", "error": "#ba1a1a", "dark-bg": "#1A1615", "on-secondary-fixed-variant": "#574500", "surface-container-low": "#fbf1ef", "on-background": "#1f1b1a", "surface-container": "#f6ecea", "on-secondary": "#ffffff", "on-tertiary-fixed": "#00210d", "on-error-container": "#93000a", "on-secondary-fixed": "#241a00", "surface-dim": "#e1d8d6", "primary-container": "#a4512a", "read-receipt": "#53BDEB", "surface-container-lowest": "#ffffff", "surface-tint": "#974721", "surface-variant": "#eae0de", "tertiary-fixed": "#9df6b6", "amber-baba": "#D97706", "on-surface-variant": "#55433c", "on-error": "#ffffff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "margin": "1rem", "space-md": "0.75rem", "space-xs": "0.25rem", "gutter": "1rem", "space-sm": "0.5rem", "space-xl": "1.5rem", "space-lg": "1rem" }, fontFamily: { "body-lg": ["Inter"], "headline-sm": ["Inter"], "title-md": ["Inter"], "headline-md": ["Inter"], "body-md": ["Inter"], "overline-xs": ["Inter"], "label-md": ["Inter"], "caption-sm": ["Inter"], "display-lg": ["Inter"] }, fontSize: { "body-lg": ["16px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }], "headline-sm": ["20px", { lineHeight: "26px", letterSpacing: "-0.01em", fontWeight: "700" }], "title-md": ["17px", { lineHeight: "22px", letterSpacing: "-0.005em", fontWeight: "600" }], "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }], "overline-xs": ["11px", { lineHeight: "14px", letterSpacing: "0.06em", fontWeight: "700" }], "label-md": ["14px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "600" }], "caption-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "400" }], "display-lg": ["32px", { lineHeight: "38px", letterSpacing: "-0.02em", fontWeight: "700" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface-cream/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(44,31,24,0.04)]"><div class="h-16 px-space-md flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><button aria-label="Retour" class="w-11 h-11 -ml-1 rounded-full flex items-center justify-center text-on-surface active:bg-surface-tile transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Pokou Brand Emblem" class="h-7 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/ALJJyrApQRjH-MIQZq3yA0e2F678kfFa-2kYqZGu83LOx39_g77wKOrCyoW_gd6r_3TvmU60XW13J-cVVHwCUJB9h2A0PQJMHsTfBkJe0lVt644MxwfeDm6b5mPGj9NbScIv7gHje8eFo-g4kjnG7yuwLgmBs-_9nZlyG81eNuJJAdN_cgTNcDHRYvRgRSeL3B-1m__Yt_Wy86Ps7RBKbWdm8ONDT-Xrc4yM8ZFulbh2fJ4-MQ"/><h1 class="text-title-md font-title-md text-on-surface truncate">Discussion Detail</h1></div><div class="flex items-center gap-space-sm flex-shrink-0"><div class="w-2 h-2 rounded-full bg-tertiary" title="En ligne"></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY01Fwhe-b7vZiUAfvhYPeAARmq0MY9Oh5wz5Onv1olacWkKsWDCrmsOeemBYUW8uMEsCbO_lh9j74IfUBgXYZji1yFbSln2MQ2SSXiKZbHaZQOVqcBgf1ggq-HXBG-P2LYhVl7U1c1RackMtlya-ugVH4PsWhnecqcqyjUpsf_kr-d3A3zRq7mc5sYC7k4ztpjGQavi0dGEOxX78mSu3kHrA3HgqlRbplSZXXZvP6"/></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface"><div class="flex flex-col w-full relative">
+<!-- Top Bar Contextuelle (In-chat custom sub-header) -->
+<div class="sticky top-0 z-40 bg-surface-cream/95 backdrop-blur-md px-space-md py-space-sm shadow-[0_2px_10px_rgba(44,31,24,0.04)] flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<button aria-label="Retour" class="w-10 h-10 -ml-1 rounded-full flex items-center justify-center text-on-surface active:bg-surface-tile transition-colors" onclick="history.back()">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<!-- Avatar Groupe FK -->
+<div class="relative flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-surface-tile flex items-center justify-center shadow-sm">
+<span class="font-label-md text-label-md text-terracotta-dark font-bold">FK</span>
+</div>
+<span class="absolute bottom-0 right-0 w-3 h-3 bg-tertiary rounded-full ring-2 ring-surface-cream" title="Actif"></span>
+</div>
+<!-- Info groupe -->
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface truncate">Famille Koffi</span>
+<span class="material-symbols-outlined text-terracotta-dark text-[16px]" title="Groupe vérifié">verified_user</span>
+</div>
+<span class="font-caption-sm text-caption-sm text-ink-muted truncate">5 membres · Chiffré de bout en bout</span>
+</div>
+</div>
+<!-- Actions header -->
+<div class="flex items-center gap-1 flex-shrink-0">
+<button aria-label="Appel vocal sécurisé" class="w-10 h-10 rounded-full flex items-center justify-center text-terracotta-dark active:bg-surface-tile transition-colors">
+<span class="material-symbols-outlined text-[22px]">call</span>
+</button>
+<button aria-label="Options" class="w-10 h-10 rounded-full flex items-center justify-center text-ink-secondary active:bg-surface-tile transition-colors" id="btn-group-options">
+<span class="material-symbols-outlined text-[22px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Fil de discussion scrollable -->
+<div class="flex flex-col px-space-lg pt-space-md pb-28 gap-space-md">
+<!-- Bannière de sécurité et confiance discrète -->
+<div class="bg-surface-tile/80 rounded-xl p-space-md flex items-start gap-space-sm mx-auto max-w-[340px] shadow-[0_1px_3px_rgba(44,31,24,0.03)]">
+<span class="material-symbols-outlined text-terracotta-dark text-[18px] flex-shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">lock</span>
+<p class="font-caption-sm text-caption-sm text-on-surface-variant leading-relaxed">
+<strong class="font-semibold text-on-surface">Chiffré de bout en bout :</strong> personne d'autre, pas même Pokou, ne peut lire ou écouter ces échanges.
+      </p>
+</div>
+<!-- Repère de date -->
+<div class="flex items-center justify-center my-space-xs">
+<span class="bg-surface-container px-3 py-1 rounded-full font-overline-xs text-overline-xs text-ink-muted tracking-wide uppercase">
+        Aujourd'hui
+      </span>
+</div>
+<!-- Bulle reçue : Maman -->
+<div class="flex items-end gap-space-sm max-w-[84%] self-start">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0 text-on-primary-fixed font-overline-xs text-overline-xs font-bold">
+        M
+      </div>
+<div class="flex flex-col">
+<div class="bg-surface-card text-on-surface px-3.5 py-2.5 rounded-[16px] rounded-bl-[4px] shadow-[0_3px_10px_rgba(44,31,24,0.055)] flex flex-col">
+<span class="font-caption-sm text-caption-sm text-terracotta-dark font-bold mb-0.5">Maman</span>
+<p class="font-body-md text-body-md leading-relaxed">On se voit dimanche chez Maman ? N'oubliez pas les enfants ! 🍲</p>
+<div class="self-end mt-1">
+<span class="font-caption-sm text-[11px] text-ink-muted">17:32</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bulle envoyée : Moi -->
+<div class="flex items-end gap-space-sm max-w-[84%] self-end">
+<div class="bg-gradient-to-br from-terracotta-light via-[#FDECE2] to-terracotta-light text-on-surface px-3.5 py-2.5 rounded-[16px] rounded-br-[4px] shadow-[0_3px_10px_rgba(44,31,24,0.055)] flex flex-col">
+<p class="font-body-md text-body-md leading-relaxed">Oui maman, j'apporte le gâteau de manioc et les jus locaux frais ! 🥭✨</p>
+<div class="self-end flex items-center gap-1 mt-1">
+<span class="font-caption-sm text-[11px] text-ink-muted">17:35</span>
+<span class="material-symbols-outlined text-read-receipt text-[15px]" style="font-variation-settings: 'FILL' 1;">done_all</span>
+</div>
+</div>
+</div>
+<!-- Bulle reçue : Koffi -->
+<div class="flex items-end gap-space-sm max-w-[84%] self-start">
+<div class="w-7 h-7 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0 text-on-secondary-fixed font-overline-xs text-overline-xs font-bold">
+        K
+      </div>
+<div class="flex flex-col">
+<div class="bg-surface-card text-on-surface px-3.5 py-2.5 rounded-[16px] rounded-bl-[4px] shadow-[0_3px_10px_rgba(44,31,24,0.055)] flex flex-col">
+<span class="font-caption-sm text-caption-sm text-terracotta-dark font-bold mb-0.5">Koffi</span>
+<p class="font-body-md text-body-md leading-relaxed">Parfait, je passe vous prendre en voiture vers 12h.</p>
+<div class="self-end mt-1">
+<span class="font-caption-sm text-[11px] text-ink-muted">17:36</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bulle interactive Kory partagée dans le fil -->
+<div class="flex items-end gap-space-sm max-w-[92%] self-start">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0 text-on-primary-fixed font-overline-xs text-overline-xs font-bold">
+        M
+      </div>
+<div class="bg-surface-card text-on-surface p-3.5 rounded-[18px] rounded-bl-[4px] shadow-[0_3px_14px_rgba(44,31,24,0.07)] flex flex-col w-full">
+<!-- En-tête Kory Badge -->
+<div class="flex items-center justify-between pb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">savings</span>
+<span class="font-overline-xs text-overline-xs text-primary font-bold uppercase tracking-wider">Cagnotte Kory Familiale</span>
+</div>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full font-overline-xs text-overline-xs font-bold">Actif</span>
+</div>
+<!-- Titre & Montant -->
+<div class="mt-1">
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">Anniversaire Grand-mère</h4>
+<p class="font-caption-sm text-caption-sm text-ink-secondary mt-0.5">Collecte collective pour le cadeau &amp; la fête</p>
+</div>
+<!-- Progress bar & chiffres -->
+<div class="mt-3 bg-surface-tile p-2.5 rounded-xl">
+<div class="flex items-center justify-between mb-1.5 font-label-md text-label-md">
+<span class="text-terracotta-dark font-bold">110 000 FCFA</span>
+<span class="text-ink-muted font-body-md text-caption-sm">sur 150 000 FCFA</span>
+</div>
+<!-- Barre de progression 73% -->
+<div class="w-full bg-surface-card h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 73.3%;"></div>
+</div>
+<div class="flex justify-between items-center mt-1.5 font-caption-sm text-caption-sm text-ink-muted">
+<span>4 contributeurs</span>
+<span class="text-tertiary font-medium">Reste 40 000 FCFA</span>
+</div>
+</div>
+<!-- Action directe intégrée -->
+<button class="mt-3 w-full bg-primary active:bg-terracotta-dark text-on-primary py-2.5 px-4 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-[0.98]" id="btn-contribute">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+<span>Contribuer via mon wallet</span>
+</button>
+<div class="self-end mt-2 flex items-center gap-1">
+<span class="font-caption-sm text-[11px] text-ink-muted">17:40</span>
+</div>
+</div>
+</div>
+<!-- Bulle de réaction rapide animée (feedback visuel interactif) -->
+<div class="flex flex-col gap-space-md" id="dynamic-bubble-container"></div>
+</div>
+<!-- Tiroir contextuel d'attachement (masqué par défaut) -->
+<div class="hidden fixed inset-x-0 bottom-20 z-50 px-space-lg pb-space-sm transition-all duration-300" id="attachment-drawer">
+<div class="bg-surface-card rounded-2xl p-space-md shadow-[0_12px_32px_rgba(44,31,24,0.18)] grid grid-cols-4 gap-space-sm text-center">
+<button class="flex flex-col items-center gap-1.5 p-2 rounded-xl active:bg-surface-tile transition-colors">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">savings</span>
+</div>
+<span class="font-caption-sm text-caption-sm text-on-surface">Cagnotte</span>
+</button>
+<button class="flex flex-col items-center gap-1.5 p-2 rounded-xl active:bg-surface-tile transition-colors">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">receipt_long</span>
+</div>
+<span class="font-caption-sm text-caption-sm text-on-surface">Honam</span>
+</button>
+<button class="flex flex-col items-center gap-1.5 p-2 rounded-xl active:bg-surface-tile transition-colors">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[24px]">image</span>
+</div>
+<span class="font-caption-sm text-caption-sm text-on-surface">Galerie</span>
+</button>
+<button class="flex flex-col items-center gap-1.5 p-2 rounded-xl active:bg-surface-tile transition-colors">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<span class="font-caption-sm text-caption-sm text-on-surface">Contact</span>
+</button>
+</div>
+</div>
+<!-- Barre de Saisie Inférieure (Fixée au bas de l'écran tactile) -->
+<div class="fixed inset-x-0 bottom-0 z-40 bg-surface-cream/95 backdrop-blur-xl px-space-md py-space-sm shadow-[0_-2px_12px_rgba(44,31,24,0.06)] flex items-center gap-2">
+<!-- Bouton (+) Attachement -->
+<button aria-label="Joindre un fichier ou une cagnotte" class="w-11 h-11 rounded-full bg-surface-card flex items-center justify-center text-primary active:bg-surface-tile shadow-sm transition-transform active:scale-95 flex-shrink-0" id="btn-attach">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</button>
+<!-- Zone de texte pastille -->
+<div class="flex-1 bg-surface-card rounded-full min-h-[46px] px-3.5 flex items-center gap-2 shadow-[0_1px_3px_rgba(44,31,24,0.04)]">
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface placeholder:text-ink-muted focus:outline-none py-2" id="chat-input" placeholder="Écris un message..." type="text"/>
+<button aria-label="Ajouter un émoji" class="text-ink-muted active:text-on-surface p-1 rounded-full flex-shrink-0" id="btn-emoji">
+<span class="material-symbols-outlined text-[22px]">sentiment_satisfied</span>
+</button>
+</div>
+<!-- Bouton interactif micro vocal / envoyer -->
+<button aria-label="Enregistrer une note vocale" class="w-11 h-11 rounded-full bg-surface-tile text-terracotta-dark flex items-center justify-center shadow-sm transition-all duration-200 active:scale-95 flex-shrink-0" id="btn-action-send">
+<span class="material-symbols-outlined text-[22px]" id="action-icon">mic</span>
+</button>
+</div>
+</div>
+<script>
+  (function() {
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('btn-action-send');
+    const actionIcon = document.getElementById('action-icon');
+    const attachBtn = document.getElementById('btn-attach');
+    const drawer = document.getElementById('attachment-drawer');
+    const container = document.getElementById('dynamic-bubble-container');
+    const contributeBtn = document.getElementById('btn-contribute');
+
+    // Toggle attachement drawer
+    attachBtn?.addEventListener('click', () => {
+      drawer?.classList.toggle('hidden');
+    });
+
+    // Bascule Micro -> Envoyer en fonction de la saisie
+    input?.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (val.length > 0) {
+        actionIcon.textContent = 'send';
+        sendBtn.classList.remove('bg-surface-tile', 'text-terracotta-dark');
+        sendBtn.classList.add('bg-primary', 'text-on-primary');
+      } else {
+        actionIcon.textContent = 'mic';
+        sendBtn.classList.remove('bg-primary', 'text-on-primary');
+        sendBtn.classList.add('bg-surface-tile', 'text-terracotta-dark');
+      }
+    });
+
+    // Envoi d'un message simulé avec défilement fluide
+    const sendMessage = () => {
+      const text = input.value.trim();
+      if (!text) {
+        // Simulation enregistrement vocal
+        const recNotice = document.createElement('div');
+        recNotice.className = 'self-center bg-error-container text-on-error-container font-caption-sm text-caption-sm px-3 py-1 rounded-full animate-pulse';
+        recNotice.textContent = 'Maintenez pour enregistrer un message vocal';
+        container.appendChild(recNotice);
+        setTimeout(() => recNotice.remove(), 2500);
+        return;
+      }
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const newBubble = document.createElement('div');
+      newBubble.className = 'flex items-end gap-space-sm max-w-[84%] self-end animate-fadeIn';
+      newBubble.innerHTML = `
+        <div class="bg-gradient-to-br from-terracotta-light via-[#FDECE2] to-terracotta-light text-on-surface px-3.5 py-2.5 rounded-[16px] rounded-br-[4px] shadow-[0_3px_10px_rgba(44,31,24,0.055)] flex flex-col">
+          <p class="font-body-md text-body-md leading-relaxed">${escapeHtml(text)}</p>
+          <div class="self-end flex items-center gap-1 mt-1">
+            <span class="font-caption-sm text-[11px] text-ink-muted">${timeStr}</span>
+            <span class="material-symbols-outlined text-read-receipt text-[15px]" style="font-variation-settings: 'FILL' 1;">done_all</span>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(newBubble);
+      input.value = '';
+      actionIcon.textContent = 'mic';
+      sendBtn.classList.remove('bg-primary', 'text-on-primary');
+      sendBtn.classList.add('bg-surface-tile', 'text-terracotta-dark');
+
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    };
+
+    sendBtn?.addEventListener('click', sendMessage);
+    input?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Interaction micro-délice cagnotte
+    contributeBtn?.addEventListener('click', () => {
+      contributeBtn.disabled = true;
+      contributeBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[18px] animate-spin">sync</span>
+        <span>Ouverture du Wallet Kory...</span>
+      `;
+      setTimeout(() => {
+        contributeBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+          <span>Participation envoyée !</span>
+        `;
+        contributeBtn.classList.remove('bg-primary');
+        contributeBtn.classList.add('bg-tertiary', 'text-on-tertiary');
+      }, 900);
+    });
+
+    function escapeHtml(string) {
+      return String(string).replace(/[&<>"']/g, function(s) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[s];
+      });
+    }
+  })();
+</script></main></body></html>

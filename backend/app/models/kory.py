@@ -11,7 +11,7 @@ celle-là fait de Pokou un intermédiaire financier, celle-ci non.
 """
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 
 from app.core.database import Base
 
@@ -221,3 +221,20 @@ class KorySwap(Base):
     status = Column(String(10), nullable=False, default="PENDING", index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     decided_at = Column(DateTime, nullable=True)
+
+
+class KoryArchive(Base):
+    """Une collecte terminée ou expirée qu'UN membre a rangée dans ses
+    archives : elle quitte SA liste, pas celle des autres.
+
+    Un réglage par personne, jamais un état de la collecte : l'organisateur
+    qui archive ne retire rien à ceux qui veulent encore la voir. Désarchiver
+    supprime la ligne.
+    """
+    __tablename__ = "kory_archives"
+    __table_args__ = (UniqueConstraint("pot_id", "user_id", name="uq_kory_archive"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    pot_id = Column(Integer, ForeignKey("kory_pots.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    archived_at = Column(DateTime, default=datetime.utcnow, nullable=False)

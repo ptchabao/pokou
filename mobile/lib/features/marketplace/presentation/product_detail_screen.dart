@@ -387,6 +387,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         tone: CalloutTone.beige,
                         text: L.of(context).assimeNoPaymentNotice,
                       ),
+                      const SizedBox(height: 8),
+                      // Vente en main propre : les deux se rencontrent, et
+                      // un code remis par l'acheteur clôt la vente.
+                      ModuleCallout(
+                        tone: CalloutTone.blue,
+                        title: L.of(context).assXInPersonTitle,
+                        text: L.of(context).assXInPersonInfo,
+                      ),
                     ],
                   ),
                 ),

@@ -12,7 +12,7 @@ from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core.countries import country_config
+from app.core.countries import country_config, demo_pharmacies_visible
 from app.models import CourierDefault, CourierLedgerEntry, CourierProfile, HonamOrder, HonamOrderEvent, Pharmacy
 from app.services.events.outbox import record_event
 
@@ -176,6 +176,9 @@ def refresh_pharmacy_status(db: Session, pharmacy: Pharmacy, now: Optional[datet
 def pharmacy_accepts_orders(db: Session, pharmacy: Pharmacy, now: Optional[datetime] = None) -> bool:
     """Visible dans l'annuaire et destinataire d'ordonnances (BM-02, BM-11)."""
     now = now or datetime.utcnow()
+    # Une officine de démonstration n'existe que là où le pays l'autorise.
+    if getattr(pharmacy, "is_demo", False) and not demo_pharmacies_visible(db, pharmacy.country):
+        return False
     if refresh_pharmacy_status(db, pharmacy, now) != "ACTIVE":
         return False
     if not pharmacy.wallet_verified or not pharmacy.wallet_phone:

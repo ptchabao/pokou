@@ -33,6 +33,7 @@ import '../../settings/presentation/delete_account_screen.dart';
 import '../../settings/presentation/devices_screen.dart';
 import '../../settings/presentation/notifications_settings_screen.dart';
 import '../../settings/presentation/privacy_settings_screen.dart';
+import '../../settings/presentation/chat_wallpaper_screen.dart';
 import '../../settings/presentation/storage_settings_screen.dart';
 import '../../status/presentation/status_privacy_screen.dart';
 import '../data/profile_repository.dart';
@@ -648,6 +649,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             onTap: () => _push(const ThemeScreen()),
                           ),
                           _SettingsRow(
+                            icon: Icons.wallpaper_outlined,
+                            label: L.of(context).wallpaperTitle,
+                            onTap: () => _push(const ChatWallpaperScreen()),
+                          ),
+                          _SettingsRow(
                             icon: Icons.language,
                             label: L.of(context).profileLanguage,
                             onTap: () => _push(const LanguageScreen()),
@@ -735,27 +741,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Positioned(
               bottom: 0,
               right: 0,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.accentPrimaryDark,
-                  border: Border.all(color: AppColors.background, width: 2),
+              // Le crayon ✏️ : changer sa photo en un geste. Un vrai
+              // bouton (et non plus une pastille décorative de 24 points),
+              // assez grand pour le pouce.
+              child: Semantics(
+                button: true,
+                label: L.of(context).chatXChangePhoto,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accentPrimaryDark,
+                    border: Border.all(color: AppColors.background, width: 2),
+                  ),
+                  child: _uploadingAvatar
+                      ? const Padding(
+                          padding: EdgeInsets.all(6),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.edit, size: 15, color: Colors.white),
                 ),
-                child: _uploadingAvatar
-                    ? const Padding(
-                        padding: EdgeInsets.all(4),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.camera_alt,
-                        size: 12,
-                        color: Colors.white,
-                      ),
               ),
             ),
           ],

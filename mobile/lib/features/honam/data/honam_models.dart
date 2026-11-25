@@ -706,3 +706,82 @@ class HonamCities {
     waitlistCity: (json['waitlist'] as Map?)?['city'] as String?,
   );
 }
+
+/// Un numéro d'urgence : le principal, ses alternatives (« 170 (ou 110,
+/// 111) ») et une précision éventuelle (« depuis un mobile »).
+class EmergencyNumber {
+  const EmergencyNumber({
+    required this.number,
+    this.key,
+    this.label,
+    this.alternatives = const [],
+    this.note,
+  });
+
+  /// police | pompiers | samu | gendarmerie | unique ; `null` pour un
+  /// « autre service », qui porte alors son [label] tel que la liste l'écrit.
+  final String? key;
+  final String? label;
+  final String number;
+  final List<String> alternatives;
+  final String? note;
+
+  factory EmergencyNumber.fromJson(Map<String, dynamic> json) =>
+      EmergencyNumber(
+        key: json['key'] as String?,
+        label: json['label'] as String?,
+        number: json['number'] as String,
+        alternatives: [
+          for (final a in (json['alternatives'] as List? ?? const []))
+            a as String,
+        ],
+        note: json['note'] as String?,
+      );
+}
+
+/// Les urgences du pays de la personne (section « Urgences » de Honam).
+class EmergencyInfo {
+  const EmergencyInfo({
+    this.country,
+    this.services = const [],
+    this.others = const [],
+    this.reliability,
+  });
+
+  final String? country;
+  final List<EmergencyNumber> services;
+  final List<EmergencyNumber> others;
+
+  /// high | medium | low.
+  final String? reliability;
+
+  bool get lowReliability => reliability == 'low';
+  bool get isEmpty => services.isEmpty && others.isEmpty;
+
+  /// `emergency` de /honam/config ; à défaut (serveur plus ancien), la
+  /// forme d'avant `{police: 117, …}`.
+  factory EmergencyInfo.fromConfig(Map<String, dynamic> json) {
+    final emergency = json['emergency'];
+    if (emergency is Map<String, dynamic>) {
+      return EmergencyInfo(
+        country: emergency['country'] as String?,
+        reliability: emergency['reliability'] as String?,
+        services: [
+          for (final s in (emergency['services'] as List? ?? const []))
+            EmergencyNumber.fromJson((s as Map).cast<String, dynamic>()),
+        ],
+        others: [
+          for (final s in (emergency['others'] as List? ?? const []))
+            EmergencyNumber.fromJson((s as Map).cast<String, dynamic>()),
+        ],
+      );
+    }
+    final legacy = (json['emergency_numbers'] as Map?) ?? const {};
+    return EmergencyInfo(
+      services: [
+        for (final e in legacy.entries)
+          EmergencyNumber(key: e.key as String, number: e.value as String),
+      ],
+    );
+  }
+}

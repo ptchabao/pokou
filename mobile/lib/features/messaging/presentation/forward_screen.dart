@@ -36,6 +36,7 @@ class ForwardPayload {
     this.media,
     this.forwardScore = 0,
     this.serverMessageId,
+    this.viewOnce = false,
   });
 
   /// Depuis une discussion à deux.
@@ -50,6 +51,7 @@ class ForwardPayload {
     serverMessageId: message.isEncrypted || message.encryption != null
         ? null
         : message.id,
+    viewOnce: message.viewOnce,
   );
 
   /// Depuis un groupe : toujours chiffré, toujours renvoyé par l'appareil.
@@ -58,7 +60,11 @@ class ForwardPayload {
     text: message.content,
     media: message.media,
     forwardScore: message.forwardScore,
+    viewOnce: message.viewOnce,
   );
+
+  /// Une vue unique ne se transfère jamais (le serveur refuse aussi).
+  final bool viewOnce;
 
   final String messageType;
   final String? text;
@@ -103,6 +109,8 @@ Future<void> openForwardScreen(
   required ForwardPayload payload,
   required int myUserId,
 }) async {
+  // Dernier verrou, quel que soit le bouton qui a mené ici.
+  if (payload.viewOnce) return;
   final messenger = ScaffoldMessenger.of(context);
   final l = L.of(context);
   final result = await Navigator.of(context).push<({int sent, int failed})>(

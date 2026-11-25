@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/country/country_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/identity_avatar.dart';
@@ -11,11 +12,21 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../channels/data/channel_model.dart';
 import '../../channels/presentation/channel_screen.dart';
+import '../../contacts/data/contact_model.dart';
 import '../../contacts/data/conversation_summary.dart';
+import '../../contacts/presentation/contacts_controller.dart'
+    show contactsProvider;
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../contacts/presentation/open_discussion.dart';
 import '../../groups/data/group_model.dart';
 import '../../groups/presentation/group_conversation_screen.dart';
+import '../../honam/data/honam_models.dart';
+import '../../honam/presentation/honam_controller.dart'
+    show honamRepositoryProvider;
+import '../../honam/presentation/honam_send_screen.dart';
+import '../../kory/data/kory_model.dart';
+import '../../kory/presentation/kory_controller.dart' show koryPotsProvider;
+import '../../kory/presentation/kory_pot_screen.dart';
 import '../../marketplace/data/product_model.dart';
 import '../../marketplace/presentation/product_detail_screen.dart';
 import '../../messaging/presentation/contact_card_bubble.dart'
@@ -73,6 +84,8 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   List<_Hit> _hits = const [];
   List<Map<String, dynamic>> _channels = const [];
   List<Map<String, dynamic>> _products = const [];
+  List<KoryPot> _pots = const [];
+  List<Pharmacy> _pharmacies = const [];
   bool _searching = false;
 
   @override
@@ -108,6 +121,8 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
         _hits = const [];
         _channels = const [];
         _products = const [];
+        _pots = const [];
+        _pharmacies = const [];
       });
       return;
     }
@@ -144,25 +159,64 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
         ),
     ]..sort((a, b) => b.at.compareTo(a.at));
 
-    // Chaînes et marché : publics, cherchés sur le serveur. Un échec réseau
-    // n'efface pas ce que l'appareil a trouvé.
-    var channels = const <Map<String, dynamic>>[];
-    var products = const <Map<String, dynamic>>[];
-    try {
-      final api = ref.read(apiClientProvider);
-      final encoded = Uri.encodeQueryComponent(query);
-      final responses = await Future.wait([
-        api.get('/channels/search?q=$encoded'),
-        api.get('/marketplace?q=$encoded'),
-      ]);
-      channels = _items(responses[0]);
-      products = _items(responses[1]);
-    } catch (_) {}
+    // Le reste, PARTOUT où le module est ouvert : chaînes et annonces
+    // (serveur), cagnottes Kory et pharmacies Honam. Chaque source est
+    // indépendante : avant, un seul échec (une chaîne indisponible)
+    // emportait aussi les annonces, et la loupe ne trouvait plus que les
+    // contacts.
+    final config = ref.read(currentCountryConfigProvider);
+    final api = ref.read(apiClientProvider);
+    final encoded = Uri.encodeQueryComponent(query);
+    final needle = query.toLowerCase();
+    bool matches(String? value) =>
+        value != null && value.toLowerCase().contains(needle);
+    Future<T> safe<T>(Future<T> Function() load, T fallback) async {
+      try {
+        return await load();
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    final results = await Future.wait<Object>([
+      safe(
+        () async => _items(await api.get('/channels/search?q=$encoded')),
+        const <Map<String, dynamic>>[],
+      ),
+      config.has('assime')
+          ? safe(
+              () async => _items(await api.get('/marketplace?q=$encoded')),
+              const <Map<String, dynamic>>[],
+            )
+          : Future.value(const <Map<String, dynamic>>[]),
+      config.has('kory')
+          ? safe(
+              () async => [
+                for (final pot in await ref.read(koryPotsProvider.future))
+                  if (matches(pot.title) || matches(pot.groupName)) pot,
+              ],
+              const <KoryPot>[],
+            )
+          : Future.value(const <KoryPot>[]),
+      config.has('honam')
+          ? safe(
+              () async => [
+                for (final pharmacy
+                    in await ref.read(honamRepositoryProvider).pharmacies())
+                  if (matches(pharmacy.name) || matches(pharmacy.address))
+                    pharmacy,
+              ],
+              const <Pharmacy>[],
+            )
+          : Future.value(const <Pharmacy>[]),
+    ]);
     if (!mounted || _controller.text.trim() != query) return;
     setState(() {
       _hits = hits;
-      _channels = channels;
-      _products = products;
+      _channels = results[0] as List<Map<String, dynamic>>;
+      _products = results[1] as List<Map<String, dynamic>>;
+      _pots = results[2] as List<KoryPot>;
+      _pharmacies = results[3] as List<Pharmacy>;
       _searching = false;
     });
   }
@@ -184,6 +238,20 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   List<Map<String, dynamic>> _items(dynamic response) {
     final map = response as Map<String, dynamic>;
     return (map['items'] as List? ?? const []).cast<Map<String, dynamic>>();
+  }
+
+  Future<void> _openContact(PokouContact contact) async {
+    final myId = ref.read(authControllerProvider).user?.id;
+    if (myId == null || contact.contactUserId == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ConversationScreen(
+          myUserId: myId,
+          contactUserId: contact.contactUserId!,
+          contactName: contact.displayName,
+        ),
+      ),
+    );
   }
 
   Future<void> _openHit(_Hit hit) async {
@@ -210,10 +278,28 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final needle = _query.toLowerCase();
-    final chats = needle.isEmpty
+    final matching = needle.isEmpty
         ? const <ConversationSummary>[]
         : (ref.watch(discussionsProvider).valueOrNull ?? const [])
               .where((d) => d.name.toLowerCase().contains(needle))
+              .toList();
+    // Discussions à deux, puis groupes et communautés, chacun sa section.
+    final chats = matching.where((d) => d.kind == 'contact').toList();
+    final groups = matching.where((d) => d.kind != 'contact').toList();
+    // Le carnet : les personnes sur Pokou sans discussion encore ouverte.
+    final withChat = {for (final d in chats) d.contactUserId};
+    final contacts = needle.isEmpty
+        ? const <PokouContact>[]
+        : (ref.watch(contactsProvider).valueOrNull ?? const <PokouContact>[])
+              .where(
+                (c) =>
+                    c.isRegistered &&
+                    c.contactUserId != null &&
+                    !withChat.contains(c.contactUserId) &&
+                    (c.displayName.toLowerCase().contains(needle) ||
+                        c.phone.contains(needle)),
+              )
+              .take(20)
               .toList();
     final textHits = _hits.where((h) => h.messageType == 'TEXT').toList();
     final photoHits = _hits.where((h) => h.messageType == 'IMAGE').toList();
@@ -223,7 +309,51 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
     bool show(SearchScope scope) =>
         _scope == SearchScope.all || _scope == scope;
 
+    Widget discussionTile(ConversationSummary d) => ListTile(
+      leading: IdentityAvatar(
+        userId: d.kind == 'contact' ? d.contactUserId : null,
+        avatar: d.avatar,
+        displayName: d.name,
+        size: 40,
+        showPresence: false,
+        showStatusRing: false,
+      ),
+      title: Text(d.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: d.lastMessage == null
+          ? null
+          : Text(
+              l.searchLastMessage(d.lastMessage!.displayTextOf(l)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+      onTap: () => openDiscussion(context, ref, d),
+    );
+
     final sections = <Widget>[
+      if (show(SearchScope.chats) && contacts.isNotEmpty) ...[
+        _section(l.homeXSearchContacts),
+        for (final c in contacts)
+          ListTile(
+            leading: IdentityAvatar(
+              userId: c.contactUserId,
+              avatar: c.avatar,
+              displayName: c.displayName,
+              size: 40,
+              showPresence: false,
+              showStatusRing: false,
+            ),
+            title: Text(
+              c.displayName,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(c.phone),
+            onTap: () => _openContact(c),
+          ),
+      ],
+      if (show(SearchScope.chats) && groups.isNotEmpty) ...[
+        _section(l.homeXSearchGroups),
+        for (final d in groups) discussionTile(d),
+      ],
       if (show(SearchScope.chats) && chats.isNotEmpty) ...[
         _section(l.searchChatsSection),
         for (final d in chats)
@@ -319,8 +449,39 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
             },
           ),
       ],
+      if (_scope == SearchScope.all && _pots.isNotEmpty) ...[
+        _section(l.homeXSearchKory),
+        for (final pot in _pots)
+          ListTile(
+            leading: const PokouIcon(PokouModuleIcon.kory),
+            title: Text(pot.title),
+            subtitle: pot.groupName == null ? null : Text(pot.groupName!),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => KoryPotScreen(potId: pot.id)),
+            ),
+          ),
+      ],
+      if (_scope == SearchScope.all && _pharmacies.isNotEmpty) ...[
+        _section(l.homeXSearchPharmacies),
+        for (final pharmacy in _pharmacies)
+          ListTile(
+            leading: const Icon(Icons.local_pharmacy_outlined),
+            title: Text(pharmacy.name),
+            subtitle: Text(
+              [
+                if (pharmacy.isOnDuty) l.homeXOnDuty,
+                pharmacy.address,
+              ].join(' · '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const HonamSendScreen())),
+          ),
+      ],
       if (_scope == SearchScope.all && _products.isNotEmpty) ...[
-        _section(l.marketTitle),
+        _section(l.homeXSearchAds),
         for (final item in _products)
           Builder(
             builder: (context) {

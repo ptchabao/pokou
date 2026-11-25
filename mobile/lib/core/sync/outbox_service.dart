@@ -282,6 +282,17 @@ Future<void> _rejouer(Ref ref, PendingAction action) async {
       await messaging.removeReaction(action.targetId);
     case 'message:delete':
       await messaging.delete(action.targetId);
+    // Une vue unique ouverte hors ligne : le serveur l'apprend au retour du
+    // réseau, et cesse alors de servir le fichier.
+    case 'message:viewed':
+      await messaging.markViewOnceViewed(action.targetId);
+    case 'group:viewed':
+      final groupId = int.tryParse(action.payload?['group_id']?.toString() ?? '');
+      if (groupId != null) {
+        await ref
+            .read(groupRepositoryProvider)
+            .markViewOnceViewed(groupId: groupId, messageId: action.targetId);
+      }
     default:
       // Un type inconnu vient d'une version PLUS RÉCENTE de l'application
       // dont la base a survécu à une réinstallation. On l'ignore plutôt que

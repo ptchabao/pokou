@@ -16,19 +16,22 @@ import 'kory_home_widgets.dart';
 import 'kory_invite_screen.dart';
 import 'kory_journal_screen.dart';
 import 'kory_pot_screen.dart';
+import 'kory_search_screen.dart';
 import 'kory_ui.dart';
 import '../../../core/widgets/pokou_sheet.dart';
 
 /// Kory — l'entrée du module (écran APP-3).
 ///
-/// De haut en bas : l'en-tête des onglets, le bloc du mois avec le geste
-/// « Nouvelle cagnotte », la recherche, les filtres en pilules, le carrousel
-/// « À la une » des échéances qui approchent, puis la liste.
+/// De haut en bas : l'en-tête des onglets (la loupe à droite ouvre la
+/// recherche et les « Archives »), le rappel « wallet à wallet », le bloc du
+/// mois avec le geste « Nouvelle cagnotte », les filtres en pilules, le
+/// carrousel « À la une » des échéances qui approchent, puis la liste.
 ///
 /// Le chiffre en tête est « mes contributions confirmées », jamais un
-/// solde : rien n'est détenu par Pokou (BM-01). Le rappel en bas de page
-/// le dit en toutes lettres, parce que c'est la question que pose quelqu'un
-/// qui voit un montant dans une application.
+/// solde : rien n'est détenu par Pokou (BM-01). Le rappel juste sous
+/// l'en-tête le dit en toutes lettres, AVANT le premier montant, parce que
+/// c'est la question que pose quelqu'un qui voit un montant dans une
+/// application.
 class KoryScreen extends ConsumerStatefulWidget {
   const KoryScreen({super.key});
 
@@ -37,23 +40,13 @@ class KoryScreen extends ConsumerStatefulWidget {
 }
 
 class _KoryScreenState extends ConsumerState<KoryScreen> {
-  final _search = TextEditingController();
   KoryHomeFilter _filter = KoryHomeFilter.all;
-
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
-  }
 
   void _openPot(int potId) => Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (_) => KoryPotScreen(potId: potId)));
 
-  void _showAll() => setState(() {
-    _search.clear();
-    _filter = KoryHomeFilter.all;
-  });
+  void _showAll() => setState(() => _filter = KoryHomeFilter.all);
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +81,32 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
                 // Le logo du module (guide des logos, novembre 2026).
                 leading: const PokouModuleLogo(PokouModule.kory, size: 38),
                 // Maquette p.14 : ni cloche ni photo dans l'en-tête de Kory.
+                // La loupe y prend la place de la barre de recherche, qui
+                // mangeait le haut de la page ; elle mène aussi aux archives.
                 showBell: false,
                 showAvatar: false,
+                actions: [
+                  IconButton(
+                    tooltip: l.koryTSearch,
+                    icon: const Icon(Icons.search),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const KorySearchScreen(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            // Le rappel « wallet à wallet », juste sous l'en-tête : avant le
+            // premier montant de la page, pas après.
+            if (!pots.hasError)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: KoryTrustCard(),
+                ),
+              ),
             // Sans cagnotte, l'état vide porte seul les deux actions : le
             // bandeau les aurait montrées en double (maquette p.111).
             if (items == null || items.isNotEmpty)
@@ -195,7 +210,7 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
                         ),
                       ),
                     ]
-                  : _content(l, items, open.length),
+                  : _content(l, items),
             ),
           ],
         ),
@@ -203,26 +218,23 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
     );
   }
 
-  /// La page quand il y a des cagnottes : recherche, filtres, « À la une »,
-  /// liste, et le rappel « wallet à wallet ».
-  List<Widget> _content(L l, List<KoryPot> items, int openCount) {
+  /// La page quand il y a des cagnottes : filtres, « À la une », liste.
+  List<Widget> _content(L l, List<KoryPot> items) {
     // Un filtre n'est proposé que s'il a de quoi montrer.
     final filters = [
       for (final filter in KoryHomeFilter.values)
         if (filter == KoryHomeFilter.all || items.any(filter.matches)) filter,
     ];
     final filter = filters.contains(_filter) ? _filter : KoryHomeFilter.all;
-    final query = _fold(_search.text);
-    final narrowed = query.isNotEmpty || filter != KoryHomeFilter.all;
+    final narrowed = filter != KoryHomeFilter.all;
     final shown = [
       for (final pot in items)
-        if (filter.matches(pot) &&
-            (query.isEmpty || _fold(pot.title).contains(query)))
-          pot,
+        if (filter.matches(pot)) pot,
     ];
+    final shownOpen = shown.where((pot) => pot.isOpen).length;
     // « À la une » : les collectes ouvertes qui ont une échéance, la plus
-    // proche d'abord. Une recherche ou un filtre la replie : on cherche
-    // alors dans la liste, pas dans une vitrine.
+    // proche d'abord. Un filtre la replie : on cherche alors dans la liste,
+    // pas dans une vitrine.
     final featured = narrowed
         ? const <KoryPot>[]
         : (items.where((pot) => pot.isOpen && pot.dueAt != null).toList()
@@ -233,17 +245,7 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
     return [
       SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-          child: KoryHomeSearchField(
-            controller: _search,
-            onChanged: (_) => setState(() {}),
-            onClear: () => setState(_search.clear),
-          ),
-        ),
-      ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.only(top: 16),
           child: KoryHomeFilterBar(
             filters: filters,
             selected: filter,
@@ -280,9 +282,10 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
         ),
       ],
       SliverToBoxAdapter(
+        // Le titre suit le filtre : « Mes tontines » sous « Tontines ».
         child: KoryHomeSectionTitle(
-          l.koryMyPots,
-          trailing: openCount > 0 ? l.koryActiveCount('$openCount') : null,
+          filter.sectionTitle(l),
+          trailing: shownOpen > 0 ? l.koryActiveCount(shownOpen) : null,
         ),
       ),
       if (shown.isEmpty)
@@ -310,12 +313,7 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
             itemBuilder: (_, index) => KoryPotCard(pot: shown[index]),
           ),
         ),
-      const SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 24, 16, 120),
-          child: _TrustCard(),
-        ),
-      ),
+      const SliverToBoxAdapter(child: SizedBox(height: 120)),
     ];
   }
 
@@ -405,33 +403,18 @@ class _KoryScreenState extends ConsumerState<KoryScreen> {
   }
 }
 
-/// « mariage » trouve « Mariage », « bapteme » trouve « Baptême » : la
-/// recherche ignore la casse et les accents courants.
-String _fold(String text) {
-  const from = 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿ';
-  const to = 'aaaaaaceeeeiiiinooooouuuuyy';
-  final lower = text.trim().toLowerCase();
-  final buffer = StringBuffer();
-  for (final rune in lower.runes) {
-    final char = String.fromCharCode(rune);
-    final index = from.indexOf(char);
-    buffer.write(index < 0 ? char : to[index]);
-  }
-  return buffer.toString();
-}
-
 /// Une cagnotte dans la liste : la vignette à son initiale, le titre, la
 /// barre d'avancement, ce qui est réuni sur ce qui est visé, et le bouton.
 ///
 /// Toute la carte ouvre la cagnotte ; le bouton aussi — c'est là que l'on
 /// déclare sa contribution.
-class KoryPotCard extends StatelessWidget {
+class KoryPotCard extends ConsumerWidget {
   const KoryPotCard({super.key, required this.pot});
 
   final KoryPot pot;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     final look = KoryKindLook.of(pot);
     final figures = KoryPotFigures.of(pot);
@@ -588,6 +571,20 @@ class KoryPotCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
+                  // Terminée ou expirée : elle peut quitter MA liste.
+                  if (pot.archivable) ...[
+                    IconButton(
+                      tooltip: pot.archived ? l.koryTUnarchive : l.koryTArchive,
+                      onPressed: () => koryToggleArchive(context, ref, pot),
+                      icon: Icon(
+                        pot.archived
+                            ? Icons.unarchive_outlined
+                            : Icons.archive_outlined,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                  ],
                   Flexible(
                     flex: 0,
                     child: KoryHomePillButton(
@@ -653,17 +650,18 @@ class _PotThumb extends StatelessWidget {
   }
 }
 
-/// Le rappel du bas de page, à la manière de celui de l'Accueil : Pokou ne
-/// touche jamais l'argent, il passe de wallet à wallet.
-class _TrustCard extends StatelessWidget {
-  const _TrustCard();
+/// Le rappel sous l'en-tête, à la manière de celui de l'Accueil : Pokou ne
+/// touche jamais l'argent, il passe de wallet à wallet. Compact : il
+/// rassure sans repousser la page.
+class KoryTrustCard extends StatelessWidget {
+  const KoryTrustCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: const BoxDecoration(
         gradient: AppGradients.certified,
         borderRadius: AppRadius.card,
@@ -683,13 +681,13 @@ class _TrustCard extends StatelessWidget {
                     color: AppColors.brandOr,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 // Fond de marque fixe : le crème ne change pas en sombre.
                 Text(
                   l.koryNeverTouches,
                   style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.4,
+                    fontSize: 13,
+                    height: 1.35,
                     fontWeight: FontWeight.w500,
                     color: AppColors.neutralCreme,
                   ),
@@ -702,7 +700,7 @@ class _TrustCard extends StatelessWidget {
             child: Icon(
               Icons.verified_user_outlined,
               color: AppColors.brandOr,
-              size: 28,
+              size: 24,
             ),
           ),
         ],

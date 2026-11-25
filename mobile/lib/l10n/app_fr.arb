@@ -3481,11 +3481,11 @@
   "callWaitingNotice": "Tu es déjà en appel. Refuser le garde ; accepter le termine.",
   "callEndAndAccept": "Terminer et accepter",
   "koryOverline": "Épargne solidaire",
-  "koryActiveCount": "{count} actives",
+  "koryActiveCount": "{count, plural, =1{1 active} other{{count} actives}}",
   "@koryActiveCount": {
     "placeholders": {
       "count": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -9676,5 +9676,346 @@
         "type": "String"
       }
     }
-  }
+  },
+  "wallpaperTitle": "Fond d'écran des discussions",
+  "wallpaperMenu": "Fond d'écran",
+  "wallpaperOnlyFor": "Seulement pour « {name} »",
+  "@wallpaperOnlyFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wallpaperAllChatsHint": "S'applique aux discussions qui n'ont pas leur propre fond. Ce choix reste sur ce téléphone.",
+  "wallpaperFamilyUnis": "Unis",
+  "wallpaperFamilyMotifs": "Motifs",
+  "wallpaperFamilyPaysages": "Paysages",
+  "wallpaperFamilyFetes": "Fêtes",
+  "wallpaperIntensity": "Intensité",
+  "wallpaperUseDefault": "Utiliser le fond par défaut",
+  "wallpaperUseDefaultHint": "Celui choisi dans les Réglages pour toutes les discussions",
+  "wallpaperDefaultBadge": "par défaut",
+  "wallpaperSelected": "sélectionné",
+  "wallpaperPreviewReceived": "Tu as vu le nouveau fond ?",
+  "wallpaperPreviewSent": "Oui, il est magnifique !",
+  "wallpaperFeastsEmpty": "Les fonds de fête apparaissent ici quelques jours avant chaque fête.",
+  "koryTSearch": "Rechercher",
+  "koryTSearchHint": "Rechercher une collecte",
+  "koryTSearchPrompt": "Tape le nom d’une cagnotte, d’une cotisation ou d’une tontine.",
+  "koryTSearchInArchives": "Dans les archives",
+  "koryTArchives": "Archives",
+  "koryTArchivesHint": "Les collectes terminées que tu as rangées",
+  "koryTArchivesEmptyTitle": "Aucune archive",
+  "koryTArchivesEmptyBody": "Une collecte terminée ou expirée peut se ranger ici depuis ta liste. Elle reste consultable, et tu peux l’en sortir à tout moment.",
+  "koryTArchive": "Archiver",
+  "koryTUnarchive": "Désarchiver",
+  "koryTArchivedToast": "Collecte rangée dans tes archives",
+  "koryTUnarchivedToast": "Collecte remise dans ta liste",
+  "koryTUndo": "Annuler",
+  "koryTSectionAll": "Mes collectes",
+  "koryTSectionCotisations": "Mes cotisations",
+  "koryTSectionTontines": "Mes tontines",
+  "koryTSectionOpen": "Mes collectes en cours",
+  "koryTSectionClosed": "Mes collectes clôturées",
+  "koryTDescCagnotte": "Crée une cagnotte rapide pour organiser des évènements entre proches. C'est sans frais. Pokou ne touche pas à l'argent. Chacun verse librement et directement sa participation sur le wallet du collecteur.",
+  "koryTDescCotisation": "Crée une collecte de fonds, avec un montant fixe, une échéance et une périodicité. C'est sans frais. Pokou ne touche pas à l'argent. À chaque échéance chacun verse directement sa participation sur le wallet du collecteur.",
+  "koryTDescTontine": "Crée une vraie tontine avec des montants fixes, des tours de collecte, et une périodicité. Des frais Kory Plus s'appliquent pour chaque participant.",
+  "koryTPickContacts": "Choisir dans mes contacts",
+  "koryTPickGroupMembers": "Membres du groupe",
+  "koryTPickSearch": "Rechercher un nom ou un numéro",
+  "koryTPickOnPokou": "Sur Pokou",
+  "koryTPickBySms": "Pas encore sur Pokou · invitation par SMS",
+  "koryTPickAlready": "Déjà dans la collecte",
+  "koryTPickConfirm": "Ajouter · {count}",
+  "@koryTPickConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTPickNoMatch": "Aucun contact ne correspond à ta recherche.",
+  "koryTPickEmpty": "Personne à ajouter pour l’instant.",
+  "koryTAddGroupMembers": "Ajouter des membres du groupe",
+  "koryTAddGroupMembersHint": "Invités comme les autres : la tontine démarre quand chacun a accepté.",
+  "koryTActSomeone": "Un membre",
+  "koryTActCreatedCagnotte": "{name} a ouvert la cagnotte « {title} »",
+  "@koryTActCreatedCagnotte": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActCreatedCotisation": "{name} a ouvert la cotisation « {title} »",
+  "@koryTActCreatedCotisation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActCreatedTontine": "{name} a ouvert la tontine « {title} »",
+  "@koryTActCreatedTontine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActContribution": "Contribution de {name} confirmée",
+  "@koryTActContribution": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActContributionAmount": "Contribution de {name} confirmée : {amount}",
+  "@koryTActContributionAmount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActTotal": "Total confirmé : {total}",
+  "@koryTActTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActStarted": "La tontine démarre. Tour 1 : {name} reçoit.",
+  "@koryTActStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActRound": "Tour {round} sur {rounds} : {name} reçoit.",
+  "@koryTActRound": {
+    "placeholders": {
+      "round": {
+        "type": "String"
+      },
+      "rounds": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActClosed": "« {title} » est clôturée",
+  "@koryTActClosed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActDissolved": "La tontine « {title} » est dissoute",
+  "@koryTActDissolved": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActReminder": "{name} a envoyé un rappel pour « {title} »",
+  "@koryTActReminder": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "koryTActOpen": "Voir dans Kory",
+  "koryTActNoMoney": "Wallet à wallet · Pokou ne touche pas l’argent",
+  "msgFixViewOncePhoto": "Photo",
+  "msgFixViewOnceVideo": "Vidéo",
+  "msgFixViewOnceOpened": "Ouvert",
+  "msgFixViewOnceUnavailable": "Cette vue unique n'a pas pu être ouverte. Réessaie avec une connexion.",
+  "msgFixViewOnceLabel": "Vue unique",
+  "msgFixMediaRetry": "Toucher pour réessayer",
+  "msgFixPollEditableFor": "{count, plural, =1{Modifiable encore 1 min} other{Modifiable encore {count} min}}",
+  "@msgFixPollEditableFor": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msgFixPollFinal": "Réponse définitive",
+  "msgFixPollSingleChoice": "Une seule réponse",
+  "msgFixPollMultipleChoice": "Plusieurs réponses",
+  "msgFixPollChoiceRule": "Les votants pourront changer d'avis pendant 15 minutes.",
+  "msgFixPollVoteRefused": "Ton vote n'a pas pu être enregistré.",
+  "hnxEmergencyGendarmerie": "Gendarmerie",
+  "hnxEmergencyUnique": "Numéro unique",
+  "hnxEmergencyOthers": "Autres services d’urgence",
+  "hnxEmergencyAlternatives": "Aussi : {numbers}",
+  "@hnxEmergencyAlternatives": {
+    "placeholders": {
+      "numbers": {
+        "type": "String"
+      }
+    }
+  },
+  "hnxEmergencyLowReliability": "Fiabilité faible : ces numéros ne sont pas tous confirmés. Garde aussi les numéros locaux.",
+  "hnxEmergencyNone": "Aucun numéro d’urgence connu pour ton pays.",
+  "hnxEmergencyCall": "Appeler le {number}",
+  "@hnxEmergencyCall": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "hnxCourierRestart": "Recommencer",
+  "hnxCourierRestartTitle": "Recommencer la candidature ?",
+  "hnxCourierRestartBody": "Toutes les étapes saisies seront effacées, ainsi que la candidature déjà envoyée si elle attend encore sa validation. Tu repartiras de l’étape 1.",
+  "hnxCourierRestartConfirm": "Tout effacer",
+  "hnxCourierRestarted": "Candidature effacée : tu repars de l’étape 1.",
+  "hnxTestPaymentDone": "Mode test : paiement simulé, aucun débit. C’est activé.",
+  "hnxTestPaymentNote": "Pays de test : le paiement est simulé, sans Mobile Money ni débit.",
+  "hnxPriceUnset": "Tarif non encore fixé pour ce pays",
+  "homeXSearchContacts": "Contacts",
+  "homeXSearchGroups": "Groupes",
+  "homeXSearchKory": "Cagnottes Kory",
+  "homeXSearchPharmacies": "Pharmacies Honam",
+  "homeXSearchAds": "Annonces Assimé",
+  "homeXOnDuty": "De garde",
+  "homeXDiscoverTitle": "Découvrir Pokou",
+  "homeXDiscoverSubtitle": "La vidéo de présentation",
+  "homeXCertUnavailable": "Pokou certifié n’est pas encore disponible dans ton pays.",
+  "assXInPersonTitle": "Vente en main propre",
+  "assXInPersonInfo": "Sur Assimé, l’acheteur et le vendeur se rencontrent : l’article se remet en main propre. Devant l’acheteur, le vendeur touche « Commande validée et livrée » ; l’acheteur reçoit un code et le lui donne pour clôturer la vente.",
+  "assXDelivered": "Commande validée et livrée",
+  "assXCodeLabel": "Code donné par l’acheteur",
+  "assXCloseSale": "Clôturer la vente",
+  "assXAskCode": "Demande à {buyer} le code qu’il vient de recevoir dans Pokou. Il est valable {minutes} minutes.",
+  "@assXAskCode": {
+    "placeholders": {
+      "buyer": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "assXWrongCode": "{count, plural, =0{Code incorrect.} =1{Code incorrect : encore 1 essai.} other{Code incorrect : encore {count} essais.}}",
+  "@assXWrongCode": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assXNewCode": "Générer un nouveau code",
+  "assXCancelHandover": "Annuler la remise",
+  "assXSaleClosed": "Vente clôturée. {buyer} est invité à te noter.",
+  "@assXSaleClosed": {
+    "placeholders": {
+      "buyer": {
+        "type": "String"
+      }
+    }
+  },
+  "assXOutsideNoCode": "Acheteur hors de Pokou : l’annonce est simplement marquée vendue, sans code.",
+  "assXCodeTitle": "Ton code de remise",
+  "assXCodeBody": "Donne ce code à {seller} quand tu as l’article en main. Pas avant.",
+  "@assXCodeBody": {
+    "placeholders": {
+      "seller": {
+        "type": "String"
+      }
+    }
+  },
+  "assXCodeUntil": "Valable jusqu’à {time}",
+  "@assXCodeUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "assXCodeExpired": "Ce code n’est plus valable : demande au vendeur d’en générer un nouveau.",
+  "assXCodeDone": "Vente clôturée. Comment s’est passée la transaction ?",
+  "assXNoHandover": "Aucune remise en cours pour cet article.",
+  "assXShowCode": "Voir mon code",
+  "assXCodeReady": "{seller} a validé la remise : ton code est prêt.",
+  "@assXCodeReady": {
+    "placeholders": {
+      "seller": {
+        "type": "String"
+      }
+    }
+  },
+  "chatXAttachLocation": "Position",
+  "chatXAttachContact": "Contact",
+  "chatXChangePhoto": "Changer la photo",
+  "chatXDeleteDiscussion": "Supprimer la discussion",
+  "chatXDeleteDiscussionAction": "Supprimer",
+  "chatXDeleteDiscussionTitle": "Supprimer la discussion avec {name} ?",
+  "@chatXDeleteDiscussionTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatXDeleteDiscussionBody": "La discussion et ses messages disparaissent de ton téléphone. L'autre personne garde les siens.",
+  "chatXDeleteDiscussionDone": "Discussion supprimée",
+  "chatXDeleteDiscussionOffline": "Pas de connexion : la discussion n'a pas été supprimée.",
+  "chatXDeleteDiscussionFailed": "Impossible de supprimer la discussion.",
+  "chatXLearnMore": "En savoir plus",
+  "chatXLocationCurrent": "Ma position actuelle",
+  "chatXLocationNearYou": "Près de toi",
+  "chatXLocationEncrypted": "Ta position part chiffrée de bout en bout : seuls les destinataires la voient.",
+  "chatXLocationSend": "Envoyer ma position",
+  "chatXLocationFailed": "Impossible d'obtenir ta position pour le moment. Réessaie.",
+  "chatXMediaEmpty": "Rien d'échangé ici pour l'instant.",
+  "chatXMediaTabMedia": "Médias",
+  "chatXMediaTabDocs": "Documents",
+  "chatXMediaTabLinks": "Liens",
+  "chatXMore": "Plus",
+  "chatXOnPokou": "Sur Pokou",
+  "chatXPhoneHidden": "Numéro masqué",
+  "chatXPrivacyPhone": "Mon numéro de téléphone",
+  "chatXPrivacyPhoneSub": "Jamais visible dans les groupes",
+  "chatXPrivacyPhoneBody": "Qui peut voir ton numéro sur ta fiche. Les membres d'un groupe ne le voient jamais : ils te joignent par le groupe.",
+  "chatXPrivacyPhoneContacts": "Visible par mes contacts",
+  "chatXPrivacyPhoneHidden": "Masqué",
+  "chatXPrivacyPhoneHiddenSub": "Sauf pour les contacts que tu autorises",
+  "chatXPrivacyPhoneAllowed": "Contacts autorisés",
+  "chatXSeeMedia": "Voir les médias",
+  "chatXShareAction": "Partager",
+  "chatXShareContactTitle": "Partager ce contact ?",
+  "chatXShareContactBody": "Tu t'apprêtes à partager le numéro d'une autre personne. Assure-toi qu'elle est d'accord avant de l'envoyer. Tu es responsable des informations que tu partages sur Pokou.",
+  "chatXShareContactPick": "Partager un contact",
+  "chatXShareContactSearch": "Rechercher un nom ou un numéro",
+  "chatXShareContactEmpty": "Aucun contact",
+  "chatXShareFromPhoneBook": "Tout le répertoire du téléphone",
+  "chatXShareFromPhoneBookRefused": "Accès au répertoire refusé : autorise-le dans les réglages du téléphone."
 }

@@ -12414,8 +12414,8 @@ abstract class L {
   /// No description provided for @koryActiveCount.
   ///
   /// In fr, this message translates to:
-  /// **'{count} actives'**
-  String koryActiveCount(String count);
+  /// **'{count, plural, =1{1 active} other{{count} actives}}'**
+  String koryActiveCount(int count);
 
   /// No description provided for @searchIntro.
   ///
@@ -25264,6 +25264,942 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Position enregistrée : {place}'**
   String locSaved(String place);
+
+  /// No description provided for @wallpaperTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fond d\'écran des discussions'**
+  String get wallpaperTitle;
+
+  /// No description provided for @wallpaperMenu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fond d\'écran'**
+  String get wallpaperMenu;
+
+  /// No description provided for @wallpaperOnlyFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seulement pour « {name} »'**
+  String wallpaperOnlyFor(String name);
+
+  /// No description provided for @wallpaperAllChatsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'applique aux discussions qui n\'ont pas leur propre fond. Ce choix reste sur ce téléphone.'**
+  String get wallpaperAllChatsHint;
+
+  /// No description provided for @wallpaperFamilyUnis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Unis'**
+  String get wallpaperFamilyUnis;
+
+  /// No description provided for @wallpaperFamilyMotifs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motifs'**
+  String get wallpaperFamilyMotifs;
+
+  /// No description provided for @wallpaperFamilyPaysages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paysages'**
+  String get wallpaperFamilyPaysages;
+
+  /// No description provided for @wallpaperFamilyFetes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fêtes'**
+  String get wallpaperFamilyFetes;
+
+  /// No description provided for @wallpaperIntensity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intensité'**
+  String get wallpaperIntensity;
+
+  /// No description provided for @wallpaperUseDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser le fond par défaut'**
+  String get wallpaperUseDefault;
+
+  /// No description provided for @wallpaperUseDefaultHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Celui choisi dans les Réglages pour toutes les discussions'**
+  String get wallpaperUseDefaultHint;
+
+  /// No description provided for @wallpaperDefaultBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'par défaut'**
+  String get wallpaperDefaultBadge;
+
+  /// No description provided for @wallpaperSelected.
+  ///
+  /// In fr, this message translates to:
+  /// **'sélectionné'**
+  String get wallpaperSelected;
+
+  /// No description provided for @wallpaperPreviewReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as vu le nouveau fond ?'**
+  String get wallpaperPreviewReceived;
+
+  /// No description provided for @wallpaperPreviewSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, il est magnifique !'**
+  String get wallpaperPreviewSent;
+
+  /// No description provided for @wallpaperFeastsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les fonds de fête apparaissent ici quelques jours avant chaque fête.'**
+  String get wallpaperFeastsEmpty;
+
+  /// No description provided for @koryTSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher'**
+  String get koryTSearch;
+
+  /// No description provided for @koryTSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une collecte'**
+  String get koryTSearchHint;
+
+  /// No description provided for @koryTSearchPrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tape le nom d’une cagnotte, d’une cotisation ou d’une tontine.'**
+  String get koryTSearchPrompt;
+
+  /// No description provided for @koryTSearchInArchives.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans les archives'**
+  String get koryTSearchInArchives;
+
+  /// No description provided for @koryTArchives.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archives'**
+  String get koryTArchives;
+
+  /// No description provided for @koryTArchivesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les collectes terminées que tu as rangées'**
+  String get koryTArchivesHint;
+
+  /// No description provided for @koryTArchivesEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune archive'**
+  String get koryTArchivesEmptyTitle;
+
+  /// No description provided for @koryTArchivesEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une collecte terminée ou expirée peut se ranger ici depuis ta liste. Elle reste consultable, et tu peux l’en sortir à tout moment.'**
+  String get koryTArchivesEmptyBody;
+
+  /// No description provided for @koryTArchive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get koryTArchive;
+
+  /// No description provided for @koryTUnarchive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désarchiver'**
+  String get koryTUnarchive;
+
+  /// No description provided for @koryTArchivedToast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecte rangée dans tes archives'**
+  String get koryTArchivedToast;
+
+  /// No description provided for @koryTUnarchivedToast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collecte remise dans ta liste'**
+  String get koryTUnarchivedToast;
+
+  /// No description provided for @koryTUndo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get koryTUndo;
+
+  /// No description provided for @koryTSectionAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes collectes'**
+  String get koryTSectionAll;
+
+  /// No description provided for @koryTSectionCotisations.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes cotisations'**
+  String get koryTSectionCotisations;
+
+  /// No description provided for @koryTSectionTontines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes tontines'**
+  String get koryTSectionTontines;
+
+  /// No description provided for @koryTSectionOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes collectes en cours'**
+  String get koryTSectionOpen;
+
+  /// No description provided for @koryTSectionClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes collectes clôturées'**
+  String get koryTSectionClosed;
+
+  /// No description provided for @koryTDescCagnotte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crée une cagnotte rapide pour organiser des évènements entre proches. C\'est sans frais. Pokou ne touche pas à l\'argent. Chacun verse librement et directement sa participation sur le wallet du collecteur.'**
+  String get koryTDescCagnotte;
+
+  /// No description provided for @koryTDescCotisation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crée une collecte de fonds, avec un montant fixe, une échéance et une périodicité. C\'est sans frais. Pokou ne touche pas à l\'argent. À chaque échéance chacun verse directement sa participation sur le wallet du collecteur.'**
+  String get koryTDescCotisation;
+
+  /// No description provided for @koryTDescTontine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crée une vraie tontine avec des montants fixes, des tours de collecte, et une périodicité. Des frais Kory Plus s\'appliquent pour chaque participant.'**
+  String get koryTDescTontine;
+
+  /// No description provided for @koryTPickContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir dans mes contacts'**
+  String get koryTPickContacts;
+
+  /// No description provided for @koryTPickGroupMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres du groupe'**
+  String get koryTPickGroupMembers;
+
+  /// No description provided for @koryTPickSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un nom ou un numéro'**
+  String get koryTPickSearch;
+
+  /// No description provided for @koryTPickOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur Pokou'**
+  String get koryTPickOnPokou;
+
+  /// No description provided for @koryTPickBySms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore sur Pokou · invitation par SMS'**
+  String get koryTPickBySms;
+
+  /// No description provided for @koryTPickAlready.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà dans la collecte'**
+  String get koryTPickAlready;
+
+  /// No description provided for @koryTPickConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter · {count}'**
+  String koryTPickConfirm(String count);
+
+  /// No description provided for @koryTPickNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact ne correspond à ta recherche.'**
+  String get koryTPickNoMatch;
+
+  /// No description provided for @koryTPickEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne à ajouter pour l’instant.'**
+  String get koryTPickEmpty;
+
+  /// No description provided for @koryTAddGroupMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter des membres du groupe'**
+  String get koryTAddGroupMembers;
+
+  /// No description provided for @koryTAddGroupMembersHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invités comme les autres : la tontine démarre quand chacun a accepté.'**
+  String get koryTAddGroupMembersHint;
+
+  /// No description provided for @koryTActSomeone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un membre'**
+  String get koryTActSomeone;
+
+  /// No description provided for @koryTActCreatedCagnotte.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a ouvert la cagnotte « {title} »'**
+  String koryTActCreatedCagnotte(String name, String title);
+
+  /// No description provided for @koryTActCreatedCotisation.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a ouvert la cotisation « {title} »'**
+  String koryTActCreatedCotisation(String name, String title);
+
+  /// No description provided for @koryTActCreatedTontine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a ouvert la tontine « {title} »'**
+  String koryTActCreatedTontine(String name, String title);
+
+  /// No description provided for @koryTActContribution.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contribution de {name} confirmée'**
+  String koryTActContribution(String name);
+
+  /// No description provided for @koryTActContributionAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contribution de {name} confirmée : {amount}'**
+  String koryTActContributionAmount(String name, String amount);
+
+  /// No description provided for @koryTActTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total confirmé : {total}'**
+  String koryTActTotal(String total);
+
+  /// No description provided for @koryTActStarted.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine démarre. Tour 1 : {name} reçoit.'**
+  String koryTActStarted(String name);
+
+  /// No description provided for @koryTActRound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tour {round} sur {rounds} : {name} reçoit.'**
+  String koryTActRound(String round, String rounds, String name);
+
+  /// No description provided for @koryTActClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » est clôturée'**
+  String koryTActClosed(String title);
+
+  /// No description provided for @koryTActDissolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'La tontine « {title} » est dissoute'**
+  String koryTActDissolved(String title);
+
+  /// No description provided for @koryTActReminder.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a envoyé un rappel pour « {title} »'**
+  String koryTActReminder(String name, String title);
+
+  /// No description provided for @koryTActOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir dans Kory'**
+  String get koryTActOpen;
+
+  /// No description provided for @koryTActNoMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wallet à wallet · Pokou ne touche pas l’argent'**
+  String get koryTActNoMoney;
+
+  /// No description provided for @msgFixViewOncePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo'**
+  String get msgFixViewOncePhoto;
+
+  /// No description provided for @msgFixViewOnceVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo'**
+  String get msgFixViewOnceVideo;
+
+  /// No description provided for @msgFixViewOnceOpened.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvert'**
+  String get msgFixViewOnceOpened;
+
+  /// No description provided for @msgFixViewOnceUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette vue unique n\'a pas pu être ouverte. Réessaie avec une connexion.'**
+  String get msgFixViewOnceUnavailable;
+
+  /// No description provided for @msgFixViewOnceLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vue unique'**
+  String get msgFixViewOnceLabel;
+
+  /// No description provided for @msgFixMediaRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toucher pour réessayer'**
+  String get msgFixMediaRetry;
+
+  /// No description provided for @msgFixPollEditableFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Modifiable encore 1 min} other{Modifiable encore {count} min}}'**
+  String msgFixPollEditableFor(int count);
+
+  /// No description provided for @msgFixPollFinal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse définitive'**
+  String get msgFixPollFinal;
+
+  /// No description provided for @msgFixPollSingleChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une seule réponse'**
+  String get msgFixPollSingleChoice;
+
+  /// No description provided for @msgFixPollMultipleChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plusieurs réponses'**
+  String get msgFixPollMultipleChoice;
+
+  /// No description provided for @msgFixPollChoiceRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les votants pourront changer d\'avis pendant 15 minutes.'**
+  String get msgFixPollChoiceRule;
+
+  /// No description provided for @msgFixPollVoteRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton vote n\'a pas pu être enregistré.'**
+  String get msgFixPollVoteRefused;
+
+  /// No description provided for @hnxEmergencyGendarmerie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gendarmerie'**
+  String get hnxEmergencyGendarmerie;
+
+  /// No description provided for @hnxEmergencyUnique.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro unique'**
+  String get hnxEmergencyUnique;
+
+  /// No description provided for @hnxEmergencyOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres services d’urgence'**
+  String get hnxEmergencyOthers;
+
+  /// No description provided for @hnxEmergencyAlternatives.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aussi : {numbers}'**
+  String hnxEmergencyAlternatives(String numbers);
+
+  /// No description provided for @hnxEmergencyLowReliability.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fiabilité faible : ces numéros ne sont pas tous confirmés. Garde aussi les numéros locaux.'**
+  String get hnxEmergencyLowReliability;
+
+  /// No description provided for @hnxEmergencyNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun numéro d’urgence connu pour ton pays.'**
+  String get hnxEmergencyNone;
+
+  /// No description provided for @hnxEmergencyCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler le {number}'**
+  String hnxEmergencyCall(String number);
+
+  /// No description provided for @hnxCourierRestart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommencer'**
+  String get hnxCourierRestart;
+
+  /// No description provided for @hnxCourierRestartTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommencer la candidature ?'**
+  String get hnxCourierRestartTitle;
+
+  /// No description provided for @hnxCourierRestartBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les étapes saisies seront effacées, ainsi que la candidature déjà envoyée si elle attend encore sa validation. Tu repartiras de l’étape 1.'**
+  String get hnxCourierRestartBody;
+
+  /// No description provided for @hnxCourierRestartConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout effacer'**
+  String get hnxCourierRestartConfirm;
+
+  /// No description provided for @hnxCourierRestarted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Candidature effacée : tu repars de l’étape 1.'**
+  String get hnxCourierRestarted;
+
+  /// No description provided for @hnxTestPaymentDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode test : paiement simulé, aucun débit. C’est activé.'**
+  String get hnxTestPaymentDone;
+
+  /// No description provided for @hnxTestPaymentNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays de test : le paiement est simulé, sans Mobile Money ni débit.'**
+  String get hnxTestPaymentNote;
+
+  /// No description provided for @hnxPriceUnset.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tarif non encore fixé pour ce pays'**
+  String get hnxPriceUnset;
+
+  /// No description provided for @homeXSearchContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts'**
+  String get homeXSearchContacts;
+
+  /// No description provided for @homeXSearchGroups.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes'**
+  String get homeXSearchGroups;
+
+  /// No description provided for @homeXSearchKory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cagnottes Kory'**
+  String get homeXSearchKory;
+
+  /// No description provided for @homeXSearchPharmacies.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacies Honam'**
+  String get homeXSearchPharmacies;
+
+  /// No description provided for @homeXSearchAds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonces Assimé'**
+  String get homeXSearchAds;
+
+  /// No description provided for @homeXOnDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'De garde'**
+  String get homeXOnDuty;
+
+  /// No description provided for @homeXDiscoverTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découvrir Pokou'**
+  String get homeXDiscoverTitle;
+
+  /// No description provided for @homeXDiscoverSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'La vidéo de présentation'**
+  String get homeXDiscoverSubtitle;
+
+  /// No description provided for @homeXCertUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokou certifié n’est pas encore disponible dans ton pays.'**
+  String get homeXCertUnavailable;
+
+  /// No description provided for @assXInPersonTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente en main propre'**
+  String get assXInPersonTitle;
+
+  /// No description provided for @assXInPersonInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur Assimé, l’acheteur et le vendeur se rencontrent : l’article se remet en main propre. Devant l’acheteur, le vendeur touche « Commande validée et livrée » ; l’acheteur reçoit un code et le lui donne pour clôturer la vente.'**
+  String get assXInPersonInfo;
+
+  /// No description provided for @assXDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande validée et livrée'**
+  String get assXDelivered;
+
+  /// No description provided for @assXCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code donné par l’acheteur'**
+  String get assXCodeLabel;
+
+  /// No description provided for @assXCloseSale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer la vente'**
+  String get assXCloseSale;
+
+  /// No description provided for @assXAskCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande à {buyer} le code qu’il vient de recevoir dans Pokou. Il est valable {minutes} minutes.'**
+  String assXAskCode(String buyer, String minutes);
+
+  /// No description provided for @assXWrongCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Code incorrect.} =1{Code incorrect : encore 1 essai.} other{Code incorrect : encore {count} essais.}}'**
+  String assXWrongCode(int count);
+
+  /// No description provided for @assXNewCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Générer un nouveau code'**
+  String get assXNewCode;
+
+  /// No description provided for @assXCancelHandover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la remise'**
+  String get assXCancelHandover;
+
+  /// No description provided for @assXSaleClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente clôturée. {buyer} est invité à te noter.'**
+  String assXSaleClosed(String buyer);
+
+  /// No description provided for @assXOutsideNoCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acheteur hors de Pokou : l’annonce est simplement marquée vendue, sans code.'**
+  String get assXOutsideNoCode;
+
+  /// No description provided for @assXCodeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton code de remise'**
+  String get assXCodeTitle;
+
+  /// No description provided for @assXCodeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donne ce code à {seller} quand tu as l’article en main. Pas avant.'**
+  String assXCodeBody(String seller);
+
+  /// No description provided for @assXCodeUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valable jusqu’à {time}'**
+  String assXCodeUntil(String time);
+
+  /// No description provided for @assXCodeExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce code n’est plus valable : demande au vendeur d’en générer un nouveau.'**
+  String get assXCodeExpired;
+
+  /// No description provided for @assXCodeDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente clôturée. Comment s’est passée la transaction ?'**
+  String get assXCodeDone;
+
+  /// No description provided for @assXNoHandover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune remise en cours pour cet article.'**
+  String get assXNoHandover;
+
+  /// No description provided for @assXShowCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mon code'**
+  String get assXShowCode;
+
+  /// No description provided for @assXCodeReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seller} a validé la remise : ton code est prêt.'**
+  String assXCodeReady(String seller);
+
+  /// No description provided for @chatXAttachLocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position'**
+  String get chatXAttachLocation;
+
+  /// No description provided for @chatXAttachContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contact'**
+  String get chatXAttachContact;
+
+  /// No description provided for @chatXChangePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la photo'**
+  String get chatXChangePhoto;
+
+  /// No description provided for @chatXDeleteDiscussion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la discussion'**
+  String get chatXDeleteDiscussion;
+
+  /// No description provided for @chatXDeleteDiscussionAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get chatXDeleteDiscussionAction;
+
+  /// No description provided for @chatXDeleteDiscussionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la discussion avec {name} ?'**
+  String chatXDeleteDiscussionTitle(String name);
+
+  /// No description provided for @chatXDeleteDiscussionBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'La discussion et ses messages disparaissent de ton téléphone. L\'autre personne garde les siens.'**
+  String get chatXDeleteDiscussionBody;
+
+  /// No description provided for @chatXDeleteDiscussionDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Discussion supprimée'**
+  String get chatXDeleteDiscussionDone;
+
+  /// No description provided for @chatXDeleteDiscussionOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion : la discussion n\'a pas été supprimée.'**
+  String get chatXDeleteDiscussionOffline;
+
+  /// No description provided for @chatXDeleteDiscussionFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de supprimer la discussion.'**
+  String get chatXDeleteDiscussionFailed;
+
+  /// No description provided for @chatXLearnMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get chatXLearnMore;
+
+  /// No description provided for @chatXLocationCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma position actuelle'**
+  String get chatXLocationCurrent;
+
+  /// No description provided for @chatXLocationNearYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de toi'**
+  String get chatXLocationNearYou;
+
+  /// No description provided for @chatXLocationEncrypted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ta position part chiffrée de bout en bout : seuls les destinataires la voient.'**
+  String get chatXLocationEncrypted;
+
+  /// No description provided for @chatXLocationSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer ma position'**
+  String get chatXLocationSend;
+
+  /// No description provided for @chatXLocationFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'obtenir ta position pour le moment. Réessaie.'**
+  String get chatXLocationFailed;
+
+  /// No description provided for @chatXMediaEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien d\'échangé ici pour l\'instant.'**
+  String get chatXMediaEmpty;
+
+  /// No description provided for @chatXMediaTabMedia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médias'**
+  String get chatXMediaTabMedia;
+
+  /// No description provided for @chatXMediaTabDocs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Documents'**
+  String get chatXMediaTabDocs;
+
+  /// No description provided for @chatXMediaTabLinks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liens'**
+  String get chatXMediaTabLinks;
+
+  /// No description provided for @chatXMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus'**
+  String get chatXMore;
+
+  /// No description provided for @chatXOnPokou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur Pokou'**
+  String get chatXOnPokou;
+
+  /// No description provided for @chatXPhoneHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro masqué'**
+  String get chatXPhoneHidden;
+
+  /// No description provided for @chatXPrivacyPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon numéro de téléphone'**
+  String get chatXPrivacyPhone;
+
+  /// No description provided for @chatXPrivacyPhoneSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais visible dans les groupes'**
+  String get chatXPrivacyPhoneSub;
+
+  /// No description provided for @chatXPrivacyPhoneBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui peut voir ton numéro sur ta fiche. Les membres d\'un groupe ne le voient jamais : ils te joignent par le groupe.'**
+  String get chatXPrivacyPhoneBody;
+
+  /// No description provided for @chatXPrivacyPhoneContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible par mes contacts'**
+  String get chatXPrivacyPhoneContacts;
+
+  /// No description provided for @chatXPrivacyPhoneHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masqué'**
+  String get chatXPrivacyPhoneHidden;
+
+  /// No description provided for @chatXPrivacyPhoneHiddenSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauf pour les contacts que tu autorises'**
+  String get chatXPrivacyPhoneHiddenSub;
+
+  /// No description provided for @chatXPrivacyPhoneAllowed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts autorisés'**
+  String get chatXPrivacyPhoneAllowed;
+
+  /// No description provided for @chatXSeeMedia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les médias'**
+  String get chatXSeeMedia;
+
+  /// No description provided for @chatXShareAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get chatXShareAction;
+
+  /// No description provided for @chatXShareContactTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager ce contact ?'**
+  String get chatXShareContactTitle;
+
+  /// No description provided for @chatXShareContactBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu t\'apprêtes à partager le numéro d\'une autre personne. Assure-toi qu\'elle est d\'accord avant de l\'envoyer. Tu es responsable des informations que tu partages sur Pokou.'**
+  String get chatXShareContactBody;
+
+  /// No description provided for @chatXShareContactPick.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager un contact'**
+  String get chatXShareContactPick;
+
+  /// No description provided for @chatXShareContactSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un nom ou un numéro'**
+  String get chatXShareContactSearch;
+
+  /// No description provided for @chatXShareContactEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact'**
+  String get chatXShareContactEmpty;
+
+  /// No description provided for @chatXShareFromPhoneBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout le répertoire du téléphone'**
+  String get chatXShareFromPhoneBook;
+
+  /// No description provided for @chatXShareFromPhoneBookRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès au répertoire refusé : autorise-le dans les réglages du téléphone.'**
+  String get chatXShareFromPhoneBookRefused;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

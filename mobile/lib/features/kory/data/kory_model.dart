@@ -62,7 +62,16 @@ class KoryPot {
     this.organizerId,
     this.participants = const [],
     this.beneficiaryPays = true,
+    this.archived = false,
+    this.archivable = false,
   });
+
+  /// Rangée dans MES archives (un réglage à moi, pas un état de la
+  /// collecte) : elle quitte l'onglet et se retrouve dans « Archives ».
+  final bool archived;
+
+  /// Terminée ou expirée : elle peut se ranger dans les archives.
+  final bool archivable;
 
   /// Tontine : le bénéficiaire du tour mise aussi (levée = mise × membres).
   /// `false` pour une tontine créée avant cette règle, qui la garde.
@@ -255,6 +264,8 @@ class KoryPot {
         : null,
     organizerId: json['organizer_id'] as int?,
     beneficiaryPays: json['beneficiary_pays'] as bool? ?? true,
+    archived: json['archived'] as bool? ?? false,
+    archivable: json['archivable'] as bool? ?? false,
     participants: [
       for (final p in (json['participants'] as List? ?? const []))
         KoryParticipantInfo.fromJson(p as Map<String, dynamic>),

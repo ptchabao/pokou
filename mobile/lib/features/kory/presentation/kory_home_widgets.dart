@@ -156,6 +156,17 @@ enum KoryHomeFilter {
     KoryHomeFilter.open => l.koryHomeFilterOpen,
     KoryHomeFilter.closed => l.koryHomeFilterClosed,
   };
+
+  /// Le titre de la liste sous ce filtre : « Mes tontines » sous
+  /// « Tontines », « Mes collectes » sous « Toutes ».
+  String sectionTitle(L l) => switch (this) {
+    KoryHomeFilter.all => l.koryTSectionAll,
+    KoryHomeFilter.cagnottes => l.koryMyPots,
+    KoryHomeFilter.cotisations => l.koryTSectionCotisations,
+    KoryHomeFilter.tontines => l.koryTSectionTontines,
+    KoryHomeFilter.open => l.koryTSectionOpen,
+    KoryHomeFilter.closed => l.koryTSectionClosed,
+  };
 }
 
 // ── Le bloc du mois ──────────────────────────────────────────────────────
@@ -497,16 +508,19 @@ class _HeroAction extends StatelessWidget {
 
 // ── Recherche et filtres ─────────────────────────────────────────────────
 
-/// La recherche en pilule, la loupe à droite. Elle filtre la liste sur
-/// place, par nom : rien ne part au serveur.
+/// La recherche en pilule, la loupe à droite (écran de recherche de Kory,
+/// ouvert par la loupe de l'en-tête). Elle filtre sur place, par nom :
+/// rien ne part au serveur.
 class KoryHomeSearchField extends StatelessWidget {
   const KoryHomeSearchField({
     super.key,
     required this.controller,
     required this.onChanged,
     required this.onClear,
+    this.autofocus = false,
   });
 
+  final bool autofocus;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
@@ -527,12 +541,13 @@ class KoryHomeSearchField extends StatelessWidget {
               child: TextField(
                 contextMenuBuilder: pokouContextMenuBuilder,
                 controller: controller,
+                autofocus: autofocus,
                 onChanged: onChanged,
                 textInputAction: TextInputAction.search,
                 cursorColor: AppColors.accentPrimary,
                 style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: l.koryHomeSearchHint,
+                  hintText: l.koryTSearchHint,
                   hintStyle: TextStyle(
                     fontSize: 15,
                     color: AppColors.textMuted,
@@ -1067,7 +1082,7 @@ class KoryHomeMessage extends StatelessWidget {
   );
 }
 
-/// L'attente, à la forme de ce qui arrive : la recherche, des pilules, deux
+/// L'attente, à la forme de ce qui arrive : des pilules, deux
 /// cartes « À la une », puis des cartes de cagnotte — une vignette, deux
 /// lignes, une barre, un bouton. Une seule pulsation pour le tout.
 class KoryHomeSkeleton extends StatelessWidget {
@@ -1078,10 +1093,7 @@ class KoryHomeSkeleton extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 14, 16, 12),
-          child: SkeletonBox(width: double.infinity, height: 52, radius: 26),
-        ),
+        const SizedBox(height: 16),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const NeverScrollableScrollPhysics(),

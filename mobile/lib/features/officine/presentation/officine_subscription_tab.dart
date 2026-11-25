@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../honam/presentation/honam_ui.dart';
@@ -30,19 +31,21 @@ class _OfficineSubscriptionTabState
   int _credit = 5000;
   bool _busy = false;
 
-  Future<void> _pay(Future<String?> Function() open) async {
+  Future<void> _pay(Future<Map<String, dynamic>> Function() open) async {
     if (_busy) return;
     final l = L.of(context);
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _busy = true);
     try {
-      final url = await open();
+      final payment = await open();
       if (!mounted) return;
-      await openPaymentGateway(
+      final simulated = await openPaymentResponse(
         context,
-        url,
+        payment,
         pendingMessage: l.offiPaymentPending,
       );
+      // Pays de test : l'abonnement ou le crédit est déjà là.
+      if (simulated) ref.invalidate(officineMeProvider);
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(officineError(l, e))));
     } finally {
@@ -55,10 +58,14 @@ class _OfficineSubscriptionTabState
     final l = L.of(context);
     final me = widget.me;
     final repository = ref.read(officineRepositoryProvider);
+    final testCountry = ref.watch(currentCountryConfigProvider).testOnly;
     final wetri = me.pricesHt['WETRI'] ?? 0;
     final epe = me.pricesHt['EPE'] ?? 0;
     final vat = (me.vatRate * 100).round();
     final freeMonths = wetri > 0 && epe > 0 ? (12 * wetri - epe) ~/ wetri : 0;
+    // Un tarif absent de la configuration du pays : « non fixé », jamais
+    // « 0 FCFA », et pas de souscription possible.
+    final unset = TextStyle(fontSize: 13, color: AppColors.textSecondary);
     final activeWetri = me.subscribed && me.plan == 'WETRI';
     final activeEpe = me.subscribed && me.plan == 'EPE';
 
@@ -96,14 +103,23 @@ class _OfficineSubscriptionTabState
                             ),
                         ],
                       ),
-                      Text(l.offiPerMonthHt(fcfa(wetri))),
-                      Text(
-                        l.offiTtcWithVat(fcfa(me.ttc(wetri)), vat),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+                      if (wetri > 0) ...[
+                        Text(
+                          l.offiPerMonthHt(fcfa(wetri)),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
+                        Text(
+                          l.offiTtcWithVat(fcfa(me.ttc(wetri)), vat),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ] else
+                        Text(l.hnxPriceUnset, style: unset),
                       if (activeWetri && me.subscriptionUntil != null)
                         Text(
                           l.offiNextPayment(
@@ -118,13 +134,16 @@ class _OfficineSubscriptionTabState
                       HonamPrimaryButton(
                         label: activeWetri ? l.offiRenewNow : l.offiChoose,
                         busy: _busy,
-                        onPressed: () =>
-                            _pay(() => repository.subscribe('WETRI')),
+                        onPressed: wetri > 0
+                            ? () => _pay(() => repository.subscribe('WETRI'))
+                            : null,
                       ),
                       const SizedBox(height: 6),
                       Center(
                         child: Text(
-                          l.offiPaidByCashPay,
+                          testCountry
+                              ? l.hnxTestPaymentNote
+                              : l.offiPaidByCashPay,
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColors.textMuted,
@@ -172,11 +191,13 @@ class _OfficineSubscriptionTabState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        l.offiEpePitch(
-                          fcfa(epe),
-                          fcfa(12 * wetri),
-                          fcfa(me.ttc(epe)),
-                        ),
+                        epe > 0
+                            ? l.offiEpePitch(
+                                fcfa(epe),
+                                fcfa(12 * wetri),
+                                fcfa(me.ttc(epe)),
+                              )
+                            : l.hnxPriceUnset,
                         style: const TextStyle(
                           color: Color(0xFFE6D9BD),
                           fontSize: 13,
@@ -196,7 +217,7 @@ class _OfficineSubscriptionTabState
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: _busy
+                          onPressed: _busy || epe <= 0
                               ? null
                               : () => _pay(() => repository.subscribe('EPE')),
                           style: OutlinedButton.styleFrom(

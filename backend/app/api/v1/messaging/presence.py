@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.utils.identity import nom_sans_numero
 from app.models import Contact, GroupMember, User
 from app.api.v1.messaging.ws import manager
 from app.services.privacy import privacy_service
@@ -91,9 +92,8 @@ def _require_membership(db: Session, group_id: int, user_id: int) -> None:
 # ─── Lecture de la présence ───────────────────────────────────────────────────
 
 def _display_name(user: Optional[User]) -> str:
-    if not user:
-        return "Inconnu"
-    return user.full_name or user.phone or f"#{user.id}"
+    # Jamais le numéro en clair : voir identity.nom_sans_numero.
+    return nom_sans_numero(user)
 
 
 def _load_user(db: Session, user_id: int) -> User:

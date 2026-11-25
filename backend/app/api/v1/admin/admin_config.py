@@ -17,7 +17,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.v1.admin.admin import _audit, _revoke_sessions, _user_json
-from app.core.countries import _DEFAULTS, _FALLBACK, MODULES, country_config
+from app.core.countries import _DEFAULTS, _FALLBACK, MODULES, PRODUCTION_COUNTRIES, country_config
 from app.core.database import get_db
 from app.core.permissions import permissions_of, require_permission
 from app.models import DeviceToken, SystemSetting, Token, User, UserRole
@@ -42,6 +42,9 @@ class EmergencyNumbers(BaseModel):
     police: EmergencyNumber = None
     pompiers: EmergencyNumber = None
     samu: EmergencyNumber = None
+    gendarmerie: EmergencyNumber = None
+    #: Le numéro unique (112, 999…), quand le pays en a un.
+    unique: EmergencyNumber = None
 
 
 class CountryBody(BaseModel):
@@ -58,6 +61,25 @@ class CountryBody(BaseModel):
     honam_cities: Annotated[list[Annotated[str, Field(min_length=2, max_length=60)]], Field(max_length=50)]
     emergency_numbers: EmergencyNumbers
     modules: Annotated[list[Literal[MODULES]], Field(max_length=len(MODULES))]  # type: ignore[valid-type]
+    #: Facultatifs : absents, la valeur par défaut du pays s'applique.
+    #: « Pays de test » : marque un pays ouvert seulement pour les testeurs.
+    test_only: Optional[bool] = None
+    #: Paiements simulés (jamais au Togo ni en Côte d'Ivoire : refusé).
+    test_payments: Optional[bool] = None
+    #: Officines « Démo » du seed visibles dans ce pays.
+    honam_demo_pharmacies: Optional[bool] = None
+    #: « Découvrir Pokou » : la vidéo de présentation (YouTube), en https.
+    discover_video_url: Optional[Annotated[str, Field(max_length=300)]] = None
+
+    @field_validator("discover_video_url")
+    @classmethod
+    def _video(cls, value: Optional[str]) -> Optional[str]:
+        value = (value or "").strip()
+        if not value:
+            return None
+        if not re.fullmatch(r"https://\S+", value):
+            raise ValueError("L'adresse de la vidéo doit commencer par https://")
+        return value
 
     @field_validator("honam_cities")
     @classmethod
@@ -85,7 +107,7 @@ def _effective(db: Session, code: str) -> dict[str, Any]:
 
 
 def _country_json(db: Session, code: str, row: Optional[SystemSetting]) -> dict[str, Any]:
-    defaults = dict(_DEFAULTS.get(code, _FALLBACK))
+    defaults = {**_FALLBACK, **_DEFAULTS.get(code, {})}
     return {
         "code": code,
         "builtin": code in _DEFAULTS,
@@ -117,6 +139,7 @@ def list_countries(
             "currency": config.get("currency"),
             "vat_rate": config.get("vat_rate"),
             "modules": config.get("modules", []),
+            "test_only": bool(config.get("test_only")),
         })
     return {"items": items, "modules": list(MODULES)}
 
@@ -142,6 +165,12 @@ def put_country(
     before = _effective(db, code)
     data = body.model_dump()
     data["emergency_numbers"] = {k: v for k, v in data["emergency_numbers"].items() if v}
+    # Facultatifs non renseignés : la valeur par défaut du pays reste.
+    for key in ("test_only", "test_payments", "honam_demo_pharmacies", "discover_video_url"):
+        if data.get(key) is None:
+            data.pop(key, None)
+    if data.get("test_payments") and code in PRODUCTION_COUNTRIES:
+        raise HTTPException(status_code=422, detail="Paiements simulés interdits dans un pays de lancement")
     enabled = set(data["modules"]) | _ALWAYS_OPEN
     data["modules"] = [m for m in MODULES if m in enabled]
     if data["pharmacy_monthly_price"] is not None and data["pharmacy_yearly_price"] is not None \

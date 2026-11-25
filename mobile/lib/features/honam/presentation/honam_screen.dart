@@ -236,10 +236,10 @@ class _CurrentOrderCard extends StatelessWidget {
         ? pharmacy
         : l.honamPCurrentLine(pharmacy, formatFcfa(order.total!));
     final action = switch (order.status) {
-      'QUOTED' || 'ACCEPTED' when !order.patientPaidDeclared =>
-        l.honamPSeeQuoteAndPay,
-      'READY' || 'IN_DELIVERY' when order.courierName != null =>
-        l.honamPFollowOrder,
+      'QUOTED' ||
+      'ACCEPTED' when !order.patientPaidDeclared => l.honamPSeeQuoteAndPay,
+      'READY' ||
+      'IN_DELIVERY' when order.courierName != null => l.honamPFollowOrder,
       _ => l.honamUiSeeOrder,
     };
     return Material(
@@ -466,7 +466,7 @@ class _Emergency extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
-    final numbers = ref.watch(honamEmergencyProvider).valueOrNull ?? const {};
+    final info = ref.watch(honamEmergencyProvider).valueOrNull;
     final danger = AppColors.securityCritical;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
@@ -525,34 +525,63 @@ class _Emergency extends ConsumerWidget {
                 ),
               ],
             ),
-            if (numbers.isNotEmpty) ...[
+            if (info != null && info.isEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                l.hnxEmergencyNone,
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+            ],
+            if (info != null && info.services.isNotEmpty) ...[
               const SizedBox(height: 14),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  for (final entry in numbers.entries)
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.feedbackDanger,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(64, 44),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        shape: const StadiumBorder(),
-                        elevation: 0,
-                      ),
-                      onPressed: () =>
-                          launchUrl(Uri.parse('tel:${entry.value}')),
-                      icon: const Icon(Icons.call, size: 18),
-                      label: Text(
-                        '${_label(l, entry.key)} ${entry.value}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
+                  for (final service in info.services)
+                    _EmergencyButton(
+                      label: _label(l, service.key ?? ''),
+                      number: service.number,
+                    ),
+                ],
+              ),
+              // Les alternatives (« 170 (ou 110, 111) »), touchables aussi.
+              for (final service in info.services)
+                if (service.alternatives.isNotEmpty || service.note != null)
+                  _EmergencyAlternatives(
+                    label: _label(l, service.key ?? ''),
+                    service: service,
+                  ),
+            ],
+            if (info != null && info.others.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                l.hnxEmergencyOthers,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              for (final other in info.others) _EmergencyOther(service: other),
+            ],
+            if (info != null && info.lowReliability) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 18, color: danger),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l.hnxEmergencyLowReliability,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        height: 1.35,
+                        color: AppColors.textSecondary,
                       ),
                     ),
+                  ),
                 ],
               ),
             ],
@@ -566,8 +595,141 @@ class _Emergency extends ConsumerWidget {
     'samu' => l.honamUiSamu,
     'pompiers' => l.honamUiFire,
     'police' => l.honamUiPolice,
+    'gendarmerie' => l.hnxEmergencyGendarmerie,
+    'unique' => l.hnxEmergencyUnique,
     _ => key,
   };
+}
+
+void _call(String number) => launchUrl(Uri.parse('tel:$number'));
+
+/// Un service d'urgence : son nom et son numéro, touchable pour appeler.
+class _EmergencyButton extends StatelessWidget {
+  const _EmergencyButton({required this.label, required this.number});
+
+  final String label;
+  final String number;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: L.of(context).hnxEmergencyCall(number),
+    child: FilledButton.icon(
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.feedbackDanger,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(64, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        shape: const StadiumBorder(),
+        elevation: 0,
+      ),
+      onPressed: () => _call(number),
+      icon: const Icon(Icons.call, size: 18),
+      label: Text(
+        '$label $number',
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFeatures: [FontFeature.tabularFigures()],
+        ),
+      ),
+    ),
+  );
+}
+
+/// « Police · aussi : 110, 111 » — chaque alternative s'appelle d'un geste.
+class _EmergencyAlternatives extends StatelessWidget {
+  const _EmergencyAlternatives({required this.label, required this.service});
+
+  final String label;
+  final EmergencyNumber service;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final soft = TextStyle(fontSize: 12.5, color: AppColors.textSecondary);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        children: [
+          Text(
+            [label, if (service.note != null) service.note!].join(' · '),
+            style: soft.copyWith(fontWeight: FontWeight.w600),
+          ),
+          if (service.alternatives.isNotEmpty)
+            Text(l.hnxEmergencyAlternatives(''), style: soft),
+          for (final number in service.alternatives)
+            InkWell(
+              onTap: () => _call(number),
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                child: Text(
+                  number,
+                  semanticsLabel: l.hnxEmergencyCall(number),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.feedbackDanger,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppColors.feedbackDanger,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Un autre service (« Protection civile (ANPC) : 170 »), tel que la liste
+/// de référence le nomme.
+class _EmergencyOther extends StatelessWidget {
+  const _EmergencyOther({required this.service});
+
+  final EmergencyNumber service;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final numbers = [service.number, ...service.alternatives];
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              [
+                service.label ?? '',
+                if (service.note != null) service.note!,
+              ].where((part) => part.isNotEmpty).join(' · '),
+              style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+            ),
+          ),
+          for (final number in numbers)
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.feedbackDanger,
+                minimumSize: const Size(48, 40),
+                visualDensity: VisualDensity.compact,
+              ),
+              onPressed: () => _call(number),
+              icon: const Icon(Icons.call, size: 16),
+              label: Text(
+                number,
+                semanticsLabel: l.hnxEmergencyCall(number),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Les officines autour de la personne — sans jamais demander la position :

@@ -1,52 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/app_colors.dart';
+import '../wallpaper/wallpaper_catalog.dart';
+import '../wallpaper/wallpaper_settings.dart';
+import '../wallpaper/wallpaper_view.dart';
 
-/// Papier peint des conversations — le motif griffonné derrière les bulles.
+/// Le fond d'écran derrière les bulles d'une conversation.
 ///
-/// Un fond de conversation n'est pas un vide : c'est lui qui rend une
-/// discussion chargée chaleureuse plutôt qu'administrative, et c'est contre
-/// lui que les bulles se détachent. D'où un motif, et non un aplat.
+/// Il vient du catalogue du kit « pokou-fonds-ecran » (voir
+/// core/wallpaper/) : le fond propre à cette discussion ([scope] :
+/// `contact:<id>` ou `group:<id>`) s'il y en a un, sinon le fond par défaut
+/// choisi dans les Réglages, sinon Sable.
 ///
-/// Trois précautions, chacune pour une raison précise :
+/// Deux règles du kit tiennent ici :
 ///
-/// - **Fondu multiplicatif** (`BlendMode.multiply`). L'image source a un fond
-///   BLANC ; posée telle quelle sur le crème, elle l'effacerait. Multipliée
-///   par la couleur de fond, ses zones blanches prennent exactement la teinte
-///   du canevas et seules les lignes du motif subsistent. Un simple réglage
-///   d'opacité aurait délavé le crème au lieu de le conserver.
-/// - **Opacité basse.** Le motif doit se deviner, pas se lire : il passe
-///   derrière du texte, et tout ce qu'il gagne en présence, la conversation
-///   le perd en lisibilité.
-/// - **Échelle 3.** La tuile fait 941 x 1672 pixels ; à cette échelle ses
-///   motifs restent discrets et se répètent sur un écran de téléphone.
-///   Rendue à l'échelle 1, une seule tuile couvrirait tout l'écran et le
-///   motif se lirait comme un dessin.
-class ChatWallpaper extends StatelessWidget {
-  const ChatWallpaper({super.key, required this.child});
+/// - **Fond fixe** : il est peint SOUS le contenu, et non dans la liste ; il
+///   ne défile pas avec les messages.
+/// - **Clavier** : le fond garde la hauteur de l'ÉCRAN, pas celle du corps
+///   de page que le clavier raccourcit. Sans cela une scène « cover » se
+///   recadrerait — elle « sauterait » — à chaque ouverture du clavier.
+class ChatWallpaper extends ConsumerWidget {
+  const ChatWallpaper({super.key, this.scope, required this.child});
 
+  /// La discussion, ou `null` pour le fond par défaut (diffusions).
+  final String? scope;
   final Widget child;
 
-  /// Publique pour que les tests puissent viser exactement cette ressource
-  /// sans recopier le chemin.
-  static const assetPath = 'assets/chat_wallpaper.webp';
-
-  static const _tileScale = 3.0;
-  static const _patternOpacity = 0.5;
-
   @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.chatBackground,
-        image: DecorationImage(
-          image: ExactAssetImage(assetPath, scale: _tileScale),
-          repeat: ImageRepeat.repeat,
-          colorFilter: ColorFilter.mode(AppColors.chatBackground, BlendMode.multiply),
-          opacity: _patternOpacity,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(wallpaperCatalogProvider).valueOrNull;
+    final choice = ref.watch(
+      chatWallpaperProvider.select((s) => s.resolve(scope)),
+    );
+    final Widget background;
+    if (catalog == null) {
+      // Le manifeste se lit en quelques millisecondes au premier écran :
+      // en attendant, la couleur de conversation habituelle.
+      background = ColoredBox(color: AppColors.chatBackground);
+    } else {
+      final wallpaper = catalog.byId(choice?.id);
+      background = WallpaperView(
+        wallpaper: wallpaper,
+        intensity: choice?.intensity ?? wallpaper.intensityDefault,
+        dark: AppColors.isDark,
+        isDefault: wallpaper.id == catalog.defaultId,
+      );
+    }
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ClipRect(
+          child: OverflowBox(
+            alignment: Alignment.topCenter,
+            minHeight: screenHeight,
+            maxHeight: screenHeight,
+            child: background,
+          ),
         ),
-      ),
-      child: child,
+        child,
+      ],
     );
   }
 }

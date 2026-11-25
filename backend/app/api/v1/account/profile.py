@@ -244,6 +244,13 @@ async def get_user_profile(
         db, user.id, viewer_id, privacy_service.Aspect.INFOS_DE_PROFIL, cible=user
     ):
         profile["about"] = None
+    # « Mon numéro de téléphone » : masqué, ou réservé à mes contacts. Un
+    # membre d'un groupe commun ne le reçoit donc pas, sauf s'il est aussi un
+    # contact ou une exception autorisée.
+    phone_visible = privacy_service.peut_voir_numero(db, user.id, viewer_id, cible=user)
+    if not phone_visible:
+        profile["phone"] = None
+    profile["phone_hidden"] = not phone_visible
     conversation = or_(
         and_(DirectMessage.sender_id == viewer_id, DirectMessage.recipient_id == user_id),
         and_(DirectMessage.sender_id == user_id, DirectMessage.recipient_id == viewer_id),

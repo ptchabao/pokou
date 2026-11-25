@@ -6,6 +6,7 @@ import '../../../core/crypto/e2ee_service.dart';
 import '../../../core/crypto/media_cipher.dart';
 import '../../../core/storage/pokou_message_store.dart';
 import 'direct_message_model.dart';
+import 'sealed_rich_content.dart';
 
 /// Le dépôt est la FRONTIÈRE du chiffrement.
 ///
@@ -132,6 +133,18 @@ class MessagingRepository {
     DirectMessage message,
     String plaintext,
   ) {
+    // Position et fiche contact : la charge utile entière est dans le
+    // chiffré (voir sealed_rich_content.dart).
+    if (message.mediaAssetId == null &&
+        SealedRichContent.types.contains(message.messageType)) {
+      final rich = SealedRichContent.open(plaintext);
+      if (rich == null) return message;
+      return message.copyWith(
+        content: rich.content ?? '',
+        payload: rich.payload,
+        clearCiphertext: true,
+      );
+    }
     // Une pièce jointe chiffrée transporte sa CLÉ, pas un texte : la
     // légende, le nom et le type du fichier voyagent avec elle.
     final mediaKey = message.mediaAssetId != null
@@ -161,9 +174,31 @@ class MessagingRepository {
       ? jsonEncode(
           message.mediaKey!.withAssetId(message.mediaAssetId!).toJson(),
         )
+      : (SealedRichContent.types.contains(message.messageType) &&
+            message.payload != null)
+      ? SealedRichContent.seal(
+          content: message.content,
+          payload: message.payload!,
+        )
       : (message.content ?? '');
 
   Future<DirectMessage> _openOnce(DirectMessage message, int peerUserId) async {
+    // MON propre message ne s'ouvre pas ici : il a été chiffré avec la
+    // chaîne d'ENVOI, et seul le cache en a le clair. Tenter de l'ouvrir
+    // échouait toujours, après avoir sollicité la session pour rien. Le
+    // seul cas utile est celui où l'envoi est en train de ranger sa copie
+    // ouverte (historique rechargé pendant l'envoi d'une photo) : on
+    // l'attend, comme une ouverture faite ailleurs.
+    if (message.senderId != peerUserId) {
+      // Attendre n'a de sens que pour un message tout juste parti : un
+      // ancien message sans copie locale (nouvel appareil) ne se rouvrira
+      // pas, et attendre pour chacun bloquerait l'historique entier.
+      final recent =
+          DateTime.now().difference(message.createdAt) <
+          const Duration(minutes: 2);
+      if (!recent) return message;
+      return await _openedElsewhere(message) ?? message;
+    }
     try {
       final plaintext = await _e2ee!.open(
         peerUserId: peerUserId,
@@ -284,7 +319,7 @@ class MessagingRepository {
     final items = (response['items'] as List).cast<Map<String, dynamic>>();
     return (
       items: await _resolveEncrypted(
-        items.map(DirectMessage.fromJson).toList(),
+        parseHistoryItems(items),
         contactUserId,
       ),
       total: response['total'] as int? ?? items.length,
@@ -358,6 +393,63 @@ class MessagingRepository {
     return encrypted
         ? saved.copyWith(content: content, clearCiphertext: true)
         : saved;
+  }
+
+  /// Une position ou une fiche contact ([messageType] LOCATION ou CONTACT),
+  /// chiffrée de bout en bout : voir sealed_rich_content.dart.
+  ///
+  /// Correspondant sans trousseau : la route dédiée, en clair — exactement
+  /// comme un texte vers ce correspondant. Le refus de chiffrer, lui, lève
+  /// (voir [_sealOrRefuse]) : rien ne part.
+  Future<DirectMessage> sendRich({
+    required int recipientId,
+    required String messageType,
+    required Map<String, dynamic> payload,
+    String? recipientPhone,
+  }) async {
+    final caption = SealedRichContent.captionOf(messageType, payload);
+    final sealed = await _sealOrRefuse(
+      recipientId,
+      SealedRichContent.seal(content: caption, payload: payload),
+    );
+    if (sealed is SealEncrypted) {
+      final response = await _api.post(
+        '/messages',
+        body: {
+          'recipient_id': recipientId,
+          'recipient_phone': ?recipientPhone,
+          'message_type': messageType,
+          'encryption': sealed.encryption,
+          'ciphertext': sealed.ciphertext,
+          'envelope': sealed.envelope,
+        },
+      );
+      return DirectMessage.fromJson(response as Map<String, dynamic>).copyWith(
+        content: caption ?? '',
+        payload: payload,
+        clearCiphertext: true,
+      );
+    }
+    final response = messageType == 'LOCATION'
+        ? await _api.post(
+            '/polls/location',
+            body: {
+              'kind': 'contact',
+              'target_id': recipientId,
+              'latitude': payload['latitude'],
+              'longitude': payload['longitude'],
+              'label': ?payload['label'],
+            },
+          )
+        : await _api.post(
+            '/polls/contact-card',
+            body: {
+              'kind': 'contact',
+              'target_id': recipientId,
+              'contacts': payload['contacts'],
+            },
+          );
+    return DirectMessage.fromJson(response as Map<String, dynamic>);
   }
 
   /// [mediaKey] : le fichier a été chiffré avant le téléversement (voir
@@ -603,6 +695,25 @@ class MessagingRepository {
     );
     return PhoneLookupResult.fromJson(response as Map<String, dynamic>);
   }
+}
+
+/// Les messages d'une page d'historique, en écartant ceux qui ne se lisent
+/// pas (forme inattendue d'un champ, type inconnu d'une version plus
+/// récente).
+///
+/// Un seul message illisible faisait échouer TOUTE la page : l'écran
+/// retombait en silence sur le cache, et sur un appareil neuf
+/// l'historique n'apparaissait jamais.
+List<DirectMessage> parseHistoryItems(List<Map<String, dynamic>> items) {
+  final parsed = <DirectMessage>[];
+  for (final item in items) {
+    try {
+      parsed.add(DirectMessage.fromJson(item));
+    } catch (_) {
+      // Écarté, pas bloquant.
+    }
+  }
+  return parsed;
 }
 
 /// Résultat de `GET /contacts/lookup` — ce qu'on sait d'un numéro touché

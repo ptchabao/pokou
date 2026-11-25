@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/country/country_config.dart';
 import '../../../core/theme/app_colors.dart';
@@ -9,6 +10,8 @@ import '../../../core/widgets/contact_avatar.dart';
 import '../../../core/widgets/pokou_bottom_nav.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../contacts/data/conversation_summary.dart';
+import '../../contacts/presentation/contacts_controller.dart'
+    show unreadCountsProvider;
 import '../../contacts/presentation/discussions_controller.dart';
 import '../../contacts/presentation/open_discussion.dart';
 import '../../honam/data/honam_models.dart';
@@ -79,6 +82,13 @@ class HomeScreen extends ConsumerWidget {
                     child: const MarketplaceScreen(),
                   ),
                 ),
+              ),
+            // « Découvrir Pokou » : la vidéo de présentation, sous Assimé.
+            // Réglée depuis la console ; tant qu'elle est vide, rien.
+            if (config.discoverVideoUrl != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: _DiscoverRow(url: config.discoverVideoUrl!),
               ),
           ],
         ),
@@ -277,7 +287,8 @@ class _ModuleCard extends StatelessWidget {
 }
 
 /// La carte Discussions (maquette p.14) : terre cuite, « Tout voir », et les
-/// deux dernières discussions — Baba compris si c'est la plus récente.
+/// trois dernières discussions — Baba compris si c'est la plus récente —
+/// avec l'aperçu de leur dernier message.
 class _DiscussionsCard extends ConsumerWidget {
   const _DiscussionsCard({required this.onSeeAll});
 
@@ -290,7 +301,7 @@ class _DiscussionsCard extends ConsumerWidget {
         (ref.watch(discussionsProvider).valueOrNull ??
                 const <ConversationSummary>[])
             .where((d) => !d.isArchived)
-            .take(2)
+            .take(3)
             .toList();
     const ink = Colors.white;
     return _ModuleCard(
@@ -339,7 +350,13 @@ class _KoryCard extends ConsumerWidget {
     final pot = pots.where((p) => p.isOpen).firstOrNull;
     const ink = Color(0xFFFFF9E5);
     return _ModuleCard(
-      color: AppColors.brandEbene,
+      // En sombre, l'ébène se confondait avec le fond (#1A1615 l'un et
+      // l'autre) : la carte prend la surface relevée de la palette, avec
+      // son filet ; l'encre crème et l'or restent.
+      color: AppColors.isDark
+          ? AppColors.surfaceElevated
+          : AppColors.brandEbene,
+      border: AppColors.isDark ? AppColors.border : null,
       onTap: pot == null
           ? onSeeAll
           : () => Navigator.of(context).push(
@@ -599,12 +616,21 @@ class _DiscussionRow extends ConsumerWidget {
     final l = L.of(context);
     final d = discussion;
     final last = d.lastMessage;
-    final unread = d.unreadCount > 0;
+    // Ouverte depuis l'Accueil après son dernier message : lue, même si la
+    // liste du serveur n'est pas encore revenue.
+    final openedAt = ref.watch(
+      homeOpenedDiscussionsProvider,
+    )[homeDiscussionKey(d)];
+    final unread =
+        d.unreadCount > 0 &&
+        !(openedAt != null &&
+            last != null &&
+            !openedAt.isBefore(last.createdAt));
     const ink = Colors.white;
     final soft = ink.withValues(alpha: 0.82);
     return InkWell(
       borderRadius: BorderRadius.circular(10),
-      onTap: () => openDiscussion(context, ref, d),
+      onTap: () => openHomeDiscussion(context, ref, d),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 6, 6, 6),
         child: Row(
@@ -625,12 +651,13 @@ class _DiscussionRow extends ConsumerWidget {
                       color: ink,
                     ),
                   ),
+                  // L'aperçu du dernier message, sur deux lignes.
                   if (last != null)
                     Text(
                       last.displayTextOf(l),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5, color: soft),
+                      style: TextStyle(fontSize: 13, height: 1.3, color: soft),
                     ),
                 ],
               ),
@@ -671,6 +698,98 @@ class _DiscussionRow extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Les discussions ouvertes DEPUIS l'Accueil, et quand : leur pastille de
+/// non-lus s'efface aussitôt, sans attendre la liste du serveur.
+///
+/// La cause du bug : la conversation marque ses messages lus, puis
+/// rafraîchit la liste — mais seulement si elle est encore ouverte. Revenu
+/// trop vite à l'Accueil, le rafraîchissement ne partait jamais et la
+/// pastille restait jusqu'au prochain tiré-pour-rafraîchir.
+final homeOpenedDiscussionsProvider = StateProvider<Map<String, DateTime>>(
+  (ref) => const {},
+);
+
+String homeDiscussionKey(ConversationSummary d) =>
+    '${d.kind}:${d.kind == 'contact' ? d.contactUserId : d.id}';
+
+/// Ouvre la discussion, puis relit la liste au retour — tout de suite et
+/// un instant plus tard, le temps que les accusés de lecture arrivent.
+Future<void> openHomeDiscussion(
+  BuildContext context,
+  WidgetRef ref,
+  ConversationSummary d,
+) async {
+  final key = homeDiscussionKey(d);
+  final opened = ref.read(homeOpenedDiscussionsProvider.notifier);
+  opened.state = {...opened.state, key: DateTime.now().toUtc()};
+  await openDiscussion(context, ref, d);
+  if (!context.mounted) return;
+  // Au retour : tout ce qui est arrivé pendant la lecture est lu aussi.
+  opened.state = {...opened.state, key: DateTime.now().toUtc()};
+  ref.invalidate(discussionsProvider);
+  ref.invalidate(unreadCountsProvider);
+  await Future<void>.delayed(const Duration(milliseconds: 1500));
+  if (!context.mounted) return;
+  ref.invalidate(discussionsProvider);
+  ref.invalidate(unreadCountsProvider);
+}
+
+/// « Découvrir Pokou » (sous Assimé) : ouvre la vidéo de présentation.
+class _DiscoverRow extends StatelessWidget {
+  const _DiscoverRow({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return _Card(
+      onTap: () =>
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.play_arrow_rounded,
+              color: AppColors.accentPrimaryDark,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.homeXDiscoverTitle,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  l.homeXDiscoverSubtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.open_in_new, size: 18, color: AppColors.textMuted),
+        ],
       ),
     );
   }

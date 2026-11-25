@@ -33,7 +33,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models import Channel, ChannelMember, ChannelPost, Contact, DirectMessage, Group, GroupMember, GroupMessage, MessageStatus, MessageType, Poll, PollOption, PollVote, User
 from app.api.v1.messaging.ws import manager
-from app.services.messaging import notification_policy
+from app.services.messaging import notification_policy, poll_window
 from app.services.notifications.push_service import send_push
 from app.utils.phone import normalize_e164
 from app.core.security import get_current_user
@@ -168,6 +168,8 @@ def _serialize_poll(poll: Poll, viewer_id: Optional[int], *, reveal_voters: bool
         # `vote_count` dépasse le nombre de participants et ne peut pas servir
         # de dénominateur aux pourcentages.
         "total_voters": len(everyone),
+        # Jusqu'à quand MA réponse reste modifiable (voir poll_window).
+        **poll_window.serialize_for(poll.vote_windows, viewer_id),
     }
 
 
@@ -623,6 +625,11 @@ async def vote(
         .filter(PollVote.option_id.in_(option_ids), PollVote.user_id == user_id)
         .all()
     }
+    # 15 minutes après le premier vote, la réponse est définitive — un
+    # retrait compris. Rejouer exactement l'état déjà enregistré (réseau
+    # capricieux) n'est pas un changement : il passe même après.
+    if set(wanted) != set(existing):
+        poll_window.enforce(db, poll.id, user_id, casting=bool(wanted))
     # Différence et non « tout supprimer puis tout réinsérer » : SQLAlchemy
     # ordonne les insertions AVANT les suppressions dans un même flush, donc
     # revoter la même option violerait uq_poll_vote. Au passage, un vote
@@ -636,6 +643,7 @@ async def vote(
             db.add(PollVote(option_id=option_id, user_id=user_id))
     db.commit()
     db.refresh(poll)
+    db.expire(poll, ["vote_windows"])
 
     # Pas de diffusion pour un sondage de chaîne : une chaîne n'a pas de
     # « participants » à qui pousser un événement, elle a des abonnés dont le
@@ -900,6 +908,14 @@ async def share_contact_card(
             )
         cards.append({"display_name": display_name, "phone": phone})
 
+    if body.kind == "group":
+        # Non-membre : le même 403 que partout ailleurs, avant tout le reste.
+        _require_membership(db, body.target_id, sender_id)
+        # Le numéro d'un tiers ne se partage qu'à deux (voir groups.py).
+        raise HTTPException(
+            status_code=400,
+            detail="Le partage de contact n'est possible que dans une discussion à deux",
+        )
     target = _resolve_target(db, body.kind, body.target_id, sender_id)
     caption = ", ".join(card["display_name"] for card in cards)
     message = _create_message(

@@ -417,8 +417,12 @@ class _OfficineRegistrationPlanScreenState
             l.officineRegPerMonth,
             style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
-          price: l.officineRegAmountHt(fcfa(wetri)),
-          caption: l.officineRegWetriCaption(fcfa(ttc(wetri)), vat),
+          price: wetri == null
+              ? l.hnxPriceUnset
+              : l.officineRegAmountHt(fcfa(wetri)),
+          caption: wetri == null
+              ? ''
+              : l.officineRegWetriCaption(fcfa(ttc(wetri)), vat),
         ),
         _PlanCard(
           selected: _plan == 'EPE',
@@ -427,11 +431,15 @@ class _OfficineRegistrationPlanScreenState
           trailing: freeMonths > 0
               ? OfficineTag(l.offiFreeMonths(freeMonths))
               : null,
-          price: l.officineRegAmountHt(fcfa(epe)),
-          caption: l.officineRegEpeCaption(
-            fcfa(wetri == null ? null : 12 * wetri),
-            fcfa(ttc(epe)),
-          ),
+          price: epe == null
+              ? l.hnxPriceUnset
+              : l.officineRegAmountHt(fcfa(epe)),
+          caption: epe == null
+              ? ''
+              : l.officineRegEpeCaption(
+                  fcfa(wetri == null ? null : 12 * wetri),
+                  fcfa(ttc(epe)),
+                ),
         ),
         ModuleCard(
           child: Column(
@@ -541,10 +549,14 @@ class _PlanCard extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              Text(
-                caption,
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
+              if (caption.isNotEmpty)
+                Text(
+                  caption,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
             ],
           ),
         ),

@@ -41,9 +41,82 @@ class MainActivity : FlutterActivity() {
         // garantie technique — elle l'était déjà à moitié, iOS n'offrant
         // aucun équivalent de ce drapeau.
         super.onCreate(savedInstanceState)
+        CallManager.addListener(lockScreenObserver)
+        if (isCallIntent(intent) && !CallManager.currentState().isTerminal) {
+            showOverLockScreen(true)
+        }
         // Ouverte par « Répondre » : on répond d'ici, une seule fois — pas
         // lors d'une recréation (rotation), où l'intention est rejouée.
         if (savedInstanceState == null) answerIfAsked(intent)
+    }
+
+    // ── Écran de verrouillage : le temps d'un appel entrant, pas plus ──────
+    //
+    // Les drapeaux `showWhenLocked` et `turnScreenOn` étaient déclarés dans
+    // le manifeste, donc PERMANENTS : l'application entière s'affichait
+    // par-dessus le verrouillage — n'importe qui pouvait l'ouvrir sans
+    // déverrouiller — et rallumait l'écran à chaque reprise. Pendant un
+    // appel décroché depuis l'écran verrouillé, le téléphone restait
+    // inaccessible : l'appel couvrait tout, et rien ne demandait jamais de
+    // déverrouiller.
+    //
+    // Désormais : posés quand l'activité est ouverte POUR un appel entrant
+    // (intention plein écran, « Répondre »). L'écran ne se rallume plus une
+    // fois l'appel établi ; et dès qu'il est établi, Android propose de
+    // déverrouiller — le téléphone redevient un téléphone, l'appel continue
+    // (service au premier plan, notification « Appel en cours » pour
+    // revenir, PiP pour la vidéo). Tout est retiré à la fin de l'appel.
+    private val lockScreenObserver: (CallState, IncomingCall?) -> Unit = { state, _ ->
+        runOnUiThread { lockScreenFor(state) }
+    }
+
+    private var overLockScreen = false
+
+    private fun isCallIntent(intent: Intent?): Boolean =
+        intent?.action == CallNotification.ACTION_ANSWER ||
+            intent?.hasExtra(IncomingCall.KEY_ROOM) == true
+
+    private fun lockScreenFor(state: CallState) {
+        if (!overLockScreen) return
+        when {
+            state.isTerminal -> showOverLockScreen(false)
+            state == CallState.CONNECTED -> {
+                turnScreenOnWhenShown(false)
+                askToUnlock()
+            }
+            else -> Unit
+        }
+    }
+
+    private fun showOverLockScreen(show: Boolean) {
+        overLockScreen = show
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(show)
+        } else {
+            @Suppress("DEPRECATION")
+            val flag = android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            if (show) window.addFlags(flag) else window.clearFlags(flag)
+        }
+        turnScreenOnWhenShown(show)
+    }
+
+    private fun turnScreenOnWhenShown(on: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setTurnScreenOn(on)
+        } else {
+            @Suppress("DEPRECATION")
+            val flag = android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            if (on) window.addFlags(flag) else window.clearFlags(flag)
+        }
+    }
+
+    /** L'appel est établi : proposer de déverrouiller (sans l'imposer). */
+    private fun askToUnlock() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as? android.app.KeyguardManager
+        if (keyguard?.isKeyguardLocked == true) {
+            runCatching { keyguard.requestDismissKeyguard(this, null) }
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -83,6 +156,26 @@ class MainActivity : FlutterActivity() {
                     val stat = android.os.StatFs(filesDir.path)
                     result.success(mapOf("total" to stat.totalBytes, "free" to stat.availableBytes))
                 } catch (exception: Exception) {
+                    result.success(null)
+                }
+            }
+
+        // Vue unique : FLAG_SECURE posé le temps de la visionneuse, et
+        // seulement là. Le drapeau permanent a été retiré (voir onCreate) ;
+        // une photo à vue unique est précisément le cas où une capture
+        // d'écran trahirait la promesse faite à l'expéditeur.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.pokou.pokou/secure")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "setSecure") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                runOnUiThread {
+                    if (call.arguments == true) {
+                        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                    } else {
+                        window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                    }
                     result.success(null)
                 }
             }
@@ -238,6 +331,9 @@ class MainActivity : FlutterActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (isCallIntent(intent) && !CallManager.currentState().isTerminal) {
+            showOverLockScreen(true)
+        }
         answerIfAsked(intent)
     }
 
@@ -253,6 +349,7 @@ class MainActivity : FlutterActivity() {
         // Filet : une activité détruite pendant un appel entrant ne doit pas
         // laisser le téléphone vibrer sans écran pour l'arrêter.
         RingVibration.stop()
+        CallManager.removeListener(lockScreenObserver)
         super.onDestroy()
     }
 

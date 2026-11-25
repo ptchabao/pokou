@@ -234,6 +234,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
       // Pré-téléchargement silencieux des médias en arrière-plan comme WhatsApp
       for (final m in messages) {
         if (m.media != null &&
+            !m.viewOnce &&
             (m.messageType == 'IMAGE' || m.messageType == 'VIDEO')) {
           unawaited(
             _media.resolveLocalFile(
@@ -279,6 +280,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
         resolved[message.id] = previous.copyWith(
           deletedAt: message.deletedAt,
           reactions: message.reactions,
+          viewedAt: message.viewedAt,
         );
       } else {
         unknown.add(message);
@@ -456,6 +458,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
         ],
       );
       if (resolved.media != null &&
+          !resolved.viewOnce &&
           (resolved.messageType == 'IMAGE' ||
               resolved.messageType == 'VIDEO')) {
         unawaited(
@@ -593,6 +596,38 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     }
   }
 
+  /// Une position dans le groupe, chiffrée par clé d'expéditeur comme un
+  /// texte : coordonnées et nom du lieu sont dans le corps chiffré. Lève en
+  /// cas d'échec — l'écran dit pourquoi.
+  Future<void> shareLocation({
+    required double latitude,
+    required double longitude,
+    String? label,
+  }) async {
+    final group = state.group;
+    final myUserId = _myUserId;
+    if (state.sending || group == null || myUserId == null) return;
+    state = state.copyWith(sending: true, error: null);
+    try {
+      final message = await _repository.shareLocation(
+        group: group,
+        senderId: myUserId,
+        latitude: latitude,
+        longitude: longitude,
+        label: label,
+      );
+      await _store.saveGroup([message]);
+      if (!mounted) return;
+      state = state.copyWith(
+        messages: [...state.messages, message],
+        sending: false,
+      );
+    } catch (_) {
+      if (mounted) state = state.copyWith(sending: false);
+      rethrow;
+    }
+  }
+
   Future<void> editMessage(String messageId, String content) async {
     final original = state.messages.where((m) => m.id == messageId).firstOrNull;
     final myUserId = _myUserId;
@@ -685,6 +720,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     required String mimeType,
     required String messageType,
     String? caption,
+    bool viewOnce = false,
   }) async {
     final localId = _store.newLocalId();
     final enAttente = GroupMessage(
@@ -697,6 +733,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
       mediaAssetId: null,
       media: null,
       createdAt: DateTime.now(),
+      viewOnce: viewOnce,
       pendingMedia: PendingMedia(
         path: path,
         filename: filename,
@@ -718,6 +755,42 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     // message d'erreur, puisqu'il n'y a rien à corriger et rien de perdu.
     await _sender.envoyerGroupe(enAttente);
   }
+
+  /// Une vue unique de groupe que J'OUVRE — même règle qu'en tête-à-tête
+  /// (MessagingController.openViewOnce) : ouverte sur l'appareil d'abord,
+  /// annoncée ensuite. `false` si déjà ouverte.
+  Future<bool> openViewOnce(GroupMessage message) async {
+    if (message.senderId == _myUserId || message.isViewed) return false;
+    if (!_openingViewOnce.add(message.id)) return false;
+    final at = DateTime.now().toUtc();
+    final opened = message.copyWith(viewedAt: at);
+    if (!opened.isEncrypted) await _store.saveGroup([opened]);
+    if (mounted) {
+      state = state.copyWith(
+        messages: [
+          for (final m in state.messages)
+            if (m.id == message.id) m.copyWith(viewedAt: at) else m,
+        ],
+      );
+    }
+    try {
+      await _repository.markViewOnceViewed(
+        groupId: groupId,
+        messageId: message.id,
+      );
+    } on NetworkException {
+      await _store.enqueueAction(
+        kind: 'group:viewed',
+        targetId: message.id,
+        payload: {'group_id': groupId},
+      );
+    } catch (_) {
+      // Refusé (message supprimé) : l'état local « ouvert » reste juste.
+    }
+    return true;
+  }
+
+  final Set<String> _openingViewOnce = {};
 
   /// Envoyer un média qui EXISTE DÉJÀ sur le serveur — un sticker.
   ///

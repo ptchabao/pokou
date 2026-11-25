@@ -8,10 +8,29 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/providers.dart';
+import '../../auth/presentation/auth_controller.dart';
 import '../data/direct_message_model.dart';
 import 'day_separator.dart';
-import 'messaging_controller.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
+
+/// Les messages lisibles de [messages] qui contiennent [query] (casse
+/// ignorée), du plus récent au plus ancien. Un message encore chiffré, ou
+/// supprimé, ne compte pas : son « texte » n'est pas le sien.
+List<DirectMessage> searchDecrypted(
+  List<DirectMessage> messages,
+  String query,
+) {
+  final needle = query.trim().toLowerCase();
+  if (needle.isEmpty) return const [];
+  return [
+    for (final message in messages.reversed)
+      if (!message.isEncrypted &&
+          message.deletedAt == null &&
+          (message.content ?? '').toLowerCase().contains(needle))
+        message,
+  ];
+}
 
 /// Recherche DANS une conversation — l'écran renvoie l'identifiant du message
 /// choisi, que la conversation fait défiler jusqu'à lui (voir
@@ -46,8 +65,8 @@ class _ConversationSearchScreenState
     super.dispose();
   }
 
-  /// Différé de 300 ms : une requête par frappe saturerait l'API et ferait
-  /// clignoter la liste avant la fin du mot.
+  /// Différé de 300 ms : relire le cache à chaque frappe ferait clignoter
+  /// la liste avant la fin du mot.
   void _onChanged(String value) {
     _debounce?.cancel();
     if (value.trim().isEmpty) {
@@ -64,11 +83,23 @@ class _ConversationSearchScreenState
     );
   }
 
+  /// Cherche dans les messages DÉCHIFFRÉS gardés sur cet appareil.
+  ///
+  /// La recherche du serveur ne peut rien trouver dans une conversation
+  /// chiffrée de bout en bout : il n'en a jamais lu un mot. C'était
+  /// pourtant elle qu'interrogeait la loupe — d'où « aucun résultat », à
+  /// chaque fois. Le cache local, lui, tient le clair.
   Future<void> _search(String query) async {
     try {
-      final results = await ref
-          .read(messagingRepositoryProvider)
-          .searchMessages(query, contactUserId: widget.contactUserId);
+      final myUserId = ref.read(authControllerProvider).user?.id;
+      if (myUserId == null) return;
+      final cached = await ref
+          .read(pokouMessageStoreProvider)
+          .directConversation(
+            myUserId: myUserId,
+            contactUserId: widget.contactUserId,
+          );
+      final results = searchDecrypted(cached.messages, query);
       // Une réponse arrivée après un nouveau mot ne doit pas écraser la
       // recherche courante.
       if (mounted && _controller.text.trim() == query) {
@@ -91,7 +122,7 @@ class _ConversationSearchScreenState
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: TextField(
-  contextMenuBuilder: pokouContextMenuBuilder,
+          contextMenuBuilder: pokouContextMenuBuilder,
           controller: _controller,
           autofocus: true,
           onChanged: _onChanged,

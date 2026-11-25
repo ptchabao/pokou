@@ -135,7 +135,28 @@ class PollData {
     required this.options,
     required this.totalVoters,
     this.revealsVoters = true,
+    this.myLocksAt,
+    this.editWindowSeconds = 900,
   });
+
+  /// L'instant où MA réponse devient définitive (15 minutes après mon
+  /// premier vote, imposé par le serveur) ; `null` si je n'ai jamais voté.
+  final DateTime? myLocksAt;
+  final int editWindowSeconds;
+
+  /// Ma réponse ne peut plus changer.
+  bool isFinalAt(DateTime now) => myLocksAt != null && !now.isBefore(myLocksAt!);
+
+  PollData withLocksAt(DateTime? locksAt) => PollData(
+    id: id,
+    question: question,
+    allowsMultiple: allowsMultiple,
+    options: options,
+    totalVoters: totalVoters,
+    revealsVoters: revealsVoters,
+    myLocksAt: locksAt ?? myLocksAt,
+    editWindowSeconds: editWindowSeconds,
+  );
 
   final String id;
   final String question;
@@ -160,6 +181,8 @@ class PollData {
         .toList(),
     totalVoters: json['total_voters'] as int? ?? 0,
     revealsVoters: json['reveals_voters'] as bool? ?? true,
+    myLocksAt: tryParseServerTime(json['my_locks_at']),
+    editWindowSeconds: json['edit_window_seconds'] as int? ?? 900,
   );
 
   Map<String, dynamic> toJson() => {
@@ -168,6 +191,9 @@ class PollData {
     'allows_multiple': allowsMultiple,
     'options': options.map((option) => option.toJson()).toList(),
     'total_voters': totalVoters,
+    'reveals_voters': revealsVoters,
+    'my_locks_at': myLocksAt?.toUtc().toIso8601String(),
+    'edit_window_seconds': editWindowSeconds,
   };
 }
 
@@ -494,6 +520,7 @@ class DirectMessage {
     DirectMessageStatus? status,
     DateTime? deletedAt,
     String? originalContent,
+    Map<String, dynamic>? payload,
   }) {
     return DirectMessage(
       id: id,
@@ -519,7 +546,7 @@ class DirectMessage {
       expiresAt: expiresAt,
       viewOnce: viewOnce,
       viewedAt: viewedAt ?? this.viewedAt,
-      payload: payload,
+      payload: payload ?? this.payload,
       poll: poll ?? this.poll,
       mediaKey: _remember(mediaAssetId, mediaKey ?? this.mediaKey),
       proofMode: proofMode,
@@ -545,6 +572,9 @@ class DirectMessage {
     content: opened.content,
     mediaKey: opened.mediaKey,
     media: opened.mediaKey != null ? opened.media : null,
+    // Position et fiche contact chiffrées : leur contenu (coordonnées,
+    // numéro du tiers) n'existe qu'ici, dans la copie ouverte.
+    payload: opened.payload,
     clearCiphertext: true,
   );
 

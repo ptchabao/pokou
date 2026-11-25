@@ -283,3 +283,23 @@ class DirectMessagePin(Base):
     expires_at = Column(DateTime, nullable=False, index=True)
 
     __table_args__ = (UniqueConstraint("message_id", name="uq_direct_message_pin"),)
+
+
+class DirectConversationClear(Base):
+    """« Supprimer la discussion » — pour MOI seulement.
+
+    Les messages d'une discussion à deux sont des lignes PARTAGÉES : les
+    effacer les retirerait aussi chez l'autre, qui n'a rien demandé. On note
+    donc seulement la date à partir de laquelle je ne veux plus rien voir :
+    l'historique que me sert le serveur commence après elle, et la
+    discussion sort de ma liste jusqu'au prochain message. Le contenu, lui,
+    est chiffré et vit sur les téléphones — l'application efface sa copie.
+    """
+    __tablename__ = "direct_conversation_clears"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    other_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    cleared_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("user_id", "other_user_id", name="uq_direct_conversation_clear"),)

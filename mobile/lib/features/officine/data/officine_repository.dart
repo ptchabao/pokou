@@ -160,20 +160,16 @@ class OfficineRepository {
       CounterPhone.fromJson((p as Map).cast<String, dynamic>()),
   ];
 
-  /// Ouvre un paiement CashPay ; renvoie l'adresse de la page de paiement.
-  Future<String?> subscribe(String plan) async {
-    final json =
-        await _api.post('$_base/subscribe', body: {'plan': plan})
-            as Map<String, dynamic>;
-    return json['payment_url'] as String?;
-  }
+  /// Ouvre un paiement CashPay ; renvoie la réponse du serveur : l'adresse
+  /// de la page de paiement (`payment_url`), ou `test_mode` quand le pays de
+  /// test a simulé le paiement (abonnement déjà actif).
+  Future<Map<String, dynamic>> subscribe(String plan) async =>
+      await _api.post('$_base/subscribe', body: {'plan': plan})
+          as Map<String, dynamic>;
 
-  Future<String?> buyCredit(int amountHt) async {
-    final json =
-        await _api.post('$_base/credit', body: {'amount_ht': amountHt})
-            as Map<String, dynamic>;
-    return json['payment_url'] as String?;
-  }
+  Future<Map<String, dynamic>> buyCredit(int amountHt) async =>
+      await _api.post('$_base/credit', body: {'amount_ht': amountHt})
+          as Map<String, dynamic>;
 
   Future<OfficineCouriers> couriers() async => OfficineCouriers.fromJson(
     await _api.get('$_base/couriers') as Map<String, dynamic>,

@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart';
 // SQLCipher et non sqflite ordinaire : ce fichier contient les messages
 // DÉCHIFFRÉS, y compris ceux des conversations chiffrées de bout en bout.
@@ -617,6 +618,26 @@ class PokouMessageStore {
               whereArgs: [directMessage.id],
             );
           }
+        case 'message:reaction' || 'message:viewed':
+          if (directMessage == null) return false;
+          final rows = await txn.query(
+            'direct_messages',
+            where: 'id = ?',
+            whereArgs: [directMessage.id],
+            limit: 1,
+          );
+          if (rows.isNotEmpty) {
+            final payload = _payloadOf(rows.single);
+            final fresh = directMessage.toJson();
+            payload['reactions'] = fresh['reactions'];
+            payload['viewed_at'] ??= fresh['viewed_at'];
+            await txn.update(
+              'direct_messages',
+              {'payload': jsonEncode(payload)},
+              where: 'id = ?',
+              whereArgs: [directMessage.id],
+            );
+          }
         case 'message:deleted':
           final messageId = event.payload['message_id']?.toString();
           if (messageId == null) return false;
@@ -758,20 +779,83 @@ class PokouMessageStore {
     bool failed = false,
   }) async {
     final db = await _database;
-    final batch = db.batch();
-    for (final incoming in messages) {
-      final message = await _keepOpened(db, incoming);
-      batch.insert('direct_messages', {
-        'id': message.id,
-        'sender_id': message.senderId,
-        'recipient_id': message.recipientId,
-        'created_at': message.createdAt.toUtc().toIso8601String(),
-        'pending': pending ? _pendingTrue : _pendingFalse,
-        'failed': failed ? _pendingTrue : _pendingFalse,
-        'payload': jsonEncode(message.toJson()),
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-    }
-    await batch.commit(noResult: true);
+    // Lecture ET écriture dans UNE transaction. Elles étaient séparées : la
+    // ligne existante était lue, puis la version fusionnée écrite plus tard
+    // en lot. Entre les deux, `confirmDirect` pouvait poser la copie OUVERTE
+    // d'un message qu'on venait d'envoyer — et le lot l'écrasait aussitôt
+    // par la copie chiffrée du serveur, lue avant. L'expéditeur perdait sa
+    // photo (clé partie) ou voyait « En attente de ce message… » à la place
+    // de son propre texte, pour toujours : il ne peut pas rouvrir ce qu'il a
+    // chiffré lui-même.
+    await db.transaction((txn) async {
+      for (final incoming in messages) {
+        final message = await _keepOpened(txn, incoming);
+        await txn.insert('direct_messages', {
+          'id': message.id,
+          'sender_id': message.senderId,
+          'recipient_id': message.recipientId,
+          'created_at': message.createdAt.toUtc().toIso8601String(),
+          'pending': pending ? _pendingTrue : _pendingFalse,
+          'failed': failed ? _pendingTrue : _pendingFalse,
+          'payload': jsonEncode(message.toJson()),
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+    });
+  }
+
+  /// Une vue unique ouverte sur CET appareil — écrit tout de suite, avant
+  /// même la réponse du serveur : c'est ce qui empêche de la rouvrir en
+  /// touchant deux fois, ou après un redémarrage hors ligne.
+  Future<DirectMessage?> markDirectViewed(String id, DateTime at) async {
+    final db = await _database;
+    return db.transaction((txn) async {
+      final rows = await txn.query(
+        'direct_messages',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final payload = _payloadOf(rows.single);
+      payload['viewed_at'] ??= at.toUtc().toIso8601String();
+      await txn.update(
+        'direct_messages',
+        {'payload': jsonEncode(payload)},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      return DirectMessage.fromJson(payload, fromCache: true);
+    });
+  }
+
+  /// Ce que le serveur a changé d'un message déjà en cache — ses réactions,
+  /// sa date d'ouverture — SANS toucher au reste de la ligne (le clair).
+  /// Pour les événements `message:reaction` et `message:viewed` : ils
+  /// n'étaient jamais écrits, et une réaction reçue disparaissait à la
+  /// réouverture de la conversation.
+  Future<DirectMessage?> patchDirectServerFields(DirectMessage server) async {
+    final db = await _database;
+    return db.transaction((txn) async {
+      final rows = await txn.query(
+        'direct_messages',
+        where: 'id = ?',
+        whereArgs: [server.id],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final payload = _payloadOf(rows.single);
+      final fresh = server.toJson();
+      payload['reactions'] = fresh['reactions'];
+      payload['viewed_at'] ??= fresh['viewed_at'];
+      payload['status'] = fresh['status'];
+      await txn.update(
+        'direct_messages',
+        {'payload': jsonEncode(payload)},
+        where: 'id = ?',
+        whereArgs: [server.id],
+      );
+      return DirectMessage.fromJson(payload, fromCache: true);
+    });
   }
 
   /// [incoming], sans perdre ce que cet appareil a déjà DÉCHIFFRÉ.
@@ -801,13 +885,39 @@ class PokouMessageStore {
       fromCache: true,
     );
     incoming = _keepProofTrace(existing, incoming);
+    incoming = _keepLocalState(existing, incoming);
     if (!incoming.isEncrypted) return incoming;
     final opened =
         !existing.isEncrypted &&
         (existing.mediaKey != null ||
+            existing.payload != null ||
             (existing.content?.trim().isNotEmpty ?? false));
     if (!opened || existing.editedAt != incoming.editedAt) return incoming;
     return incoming.resolvedWith(existing);
+  }
+
+  /// Ce que CET appareil sait et que la version entrante peut ignorer :
+  ///
+  /// - une vue unique déjà ouverte ici (`viewed_at` local, posé avant que le
+  ///   serveur ne l'ait appris — hors ligne, ou réponse perdue) ne redevient
+  ///   jamais « à ouvrir » parce qu'un historique plus ancien arrive ;
+  /// - la clé d'une pièce jointe n'est jamais perdue au profit d'une copie
+  ///   en clair qui ne la porte pas (accusé, réaction).
+  DirectMessage _keepLocalState(
+    DirectMessage existing,
+    DirectMessage incoming,
+  ) {
+    var kept = incoming;
+    if (kept.viewedAt == null && existing.viewedAt != null) {
+      kept = kept.copyWith(viewedAt: existing.viewedAt);
+    }
+    if (!kept.isEncrypted &&
+        kept.mediaKey == null &&
+        existing.mediaKey != null &&
+        existing.mediaAssetId == kept.mediaAssetId) {
+      kept = kept.copyWith(mediaKey: existing.mediaKey, media: existing.media);
+    }
+    return kept;
   }
 
   /// La trace du mode preuve à deux, gardée par CET appareil.
@@ -949,6 +1059,32 @@ class PokouMessageStore {
   Future<void> deleteDirect(String id) async {
     final db = await _database;
     await db.delete('direct_messages', where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// « Supprimer la discussion » : toute la copie locale d'une discussion
+  /// à deux disparaît de cet appareil — messages ouverts, en attente et en
+  /// échec, et les gestes encore en file qui les visaient.
+  Future<void> clearDirectConversation({
+    required int myUserId,
+    required int contactUserId,
+  }) async {
+    final db = await _database;
+    const pair =
+        '(sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)';
+    final args = [myUserId, contactUserId, contactUserId, myUserId];
+    final ids = [
+      for (final row in await db.query(
+        'direct_messages',
+        columns: ['id'],
+        where: pair,
+        whereArgs: args,
+      ))
+        row['id'] as String,
+    ];
+    await db.delete('direct_messages', where: pair, whereArgs: args);
+    for (final id in ids) {
+      await dropActionsFor(id);
+    }
   }
 
   /// Texte déchiffré de messages précis, par identifiant.
@@ -1169,6 +1305,7 @@ class PokouMessageStore {
       if (message.isEncrypted) continue;
       final content = message.content;
       if (message.mediaKey != null ||
+          message.payload != null ||
           (content != null && content.trim().isNotEmpty)) {
         found[message.id] = message;
       }
@@ -1206,28 +1343,58 @@ class PokouMessageStore {
     final db = await _database;
     final oldest = serverMessages
         .map((message) => message.createdAt)
-        .reduce((a, b) => a.isBefore(b) ? a : b)
-        .toUtc()
-        .toIso8601String();
-    final keptIds = serverMessages.map((message) => message.id).toList();
-    final placeholders = List.filled(keptIds.length, '?').join(',');
-    await db.delete(
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+    final keptIds = serverMessages.map((message) => message.id).toSet();
+    final rows = await db.query(
       'direct_messages',
+      columns: ['id', 'created_at', 'payload'],
       where:
           '((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)) '
-          'AND created_at >= ? AND pending = 0 AND failed = 0 AND id NOT IN ($placeholders) '
-          // Un message du mode preuve reste chez les autres participants,
-          // même si l'auteur supprime son compte ou la discussion.
-          "AND payload NOT LIKE '%\"proof_mode\":true%'",
-      whereArgs: [
-        myUserId,
-        contactUserId,
-        contactUserId,
-        myUserId,
-        oldest,
-        ...keptIds,
-      ],
+          'AND pending = 0 AND failed = 0',
+      whereArgs: [myUserId, contactUserId, contactUserId, myUserId],
     );
+    final gone = staleIds(rows, keptIds: keptIds, oldest: oldest);
+    if (gone.isEmpty) return;
+    final placeholders = List.filled(gone.length, '?').join(',');
+    await db.delete(
+      'direct_messages',
+      where: 'id IN ($placeholders)',
+      whereArgs: gone,
+    );
+  }
+
+  /// Les lignes du cache que la page du serveur dit SUPPRIMÉES.
+  ///
+  /// Deux erreurs faisaient disparaître des messages bien vivants :
+  ///
+  /// - la comparaison des dates se faisait sur leur TEXTE. `…:00.123Z` et
+  ///   `…:00.123400Z` (millisecondes contre microsecondes, selon que la date
+  ///   en a ou non) se classent à l'envers — `Z` vient après les chiffres —
+  ///   et un message plus ANCIEN que la page passait pour couvert par elle ;
+  /// - la borne était INCLUSE : plusieurs messages de la même seconde au
+  ///   bord de la page (une rafale, un transfert multiple), le serveur n'en
+  ///   rend qu'une partie, et les autres étaient effacés.
+  ///
+  /// Seul un message strictement plus récent que le plus ancien de la page,
+  /// et absent d'elle, a vraiment disparu du serveur. Ceux du mode preuve
+  /// restent quoi qu'il arrive.
+  @visibleForTesting
+  static List<String> staleIds(
+    List<Map<String, Object?>> rows, {
+    required Set<String> keptIds,
+    required DateTime oldest,
+  }) {
+    final gone = <String>[];
+    for (final row in rows) {
+      final id = row['id'] as String;
+      if (keptIds.contains(id)) continue;
+      final at = DateTime.tryParse(row['created_at'] as String? ?? '');
+      if (at == null || !at.isAfter(oldest)) continue;
+      final payload = row['payload'] as String? ?? '';
+      if (payload.contains('"proof_mode":true')) continue;
+      gone.add(id);
+    }
+    return gone;
   }
 
   // ─── Messages de groupe ────────────────────────────────────────────────────
@@ -1238,19 +1405,22 @@ class PokouMessageStore {
     bool failed = false,
   }) async {
     final db = await _database;
-    final batch = db.batch();
-    for (final incoming in messages) {
-      final message = await _keepOpenedGroup(db, incoming);
-      batch.insert('group_messages', {
-        'id': message.id,
-        'group_id': message.groupId,
-        'created_at': message.createdAt.toUtc().toIso8601String(),
-        'pending': pending ? _pendingTrue : _pendingFalse,
-        'failed': failed ? _pendingTrue : _pendingFalse,
-        'payload': jsonEncode(message.toJson()),
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-    }
-    await batch.commit(noResult: true);
+    // Même transaction que saveDirect, pour la même raison : une lecture
+    // suivie d'une écriture différée laissait une copie chiffrée écraser la
+    // copie ouverte posée entre-temps.
+    await db.transaction((txn) async {
+      for (final incoming in messages) {
+        final message = await _keepOpenedGroup(txn, incoming);
+        await txn.insert('group_messages', {
+          'id': message.id,
+          'group_id': message.groupId,
+          'created_at': message.createdAt.toUtc().toIso8601String(),
+          'pending': pending ? _pendingTrue : _pendingFalse,
+          'failed': failed ? _pendingTrue : _pendingFalse,
+          'payload': jsonEncode(message.toJson()),
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+    });
   }
 
   /// Discussions · 22 — chercher dans les messages GARDÉS SUR CET APPAREIL.
@@ -1386,6 +1556,7 @@ class PokouMessageStore {
     return existing.copyWith(
       reactions: incoming.reactions,
       deletedAt: incoming.deletedAt ?? existing.deletedAt,
+      viewedAt: incoming.viewedAt,
     );
   }
 
@@ -1397,17 +1568,25 @@ class PokouMessageStore {
     final db = await _database;
     final oldest = serverMessages
         .map((message) => message.createdAt)
-        .reduce((a, b) => a.isBefore(b) ? a : b)
-        .toUtc()
-        .toIso8601String();
-    final keptIds = serverMessages.map((message) => message.id).toList();
-    final placeholders = List.filled(keptIds.length, '?').join(',');
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+    final rows = await db.query(
+      'group_messages',
+      columns: ['id', 'created_at', 'payload'],
+      where: 'group_id = ? AND pending = 0 AND failed = 0',
+      whereArgs: [groupId],
+    );
+    // Mêmes deux erreurs qu'en tête-à-tête — voir staleIds.
+    final gone = staleIds(
+      rows,
+      keptIds: serverMessages.map((message) => message.id).toSet(),
+      oldest: oldest,
+    );
+    if (gone.isEmpty) return;
+    final placeholders = List.filled(gone.length, '?').join(',');
     await db.delete(
       'group_messages',
-      where:
-          'group_id = ? AND created_at >= ? AND pending = 0 AND failed = 0 '
-          'AND id NOT IN ($placeholders)',
-      whereArgs: [groupId, oldest, ...keptIds],
+      where: 'id IN ($placeholders)',
+      whereArgs: gone,
     );
   }
 

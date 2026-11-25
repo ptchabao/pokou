@@ -7199,8 +7199,16 @@ class LRu extends L {
   String get koryOverline => 'Солидарные сбережения';
 
   @override
-  String koryActiveCount(String count) {
-    return 'активных: $count';
+  String koryActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count активных',
+      many: '$count активных',
+      few: '$count активные',
+      one: '1 активная',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -15506,4 +15514,562 @@ class LRu extends L {
   String locSaved(String place) {
     return 'Местоположение сохранено: $place';
   }
+
+  @override
+  String get wallpaperTitle => 'Обои чатов';
+
+  @override
+  String get wallpaperMenu => 'Обои';
+
+  @override
+  String wallpaperOnlyFor(String name) {
+    return 'Только для «$name»';
+  }
+
+  @override
+  String get wallpaperAllChatsHint =>
+      'Применяется к чатам без собственных обоев. Этот выбор хранится только на этом телефоне.';
+
+  @override
+  String get wallpaperFamilyUnis => 'Однотонные';
+
+  @override
+  String get wallpaperFamilyMotifs => 'Узоры';
+
+  @override
+  String get wallpaperFamilyPaysages => 'Пейзажи';
+
+  @override
+  String get wallpaperFamilyFetes => 'Праздники';
+
+  @override
+  String get wallpaperIntensity => 'Насыщенность';
+
+  @override
+  String get wallpaperUseDefault => 'Использовать обои по умолчанию';
+
+  @override
+  String get wallpaperUseDefaultHint =>
+      'Те, что выбраны в настройках для всех чатов';
+
+  @override
+  String get wallpaperDefaultBadge => 'по умолчанию';
+
+  @override
+  String get wallpaperSelected => 'выбрано';
+
+  @override
+  String get wallpaperPreviewReceived => 'Видел новые обои?';
+
+  @override
+  String get wallpaperPreviewSent => 'Да, они чудесные!';
+
+  @override
+  String get wallpaperFeastsEmpty =>
+      'Праздничные обои появляются здесь за несколько дней до каждого праздника.';
+
+  @override
+  String get koryTSearch => 'Поиск';
+
+  @override
+  String get koryTSearchHint => 'Найти сбор';
+
+  @override
+  String get koryTSearchPrompt =>
+      'Введите название копилки, взноса или тонтины.';
+
+  @override
+  String get koryTSearchInArchives => 'В архиве';
+
+  @override
+  String get koryTArchives => 'Архив';
+
+  @override
+  String get koryTArchivesHint => 'Завершённые сборы, которые вы убрали';
+
+  @override
+  String get koryTArchivesEmptyTitle => 'Архив пуст';
+
+  @override
+  String get koryTArchivesEmptyBody =>
+      'Завершённый или истёкший сбор можно убрать сюда из списка. Он остаётся доступным, и его можно вернуть в любой момент.';
+
+  @override
+  String get koryTArchive => 'В архив';
+
+  @override
+  String get koryTUnarchive => 'Вернуть из архива';
+
+  @override
+  String get koryTArchivedToast => 'Сбор перемещён в архив';
+
+  @override
+  String get koryTUnarchivedToast => 'Сбор возвращён в список';
+
+  @override
+  String get koryTUndo => 'Отменить';
+
+  @override
+  String get koryTSectionAll => 'Мои сборы';
+
+  @override
+  String get koryTSectionCotisations => 'Мои взносы';
+
+  @override
+  String get koryTSectionTontines => 'Мои тонтины';
+
+  @override
+  String get koryTSectionOpen => 'Мои текущие сборы';
+
+  @override
+  String get koryTSectionClosed => 'Мои закрытые сборы';
+
+  @override
+  String get koryTDescCagnotte =>
+      'Создайте быструю копилку, чтобы устроить событие с близкими. Это бесплатно. Pokou не касается денег. Каждый свободно переводит свою долю прямо на кошелёк сборщика.';
+
+  @override
+  String get koryTDescCotisation =>
+      'Создайте сбор средств с фиксированной суммой, сроком и периодичностью. Это бесплатно. Pokou не касается денег. В каждый срок каждый переводит свою долю прямо на кошелёк сборщика.';
+
+  @override
+  String get koryTDescTontine =>
+      'Создайте настоящую тонтину с фиксированными суммами, очередями сбора и периодичностью. Для каждого участника действуют сборы Kory Plus.';
+
+  @override
+  String get koryTPickContacts => 'Выбрать из контактов';
+
+  @override
+  String get koryTPickGroupMembers => 'Участники группы';
+
+  @override
+  String get koryTPickSearch => 'Поиск по имени или номеру';
+
+  @override
+  String get koryTPickOnPokou => 'В Pokou';
+
+  @override
+  String get koryTPickBySms => 'Ещё не в Pokou · приглашение по SMS';
+
+  @override
+  String get koryTPickAlready => 'Уже в сборе';
+
+  @override
+  String koryTPickConfirm(String count) {
+    return 'Добавить · $count';
+  }
+
+  @override
+  String get koryTPickNoMatch => 'Нет контактов по вашему запросу.';
+
+  @override
+  String get koryTPickEmpty => 'Пока некого добавить.';
+
+  @override
+  String get koryTAddGroupMembers => 'Добавить участников группы';
+
+  @override
+  String get koryTAddGroupMembersHint =>
+      'Приглашаются как остальные: тонтина начнётся, когда все согласятся.';
+
+  @override
+  String get koryTActSomeone => 'Участник';
+
+  @override
+  String koryTActCreatedCagnotte(String name, String title) {
+    return '$name открывает копилку «$title»';
+  }
+
+  @override
+  String koryTActCreatedCotisation(String name, String title) {
+    return '$name открывает взнос «$title»';
+  }
+
+  @override
+  String koryTActCreatedTontine(String name, String title) {
+    return '$name открывает тонтину «$title»';
+  }
+
+  @override
+  String koryTActContribution(String name) {
+    return 'Взнос участника $name подтверждён';
+  }
+
+  @override
+  String koryTActContributionAmount(String name, String amount) {
+    return 'Взнос участника $name подтверждён: $amount';
+  }
+
+  @override
+  String koryTActTotal(String total) {
+    return 'Подтверждено всего: $total';
+  }
+
+  @override
+  String koryTActStarted(String name) {
+    return 'Тонтина начинается. Очередь 1: получает $name.';
+  }
+
+  @override
+  String koryTActRound(String round, String rounds, String name) {
+    return 'Очередь $round из $rounds: получает $name.';
+  }
+
+  @override
+  String koryTActClosed(String title) {
+    return '«$title»: сбор закрыт';
+  }
+
+  @override
+  String koryTActDissolved(String title) {
+    return 'Тонтина «$title» распущена';
+  }
+
+  @override
+  String koryTActReminder(String name, String title) {
+    return '$name отправляет напоминание о «$title»';
+  }
+
+  @override
+  String get koryTActOpen => 'Открыть в Kory';
+
+  @override
+  String get koryTActNoMoney =>
+      'С кошелька на кошелёк · Pokou не касается денег';
+
+  @override
+  String get msgFixViewOncePhoto => 'Фото';
+
+  @override
+  String get msgFixViewOnceVideo => 'Видео';
+
+  @override
+  String get msgFixViewOnceOpened => 'Открыто';
+
+  @override
+  String get msgFixViewOnceUnavailable =>
+      'Не удалось открыть это одноразовое медиа. Повторите при подключении.';
+
+  @override
+  String get msgFixViewOnceLabel => 'Одноразовый просмотр';
+
+  @override
+  String get msgFixMediaRetry => 'Нажмите, чтобы повторить';
+
+  @override
+  String msgFixPollEditableFor(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Можно изменить ещё $count мин',
+      many: 'Можно изменить ещё $count мин',
+      few: 'Можно изменить ещё $count мин',
+      one: 'Можно изменить ещё $count мин',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get msgFixPollFinal => 'Окончательный ответ';
+
+  @override
+  String get msgFixPollSingleChoice => 'Только один ответ';
+
+  @override
+  String get msgFixPollMultipleChoice => 'Несколько ответов';
+
+  @override
+  String get msgFixPollChoiceRule =>
+      'Голосующие смогут передумать в течение 15 минут.';
+
+  @override
+  String get msgFixPollVoteRefused => 'Не удалось сохранить ваш голос.';
+
+  @override
+  String get hnxEmergencyGendarmerie => 'Жандармерия';
+
+  @override
+  String get hnxEmergencyUnique => 'Единый номер';
+
+  @override
+  String get hnxEmergencyOthers => 'Другие экстренные службы';
+
+  @override
+  String hnxEmergencyAlternatives(String numbers) {
+    return 'Также: $numbers';
+  }
+
+  @override
+  String get hnxEmergencyLowReliability =>
+      'Низкая надёжность: не все эти номера подтверждены. Сохраните и местные номера.';
+
+  @override
+  String get hnxEmergencyNone =>
+      'Для вашей страны не известно ни одного экстренного номера.';
+
+  @override
+  String hnxEmergencyCall(String number) {
+    return 'Позвонить по номеру $number';
+  }
+
+  @override
+  String get hnxCourierRestart => 'Начать заново';
+
+  @override
+  String get hnxCourierRestartTitle => 'Начать заявку заново?';
+
+  @override
+  String get hnxCourierRestartBody =>
+      'Все введённые шаги будут удалены, как и уже отправленная заявка, если она ещё ждёт проверки. Вы начнёте с шага 1.';
+
+  @override
+  String get hnxCourierRestartConfirm => 'Удалить всё';
+
+  @override
+  String get hnxCourierRestarted => 'Заявка удалена: вы снова на шаге 1.';
+
+  @override
+  String get hnxTestPaymentDone =>
+      'Тестовый режим: платёж смоделирован, без списания. Уже активно.';
+
+  @override
+  String get hnxTestPaymentNote =>
+      'Тестовая страна: платёж моделируется, без Mobile Money и списания.';
+
+  @override
+  String get hnxPriceUnset => 'Тариф для этой страны ещё не установлен';
+
+  @override
+  String get homeXSearchContacts => 'Контакты';
+
+  @override
+  String get homeXSearchGroups => 'Группы';
+
+  @override
+  String get homeXSearchKory => 'Сборы Kory';
+
+  @override
+  String get homeXSearchPharmacies => 'Аптеки Honam';
+
+  @override
+  String get homeXSearchAds => 'Объявления Assimé';
+
+  @override
+  String get homeXOnDuty => 'Дежурная';
+
+  @override
+  String get homeXDiscoverTitle => 'Узнать о Pokou';
+
+  @override
+  String get homeXDiscoverSubtitle => 'Видеопрезентация';
+
+  @override
+  String get homeXCertUnavailable =>
+      'Pokou certified пока недоступен в вашей стране.';
+
+  @override
+  String get assXInPersonTitle => 'Продажа из рук в руки';
+
+  @override
+  String get assXInPersonInfo =>
+      'На Assimé покупатель и продавец встречаются: товар передаётся из рук в руки. При покупателе продавец нажимает «Заказ подтверждён и передан»; покупатель получает код и называет его продавцу, чтобы закрыть продажу.';
+
+  @override
+  String get assXDelivered => 'Заказ подтверждён и передан';
+
+  @override
+  String get assXCodeLabel => 'Код от покупателя';
+
+  @override
+  String get assXCloseSale => 'Закрыть продажу';
+
+  @override
+  String assXAskCode(String buyer, String minutes) {
+    return 'Попросите у $buyer код, который только что пришёл в Pokou. Он действует $minutes мин.';
+  }
+
+  @override
+  String assXWrongCode(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Неверный код: осталось $count попыток.',
+      few: 'Неверный код: осталось $count попытки.',
+      one: 'Неверный код: осталась 1 попытка.',
+      zero: 'Неверный код.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assXNewCode => 'Создать новый код';
+
+  @override
+  String get assXCancelHandover => 'Отменить передачу';
+
+  @override
+  String assXSaleClosed(String buyer) {
+    return 'Продажа закрыта. $buyer может вас оценить.';
+  }
+
+  @override
+  String get assXOutsideNoCode =>
+      'Покупатель не в Pokou: объявление просто помечается проданным, без кода.';
+
+  @override
+  String get assXCodeTitle => 'Ваш код передачи';
+
+  @override
+  String assXCodeBody(String seller) {
+    return 'Назовите этот код $seller, когда товар будет у вас в руках. Не раньше.';
+  }
+
+  @override
+  String assXCodeUntil(String time) {
+    return 'Действует до $time';
+  }
+
+  @override
+  String get assXCodeExpired =>
+      'Этот код больше не действует: попросите продавца создать новый.';
+
+  @override
+  String get assXCodeDone => 'Продажа закрыта. Как прошла сделка?';
+
+  @override
+  String get assXNoHandover => 'Для этого товара нет текущей передачи.';
+
+  @override
+  String get assXShowCode => 'Показать мой код';
+
+  @override
+  String assXCodeReady(String seller) {
+    return '$seller подтвердил передачу: ваш код готов.';
+  }
+
+  @override
+  String get chatXAttachLocation => 'Геопозиция';
+
+  @override
+  String get chatXAttachContact => 'Контакт';
+
+  @override
+  String get chatXChangePhoto => 'Изменить фото';
+
+  @override
+  String get chatXDeleteDiscussion => 'Удалить чат';
+
+  @override
+  String get chatXDeleteDiscussionAction => 'Удалить';
+
+  @override
+  String chatXDeleteDiscussionTitle(String name) {
+    return 'Удалить чат с $name?';
+  }
+
+  @override
+  String get chatXDeleteDiscussionBody =>
+      'Чат и его сообщения исчезнут с вашего телефона. У собеседника они останутся.';
+
+  @override
+  String get chatXDeleteDiscussionDone => 'Чат удалён';
+
+  @override
+  String get chatXDeleteDiscussionOffline => 'Нет соединения: чат не удалён.';
+
+  @override
+  String get chatXDeleteDiscussionFailed => 'Не удалось удалить чат.';
+
+  @override
+  String get chatXLearnMore => 'Подробнее';
+
+  @override
+  String get chatXLocationCurrent => 'Моё текущее местоположение';
+
+  @override
+  String get chatXLocationNearYou => 'Рядом с вами';
+
+  @override
+  String get chatXLocationEncrypted =>
+      'Ваше местоположение передаётся со сквозным шифрованием: его видят только получатели.';
+
+  @override
+  String get chatXLocationSend => 'Отправить местоположение';
+
+  @override
+  String get chatXLocationFailed =>
+      'Не удалось определить местоположение. Попробуйте ещё раз.';
+
+  @override
+  String get chatXMediaEmpty => 'Здесь пока ничего нет.';
+
+  @override
+  String get chatXMediaTabMedia => 'Медиа';
+
+  @override
+  String get chatXMediaTabDocs => 'Документы';
+
+  @override
+  String get chatXMediaTabLinks => 'Ссылки';
+
+  @override
+  String get chatXMore => 'Ещё';
+
+  @override
+  String get chatXOnPokou => 'В Pokou';
+
+  @override
+  String get chatXPhoneHidden => 'Номер скрыт';
+
+  @override
+  String get chatXPrivacyPhone => 'Мой номер телефона';
+
+  @override
+  String get chatXPrivacyPhoneSub => 'Никогда не виден в группах';
+
+  @override
+  String get chatXPrivacyPhoneBody =>
+      'Кто видит ваш номер в профиле. Участники групп его никогда не видят: они связываются с вами через группу.';
+
+  @override
+  String get chatXPrivacyPhoneContacts => 'Виден моим контактам';
+
+  @override
+  String get chatXPrivacyPhoneHidden => 'Скрыт';
+
+  @override
+  String get chatXPrivacyPhoneHiddenSub =>
+      'Кроме контактов, которым вы разрешите';
+
+  @override
+  String get chatXPrivacyPhoneAllowed => 'Разрешённые контакты';
+
+  @override
+  String get chatXSeeMedia => 'Медиафайлы';
+
+  @override
+  String get chatXShareAction => 'Поделиться';
+
+  @override
+  String get chatXShareContactTitle => 'Поделиться этим контактом?';
+
+  @override
+  String get chatXShareContactBody =>
+      'Вы собираетесь поделиться номером другого человека. Убедитесь, что он согласен, прежде чем отправлять. Вы несёте ответственность за информацию, которой делитесь в Pokou.';
+
+  @override
+  String get chatXShareContactPick => 'Поделиться контактом';
+
+  @override
+  String get chatXShareContactSearch => 'Поиск по имени или номеру';
+
+  @override
+  String get chatXShareContactEmpty => 'Нет контактов';
+
+  @override
+  String get chatXShareFromPhoneBook => 'Вся адресная книга телефона';
+
+  @override
+  String get chatXShareFromPhoneBookRefused =>
+      'Доступ к контактам запрещён: разрешите его в настройках телефона.';
 }

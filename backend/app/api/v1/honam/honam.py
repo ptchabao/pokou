@@ -42,6 +42,7 @@ from app.models import (
     User,
     UserRole,
 )
+from app.services.honam import emergency as honam_emergency
 from app.services.honam import rules
 from app.services.honam import channels as honam_channels
 from app.services.honam.order_notifications import notify_order_message, notify_order_state_changed
@@ -612,12 +613,32 @@ def _message_channel(db: Session, order: Optional[HonamOrder], user_id: int, cha
 @router.get("/config")
 def honam_config(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = _user(db, current_user)
-    config = country_config(db, country_of_phone(user.phone))
+    country = country_of_phone(user.phone)
+    config = country_config(db, country)
+    emergency = honam_emergency.emergency_for(db, country)
     return {
         "delivery_price": config.get("delivery_price"),
-        "emergency_numbers": config.get("emergency_numbers", {}),
+        # La forme d'avant, pour les versions de l'app qui la lisent encore.
+        "emergency_numbers": honam_emergency.legacy_numbers(emergency),
+        # Tous les services du pays (police, pompiers, SAMU, gendarmerie,
+        # numéro unique, autres), avec alternatives et fiabilité.
+        "emergency": emergency,
+        "test_country": bool(config.get("test_only")),
         "disclaimer": "Pokou n'est pas un service d'urgence.",
     }
+
+
+@router.get("/emergency")
+def emergency_numbers(
+    country: Optional[str] = Query(None, pattern=r"^[A-Za-z]{2}$"),
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Les numéros d'urgence d'un pays : celui du numéro de la personne par
+    défaut, ou `country` (code ISO) quand l'app connaît mieux le pays où
+    elle se trouve (sa position)."""
+    user = _user(db, current_user)
+    return honam_emergency.emergency_for(db, country or country_of_phone(user.phone))
 
 
 @router.get("/pharmacies")
@@ -1862,6 +1883,30 @@ def courier_join(body: CourierApplication, current_user: dict = Depends(get_curr
             courier.referred_by_id = referrer.id
     db.commit()
     return _courier_json(db, courier)
+
+
+@router.delete("/courier/application")
+def courier_restart_application(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """« Recommencer » la candidature coursier : efface ce qui a été envoyé
+    (candidature en attente, wallet vérifié pendant l'inscription) pour
+    repartir de l'étape 1.
+
+    Jamais un coursier validé : dès que l'équipe a validé la candidature
+    (essai, membre, fin d'essai, suspension), son historique de courses et
+    son registre restent intacts — 409.
+    """
+    user = _user(db, current_user)
+    courier = db.query(CourierProfile).filter(CourierProfile.user_id == user.id).first()
+    if courier is not None and (courier.status != "PENDING" or courier.validated_at is not None):
+        raise HTTPException(status_code=409, detail="Ta candidature est déjà validée : elle ne peut plus être recommencée")
+    had_application = courier is not None
+    if courier is not None:
+        if db.query(HonamOrder.id).filter(HonamOrder.courier_id == user.id).first() is not None:
+            raise HTTPException(status_code=409, detail="Ta candidature est déjà validée : elle ne peut plus être recommencée")
+        db.delete(courier)
+    db.query(CourierWalletCheck).filter(CourierWalletCheck.user_id == user.id).delete(synchronize_session=False)
+    db.commit()
+    return {"reset": True, "had_application": had_application}
 
 
 @router.get("/courier/me")

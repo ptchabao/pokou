@@ -82,3 +82,24 @@ def nom_affiche(user, nom_du_carnet: Optional[str] = None, repli: str = "Utilisa
     if user is None:
         return repli
     return user.full_name or user.phone or repli
+
+
+def numero_masque(phone: Optional[str]) -> Optional[str]:
+    """« +228 9• •• •• 41 » — de quoi distinguer deux membres sans nom, sans
+    donner le numéro. Même forme que conversations.py::masked_phone."""
+    if not phone:
+        return None
+    digits = phone.lstrip("+")
+    if len(digits) < 7:
+        return "•• ••"
+    return f"+{digits[:3]} {digits[3]}• •• •• {digits[-2:]}"
+
+
+def nom_sans_numero(user, repli: str = "Inconnu") -> str:
+    """Le nom d'une personne là où son numéro ne doit JAMAIS sortir — un
+    groupe, ses aperçus, ses indicateurs de frappe. Les membres d'un groupe
+    ne se connaissent pas forcément : un compte sans nom de profil y montrait
+    son numéro complet à tous. On montre désormais une forme masquée."""
+    if not user:
+        return repli
+    return user.full_name or numero_masque(user.phone) or f"#{user.id}"

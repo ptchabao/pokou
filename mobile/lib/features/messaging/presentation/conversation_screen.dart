@@ -41,6 +41,8 @@ import 'composer/composer_panel.dart';
 import 'encryption_banner.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/widgets/chat_wallpaper.dart';
+import '../../../core/wallpaper/wallpaper_settings.dart';
+import '../../settings/presentation/chat_wallpaper_screen.dart';
 import '../../calls/presentation/call_controller.dart';
 import '../../calls/presentation/call_screen.dart';
 import '../../contacts/presentation/contacts_controller.dart';
@@ -54,6 +56,11 @@ import '../../marketplace/presentation/marketplace_controller.dart'
 import '../../profile/presentation/contact_profile_screen.dart';
 import '../data/direct_message_model.dart';
 import 'attach_sheet.dart';
+import 'share_sheets.dart';
+import 'conversation_media_screen.dart';
+import 'delete_discussion.dart';
+import 'search_highlight.dart';
+import '../data/sealed_rich_content.dart';
 import 'bubble_widgets.dart';
 import 'contact_card_bubble.dart';
 import 'forward_screen.dart';
@@ -83,6 +90,7 @@ import 'proof_widgets.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../home/presentation/certified_screen.dart';
 import 'poll_bubble.dart';
+import 'view_once.dart';
 import '../../../core/widgets/media_image.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../contacts/presentation/discussions_controller.dart';
@@ -427,6 +435,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     // « écrit… » jusqu'à l'expiration côté réception, soit plusieurs secondes
     // après qu'on a quitté l'écran.
     _typing.dispose();
+    _highlightTimer?.cancel();
     _inputController.removeListener(_onInputChanged);
     _inputController.dispose();
     _inputFocus.dispose();
@@ -477,9 +486,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void _onRichContentEvent(Map<String, dynamic> event) {
     final type = event['type'] as String?;
 
-    if (type == 'message:edited' ||
-        type == 'message:reaction' ||
-        type == 'message:viewed') {
+    // Réactions et vues uniques : le contrôleur les écrit dans le cache et
+    // dans son état (MessagingController._onEvent). Les superposer ICI en
+    // plus figeait la bulle sur cette version : la réaction suivante, ou
+    // l'accusé de lecture, ne s'affichait plus.
+    if (type == 'message:edited') {
       final raw = event['message'] as Map<String, dynamic>?;
       if (raw == null) return;
       final message = DirectMessage.fromJson(raw);
@@ -607,8 +618,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (messageId == null || !mounted) return;
     // Laisse la liste se reconstruire après le retour avant de chercher la
     // clé de la bulle : elle n'existe pas tant qu'elle n'est pas montée.
+    // Le résultat peut être loin dans le fil : on y va, puis on le surligne.
     await Future<void>.delayed(const Duration(milliseconds: 120));
-    if (mounted) _scrollToMessage(messageId);
+    if (mounted) await _revealAndHighlight(messageId);
   }
 
   DateTime? _holdScrollUntil;
@@ -715,7 +727,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           ? await repository.removeReaction(message.id)
           : await repository.setReaction(messageId: message.id, emoji: emoji);
       if (!mounted) return;
-      setState(() => _patches[message.id] = _withLocalClear(updated, message));
+      // Par le contrôleur, et non une superposition locale : la réaction est
+      // écrite dans le cache (elle disparaissait à la réouverture), et les
+      // suivantes, venues de l'autre, restent visibles.
+      setState(() => _patches.remove(message.id));
+      await ref
+          .read(messagingControllerProvider(_key).notifier)
+          .applyServerUpdate(updated);
     } on NetworkException {
       // ── Hors ligne : le geste est GARDÉ, pas perdu ──────────────────
       //
@@ -756,17 +774,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  Future<void> _markViewOnceViewed(DirectMessage message) async {
-    try {
-      final updated = await ref
-          .read(messagingRepositoryProvider)
-          .markViewOnceViewed(message.id);
-      if (!mounted) return;
-      setState(() => _patches[message.id] = _withLocalClear(updated, message));
-    } catch (_) {
-      // Best-effort : un événement WS `message:viewed` ou un futur
-      // rechargement rattraperont l'état si cet appel échoue en silence.
-    }
+  /// Une seule ouverture : le contrôleur l'écrit sur l'appareil AVANT le
+  /// réseau, et refuse la seconde (voir MessagingController.openViewOnce).
+  Future<bool> _markViewOnceViewed(DirectMessage message) async {
+    final opened = await ref
+        .read(messagingControllerProvider(_key).notifier)
+        .openViewOnce(message);
+    if (opened && mounted) setState(() => _patches.remove(message.id));
+    return opened;
   }
 
   void _onInputChanged() {
@@ -1131,6 +1146,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       context,
       targetName: widget.contactName,
       offerPoll: true,
+      offerContact: true,
     );
     switch (choice) {
       case AttachChoice.document:
@@ -1139,6 +1155,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         await _pickGalleryMedia();
       case AttachChoice.camera:
         await _pickImage(ImageSource.camera);
+      case AttachChoice.location:
+        await _shareLocation();
+      case AttachChoice.contact:
+        await _shareContact();
       case AttachChoice.poll:
         await _createPoll();
       case AttachChoice.kory:
@@ -1184,6 +1204,46 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       caption: prepared.caption,
       viewOnce: prepared.viewOnce,
     );
+  }
+
+  /// Ma position actuelle, chiffrée (voir share_sheets.dart).
+  Future<void> _shareLocation() async {
+    final place = await pickLocationToShare(context, ref);
+    if (place == null || !mounted) return;
+    await _sendRich(
+      'LOCATION',
+      SealedRichContent.location(
+        latitude: place.latitude,
+        longitude: place.longitude,
+        label: place.label,
+      ),
+    );
+  }
+
+  /// Partager un contact : choisir la fiche, PUIS confirmer — le numéro
+  /// est celui d'une autre personne.
+  Future<void> _shareContact() async {
+    final card = await pickContactToShare(context, ref);
+    if (card == null || !mounted) return;
+    if (!await confirmShareContact(context) || !mounted) return;
+    await _sendRich('CONTACT', SealedRichContent.contacts([card]));
+  }
+
+  Future<void> _sendRich(
+    String messageType,
+    Map<String, dynamic> payload,
+  ) async {
+    final failure = await ref
+        .read(messagingControllerProvider(_key).notifier)
+        .shareRich(messageType: messageType, payload: payload);
+    if (!mounted) return;
+    if (failure != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure)));
+      return;
+    }
+    _scrollToBottom();
   }
 
   /// Discussions · 20 — un sondage dans une discussion à deux.
@@ -1249,15 +1309,76 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     unawaited(file.delete());
   }
 
-  void _openContactProfile() {
-    Navigator.of(context).push(
+  /// La fiche du contact, ouverte comme écran de contrôle de la
+  /// discussion : ce qu'elle demande en se refermant s'exécute ici.
+  Future<void> _openContactProfile({
+    bool? proofOn,
+    List<DirectMessage>? messages,
+  }) async {
+    final list =
+        messages ?? ref.read(messagingControllerProvider(_key)).messages;
+    final on = proofOn ?? _proofOn(list);
+    final action = await Navigator.of(context).push<ContactProfileAction>(
       MaterialPageRoute(
         builder: (_) => ContactProfileScreen(
           contactUserId: widget.contactUserId,
           contactName: widget.contactName,
+          fromConversation: true,
+          proofOn: on,
+          canExportProof: list.isNotEmpty,
         ),
       ),
     );
+    if (action == null || !mounted) return;
+    switch (action.kind) {
+      case 'goto':
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+        if (mounted) await _revealAndHighlight(action.messageId!);
+      case 'starred':
+        await _runConversationAction('starred', on, list);
+      case 'proof':
+        await _runConversationAction('toggle', on, list);
+      case 'export':
+        await _runConversationAction('export', on, list);
+    }
+  }
+
+  /// « Voir les médias » : photos, vidéos, documents et liens de CETTE
+  /// discussion, tirés du cache déchiffré.
+  Future<void> _openMediaGallery() => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => ConversationMediaScreen(
+        myUserId: widget.myUserId,
+        contactUserId: widget.contactUserId,
+        contactName: widget.contactName,
+      ),
+    ),
+  );
+
+  Future<void> _deleteDiscussion() async {
+    final deleted = await confirmAndDeleteDirectDiscussion(
+      context,
+      ref,
+      myUserId: widget.myUserId,
+      contactUserId: widget.contactUserId,
+      name: widget.contactName,
+    );
+    if (deleted && mounted) Navigator.of(context).maybePop();
+  }
+
+  /// Le message trouvé par la recherche est surligné quelques secondes,
+  /// le temps que l'œil le retrouve.
+  String? _highlightedId;
+  Timer? _highlightTimer;
+
+  Future<void> _revealAndHighlight(String messageId) async {
+    await _revealMessage(messageId);
+    if (!mounted) return;
+    setState(() => _highlightedId = messageId);
+    _highlightTimer?.cancel();
+    _highlightTimer = Timer(const Duration(milliseconds: 2400), () {
+      if (mounted) setState(() => _highlightedId = null);
+    });
   }
 
   /// Discussions · 15 — « Bloquer » sur la carte d'un inconnu. La ligne de
@@ -1513,63 +1634,64 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Lot 1 · 2b — un ⋮ complet. Les entrées du mode preuve mènent
-            // à ses propres feuilles, inchangées.
+            // Le ⋮ simplifié (retour de l'équipe de test) : trois entrées.
+            // Recherche, messages importants, mode preuve, blocage et
+            // signalement sont dans « Plus », la fiche du contact.
             ListTile(
-              leading: const Icon(Icons.person_outline),
-              title: Text(_l.contactInfoTitle),
-              onTap: () => Navigator.pop(sheetContext, 'info'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: Text(_l.actionSearch),
-              onTap: () => Navigator.pop(sheetContext, 'search'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.star_outline_rounded),
-              title: Text(_l.msgStarTitle),
-              onTap: () => Navigator.pop(sheetContext, 'starred'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.gavel_outlined),
-              title: Text(proofOn ? _l.proofModeDisable : _l.proofModeEnable),
-              subtitle: proofOn ? null : Text(_l.proofModeDirectHint),
-              onTap: () => Navigator.pop(sheetContext, 'toggle'),
-            ),
-            if (proofOn && messages.isNotEmpty)
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf_outlined),
-                title: Text(_l.proofExport),
-                onTap: () => Navigator.pop(sheetContext, 'export'),
-              ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.block, color: AppColors.semanticError),
-              title: Text(
-                _l.contactBlockName(widget.contactName),
-                style: const TextStyle(color: AppColors.semanticError),
-              ),
-              onTap: () => Navigator.pop(sheetContext, 'block'),
+              leading: const Icon(Icons.perm_media_outlined),
+              title: Text(_l.chatXSeeMedia),
+              onTap: () => Navigator.pop(sheetContext, 'media'),
             ),
             ListTile(
               leading: const Icon(
-                Icons.flag_outlined,
+                Icons.delete_outline,
                 color: AppColors.semanticError,
               ),
               title: Text(
-                _l.reportTitle(widget.contactName),
+                _l.chatXDeleteDiscussion,
                 style: const TextStyle(color: AppColors.semanticError),
               ),
-              onTap: () => Navigator.pop(sheetContext, 'report'),
+              onTap: () => Navigator.pop(sheetContext, 'delete'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.more_horiz),
+              title: Text(_l.chatXMore),
+              onTap: () => Navigator.pop(sheetContext, 'more'),
             ),
           ],
         ),
       ),
     );
     if (!mounted) return;
-    if (action == 'info') _openContactProfile();
+    if (action == 'media') await _openMediaGallery();
+    if (action == 'delete') await _deleteDiscussion();
+    if (action == 'more') {
+      await _openContactProfile(proofOn: proofOn, messages: messages);
+    }
+    await _runConversationAction(action, proofOn, messages);
+  }
+
+  /// Les gestes de la discussion, qu'ils viennent du ⋮ ou de la fiche
+  /// (« Plus », voir ContactProfileAction).
+  Future<void> _runConversationAction(
+    String? action,
+    bool proofOn,
+    List<DirectMessage> messages,
+  ) async {
+    if (!mounted) return;
+    if (action == 'info') await _openContactProfile();
     if (action == 'search') await _openSearch();
     if (action == 'starred') await _openStarred();
+    if (action == 'wallpaper') {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => ChatWallpaperScreen(
+            scope: scopeForContact(widget.contactUserId),
+            chatName: widget.contactName,
+          ),
+        ),
+      );
+    }
     if (action == 'block') await _confirmBlockFromMenu();
     if (action == 'report') await _reportUnknownSender();
     if (action == 'toggle') {
@@ -1735,6 +1857,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     return Scaffold(
       backgroundColor: AppColors.chatBackground,
       body: ChatWallpaper(
+        scope: scopeForContact(widget.contactUserId),
         // `top: false` : la barre du haut gère elle-même l'encoche, pour
         // que son blanc monte jusqu'en haut de l'écran. Laissé à SafeArea,
         // le motif du papier peint réapparaissait dans la bande de statut,
@@ -1770,7 +1893,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       Expanded(
                         child: InkWell(
                           borderRadius: BorderRadius.circular(AppRadius.md),
-                          onTap: _openContactProfile,
+                          onTap: () => _openContactProfile(),
                           child: Row(
                             children: [
                               _AvatarRing(
@@ -2077,8 +2200,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                               _startCall(startWithVideo: video),
                                         )
                                       else
-                                        KeyedSubtree(
+                                        SearchHighlight(
                                           key: _keyFor(message.id),
+                                          active: _highlightedId == message.id,
                                           child: MessageAppear(
                                             messageId: message.id,
                                             isMine:
@@ -2109,7 +2233,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                   .contains(message.id),
                                               onSwipeReply: () =>
                                                   _startReply(message),
-                                              onForward: message.isEncrypted
+                                              onForward:
+                                                  message.isEncrypted ||
+                                                      message.viewOnce
                                                   ? null
                                                   : () => openForwardScreen(
                                                       context,
@@ -2119,7 +2245,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                           ),
                                                       myUserId: widget.myUserId,
                                                     ),
-                                              onSave: () => _saveMedia(message),
+                                              onSave: message.viewOnce
+                                                  ? null
+                                                  : () => _saveMedia(message),
                                               onLongPress: () =>
                                                   _showMessageActions(message),
                                               onRetry: () => ref
@@ -2465,8 +2593,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               onTap: () => Navigator.pop(sheetContext, 'reply'),
             ),
             // Un message resté chiffré n'a rien à transférer : on ne le lit
-            // pas soi-même.
-            if (!message.isEncrypted)
+            // pas soi-même. Une vue unique ne se transfère jamais, ni par
+            // son expéditeur ni par son destinataire.
+            if (!message.isEncrypted && !message.viewOnce)
               ListTile(
                 leading: const Icon(Icons.forward),
                 title: Text(_l.conversationForward),
@@ -2475,12 +2604,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             // Copier, sélectionner, partager : seulement s'il y a un texte
             // lisible (pas un média sans légende, ni un message supprimé ou
             // pas encore déchiffré).
-            if (copyableText(
-                  message.content,
-                  deleted: message.deletedAt != null,
-                  locked: message.isEncrypted,
-                )
-                case final text?)
+            if (!message.viewOnce)
+              if (copyableText(
+                    message.content,
+                    deleted: message.deletedAt != null,
+                    locked: message.isEncrypted,
+                  )
+                  case final text?)
               ...messageTextActionTiles(
                 context: context,
                 text: text,
@@ -2513,7 +2643,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               ),
             if (message.media != null &&
                 message.messageType != 'STICKER' &&
-                !message.isEncrypted)
+                !message.isEncrypted &&
+                !message.viewOnce)
               ListTile(
                 leading: const Icon(Icons.download_outlined),
                 title: Text(_l.mediaSaveToPhone),
@@ -3219,9 +3350,9 @@ class _Bubble extends StatefulWidget {
   /// `_quotedOf`. `null` s'il n'est pas (ou plus) dans la conversation.
   final DirectMessage? quoted;
 
-  /// Vue unique révélée par SON DESTINATAIRE — appelle
-  /// `POST /messages/{id}/viewed` côté écran, sans savoir comment.
-  final VoidCallback onViewOnceReveal;
+  /// Vue unique ouverte par SON DESTINATAIRE — la marque ouverte (appareil
+  /// puis serveur). `false` si elle l'était déjà : rien ne s'affiche.
+  final Future<bool> Function() onViewOnceReveal;
 
   /// Sondage voté/changé — remonté à l'écran pour fusionner le sondage à
   /// jour dans le message affiché.
@@ -3313,6 +3444,8 @@ class _BubbleState extends State<_Bubble> {
     if (media == null) return false;
     if (message.messageType != 'IMAGE' && message.messageType != 'VIDEO')
       return false;
+    // La pastille d'une vue unique vit dans une bulle, comme un texte.
+    if (message.viewOnce) return false;
     return message.content == null || message.content!.trim().isEmpty;
   }
 
@@ -3336,6 +3469,7 @@ class _BubbleState extends State<_Bubble> {
       ),
       'IMAGE' => ImageMessageBubble(
         media: media,
+        mediaKey: message.mediaKey,
         viewerTitle: isMine ? L.of(context).callYou : widget.contactName,
         viewerSubtitle: L
             .of(context)
@@ -3351,20 +3485,25 @@ class _BubbleState extends State<_Bubble> {
           onReact: widget.onReactionPick,
         ),
       ),
-      'VIDEO' => VideoMessageBubble(media: media),
+      'VIDEO' => VideoMessageBubble(media: media, mediaKey: message.mediaKey),
       _ => DocumentMessageBubble(media: media, isMine: isMine),
     };
-    final isViewOnceCapable =
-        message.viewOnce &&
-        (message.messageType == 'IMAGE' || message.messageType == 'VIDEO');
-    if (!isViewOnceCapable) return base;
-    return ViewOnceGate(
-      viewed: message.isViewed,
+    if (!_isViewOnce) return base;
+    // Vue unique : la pastille, jamais l'image — chez l'expéditeur comme
+    // chez le destinataire (elle s'affichait en grand chez l'expéditeur).
+    return ViewOnceBubble(
+      media: media,
+      mediaKey: message.mediaKey,
+      isVideo: message.messageType == 'VIDEO',
       isMine: isMine,
-      onReveal: widget.onViewOnceReveal,
-      builder: (_) => base,
+      opened: message.isViewed,
+      onOpen: widget.onViewOnceReveal,
     );
   }
+
+  bool get _isViewOnce =>
+      message.viewOnce &&
+      (message.messageType == 'IMAGE' || message.messageType == 'VIDEO');
 
   /// POLL/LOCATION/CONTACT n'ont pas de pièce jointe — leur rendu vient de
   /// `payload`/`poll`, pas de `message.media`. `null` si le type ne concerne
@@ -3472,7 +3611,10 @@ class _BubbleState extends State<_Bubble> {
       // Un message fait seulement d'emoji s'affiche en grand (WhatsApp).
       final emojis = emojiOnlyCount(content);
       if (emojis != null) {
-        return Text(content.trim(), style: emojiOnlyStyle(textStyle, emojis));
+        return Text(
+          withEmojiPresentation(content.trim()),
+          style: emojiOnlyStyle(textStyle, emojis),
+        );
       }
       final firstUrl = extractFirstUrl(content);
       if (firstUrl == null)
@@ -3510,7 +3652,11 @@ class _BubbleState extends State<_Bubble> {
     }
 
     final mediaWidget = _mediaWidget(media);
-    if (message.content == null || message.content!.trim().isEmpty)
+    // La légende d'une vue unique n'est pas montrée dans le fil : elle
+    // dirait ce que la photo cache.
+    if (_isViewOnce ||
+        message.content == null ||
+        message.content!.trim().isEmpty)
       return mediaWidget;
 
     return Column(

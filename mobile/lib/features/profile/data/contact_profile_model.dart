@@ -18,6 +18,7 @@ class ContactProfile {
     required this.about,
     required this.avatar,
     required this.isBlocked,
+    this.phoneHidden = false,
     this.isContact = true,
     this.isVerified = false,
     this.badge,
@@ -38,6 +39,11 @@ class ContactProfile {
   final String? about;
   final MediaMeta? avatar;
   final bool isBlocked;
+
+  /// La personne a masqué son numéro (ou le réserve à ses contacts, dont je
+  /// ne fais pas partie) : le serveur ne l'a pas envoyé. La fiche affiche
+  /// « Numéro masqué » plutôt qu'une ligne vide.
+  final bool phoneHidden;
 
   /// Dans MON carnet. Faux pour quelqu'un qui m'a écrit sans que j'aie son
   /// numéro : la fiche propose alors de l'enregistrer.
@@ -87,6 +93,7 @@ class ContactProfile {
       about: json['about'] as String?,
       avatar: avatarJson == null ? null : MediaMeta.fromJson(avatarJson),
       isBlocked: json['is_blocked'] as bool? ?? false,
+      phoneHidden: json['phone_hidden'] as bool? ?? false,
       // Absent d'une ancienne API, qui n'ouvrait la fiche qu'aux contacts.
       isContact: json['is_contact'] as bool? ?? true,
       isVerified: json['is_verified'] as bool? ?? false,

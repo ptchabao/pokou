@@ -207,14 +207,15 @@ Future<void> showPackExhaustedSheet(
                     (next.upgradePriceHt * (1 + status.vatRate)).round(),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(sheet);
-                  openPayment(
+                  final simulated = await openPayment(
                     context,
                     ref
                         .read(honamRepositoryProvider)
                         .pay('/honam/courier/pack', body: {'pack': next.code}),
                   );
+                  if (simulated) ref.invalidate(courierStatusProvider);
                 },
               ),
             ],

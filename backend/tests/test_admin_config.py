@@ -120,6 +120,36 @@ def test_pays_modifier_ajouter_et_revenir(client):
     assert "SN" not in codes
 
 
+def test_pays_de_test_video_et_officines_demo(client):
+    admin, _ = _signup(client, "+22890600005", UserRole.ADMIN)
+    fr = client.get("/api/v1/admin/countries/FR", headers=admin).json()
+    assert fr["builtin"] is True and fr["config"]["test_only"] is True
+    assert fr["config"]["test_payments"] is True and fr["config"]["honam_demo_pharmacies"] is True
+    listing = {c["code"]: c for c in client.get("/api/v1/admin/countries", headers=admin).json()["items"]}
+    assert listing["FR"]["test_only"] is True and listing["TG"]["test_only"] is False
+    # Couper le pays de test depuis la console, poser la vidéo.
+    done = client.put("/api/v1/admin/countries/FR", json=_country_body(
+        test_only=False, test_payments=False, honam_demo_pharmacies=False,
+        discover_video_url="https://www.youtube.com/watch?v=exemple"), headers=admin)
+    assert done.status_code == 200, done.text
+    config = done.json()["config"]
+    assert config["test_only"] is False and config["honam_demo_pharmacies"] is False
+    assert config["discover_video_url"] == "https://www.youtube.com/watch?v=exemple"
+    # Non renseignés : la valeur par défaut du pays reste ; une vidéo vide est effacée.
+    kept = client.put("/api/v1/admin/countries/FR", json=_country_body(discover_video_url=""), headers=admin).json()
+    assert kept["config"]["test_only"] is True and kept["config"]["discover_video_url"] is None
+    # La vidéo arrive dans la configuration lue par l'app.
+    client.put("/api/v1/admin/countries/TG", json=_country_body(
+        modules=["discussions", "assime"], discover_video_url="https://youtu.be/abc"), headers=admin)
+    user, _ = _signup(client, "+22890600006")
+    assert client.get("/api/v1/config/country", headers=user).json()["discover_video_url"] == "https://youtu.be/abc"
+    # Jamais de paiements simulés dans un pays de lancement.
+    refused = client.put("/api/v1/admin/countries/CI", json=_country_body(test_payments=True), headers=admin)
+    assert refused.status_code == 422
+    assert client.put("/api/v1/admin/countries/TG", json=_country_body(
+        discover_video_url="http://exemple.test"), headers=admin).status_code == 422
+
+
 @pytest.mark.parametrize("patch_", [
     {"modules": ["discussions", "casino"]},
     {"vat_rate": 0.9},
@@ -130,6 +160,8 @@ def test_pays_modifier_ajouter_et_revenir(client):
     {"currency": "fcfa"},
     {"emergency_numbers": {"police": "11a"}},
     {"emergency_numbers": {"ambulance": "112"}},
+    {"emergency_numbers": {"unique": "11 2"}},
+    {"test_only": "oui"},
     {"honam_cities": ["L"]},
     {"pharmacy_monthly_price": 9000, "pharmacy_yearly_price": 5000},
     {"inconnu": 1},

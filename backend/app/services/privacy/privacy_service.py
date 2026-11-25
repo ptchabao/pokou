@@ -41,7 +41,7 @@ from typing import Iterable, Optional, Set
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.models import Contact, PrivacyAudience, User
+from app.models import Contact, PhoneVisibilityException, PrivacyAudience, User
 
 
 class Aspect(str, enum.Enum):
@@ -239,6 +239,9 @@ def reglages(user: User) -> dict:
         # Un appel d'inconnu ne sonne pas, il reste dans le journal (voir
         # `appel_sonne_chez`).
         "silence_unknown_calls": bool(user.silence_unknown_calls),
+        # « Mon numéro de téléphone » : CONTACTS ou HIDDEN (voir
+        # `peut_voir_numero`). Les exceptions ont leur propre route.
+        "phone_number": visibilite_numero(user),
     }
 
 
@@ -261,6 +264,9 @@ def appliquer(db: Session, user: User, modifications: dict) -> dict:
     pas remettre les cinq autres à leur défaut. C'est le genre d'erreur qui
     rouvre en silence ce que quelqu'un avait fermé.
     """
+    numero = modifications.get("phone_number")
+    if numero is not None and numero not in VISIBILITES_NUMERO:
+        raise ValueError(numero)
     for champ, aspect in CHAMPS_AUDIENCE.items():
         if champ not in modifications or modifications[champ] is None:
             continue
@@ -272,6 +278,8 @@ def appliquer(db: Session, user: User, modifications: dict) -> dict:
         user.presence_visible = bool(modifications["presence_reciprocal"])
     if modifications.get("silence_unknown_calls") is not None:
         user.silence_unknown_calls = bool(modifications["silence_unknown_calls"])
+    if modifications.get("phone_number") is not None:
+        user.phone_visibility = str(modifications["phone_number"])
 
     db.commit()
     db.refresh(user)
@@ -301,3 +309,106 @@ def appel_sonne_chez(db: Session, invite: Optional[User], appelant_id: int) -> b
         .first()
         is not None
     )
+
+
+# ─── « Mon numéro de téléphone » ─────────────────────────────────────────────
+#
+# Deux valeurs : visible par mes contacts, ou masqué — sauf pour une liste de
+# personnes autorisées. Pas d'« tout le monde » : un numéro donné à quiconque
+# partage un groupe avec moi, c'est précisément ce que les membres d'un groupe
+# ne doivent pas obtenir.
+#
+# « Mes contacts » a ici le sens de `est_dans_les_contacts` (un sens OU
+# l'autre). Ce n'est pas une fuite : celui qui m'a dans SON carnet y a été
+# mis avec mon numéro, il le connaît déjà. Celui qui partage seulement un
+# groupe avec moi, ou qui m'a écrit d'un numéro inconnu, ne le reçoit pas.
+
+NUMERO_VISIBLE_CONTACTS = "CONTACTS"
+NUMERO_MASQUE = "HIDDEN"
+VISIBILITES_NUMERO = (NUMERO_VISIBLE_CONTACTS, NUMERO_MASQUE)
+
+
+def visibilite_numero(user: User) -> str:
+    """La règle en vigueur ; une valeur inconnue se lit « masqué » — le repli
+    le plus restrictif, comme `regle`."""
+    valeur = getattr(user, "phone_visibility", None) or NUMERO_VISIBLE_CONTACTS
+    return valeur if valeur in VISIBILITES_NUMERO else NUMERO_MASQUE
+
+
+def _exception_numero(db: Session, cible_id: int, spectateur_id: int) -> bool:
+    return (
+        db.query(PhoneVisibilityException.id)
+        .filter(
+            PhoneVisibilityException.owner_user_id == cible_id,
+            PhoneVisibilityException.allowed_user_id == spectateur_id,
+        )
+        .first()
+        is not None
+    )
+
+
+def _contact_reel(db: Session, cible_id: int, spectateur_id: int) -> bool:
+    """`est_dans_les_contacts`, sans les lignes posées seulement pour
+    BLOQUER un inconnu (conversations.py::_contact_for_block) : bloquer
+    quelqu'un ne doit pas lui donner mon numéro. Et pas quand la cible a
+    bloqué le spectateur."""
+    lignes = (
+        db.query(Contact.owner_user_id, Contact.added_by_block, Contact.is_blocked)
+        .filter(
+            or_(
+                (Contact.owner_user_id == cible_id) & (Contact.contact_user_id == spectateur_id),
+                (Contact.owner_user_id == spectateur_id) & (Contact.contact_user_id == cible_id),
+            )
+        )
+        .all()
+    )
+    if any(owner == cible_id and bloque for owner, _, bloque in lignes):
+        return False
+    return any(not par_blocage for _, par_blocage, _ in lignes)
+
+
+def peut_voir_numero(
+    db: Session, cible_id: int, spectateur_id: Optional[int], *, cible: Optional[User] = None
+) -> bool:
+    """Ce spectateur peut-il recevoir le numéro de cette personne ?"""
+    if spectateur_id is None:
+        return False
+    if spectateur_id == cible_id:
+        return True
+    personne = cible or db.query(User).filter(User.id == cible_id).first()
+    if personne is None:
+        return False
+    if visibilite_numero(personne) == NUMERO_MASQUE:
+        return _exception_numero(db, cible_id, spectateur_id)
+    return _contact_reel(db, cible_id, spectateur_id)
+
+
+def exceptions_numero(db: Session, user_id: int) -> list:
+    return [
+        allowed
+        for (allowed,) in db.query(PhoneVisibilityException.allowed_user_id)
+        .filter(PhoneVisibilityException.owner_user_id == user_id)
+        .order_by(PhoneVisibilityException.id)
+        .all()
+    ]
+
+
+def remplacer_exceptions_numero(db: Session, user_id: int, autorises: Iterable[int]) -> list:
+    """Remplace la liste (sémantique d'ÉTAT, comme un vote : la rejouer donne
+    le même résultat). Seules des personnes que je connais peuvent y figurer
+    — sinon la liste servirait à sonder des identifiants au hasard."""
+    voulus = {i for i in autorises if i is not None and i != user_id}
+    connus = {i for i in voulus if est_dans_les_contacts(db, user_id, i)}
+    if voulus - connus:
+        raise PermissionError(sorted(voulus - connus))
+    retirees = db.query(PhoneVisibilityException).filter(
+        PhoneVisibilityException.owner_user_id == user_id
+    )
+    if connus:
+        retirees = retirees.filter(PhoneVisibilityException.allowed_user_id.notin_(connus))
+    retirees.delete(synchronize_session=False)
+    deja = set(exceptions_numero(db, user_id))
+    for autre in sorted(connus - deja):
+        db.add(PhoneVisibilityException(owner_user_id=user_id, allowed_user_id=autre))
+    db.commit()
+    return exceptions_numero(db, user_id)

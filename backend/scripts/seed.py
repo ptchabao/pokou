@@ -12,6 +12,9 @@ a réglé depuis la console (un module fermé reste fermé).
    Le mot de passe n'est affiché qu'UNE fois, dans les journaux du
    déploiement qui crée le compte — à changer dès la première connexion
    (Console → menu du compte). Les déploiements suivants ne l'affichent plus.
+3. Les trois officines « Démo » de Honam, pour les testeurs — UNE fois (voir
+   app/services/honam/demo.py ; les retirer :
+   `python -m scripts.honam_demo_pharmacies remove`).
 
     python -m scripts.seed
 """
@@ -23,6 +26,7 @@ from app import models  # noqa: F401
 from app.core.database import SessionLocal
 from app.core.security import hash_password
 from app.models import AppModule, User, UserRole
+from app.services.honam.demo import seed_demo_pharmacies
 
 # (slug, nom, accroche, description, icône, couleur, catégorie, recommandé)
 MODULES = [
@@ -152,6 +156,14 @@ def main() -> int:
         added = seed_modules(db)
         print(f"Seed : {added} module(s) ajouté(s) au catalogue.")
         seed_superadmin(db)
+        try:
+            demo = seed_demo_pharmacies(db)
+            db.commit()
+            if demo:
+                print(f"Seed : {demo} officine(s) de démonstration Honam créée(s).")
+        except Exception as exc:  # le seed ne doit jamais bloquer un déploiement
+            db.rollback()
+            print(f"Seed : officines de démonstration non créées ({exc}).")
         return 0
     finally:
         db.close()

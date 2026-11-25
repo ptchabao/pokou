@@ -45,6 +45,7 @@ class PrivacySettings {
     required this.readReceipts,
     required this.presenceReciprocal,
     this.silenceUnknownCalls = false,
+    this.phoneHidden = false,
   });
 
   final PrivacyAudience lastSeen;
@@ -65,6 +66,11 @@ class PrivacySettings {
   /// Appliqué par le serveur, qui ne fait pas sonner (voir calls.py::_ring).
   final bool silenceUnknownCalls;
 
+  /// « Mon numéro de téléphone » : masqué (sauf pour les personnes
+  /// autorisées), ou visible par mes contacts. Le serveur ne l'envoie pas à
+  /// qui n'y a pas droit — un membre de groupe ne le reçoit jamais.
+  final bool phoneHidden;
+
   factory PrivacySettings.fromJson(Map<String, dynamic> json) =>
       PrivacySettings(
         lastSeen: PrivacyAudience.parse(json['last_seen'] as String?),
@@ -78,6 +84,9 @@ class PrivacySettings {
         readReceipts: json['read_receipts'] as bool? ?? true,
         presenceReciprocal: json['presence_reciprocal'] as bool? ?? true,
         silenceUnknownCalls: json['silence_unknown_calls'] as bool? ?? false,
+        // Une valeur inconnue se lit « masqué », le repli prudent.
+        phoneHidden:
+            (json['phone_number'] as String? ?? 'CONTACTS') != 'CONTACTS',
       );
 }
 
@@ -108,6 +117,7 @@ class PrivacyRepository {
     bool? readReceipts,
     bool? presenceReciprocal,
     bool? silenceUnknownCalls,
+    bool? phoneHidden,
   }) async {
     final reponse = await _api.put(
       '/account-privacy/privacy',
@@ -123,9 +133,26 @@ class PrivacyRepository {
           'presence_reciprocal': presenceReciprocal,
         if (silenceUnknownCalls != null)
           'silence_unknown_calls': silenceUnknownCalls,
+        if (phoneHidden != null)
+          'phone_number': phoneHidden ? 'HIDDEN' : 'CONTACTS',
       },
     );
     return PrivacySettings.fromJson(reponse as Map<String, dynamic>);
+  }
+
+  /// Qui voit mon numéro alors qu'il est masqué.
+  Future<List<int>> phoneExceptions() async {
+    final reponse = await _api.get('/account-privacy/privacy/phone-exceptions');
+    return ((reponse as Map<String, dynamic>)['user_ids'] as List).cast<int>();
+  }
+
+  /// Remplace la liste entière.
+  Future<List<int>> setPhoneExceptions(List<int> userIds) async {
+    final reponse = await _api.put(
+      '/account-privacy/privacy/phone-exceptions',
+      body: {'user_ids': userIds},
+    );
+    return ((reponse as Map<String, dynamic>)['user_ids'] as List).cast<int>();
   }
 }
 

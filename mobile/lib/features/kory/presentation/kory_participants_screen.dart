@@ -4,14 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../contacts/data/contact_model.dart';
-import '../../contacts/presentation/contacts_controller.dart';
 import '../data/kory_model.dart';
 import 'kory_screen.dart';
 import 'kory_ui.dart';
 import 'kory_controller.dart';
+import 'kory_people_picker.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
-import '../../../core/widgets/pokou_sheet.dart';
 
 /// Un participant en attente d'ajout : quelqu'un de Pokou (par son compte)
 /// ou un numéro, qui recevra un SMS d'invitation.
@@ -87,46 +85,34 @@ class _KoryParticipantsScreenState
     });
   }
 
-  Future<void> _fromContacts() async {
-    final contacts =
-        (ref.read(contactsProvider).valueOrNull ?? const <PokouContact>[])
-            .where((c) => c.contactUserId != null)
-            .toList();
-    final picked = await showPokouSheet<PokouContact>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      builder: (sheetContext) => SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(sheetContext).size.height * 0.7,
-          child: ListView(
-            children: [
-              for (final c in contacts)
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.terracottaTint,
-                    foregroundColor: AppColors.onTerracottaTint,
-                    child: Text(
-                      c.displayName.isEmpty
-                          ? '?'
-                          : c.displayName[0].toUpperCase(),
-                    ),
-                  ),
-                  title: Text(c.displayName),
-                  onTap: () => Navigator.pop(sheetContext, c),
-                ),
-            ],
-          ),
+  /// « Depuis mes contacts » : le carnet entier, avec recherche — les
+  /// contacts Pokou entrent tout de suite, les autres numéros reçoivent un
+  /// SMS d'invitation.
+  Future<void> _fromContacts(KoryPot? pot) async {
+    final picked = await Navigator.of(context).push<List<KoryPickable>>(
+      MaterialPageRoute(
+        builder: (_) => KoryContactsPicker(
+          alreadyUserIds: {
+            ?pot?.collectorId,
+            ...?pot?.participants.map((p) => p.userId).whereType<int>(),
+            for (final p in _pending) ?p.userId,
+          },
+          alreadyPhones: {for (final p in _pending) ?p.phone},
         ),
       ),
     );
-    if (picked == null) return;
-    if (_pending.any((p) => p.userId == picked.contactUserId)) return;
-    setState(
-      () => _pending.add(
-        _Pending.user(picked.contactUserId!, picked.displayName),
-      ),
-    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      for (final p in picked) {
+        if (p.userId != null) {
+          if (_pending.any((q) => q.userId == p.userId)) continue;
+          _pending.add(_Pending.user(p.userId!, p.name));
+        } else if (p.phone != null) {
+          if (_pending.any((q) => q.phone == p.phone)) continue;
+          _pending.add(_Pending.phone(p.phone!, p.name));
+        }
+      }
+    });
   }
 
   Future<void> _continue() async {
@@ -249,7 +235,7 @@ class _KoryParticipantsScreenState
                 ),
               ),
               TextButton(
-                onPressed: _fromContacts,
+                onPressed: () => _fromContacts(pot),
                 child: Text(l.koryFromContacts),
               ),
             ],

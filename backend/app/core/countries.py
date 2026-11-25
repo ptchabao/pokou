@@ -28,7 +28,10 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         "delivery_price": 1000,
         "pharmacy_monthly_price": 5000,
         "pharmacy_yearly_price": 50000,
-        "emergency_numbers": {"police": "117", "pompiers": "118", "samu": "8200"},
+        #: Surcharge des numéros d'urgence depuis la console. La référence est
+        #: le fichier app/data/emergency_numbers.csv (voir
+        #: app/services/honam/emergency.py) : vide, c'est lui qui s'applique.
+        "emergency_numbers": {},
         #: Villes où Honam livre. Ailleurs, l'offre coursier laisse place à
         #: la liste d'attente (maquette Coursiers 16).
         "honam_cities": ["Lomé"],
@@ -42,12 +45,44 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         "delivery_price": 1500,
         "pharmacy_monthly_price": 7500,
         "pharmacy_yearly_price": 75000,
-        "emergency_numbers": {"police": "110", "pompiers": "180", "samu": "185"},
+        "emergency_numbers": {},
         "honam_cities": ["Abidjan"],
         "kory_plus_fee_ht": 1000,
         "modules": ["discussions", "kory", "kory_plus", "honam", "assime"],
     },
+    # ── PAYS DE TEST ──────────────────────────────────────────────────────
+    # La France n'est PAS un pays de lancement : elle sert aux testeurs qui
+    # y vivent, pour qu'ils puissent faire tout le parcours Honam (officines
+    # de démonstration, coursier, abonnement) avec leur numéro français.
+    # À couper depuis la console (Pays → FR : fermer les modules, ou
+    # « Pays de test » / « Paiements simulés » décochés) dès la fin des tests.
+    #
+    # Devise : XOF et non EUR, volontairement — les tarifs restent ceux du
+    # Togo et se lisent de la même façon que dans les maquettes.
+    "FR": {
+        "test_only": True,
+        #: Paiements SIMULÉS (aucun appel à Semoa, aucun débit) : l'effet du
+        #: paiement est posé tout de suite, et la réponse le signale
+        #: (`test_mode`). Jamais pour un pays de lancement : voir
+        #: `simulated_payments_enabled`.
+        "test_payments": True,
+        #: Les trois officines « Démo » créées par le seed sont visibles.
+        "honam_demo_pharmacies": True,
+        "currency": "XOF",
+        "vat_rate": 0.18,
+        "delivery_price": 1000,
+        "pharmacy_monthly_price": 5000,
+        "pharmacy_yearly_price": 50000,
+        "emergency_numbers": {},
+        "honam_cities": ["Paris", "Lyon", "Marseille", "Toulouse", "Lille", "Bordeaux", "Nantes", "Strasbourg"],
+        "kory_plus_fee_ht": 1000,
+        "modules": ["discussions", "kory", "kory_plus", "honam", "assime", "certified"],
+    },
 }
+
+#: Les pays de lancement : jamais de paiement simulé, quoi que dise leur
+#: réglage. Un garde-fou écrit dans le code, pas seulement dans la console.
+PRODUCTION_COUNTRIES = frozenset({"TG", "CI"})
 
 _FALLBACK: dict[str, Any] = {
     "currency": "XOF",
@@ -58,6 +93,14 @@ _FALLBACK: dict[str, Any] = {
     "emergency_numbers": {},
     "honam_cities": [],
     "kory_plus_fee_ht": 1000,
+    #: Pays de test (coupable depuis la console), paiements simulés, et
+    #: officines de démonstration visibles : tout est fermé par défaut.
+    "test_only": False,
+    "test_payments": False,
+    "honam_demo_pharmacies": False,
+    #: « Découvrir Pokou » (Accueil, sous Assimé) : la vidéo de présentation.
+    #: Vide, l'entrée ne s'affiche pas.
+    "discover_video_url": None,
     #: La même application partout : Kory, Honam et Assimé sont ouverts par
     #: défaut dans tous les pays. Pokou certifié reste réservé aux pays où
     #: la vérification d'identité est en place.
@@ -67,7 +110,9 @@ _FALLBACK: dict[str, Any] = {
 
 def country_config(db: Session, country: Optional[str]) -> dict[str, Any]:
     code = (country or "").upper()
-    config = dict(_DEFAULTS.get(code, _FALLBACK))
+    # Les clés ajoutées après coup (pays de test, vidéo…) existent partout,
+    # même pour un pays écrit avant elles.
+    config = {**_FALLBACK, **_DEFAULTS.get(code, {})}
     override = get_setting(db, f"country.{code}") if code else None
     if override:
         try:
@@ -97,3 +142,23 @@ def country_of_phone(phone: Optional[str]) -> Optional[str]:
 
 def module_open(db: Session, phone: Optional[str], module: str) -> bool:
     return module in country_config(db, country_of_phone(phone))["modules"]
+
+
+def simulated_payments_enabled(db: Session, country: Optional[str]) -> bool:
+    """Paiements simulés : seulement dans un pays marqué « de test » ET dont
+    les paiements simulés sont ouverts — et jamais au Togo ni en Côte
+    d'Ivoire, même si la console le demandait par erreur."""
+    code = (country or "").upper()
+    if not code or code in PRODUCTION_COUNTRIES:
+        return False
+    config = country_config(db, code)
+    return bool(config.get("test_only")) and bool(config.get("test_payments"))
+
+
+def demo_pharmacies_visible(db: Session, country: Optional[str]) -> bool:
+    """Les officines « Démo » du seed : visibles seulement là où le réglage
+    `honam_demo_pharmacies` du pays est ouvert (ouvert par défaut pour le
+    pays de test, fermé pour les pays de lancement)."""
+    if not country:
+        return False
+    return bool(country_config(db, country).get("honam_demo_pharmacies"))

@@ -92,6 +92,12 @@ class ConversationsRepository {
     );
   }
 
+  /// « Supprimer la discussion » — pour MOI seulement : le serveur ne me
+  /// sert plus rien d'antérieur, l'autre garde tout (voir
+  /// messages.py::clear_history_for_me).
+  Future<void> clearDirectHistory(int contactUserId) =>
+      _api.delete('/messages/$contactUserId/history');
+
   /// Les personnes que j'ai bloquées — écran « Contacts bloqués ».
   Future<List<BlockedContact>> listBlocked() async {
     final response = await _api.get('/conversations/blocked');

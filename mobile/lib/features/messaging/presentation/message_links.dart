@@ -275,8 +275,23 @@ const kMessageCollapseAt = 600;
 String? collapsedMessageText(String text) {
   if (text.length <= kMessageCollapseAt + 120) return null;
   var cut = text.lastIndexOf(RegExp(r'\s'), kMessageCollapseAt);
-  if (cut < kMessageCollapseAt ~/ 2) cut = kMessageCollapseAt;
+  if (cut < kMessageCollapseAt ~/ 2) cut = graphemeBoundaryBefore(text, kMessageCollapseAt);
   return text.substring(0, cut).trimRight();
+}
+
+/// La dernière frontière de GRAPHÈME à [index] ou avant.
+///
+/// Couper une chaîne à un nombre d'unités UTF-16 tombe volontiers au milieu
+/// d'un emoji — deux unités, voire une dizaine pour une famille ou un
+/// drapeau : il en restait un carré « � ». Un message fait d'emoji sans
+/// espace (le cas courant) repliait ainsi sur un carré.
+int graphemeBoundaryBefore(String text, int index) {
+  var at = 0;
+  for (final g in text.characters) {
+    if (at + g.length > index) break;
+    at += g.length;
+  }
+  return at;
 }
 
 /// « … Voir plus », à la fin d'un message replié.

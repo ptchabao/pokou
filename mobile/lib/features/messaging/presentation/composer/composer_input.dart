@@ -165,6 +165,15 @@ class ComposerInputPill extends StatelessWidget {
                 textInputAction: TextInputAction.send,
                 onSubmitted: onSubmitted,
                 style: TextStyle(color: AppColors.textPrimary),
+                // Une hauteur de ligne FIXE : la police emoji est plus haute
+                // que celle du texte, et le premier emoji tapé faisait
+                // grandir la barre de saisie — toute la conversation
+                // sautait d'un cran.
+                strutStyle: const StrutStyle(
+                  fontSize: 16,
+                  height: 1.35,
+                  forceStrutHeight: true,
+                ),
                 decoration: InputDecoration(
                   hintText: hintText,
                   // UNE ligne : un indicateur qui passe à la ligne

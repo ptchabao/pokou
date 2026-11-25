@@ -10,7 +10,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import Channel, ChannelMember, ChannelPost, Community, CommunityMember, Contact, DirectMessage, Group, GroupMember, GroupMessage, MarketplaceProduct, MarketplaceProductImage, MediaAsset, MessageType, SellerVerificationApplication, Status, StatusRecipient, SparkLike, SparkMatch, SparkPhoto, SparkProfile, SparkRoomMessage, User, UserRole, VipPost, VipRoom, VipSubscription
+from app.models import Channel, ChannelMember, ChannelPost, Community, CommunityMember, Contact, DirectMessage, Group, GroupMember, GroupMessage, GroupMessageView, MarketplaceProduct, MarketplaceProductImage, MediaAsset, MessageType, SellerVerificationApplication, Status, StatusRecipient, SparkLike, SparkMatch, SparkPhoto, SparkProfile, SparkRoomMessage, User, UserRole, VipPost, VipRoom, VipSubscription
 from app.services.media import media_storage, object_storage, sticker_service, thumbnail_service
 from app.services.privacy import privacy_service, status_privacy_service
 from app.core.security import get_current_user
@@ -218,6 +218,17 @@ def _can_access(db: Session, asset: MediaAsset, user_id: int) -> bool:
     # de l'envoi, comme le fil du groupe lui-même reste lisible tant qu'on y
     # est.
     for linked_group_message in db.query(GroupMessage).filter(GroupMessage.media_asset_id == asset.id).all():
+        # Vue unique de groupe déjà ouverte par CE membre : même verrou qu'en
+        # tête-à-tête, membre par membre (voir GroupMessageView).
+        if (
+            linked_group_message.view_once
+            and linked_group_message.sender_id != user_id
+            and db.query(GroupMessageView.id).filter(
+                GroupMessageView.message_id == linked_group_message.id,
+                GroupMessageView.user_id == user_id,
+            ).first()
+        ):
+            continue
         if db.query(GroupMember).filter(
             GroupMember.group_id == linked_group_message.group_id, GroupMember.user_id == user_id
         ).first():

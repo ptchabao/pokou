@@ -2,7 +2,7 @@
 from datetime import datetime
 import enum
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, UniqueConstraint, Enum as SQLEnum
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import relationship
 
@@ -153,6 +153,13 @@ class User(Base):
     #: Modules) — « kory », « honam », « assime ». La ligne du centre de
     #: notifications reste écrite : seul le push se tait.
     muted_service_pushes = Column(JSON, nullable=True)
+    #: « Mon numéro de téléphone » (Réglages · Confidentialité) : CONTACTS
+    #: (visible par mes contacts) ou HIDDEN (masqué, sauf pour les personnes
+    #: de `phone_visibility_exceptions`). Une chaîne et non l'énumération
+    #: `privacy_audience` : « tout le monde » n'a pas de sens pour un numéro,
+    #: et un type énuméré de plus se migre mal sous PostgreSQL. Voir
+    #: privacy_service.peut_voir_numero.
+    phone_visibility = Column(String(16), default="CONTACTS", server_default="CONTACTS", nullable=False)
     # Compte vendeur certifié par l'équipe (marketplace) — même motif que
     # Channel.is_verified : posé uniquement par un rôle d'équipe, jamais par
     # le vendeur lui-même (voir routes/marketplace.py::certify_seller).
@@ -215,3 +222,21 @@ class User(Base):
     # Relationships
     avatar_media = relationship("MediaAsset", foreign_keys=[avatar_media_id])
     tokens = relationship("Token", back_populates="user", cascade="all, delete-orphan")
+
+
+class PhoneVisibilityException(Base):
+    """Les personnes qui voient mon numéro alors que je l'ai masqué.
+
+    Une liste d'AUTORISATIONS, pas d'exclusions : « masqué sauf pour… ».
+    Elle ne sert à rien tant que le numéro est visible par les contacts, et
+    elle est gardée telle quelle quand on repasse de l'un à l'autre — la
+    retrouver intacte en remasquant son numéro est ce qu'on attend."""
+
+    __tablename__ = "phone_visibility_exceptions"
+
+    id = Column(Integer, primary_key=True)
+    owner_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    allowed_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("owner_user_id", "allowed_user_id", name="uq_phone_visibility_exception"),)

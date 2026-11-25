@@ -1,0 +1,599 @@
+{
+  "version": 1,
+  "units": "dp (Android) / pt (iOS) / logical px (Flutter, React Native)",
+  "families": [
+    {
+      "id": "unis",
+      "label": "Unis"
+    },
+    {
+      "id": "motifs",
+      "label": "Motifs"
+    },
+    {
+      "id": "paysages",
+      "label": "Paysages"
+    },
+    {
+      "id": "fetes",
+      "label": "Fêtes"
+    }
+  ],
+  "default": "sable",
+  "wallpapers": [
+    {
+      "id": "sable",
+      "name": "Sable",
+      "meaning": "par défaut",
+      "family": "unis",
+      "type": "color",
+      "base": "#FBF5EC",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/sable.webp",
+      "intensity_adjustable": false
+    },
+    {
+      "id": "ndi",
+      "name": "Ŋdi",
+      "meaning": "éwé · « matin »",
+      "family": "unis",
+      "type": "color",
+      "base": "#F7E8CC",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/ndi.webp",
+      "intensity_adjustable": false
+    },
+    {
+      "id": "fie",
+      "name": "Fiẽ",
+      "meaning": "éwé · « soir »",
+      "family": "unis",
+      "type": "color",
+      "base": "#F2D9CB",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/fie.webp",
+      "intensity_adjustable": false
+    },
+    {
+      "id": "za",
+      "name": "Zã",
+      "meaning": "éwé · « nuit »",
+      "family": "unis",
+      "type": "color",
+      "base": "#33261F",
+      "tone": "dark",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/za.webp",
+      "intensity_adjustable": false
+    },
+    {
+      "id": "kete",
+      "name": "Kente",
+      "meaning": "Éwé · Togo et Ghana",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#E3A72F",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/kete.webp",
+      "tile": {
+        "svg": "svg/tiles/kete.svg",
+        "png": "png/tiles/kete.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          96,
+          96
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "takienta",
+      "name": "Takienta",
+      "meaning": "Batammariba · Togo et Bénin",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#F1E1C4",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/takienta.webp",
+      "tile": {
+        "svg": "svg/tiles/takienta.svg",
+        "png": "png/tiles/takienta.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          130,
+          240
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "kabye",
+      "name": "Kabyè",
+      "meaning": "Kabyè · Togo",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#E9D2A8",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/kabye.webp",
+      "tile": {
+        "svg": "svg/tiles/kabye.svg",
+        "png": "png/tiles/kabye.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          110,
+          120
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "adinkra",
+      "name": "Adinkra",
+      "meaning": "Akan · Ghana et Côte d’Ivoire",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#EEE1C6",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/adinkra.webp",
+      "tile": {
+        "svg": "svg/tiles/adinkra.svg",
+        "png": "png/tiles/adinkra.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          240,
+          240
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "korhogo",
+      "name": "Korhogo",
+      "meaning": "Sénoufo · Côte d’Ivoire",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#EDE2CB",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/korhogo.webp",
+      "tile": {
+        "svg": "svg/tiles/korhogo.svg",
+        "png": "png/tiles/korhogo.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          200,
+          200
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "baoule",
+      "name": "Baoulé",
+      "meaning": "Baoulé · Côte d’Ivoire",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#F3EEE4",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/baoule.webp",
+      "tile": {
+        "svg": "svg/tiles/baoule.svg",
+        "png": "png/tiles/baoule.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          64,
+          64
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "bogolan",
+      "name": "Bogolan",
+      "meaning": "Bambara · Mali",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#33251B",
+      "tone": "dark",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/bogolan.webp",
+      "tile": {
+        "svg": "svg/tiles/bogolan.svg",
+        "png": "png/tiles/bogolan.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          120,
+          120
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "agadez",
+      "name": "Agadez",
+      "meaning": "Touareg · Niger",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#1E2C4A",
+      "tone": "dark",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/agadez.webp",
+      "tile": {
+        "svg": "svg/tiles/agadez.svg",
+        "png": "png/tiles/agadez.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          90,
+          110
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "kuba",
+      "name": "Kuba",
+      "meaning": "Kuba · RD Congo",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#D7B47E",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/kuba.webp",
+      "tile": {
+        "svg": "svg/tiles/kuba.svg",
+        "png": "png/tiles/kuba.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          80,
+          80
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "ndebele",
+      "name": "Ndebele",
+      "meaning": "Ndebele · Afrique du Sud",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#FAF6EE",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/ndebele.webp",
+      "tile": {
+        "svg": "svg/tiles/ndebele.svg",
+        "png": "png/tiles/ndebele.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          120,
+          120
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "maasai",
+      "name": "Maasaï",
+      "meaning": "Maasaï · Kenya et Tanzanie",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#92241F",
+      "tone": "dark",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/maasai.webp",
+      "tile": {
+        "svg": "svg/tiles/maasai.svg",
+        "png": "png/tiles/maasai.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          100,
+          100
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "amazigh",
+      "name": "Amazigh",
+      "meaning": "Amazigh · Afrique du Nord",
+      "family": "motifs",
+      "type": "tile",
+      "base": "#F1E6D3",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/amazigh.webp",
+      "tile": {
+        "svg": "svg/tiles/amazigh.svg",
+        "png": "png/tiles/amazigh.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          120,
+          120
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "ge",
+      "name": "Ɣe",
+      "meaning": "éwé · « soleil »",
+      "family": "paysages",
+      "type": "scene",
+      "base": "#FBEBD8",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/ge.webp",
+      "scene": {
+        "svg": "svg/scenes/ge.svg",
+        "webp": "webp/scenes/ge.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "atsiafu",
+      "name": "Atsiaƒu",
+      "meaning": "éwé · « mer »",
+      "family": "paysages",
+      "type": "tile",
+      "base": "#E6EEF6",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/atsiafu.webp",
+      "tile": {
+        "svg": "svg/tiles/atsiafu.svg",
+        "png": "png/tiles/atsiafu.png",
+        "png_variants": [
+          "@2x",
+          "@3x"
+        ],
+        "size": [
+          100,
+          44
+        ],
+        "repeat": "both"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "adido",
+      "name": "Adido",
+      "meaning": "éwé · « baobab »",
+      "family": "paysages",
+      "type": "scene",
+      "base": "#F2F0E3",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/adido.webp",
+      "scene": {
+        "svg": "svg/scenes/adido.svg",
+        "webp": "webp/scenes/adido.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "gleti",
+      "name": "Ɣleti",
+      "meaning": "éwé · « lune »",
+      "family": "paysages",
+      "type": "scene",
+      "base": "#2A2236",
+      "tone": "dark",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/gleti.webp",
+      "scene": {
+        "svg": "svg/scenes/gleti.svg",
+        "webp": "webp/scenes/gleti.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true
+    },
+    {
+      "id": "togo",
+      "name": "27 avril",
+      "meaning": "Togo · fête de l'indépendance",
+      "family": "fetes",
+      "type": "scene",
+      "base": "#E3EEDF",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/togo.webp",
+      "scene": {
+        "svg": "svg/scenes/togo.svg",
+        "webp": "webp/scenes/togo.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true,
+      "availability": {
+        "mode": "dates",
+        "from": "04-20",
+        "to": "05-04"
+      }
+    },
+    {
+      "id": "ci",
+      "name": "7 août",
+      "meaning": "Côte d'Ivoire · fête de l'indépendance",
+      "family": "fetes",
+      "type": "scene",
+      "base": "#FFFBF6",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/ci.webp",
+      "scene": {
+        "svg": "svg/scenes/ci.svg",
+        "webp": "webp/scenes/ci.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true,
+      "availability": {
+        "mode": "dates",
+        "from": "07-31",
+        "to": "08-14"
+      }
+    },
+    {
+      "id": "tabaski",
+      "name": "Ramadan & Tabaski",
+      "meaning": "dates selon la lune",
+      "family": "fetes",
+      "type": "scene",
+      "base": "#F1F4EA",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/tabaski.webp",
+      "scene": {
+        "svg": "svg/scenes/tabaski.svg",
+        "webp": "webp/scenes/tabaski.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true,
+      "availability": {
+        "mode": "remote",
+        "note": "Fenêtres fixées chaque année par configuration distante (calendrier lunaire)."
+      }
+    },
+    {
+      "id": "finannee",
+      "name": "Fin d'année",
+      "meaning": "Noël et Nouvel An",
+      "family": "fetes",
+      "type": "scene",
+      "base": "#FBF3E4",
+      "tone": "light",
+      "intensity_default": 100,
+      "thumbnail": "thumbnails/finannee.webp",
+      "scene": {
+        "svg": "svg/scenes/finannee.svg",
+        "webp": "webp/scenes/finannee.webp",
+        "viewbox": [
+          390,
+          700
+        ],
+        "webp_size": [
+          1560,
+          2800
+        ],
+        "fit": "cover",
+        "align": "center"
+      },
+      "intensity_adjustable": true,
+      "availability": {
+        "mode": "dates",
+        "from": "12-15",
+        "to": "01-07"
+      }
+    }
+  ]
+}

@@ -21,6 +21,23 @@ final _saleToRateProvider = FutureProvider.autoDispose
       }
     });
 
+/// La remise en main propre en attente du code, côté ACHETEUR, ou `null`.
+final _pendingHandoverProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>?, int>((ref, productId) async {
+      try {
+        final handover = await ref
+            .read(marketplaceRepositoryProvider)
+            .handover(productId);
+        return handover['role'] == 'buyer' &&
+                handover['status'] == 'PENDING' &&
+                handover['code'] != null
+            ? handover
+            : null;
+      } catch (_) {
+        return null;
+      }
+    });
+
 /// Assimé 19 · Invitation à noter, dans la discussion liée à l'annonce :
 /// « {vendeur} a indiqué que tu as acheté cet article pour … », des
 /// étoiles et « Noter la transaction ». Rien tant que le vendeur n'a pas
@@ -41,9 +58,43 @@ class AssimeRateInvitationCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = L.of(context);
+    // Vente en main propre : le vendeur a validé la remise, l'acheteur a
+    // un code à lui donner.
+    final pending = ref.watch(_pendingHandoverProvider(productId)).valueOrNull;
+    if (pending != null) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+        child: ModuleCard(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.assXCodeReady(pending['seller_name'] as String? ?? ''),
+                style: const TextStyle(fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              ModuleActionButton(
+                label: l.assXShowCode,
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          AssimeHandoverCodeScreen(productId: productId),
+                    ),
+                  );
+                  ref.invalidate(_pendingHandoverProvider(productId));
+                  ref.invalidate(_saleToRateProvider(productId));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final sale = ref.watch(_saleToRateProvider(productId)).valueOrNull;
     if (sale == null) return const SizedBox.shrink();
-    final l = L.of(context);
     final price = sale['final_price'];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),

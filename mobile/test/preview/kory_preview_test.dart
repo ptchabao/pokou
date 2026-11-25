@@ -429,6 +429,9 @@ void main() {
         _kory,
         overrides: _data(),
         after: () async {
+          // La recherche s'ouvre à la loupe de l'en-tête.
+          await tester.tap(find.byTooltip('Rechercher'));
+          await tester.pump(const Duration(milliseconds: 600));
           await tester.enterText(find.byType(TextField), 'anniversaire');
         },
       ),

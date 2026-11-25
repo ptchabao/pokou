@@ -59,6 +59,11 @@ class PokouSyncEngine extends StateNotifier<PokouSyncState> {
     'message:status',
     'message:deleted',
     'group:message:new',
+    // Une réaction ou une vue unique ouverte, rattrapées après une coupure :
+    // sans projection, l'expéditeur ne voyait jamais la réaction reçue
+    // pendant qu'il était hors ligne.
+    'message:reaction',
+    'message:viewed',
   ];
 
   void _onConnectionChanged(bool connected) {
@@ -191,7 +196,7 @@ class PokouSyncEngine extends StateNotifier<PokouSyncState> {
                   directMessage: opened,
                 ) ||
                 madeProgress;
-          case 'message:status':
+          case 'message:status' || 'message:reaction' || 'message:viewed':
             final raw = event.payload['message'];
             if (raw is! Map<String, dynamic>) continue;
             madeProgress =

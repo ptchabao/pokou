@@ -6,7 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/pokou_sheet.dart';
 
 /// Ce qu'on peut joindre (Discussions · 2).
-enum AttachChoice { gallery, camera, document, poll, kory }
+enum AttachChoice { gallery, camera, document, location, contact, poll, kory }
 
 /// Discussions · 2 — « Joindre à {nom} » : quatre pastilles en ligne et la
 /// note sur la compression.
@@ -21,6 +21,12 @@ enum AttachChoice { gallery, camera, document, poll, kory }
 /// - [koryGroupsOnlyNote] : en discussion à deux là où Kory est ouvert, la
 ///   note rappelle que la cagnotte se crée dans un groupe.
 ///
+/// - [offerContact] : partager un contact — en discussion à deux SEULEMENT.
+///   Donner le numéro d'un tiers à tout un groupe, c'est le donner à des
+///   gens qu'il ne connaît pas (le serveur le refuse aussi).
+///
+/// La position, elle, est proposée partout : discussion à deux et groupe.
+///
 /// La galerie propose photos ET vidéos : la maquette n'a qu'une pastille
 /// « Galerie », et la distinction se fait sur le fichier choisi.
 Future<AttachChoice?> showAttachSheet(
@@ -28,6 +34,7 @@ Future<AttachChoice?> showAttachSheet(
   required String targetName,
   bool offerPoll = false,
   bool offerKory = false,
+  bool offerContact = false,
   bool koryGroupsOnlyNote = false,
 }) {
   return showPokouSheet<AttachChoice>(
@@ -55,6 +62,19 @@ Future<AttachChoice?> showAttachSheet(
           l.convAttachDocument,
           const Color(0xFF7A6A5C),
         ),
+        (
+          AttachChoice.location,
+          Icons.location_on_outlined,
+          l.chatXAttachLocation,
+          const Color(0xFF2E8B57),
+        ),
+        if (offerContact)
+          (
+            AttachChoice.contact,
+            Icons.person_outline,
+            l.chatXAttachContact,
+            const Color(0xFF3F6FB5),
+          ),
         if (offerPoll)
           (
             AttachChoice.poll,
@@ -110,20 +130,28 @@ Future<AttachChoice?> showAttachSheet(
                 ],
               ),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final (choice, icon, label, tint) in options)
-                    Expanded(
-                      child: _AttachPill(
-                        icon: icon,
-                        label: label,
-                        tint: tint,
-                        onTap: () => Navigator.pop(sheetContext, choice),
-                      ),
-                    ),
-                ],
+              // Quatre pastilles par ligne : au-delà, les libellés se
+              // tassaient jusqu'à devenir illisibles sur un petit écran.
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final width = constraints.maxWidth / 4;
+                  return Wrap(
+                    alignment: WrapAlignment.start,
+                    runSpacing: 6,
+                    children: [
+                      for (final (choice, icon, label, tint) in options)
+                        SizedBox(
+                          width: width,
+                          child: _AttachPill(
+                            icon: icon,
+                            label: label,
+                            tint: tint,
+                            onTap: () => Navigator.pop(sheetContext, choice),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 14),
               Container(

@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core import report_crypto
 from app.core.database import get_db
-from app.models import Community, Contact, DirectMessage, Group, GroupMember, GroupMessage, MediaAsset, MessageStatus, User
+from app.models import Community, Contact, DirectConversationClear, DirectMessage, Group, GroupMember, GroupMessage, MediaAsset, MessageStatus, User
 from app.utils.identity import est_certifie, forme_du_badge, nom_affiche
 from app.core.security import get_current_user
 
@@ -718,11 +718,37 @@ def _latest_group_messages(db: Session, group_ids: set) -> Dict[int, Any]:
     return {row.group_id: row for row in rows}
 
 
-def _unread_direct_counts(db: Session, user_id: int, partner_ids: set) -> Dict[int, int]:
+def _unread_direct_counts(
+    db: Session,
+    user_id: int,
+    partner_ids: set,
+    cleared: Optional[Dict[int, datetime]] = None,
+) -> Dict[int, int]:
     """Non-lus par interlocuteur, en une requête agrégée côté base — même
-    motif que pour les derniers messages."""
+    motif que pour les derniers messages. [cleared] : les discussions
+    effacées pour moi, dont les non-lus antérieurs ne comptent plus."""
     if not partner_ids:
         return {}
+    if cleared:
+        partner_ids = set(partner_ids)
+        counts = _unread_direct_counts(db, user_id, partner_ids - set(cleared))
+        for partner_id, since in cleared.items():
+            if partner_id not in partner_ids:
+                continue
+            count = (
+                db.query(func.count(DirectMessage.id))
+                .filter(
+                    DirectMessage.recipient_id == user_id,
+                    DirectMessage.sender_id == partner_id,
+                    DirectMessage.status != MessageStatus.READ,
+                    DirectMessage.created_at > since,
+                    _not_expired(),
+                )
+                .scalar()
+            )
+            if count:
+                counts[partner_id] = count
+        return counts
     rows = (
         db.query(DirectMessage.sender_id, func.count(DirectMessage.id))
         .filter(
@@ -744,7 +770,9 @@ def _sender_names(db: Session, sender_ids: set) -> Dict[int, str]:
     if not sender_ids:
         return {}
     rows = db.query(User.id, User.full_name, User.phone).filter(User.id.in_(sender_ids)).all()
-    return {row[0]: (row[1] or row[2] or f"#{row[0]}") for row in rows}
+    # Ces noms servent aussi aux aperçus de GROUPE : jamais le numéro en
+    # clair (voir identity.nom_sans_numero).
+    return {row[0]: (row[1] or masked_phone(row[2]) or f"#{row[0]}") for row in rows}
 
 
 def _last_message_payload(row: Any, user_id: int, sender_name: Optional[str]) -> dict:
@@ -871,9 +899,24 @@ async def list_conversations(
         else []
     )
 
-    latest_direct = _latest_direct_messages(db, user_id, partner_ids | stranger_ids)
+    # « Supprimer la discussion » (pour moi) : la date à partir de laquelle
+    # chaque discussion à deux recommence. Une discussion dont le dernier
+    # message est antérieur sort de la liste ; ses non-lus d'avant ne
+    # comptent plus.
+    cleared = dict(
+        db.query(DirectConversationClear.other_user_id, DirectConversationClear.cleared_at)
+        .filter(DirectConversationClear.user_id == user_id)
+        .all()
+    )
+    latest_direct = {
+        partner_id: row
+        for partner_id, row in _latest_direct_messages(
+            db, user_id, partner_ids | stranger_ids
+        ).items()
+        if partner_id not in cleared or row.created_at > cleared[partner_id]
+    }
     latest_group = _latest_group_messages(db, group_ids)
-    unread_direct = _unread_direct_counts(db, user_id, partner_ids | stranger_ids)
+    unread_direct = _unread_direct_counts(db, user_id, partner_ids | stranger_ids, cleared)
     names = _sender_names(
         db,
         {row.sender_id for row in latest_direct.values()}

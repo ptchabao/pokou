@@ -281,3 +281,31 @@ class SellerVerificationApplication(Base):
     reviewed_at = Column(DateTime, nullable=True)
 
     identity_media = relationship("MediaAsset")
+
+
+class MarketplaceHandover(Base):
+    """Vente en main propre (Assimé) : le vendeur, en face de l'acheteur,
+    touche « Commande validée et livrée » ; l'acheteur reçoit un CODE et le
+    lui dit ; le vendeur le saisit pour « Clôturer la vente ».
+
+    Le code prouve que l'acheteur était là et a reçu l'article : sans lui,
+    un vendeur pourrait déclarer n'importe qui acheteur (et s'offrir une
+    note). Usage unique, valable `HANDOVER_TTL_MINUTES`, et
+    `HANDOVER_MAX_ATTEMPTS` essais — au-delà, il faut recommencer.
+    """
+    __tablename__ = "marketplace_handovers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("marketplace_products.id", ondelete="CASCADE"), nullable=False, index=True)
+    seller_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    buyer_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    #: Le code à 6 chiffres. Montré à l'acheteur seulement, effacé dès qu'il
+    #: a servi ou que la remise est close.
+    code = Column(String(6), nullable=True)
+    final_price = Column(Integer, nullable=True)
+    #: PENDING | DONE | CANCELLED | EXPIRED | LOCKED (trop d'essais)
+    status = Column(String(10), default="PENDING", nullable=False, index=True)
+    attempts = Column(Integer, default=0, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    closed_at = Column(DateTime, nullable=True)

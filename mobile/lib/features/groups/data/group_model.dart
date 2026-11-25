@@ -307,7 +307,17 @@ class GroupMessage {
     this.deletedAt,
     this.originalContent,
     this.forwardScore = 0,
+    this.viewOnce = false,
+    this.viewedAt,
   });
+
+  /// Photo ou vidéo à vue unique : chaque membre l'ouvre une fois.
+  final bool viewOnce;
+
+  /// Quand JE l'ai ouverte (chacun la consomme pour soi) — `null` tant que
+  /// non ouverte.
+  final DateTime? viewedAt;
+  bool get isViewed => viewedAt != null;
 
   /// Transfert : 0 pour un message d'origine, sinon le nombre de transferts
   /// (voir DirectMessage.forwardScore).
@@ -410,6 +420,8 @@ class GroupMessage {
     'payload': payload,
     'poll': poll?.toJson(),
     'forward_score': forwardScore,
+    'view_once': viewOnce,
+    'viewed_at': viewedAt?.toUtc().toIso8601String(),
   };
 
   factory GroupMessage.fromJson(Map<String, dynamic> json) {
@@ -462,6 +474,8 @@ class GroupMessage {
       poll: pollJson != null ? PollData.fromJson(pollJson) : null,
       pendingMedia: enAttente == null ? null : PendingMedia.fromJson(enAttente),
       forwardScore: json['forward_score'] as int? ?? 0,
+      viewOnce: json['view_once'] as bool? ?? false,
+      viewedAt: tryParseServerTime(json['viewed_at']),
     );
   }
 
@@ -482,6 +496,7 @@ class GroupMessage {
     Map<String, dynamic>? payload,
     MediaMeta? media,
     MediaKey? mediaKey,
+    DateTime? viewedAt,
   }) {
     return GroupMessage(
       id: id,
@@ -510,6 +525,8 @@ class GroupMessage {
       deletedAt: deletedAt ?? this.deletedAt,
       originalContent: originalContent,
       forwardScore: forwardScore,
+      viewOnce: viewOnce,
+      viewedAt: viewedAt ?? this.viewedAt,
     );
   }
 

@@ -6,11 +6,11 @@ from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, true
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.database import get_db
-from app.models import Contact, MarketplaceProduct, DirectMessage, DirectMessagePin, DirectProofMode, GroupMember, MediaAsset, MessageReaction, MessageStatus, MessageType, Poll, PollOption, User
+from app.models import Contact, MarketplaceProduct, DirectConversationClear, DirectMessage, DirectMessagePin, DirectProofMode, GroupMember, MediaAsset, MessageReaction, MessageStatus, MessageType, Poll, PollOption, User
 from app.services.media import sticker_service
 from app.services.auth.otp_service import OTPInvalidError, normalize_phone
 from app.utils.editing import MESSAGE_EDIT_WINDOW, MESSAGE_EDIT_WINDOW_MINUTES
@@ -18,7 +18,7 @@ from app.utils.identity import nom_affiche
 from app.core.security import get_current_user
 from app.api.v1.modules import streak_lock
 from app.api.v1.messaging.ws import manager
-from app.services.messaging import notification_policy
+from app.services.messaging import notification_policy, poll_window
 from app.services.messaging.sync_service import append_sync_event, public_event_id
 from app.services.notifications.push_service import send_push
 
@@ -46,6 +46,9 @@ REPLY_PREVIEW_LENGTH = 120
 # Seuls ces types se prêtent à la vue unique : un document ou une note vocale
 # se rejouent hors de l'app de toute façon, la promesse serait mensongère.
 VIEW_ONCE_TYPES = (MessageType.IMAGE, MessageType.VIDEO)
+
+#: Types sans pièce jointe dont tout le contenu est dans le chiffré.
+SEALED_RICH_TYPES = (MessageType.LOCATION, MessageType.CONTACT)
 
 
 class MessageCreate(BaseModel):
@@ -182,6 +185,7 @@ def _serialize_poll(poll: Poll, viewer_id: Optional[int]) -> dict:
         "reveals_voters": True,
         "options": options,
         "total_voters": len(everyone),
+        **poll_window.serialize_for(poll.vote_windows, viewer_id),
     }
 
 
@@ -397,6 +401,25 @@ def _conversation_pair(user_id: int, other_id: int):
         and_(DirectMessage.sender_id == user_id, DirectMessage.recipient_id == other_id),
         and_(DirectMessage.sender_id == other_id, DirectMessage.recipient_id == user_id),
     )
+
+
+def cleared_at_for(db: Session, user_id: int, other_id: int) -> Optional[datetime]:
+    """La date à partir de laquelle [user_id] a effacé sa discussion avec
+    [other_id] (« Supprimer la discussion », pour soi seulement), ou None."""
+    return (
+        db.query(DirectConversationClear.cleared_at)
+        .filter(
+            DirectConversationClear.user_id == user_id,
+            DirectConversationClear.other_user_id == other_id,
+        )
+        .scalar()
+    )
+
+
+def _after_clear(db: Session, user_id: int, other_id: int):
+    """Filtre « ce que je n'ai pas effacé » d'une discussion à deux."""
+    cleared = cleared_at_for(db, user_id, other_id)
+    return DirectMessage.created_at > cleared if cleared else true()
 
 
 def _get_participating_message(db: Session, message_id: str, user_id: int) -> DirectMessage:
@@ -655,7 +678,19 @@ async def send_message(
             )
 
     media_asset = None
-    if message_type == MessageType.TEXT:
+    if message_type in SEALED_RICH_TYPES:
+        # Position et fiche contact passent par ici quand la conversation
+        # est chiffrée : coordonnées, nom et numéro du tiers voyagent dans
+        # le chiffré, et le serveur n'en voit rien. En clair, c'est la route
+        # dédiée (polls.py) qui les reçoit — ici, on n'accepte que le scellé.
+        if not encrypted:
+            raise HTTPException(
+                status_code=400,
+                detail="Une position ou une fiche contact doit être chiffrée",
+            )
+        if payload.media_asset_id or payload.view_once:
+            raise HTTPException(status_code=400, detail="Ce type de message ne porte pas de pièce jointe")
+    elif message_type == MessageType.TEXT:
         # Un message chiffré porte son texte dans le ciphertext ; exiger
         # `content` en plus reviendrait à demander une copie en clair de ce
         # qu'on vient de chiffrer.
@@ -876,6 +911,7 @@ async def search_messages(
             else or_(DirectMessage.sender_id == user_id, DirectMessage.recipient_id == user_id),
             DirectMessage.content.ilike(f"%{escaped}%", escape="\\"),
             _not_expired(),
+            _after_clear(db, user_id, contact_user_id) if contact_user_id is not None else true(),
         )
         .order_by(DirectMessage.created_at.desc())
         .limit(limit)
@@ -935,6 +971,8 @@ async def get_conversation(
     query = db.query(DirectMessage).filter(
         _conversation_pair(user_id, contact_user_id),
         _not_expired(),
+        # Effacée pour moi : l'historique repart de là, chez moi seulement.
+        _after_clear(db, user_id, contact_user_id),
     )
     # Le comptage garde la requête NUE : les chargements anticipés n'ont pas
     # de sens dans un count() et y ajouteraient des jointures pour rien.
@@ -959,6 +997,45 @@ async def get_conversation(
         # besoin.
         "pins": _pins_payload(db, user_id, contact_user_id) if skip == 0 else None,
     }
+
+
+@router.delete("/{contact_user_id}/history")
+async def clear_history_for_me(
+    contact_user_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """« Supprimer la discussion » — chez MOI seulement.
+
+    Rien n'est effacé chez l'autre : les messages sont des lignes partagées,
+    et un message du mode preuve doit justement rester chez lui. On écrit la
+    date du geste ; l'historique et la liste des discussions ne montrent plus
+    rien d'antérieur. Le prochain message, d'un côté ou de l'autre, fait
+    réapparaître la discussion, vide de ce qui précède.
+
+    Idempotent : rejouer la requête avance la date, sans erreur. Aucune
+    vérification d'existence de la personne : écrire une date pour un
+    identifiant inconnu n'apprend rien à personne et ne montre rien."""
+    user_id = current_user["user_id"]
+    if contact_user_id == user_id:
+        raise HTTPException(status_code=400, detail="Discussion invalide")
+    if db.query(User.id).filter(User.id == contact_user_id).first() is None:
+        raise HTTPException(status_code=404, detail="Discussion introuvable")
+    now = datetime.utcnow()
+    row = (
+        db.query(DirectConversationClear)
+        .filter(
+            DirectConversationClear.user_id == user_id,
+            DirectConversationClear.other_user_id == contact_user_id,
+        )
+        .first()
+    )
+    if row is None:
+        db.add(DirectConversationClear(user_id=user_id, other_user_id=contact_user_id, cleared_at=now))
+    else:
+        row.cleared_at = now
+    db.commit()
+    return {"cleared_at": now.isoformat()}
 
 
 # ─── Épingles ─────────────────────────────────────────────────────────────────
@@ -1254,6 +1331,52 @@ async def edit_message(
     return _serialize(message, user_id)
 
 
+def reaction_push_body(reactor_name: str, emoji: str) -> str:
+    """« Awa a réagi ❤️ à ton message » — le NOM et l'emoji, jamais le texte
+    du message : il est chiffré, et même en clair il n'a rien à faire chez
+    Firebase ni sur un écran verrouillé (voir _push_preview)."""
+    return f"{reactor_name} a réagi {emoji} à ton message"
+
+
+def _push_reaction(db: Session, message: DirectMessage, *, reactor_id: int, emoji: str) -> None:
+    """Prévient l'AUTEUR du message qu'on y a réagi.
+
+    La règle de dérangement est celle de notification_policy : une réaction
+    dans une conversation en sourdine ne part pas du tout. Côté appareil, le
+    réglage « Réactions » (Réglages › Notifications) et la conversation
+    ouverte décident de la présentation — `type: reaction` les y conduit."""
+    author_id = message.sender_id
+    decision = notification_policy.decide(
+        db,
+        recipient_id=author_id,
+        event=notification_policy.NotificationEvent.REACTION,
+        sender_id=reactor_id,
+    )
+    if not decision.deliver:
+        return
+    reactor = db.query(User).filter(User.id == reactor_id).first()
+    author_contact = db.query(Contact).filter(
+        Contact.owner_user_id == author_id, Contact.contact_user_id == reactor_id
+    ).first()
+    reactor_name = nom_affiche(
+        reactor, author_contact.display_name if author_contact else None, repli="Pokou"
+    )
+    send_push(
+        db,
+        author_id,
+        title=reactor_name,
+        body=reaction_push_body(reactor_name, emoji),
+        data={
+            "type": notification_policy.NotificationEvent.REACTION.value,
+            "contact_user_id": str(reactor_id),
+            "contact_name": reactor_name,
+            "message_id": str(message.id),
+            "emoji": emoji,
+            **decision.as_payload(),
+        },
+    )
+
+
 @router.put("/{message_id}/reaction")
 async def set_reaction(
     message_id: str,
@@ -1270,11 +1393,20 @@ async def set_reaction(
     existing = db.query(MessageReaction).filter(
         MessageReaction.message_id == message.id, MessageReaction.user_id == user_id
     ).first()
+    # Un même emoji reposé (double appui, geste rejoué par la file hors
+    # ligne) ne repréviens pas l'auteur.
+    changed = existing is None or existing.emoji != payload.emoji
     if existing:
         existing.emoji = payload.emoji
     else:
         db.add(MessageReaction(message_id=message.id, user_id=user_id, emoji=payload.emoji))
     other_id = message.recipient_id if message.sender_id == user_id else message.sender_id
+    # La session ne vide pas ses écritures d'elle-même (autoflush coupé) :
+    # sans ce flush, l'événement DURABLE était calculé avant la réaction
+    # qu'il annonce, et l'appareil qui le rattrapait plus tard n'y voyait
+    # rien.
+    db.flush()
+    db.expire(message, ["reactions"])
     event = {"type": "message:reaction", "message": _serialize(message, other_id)}
     sync_event = append_sync_event(db, other_id, event)
     db.commit()
@@ -1283,6 +1415,10 @@ async def set_reaction(
     await _notify_other_party(
         message, user_id, "message:reaction", sync_event_id=public_event_id(db, sync_event.id)
     )
+    # Réagir au message de QUELQU'UN D'AUTRE le prévient ; réagir au sien,
+    # non — personne n'a besoin d'apprendre qu'il a réagi lui-même.
+    if changed and message.sender_id != user_id:
+        _push_reaction(db, message, reactor_id=user_id, emoji=payload.emoji)
     return _serialize(message, user_id)
 
 
@@ -1303,6 +1439,8 @@ async def remove_reaction(
     if existing:
         db.delete(existing)
     other_id = message.recipient_id if message.sender_id == user_id else message.sender_id
+    db.flush()
+    db.expire(message, ["reactions"])
     event = {"type": "message:reaction", "message": _serialize(message, other_id)}
     sync_event = append_sync_event(db, other_id, event)
     db.commit()
@@ -1398,6 +1536,12 @@ async def forward_message(
     # La copie arriverait vide — ou, pour une pièce jointe, comme un bloc
     # que personne ne peut ouvrir. L'appareil, qui détient le clair, le
     # renvoie comme un nouveau message.
+    # Une vue unique ne se transfère pas, ni par l'expéditeur ni par le
+    # destinataire : la copie deviendrait un média ordinaire, consultable à
+    # volonté chez un tiers. Refusé AVANT le cas chiffré, pour que la raison
+    # donnée soit la bonne.
+    if source.view_once:
+        raise HTTPException(status_code=403, detail="Une vue unique ne peut pas être transférée")
     if source.encryption:
         raise HTTPException(
             status_code=409,

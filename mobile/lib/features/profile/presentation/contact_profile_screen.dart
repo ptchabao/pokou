@@ -21,12 +21,14 @@ import '../../groups/presentation/group_conversation_screen.dart';
 import '../../marketplace/data/product_model.dart';
 import '../../marketplace/presentation/product_detail_screen.dart';
 import '../../messaging/presentation/conversation_search_screen.dart';
+import '../../messaging/presentation/message_links.dart' show CopyablePhone;
 import '../../messaging/presentation/report_sheet.dart';
 import '../data/contact_profile_model.dart';
 import 'profile_screen.dart';
 import 'pro_profile_view.dart';
 import '../../../core/widgets/identity_avatar.dart';
 import '../../../core/widgets/media_image.dart';
+import '../../../core/widgets/profile_photo_viewer.dart';
 import '../../../core/widgets/verified_badge.dart';
 import '../../../core/widgets/pokou_context_menu.dart';
 import '../../../core/widgets/pokou_sheet.dart';
@@ -40,10 +42,22 @@ class ContactProfileScreen extends ConsumerStatefulWidget {
     super.key,
     required this.contactUserId,
     required this.contactName,
+    this.fromConversation = false,
+    this.proofOn = false,
+    this.canExportProof = false,
   });
 
   final int contactUserId;
   final String contactName;
+
+  /// Ouverte depuis la discussion à deux (« ⋮ › Plus ») : la fiche devient
+  /// l'écran de contrôle de la discussion. Ses gestes propres à la
+  /// discussion (aller à un message trouvé, messages importants, mode
+  /// preuve) REFERMENT la fiche avec un [ContactProfileAction], que la
+  /// discussion exécute — c'est elle qui tient le fil et son état.
+  final bool fromConversation;
+  final bool proofOn;
+  final bool canExportProof;
 
   @override
   ConsumerState<ContactProfileScreen> createState() =>
@@ -185,6 +199,24 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
     }
   }
 
+  /// La loupe : cherche dans les messages DÉCHIFFRÉS de cet appareil (voir
+  /// ConversationSearchScreen). Depuis la discussion, le message choisi
+  /// referme la fiche et la discussion défile jusqu'à lui en le surlignant.
+  Future<void> _search(String displayName) async {
+    final messageId = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => ConversationSearchScreen(
+          contactUserId: widget.contactUserId,
+          contactName: displayName,
+        ),
+      ),
+    );
+    if (messageId == null || !mounted) return;
+    if (widget.fromConversation) {
+      Navigator.of(context).pop(ContactProfileAction.goTo(messageId));
+    }
+  }
+
   /// La ligne de carnet de cette personne — c'est elle qui porte la
   /// sourdine (PUT /conversations/mute, `kind: contact`).
   int? _contactRowId() {
@@ -279,6 +311,7 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
       about: profile.about,
       avatar: profile.avatar,
       isBlocked: blocked,
+      phoneHidden: profile.phoneHidden,
       isContact: profile.isContact,
       isVerified: profile.isVerified,
       sharedMedia: profile.sharedMedia,
@@ -414,12 +447,23 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
+                    // Toucher la photo l'ouvre en plein écran, sans
+                    // capture d'écran possible (voir openProfilePhoto).
                     Center(
-                      child: IdentityAvatar(
-                        userId: widget.contactUserId,
-                        avatar: profile?.avatar,
-                        displayName: displayName,
-                        size: 88,
+                      child: GestureDetector(
+                        onTap: profile?.avatar == null
+                            ? null
+                            : () => openProfilePhoto(
+                                context,
+                                avatar: profile!.avatar!,
+                                title: displayName,
+                              ),
+                        child: IdentityAvatar(
+                          userId: widget.contactUserId,
+                          avatar: profile?.avatar,
+                          displayName: displayName,
+                          size: 88,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -464,6 +508,43 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                         ),
                       ),
                     ],
+                    if (profile != null) ...[
+                      const SizedBox(height: 4),
+                      // Le numéro, seulement si la personne le montre (le
+                      // serveur ne l'envoie pas sinon) : toucher pour
+                      // appeler, appui long pour copier.
+                      if (profile.phone != null && !profile.phoneHidden)
+                        Center(
+                          child: CopyablePhone(
+                            phone: profile.phone!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppColors.accentPrimaryDark,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.visibility_off_outlined,
+                              size: 14,
+                              color: AppColors.textMuted,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              L.of(context).chatXPhoneHidden,
+                              style: TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                     if (_error != null) ...[
                       const SizedBox(height: 16),
                       Text(
@@ -500,14 +581,7 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                           _CircleAction(
                             icon: Icons.search,
                             label: L.of(context).actionSearch,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ConversationSearchScreen(
-                                  contactUserId: widget.contactUserId,
-                                  contactName: displayName,
-                                ),
-                              ),
-                            ),
+                            onTap: () => _search(displayName),
                           ),
                           if (!profile.isContact && profile.phone != null) ...[
                             const SizedBox(width: 24),
@@ -578,6 +652,13 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                           ),
                         ),
                       ],
+                      if (widget.fromConversation) ...[
+                        const SizedBox(height: 16),
+                        _ConversationControls(
+                          proofOn: widget.proofOn,
+                          canExportProof: widget.canExportProof,
+                        ),
+                      ],
                       // Discussions · 7 — « Bloquer » toujours disponible :
                       // le serveur crée la ligne nécessaire pour un inconnu
                       // (conversations.py::_contact_for_block).
@@ -616,6 +697,73 @@ class _ContactProfileScreenState extends ConsumerState<ContactProfileScreen> {
                   ],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+/// Ce que la fiche demande à la discussion d'où elle a été ouverte.
+class ContactProfileAction {
+  const ContactProfileAction._(this.kind, [this.messageId]);
+
+  const ContactProfileAction.goTo(String messageId) : this._('goto', messageId);
+  static const starred = ContactProfileAction._('starred');
+  static const toggleProof = ContactProfileAction._('proof');
+  static const exportProof = ContactProfileAction._('export');
+
+  final String kind;
+  final String? messageId;
+}
+
+/// Les réglages de la discussion elle-même, rangés dans la fiche depuis que
+/// le ⋮ n'a plus que trois entrées.
+class _ConversationControls extends StatelessWidget {
+  const _ConversationControls({
+    required this.proofOn,
+    required this.canExportProof,
+  });
+
+  final bool proofOn;
+  final bool canExportProof;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    void close(ContactProfileAction action) =>
+        Navigator.of(context).pop(action);
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.card,
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.star_outline_rounded),
+            title: Text(l.msgStarTitle, style: const TextStyle(fontSize: 14)),
+            onTap: () => close(ContactProfileAction.starred),
+          ),
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: Text(
+              proofOn ? l.proofModeDisable : l.proofModeEnable,
+              style: const TextStyle(fontSize: 14),
+            ),
+            subtitle: proofOn
+                ? null
+                : Text(
+                    l.proofModeDirectHint,
+                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  ),
+            onTap: () => close(ContactProfileAction.toggleProof),
+          ),
+          if (proofOn && canExportProof)
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_outlined),
+              title: Text(l.proofExport, style: const TextStyle(fontSize: 14)),
+              onTap: () => close(ContactProfileAction.exportProof),
+            ),
+        ],
       ),
     );
   }

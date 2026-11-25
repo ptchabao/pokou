@@ -26,13 +26,17 @@ type Config = {
   pharmacy_yearly_price: number | null
   kory_plus_fee_ht: number
   honam_cities: string[]
-  emergency_numbers: { police?: string; pompiers?: string; samu?: string }
+  emergency_numbers: { police?: string; pompiers?: string; samu?: string; gendarmerie?: string; unique?: string }
   modules: string[]
+  test_only?: boolean
+  test_payments?: boolean
+  honam_demo_pharmacies?: boolean
+  discover_video_url?: string | null
 }
 
 type CountryRow = {
   code: string; builtin: boolean; has_override: boolean; updated_at: string | null
-  currency: string; vat_rate: number; modules: string[]
+  currency: string; vat_rate: number; modules: string[]; test_only?: boolean
 }
 
 type CountryDetail = {
@@ -42,8 +46,16 @@ type CountryDetail = {
 
 type Form = {
   currency: string; vat: string; delivery: string; monthly: string; yearly: string; koryFee: string
-  cities: string; police: string; pompiers: string; samu: string; modules: string[]
+  cities: string; police: string; pompiers: string; samu: string; gendarmerie: string; unique: string
+  modules: string[]; testOnly: boolean; testPayments: boolean; demoPharmacies: boolean; video: string
 }
+
+const EMERGENCY_KEYS = ["police", "pompiers", "samu", "gendarmerie", "unique"] as const
+const EMERGENCY_LABELS: Record<(typeof EMERGENCY_KEYS)[number], string> = {
+  police: "Police", pompiers: "Pompiers", samu: "SAMU", gendarmerie: "Gendarmerie", unique: "Numéro unique",
+}
+/** Pays de lancement : jamais de paiements simulés (refusé aussi par l'API). */
+const PRODUCTION = new Set(["TG", "CI"])
 
 const MODULE_LABELS: Record<string, string> = {
   discussions: "Discussions", kory: "Kory", kory_plus: "Kory Plus (tontine)", honam: "Honam",
@@ -69,7 +81,10 @@ function toForm(c: Config): Form {
     cities: (c.honam_cities ?? []).join("\n"),
     police: c.emergency_numbers?.police ?? "", pompiers: c.emergency_numbers?.pompiers ?? "",
     samu: c.emergency_numbers?.samu ?? "",
+    gendarmerie: c.emergency_numbers?.gendarmerie ?? "", unique: c.emergency_numbers?.unique ?? "",
     modules: c.modules ?? [],
+    testOnly: !!c.test_only, testPayments: !!c.test_payments, demoPharmacies: !!c.honam_demo_pharmacies,
+    video: c.discover_video_url ?? "",
   }
 }
 
@@ -97,12 +112,15 @@ function validate(f: Form): { body?: Config; errors: Record<string, string> } {
   if (cities.some((c) => c.length < 2 || c.length > 60)) errors.cities = "Chaque ville : 2 à 60 caractères"
   if (cities.length > 50) errors.cities = "50 villes au plus"
   const emergency: Config["emergency_numbers"] = {}
-  for (const k of ["police", "pompiers", "samu"] as const) {
+  for (const k of EMERGENCY_KEYS) {
     const v = f[k].trim()
     if (v === "") continue
     if (!/^\d{2,10}$/.test(v)) errors[k] = "2 à 10 chiffres"
     else emergency[k] = v
   }
+  const video = f.video.trim()
+  if (video && !/^https:\/\/\S+$/.test(video)) errors.video = "Adresse en https://"
+  if (video.length > 300) errors.video = "300 caractères au plus"
   if (Object.keys(errors).length) return { errors }
   return {
     errors,
@@ -110,8 +128,10 @@ function validate(f: Form): { body?: Config; errors: Record<string, string> } {
       currency: f.currency.trim(), vat_rate: Math.round(vat * 100) / 10000, delivery_price: delivery,
       pharmacy_monthly_price: monthly, pharmacy_yearly_price: yearly, kory_plus_fee_ht: koryFee,
       honam_cities: cities,
-      emergency_numbers: { police: emergency.police ?? null, pompiers: emergency.pompiers ?? null, samu: emergency.samu ?? null } as Config["emergency_numbers"],
+      emergency_numbers: Object.fromEntries(EMERGENCY_KEYS.map((k) => [k, emergency[k] ?? null])) as Config["emergency_numbers"],
       modules: f.modules,
+      test_only: f.testOnly, test_payments: f.testOnly && f.testPayments,
+      honam_demo_pharmacies: f.demoPharmacies, discover_video_url: video || null,
     },
   }
 }
@@ -189,6 +209,7 @@ export default function CountriesPage() {
           ) },
           { header: "Devise", cell: (c) => c.currency },
           { header: "TVA", cell: (c) => `${Math.round(c.vat_rate * 10000) / 100} %` },
+          { header: "Test", cell: (c) => c.test_only ? <Badge variant="destructive">Pays de test</Badge> : null },
           { header: "Réglage", cell: (c) => c.has_override
             ? <Badge>Personnalisé</Badge>
             : <span className="text-muted-foreground">Par défaut</span> },
@@ -247,16 +268,45 @@ export default function CountriesPage() {
               <Field id="cities" label="Villes Honam" error={errors.cities} hint="Une ville par ligne. Ailleurs, l'offre coursier laisse place à la liste d'attente.">
                 <Textarea id="cities" rows={4} value={form.cities} onChange={(e) => set({ cities: e.target.value })} />
               </Field>
+              <div className="grid gap-1.5">
+                <span className="font-medium">Numéros d&apos;urgence (surcharge)</span>
+                <p className="text-xs text-muted-foreground">
+                  Vide : le numéro de la liste de référence (fichier backend/app/data/emergency_numbers.csv) s&apos;applique.
+                  Rempli : il la remplace pour ce service.
+                </p>
+              </div>
               <div className="grid grid-cols-3 gap-3">
-                <Field id="police" label="Police" error={errors.police}>
-                  <Input id="police" inputMode="numeric" value={form.police} onChange={(e) => set({ police: e.target.value })} />
-                </Field>
-                <Field id="pompiers" label="Pompiers" error={errors.pompiers}>
-                  <Input id="pompiers" inputMode="numeric" value={form.pompiers} onChange={(e) => set({ pompiers: e.target.value })} />
-                </Field>
-                <Field id="samu" label="SAMU" error={errors.samu}>
-                  <Input id="samu" inputMode="numeric" value={form.samu} onChange={(e) => set({ samu: e.target.value })} />
-                </Field>
+                {EMERGENCY_KEYS.map((k) => (
+                  <Field key={k} id={k} label={EMERGENCY_LABELS[k]} error={errors[k]}>
+                    <Input id={k} inputMode="numeric" value={form[k]} onChange={(e) => set({ [k]: e.target.value } as Partial<Form>)} />
+                  </Field>
+                ))}
+              </div>
+              <Separator />
+              <Field id="video" label="Vidéo « Découvrir Pokou »" error={errors.video}
+                hint="Lien YouTube (https://…). Vide : l'entrée « Découvrir Pokou » de l'Accueil est cachée.">
+                <Input id="video" value={form.video} placeholder="https://www.youtube.com/watch?v=…" onChange={(e) => set({ video: e.target.value })} />
+              </Field>
+              <Separator />
+              <div className="grid gap-2">
+                <span className="font-medium">Tests</span>
+                <label className="flex items-start gap-2">
+                  <Checkbox checked={form.testOnly} onCheckedChange={(v) => set({ testOnly: !!v, testPayments: v ? form.testPayments : false })} />
+                  <span>Pays de test<span className="block text-xs text-muted-foreground">Ouvert pour les testeurs seulement. Décocher pour le couper.</span></span>
+                </label>
+                <label className="flex items-start gap-2">
+                  <Checkbox checked={form.testPayments} disabled={!manage || !form.testOnly || PRODUCTION.has(d.code)}
+                    onCheckedChange={(v) => set({ testPayments: !!v })} />
+                  <span>Paiements simulés<span className="block text-xs text-muted-foreground">
+                    Abonnement officine, crédit, coursier et Pokou certifié activés sans Mobile Money, signalés « mode test » dans l&apos;app. Jamais au Togo ni en Côte d&apos;Ivoire.
+                  </span></span>
+                </label>
+                <label className="flex items-start gap-2">
+                  <Checkbox checked={form.demoPharmacies} onCheckedChange={(v) => set({ demoPharmacies: !!v })} />
+                  <span>Officines de démonstration<span className="block text-xs text-muted-foreground">
+                    Les officines « Démo » créées par le seed apparaissent dans l&apos;annuaire Honam de ce pays.
+                  </span></span>
+                </label>
               </div>
             </fieldset>
           ) : (

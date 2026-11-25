@@ -10,6 +10,7 @@ import '../../status/presentation/status_privacy_screen.dart';
 import '../data/privacy_repository.dart';
 import '../../contacts/presentation/blocked_contacts_screen.dart';
 import 'settings_widgets.dart';
+import 'phone_visibility_screen.dart';
 import 'storage_settings_screen.dart';
 import '../../../core/widgets/pokou_sheet.dart';
 
@@ -139,6 +140,30 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
               'profile_photo',
               (depot) => depot.update(profilePhoto: v),
             ),
+          ),
+          // « Mon numéro de téléphone » : visible par mes contacts, ou
+          // masqué — sauf pour les personnes que j'autorise.
+          SettingsRow(
+            label: l.chatXPrivacyPhone,
+            subtitle: l.chatXPrivacyPhoneSub,
+            trailing: _enCours.contains('phone_number')
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : SettingsValue(
+                    r.phoneHidden
+                        ? l.chatXPrivacyPhoneHidden
+                        : l.chatXPrivacyPhoneContacts,
+                  ),
+            onTap: _enCours.contains('phone_number')
+                ? null
+                : () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const PhoneVisibilityScreen(),
+                    ),
+                  ),
           ),
           SettingsRow(
             label: l.privacyStatuses,

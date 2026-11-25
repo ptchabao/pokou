@@ -70,12 +70,15 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
           'wallet_phone': _walletPhone.text.trim(),
       };
       if (!mounted) return;
-      await openPayment(
+      // La réponse entière : dans un pays de test, le paiement est simulé
+      // et le badge déjà actif (`test_mode`), sans page à ouvrir.
+      final simulated = await openPayment(
         context,
-        api
-            .post('/certified/subscribe', body: body)
-            .then((json) => (json as Map<String, dynamic>)['payment_url'] as String?),
+        api.post('/certified/subscribe', body: body),
       );
+      if (simulated) {
+        ref.read(authControllerProvider.notifier).reloadProfile();
+      }
       if (mounted) Navigator.of(context).pop();
     } catch (_) {
       if (mounted) setState(() => _error = l.honamFailed);
@@ -91,7 +94,9 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
       _error = null;
     });
     try {
-      await ref.read(apiClientProvider).post(
+      await ref
+          .read(apiClientProvider)
+          .post(
             '/certified/resolve-name',
             body: {'full_name': _name.text.trim()},
           );
@@ -111,7 +116,8 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
     final priceHt = plan['price_ht'] as int? ?? 0;
     final priceTtc = plan['price_ttc'] as int? ?? priceHt;
     final vatRate = (plan['vat_rate'] as num?)?.toDouble() ?? 0;
-    final planLabel = plan['label'] as String? ?? widget.plan['code'] as String? ?? '';
+    final planLabel =
+        plan['label'] as String? ?? widget.plan['code'] as String? ?? '';
     final wallet = KoryWallet.of(ref.read(authControllerProvider).user?.phone);
 
     return ModuleScaffold(
@@ -128,7 +134,10 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
             ),
             const SizedBox(height: 16),
           ],
-          Text(l.certNameFieldLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            l.certNameFieldLabel,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 6),
           TextField(
             contextMenuBuilder: pokouContextMenuBuilder,
@@ -170,7 +179,9 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
                       contextMenuBuilder: pokouContextMenuBuilder,
                       controller: _walletPhone,
                       keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(hintText: l.certOtherWalletHint),
+                      decoration: InputDecoration(
+                        hintText: l.certOtherWalletHint,
+                      ),
                     ),
                   ),
               ],
@@ -182,9 +193,16 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
               child: Column(
                 children: [
                   KoryLine(planLabel, '${formatFcfa(priceHt)} HT'),
-                  KoryLine(l.certVatLabel('${(vatRate * 100).toStringAsFixed(0)}'), formatFcfa(priceTtc - priceHt)),
+                  KoryLine(
+                    l.certVatLabel('${(vatRate * 100).toStringAsFixed(0)}'),
+                    formatFcfa(priceTtc - priceHt),
+                  ),
                   const Divider(height: 18),
-                  KoryLine(l.certTotalLabel, '${formatFcfa(priceTtc)} TTC', strong: true),
+                  KoryLine(
+                    l.certTotalLabel,
+                    '${formatFcfa(priceTtc)} TTC',
+                    strong: true,
+                  ),
                 ],
               ),
             ),
@@ -203,7 +221,9 @@ class _CertifiedPayScreenState extends ConsumerState<CertifiedPayScreen> {
                 ? l.certRetryName
                 : l.certVerifyAndPay(formatFcfa(priceTtc)),
             busy: _busy,
-            onPressed: _busy ? null : (widget.nameMismatch ? _resolveName : _verifyAndPay),
+            onPressed: _busy
+                ? null
+                : (widget.nameMismatch ? _resolveName : _verifyAndPay),
           ),
           const SizedBox(height: 6),
           Center(

@@ -22,7 +22,7 @@ from app.api.v1.calls import calls
 from app.api.v1.certified import certified
 from app.api.v1.config import banners, country, geo
 from app.api.v1.communities import channels, communities
-from app.api.v1.marketplace import assime, marketplace, marketplace_admin
+from app.api.v1.marketplace import assime, handover as assime_handover, marketplace, marketplace_admin
 from app.api.v1.media import media, stickers, status
 from app.api.v1.honam import honam
 from app.api.v1.kory import kory
@@ -68,6 +68,7 @@ for router in (
     status.router,
     channels.router,
     marketplace.router,
+    assime_handover.router,
     marketplace_admin.router,
     assime.router,
     assime.admin_router,
