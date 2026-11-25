@@ -59,4 +59,4 @@ def test_sans_twilio_c_est_ngh(monkeypatch):
 def test_le_code_expire_en_50_secondes():
     assert otp_service.OTP_TTL_SECONDS == 50
     assert otp_service.RESEND_MIN_SECONDS == 50
-    assert "50 secondes" in otp_service._otp_message("123456")
+    assert "10 minutes" in otp_service._otp_message("123456")

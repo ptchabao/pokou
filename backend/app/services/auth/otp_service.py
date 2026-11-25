@@ -20,9 +20,14 @@ from app.core.security import hash_password, verify_password
 logger = logging.getLogger(__name__)
 
 OTP_LENGTH = 6
-#: Un code vit 50 secondes : le temps de le lire dans le SMS et de le
-#: saisir, pas celui de le transmettre à quelqu'un d'autre.
+#: Délai affiché avant de pouvoir redemander un code : 50 secondes.
 OTP_TTL_SECONDS = 50
+#: Durée de vie réelle d'un code : 10 minutes, la même que celle des codes de
+#: Twilio Verify. 50 secondes ne suffisaient pas : au Togo, un SMS arrive
+#: souvent après une minute, et le code de secours (envoyé quand Verify
+#: refuse un numéro) expirait avant d'arriver — « les codes n'arrivent pas ».
+#: Les essais restent bornés (5 faux codes verrouillent le numéro).
+OTP_CODE_VALIDITY_SECONDS = 600
 # Durée de vie du code d'un compte de démonstration. Bien plus longue que
 # les 50 secondes ordinaires, pour une raison pratique : un relecteur de store
 # prend des captures, remplit un formulaire, revient — et seules 3 demandes
@@ -136,7 +141,7 @@ def _otp_message(code: str) -> str:
     """Le message nomme POKOU : c'est l'application que la personne vient
     d'ouvrir. Un code arrivant au nom d'une marque qu'elle n'a jamais vue se
     lit comme une tentative d'hameçonnage, et se jette."""
-    return f"Votre code Pokou est {code}. Il expire dans {OTP_TTL_SECONDS} secondes."
+    return f"Votre code Pokou est {code}. Il expire dans {OTP_CODE_VALIDITY_SECONDS // 60} minutes."
 
 
 def _send_whatsapp_otp(phone: str, code: str) -> None:
@@ -242,10 +247,11 @@ def generate_and_send_otp(db: Session, raw_phone: str, channel: str = "both") ->
             return ttl_seconds
         logger.warning("[OTP] Twilio Verify indisponible pour %s : code Pokou par SMS", phone)
 
+    validity = REVIEW_OTP_TTL_MINUTES * 60 if is_review else OTP_CODE_VALIDITY_SECONDS
     otp = PhoneOTP(
         phone=phone,
         code_hash=hash_password(code),
-        expires_at=datetime.utcnow() + timedelta(seconds=ttl_seconds),
+        expires_at=datetime.utcnow() + timedelta(seconds=validity),
     )
     db.add(otp)
     db.commit()

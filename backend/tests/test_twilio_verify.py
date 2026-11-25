@@ -121,6 +121,26 @@ def test_si_verify_refuse_l_envoi_le_code_pokou_part_par_sms(client):
     assert ok.status_code == 200, ok.text
 
 
+def test_le_code_de_secours_vaut_encore_apres_deux_minutes(client):
+    """Verify refuse le numéro (fraude présumée, code 60410) : le code de
+    secours part par SMS. Au Togo il arrive souvent après une minute — il
+    doit encore valoir, comme un code Verify (10 minutes)."""
+    from datetime import datetime, timedelta
+
+    fake = FakeTwilio(fail_start=True)
+    with patch.object(twilio_verify.httpx, "post", side_effect=fake.post), \
+         patch.object(otp_service.sms_service, "send_sms", return_value=True) as sms:
+        assert _request(client, "+22890700005", channel="sms").status_code == 200
+    import re
+    code = re.search(r"\b(\d{6})\b", sms.call_args.args[2]).group(1)
+    assert "10 minutes" in sms.call_args.args[2]
+    later = datetime.utcnow() + timedelta(minutes=2)
+    with patch.object(otp_service, "datetime") as clock:
+        clock.utcnow.return_value = later
+        ok = client.post("/api/v1/auth/phone/verify-otp", json={"phone": "+22890700005", "code": code})
+    assert ok.status_code == 200, ok.text
+
+
 def test_twilio_injoignable_a_la_verification_ne_compte_pas_comme_une_erreur(client):
     fake = FakeTwilio()
     with patch.object(twilio_verify.httpx, "post", side_effect=fake.post):
