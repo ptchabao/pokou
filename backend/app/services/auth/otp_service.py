@@ -292,12 +292,18 @@ def generate_and_send_otp(db: Session, raw_phone: str, channel: str = "both") ->
 def get_or_create_user_by_phone(db: Session, phone: str) -> User:
     user = db.query(User).filter(User.phone == phone).first()
     if user:
+        if is_review_phone(phone) and not user.is_store_review_account:
+            raise OTPInvalidError("Ce numéro est réservé au compte de démonstration.")
         return user
-    # Un compte de démonstration porte son nom : sans ça, il ressemble à
-    # n'importe quel utilisateur dans la base de production, et personne ne
-    # sait plus lequel peut être supprimé après la revue.
-    full_name = "Compte de démonstration (revue des stores)" if is_review_phone(phone) else None
-    user = User(phone=phone, email=None, is_active=True, full_name=full_name)
+    is_review = is_review_phone(phone)
+    full_name = "Compte de démonstration (revue des stores)" if is_review else None
+    user = User(
+        phone=phone,
+        email=None,
+        is_active=True,
+        full_name=full_name,
+        is_store_review_account=is_review,
+    )
     db.add(user)
     db.commit()
     db.refresh(user)

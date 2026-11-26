@@ -271,9 +271,12 @@ L'app s'identifie par l'en-tête `X-Pokou-Crypto` (version du protocole de
 chiffrement, aujourd'hui `2`). En dessous, l'envoi en groupe répond 426.
 
 Deux garde-fous au démarrage (`core/startup_checks.py`) : l'API refuse de
-démarrer en production avec les secrets par défaut, ou avec le code de
-connexion fixe prévu pour la revue des stores (`REVIEW_PHONE_NUMBERS`,
-`REVIEW_OTP_CODE`).
+démarrer en production avec les secrets par défaut. Un compte de revue peut
+être activé explicitement en production avec `REVIEW_PHONE_NUMBERS`,
+`REVIEW_OTP_CODE` et `REVIEW_OTP_PRODUCTION_ENABLED=true`. Cette configuration
+est limitée à un numéro E.164 et un code à six chiffres ; un compte existant
+non marqué comme compte de revue ne peut pas être ouvert avec cet OTP.
+Désactiver l'opt-in et vider les deux identifiants après l'examen.
 
 ### 4.6 Rôles et droits
 
@@ -454,7 +457,7 @@ Toutes définies dans `app/core/config.py`. Les principales :
 | Assistant | `GEMINI_*`, `GROQ_*`, `DEEPSEEK_*`, `GROK_*`, `OLLAMA_*` (chacun avec `_ENABLED`, `_API_KEY`, `_MODEL`) |
 | Kafka | `KAFKA_BOOTSTRAP_SERVERS`, `KAFKA_SECURITY_PROTOCOL`, `KAFKA_SASL_*`, `KAFKA_TOPIC_PREFIX` |
 | Console | `POKOU_SUPERADMIN_EMAIL`, `POKOU_SUPERADMIN_PASSWORD`, `POKOU_SUPERADMIN_NAME`, `POKOU_SUPERADMIN_PHONE` |
-| Revue des stores | `REVIEW_PHONE_NUMBERS`, `REVIEW_OTP_CODE` (interdits en production) |
+| Revue des stores | `REVIEW_PHONE_NUMBERS`, `REVIEW_OTP_CODE`, `REVIEW_OTP_PRODUCTION_ENABLED` (opt-in explicite en production) |
 
 ---
 

@@ -144,35 +144,65 @@ def test_la_notification_porte_de_quoi_aller_chercher_le_contenu():
 class _Settings:
     """Juste ce que le garde-fou regarde."""
 
-    def __init__(self, environment, numbers="", code=""):
+    def __init__(self, environment, numbers="", code="", production_enabled=False):
         self.environment = environment
         self.review_phone_numbers = numbers
         self.review_otp_code = code
+        self.review_otp_production_enabled = production_enabled
         self.secret_key = "une-vraie-cle"
         self.webhook_hmac_secret = "un-vrai-secret"
 
 
-def test_la_porte_derobee_de_revue_empeche_de_demarrer_en_production():
-    # REVIEW_PHONE_NUMBERS + REVIEW_OTP_CODE donnent un code de connexion
-    # FIXE. Indispensable pour faire publier l'application, et à retirer
-    # ensuite — or rien ne le rappelait. La porte se refermait par mémoire,
-    # c'est-à-dire jamais.
+def test_la_revue_en_production_exige_un_opt_in_explicite():
     from app.main import ensure_no_review_backdoor
 
-    with pytest.raises(RuntimeError, match="REVIEW_PHONE_NUMBERS"):
+    with pytest.raises(RuntimeError, match="REVIEW_OTP_PRODUCTION_ENABLED"):
         ensure_no_review_backdoor(
             _Settings("production", numbers="+22890000000", code="123456")
         )
 
 
 def test_une_moitie_de_configuration_oubliee_bloque_aussi():
-    # `is_review_phone` exige les deux, donc une seule ne suffit pas à ouvrir
-    # la porte. Mais la laisser traîner la rouvre au prochain déploiement, et
-    # personne ne s'en souviendra.
     from app.main import ensure_no_review_backdoor
 
     with pytest.raises(RuntimeError, match="REVIEW_OTP_CODE"):
         ensure_no_review_backdoor(_Settings("production", code="123456"))
+
+
+def test_la_revue_en_production_demande_un_seul_numero_et_un_code_a_six_chiffres():
+    from app.main import ensure_no_review_backdoor
+
+    with pytest.raises(RuntimeError, match="unique numéro"):
+        ensure_no_review_backdoor(
+            _Settings(
+                "production",
+                numbers="+22890000000,+22890000001",
+                code="123456",
+                production_enabled=True,
+            )
+        )
+    with pytest.raises(RuntimeError, match="six chiffres"):
+        ensure_no_review_backdoor(
+            _Settings(
+                "production",
+                numbers="+22890000000",
+                code="00000",
+                production_enabled=True,
+            )
+        )
+
+
+def test_la_revue_en_production_demarre_avec_un_opt_in_valide():
+    from app.main import ensure_no_review_backdoor
+
+    ensure_no_review_backdoor(
+        _Settings(
+            "production",
+            numbers="+22890000000",
+            code="000000",
+            production_enabled=True,
+        )
+    )
 
 
 def test_hors_production_on_avertit_sans_bloquer(journal):

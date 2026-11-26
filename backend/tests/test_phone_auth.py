@@ -248,7 +248,7 @@ def test_rate_limited_request_sends_nothing_on_either_channel(client, monkeypatc
 # aucun effet sur le flux de tout le monde.
 
 _REVIEW_PHONE = "+22890000000"
-_REVIEW_CODE = "609785"
+_REVIEW_CODE = "000000"
 
 
 class _ReviewSettings:
@@ -288,6 +288,12 @@ def test_the_review_account_logs_in_with_a_fixed_code_and_no_sms(client):
     # utilisateur en production et personne ne sait lequel supprimer après la
     # revue.
     assert "démonstration" in verified.json()["user"]["full_name"]
+    db = TestingSessionLocal()
+    try:
+        user = db.query(User).filter(User.phone == _REVIEW_PHONE).one()
+        assert user.is_store_review_account is True
+    finally:
+        db.close()
 
 
 def test_the_review_account_still_refuses_a_wrong_code(client):
@@ -298,7 +304,27 @@ def test_the_review_account_still_refuses_a_wrong_code(client):
     ), patch.object(otp_service, "_send_whatsapp_otp"):
         client.post("/api/v1/auth/phone/request-otp", json={"phone": _REVIEW_PHONE})
         refused = client.post(
-            "/api/v1/auth/phone/verify-otp", json={"phone": _REVIEW_PHONE, "code": "000000"}
+            "/api/v1/auth/phone/verify-otp", json={"phone": _REVIEW_PHONE, "code": "111111"}
+        )
+
+    assert refused.status_code == 400
+
+
+def test_review_otp_cannot_open_an_existing_regular_account(client):
+    db = TestingSessionLocal()
+    try:
+        db.add(User(phone=_REVIEW_PHONE, email=None, is_active=True))
+        db.commit()
+    finally:
+        db.close()
+
+    with _with_review_account(), patch.object(
+        otp_service.sms_service, "send_sms", return_value=True
+    ), patch.object(otp_service, "_send_whatsapp_otp"):
+        client.post("/api/v1/auth/phone/request-otp", json={"phone": _REVIEW_PHONE})
+        refused = client.post(
+            "/api/v1/auth/phone/verify-otp",
+            json={"phone": _REVIEW_PHONE, "code": _REVIEW_CODE},
         )
 
     assert refused.status_code == 400

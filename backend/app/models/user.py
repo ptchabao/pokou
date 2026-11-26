@@ -63,6 +63,7 @@ class User(Base):
         nullable=True,
     )
     is_active = Column(Boolean, default=True)
+    is_store_review_account = Column(Boolean, default=False, server_default="false", nullable=False)
     role = Column(SQLEnum(UserRole, name="userrole"), default=UserRole.USER, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     # back_populates des deux côtés : sans lui, SQLAlchemy avertit que cette

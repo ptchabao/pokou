@@ -1,6 +1,7 @@
 """Garde-fous de démarrage : refusent de lancer la production avec une
 configuration dangereuse, et préviennent bruyamment ailleurs."""
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -32,21 +33,7 @@ def ensure_no_weak_secrets(settings) -> None:
 
 
 def ensure_no_review_backdoor(settings) -> None:
-    """Refuse de démarrer en production avec la porte dérobée de revue des
-    stores encore ouverte.
-
-    REVIEW_PHONE_NUMBERS + REVIEW_OTP_CODE donnent un code de connexion FIXE,
-    valable une heure, sur des numéros déclarés. C'est indispensable pour
-    faire publier l'application — un relecteur doit pouvoir entrer — et ça
-    n'a plus rien à faire là une fois la revue passée. Or rien ne le
-    rappelait : la porte se refermait par mémoire, ce qui veut dire jamais.
-
-    Les deux réglages sont exigés ensemble par `is_review_phone`, donc il
-    suffit qu'UN des deux traîne pour que la porte soit close. On refuse
-    quand même dès qu'il y en a un : une configuration à moitié oubliée est
-    le meilleur moyen de rouvrir la porte au prochain déploiement sans que
-    personne ne s'en rende compte.
-    """
+    """Valide la configuration de l'OTP de revue des stores."""
     leftovers = [
         name
         for name, value in (
@@ -55,14 +42,43 @@ def ensure_no_review_backdoor(settings) -> None:
         )
         if (value or "").strip()
     ]
-    if not leftovers:
+    production_enabled = getattr(settings, "review_otp_production_enabled", False)
+    if not leftovers and not production_enabled:
         return
 
-    message = (
-        f"{', '.join(leftovers)} encore renseigné — la porte dérobée de revue "
-        "des stores donne un code de connexion fixe. À vider une fois la revue "
-        "passée."
+    if bool(settings.review_phone_numbers) != bool(settings.review_otp_code):
+        raise RuntimeError(
+            "REVIEW_PHONE_NUMBERS et REVIEW_OTP_CODE doivent être configurés ensemble."
+        )
+
+    if settings.environment != "production":
+        if leftovers:
+            logger.warning(
+                "REVIEW_PHONE_NUMBERS and REVIEW_OTP_CODE are configured outside production; "
+                "remove them after the review."
+            )
+        return
+
+    if not leftovers:
+        raise RuntimeError(
+            "REVIEW_OTP_PRODUCTION_ENABLED ne peut pas être activé sans "
+            "REVIEW_PHONE_NUMBERS et REVIEW_OTP_CODE."
+        )
+    if not production_enabled:
+        raise RuntimeError(
+            "La configuration OTP de revue en production exige "
+            "REVIEW_OTP_PRODUCTION_ENABLED=true."
+        )
+
+    numbers = [part.strip() for part in settings.review_phone_numbers.split(",") if part.strip()]
+    if len(numbers) != 1 or not re.fullmatch(r"\+[1-9]\d{6,14}", numbers[0]):
+        raise RuntimeError(
+            "La revue en production exige un unique numéro REVIEW_PHONE_NUMBERS au format E.164."
+        )
+    if not re.fullmatch(r"\d{6}", settings.review_otp_code):
+        raise RuntimeError("REVIEW_OTP_CODE doit contenir exactement six chiffres.")
+
+    logger.warning(
+        "Store-review OTP is enabled in production for one dedicated account. "
+        "Disable REVIEW_OTP_PRODUCTION_ENABLED after the review."
     )
-    if settings.environment == "production":
-        raise RuntimeError(f"Refusing to start in production: {message}")
-    logger.warning("INSECURE CONFIG: %s", message)

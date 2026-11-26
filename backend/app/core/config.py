@@ -133,6 +133,8 @@ class Settings(BaseSettings):
     # À retirer de l'environnement dès la revue passée, ou à faire tourner.
     review_phone_numbers: str = ""
     review_otp_code: str = ""
+    # L'activation en production exige un opt-in séparé et explicite.
+    review_otp_production_enabled: bool = False
 
     # Clé Fernet qui chiffre au repos les messages joints à un signalement
     # (voir app/core/report_crypto.py). Vide : ces messages ne sont pas
