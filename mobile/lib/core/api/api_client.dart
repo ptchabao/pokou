@@ -31,6 +31,16 @@ const _defaultBaseUrl = 'https://api.pokou.app/api/v1';
 /// Or les deux cas sont parfaitement distinguables : le serveur répond
 /// explicitement 401 ou 403 quand il REFUSE, et une coupure lève une
 /// exception. Il n'y avait qu'à cesser de les confondre.
+/// La session a été REFUSÉE par le serveur (rafraîchissement 401/403) :
+/// jeton révoqué, compte supprimé, base remise à zéro. Écouté par le
+/// contrôleur d'authentification, qui déconnecte aussitôt. Sans ce signal,
+/// l'application restait affichée sans rien charger et redemandait un
+/// jeton toutes les 25 secondes, jusqu'à être fermée et rouverte.
+///
+/// Une coupure réseau n'émet RIEN : on ne sait pas, on garde la session.
+final StreamController<void> sessionRejectedEvents =
+    StreamController<void>.broadcast();
+
 enum RefreshOutcome {
   /// Nouveaux jetons obtenus et enregistrés.
   refreshed,
@@ -260,6 +270,7 @@ class ApiClient {
       // dit rien de la session et ne doit pas la condamner.
       if (response.statusCode == 401 || response.statusCode == 403) {
         _log('refresh: refusé par le serveur (${response.statusCode})');
+        sessionRejectedEvents.add(null);
         return _settle(RefreshOutcome.rejected);
       }
       _log('refresh: serveur indisponible (${response.statusCode})');

@@ -61,16 +61,56 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   FlutterSecureStoragePlatform.instance = _InMemorySecureStorage();
 
+  group('session refusée par le serveur', () {
+    Future<(ApiClient, List<void>)> clientWith(
+      Future<http.Response> Function() refresh,
+    ) async {
+      final tokenStorage = SecureTokenStorage();
+      await tokenStorage.saveTokens(
+        accessToken: 'mort',
+        refreshToken: 'mort-aussi',
+      );
+      final client = ApiClient(
+        httpClient: MockClient((request) async {
+          if (request.url.path.endsWith('/auth/refresh')) return refresh();
+          return http.Response(jsonEncode({'detail': 'Session révoquée'}), 401);
+        }),
+        tokenStorage: tokenStorage,
+        baseUrl: 'https://api.test/v1',
+      );
+      final events = <void>[];
+      final sub = sessionRejectedEvents.stream.listen(events.add);
+      addTearDown(sub.cancel);
+      return (client, events);
+    }
+
+    test('un 403 au rafraîchissement le signale (déconnexion)', () async {
+      final (client, events) = await clientWith(
+        () async =>
+            http.Response(jsonEncode({'detail': 'Invalid refresh token'}), 403),
+      );
+      await expectLater(client.get('/messages'), throwsA(isA<ApiException>()));
+      await Future<void>.delayed(Duration.zero);
+      expect(events, hasLength(1));
+    });
+
+    test('une coupure réseau ne le signale pas', () async {
+      final (client, events) = await clientWith(
+        () async => throw const SocketException('pas de réseau'),
+      );
+      await expectLater(client.get('/messages'), throwsA(anything));
+      await Future<void>.delayed(Duration.zero);
+      expect(events, isEmpty);
+    });
+  });
+
   group('ApiClient', () {
     test('utilise par défaut l’hôte de production actuellement actif', () {
       final client = ApiClient(
         httpClient: MockClient((_) async => http.Response('', 200)),
       );
 
-      expect(
-        client.baseUrl,
-        'https://api.pokou.app/api/v1',
-      );
+      expect(client.baseUrl, 'https://api.pokou.app/api/v1');
     });
 
     test(
@@ -374,25 +414,28 @@ void main() {
       expect(await storage.readRefreshToken(), 'refresh-valable');
     });
 
-    test('une coupure de socket pendant le refresh CONSERVE la session', () async {
-      final storage = await storageAvecSession();
-      final client = ApiClient(
-        baseUrl: 'https://exemple.test',
-        tokenStorage: storage,
-        httpClient: MockClient((request) async {
-          if (request.url.path.endsWith('/auth/refresh')) {
-            throw const SocketException('réseau injoignable');
-          }
-          return http.Response('', 401);
-        }),
-      );
+    test(
+      'une coupure de socket pendant le refresh CONSERVE la session',
+      () async {
+        final storage = await storageAvecSession();
+        final client = ApiClient(
+          baseUrl: 'https://exemple.test',
+          tokenStorage: storage,
+          httpClient: MockClient((request) async {
+            if (request.url.path.endsWith('/auth/refresh')) {
+              throw const SocketException('réseau injoignable');
+            }
+            return http.Response('', 401);
+          }),
+        );
 
-      await expectLater(
-        client.get('/users/me/profile'),
-        throwsA(isA<NetworkException>()),
-      );
-      expect(await storage.readRefreshToken(), 'refresh-valable');
-    });
+        await expectLater(
+          client.get('/users/me/profile'),
+          throwsA(isA<NetworkException>()),
+        );
+        expect(await storage.readRefreshToken(), 'refresh-valable');
+      },
+    );
 
     test('une API momentanément indisponible CONSERVE la session', () async {
       // 502/503 ne parlent PAS du jeton. Les traiter comme un refus
@@ -442,141 +485,150 @@ void main() {
       );
     });
 
-    test('un access périmé + un refresh valable se rattrapent tout seuls', () async {
-      // Le cas nominal du réveil : personne ne doit rien voir.
-      final storage = await storageAvecSession();
-      var appelsProfil = 0;
-      final client = ApiClient(
-        baseUrl: 'https://exemple.test',
-        tokenStorage: storage,
-        httpClient: MockClient((request) async {
-          if (request.url.path.endsWith('/auth/refresh')) {
-            return http.Response(
-              jsonEncode({
-                'access_token': 'access-neuf',
-                'refresh_token': 'refresh-neuf',
-              }),
-              200,
-            );
-          }
-          appelsProfil++;
-          // Le premier appel porte le jeton périmé, le second le neuf.
-          return appelsProfil == 1
-              ? http.Response('', 401)
-              : http.Response(jsonEncode({'id': 7}), 200);
-        }),
-      );
-
-      final profil = await client.get('/users/me/profile');
-
-      expect((profil as Map)['id'], 7);
-      expect(await storage.readRefreshToken(), 'refresh-neuf');
-      expect(await storage.readAccessToken(), 'access-neuf');
-    });
-
-    test('sans jeton de rafraîchissement, c\'est un refus et non une coupure', () async {
-      // Un kill entre les deux écritures pouvait laisser cet état. Il n'y a
-      // rien à attendre du réseau : la session est bel et bien finie.
-      final storage = SecureTokenStorage();
-      await storage.clear();
-      final client = ApiClient(
-        baseUrl: 'https://exemple.test',
-        tokenStorage: storage,
-        httpClient: MockClient((request) async => http.Response('', 401)),
-      );
-
-      await expectLater(
-        client.get('/users/me/profile'),
-        throwsA(
-          isA<ApiException>().having((e) => e.statusCode, 'statusCode', 401),
-        ),
-      );
-    });
-
-    test('deux requêtes 401 simultanées ne rafraîchissent qu\'UNE fois', () async {
-      // Sans la déduplication, chacune tournerait le jeton de son côté et la
-      // seconde rotation invaliderait la première.
-      final storage = await storageAvecSession();
-      var refreshs = 0;
-      final client = ApiClient(
-        baseUrl: 'https://exemple.test',
-        tokenStorage: storage,
-        httpClient: MockClient((request) async {
-          if (request.url.path.endsWith('/auth/refresh')) {
-            refreshs++;
-            return http.Response(
-              jsonEncode({
-                'access_token': 'access-neuf',
-                'refresh_token': 'refresh-neuf',
-              }),
-              200,
-            );
-          }
-          final porteur = request.headers['Authorization'];
-          return porteur == 'Bearer access-neuf'
-              ? http.Response(jsonEncode({'ok': true}), 200)
-              : http.Response('', 401);
-        }),
-      );
-
-      await Future.wait([
-        client.get('/a'),
-        client.get('/b'),
-      ]);
-
-      expect(refreshs, 1);
-    });
-
-    test('une requête 401 décalée dont le jeton a déjà été renouvelé rejoue directement sans deuxième refresh', () async {
-      final storage = await storageAvecSession();
-      var refreshs = 0;
-      final completerA = Completer<http.Response>();
-      final client = ApiClient(
-        baseUrl: 'https://exemple.test',
-        tokenStorage: storage,
-        httpClient: MockClient((request) async {
-          if (request.url.path.endsWith('/auth/refresh')) {
-            refreshs++;
-            return http.Response(
-              jsonEncode({
-                'access_token': 'access-neuf',
-                'refresh_token': 'refresh-neuf',
-              }),
-              200,
-            );
-          }
-          final porteur = request.headers['Authorization'];
-          if (request.url.path == '/a') {
-            if (porteur == 'Bearer access-neuf') {
-              return http.Response(jsonEncode({'a': 'ok'}), 200);
+    test(
+      'un access périmé + un refresh valable se rattrapent tout seuls',
+      () async {
+        // Le cas nominal du réveil : personne ne doit rien voir.
+        final storage = await storageAvecSession();
+        var appelsProfil = 0;
+        final client = ApiClient(
+          baseUrl: 'https://exemple.test',
+          tokenStorage: storage,
+          httpClient: MockClient((request) async {
+            if (request.url.path.endsWith('/auth/refresh')) {
+              return http.Response(
+                jsonEncode({
+                  'access_token': 'access-neuf',
+                  'refresh_token': 'refresh-neuf',
+                }),
+                200,
+              );
             }
-            return completerA.future;
-          }
-          if (request.url.path == '/b') {
+            appelsProfil++;
+            // Le premier appel porte le jeton périmé, le second le neuf.
+            return appelsProfil == 1
+                ? http.Response('', 401)
+                : http.Response(jsonEncode({'id': 7}), 200);
+          }),
+        );
+
+        final profil = await client.get('/users/me/profile');
+
+        expect((profil as Map)['id'], 7);
+        expect(await storage.readRefreshToken(), 'refresh-neuf');
+        expect(await storage.readAccessToken(), 'access-neuf');
+      },
+    );
+
+    test(
+      'sans jeton de rafraîchissement, c\'est un refus et non une coupure',
+      () async {
+        // Un kill entre les deux écritures pouvait laisser cet état. Il n'y a
+        // rien à attendre du réseau : la session est bel et bien finie.
+        final storage = SecureTokenStorage();
+        await storage.clear();
+        final client = ApiClient(
+          baseUrl: 'https://exemple.test',
+          tokenStorage: storage,
+          httpClient: MockClient((request) async => http.Response('', 401)),
+        );
+
+        await expectLater(
+          client.get('/users/me/profile'),
+          throwsA(
+            isA<ApiException>().having((e) => e.statusCode, 'statusCode', 401),
+          ),
+        );
+      },
+    );
+
+    test(
+      'deux requêtes 401 simultanées ne rafraîchissent qu\'UNE fois',
+      () async {
+        // Sans la déduplication, chacune tournerait le jeton de son côté et la
+        // seconde rotation invaliderait la première.
+        final storage = await storageAvecSession();
+        var refreshs = 0;
+        final client = ApiClient(
+          baseUrl: 'https://exemple.test',
+          tokenStorage: storage,
+          httpClient: MockClient((request) async {
+            if (request.url.path.endsWith('/auth/refresh')) {
+              refreshs++;
+              return http.Response(
+                jsonEncode({
+                  'access_token': 'access-neuf',
+                  'refresh_token': 'refresh-neuf',
+                }),
+                200,
+              );
+            }
+            final porteur = request.headers['Authorization'];
             return porteur == 'Bearer access-neuf'
-                ? http.Response(jsonEncode({'b': 'ok'}), 200)
+                ? http.Response(jsonEncode({'ok': true}), 200)
                 : http.Response('', 401);
-          }
-          return http.Response('', 404);
-        }),
-      );
+          }),
+        );
 
-      // /a est lancée avec le vieux token (access-perime) mais attend
-      final futureA = client.get('/a');
-      await Future<void>.delayed(Duration.zero);
+        await Future.wait([client.get('/a'), client.get('/b')]);
 
-      // /b est lancée, prend 401, déclenche le refresh et termine
-      final futureB = client.get('/b');
-      await futureB;
+        expect(refreshs, 1);
+      },
+    );
 
-      // Le refresh est terminé, stockage contient 'access-neuf'.
-      // Maintenant on livre enfin le 401 à /a
-      completerA.complete(http.Response('', 401));
-      final resA = await futureA;
+    test(
+      'une requête 401 décalée dont le jeton a déjà été renouvelé rejoue directement sans deuxième refresh',
+      () async {
+        final storage = await storageAvecSession();
+        var refreshs = 0;
+        final completerA = Completer<http.Response>();
+        final client = ApiClient(
+          baseUrl: 'https://exemple.test',
+          tokenStorage: storage,
+          httpClient: MockClient((request) async {
+            if (request.url.path.endsWith('/auth/refresh')) {
+              refreshs++;
+              return http.Response(
+                jsonEncode({
+                  'access_token': 'access-neuf',
+                  'refresh_token': 'refresh-neuf',
+                }),
+                200,
+              );
+            }
+            final porteur = request.headers['Authorization'];
+            if (request.url.path == '/a') {
+              if (porteur == 'Bearer access-neuf') {
+                return http.Response(jsonEncode({'a': 'ok'}), 200);
+              }
+              return completerA.future;
+            }
+            if (request.url.path == '/b') {
+              return porteur == 'Bearer access-neuf'
+                  ? http.Response(jsonEncode({'b': 'ok'}), 200)
+                  : http.Response('', 401);
+            }
+            return http.Response('', 404);
+          }),
+        );
 
-      expect(resA, {'a': 'ok'});
-      expect(refreshs, 1);
-    });
+        // /a est lancée avec le vieux token (access-perime) mais attend
+        final futureA = client.get('/a');
+        await Future<void>.delayed(Duration.zero);
+
+        // /b est lancée, prend 401, déclenche le refresh et termine
+        final futureB = client.get('/b');
+        await futureB;
+
+        // Le refresh est terminé, stockage contient 'access-neuf'.
+        // Maintenant on livre enfin le 401 à /a
+        completerA.complete(http.Response('', 401));
+        final resA = await futureA;
+
+        expect(resA, {'a': 'ok'});
+        expect(refreshs, 1);
+      },
+    );
   });
 
   // ── Le stockage lui-même ────────────────────────────────────────────

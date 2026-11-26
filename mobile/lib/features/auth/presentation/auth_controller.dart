@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_client.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/crypto/call_keys.dart';
 import '../../../core/crypto/e2ee_store.dart';
@@ -47,7 +48,27 @@ class AuthController extends StateNotifier<AuthState> {
   }) : _linkedMahizuTokens = linkedMahizuTokens,
        _wipeEncryptionKeys = wipeEncryptionKeys ?? _wipeDeviceKeys,
        super(AuthState.unknown) {
+    _sessionRejected = sessionRejectedEvents.stream.listen(
+      (_) => unawaited(_onSessionRejected()),
+    );
     _restoreSession();
+  }
+
+  StreamSubscription<void>? _sessionRejected;
+
+  /// Le serveur a refusé la session pendant que l'application tournait :
+  /// on déconnecte tout de suite (jetons, cache, clés), et l'écran revient
+  /// à la saisie du numéro. Sans effet si l'on n'était pas connecté — un
+  /// refus pendant la connexion elle-même n'a rien à défaire.
+  Future<void> _onSessionRejected() async {
+    if (!mounted || state.status != AuthStatus.authenticated) return;
+    await logout();
+  }
+
+  @override
+  void dispose() {
+    _sessionRejected?.cancel();
+    super.dispose();
   }
 
   final AuthRepository _repository;

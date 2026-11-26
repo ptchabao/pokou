@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pokou/core/api/api_client.dart';
+import 'package:pokou/core/api/api_client.dart'
+    show ApiClient, sessionRejectedEvents;
 import 'package:pokou/core/api/api_exceptions.dart';
 import 'package:pokou/core/push/push_service.dart';
 import 'package:pokou/core/storage/secure_token_storage.dart';
@@ -372,5 +373,28 @@ void main() {
       await controller.logout();
       expect(wipes(), 1);
     });
+  });
+
+  test('une session refusée en cours de route déconnecte aussitôt', () async {
+    final store = _OwnedStore()..owner = 'meme:8';
+    final repository = _FakeRepository(cached: _user, instance: 'meme');
+    var wipes = 0;
+    final controller = AuthController(
+      repository,
+      _FakeWs(),
+      _FakePush(refOf()),
+      store,
+      wipeEncryptionKeys: () async => wipes++,
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(controller.state.status, AuthStatus.authenticated);
+
+    sessionRejectedEvents.add(null);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    expect(controller.state.status, AuthStatus.unauthenticated);
+    expect(repository.loggedOut, isTrue);
+    expect(wipes, 1);
+    controller.dispose();
   });
 }
