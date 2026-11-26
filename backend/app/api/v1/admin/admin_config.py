@@ -125,14 +125,20 @@ def list_countries(
     user: User = Depends(require_permission("countries.view")),
     db: Session = Depends(get_db),
 ):
+    from app.core.countries import world
+
     stored = _stored_codes(db)
-    codes = sorted(set(_DEFAULTS) | set(stored))
+    every = world()
+    codes = sorted(set(every) | set(_DEFAULTS) | set(stored),
+                   key=lambda c: (c not in _DEFAULTS and c not in stored, (every.get(c) or {}).get("name", c)))
     items = []
     for code in codes:
         config = _effective(db, code)
         row = stored.get(code)
         items.append({
             "code": code,
+            "name": (every.get(code) or {}).get("name", code),
+            "dial": (every.get(code) or {}).get("dial"),
             "builtin": code in _DEFAULTS,
             "has_override": row is not None,
             "updated_at": row.updated_at.isoformat() if row is not None and row.updated_at else None,

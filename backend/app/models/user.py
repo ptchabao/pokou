@@ -211,6 +211,10 @@ class User(Base):
     console_password_hash = Column(String(100), nullable=True)
     console_failed_attempts = Column(Integer, nullable=False, default=0, server_default="0")
     console_locked_until = Column(DateTime, nullable=True)
+    # Rôle de console créé par l'équipe (migration 0034) : il remplace alors
+    # les permissions du rôle prédéfini. Vide : celles de `role`.
+    admin_role_id = Column(Integer, ForeignKey("admin_roles.id", ondelete="SET NULL"), nullable=True)
+    admin_role = relationship("AdminRole", lazy="joined")
     # ── Consentements (cahier des charges, section 8.1) ────────────────
     terms_accepted_at = Column(DateTime, nullable=True)
     terms_version = Column(String(16), nullable=True)

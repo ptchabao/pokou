@@ -21,6 +21,9 @@ from app.models.auth import (  # noqa: F401
 from app.models.settings import (  # noqa: F401
     SystemSetting,
 )
+from app.models.admin_roles import (  # noqa: F401
+    AdminRole,
+)
 from app.models.audit import (  # noqa: F401
     AuditLog,
 )

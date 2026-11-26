@@ -14,7 +14,10 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.permissions import ROLE_LABELS, ROLE_PERMISSIONS, permissions_of, require_permission
+from app.core.permissions import (
+    ALL as ALL_PERMISSIONS, EDITABLE_SYSTEM_ROLES, PERMISSION_CATALOG, ROLE_LABELS, ROLE_PERMISSIONS,
+    SUPER_ADMIN_ONLY, permissions_of, require_permission,
+)
 from app.models import (
     DeviceToken,
     AbuseReport, AuditLog, CertifiedSubscription, DirectMessage, Group, GroupMessage,
@@ -50,8 +53,8 @@ def _user_json(u: User) -> dict:
         "full_name": u.full_name,
         "phone": u.phone,
         "email": u.email,
-        "role": role.value,
-        "role_label": ROLE_LABELS.get(role, role.value),
+        "role": f"custom:{u.admin_role.id}" if u.admin_role is not None else role.value,
+        "role_label": u.admin_role.label if u.admin_role is not None else ROLE_LABELS.get(role, role.value),
         "is_active": bool(u.is_active),
         "is_verified": bool(getattr(u, "is_verified", False)),
         "created_at": u.created_at.isoformat() if u.created_at else None,
@@ -141,12 +144,168 @@ def me(user: User = Depends(require_permission("dashboard.view"))):
             "permissions": sorted(permissions_of(user))}
 
 
+# ── Rôles (RBAC modifiable) ──────────────────────────────────────────────
+
+def _ensure_system_roles(db: Session) -> None:
+    """Une ligne par rôle prédéfini modifiable, créée avec ses permissions
+    par défaut la première fois. Idempotent."""
+    from app.models import AdminRole
+
+    existing = {k for (k,) in db.query(AdminRole.key).filter(AdminRole.is_system.is_(True))}
+    for role in EDITABLE_SYSTEM_ROLES:
+        if role.value not in existing:
+            db.add(AdminRole(key=role.value, label=ROLE_LABELS[role], is_system=True,
+                             permissions=sorted(ROLE_PERMISSIONS[role] - SUPER_ADMIN_ONLY)))
+    db.flush()
+
+
+def _role_json(db: Session, row) -> dict:
+    if row.is_system:
+        members = db.query(func.count(User.id)).filter(
+            User.role == UserRole(row.key), User.admin_role_id.is_(None)).scalar()
+        key = row.key
+    else:
+        members = db.query(func.count(User.id)).filter(User.admin_role_id == row.id).scalar()
+        key = f"custom:{row.id}"
+    return {"id": row.id, "key": key, "label": row.label, "description": row.description,
+            "permissions": sorted(row.permission_set() & ALL_PERMISSIONS), "is_system": bool(row.is_system),
+            "editable": True, "deletable": not row.is_system and not members, "members": members}
+
+
 @router.get("/roles")
-def roles(user: User = Depends(require_permission("team.view"))):
-    return {"items": [
-        {"role": r.value, "label": ROLE_LABELS[r], "permissions": sorted(ROLE_PERMISSIONS[r])}
-        for r in ROLE_PERMISSIONS if r != UserRole.USER
-    ]}
+def roles(user: User = Depends(require_permission("team.view")), db: Session = Depends(get_db)):
+    from app.models import AdminRole
+
+    _ensure_system_roles(db)
+    db.commit()
+    rows = db.query(AdminRole).order_by(AdminRole.is_system.desc(), AdminRole.label).all()
+    super_admins = db.query(func.count(User.id)).filter(User.role == UserRole.SUPER_ADMIN).scalar()
+    items = [{"id": None, "key": UserRole.SUPER_ADMIN.value, "label": ROLE_LABELS[UserRole.SUPER_ADMIN],
+              "description": "Toutes les permissions, toujours. Ne se modifie pas.",
+              "permissions": sorted(ALL_PERMISSIONS), "is_system": True, "editable": False,
+              "deletable": False, "members": super_admins}]
+    items += [_role_json(db, r) for r in rows]
+    return {
+        "items": items,
+        "catalog": [{"group": g, "permissions": [{"key": k, "label": lbl, "super_admin_only": k in SUPER_ADMIN_ONLY}
+                                                 for k, lbl in perms]} for g, perms in PERMISSION_CATALOG],
+    }
+
+
+class RoleEdit(BaseModel):
+    label: Optional[str] = Field(None, min_length=2, max_length=80)
+    description: Optional[str] = Field(None, max_length=500)
+    permissions: list[str]
+
+
+def _clean_permissions(values: list[str]) -> list[str]:
+    unknown = set(values) - ALL_PERMISSIONS
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Permissions inconnues : {', '.join(sorted(unknown))}")
+    if set(values) & SUPER_ADMIN_ONLY:
+        raise HTTPException(status_code=422, detail="« Créer et modifier les rôles » est réservée au super-administrateur")
+    return sorted(set(values))
+
+
+@router.post("/roles")
+def create_role(body: RoleEdit, request: Request,
+                user: User = Depends(require_permission("roles.manage")), db: Session = Depends(get_db)):
+    import re
+    import secrets
+
+    from app.models import AdminRole
+
+    if not body.label or not body.label.strip():
+        raise HTTPException(status_code=422, detail="Donne un nom au rôle")
+    label = body.label.strip()
+    if db.query(AdminRole).filter(func.lower(AdminRole.label) == label.lower()).first():
+        raise HTTPException(status_code=409, detail="Un rôle porte déjà ce nom")
+    slug = re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")[:40] or "role"
+    row = AdminRole(key=f"custom-{slug}-{secrets.token_hex(3)}", label=label,
+                    description=(body.description or "").strip() or None,
+                    permissions=_clean_permissions(body.permissions), is_system=False)
+    db.add(row)
+    db.flush()
+    _audit(db, user, "role_create", "admin_role", row.id, {"label": label, "permissions": row.permissions}, request)
+    db.commit()
+    return _role_json(db, row)
+
+
+@router.put("/roles/{role_id}")
+def edit_role(role_id: int, body: RoleEdit, request: Request,
+              user: User = Depends(require_permission("roles.manage")), db: Session = Depends(get_db)):
+    from app.models import AdminRole
+
+    row = db.get(AdminRole, role_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Rôle introuvable")
+    before = {"label": row.label, "permissions": sorted(row.permission_set())}
+    row.permissions = _clean_permissions(body.permissions)
+    if not row.is_system:
+        if body.label is not None and body.label.strip():
+            label = body.label.strip()
+            clash = db.query(AdminRole).filter(func.lower(AdminRole.label) == label.lower(), AdminRole.id != row.id).first()
+            if clash:
+                raise HTTPException(status_code=409, detail="Un rôle porte déjà ce nom")
+            row.label = label
+        if body.description is not None:
+            row.description = body.description.strip() or None
+    _audit(db, user, "role_edit", "admin_role", row.id,
+           {"from": before, "to": {"label": row.label, "permissions": row.permissions}}, request)
+    db.commit()
+    return _role_json(db, row)
+
+
+@router.delete("/roles/{role_id}")
+def delete_role(role_id: int, request: Request,
+                user: User = Depends(require_permission("roles.manage")), db: Session = Depends(get_db)):
+    from app.models import AdminRole
+
+    row = db.get(AdminRole, role_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Rôle introuvable")
+    if row.is_system:
+        raise HTTPException(status_code=409, detail="Un rôle prédéfini ne se supprime pas")
+    if db.query(func.count(User.id)).filter(User.admin_role_id == row.id).scalar():
+        raise HTTPException(status_code=409, detail="Des membres ont encore ce rôle : change-le d'abord")
+    _audit(db, user, "role_delete", "admin_role", row.id, {"label": row.label}, request)
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
+
+
+def _resolve_role(db: Session, value: str):
+    """`SUPPORT`, `ADMIN`… ou `custom:<id>` → (rôle prédéfini, rôle créé ou None).
+    Un membre au rôle créé garde `VIEWER` comme rôle de base : il reste
+    membre de l'équipe, et ce sont les permissions du rôle créé qui comptent."""
+    from app.models import AdminRole
+
+    if value.startswith("custom:"):
+        try:
+            row = db.get(AdminRole, int(value.split(":", 1)[1]))
+        except ValueError:
+            row = None
+        if row is None or row.is_system:
+            raise HTTPException(status_code=422, detail="Rôle inconnu")
+        return UserRole.VIEWER, row
+    try:
+        return UserRole(value), None
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Rôle inconnu")
+
+
+def _guard_super_admin(actor: User, target: Optional[User], new_role: UserRole) -> None:
+    """Seul un super-administrateur nomme ou retire un super-administrateur :
+    sans cela, un rôle créé avec « gérer l'équipe » pourrait se donner tous
+    les droits."""
+    touches_super = new_role == UserRole.SUPER_ADMIN or (
+        target is not None and target.role == UserRole.SUPER_ADMIN)
+    if touches_super and actor.role != UserRole.SUPER_ADMIN:
+        raise HTTPException(status_code=403, detail="Seul un super-administrateur peut faire cela")
+
+
+def _role_name(u: User) -> str:
+    return f"custom:{u.admin_role_id}" if u.admin_role_id else (u.role or UserRole.USER).value
 
 
 # ── Tableau de bord ─────────────────────────────────────────────────────
@@ -348,23 +507,24 @@ def set_role(
     user: User = Depends(require_permission("team.manage")),
     db: Session = Depends(get_db),
 ):
-    try:
-        new_role = UserRole(body.role)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="Rôle inconnu")
+    new_role, custom = _resolve_role(db, body.role)
     target = db.get(User, user_id)
     if target is None:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
     if target.id == user.id:
         raise HTTPException(status_code=409, detail="Tu ne peux pas changer ton propre rôle")
+    _guard_super_admin(user, target, new_role)
     old = target.role or UserRole.USER
     if old == UserRole.SUPER_ADMIN and new_role != UserRole.SUPER_ADMIN:
         others = db.query(func.count(User.id)).filter(
             User.role == UserRole.SUPER_ADMIN, User.id != target.id, User.is_active.is_(True)).scalar()
         if not others:
             raise HTTPException(status_code=409, detail="Il faut garder au moins un super-administrateur")
+    before = _role_name(target)
     target.role = new_role
-    _audit(db, user, "role_change", "user", target.id, {"from": old.value, "to": new_role.value}, request)
+    target.admin_role_id = custom.id if custom is not None else None
+    target.admin_role = custom
+    _audit(db, user, "role_change", "user", target.id, {"from": before, "to": _role_name(target)}, request)
     db.commit()
     return _user_json(target)
 
@@ -391,14 +551,12 @@ def add_member(
     seule fois, à transmettre à la personne (qui le change à sa première
     connexion). Aucun numéro de téléphone : la console ne s'en sert pas."""
     from app.core.security import hash_password
-    try:
-        role = UserRole(body.role)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="Rôle inconnu")
+    role, custom = _resolve_role(db, body.role)
     if role == UserRole.USER:
         raise HTTPException(status_code=422, detail="Choisis un rôle d'équipe")
     email = body.email.strip().lower()
     target = db.query(User).filter(func.lower(User.email) == email).first()
+    _guard_super_admin(user, target, role)
     created = target is None
     if not created:
         # Mêmes garde-fous que PUT /team/{id} : on ne change pas son propre
@@ -414,14 +572,16 @@ def add_member(
         target = User(email=email, full_name=body.full_name.strip(), role=role, is_active=True)
         db.add(target)
         db.flush()
-    old = target.role or UserRole.USER
+    before = _role_name(target)
     target.role = role
+    target.admin_role_id = custom.id if custom is not None else None
+    target.admin_role = custom
     password = None
     if not target.console_password_hash:
         password = _temporary_password()
         target.console_password_hash = hash_password(password)
     _audit(db, user, "team_add" if created else "role_change", "user", target.id,
-           {"from": old.value, "to": role.value, "email": email}, request)
+           {"from": before, "to": _role_name(target), "email": email}, request)
     db.commit()
     return {**_user_json(target), "temporary_password": password}
 

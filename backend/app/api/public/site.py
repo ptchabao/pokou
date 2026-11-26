@@ -73,6 +73,12 @@ def site_redirect(request: Request) -> Optional[Response]:
         return _file("index.html")
     if host == site and path.strip("/") in _DOCS:
         return _legal_page(path.strip("/"))
+    if host == site and path.rstrip("/") in ("/officine", "/livreur", "/kory"):
+        from app.api.public.site_pages import PAGES
+
+        headers = dict(_HEADERS)
+        headers["Cache-Control"] = "no-cache"
+        return HTMLResponse(PAGES[path.strip("/")](), headers=headers)
     return None
 
 
@@ -160,7 +166,7 @@ def _legal_page(name: str) -> HTMLResponse:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{title}</title>
   <link rel="icon" href="/site/img/favicon-32.png" sizes="32x32">
-  <link rel="stylesheet" href="/site/site.css?v=20261126">
+  <link rel="stylesheet" href="/site/site.css?v=20261126c">
 </head>
 <body>
 <!--email_off-->

@@ -11,6 +11,8 @@ dans un pays ; s'ils sont tous fermés, l'app se présente en Lot 1
 (Discussions, Statuts, Appels, Réglages).
 """
 import json
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Optional
 
 from sqlalchemy.orm import Session
@@ -108,11 +110,27 @@ _FALLBACK: dict[str, Any] = {
 }
 
 
+@lru_cache(maxsize=1)
+def world() -> dict[str, dict[str, Any]]:
+    """Tous les pays et territoires du monde : nom français, monnaie ISO
+    4217 et indicatif (app/data/countries.json, 252 entrées)."""
+    path = Path(__file__).resolve().parent.parent / "data" / "countries.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def country_name(code: Optional[str]) -> Optional[str]:
+    entry = world().get((code or "").upper())
+    return entry["name"] if entry else None
+
+
 def country_config(db: Session, country: Optional[str]) -> dict[str, Any]:
     code = (country or "").upper()
     # Les clés ajoutées après coup (pays de test, vidéo…) existent partout,
-    # même pour un pays écrit avant elles.
-    config = {**_FALLBACK, **_DEFAULTS.get(code, {})}
+    # même pour un pays écrit avant elles. La monnaie d'un pays sans réglage
+    # est la sienne (EUR, NGN…), pas le franc CFA du marché de lancement.
+    local = world().get(code, {})
+    config = {**_FALLBACK, **({"currency": local["currency"]} if local.get("currency") else {}),
+              **_DEFAULTS.get(code, {})}
     override = get_setting(db, f"country.{code}") if code else None
     if override:
         try:

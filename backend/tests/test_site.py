@@ -73,3 +73,15 @@ def test_markdown_is_escaped():
     assert "<script>" not in out and "&lt;script&gt;" in out
     assert "<strong>gras</strong>" in out
     assert "<li>a suite</li>" in out and "<blockquote>" in out
+
+
+def test_project_pages_on_the_site():
+    for path, needle in (("/officine", "Inscrire mon officine"), ("/livreur", "Devenir livreur"),
+                         ("/kory", "Créer une cagnotte")):
+        response = client.get(path, headers={"host": "pokou.app"})
+        assert response.status_code == 200, path
+        assert needle in response.text and "<details>" in response.text
+        assert 'aria-current="page"' in response.text
+    # L'espace officine reste à sa place sur l'extranet.
+    extranet = client.get("/officine/", headers={"host": "extranet.pokou.app"})
+    assert "Inscrire mon officine" not in extranet.text

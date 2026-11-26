@@ -26,11 +26,34 @@ ALL = {
     "audit.view",
     "countries.view", "countries.manage",
     "settings.manage",
+    "roles.manage",
 }
+
+#: Ce que chaque permission autorise, regroupé comme dans la console.
+PERMISSION_CATALOG = [
+    ("Général", [("dashboard.view", "Voir le tableau de bord"), ("audit.view", "Voir le journal d'audit")]),
+    ("Utilisateurs", [("users.view", "Voir les comptes"), ("users.manage", "Suspendre, réactiver, modifier les comptes")]),
+    ("Équipe", [("team.view", "Voir l'équipe"), ("team.manage", "Ajouter des membres, changer leur rôle"),
+                ("roles.manage", "Créer et modifier les rôles")]),
+    ("Signalements", [("reports.view", "Voir les signalements"), ("reports.manage", "Traiter les signalements")]),
+    ("Kory", [("kory.view", "Voir les collectes"), ("kory.manage", "Geler, intervenir sur une collecte")]),
+    ("Honam", [("honam.view", "Voir officines, commandes, coursiers"), ("honam.manage", "Valider officines et coursiers, intervenir")]),
+    ("Assimé", [("assime.view", "Voir les annonces"), ("assime.manage", "Modérer les annonces")]),
+    ("Pokou certifié", [("certified.view", "Voir les dossiers"), ("certified.manage", "Valider ou refuser les dossiers")]),
+    ("Contenus", [("banners.view", "Voir les bannières"), ("banners.manage", "Gérer les bannières"),
+                  ("modules.manage", "Ouvrir ou fermer les modules")]),
+    ("Configuration", [("countries.view", "Voir les réglages par pays"), ("countries.manage", "Modifier les réglages par pays"),
+                       ("settings.manage", "Modifier les réglages système")]),
+]
+assert {k for _, items in PERMISSION_CATALOG for k, _ in items} == ALL
+
+#: Réservée au super-administrateur : un rôle qui pourrait modifier les rôles
+#: pourrait se donner tous les droits.
+SUPER_ADMIN_ONLY = {"roles.manage"}
 
 ROLE_PERMISSIONS = {
     UserRole.SUPER_ADMIN: ALL,
-    UserRole.ADMIN: ALL - {"team.manage"},
+    UserRole.ADMIN: ALL - {"team.manage", "roles.manage"},
     UserRole.SUPPORT: {
         "dashboard.view", "users.view", "users.manage", "team.view",
         "reports.view", "reports.manage", "kory.view", "honam.view",
@@ -60,8 +83,35 @@ ROLE_LABELS = {
 }
 
 
+#: Les rôles prédéfinis dont les permissions se modifient dans la console.
+EDITABLE_SYSTEM_ROLES = [UserRole.ADMIN, UserRole.SUPPORT, UserRole.AI_OPERATOR, UserRole.VIEWER]
+
+
 def permissions_of(user: User) -> set:
-    return set(ROLE_PERMISSIONS.get(user.role or UserRole.USER, set()))
+    """Les permissions effectives d'un compte.
+
+    Super-administrateur : toutes, toujours. Sinon, le rôle créé par
+    l'équipe s'il en a un, puis le rôle prédéfini tel que modifié dans la
+    console, puis sa valeur par défaut."""
+    from sqlalchemy.orm import object_session
+
+    from app.models import AdminRole
+
+    role = user.role or UserRole.USER
+    if role == UserRole.SUPER_ADMIN:
+        return set(ALL)
+    if role == UserRole.USER:
+        return set()
+    allowed = ALL - SUPER_ADMIN_ONLY
+    custom = getattr(user, "admin_role", None)
+    if custom is not None:
+        return custom.permission_set() & allowed
+    session = object_session(user)
+    if session is not None:
+        row = session.query(AdminRole).filter(AdminRole.key == role.value).first()
+        if row is not None:
+            return row.permission_set() & allowed
+    return set(ROLE_PERMISSIONS.get(role, set())) & allowed
 
 
 def require_permission(permission: str):

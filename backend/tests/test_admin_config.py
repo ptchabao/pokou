@@ -116,8 +116,11 @@ def test_pays_modifier_ajouter_et_revenir(client):
     assert _last_audit().action == "country_reset"
     assert client.delete("/api/v1/admin/countries/TG", headers=admin).status_code == 404
     client.delete("/api/v1/admin/countries/SN", headers=admin)
-    codes = {c["code"] for c in client.get("/api/v1/admin/countries", headers=admin).json()["items"]}
-    assert "SN" not in codes
+    # Tous les pays du monde restent listés ; le Sénégal n'a simplement plus
+    # de réglage propre.
+    senegal = next(c for c in client.get("/api/v1/admin/countries", headers=admin).json()["items"]
+                   if c["code"] == "SN")
+    assert senegal["has_override"] is False
 
 
 def test_pays_de_test_video_et_officines_demo(client):
