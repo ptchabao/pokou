@@ -282,11 +282,9 @@ class CallRepository {
 
   /// Une clé neuve si l'appel vers [peerUserId] peut être chiffré.
   ///
-  /// Une session DÉJÀ ouverte est exigée, et pas seulement possible : la
-  /// clé ne doit jamais être l'enveloppe qui ouvre une session. Elle n'est
-  /// remise qu'à l'invité qui décroche ; un appel manqué laisserait sinon
-  /// une session dont le préambule n'arrive jamais, et tous nos messages
-  /// suivants deviendraient illisibles chez lui.
+  /// La clé peut être l'enveloppe qui ouvre une session : nos messages
+  /// suivants rapportent le préambule tant qu'il n'a pas répondu, donc un
+  /// appel manqué ne rend pas la session illisible chez lui.
   ///
   /// La session doit aussi viser l'identité qu'il publie aujourd'hui : après
   /// une réinstallation chez lui, une clé scellée sur l'ancienne ne
@@ -385,7 +383,17 @@ class CallRepository {
       peerUserId,
       publishedIdentityKey: peer.identityKey,
     );
-    return state == PeerSessionState.established;
+    // Toute session qui vise son identité d'aujourd'hui — ou aucune encore :
+    // `seal` en ouvre une. Exiger un message déjà REÇU de lui bloquait
+    // l'ajout à un appel de quiconque ne nous avait jamais écrit (presque
+    // tout le monde après une remise à zéro). Ce n'est plus nécessaire :
+    // tant qu'il n'a pas répondu, chacun de nos messages porte le
+    // préambule de la session (E2EESession.pendingPreamble), donc une clé
+    // d'appel jamais ouverte ne rend rien illisible.
+    //
+    // Seule exception : une identité qui a CHANGÉ. L'avertissement de
+    // sécurité reste à valider par l'utilisateur avant tout envoi.
+    return state != PeerSessionState.changed;
   }
 
   /// Scelle [key] pour [peerUserId] — ou lève. On ne bascule pas en clair à

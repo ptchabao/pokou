@@ -36,6 +36,7 @@ class E2EESession {
     this.sendCounter = 0,
     this.receiveCounter = 0,
     Map<int, List<int>>? skipped,
+    this.pendingPreamble,
   }) : skippedKeys = skipped ?? {};
 
   /// Identifiant dérivé des éléments de la poignée de main.
@@ -68,32 +69,47 @@ class E2EESession {
   /// rare.
   final Map<int, List<int>> skippedKeys;
 
+  /// Le préambule d'une session que NOUS avons ouverte, tant que le
+  /// correspondant n'y a pas encore répondu.
+  ///
+  /// Il accompagne chacun de nos messages jusqu'à la première réponse, comme
+  /// dans Signal : si le premier message ne lui parvient jamais — une clé
+  /// d'appel scellée pour quelqu'un qui ne décroche pas —, le suivant porte
+  /// encore de quoi ouvrir la session, et rien ne devient illisible. Celui
+  /// qui a déjà la session ignore simplement le préambule.
+  Map<String, dynamic>? pendingPreamble;
+
   /// Au-delà, on refuse d'avancer. Un numéro de message absurde (par erreur
   /// ou par malveillance) ferait sinon dériver des millions de clés d'un
   /// coup — un déni de service depuis un seul message.
   static const maxSkip = 200;
 
   Map<String, dynamic> toJson() => {
-        'sid': sessionId,
-        'pik': base64.encode(peerIdentityKey),
-        'sc': base64.encode(sendingChain),
-        'rc': base64.encode(receivingChain),
-        'sn': sendCounter,
-        'rn': receiveCounter,
-        'skip': skippedKeys.map((n, key) => MapEntry('$n', base64.encode(key))),
-      };
+    'sid': sessionId,
+    'pik': base64.encode(peerIdentityKey),
+    'sc': base64.encode(sendingChain),
+    'rc': base64.encode(receivingChain),
+    'sn': sendCounter,
+    'rn': receiveCounter,
+    'skip': skippedKeys.map((n, key) => MapEntry('$n', base64.encode(key))),
+    if (pendingPreamble != null) 'pre': pendingPreamble,
+  };
 
   factory E2EESession.fromJson(Map<String, dynamic> json) => E2EESession(
-        sessionId: json['sid'] as String,
-        peerIdentityKey: base64.decode(json['pik'] as String),
-        sendingChain: base64.decode(json['sc'] as String),
-        receivingChain: base64.decode(json['rc'] as String),
-        sendCounter: json['sn'] as int? ?? 0,
-        receiveCounter: json['rn'] as int? ?? 0,
-        skipped: ((json['skip'] as Map?) ?? {}).map(
-          (n, key) => MapEntry(int.parse(n as String), base64.decode(key as String) as List<int>),
-        ),
-      );
+    sessionId: json['sid'] as String,
+    peerIdentityKey: base64.decode(json['pik'] as String),
+    sendingChain: base64.decode(json['sc'] as String),
+    receivingChain: base64.decode(json['rc'] as String),
+    sendCounter: json['sn'] as int? ?? 0,
+    receiveCounter: json['rn'] as int? ?? 0,
+    skipped: ((json['skip'] as Map?) ?? {}).map(
+      (n, key) => MapEntry(
+        int.parse(n as String),
+        base64.decode(key as String) as List<int>,
+      ),
+    ),
+    pendingPreamble: (json['pre'] as Map?)?.cast<String, dynamic>(),
+  );
 }
 
 /// Le trousseau public de quelqu'un, tel que le serveur le rend.
@@ -120,10 +136,13 @@ class PeerBundle {
       identityKey: base64.decode(json['identity_key'] as String),
       signingKey: base64.decode(json['signing_key'] as String),
       signedPrekey: base64.decode(json['signed_prekey'] as String),
-      signedPrekeySignature: base64.decode(json['signed_prekey_signature'] as String),
+      signedPrekeySignature: base64.decode(
+        json['signed_prekey_signature'] as String,
+      ),
       oneTimePrekeyId: oneTime?['key_id'] as int?,
-      oneTimePrekey:
-          oneTime == null ? null : base64.decode(oneTime['public_key'] as String),
+      oneTimePrekey: oneTime == null
+          ? null
+          : base64.decode(oneTime['public_key'] as String),
     );
   }
 }
@@ -151,7 +170,8 @@ class E2EEHandshake {
   ///
   /// Renvoie la session ET les éléments à joindre au premier message, sans
   /// lesquels le destinataire ne pourrait rien reconstituer.
-  static Future<({E2EESession session, Map<String, dynamic> preamble})> initiate({
+  static Future<({E2EESession session, Map<String, dynamic> preamble})>
+  initiate({
     required SimpleKeyPair myIdentity,
     required PeerBundle peer,
   }) async {
@@ -255,8 +275,14 @@ class E2EEHandshake {
     // rang — réutiliser une clé AES-GCM révèle le clair des deux messages.
     // C'est la faute la plus grave possible ici, et c'est cette seule ligne
     // qui l'évite.
-    final initiatorChain = await E2EEPrimitives.derive(root, info: _infoInitiator);
-    final responderChain = await E2EEPrimitives.derive(root, info: _infoResponder);
+    final initiatorChain = await E2EEPrimitives.derive(
+      root,
+      info: _infoInitiator,
+    );
+    final responderChain = await E2EEPrimitives.derive(
+      root,
+      info: _infoResponder,
+    );
 
     // L'empreinte ne doit dépendre que d'éléments que les DEUX côtés
     // connaissent à l'identique — d'où l'identité de l'INITIATEUR et non

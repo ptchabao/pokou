@@ -250,6 +250,11 @@ class E2EEService {
         final sealed = await E2EEEnvelope.seal(
           session: session,
           plaintext: plaintext,
+          // Tant qu'il n'a pas répondu, chaque message rapporte de quoi
+          // ouvrir la session (voir E2EESession.pendingPreamble).
+          preamble: session.receiveCounter == 0
+              ? session.pendingPreamble
+              : null,
         );
         await _store.saveSession(peerUserId, session);
         return SealEncrypted(
@@ -327,6 +332,7 @@ class E2EEService {
         plaintext: plaintext,
         preamble: opened.preamble,
       );
+      opened.session.pendingPreamble = opened.preamble;
       await _store.saveSession(peerUserId, opened.session);
       return SealEncrypted(
         encryption: E2EEEnvelope.version,
@@ -396,6 +402,9 @@ class E2EEService {
       envelope: envelope,
       ciphertext: ciphertext,
     );
+    // Il nous a répondu sur cette session : il la détient, le préambule ne
+    // sert plus.
+    if (session.receiveCounter > 0) session.pendingPreamble = null;
     // La session a avancé : la persister est ce qui empêche de redériver
     // deux fois la même clé au redémarrage.
     await _store.saveSession(peerUserId, session);
