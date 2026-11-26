@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../core/widgets/keyboard_height.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -957,6 +958,7 @@ class _GroupConversationScreenState
     if (inset > 120 && inset != _keyboardHeight) {
       _keyboardHeight = inset;
     }
+    KeyboardHeight.remember(inset);
   }
 
   /// Le nom d'un auteur, même règle que partout (voir
@@ -2292,7 +2294,7 @@ class _GroupConversationScreenState
               if (_emojiOpen)
                 ComposerPanel(
                   controller: _inputController,
-                  height: _keyboardHeight,
+                  height: KeyboardHeight.of(context),
                   onBackspace: _emojiBackspace,
                   tab: _panelTab,
                   onTabChanged: (tab) => setState(() => _panelTab = tab),

@@ -11,6 +11,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../media/media_repository.dart';
 import '../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../features/contacts/presentation/discussions_controller.dart';
 import 'web_notifications_stub.dart'
     if (dart.library.js_interop) 'web_notifications_web.dart'
     as web_notifications;
@@ -702,7 +704,12 @@ class PushService {
     final saved = await _ref
         .read(messagingRepositoryProvider)
         .send(recipientId: recipientId, content: text);
-    await _ref.read(pokouMessageStoreProvider).saveDirect([saved]);
+    final store = _ref.read(pokouMessageStoreProvider);
+    await store.saveDirect([saved]);
+    // La conversation ouverte et la liste des discussions le montrent tout
+    // de suite : sans cela, la réponse n'apparaissait qu'au rechargement.
+    store.announceSent(direct: saved);
+    _ref.invalidate(discussionsProvider);
   }
 
   Future<bool> _sendGroupReply(int groupId, String text) async {
@@ -716,7 +723,10 @@ class PushService {
       content: text,
       messageType: 'TEXT',
     );
-    await _ref.read(pokouMessageStoreProvider).saveGroup([sent]);
+    final store = _ref.read(pokouMessageStoreProvider);
+    await store.saveGroup([sent]);
+    store.announceSent(group: sent);
+    _ref.invalidate(discussionsProvider);
     return true;
   }
 

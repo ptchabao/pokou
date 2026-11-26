@@ -53,6 +53,14 @@ class PokouMessageStore {
 
   Stream<SyncInboxEvent> get syncUpdates => _syncUpdates.stream;
 
+  /// Un message ENVOYÉ hors de l'écran de conversation — une réponse écrite
+  /// depuis une notification : la conversation ouverte l'affiche aussitôt,
+  /// au lieu d'attendre un rechargement. `localId` vide = rien à remplacer.
+  void announceSent({DirectMessage? direct, GroupMessage? group}) {
+    if (_updates.isClosed) return;
+    _updates.add(OutboxUpdate(localId: '', direct: direct, group: group));
+  }
+
   static const _pendingTrue = 1;
   static const _pendingFalse = 0;
 

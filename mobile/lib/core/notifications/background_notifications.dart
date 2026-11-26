@@ -187,11 +187,23 @@ class _StandaloneNotifications {
       groups: groups,
       groupStore: groupStore,
       myUserId: userId,
-      // Une réponse privée attend l'application — voir
-      // MessageNotificationHandler.
+      // La réponse privée est scellée et envoyée ici, comme celle d'un
+      // groupe : cet isolat ouvre déjà les messages reçus avec les mêmes
+      // clés. Elle attendait l'ouverture de l'application, et n'apparaissait
+      // donc nulle part — ni chez le correspondant, ni dans la discussion.
+      // La file ne sert plus qu'en secours, si l'envoi échoue.
       sendDirect: (recipientId, text) async {
-        await pending.add(recipientId, text);
-        return false;
+        try {
+          final saved = await messaging.send(
+            recipientId: recipientId,
+            content: text,
+          );
+          await groupStore.saveDirect([saved]);
+          return true;
+        } catch (_) {
+          await pending.add(recipientId, text);
+          return false;
+        }
       },
       sendGroup: (groupId, text) async {
         if (userId == null) return false;

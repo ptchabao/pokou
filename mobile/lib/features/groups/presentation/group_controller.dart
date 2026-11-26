@@ -352,6 +352,18 @@ class GroupChatController extends StateNotifier<GroupChatState> {
     final confirmed = update.group;
     if (confirmed != null) {
       if (confirmed.groupId != groupId) return;
+      if (update.localId.isEmpty) {
+        final exists = state.messages.any((m) => m.id == confirmed.id);
+        state = state.copyWith(
+          messages: exists
+              ? [
+                  for (final m in state.messages)
+                    m.id == confirmed.id ? confirmed : m,
+                ]
+              : [...state.messages, confirmed],
+        );
+        return;
+      }
       state = state.copyWith(
         messages: [
           for (final m in state.messages)

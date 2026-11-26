@@ -340,6 +340,20 @@ class MessagingController extends StateNotifier<MessagingState> {
     final confirmed = update.direct;
     if (confirmed != null) {
       if (!_belongsToConversation(confirmed)) return;
+      if (update.localId.isEmpty) {
+        // Envoyé ailleurs (réponse depuis une notification) : on l'ajoute,
+        // ou on le remplace s'il est déjà là.
+        final exists = state.messages.any((m) => m.id == confirmed.id);
+        state = state.copyWith(
+          messages: exists
+              ? [
+                  for (final m in state.messages)
+                    m.id == confirmed.id ? confirmed : m,
+                ]
+              : [...state.messages, confirmed],
+        );
+        return;
+      }
       state = state.copyWith(
         messages: replaceConfirmed(state.messages, update.localId, confirmed),
         pendingIds: state.pendingIds.difference({update.localId}),
