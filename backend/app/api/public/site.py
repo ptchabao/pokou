@@ -160,7 +160,7 @@ def _legal_page(name: str) -> HTMLResponse:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{title}</title>
   <link rel="icon" href="/site/img/favicon-32.png" sizes="32x32">
-  <link rel="stylesheet" href="/site/site.css">
+  <link rel="stylesheet" href="/site/site.css?v=20261126">
 </head>
 <body>
 <!--email_off-->
