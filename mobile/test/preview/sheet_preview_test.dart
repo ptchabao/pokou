@@ -9,6 +9,10 @@ import 'package:pokou/core/widgets/pokou_sheet.dart';
 // Rendu d'une longue feuille d'actions sur un écran à barre de navigation
 // système : POKOU_PREVIEW=<dossier> flutter test test/preview/sheet_preview_test.dart
 final _out = Platform.environment['POKOU_PREVIEW'];
+
+/// Échelle des rendus (POKOU_PREVIEW_SCALE=2 pour le site) ; 1 par défaut.
+final _scale =
+    double.tryParse(Platform.environment['POKOU_PREVIEW_SCALE'] ?? '') ?? 1;
 final _key = GlobalKey();
 
 void main() {
@@ -53,7 +57,7 @@ void main() {
     final boundary =
         _key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final bytes = await tester.runAsync(() async {
-      final image = await boundary.toImage(pixelRatio: 1);
+      final image = await boundary.toImage(pixelRatio: _scale);
       return (await image.toByteData(
         format: ui.ImageByteFormat.png,
       ))!.buffer.asUint8List();

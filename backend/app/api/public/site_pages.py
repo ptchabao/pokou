@@ -10,7 +10,7 @@ from typing import Optional
 
 PLAY_URL = "https://play.google.com/store/apps/details?id=com.pokou.pokou"
 OFFICINE_URL = "https://extranet.pokou.app/officine/"
-CSS_VERSION = "20261126d"
+CSS_VERSION = "20261127b"
 
 
 def _fcfa(amount: Optional[int]) -> Optional[str]:
@@ -187,7 +187,7 @@ def officine_page() -> str:
     <section class="hero-shell">
       <div class="hero hero--page mesh mesh--warm">
         <div class="hero__text">
-          <span class="pill">Honam · pour les pharmacies</span>
+          <span class="pill"><i class="ico ico--honam" aria-hidden="true"></i>Honam · pour les pharmacies</span>
           <h1>Votre officine, à portée de tout le quartier.</h1>
           <p class="lead">Recevez les ordonnances des patients proches, envoyez un devis en quelques gestes, encaissez par mobile money et faites livrer par un coursier Pokou. Sans site à créer, sans caisse à changer.</p>
           <div class="row">
@@ -196,7 +196,7 @@ def officine_page() -> str:
           </div>
         </div>
         <div class="hero__visual hero__visual--shot" aria-hidden="true">
-          <img class="phone" src="/site/img/tel-honam.jpg" alt="" width="480" height="997">
+          <img class="phone" src="/site/img/app/honam.jpg" alt="" width="390" height="844">
           <div class="chip chip--b"><span class="chip__dot chip__dot--green"></span>Nouvelle ordonnance</div>
           <div class="chip chip--c"><span class="chip__dot chip__dot--gold"></span>Devis payé · 8 400 F</div>
         </div>
@@ -302,7 +302,7 @@ def livreur_page() -> str:
     <section class="hero-shell">
       <div class="hero hero--page mesh mesh--warm">
         <div class="hero__text">
-          <span class="pill">Honam · devenir livreur</span>
+          <span class="pill"><i class="ico ico--coursier" aria-hidden="true"></i>Honam · devenir livreur</span>
           <h1>Gagne de l'argent en livrant près de chez toi.</h1>
           <p class="lead">Livre les médicaments des pharmacies de ton quartier, à moto, à vélo ou à pied. Tu choisis tes courses, l'officine te paie sur ton wallet.</p>
           <div class="row">
@@ -351,6 +351,7 @@ def livreur_page() -> str:
             <li>Un téléphone Android avec Pokou et un wallet mobile money.</li>
             <li>Une pièce d'identité, vérifiée par l'équipe Pokou.</li>
           </ul>
+          <img class="phone phone--inline" src="/site/img/app/livraison.jpg" alt="Le suivi d'une livraison dans Pokou : le coursier en route et le code de remise." width="390" height="844" loading="lazy">
         </div>
         <div class="split__text">
           <h2>Ce que ça coûte.</h2>
@@ -405,7 +406,7 @@ def kory_page() -> str:
     <section class="hero-shell">
       <div class="hero hero--page mesh mesh--warm">
         <div class="hero__text">
-          <span class="pill">Kory · cagnottes, tontines, cotisations</span>
+          <span class="pill"><i class="ico ico--kory" aria-hidden="true"></i>Kory · cagnottes, tontines, cotisations</span>
           <h1>Cotiser ensemble, sur la parole donnée.</h1>
           <p class="lead">Organise une cagnotte pour un anniversaire, une tontine entre collègues ou la cotisation de la famille. Chacun s'engage, Kory suit les échéances et tient le journal. L'argent, lui, ne passe jamais par Pokou.</p>
           <div class="row">
@@ -414,7 +415,7 @@ def kory_page() -> str:
           </div>
         </div>
         <div class="hero__visual hero__visual--shot" aria-hidden="true">
-          <img class="phone" src="/site/img/tel-kory.jpg" alt="" width="480" height="997">
+          <img class="phone" src="/site/img/app/kory.jpg" alt="" width="390" height="844">
           <div class="chip chip--b"><span class="chip__dot chip__dot--gold"></span>Tontine · tour 4 sur 10</div>
           <div class="chip chip--c"><span class="chip__dot chip__dot--green"></span>Ta part est confirmée</div>
         </div>
@@ -439,7 +440,7 @@ def kory_page() -> str:
     <section class="band mesh mesh--sunset">
       <div class="wrap split">
         <div class="split__visual">
-          <div class="orb"><img src="/site/img/tel-kory.jpg" alt="Capture : Kory, avec une cagnotte, une tontine et une cotisation." width="480" height="997" loading="lazy"></div>
+          <div class="orb"><img src="/site/img/app/kory.jpg" alt="L'onglet Kory : cagnottes, tontines et cotisations." width="390" height="844" loading="lazy"></div>
         </div>
         <div class="split__text">
           <span class="caps caps--light">Pokou ne touche pas l'argent</span>

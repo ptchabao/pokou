@@ -419,3 +419,43 @@ a.store:hover { transform: translateY(-1px); }
 .foot .brand__logo { height: 30px; }
 .back .brand__logo { height: 30px; }
 @media (max-width: 560px) { .nav .brand__logo { height: 28px; } }
+
+/* Vraies icônes de l'application (assets/icons/modules), teintées par masque */
+.ico { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -0.2em; margin-right: .45em;
+  background-color: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.ico--discussions { --i: url("/site/img/icons/discussions.svg"); }
+.ico--appels { --i: url("/site/img/icons/appels.svg"); }
+.ico--kory { --i: url("/site/img/icons/kory.svg"); }
+.ico--honam { --i: url("/site/img/icons/honam.svg"); }
+.ico--assime { --i: url("/site/img/icons/assime.svg"); }
+.ico--coursier { --i: url("/site/img/icons/coursier.svg"); }
+.ico--xl { width: 120px; height: 120px; margin: 0; color: #fff; }
+.ico-baba { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -0.25em; margin-right: .45em; border-radius: 50%; }
+.strip__list li { display: inline-flex; align-items: center; }
+.strip__list .ico { color: var(--terracotta); }
+.strip__list .ico-baba { width: 1.4em; height: 1.4em; }
+
+/* Vrais écrans de l'application */
+.phone { display: block; width: 100%; max-width: 300px; height: auto; border-radius: 30px;
+  border: 6px solid #1c1514; background: #1c1514; box-shadow: 0 30px 60px -30px rgba(60,25,10,.55); }
+.phone--hero { width: 330px; max-width: 100%; border-bottom: 0; border-radius: 38px 38px 0 0; box-shadow: 0 40px 80px -40px rgba(80,30,10,.5); }
+.hero__visual--shot .phone { width: 320px; max-width: 100%; border-bottom: 0; border-radius: 38px 38px 0 0; }
+.screens { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 64px; }
+.screens figure { margin: 0; display: grid; justify-items: center; gap: 12px; }
+.screens figcaption { font-size: .92rem; color: var(--muted); font-weight: 500; }
+@media (max-width: 1000px) { .screens { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pair { position: relative; display: flex; justify-content: center; padding-right: 90px; }
+.pair .phone { width: 260px; }
+.pair .phone--back { position: absolute; right: 0; top: 60px; width: 230px; transform: rotate(4deg); z-index: -1; opacity: .96; }
+@media (max-width: 560px) { .pair { padding-right: 40px; } .pair .phone--back { width: 170px; } }
+.orb img { width: 56%; border-radius: 26px; border: 5px solid #1c1514; margin-top: 24%; }
+.card__emblem { height: 220px; display: grid; place-items: center; margin-bottom: 28px; }
+.baba-face { width: 160px; height: 160px; border-radius: 50%; box-shadow: 0 0 0 10px rgba(255,255,255,.25), 0 30px 50px -25px rgba(0,0,0,.5); }
+.caps .ico { margin-right: .35em; }
+.phone--inline { width: 240px; margin-top: 28px; }
+.pill .ico { color: var(--terracotta); }
+/* Correctifs : puce dans l'accroche, deuxième écran Honam visible */
+.chip--b { right: -2%; }
+.pair { isolation: isolate; }
+.pair .phone:first-child { position: relative; z-index: 2; }
+.pair .phone--back { z-index: 1; }

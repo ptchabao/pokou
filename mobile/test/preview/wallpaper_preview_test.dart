@@ -24,6 +24,10 @@ import 'package:pokou/l10n/app_localizations.dart';
 import '../core/wallpaper/memory_storage.dart';
 
 final _out = Platform.environment['POKOU_PREVIEW'];
+
+/// Échelle des rendus (POKOU_PREVIEW_SCALE=2 pour le site) ; 1 par défaut.
+final _scale =
+    double.tryParse(Platform.environment['POKOU_PREVIEW_SCALE'] ?? '') ?? 1;
 final _key = GlobalKey();
 
 Future<void> _loadFonts() async {
@@ -104,7 +108,7 @@ Future<void> _shot(
   final boundary =
       _key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
   final bytes = await tester.runAsync(() async {
-    final image = await boundary.toImage(pixelRatio: 1);
+    final image = await boundary.toImage(pixelRatio: _scale);
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
     return data!.buffer.asUint8List();
   });

@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-/// L'orbe de Baba — son visage, dans le vert de l'application.
+/// Baba : le visage du vieil homme (assets/illustrations/baba.svg), le même
+/// partout où l'assistant apparaît — discussion, listes, profil, accueil.
 ///
 /// Elle doit paraître VIVANTE, sans s'agiter :
 ///
@@ -28,11 +30,9 @@ class AssistantOrb extends StatefulWidget {
   State<AssistantOrb> createState() => _AssistantOrbState();
 }
 
-/// Le vert de l'application, de la lumière à l'ombre.
+/// Le halo, aux couleurs de la marque.
 const _light = Color(0xFFE39A6B);
-const _mid = Color(0xFF93491F);
 const _brand = Color(0xFFA4512A);
-const _deep = Color(0xFF7A3A18);
 
 class _AssistantOrbState extends State<AssistantOrb>
     with TickerProviderStateMixin {
@@ -94,11 +94,10 @@ class _AssistantOrbState extends State<AssistantOrb>
               height: size,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const RadialGradient(
-                  center: Alignment(-0.3, -0.4),
-                  radius: 1.1,
-                  colors: [_light, _mid, _brand, _deep],
-                  stops: [0.0, 0.35, 0.7, 1.0],
+                color: const Color(0xFFF3E2B0),
+                border: Border.all(
+                  color: _brand.withValues(alpha: 0.35),
+                  width: size >= 56 ? 2 : 1,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -112,9 +111,13 @@ class _AssistantOrbState extends State<AssistantOrb>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
+                    SvgPicture.asset(
+                      'assets/illustrations/baba.svg',
+                      fit: BoxFit.cover,
+                      semanticsLabel: 'Baba',
+                    ),
                     if (_detailed)
-                      // La lumière qui tourne : un balayage clair, très
-                      // doux, entraîné par la rotation.
+                      // La lumière qui tourne, très douce, sur le visage.
                       Transform.rotate(
                         angle: _spin.value * 2 * math.pi,
                         child: DecoratedBox(
@@ -123,7 +126,7 @@ class _AssistantOrbState extends State<AssistantOrb>
                               colors: [
                                 Colors.white.withValues(alpha: 0),
                                 Colors.white.withValues(
-                                  alpha: thinking ? 0.32 : 0.22,
+                                  alpha: thinking ? 0.22 : 0.12,
                                 ),
                                 Colors.white.withValues(alpha: 0),
                                 Colors.white.withValues(alpha: 0),
@@ -133,27 +136,6 @@ class _AssistantOrbState extends State<AssistantOrb>
                           ),
                         ),
                       ),
-                    // Le reflet, qui monte et descend avec le souffle.
-                    Align(
-                      alignment: Alignment.lerp(
-                        const Alignment(-0.35, -0.2),
-                        const Alignment(-0.35, -0.6),
-                        t,
-                      )!,
-                      child: Container(
-                        width: size * 0.38,
-                        height: size * 0.22,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.white.withValues(alpha: 0.45),
-                              Colors.white.withValues(alpha: 0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),

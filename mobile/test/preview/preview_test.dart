@@ -39,6 +39,10 @@ import 'package:pokou/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _out = Platform.environment['POKOU_PREVIEW'];
+
+/// Échelle des rendus (POKOU_PREVIEW_SCALE=2 pour le site) ; 1 par défaut.
+final _scale =
+    double.tryParse(Platform.environment['POKOU_PREVIEW_SCALE'] ?? '') ?? 1;
 final _key = GlobalKey();
 
 Future<void> _loadFonts() async {
@@ -118,7 +122,7 @@ Future<void> _shot(
   final boundary =
       _key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
   final bytes = await tester.runAsync(() async {
-    final image = await boundary.toImage(pixelRatio: 1);
+    final image = await boundary.toImage(pixelRatio: _scale);
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
     return data!.buffer.asUint8List();
   });
@@ -320,7 +324,14 @@ void main() {
                 'group_name': 'Famille Mensah',
                 'is_video': true,
                 'in_call': [
-                  for (final (i, n) in ['Ama', 'Kofi', 'Afi', 'Yao', 'Séna', 'Komi'].indexed)
+                  for (final (i, n) in [
+                    'Ama',
+                    'Kofi',
+                    'Afi',
+                    'Yao',
+                    'Séna',
+                    'Komi',
+                  ].indexed)
                     {'user_id': 10 + i, 'name': n},
                 ],
               }),
@@ -332,12 +343,7 @@ void main() {
     );
     await safe(
       'discussions',
-      () => _shot(
-        tester,
-        'discussions',
-        _discussions,
-        overrides: _homeData(),
-      ),
+      () => _shot(tester, 'discussions', _discussions, overrides: _homeData()),
     );
     await safe(
       'discussions_dark',

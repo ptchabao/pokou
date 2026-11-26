@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/assistant_orb.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -77,10 +79,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
           const SizedBox(height: 12),
           _Card(
             child: ListTile(
-              leading: Icon(
-                Icons.auto_awesome,
-                color: AppColors.chatAiIconColor,
-              ),
+              leading: const AssistantOrb(size: 36),
               title: Text(l.helpAskBaba),
               subtitle: Text(l.helpAskBabaSub),
               trailing: const Icon(Icons.chevron_right),

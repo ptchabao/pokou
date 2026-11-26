@@ -29,7 +29,7 @@
   <link rel="apple-touch-icon" href="/site/img/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <link rel="preload" href="/site/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/site/site.css?v=20261126d">
+  <link rel="stylesheet" href="/site/site.css?v=20261127b">
   <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://pokou.app/#org", "name": "Pokou", "url": "https://pokou.app/", "logo": "https://pokou.app/site/img/favicon-512.png", "email": "support@pokou.app", "slogan": "Nos racines. Nos liens. Notre avenir."}, {"@type": "WebSite", "@id": "https://pokou.app/#site", "url": "https://pokou.app/", "name": "Pokou", "inLanguage": "fr", "publisher": {"@id": "https://pokou.app/#org"}}, {"@type": "MobileApplication", "name": "Pokou – Messagerie et services", "operatingSystem": "Android", "applicationCategory": "CommunicationApplication", "inLanguage": "fr", "description": "Discussions, appels audio et vidéo, cagnottes et tontines (Kory), pharmacies et livraison (Honam), petites annonces (Assimé).", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "XOF"}, "downloadUrl": "https://play.google.com/store/apps/details?id=com.pokou.pokou", "publisher": {"@id": "https://pokou.app/#org"}, "image": "https://pokou.app/site/img/partage.jpg"}]}</script>
 </head>
 <body>
@@ -75,26 +75,7 @@
         </div>
 
         <div class="hero__visual" aria-hidden="true">
-          <div class="device">
-            <div class="device__bar">
-              <span class="dot"></span>
-              <strong>Famille Koffi</strong>
-              <span class="device__sub">Mamie, Yao et 6 autres</span>
-            </div>
-            <div class="chat">
-              <div class="msg msg--in"><b>Yao</b>On se retrouve dimanche chez Mamie&nbsp;?</div>
-              <div class="msg msg--out">Oui&nbsp;! J'apporte le gâteau 🎂</div>
-              <div class="msg msg--in msg--voice"><b>Mamie</b><span class="wave"></span><em>0:12</em></div>
-              <div class="kory-card">
-                <span class="kory-card__label">Cagnotte · Anniversaire de Papa</span>
-                <strong>75 000 F confirmés</strong>
-                <span class="bar"><span></span></span>
-              </div>
-              <div class="typing"><i></i><i></i><i></i></div>
-            </div>
-            <div class="device__input">Écris un message…<span class="send">➤</span></div>
-          </div>
-
+          <img class="phone phone--hero" src="/site/img/app/accueil.jpg" alt="L'écran d'accueil de Pokou : discussions, Kory, Honam et Assimé." width="390" height="844">
           <div class="chip chip--a"><img src="/site/img/ambassadrice.jpg" alt="" width="28" height="28">Appel vidéo · 12:04</div>
           <div class="chip chip--b"><span class="chip__dot chip__dot--green"></span>Ordonnance livrée</div>
           <div class="chip chip--c"><span class="chip__dot chip__dot--gold"></span>Ta part est confirmée</div>
@@ -106,7 +87,12 @@
     <section class="strip">
       <p class="caps">Une seule application, six usages du quotidien</p>
       <ul class="strip__list">
-        <li>Discussions</li><li>Appels</li><li>Kory</li><li>Honam</li><li>Assimé</li><li>Baba</li>
+        <li><i class="ico ico--discussions" aria-hidden="true"></i>Discussions</li>
+        <li><i class="ico ico--appels" aria-hidden="true"></i>Appels</li>
+        <li><i class="ico ico--kory" aria-hidden="true"></i>Kory</li>
+        <li><i class="ico ico--honam" aria-hidden="true"></i>Honam</li>
+        <li><i class="ico ico--assime" aria-hidden="true"></i>Assimé</li>
+        <li><img class="ico-baba" src="/site/img/baba.svg" alt="" width="28" height="28">Baba</li>
       </ul>
     </section>
 
@@ -140,6 +126,12 @@
             </div>
           </article>
         </div>
+        <div class="screens">
+          <figure><img class="phone" src="/site/img/app/discussions.jpg" alt="La liste des discussions." width="390" height="844" loading="lazy"><figcaption>Tes discussions</figcaption></figure>
+          <figure><img class="phone" src="/site/img/app/conversation.jpg" alt="Une conversation avec un fond d'écran Kente." width="390" height="844" loading="lazy"><figcaption>Des fonds d'écran d'ici</figcaption></figure>
+          <figure><img class="phone" src="/site/img/app/appels.jpg" alt="L'onglet Appels avec un appel de groupe en cours." width="390" height="844" loading="lazy"><figcaption>Rejoindre un appel en cours</figcaption></figure>
+          <figure><img class="phone" src="/site/img/app/statut.jpg" alt="Un statut texte." width="390" height="844" loading="lazy"><figcaption>Tes statuts</figcaption></figure>
+        </div>
       </div>
     </section>
 
@@ -147,11 +139,11 @@
     <section class="band mesh mesh--sunset" id="kory">
       <div class="wrap split">
         <div class="split__visual">
-          <div class="orb"><img src="/site/img/tel-kory.jpg" alt="Capture : Kory, avec une cagnotte, une tontine et une cotisation." width="480" height="997" loading="lazy"></div>
+          <div class="orb"><img src="/site/img/app/kory.jpg" alt="L'onglet Kory : cagnottes, tontines et cotisations." width="390" height="844" loading="lazy"></div>
           <div class="chip chip--float"><span class="chip__dot chip__dot--gold"></span>Tontine · tour 4 sur 10</div>
         </div>
         <div class="split__text">
-          <span class="caps caps--light">Kory · cagnottes et tontines</span>
+          <span class="caps caps--light"><i class="ico ico--kory" aria-hidden="true"></i>Kory · cagnottes et tontines</span>
           <h2>Cotiser ensemble, sur la parole donnée.</h2>
           <p>Cagnottes, tontines et cotisations entre proches. Chacun s'engage sur un montant, Kory suit les échéances et tient le journal des contributions. L'argent ne passe pas par Pokou&nbsp;: chacun verse depuis son wallet mobile money, et aucune commission n'est prise sur les cagnottes et les tontines.</p>
           <div class="row"><a class="btn btn--dark" href="#telecharger">Créer une cagnotte</a><a class="btn btn--light" href="/kory">En savoir plus</a></div>
@@ -163,7 +155,7 @@
     <section class="section" id="honam">
       <div class="wrap split">
         <div class="split__text">
-          <span class="caps">Honam · pharmacies et livraison</span>
+          <span class="caps"><i class="ico ico--honam" aria-hidden="true"></i>Honam · pharmacies et livraison</span>
           <h2>Ton ordonnance, livrée chez toi.</h2>
           <p>Photographie ton ordonnance et envoie-la à une pharmacie proche. Elle te répond avec un devis, médicaments et course compris&nbsp;; tu paies depuis ton wallet et un coursier te livre, contre un code.</p>
           <p class="note">Les médicaments sur ordonnance ne sont délivrés que sur présentation d'une ordonnance. En cas d'urgence, appelle les secours&nbsp;: Pokou n'est pas un service d'urgence.</p>
@@ -174,17 +166,9 @@
           </div>
         </div>
         <div class="split__visual">
-          <div class="window" aria-hidden="true">
-            <div class="window__bar"><i></i><i></i><i></i></div>
-            <div class="window__body">
-              <div class="flow__head"><strong>Commande #1042</strong><span>Pharmacie du Marché</span></div>
-              <ol class="flow">
-                <li class="done">Ordonnance envoyée<small>10 h 02</small></li>
-                <li class="done">Devis reçu · 8 400 F<small>10 h 09</small></li>
-                <li class="done">Payé depuis le wallet<small>10 h 11</small></li>
-                <li class="now">Le coursier arrive<small>code de livraison · 4821</small></li>
-              </ol>
-            </div>
+          <div class="pair">
+            <img class="phone" src="/site/img/app/honam.jpg" alt="L'onglet Honam : envoyer une ordonnance, commandes en cours." width="390" height="844" loading="lazy">
+            <img class="phone phone--back" src="/site/img/app/livraison.jpg" alt="Le suivi d'une livraison, avec le code de remise." width="390" height="844" loading="lazy">
           </div>
           <div class="tag"><span class="tag__ico">🛵</span><span><small>Coursier</small>Kodjo · 4 min</span></div>
         </div>
@@ -198,14 +182,14 @@
         <p class="center lead lead--narrow">Les petites annonces du quartier, et un assistant pour prendre l'application en main.</p>
         <div class="duo">
           <article class="card mesh mesh--violet">
-            <div class="card__shot"><img src="/site/img/tel-assime.jpg" alt="Capture : Assimé, les petites annonces du quartier." width="480" height="997" loading="lazy"></div>
-            <span class="caps caps--light">Assimé · petites annonces</span>
+            <div class="card__emblem" aria-hidden="true"><i class="ico ico--assime ico--xl"></i></div>
+            <span class="caps caps--light"><i class="ico ico--assime" aria-hidden="true"></i>Assimé · petites annonces</span>
             <h3>Vends et achète près de chez toi.</h3>
             <p>Publie une annonce en quelques photos, discute avec le vendeur, et conclus la vente en main propre avec un code.</p>
           </article>
           <article class="card mesh mesh--coral">
-            <div class="card__shot"><img src="/site/img/tel-baba.jpg" alt="Capture : Baba, l'assistant de Pokou." width="480" height="997" loading="lazy"></div>
-            <span class="caps caps--light">Baba · ton assistant</span>
+            <div class="card__emblem"><img class="baba-face" src="/site/img/baba.svg" alt="Baba, le vieil homme qui t'aide dans Pokou" width="150" height="150"></div>
+            <span class="caps caps--light"><img class="ico-baba" src="/site/img/baba.svg" alt="" width="20" height="20">Baba · ton assistant</span>
             <h3>Une question&nbsp;? Demande à Baba.</h3>
             <p>Baba t'aide à démarrer et répond à tes questions sur Pokou. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.</p>
           </article>
