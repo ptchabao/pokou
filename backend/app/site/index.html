@@ -11,36 +11,42 @@
   <meta property="og:description" content="Discussions et appels, pensés depuis l'Afrique. Nos racines. Nos liens. Notre avenir.">
   <meta property="og:image" content="https://pokou.app/site/img/partage.jpg">
   <meta property="og:url" content="https://pokou.app/">
+  <link rel="preload" href="/site/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="/site/img/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="/site/img/apple-touch-icon.png">
   <link rel="stylesheet" href="/site/site.css">
 </head>
 <body>
 <!--email_off-->
-  <header class="top">
-    <div class="wrap top__in">
+  <header class="nav">
+    <div class="wrap nav__in">
       <a class="brand" href="/" aria-label="Pokou, accueil">
-        <img src="/site/img/icone-192.png" alt="" width="36" height="36">
+        <img src="/site/img/icone-192.png" alt="" width="34" height="34">
         <span>Pokou</span>
       </a>
-      <nav class="nav" aria-label="Sections">
+      <nav class="nav__links" aria-label="Sections">
         <a href="#discussions">Discussions</a>
         <a href="#kory">Kory</a>
         <a href="#honam">Honam</a>
         <a href="#assime">Assimé</a>
-        <a class="nav__cta" href="#telecharger">Télécharger</a>
+        <a href="#confidentialite">Confidentialité</a>
       </nav>
+      <div class="nav__end">
+        <a class="nav__link" href="https://extranet.pokou.app/officine/">Espace officine</a>
+        <a class="btn btn--dark btn--sm" href="#telecharger">Télécharger</a>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="wrap hero__in">
+    <!-- Accroche -->
+    <section class="hero-shell">
+      <div class="hero mesh mesh--warm">
         <div class="hero__text">
-          <p class="eyebrow">Messagerie et services</p>
-          <h1>Discussions et appels, pensés depuis l'Afrique.</h1>
-          <p class="lead">Parle à ceux qui comptent, et fais ensemble ce que nos communautés font déjà&nbsp;: cotiser, se soigner, commercer. D'un pays à l'autre, garde le lien avec les tiens.</p>
-          <div class="cta" id="telecharger">
+          <span class="pill">Messagerie et services · pensée depuis l'Afrique</span>
+          <h1>Parle, cotise, soigne-toi. Avec les tiens.</h1>
+          <p class="lead">Discussions, appels audio et vidéo, cagnottes et tontines, pharmacies et petites annonces : tout ce que nos communautés font déjà, dans une seule application.</p>
+          <div class="stores" id="telecharger">
             <a class="store" href="https://play.google.com/store/apps/details?id=com.pokou.pokou" rel="noopener">
               <svg class="store__logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/></svg>
               <span class="store__text"><small>Disponible sur</small>Google Play</span>
@@ -50,145 +56,226 @@
               <span class="store__text"><small>Télécharger dans</small>l'App Store</span>
             </span>
           </div>
-          <p class="sign">Nos racines. Nos liens. Notre avenir.</p>
         </div>
-        <div class="hero__art">
-          <img src="/site/img/ambassadrice.jpg" alt="Une femme en tenue wax sourit, son téléphone Pokou à la main." width="520" height="500">
+
+        <div class="hero__visual" aria-hidden="true">
+          <div class="device">
+            <div class="device__bar">
+              <span class="dot"></span>
+              <strong>Famille Koffi</strong>
+              <span class="device__sub">Mamie, Yao et 6 autres</span>
+            </div>
+            <div class="chat">
+              <div class="msg msg--in"><b>Yao</b>On se retrouve dimanche chez Mamie&nbsp;?</div>
+              <div class="msg msg--out">Oui&nbsp;! J'apporte le gâteau 🎂</div>
+              <div class="msg msg--in msg--voice"><b>Mamie</b><span class="wave"></span><em>0:12</em></div>
+              <div class="kory-card">
+                <span class="kory-card__label">Cagnotte · Anniversaire de Papa</span>
+                <strong>75 000 F confirmés</strong>
+                <span class="bar"><span></span></span>
+              </div>
+              <div class="typing"><i></i><i></i><i></i></div>
+            </div>
+            <div class="device__input">Écris un message…<span class="send">➤</span></div>
+          </div>
+
+          <div class="chip chip--a"><img src="/site/img/ambassadrice.jpg" alt="" width="28" height="28">Appel vidéo · 12:04</div>
+          <div class="chip chip--b"><span class="chip__dot chip__dot--green"></span>Ordonnance livrée</div>
+          <div class="chip chip--c"><span class="chip__dot chip__dot--gold"></span>Ta part est confirmée</div>
         </div>
       </div>
     </section>
 
-    <section class="story">
-      <div class="wrap narrow">
-        <p>Pokou porte le nom d'une reine qui a conduit son peuple vers une terre nouvelle. Aujourd'hui, c'est toi qui gardes le lien avec les tiens. L'application est pensée depuis l'Afrique, par des Africains et des Afro-descendants, et ouverte à toutes et à tous.</p>
-      </div>
+    <!-- Bandeau des modules -->
+    <section class="strip">
+      <p class="caps">Une seule application, six usages du quotidien</p>
+      <ul class="strip__list">
+        <li>Discussions</li><li>Appels</li><li>Kory</li><li>Honam</li><li>Assimé</li><li>Baba</li>
+      </ul>
     </section>
 
-    <section class="feature" id="discussions">
-      <div class="wrap feature__in">
-        <div class="feature__text">
-          <p class="eyebrow">Discussions</p>
-          <h2>Discute et appelle, à deux ou en groupe</h2>
-          <ul>
-            <li>Messages, photos, documents et notes vocales</li>
-            <li>Groupes pour la famille, le quartier, l'association ou le bureau</li>
-            <li>Appels audio et vidéo, à deux ou en groupe</li>
-            <li>Statuts pour donner des nouvelles, visibles par qui tu choisis</li>
-          </ul>
-        </div>
-        <div class="shots">
-          <img src="/site/img/03-discussions.jpg" alt="Capture : la liste des discussions de Pokou." width="540" height="960" loading="lazy">
-          <img src="/site/img/02-appel-video.jpg" alt="Capture : un appel vidéo dans Pokou." width="540" height="960" loading="lazy">
-        </div>
-      </div>
-    </section>
-
-    <section class="feature feature--alt" id="kory">
-      <div class="wrap feature__in">
-        <div class="feature__text">
-          <p class="eyebrow">Kory</p>
-          <h2>Cotiser ensemble, sur la parole donnée</h2>
-          <ul>
-            <li>Cagnottes, tontines et cotisations entre proches</li>
-            <li>Chacun s'engage sur un montant, Kory suit les échéances et tient le journal des contributions</li>
-            <li>L'argent ne passe pas par Pokou&nbsp;: chacun verse directement depuis son wallet mobile money</li>
-            <li>Aucune commission sur les cagnottes et les tontines</li>
-          </ul>
-        </div>
-        <div class="shots shots--one">
-          <img src="/site/img/04-kory.jpg" alt="Capture : Kory, avec une cagnotte, une tontine et une cotisation." width="540" height="960" loading="lazy">
-        </div>
-      </div>
-    </section>
-
-    <section class="feature" id="honam">
-      <div class="wrap feature__in">
-        <div class="feature__text">
-          <p class="eyebrow">Honam</p>
-          <h2>Ton ordonnance, livrée chez toi</h2>
-          <ul>
-            <li>Photographie ton ordonnance et envoie-la à une pharmacie proche inscrite sur Honam</li>
-            <li>La pharmacie t'envoie un devis, médicaments et course compris</li>
-            <li>Tu la paies depuis ton wallet mobile money, puis un coursier te livre</li>
-            <li>La livraison est confirmée par un code, remis au coursier à la réception</li>
-          </ul>
-          <p class="note">Les médicaments sur ordonnance ne sont délivrés que sur présentation d'une ordonnance. Demande toujours conseil à un médecin ou à un pharmacien. En cas d'urgence, appelle les secours&nbsp;: Pokou n'est pas un service d'urgence.</p>
-          <p class="link"><a href="https://extranet.pokou.app/officine/">Vous êtes pharmacien&nbsp;? Ouvrir l'espace officine</a></p>
-        </div>
-        <div class="shots shots--one">
-          <img src="/site/img/05-honam.jpg" alt="Capture : Honam, l'envoi d'une ordonnance et les pharmacies proches." width="540" height="960" loading="lazy">
-        </div>
-      </div>
-    </section>
-
-    <section class="feature feature--alt" id="assime">
-      <div class="wrap feature__in">
-        <div class="feature__text">
-          <p class="eyebrow">Assimé</p>
-          <h2>Les petites annonces de ton quartier</h2>
-          <ul>
-            <li>Publie une annonce en quelques photos</li>
-            <li>Trouve ce qui se vend près de chez toi&nbsp;: mode, beauté, maison, électronique</li>
-            <li>Discute directement avec le vendeur et signale une annonce douteuse</li>
-          </ul>
-        </div>
-        <div class="shots shots--one">
-          <img src="/site/img/06-assime.jpg" alt="Capture : Assimé, les petites annonces du quartier." width="540" height="960" loading="lazy">
-        </div>
-      </div>
-    </section>
-
-    <section class="feature" id="baba">
-      <div class="wrap feature__in">
-        <div class="feature__text">
-          <p class="eyebrow">Baba et le mode preuve</p>
-          <h2>Un assistant pour démarrer, une preuve quand il le faut</h2>
-          <ul>
-            <li>Baba, l'assistant de Pokou, t'aide à prendre l'application en main. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.</li>
-            <li>Avec Pokou certifié&nbsp;: un nom vérifié, le mode preuve (un message supprimé reste visible, barré, pour tous) et l'export daté d'une discussion en PDF.</li>
-          </ul>
-        </div>
-        <div class="shots">
-          <img src="/site/img/08-baba.jpg" alt="Capture : Baba, l'assistant de Pokou." width="540" height="960" loading="lazy">
-          <img src="/site/img/07-mode-preuve.jpg" alt="Capture : une discussion en mode preuve." width="540" height="960" loading="lazy">
-        </div>
-      </div>
-    </section>
-
-    <section class="privacy">
+    <!-- Fonctions numérotées -->
+    <section class="section" id="discussions">
       <div class="wrap">
-        <h2>Tu décides qui voit quoi</h2>
-        <div class="grid">
-          <p>Choisis qui voit ta photo de profil, ton «&nbsp;vu à&nbsp;» et tes statuts.</p>
-          <p>Personne ne t'ajoute à un groupe sans ton accord&nbsp;: on t'envoie une invitation.</p>
-          <p>Coupe les appels d'inconnus, bloque et signale en quelques gestes.</p>
-          <p>Protège l'accès à l'application avec un code PIN.</p>
+        <h2 class="center">Tout pour garder le lien.</h2>
+        <div class="steps">
+          <article class="step">
+            <span class="step__n">1</span>
+            <div>
+              <h3>Messages et groupes</h3>
+              <p>Textes, photos, documents et notes vocales. Des groupes pour la famille, le quartier, l'association ou le bureau.</p>
+              <svg class="step__art" viewBox="0 0 120 90" aria-hidden="true"><rect x="8" y="10" width="72" height="44" rx="12" fill="#F7E3D6" stroke="#2A1E18" stroke-width="2"/><path d="M24 54l-6 14 18-14" fill="#F7E3D6" stroke="#2A1E18" stroke-width="2" stroke-linejoin="round"/><rect x="44" y="40" width="68" height="40" rx="12" fill="#B4532A" stroke="#2A1E18" stroke-width="2"/><path d="M58 52h40M58 62h26" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M22 26h40M22 36h28" stroke="#2A1E18" stroke-width="3" stroke-linecap="round"/></svg>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__n">2</span>
+            <div>
+              <h3>Appels audio et vidéo</h3>
+              <p>À deux ou en groupe. Rejoins un appel en cours depuis l'onglet Appels, tant qu'il y a du monde dedans.</p>
+              <svg class="step__art" viewBox="0 0 120 90" aria-hidden="true"><rect x="22" y="8" width="76" height="74" rx="14" fill="#FBF5EC" stroke="#2A1E18" stroke-width="2"/><circle cx="60" cy="38" r="14" fill="#D9A441" stroke="#2A1E18" stroke-width="2"/><path d="M38 70c4-12 40-12 44 0" fill="#D9A441" stroke="#2A1E18" stroke-width="2"/><circle cx="96" cy="70" r="12" fill="#2E8B57" stroke="#2A1E18" stroke-width="2"/><path d="M91 70h10M96 65v10" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__n">3</span>
+            <div>
+              <h3>Chiffré de bout en bout</h3>
+              <p>Les messages, les fichiers et les appels sont chiffrés sur ton téléphone. Pokou ne peut pas les lire.</p>
+              <svg class="step__art" viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="14" width="100" height="60" rx="8" fill="#fff" stroke="#2A1E18" stroke-width="2"/><rect x="10" y="62" width="100" height="12" fill="#8FD3C1" stroke="#2A1E18" stroke-width="2"/><path d="M60 22l18 7v12c0 12-8 18-18 22-10-4-18-10-18-22V29z" fill="#D9A441" stroke="#2A1E18" stroke-width="2"/><rect x="52" y="38" width="16" height="12" rx="2" fill="#fff" stroke="#2A1E18" stroke-width="2"/><path d="M55 38v-4a5 5 0 0 1 10 0v4" fill="none" stroke="#2A1E18" stroke-width="2"/></svg>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="closing">
-      <div class="wrap narrow">
+    <!-- Kory : panneau dégradé -->
+    <section class="band mesh mesh--sunset" id="kory">
+      <div class="wrap split">
+        <div class="split__visual">
+          <div class="orb"><img src="/site/img/tel-kory.jpg" alt="Capture : Kory, avec une cagnotte, une tontine et une cotisation." width="480" height="997" loading="lazy"></div>
+          <div class="chip chip--float"><span class="chip__dot chip__dot--gold"></span>Tontine · tour 4 sur 10</div>
+        </div>
+        <div class="split__text">
+          <span class="caps caps--light">Kory · cagnottes et tontines</span>
+          <h2>Cotiser ensemble, sur la parole donnée.</h2>
+          <p>Cagnottes, tontines et cotisations entre proches. Chacun s'engage sur un montant, Kory suit les échéances et tient le journal des contributions. L'argent ne passe pas par Pokou&nbsp;: chacun verse depuis son wallet mobile money, et aucune commission n'est prise sur les cagnottes et les tontines.</p>
+          <a class="btn btn--dark" href="#telecharger">Créer une cagnotte</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Honam : texte + fenêtre -->
+    <section class="section" id="honam">
+      <div class="wrap split">
+        <div class="split__text">
+          <span class="caps">Honam · pharmacies et livraison</span>
+          <h2>Ton ordonnance, livrée chez toi.</h2>
+          <p>Photographie ton ordonnance et envoie-la à une pharmacie proche. Elle te répond avec un devis, médicaments et course compris&nbsp;; tu paies depuis ton wallet et un coursier te livre, contre un code.</p>
+          <p class="note">Les médicaments sur ordonnance ne sont délivrés que sur présentation d'une ordonnance. En cas d'urgence, appelle les secours&nbsp;: Pokou n'est pas un service d'urgence.</p>
+          <div class="row">
+            <a class="btn btn--dark" href="#telecharger">Envoyer une ordonnance</a>
+            <a class="btn btn--ghost" href="https://extranet.pokou.app/officine/">Je suis pharmacien</a>
+          </div>
+        </div>
+        <div class="split__visual">
+          <div class="window" aria-hidden="true">
+            <div class="window__bar"><i></i><i></i><i></i></div>
+            <div class="window__body">
+              <div class="flow__head"><strong>Commande #1042</strong><span>Pharmacie du Marché</span></div>
+              <ol class="flow">
+                <li class="done">Ordonnance envoyée<small>10 h 02</small></li>
+                <li class="done">Devis reçu · 8 400 F<small>10 h 09</small></li>
+                <li class="done">Payé depuis le wallet<small>10 h 11</small></li>
+                <li class="now">Le coursier arrive<small>code de livraison · 4821</small></li>
+              </ol>
+            </div>
+          </div>
+          <div class="tag"><span class="tag__ico">🛵</span><span><small>Coursier</small>Kodjo · 4 min</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Assimé et Baba : deux cartes -->
+    <section class="section section--tight" id="assime">
+      <div class="wrap">
+        <h2 class="center">Et au quotidien.</h2>
+        <p class="center lead lead--narrow">Les petites annonces du quartier, et un assistant pour prendre l'application en main.</p>
+        <div class="duo">
+          <article class="card mesh mesh--violet">
+            <div class="card__shot"><img src="/site/img/tel-assime.jpg" alt="Capture : Assimé, les petites annonces du quartier." width="480" height="997" loading="lazy"></div>
+            <span class="caps caps--light">Assimé · petites annonces</span>
+            <h3>Vends et achète près de chez toi.</h3>
+            <p>Publie une annonce en quelques photos, discute avec le vendeur, et conclus la vente en main propre avec un code.</p>
+          </article>
+          <article class="card mesh mesh--coral">
+            <div class="card__shot"><img src="/site/img/tel-baba.jpg" alt="Capture : Baba, l'assistant de Pokou." width="480" height="997" loading="lazy"></div>
+            <span class="caps caps--light">Baba · ton assistant</span>
+            <h3>Une question&nbsp;? Demande à Baba.</h3>
+            <p>Baba t'aide à démarrer et répond à tes questions sur Pokou. Il ne lit pas tes autres discussions et ne te demandera jamais un code reçu par SMS.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Confidentialité : panneau or, orbite -->
+    <section class="band band--gold" id="confidentialite">
+      <div class="wrap split">
+        <div class="split__text">
+          <h2>Tu décides qui voit quoi.</h2>
+          <p>Choisis qui voit ta photo, ton «&nbsp;vu à&nbsp;», tes statuts et ton numéro. Personne ne t'ajoute à un groupe sans ton accord. Coupe les appels d'inconnus, bloque, signale, et protège l'application par un code PIN.</p>
+          <a class="btn btn--dark" href="/confidentialite">Notre politique de confidentialité <span aria-hidden="true">›</span></a>
+        </div>
+        <div class="split__visual" aria-hidden="true">
+          <div class="orbit">
+            <svg class="orbit__ring" viewBox="0 0 400 400"><circle cx="200" cy="200" r="170" fill="none" stroke="#2A1E18" stroke-width="2"/></svg>
+            <span class="orbit__ico o1">🔒</span>
+            <span class="orbit__ico o2">👁️</span>
+            <span class="orbit__ico o3">🛡️</span>
+            <span class="orbit__ico o4">🔢</span>
+            <span class="orbit__ico o5">🚫</span>
+            <span class="orbit__ico o6">🙈</span>
+            <div class="settings">
+              <div class="settings__title">Confidentialité</div>
+              <div class="toggle-row"><span>Photo de profil<small>Mes contacts</small></span><span class="toggle on"></span></div>
+              <div class="toggle-row"><span>Vu à<small>Personne</small></span><span class="toggle"></span></div>
+              <div class="toggle-row"><span>Mon numéro<small>Masqué</small></span><span class="toggle on"></span></div>
+              <div class="toggle-row"><span>Code PIN<small>Activé</small></span><span class="toggle on"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Offres -->
+    <section class="section">
+      <div class="wrap">
+        <h2 class="center">Gratuit pour l'essentiel.</h2>
+        <p class="center lead lead--narrow">Les discussions, les appels, les cagnottes et les tontines sont gratuits. Les options payantes sont clairement indiquées avant tout paiement.</p>
+        <div class="plans">
+          <article class="plan">
+            <h3>Pokou</h3>
+            <p class="plan__price">Gratuit</p>
+            <ul><li>Discussions et groupes</li><li>Appels audio et vidéo</li><li>Statuts</li><li>Cagnottes et tontines Kory</li><li>Honam et Assimé</li></ul>
+          </article>
+          <article class="plan plan--accent">
+            <span class="plan__tag">Option</span>
+            <h3>Pokou certifié</h3>
+            <p class="plan__price">Un mois d'essai</p>
+            <ul><li>Nom vérifié avec un badge</li><li>Mode preuve&nbsp;: un message supprimé reste visible, barré</li><li>Export daté d'une discussion en PDF</li></ul>
+          </article>
+          <article class="plan">
+            <span class="plan__tag plan__tag--muted">Pour les pros</span>
+            <h3>Pokou certifié Pro</h3>
+            <p class="plan__price">Commerçants et associations</p>
+            <ul><li>Profil professionnel vérifié</li><li>Pour les commerçants, entreprises et associations</li></ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fin -->
+    <section class="hero-shell">
+      <div class="cta mesh mesh--warm">
         <h2>Bienvenue à la maison.</h2>
-        <p>Traversons ensemble.</p>
+        <p>Nos racines. Nos liens. Notre avenir. Traversons ensemble.</p>
+        <a class="btn btn--dark" href="#telecharger">Télécharger Pokou</a>
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    <div class="wrap foot__in">
-      <div class="brand brand--small">
-        <img src="/site/img/icone-192.png" alt="" width="28" height="28">
-        <span>Pokou</span>
+    <div class="wrap foot__grid">
+      <div class="foot__brand">
+        <a class="brand" href="/"><img src="/site/img/icone-192.png" alt="" width="30" height="30"><span>Pokou</span></a>
+        <p>La messagerie et les services du quotidien, pensés depuis l'Afrique.</p>
       </div>
-      <nav aria-label="Informations">
-        <a href="/conditions">Conditions d'utilisation</a>
-        <a href="/confidentialite">Confidentialité</a>
-        <a href="/compte/suppression/">Supprimer mon compte</a>
-        <a href="https://extranet.pokou.app/officine/">Espace officine</a>
-        <a href="mailto:support@pokou.app">support@pokou.app</a>
-      </nav>
-      <p class="copy">© 2026 Pokou</p>
+      <nav aria-label="Pokou"><h4>Pokou</h4><a href="#discussions">Discussions</a><a href="#kory">Kory</a><a href="#honam">Honam</a><a href="#assime">Assimé</a></nav>
+      <nav aria-label="Aide"><h4>Aide</h4><a href="mailto:support@pokou.app">support@pokou.app</a><a href="/compte/suppression/">Supprimer mon compte</a></nav>
+      <nav aria-label="Légal"><h4>Légal</h4><a href="/conditions">Conditions d'utilisation</a><a href="/confidentialite">Confidentialité</a></nav>
+      <nav aria-label="Professionnels"><h4>Professionnels</h4><a href="https://extranet.pokou.app/officine/">Espace officine</a></nav>
+    </div>
+    <div class="wrap foot__bottom">
+      <span>© 2026 Pokou</span>
+      <span>Nos racines. Nos liens. Notre avenir.</span>
     </div>
   </footer>
 <!--/email_off-->

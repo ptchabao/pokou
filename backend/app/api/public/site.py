@@ -37,7 +37,8 @@ _HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
 }
-_TYPES = {".css": "text/css; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".html": "text/html; charset=utf-8"}
+_TYPES = {".css": "text/css; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".html": "text/html; charset=utf-8",
+          ".woff2": "font/woff2"}
 
 
 def _host(request: Request) -> str:
@@ -80,7 +81,7 @@ def _file(name: str) -> FileResponse:
     if not target.is_file() or _SITE not in target.parents:
         raise HTTPException(status_code=404)
     headers = dict(_HEADERS)
-    headers["Cache-Control"] = "no-cache" if target.suffix == ".html" else "public, max-age=86400"
+    headers["Cache-Control"] = "no-cache" if target.suffix in (".html", ".css") else "public, max-age=86400"
     return FileResponse(target, media_type=_TYPES.get(target.suffix, "application/octet-stream"), headers=headers)
 
 
