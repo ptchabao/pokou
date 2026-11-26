@@ -153,7 +153,10 @@ resources.append(deployment("resolver", f"ghcr.io/mailu/unbound:{VERSION}",
                             [(53, "UDP"), (53, "TCP")], [], [], use_resolver=False, memory="128Mi"))
 resources.append(service("resolver", [(53, "UDP"), (53, "TCP")], cluster_ip=IP["resolver"]))
 
-front_ports = [(80, "TCP"), (25, "TCP"), (465, "TCP"), (587, "TCP"), (993, "TCP"), (143, "TCP"), (4190, "TCP"), (10025, "TCP"), (10143, "TCP"), (8008, "TCP")]
+# 2525 : LMTP. Postfix remet le courrier aux boîtes EN PASSANT PAR front
+# (qui le relaie à dovecot) ; sans ce port, tout message entrant restait en
+# file (« connect to 10.43.200.10:2525: Operation timed out »).
+front_ports = [(80, "TCP"), (25, "TCP"), (465, "TCP"), (587, "TCP"), (993, "TCP"), (143, "TCP"), (4190, "TCP"), (2525, "TCP"), (10025, "TCP"), (10143, "TCP"), (8008, "TCP")]
 resources.append(deployment(
     "front", f"ghcr.io/mailu/nginx:{VERSION}", front_ports,
     [{"name": "certs", "mountPath": "/certs", "readOnly": True}],
