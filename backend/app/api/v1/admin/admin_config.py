@@ -556,6 +556,34 @@ def update_member_profile(
     return _user_json(target)
 
 
+@router.put("/me/profile")
+def update_my_profile(
+    body: MemberProfileBody, request: Request,
+    user: User = Depends(require_permission("dashboard.view")),
+    db: Session = Depends(get_db),
+):
+    """« Mon profil » : chacun corrige son nom et son e-mail de connexion,
+    sans avoir besoin de gérer l'équipe."""
+    email = body.email.strip().lower()
+    name = " ".join(body.full_name.split())
+    if len(name) < 2:
+        raise HTTPException(status_code=422, detail="Nom trop court")
+    taken = db.query(User.id).filter(func.lower(User.email) == email, User.id != user.id).first()
+    if taken:
+        raise HTTPException(status_code=409, detail="Cet e-mail est déjà utilisé par un autre compte")
+    changes = {}
+    if user.full_name != name:
+        changes["full_name"] = {"from": user.full_name, "to": name}
+    if (user.email or "").lower() != email:
+        changes["email"] = {"from": user.email, "to": email}
+    user.full_name = name
+    user.email = email
+    if changes:
+        _audit(db, user, "my_profile_update", "user", user.id, changes, request)
+    db.commit()
+    return _user_json(user)
+
+
 @router.post("/team/{user_id}/console-access/disable")
 def disable_console_access(
     user_id: int, request: Request,

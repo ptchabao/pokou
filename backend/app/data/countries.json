@@ -1,7 +1,7 @@
 {
 "AC": {
-"name": "AC",
-"currency": null,
+"name": "Île de l'Ascension",
+"currency": "SHP",
 "dial": "+247"
 },
 "AD": {
@@ -43,11 +43,6 @@
 "name": "Angola",
 "currency": "AOA",
 "dial": "+244"
-},
-"AQ": {
-"name": "Antarctique",
-"currency": null,
-"dial": null
 },
 "AR": {
 "name": "Argentine",
@@ -168,11 +163,6 @@
 "name": "Bhoutan",
 "currency": "INR",
 "dial": "+975"
-},
-"BV": {
-"name": "Île Bouvet",
-"currency": "NOK",
-"dial": null
 },
 "BW": {
 "name": "Botswana",
@@ -449,11 +439,6 @@
 "currency": "EUR",
 "dial": "+30"
 },
-"GS": {
-"name": "Géorgie du Sud et îles Sandwich du Sud",
-"currency": null,
-"dial": null
-},
 "GT": {
 "name": "Guatemala",
 "currency": "GTQ",
@@ -478,11 +463,6 @@
 "name": "Hong-Kong",
 "currency": "HKD",
 "dial": "+852"
-},
-"HM": {
-"name": "Île Heard et îles McDonald",
-"currency": "AUD",
-"dial": null
 },
 "HN": {
 "name": "Honduras",
@@ -916,7 +896,7 @@
 },
 "PS": {
 "name": "Palestine",
-"currency": null,
+"currency": "ILS",
 "dial": "+970"
 },
 "PT": {
@@ -1070,8 +1050,8 @@
 "dial": "+268"
 },
 "TA": {
-"name": "TA",
-"currency": null,
+"name": "Tristan da Cunha",
+"currency": "SHP",
 "dial": "+290"
 },
 "TC": {
@@ -1083,11 +1063,6 @@
 "name": "Tchad",
 "currency": "XAF",
 "dial": "+235"
-},
-"TF": {
-"name": "Territoires Français du Sud",
-"currency": "EUR",
-"dial": null
 },
 "TG": {
 "name": "Togo",
@@ -1164,11 +1139,6 @@
 "currency": "UGX",
 "dial": "+256"
 },
-"UM": {
-"name": "Dépendances américaines du Pacifique",
-"currency": "USD",
-"dial": null
-},
 "US": {
 "name": "Etats-Unis",
 "currency": "USD",
@@ -1230,8 +1200,8 @@
 "dial": "+685"
 },
 "XK": {
-"name": "XK",
-"currency": null,
+"name": "Kosovo",
+"currency": "EUR",
 "dial": "+383"
 },
 "YE": {

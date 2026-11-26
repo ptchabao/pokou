@@ -12,3 +12,6 @@ export type AdminUser = {
   console_access?: boolean
 }
 export type Paged<T> = { items: T[]; total: number; page?: number; size?: number }
+
+/** Un rôle de la console (RBAC) : prédéfini ou créé par l'équipe. */
+export type Role = { id: number | null; key: string; label: string; description: string | null; permissions: string[]; is_system: boolean; editable: boolean; deletable: boolean; members: number }

@@ -1,25 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { IconCheck, IconUserPlus } from "@tabler/icons-react"
+import { IconUserPlus } from "@tabler/icons-react"
 import { toast } from "sonner"
 
 import { ConsoleShell } from "@/components/console-shell"
 import { SimpleTable } from "@/components/simple-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useApi, useAuth } from "@/lib/auth"
 import { api, when } from "@/lib/api"
-import { ActiveBadge, PERMISSION_LABELS, ROLE_OPTIONS } from "@/lib/labels"
-import type { AdminUser } from "@/lib/types"
+import { ActiveBadge } from "@/lib/labels"
+import type { AdminUser, Role } from "@/lib/types"
 
-type Role = { role: string; label: string; permissions: string[] }
 
 export default function TeamPage() {
   const { me, can } = useAuth()
@@ -31,6 +28,9 @@ export default function TeamPage() {
   const [secret, setSecret] = React.useState<{ email: string; password: string } | null>(null)
   const [newRole, setNewRole] = React.useState("SUPPORT")
   const manage = can("team.manage")
+  // Les rôles viennent du serveur (prédéfinis ET créés). Seul un
+  // super-administrateur peut nommer un super-administrateur.
+  const roleOptions = (roles.data?.items ?? []).filter((r) => r.key !== "SUPER_ADMIN" || me?.role === "SUPER_ADMIN")
   const [editing, setEditing] = React.useState<AdminUser | null>(null)
   const [editName, setEditName] = React.useState("")
   const [editEmail, setEditEmail] = React.useState("")
@@ -88,21 +88,21 @@ export default function TeamPage() {
     } catch (e) { toast.error((e as Error).message) }
   }
 
-  const allPerms = Object.keys(PERMISSION_LABELS)
   return (
-    <ConsoleShell title="Équipe et rôles" permission="team.view"
+    <ConsoleShell title="Équipe · Membres" permission="team.view"
       actions={manage && <Button size="sm" onClick={() => setAdding(true)}><IconUserPlus />Ajouter</Button>}>
       <SimpleTable
         rows={team.data?.items ?? null}
         empty="Personne dans l'équipe." illustration="team"
         columns={[
-          { header: "Nom", cell: (u) => <span className="font-medium">{u.full_name ?? "—"}{u.id === me?.id && " (toi)"}</span> },
+          { header: "Nom", sortValue: (u) => u.full_name ?? "", cell: (u) => <span className="font-medium">{u.full_name ?? "—"}{u.id === me?.id && " (toi)"}</span> },
           { header: "E-mail", cell: (u) => u.email ?? <span className="text-muted-foreground">sans accès console</span> },
           { header: "Rôle", cell: (u) => manage && u.id !== me?.id ? (
             <Select value={u.role} onValueChange={(v) => changeRole(u, v)}>
               <SelectTrigger size="sm" className="w-52"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {ROLE_OPTIONS.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+                {roleOptions.map((r) => <SelectItem key={r.key} value={r.key}>{r.label}</SelectItem>)}
+                <SelectItem value="USER" className="text-destructive">Retirer de l&apos;équipe</SelectItem>
               </SelectContent>
             </Select>
           ) : u.role_label },
@@ -110,7 +110,7 @@ export default function TeamPage() {
           { header: "Console", cell: (u) => u.console_access
             ? <Badge variant="secondary">Accès ouvert</Badge>
             : <Badge variant="outline">Accès coupé</Badge> },
-          { header: "Vu le", cell: (u) => when(u.last_seen_at) },
+          { header: "Vu le", sortValue: (u) => u.last_seen_at ?? "", cell: (u) => when(u.last_seen_at) },
           { header: "", className: "text-right", cell: (u) => manage ? (
             <div className="flex justify-end gap-1">
               <Button size="sm" variant="ghost" onClick={() => { setEditName(u.full_name ?? ""); setEditEmail(u.email ?? ""); setEditing(u) }}>
@@ -128,36 +128,6 @@ export default function TeamPage() {
           ) : null },
         ]}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Ce que chaque rôle permet</CardTitle>
-          <CardDescription>
-            Les droits sont vérifiés par l&apos;API à chaque requête : la console ne fait que cacher ce qui serait refusé.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Permission</TableHead>
-                {roles.data?.items.map((r) => <TableHead key={r.role} className="text-center">{r.label}</TableHead>)}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allPerms.map((p) => (
-                <TableRow key={p}>
-                  <TableCell>{PERMISSION_LABELS[p]}</TableCell>
-                  {roles.data?.items.map((r) => (
-                    <TableCell key={r.role} className="text-center">
-                      {r.permissions.includes(p) ? <IconCheck className="mx-auto size-4 text-primary" /> : <span className="text-muted-foreground">·</span>}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
       <Dialog open={adding} onOpenChange={setAdding}>
         <DialogContent>
           <DialogHeader>
@@ -180,7 +150,7 @@ export default function TeamPage() {
               <Select value={newRole} onValueChange={setNewRole}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {ROLE_OPTIONS.filter((r) => r.value !== "USER").map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+                  {roleOptions.map((r) => <SelectItem key={r.key} value={r.key}>{r.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

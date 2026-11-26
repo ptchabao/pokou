@@ -10,6 +10,7 @@ export const ROLE_OPTIONS = [
 ]
 
 export const PERMISSION_LABELS: Record<string, string> = {
+  "roles.manage": "Créer et modifier les rôles",
   "dashboard.view": "Voir le tableau de bord",
   "users.view": "Voir les utilisateurs",
   "users.manage": "Gérer les comptes (suspendre, déconnecter, supprimer…)",

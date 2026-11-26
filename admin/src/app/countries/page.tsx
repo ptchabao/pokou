@@ -35,7 +35,7 @@ type Config = {
 }
 
 type CountryRow = {
-  code: string; builtin: boolean; has_override: boolean; updated_at: string | null
+  code: string; name?: string; dial?: string | null; builtin: boolean; has_override: boolean; updated_at: string | null
   currency: string; vat_rate: number; modules: string[]; test_only?: boolean
 }
 
@@ -203,14 +203,15 @@ export default function CountriesPage() {
         onRowClick={(c) => setSelected(c.code)}
         empty="Aucun pays configuré."
         columns={[
-          { header: "Pays", cell: (c) => <span className="font-medium">{countryName(c.code)} <span className="text-muted-foreground">({c.code})</span></span> },
+          { header: "Pays", sortValue: (c) => c.name ?? countryName(c.code), cell: (c) => <span className="font-medium">{c.name ?? countryName(c.code)} <span className="text-muted-foreground">({c.code})</span></span> },
+          { header: "Indicatif", sortValue: (c) => c.dial ?? "", cell: (c) => c.dial ?? "—" },
           { header: "Modules", cell: (c) => (
             <div className="flex flex-wrap gap-1">{c.modules.map((m) => <Badge key={m} variant="outline">{MODULE_LABELS[m] ?? m}</Badge>)}</div>
           ) },
-          { header: "Devise", cell: (c) => c.currency },
+          { header: "Devise", sortValue: (c) => c.currency, cell: (c) => c.currency },
           { header: "TVA", cell: (c) => `${Math.round(c.vat_rate * 10000) / 100} %` },
           { header: "Test", cell: (c) => c.test_only ? <Badge variant="destructive">Pays de test</Badge> : null },
-          { header: "Réglage", cell: (c) => c.has_override
+          { header: "Réglage", sortValue: (c) => (c.has_override ? 0 : 1), cell: (c) => c.has_override
             ? <Badge>Personnalisé</Badge>
             : <span className="text-muted-foreground">Par défaut</span> },
           { header: "Modifié le", cell: (c) => when(c.updated_at) },

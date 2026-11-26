@@ -148,3 +148,15 @@ def test_all_countries_of_the_world_are_listed(client):
     with TestingSessionLocal() as db:
         assert country_config(db, "JP")["currency"] == "JPY"
         assert country_config(db, "TG")["currency"] == "XOF"
+
+
+def test_anyone_can_edit_their_own_profile(client):
+    viewer, viewer_id = _member(client, "+22890700112", UserRole.VIEWER)
+    done = client.put("/api/v1/admin/me/profile", headers=viewer,
+                      json={"full_name": "Afi  Mensah", "email": "Afi@Pokou.app"})
+    assert done.status_code == 200, done.text
+    assert done.json()["full_name"] == "Afi Mensah" and done.json()["email"] == "afi@pokou.app"
+    # Mais pas celui des autres.
+    _, other_id = _member(client, "+22890700113", UserRole.SUPPORT)
+    assert client.put(f"/api/v1/admin/team/{other_id}/profile", headers=viewer,
+                      json={"full_name": "X Y", "email": "x@pokou.app"}).status_code == 403

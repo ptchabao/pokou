@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[1228],{1347:(e,s,t)=>{Promise.resolve().then(t.bind(t,54977))},54977:(e,s,t)=>{"use strict";t.r(s),t.d(s,{default:()=>u});var n=t(95155),r=t(49957);function u(){return(0,n.jsx)(r.n,{tab:"waitlist"})}}},e=>{e.O(0,[677,3128,3691,1404,7993,2,6238,9957,8441,1255,7358],()=>e(e.s=1347)),_N_E=e.O()}]);
