@@ -110,6 +110,9 @@ abstract final class CallKeys {
   static CallKey? of(String room) => _keys[room];
 
   static void forget(String room) => _keys.remove(room);
+
+  /// Toutes les clés en mémoire (changement de compte ou de serveur).
+  static void forgetAll() => _keys.clear();
 }
 
 /// Les clés des appels de GROUPE encore joignables, gardées sur le téléphone.

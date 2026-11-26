@@ -269,7 +269,10 @@ class LegalScreen extends ConsumerWidget {
             if (updated != null)
               pw.Padding(
                 padding: const pw.EdgeInsets.only(top: 4, bottom: 12),
-                child: pw.Text(updated, style: const pw.TextStyle(fontSize: 10)),
+                child: pw.Text(
+                  updated,
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
               ),
             for (var i = 0; i < chapters.length; i++) ...[
               pw.Padding(

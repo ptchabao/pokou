@@ -20,7 +20,7 @@ from app.api.v1.auth import auth, devices, e2ee
 from app.api.v1.business import bot_api, business
 from app.api.v1.calls import calls
 from app.api.v1.certified import certified
-from app.api.v1.config import banners, country, geo
+from app.api.v1.config import banners, country, geo, instance
 from app.api.v1.communities import channels, communities
 from app.api.v1.marketplace import assime, handover as assime_handover, marketplace, marketplace_admin
 from app.api.v1.media import media, stickers, status
@@ -93,6 +93,7 @@ for router in (
     country.router,
     banners.router,
     geo.router,
+    instance.router,
     banners.admin_router,
     kory.router,
     certified.router,

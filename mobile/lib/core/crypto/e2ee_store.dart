@@ -19,7 +19,7 @@ import 'e2ee_session.dart';
 /// elle n'a pas de garde-fou technique — d'où ce paragraphe.
 class E2EEStore {
   E2EEStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -53,7 +53,10 @@ class E2EEStore {
       signingKeyPair: signing,
       signedPrekeyPair: signedPrekey,
     );
-    await _storage.write(key: _identityKey, value: jsonEncode(await created.toJson()));
+    await _storage.write(
+      key: _identityKey,
+      value: jsonEncode(await created.toJson()),
+    );
     return created;
   }
 
@@ -77,15 +80,24 @@ class E2EEStore {
   /// répondre le serveur avec une pré-clé publique dont on aurait écrasé la
   /// privée — un message qu'on ne pourrait plus jamais ouvrir, sans erreur
   /// visible nulle part.
-  Future<List<({int keyId, List<int> publicKey})>> generateOneTimePrekeys(int count) async {
-    final start = int.tryParse(await _storage.read(key: _prekeyCounterKey) ?? '0') ?? 0;
+  Future<List<({int keyId, List<int> publicKey})>> generateOneTimePrekeys(
+    int count,
+  ) async {
+    final start =
+        int.tryParse(await _storage.read(key: _prekeyCounterKey) ?? '0') ?? 0;
     final generated = <({int keyId, List<int> publicKey})>[];
 
     for (var i = 0; i < count; i++) {
       final keyId = start + i;
       final pair = await E2EEPrimitives.generateExchangeKeyPair();
-      await _storage.write(key: _oneTimeKey(keyId), value: await _encodeKeyPair(pair));
-      generated.add((keyId: keyId, publicKey: (await pair.extractPublicKey()).bytes));
+      await _storage.write(
+        key: _oneTimeKey(keyId),
+        value: await _encodeKeyPair(pair),
+      );
+      generated.add((
+        keyId: keyId,
+        publicKey: (await pair.extractPublicKey()).bytes,
+      ));
     }
 
     await _storage.write(key: _prekeyCounterKey, value: '${start + count}');
@@ -115,7 +127,8 @@ class E2EEStore {
     if (stored == null) return {};
     final decoded = jsonDecode(stored) as Map<String, dynamic>;
     return decoded.map(
-      (sid, json) => MapEntry(sid, E2EESession.fromJson(json as Map<String, dynamic>)),
+      (sid, json) =>
+          MapEntry(sid, E2EESession.fromJson(json as Map<String, dynamic>)),
     );
   }
 
@@ -153,6 +166,36 @@ class E2EEStore {
     }
   }
 
+  /// Préfixes de TOUT ce qui, dans le coffre, appartient au chiffrement d'un
+  /// compte : identité, pré-clés, sessions par correspondant, clés
+  /// d'expéditeur des groupes, clés d'appels de groupe, appels vus.
+  static const accountKeyPrefixes = [
+    'e2ee_',
+    'signal_sender_key_',
+    'pokou_group_call_keys_v1',
+    'pokou_calls_seen_at',
+  ];
+
+  /// Efface toutes les clés de chiffrement de ce téléphone.
+  ///
+  /// À appeler quand le compte ou le SERVEUR change (remise à zéro) : les
+  /// sessions sont rangées par identifiant de correspondant, et ces
+  /// identifiants sont redistribués. Garder les anciennes, c'était chiffrer
+  /// pour « le compte 3 » avec la session de l'ancien compte 3 — messages
+  /// illisibles et appels impossibles à rejoindre. Une nouvelle identité est
+  /// créée et publiée à la connexion suivante.
+  Future<int> wipeAllLocalKeys() async {
+    final all = await _storage.readAll();
+    var removed = 0;
+    for (final key in all.keys) {
+      if (accountKeyPrefixes.any(key.startsWith)) {
+        await _storage.delete(key: key);
+        removed++;
+      }
+    }
+    return removed;
+  }
+
   static Future<String> _encodeKeyPair(SimpleKeyPair pair) async {
     return jsonEncode({
       'priv': base64.encode(await pair.extractPrivateKeyBytes()),
@@ -186,29 +229,38 @@ class E2EEIdentity {
   final SimpleKeyPair signedPrekeyPair;
 
   Future<Map<String, dynamic>> toJson() async => {
-        'ik': jsonDecode(await E2EEStore._encodeKeyPair(identityKeyPair)),
-        'sk': jsonDecode(await E2EEStore._encodeKeyPair(signingKeyPair)),
-        'spk': jsonDecode(await E2EEStore._encodeKeyPair(signedPrekeyPair)),
-      };
+    'ik': jsonDecode(await E2EEStore._encodeKeyPair(identityKeyPair)),
+    'sk': jsonDecode(await E2EEStore._encodeKeyPair(signingKeyPair)),
+    'spk': jsonDecode(await E2EEStore._encodeKeyPair(signedPrekeyPair)),
+  };
 
   factory E2EEIdentity.fromJson(Map<String, dynamic> json) => E2EEIdentity(
-        identityKeyPair: E2EEStore._decodeKeyPair(jsonEncode(json['ik'])),
-        signingKeyPair: E2EEStore._decodeKeyPair(jsonEncode(json['sk']), signing: true),
-        signedPrekeyPair: E2EEStore._decodeKeyPair(jsonEncode(json['spk'])),
-      );
+    identityKeyPair: E2EEStore._decodeKeyPair(jsonEncode(json['ik'])),
+    signingKeyPair: E2EEStore._decodeKeyPair(
+      jsonEncode(json['sk']),
+      signing: true,
+    ),
+    signedPrekeyPair: E2EEStore._decodeKeyPair(jsonEncode(json['spk'])),
+  );
 
   /// Le trousseau PUBLIC à publier — et rien d'autre. La signature lie la
   /// pré-clé à l'identité : sans elle, l'annuaire pourrait substituer la
   /// sienne.
   Future<Map<String, dynamic>> publicBundle({required String deviceId}) async {
-    final signedPrekeyPublic = (await signedPrekeyPair.extractPublicKey()).bytes;
+    final signedPrekeyPublic =
+        (await signedPrekeyPair.extractPublicKey()).bytes;
     return {
       'device_id': deviceId,
-      'identity_key': base64.encode((await identityKeyPair.extractPublicKey()).bytes),
-      'signing_key': base64.encode((await signingKeyPair.extractPublicKey()).bytes),
+      'identity_key': base64.encode(
+        (await identityKeyPair.extractPublicKey()).bytes,
+      ),
+      'signing_key': base64.encode(
+        (await signingKeyPair.extractPublicKey()).bytes,
+      ),
       'signed_prekey': base64.encode(signedPrekeyPublic),
-      'signed_prekey_signature':
-          base64.encode(await E2EEPrimitives.sign(signedPrekeyPublic, signingKeyPair)),
+      'signed_prekey_signature': base64.encode(
+        await E2EEPrimitives.sign(signedPrekeyPublic, signingKeyPair),
+      ),
     };
   }
 }

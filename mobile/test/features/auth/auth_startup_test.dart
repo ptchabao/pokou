@@ -17,7 +17,12 @@ import 'package:pokou/features/auth/presentation/auth_controller.dart';
 /// sans identité » après un hoquet réseau, puis elle faisait attendre deux
 /// allers-retours avant d'afficher quoi que ce soit. Les deux se voient
 /// ici.
-const _user = PokouUser(id: 8, phone: '+22890000000', fullName: 'Kodjo', plan: 'free');
+const _user = PokouUser(
+  id: 8,
+  phone: '+22890000000',
+  fullName: 'Kodjo',
+  plan: 'free',
+);
 
 class _FakeRepository extends AuthRepository {
   _FakeRepository({
@@ -25,15 +30,19 @@ class _FakeRepository extends AuthRepository {
     this.cached,
     this.profile,
     this.failure,
+    this.instance,
   }) : super(
-          apiClient: ApiClient(baseUrl: 'https://inutilise'),
-          tokenStorage: SecureTokenStorage(),
-        );
+         apiClient: ApiClient(baseUrl: 'https://inutilise'),
+         tokenStorage: SecureTokenStorage(),
+       );
 
   final bool session;
   final PokouUser? cached;
   final PokouUser? profile;
   final Object? failure;
+
+  /// L'identité de la base du serveur ; `null` = serveur injoignable.
+  String? instance;
 
   int profileCalls = 0;
   bool loggedOut = false;
@@ -53,15 +62,18 @@ class _FakeRepository extends AuthRepository {
 
   @override
   Future<void> logout() async => loggedOut = true;
+
+  @override
+  Future<String?> serverInstanceId() async => instance;
 }
 
 class _FakeWs extends WsClient {
   _FakeWs()
-      : super(
-          baseWsUrl: 'wss://inutilise',
-          tokenStorage: SecureTokenStorage(),
-          apiClient: ApiClient(baseUrl: 'https://inutilise'),
-        );
+    : super(
+        baseWsUrl: 'wss://inutilise',
+        tokenStorage: SecureTokenStorage(),
+        apiClient: ApiClient(baseUrl: 'https://inutilise'),
+      );
 
   bool connected = false;
 
@@ -98,6 +110,23 @@ class _FakePush extends PushService {
 class _FakeStore extends PokouMessageStore {
   @override
   Future<void> clear() async {}
+}
+
+/// Retient le propriétaire comme la vraie base (voir claimFor).
+class _OwnedStore extends PokouMessageStore {
+  String? owner;
+  int clears = 0;
+
+  @override
+  Future<void> clear() async => clears++;
+
+  @override
+  Future<bool> claimFor(String newOwner) async {
+    final changed = owner != newOwner;
+    if (changed) clears++;
+    owner = newOwner;
+    return changed;
+  }
 }
 
 void main() {
@@ -158,52 +187,58 @@ void main() {
     expect(controller.state.user?.id, 8);
   });
 
-  test('un rafraîchissement raté ne fait pas perdre le profil affiché',
-      () async {
-    // Le piège du démarrage optimiste. `myUserId` découle de cet état, et
-    // tout l'écran d'accueil s'en sert : l'écraser rendrait les
-    // conversations impossibles à ouvrir, sans le moindre message.
-    final repository = _FakeRepository(
-      cached: _user,
-      failure: NetworkException('coupure'),
-    );
-    final controller = await start(repository, _FakeWs());
-    await Future<void>.delayed(Duration.zero);
+  test(
+    'un rafraîchissement raté ne fait pas perdre le profil affiché',
+    () async {
+      // Le piège du démarrage optimiste. `myUserId` découle de cet état, et
+      // tout l'écran d'accueil s'en sert : l'écraser rendrait les
+      // conversations impossibles à ouvrir, sans le moindre message.
+      final repository = _FakeRepository(
+        cached: _user,
+        failure: NetworkException('coupure'),
+      );
+      final controller = await start(repository, _FakeWs());
+      await Future<void>.delayed(Duration.zero);
 
-    expect(controller.state.status, AuthStatus.authenticated);
-    expect(controller.state.user?.id, 8, reason: 'le profil en cache survit');
-  });
+      expect(controller.state.status, AuthStatus.authenticated);
+      expect(controller.state.user?.id, 8, reason: 'le profil en cache survit');
+    },
+  );
 
-  test('un jeton révoqué déconnecte, même après ouverture sur le cache',
-      () async {
-    // La contrepartie du démarrage optimiste : si le serveur dit que la
-    // session n'existe plus, il faut le suivre — sinon on garderait
-    // indéfiniment l'écran de quelqu'un qui n'est plus connecté.
-    final repository = _FakeRepository(
-      cached: _user,
-      failure: ApiException(401, 'jeton périmé'),
-    );
-    final controller = await start(repository, _FakeWs());
-    await Future<void>.delayed(Duration.zero);
+  test(
+    'un jeton révoqué déconnecte, même après ouverture sur le cache',
+    () async {
+      // La contrepartie du démarrage optimiste : si le serveur dit que la
+      // session n'existe plus, il faut le suivre — sinon on garderait
+      // indéfiniment l'écran de quelqu'un qui n'est plus connecté.
+      final repository = _FakeRepository(
+        cached: _user,
+        failure: ApiException(401, 'jeton périmé'),
+      );
+      final controller = await start(repository, _FakeWs());
+      await Future<void>.delayed(Duration.zero);
 
-    expect(controller.state.status, AuthStatus.unauthenticated);
-    expect(repository.loggedOut, isTrue);
-  });
+      expect(controller.state.status, AuthStatus.unauthenticated);
+      expect(repository.loggedOut, isTrue);
+    },
+  );
 
-  test('une panne réseau au tout premier lancement laisse l\'app utilisable',
-      () async {
-    // Pas de cache, pas de réseau : on ne connaît pas l'identité, mais la
-    // session est valable. Rester bloqué sur l'écran d'attente serait pire
-    // que d'ouvrir avec ce qu'on a.
-    final repository = _FakeRepository(
-      cached: null,
-      failure: NetworkException('coupure'),
-    );
-    final controller = await start(repository, _FakeWs());
+  test(
+    'une panne réseau au tout premier lancement laisse l\'app utilisable',
+    () async {
+      // Pas de cache, pas de réseau : on ne connaît pas l'identité, mais la
+      // session est valable. Rester bloqué sur l'écran d'attente serait pire
+      // que d'ouvrir avec ce qu'on a.
+      final repository = _FakeRepository(
+        cached: null,
+        failure: NetworkException('coupure'),
+      );
+      final controller = await start(repository, _FakeWs());
 
-    expect(controller.state.status, AuthStatus.authenticated);
-    expect(controller.state.user, isNull);
-  });
+      expect(controller.state.status, AuthStatus.authenticated);
+      expect(controller.state.user, isNull);
+    },
+  );
 
   // ── La session d'une nuit sur l'autre ───────────────────────────────
   //
@@ -276,5 +311,66 @@ void main() {
 
     expect(controller.state.status, AuthStatus.unauthenticated);
     expect(repository.loggedOut, isTrue);
+  });
+
+  group('remise à zéro du serveur', () {
+    Future<(AuthController, int Function())> startOwned(
+      _FakeRepository repository,
+      _OwnedStore store,
+    ) async {
+      var wipes = 0;
+      final controller = AuthController(
+        repository,
+        _FakeWs(),
+        _FakePush(refOf()),
+        store,
+        wipeEncryptionKeys: () async => wipes++,
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      return (controller, () => wipes);
+    }
+
+    test(
+      'un autre serveur, même numéro de compte : clés et cache effacés',
+      () async {
+        final store = _OwnedStore()..owner = 'ancien:8';
+        final repository = _FakeRepository(cached: _user, instance: 'nouveau');
+        final (_, wipes) = await startOwned(repository, store);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(store.owner, 'nouveau:8');
+        expect(
+          wipes(),
+          1,
+          reason: 'les sessions de l\'ancien compte 8 ne valent plus',
+        );
+      },
+    );
+
+    test('le même serveur et le même compte gardent tout', () async {
+      final store = _OwnedStore()..owner = 'meme:8';
+      final repository = _FakeRepository(cached: _user, instance: 'meme');
+      final (_, wipes) = await startOwned(repository, store);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(wipes(), 0);
+      expect(store.clears, 0);
+    });
+
+    test('serveur injoignable : on n\'efface rien', () async {
+      final store = _OwnedStore()..owner = 'ancien:8';
+      final repository = _FakeRepository(cached: _user, instance: null);
+      final (_, wipes) = await startOwned(repository, store);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(wipes(), 0);
+      expect(store.owner, 'ancien:8');
+    });
+
+    test('la déconnexion efface aussi les clés', () async {
+      final store = _OwnedStore()..owner = 'meme:8';
+      final repository = _FakeRepository(cached: _user, instance: 'meme');
+      final (controller, wipes) = await startOwned(repository, store);
+      await controller.logout();
+      expect(wipes(), 1);
+    });
   });
 }

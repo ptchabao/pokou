@@ -138,5 +138,17 @@ class AuthRepository {
     }
   }
 
+  /// L'identité de la base du serveur (`GET /instance`) : elle change à
+  /// chaque remise à zéro. `null` si le serveur ne répond pas.
+  Future<String?> serverInstanceId() async {
+    try {
+      final body = await _api.get('/instance', authenticated: false);
+      final value = (body as Map<String, dynamic>)['instance_id'];
+      return value is String && value.isNotEmpty ? value : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> logout() => _tokens.clear();
 }

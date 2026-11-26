@@ -645,11 +645,12 @@ void main() {
 
   group('les données locales appartiennent à un compte', () {
     test('le même compte qui se reconnecte garde son historique', () async {
-      expect(await store.claimFor(3), isFalse);
+      // Première connexion : la base n'avait pas de propriétaire connu.
+      expect(await store.claimFor('srv:3'), isTrue);
       await store.saveDirect([_direct(id: 'm1', senderId: 3, recipientId: 5)]);
       await store.saveSyncBatch(scope: 'pokou', events: const [], cursor: '93');
 
-      expect(await store.claimFor(3), isFalse);
+      expect(await store.claimFor('srv:3'), isFalse);
       expect(await store.directById('m1'), isNotNull);
       expect(await store.syncCursor('pokou'), '93');
     });
@@ -657,7 +658,7 @@ void main() {
     test(
       'un autre compte ne voit ni les messages ni le curseur du précédent',
       () async {
-        await store.claimFor(3);
+        await store.claimFor('srv:3');
         await store.saveDirect([
           _direct(id: 'm1', senderId: 3, recipientId: 5),
         ]);
@@ -667,12 +668,19 @@ void main() {
           cursor: '93',
         );
 
-        expect(await store.claimFor(8), isTrue);
+        expect(await store.claimFor('srv:8'), isTrue);
         expect(await store.directById('m1'), isNull);
         expect(await store.syncCursor('pokou'), isNull);
         // Et le nouveau propriétaire est retenu.
-        expect(await store.claimFor(8), isFalse);
+        expect(await store.claimFor('srv:8'), isFalse);
       },
     );
+
+    test('le même numéro de compte sur un serveur remis à zéro : effacé', () async {
+      await store.claimFor('ancien:3');
+      await store.saveDirect([_direct(id: 'm1', senderId: 3, recipientId: 5)]);
+      expect(await store.claimFor('nouveau:3'), isTrue);
+      expect(await store.directById('m1'), isNull);
+    });
   });
 }

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exceptions.dart';
+import '../../../core/crypto/call_keys.dart';
+import '../../../core/crypto/e2ee_store.dart';
 import '../../../core/crypto/media_cipher.dart';
 import '../../../core/mahizu/mahizu_session.dart';
 import '../../../core/providers.dart';
@@ -41,7 +43,9 @@ class AuthController extends StateNotifier<AuthState> {
     this._push,
     this._messageStore, {
     SecureTokenStorage? linkedMahizuTokens,
+    Future<void> Function()? wipeEncryptionKeys,
   }) : _linkedMahizuTokens = linkedMahizuTokens,
+       _wipeEncryptionKeys = wipeEncryptionKeys ?? _wipeDeviceKeys,
        super(AuthState.unknown) {
     _restoreSession();
   }
@@ -55,6 +59,15 @@ class AuthController extends StateNotifier<AuthState> {
   /// avec la session Pokou, pour qu'un téléphone partagé ne garde pas
   /// l'accès à l'assistant du compte précédent.
   final SecureTokenStorage? _linkedMahizuTokens;
+
+  /// Efface les clés de chiffrement du téléphone (identité, sessions, clés
+  /// de groupe et d'appel) — voir E2EEStore.wipeAllLocalKeys.
+  final Future<void> Function() _wipeEncryptionKeys;
+
+  static Future<void> _wipeDeviceKeys() async {
+    await E2EEStore().wipeAllLocalKeys();
+    CallKeys.forgetAll();
+  }
 
   /// Pose l'état, mais seulement si ce contrôleur est encore vivant.
   ///
@@ -242,14 +255,22 @@ class AuthController extends StateNotifier<AuthState> {
     await _onSignedIn(user);
   }
 
-  /// Les données locales d'un AUTRE compte sont effacées avant d'afficher
-  /// celui-ci (voir PokouMessageStore.claimFor). Sans effet si elles sont
-  /// déjà à ce compte.
+  /// Les données locales d'un AUTRE compte — ou d'un autre SERVEUR, après
+  /// une remise à zéro — sont effacées avant d'afficher celui-ci : cache des
+  /// messages ET clés de chiffrement (voir PokouMessageStore.claimFor). Sans
+  /// effet si elles sont déjà à ce compte, sur ce serveur.
+  ///
+  /// Sans réponse du serveur (hors ligne au démarrage), on ne décide rien :
+  /// effacer à tort ferait perdre l'historique, qui n'existe que sur ce
+  /// téléphone.
   Future<void> _claimLocalData(int userId) async {
+    final instance = await _repository.serverInstanceId();
+    if (instance == null) return;
     try {
-      if (await _messageStore.claimFor(userId)) {
+      if (await _messageStore.claimFor('$instance:$userId')) {
         await _linkedMahizuTokens?.clear();
         MediaKeyRing.clear();
+        await _wipeEncryptionKeys();
       }
     } catch (_) {
       // Base locale illisible : elle sera recréée à la prochaine écriture.
@@ -271,6 +292,11 @@ class AuthController extends StateNotifier<AuthState> {
     await _messageStore.clear();
     await _linkedMahizuTokens?.clear();
     MediaKeyRing.clear();
+    // Les clés aussi : le compte suivant sur ce téléphone ne doit ni lire
+    // ni chiffrer avec celles du précédent.
+    try {
+      await _wipeEncryptionKeys();
+    } catch (_) {}
     _ws.disconnect();
     _setState(AuthState.unauthenticated);
   }
