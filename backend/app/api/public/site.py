@@ -38,7 +38,12 @@ _HEADERS = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
 }
 _TYPES = {".css": "text/css; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png", ".html": "text/html; charset=utf-8",
-          ".woff2": "font/woff2"}
+          ".woff2": "font/woff2", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
+
+#: Les pages du site, pour le plan (sitemap.xml) : chemin, priorité, fréquence.
+SITEMAP = [("/", "1.0", "weekly"), ("/kory", "0.8", "monthly"), ("/officine", "0.8", "monthly"),
+           ("/livreur", "0.8", "monthly"), ("/confidentialite", "0.4", "yearly"), ("/conditions", "0.4", "yearly"),
+           ("/compte/suppression/", "0.3", "yearly")]
 
 
 def _host(request: Request) -> str:
@@ -69,8 +74,16 @@ def site_redirect(request: Request) -> Optional[Response]:
     link_host = settings.public_link_base_url.split("://", 1)[-1].split("/")[0].lower()
     if path == "/" and host == link_host and host != site:
         return RedirectResponse(f"https://{site}/", status_code=302)
+    if path == "/robots.txt":
+        return _robots(host == site, site)
     if host == site and path == "/":
         return _file("index.html")
+    if host == site and path == "/favicon.ico":
+        return _file("favicon.ico")
+    if host == site and path == "/sitemap.xml":
+        return _sitemap(site)
+    if host == site and path == "/site.webmanifest":
+        return _manifest()
     if host == site and path.strip("/") in _DOCS:
         return _legal_page(path.strip("/"))
     if host == site and path.rstrip("/") in ("/officine", "/livreur", "/kory"):
@@ -80,6 +93,44 @@ def site_redirect(request: Request) -> Optional[Response]:
         headers["Cache-Control"] = "no-cache"
         return HTMLResponse(PAGES[path.strip("/")](), headers=headers)
     return None
+
+
+def _robots(public: bool, site: str) -> Response:
+    """Le site s'indexe ; l'API, la console, l'officine et les liens
+    d'invitation, non (ils servent sous d'autres noms du même serveur)."""
+    if public:
+        body = f"User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /console/\n\nSitemap: https://{site}/sitemap.xml\n"
+    else:
+        body = "User-agent: *\nDisallow: /\n"
+    return Response(body, media_type="text/plain; charset=utf-8", headers={"Cache-Control": "public, max-age=3600"})
+
+
+def _sitemap(site: str) -> Response:
+    from datetime import date
+
+    today = date.today().isoformat()
+    urls = "".join(
+        f"<url><loc>https://{site}{path}</loc><lastmod>{today}</lastmod>"
+        f"<changefreq>{freq}</changefreq><priority>{prio}</priority></url>"
+        for path, prio, freq in SITEMAP
+    )
+    body = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n'
+    return Response(body, media_type="application/xml; charset=utf-8", headers={"Cache-Control": "public, max-age=3600"})
+
+
+def _manifest() -> Response:
+    import json
+
+    body = json.dumps({
+        "name": "Pokou – Messagerie et services", "short_name": "Pokou", "lang": "fr",
+        "start_url": "/", "display": "standalone", "background_color": "#FFFFFF", "theme_color": "#B4532A",
+        "icons": [{"src": "/site/img/favicon-192.png", "sizes": "192x192", "type": "image/png"},
+                  {"src": "/site/img/favicon-512.png", "sizes": "512x512", "type": "image/png"},
+                  {"src": "/site/img/favicon.svg", "sizes": "any", "type": "image/svg+xml"}],
+        "related_applications": [{"platform": "play", "id": "com.pokou.pokou",
+                                  "url": "https://play.google.com/store/apps/details?id=com.pokou.pokou"}],
+    }, ensure_ascii=False)
+    return Response(body, media_type="application/manifest+json; charset=utf-8", headers={"Cache-Control": "public, max-age=86400"})
 
 
 def _file(name: str) -> FileResponse:
@@ -159,20 +210,20 @@ def _legal_page(name: str) -> HTMLResponse:
     source = (_LEGAL / _DOCS[name]).read_text(encoding="utf-8")
     title = html.escape(source.splitlines()[0].lstrip("# ").strip())
     body = markdown_to_html(source)
+    from app.api.public.site_pages import head_tags
+
+    summary = ("Comment Pokou utilise, protège et partage vos données, et comment exercer vos droits."
+               if name == "confidentialite" else "Les conditions d'utilisation de l'application Pokou.")
     page = f"""<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{title}</title>
-  <link rel="icon" href="/site/img/favicon-32.png" sizes="32x32">
-  <link rel="stylesheet" href="/site/site.css?v=20261126c">
+  {head_tags(html.unescape(title) + " | Pokou", summary, "/" + name)}
 </head>
 <body>
 <!--email_off-->
   <main class="doc">
     <div class="wrap narrow">
-      <a class="back" href="/">← Pokou</a>
+      <a class="back" href="/" aria-label="Pokou, accueil"><img class="brand__logo" src="/site/img/pokou-logotype.svg" alt="Pokou" width="108" height="32"></a>
       {body}
     </div>
   </main>

@@ -85,3 +85,20 @@ def test_project_pages_on_the_site():
     # L'espace officine reste à sa place sur l'extranet.
     extranet = client.get("/officine/", headers={"host": "extranet.pokou.app"})
     assert "Inscrire mon officine" not in extranet.text
+
+
+def test_seo_files_and_logo():
+    robots = client.get("/robots.txt", headers={"host": "pokou.app"})
+    assert robots.status_code == 200 and "Sitemap: https://pokou.app/sitemap.xml" in robots.text
+    assert "Disallow: /" in client.get("/robots.txt", headers={"host": "extranet.pokou.app"}).text
+    sitemap = client.get("/sitemap.xml", headers={"host": "pokou.app"})
+    assert sitemap.status_code == 200 and "<loc>https://pokou.app/officine</loc>" in sitemap.text
+    assert client.get("/site.webmanifest", headers={"host": "pokou.app"}).json()["short_name"] == "Pokou"
+    ico = client.get("/favicon.ico", headers={"host": "pokou.app"})
+    assert ico.status_code == 200 and ico.headers["content-type"] == "image/x-icon"
+    assert client.get("/site/img/favicon.svg").headers["content-type"] == "image/svg+xml"
+    home = client.get("/", headers={"host": "pokou.app"}).text
+    assert 'rel="canonical" href="https://pokou.app/"' in home and "pokou-logotype.svg" in home
+    assert '"@type": "MobileApplication"' in home
+    kory = client.get("/kory", headers={"host": "pokou.app"}).text
+    assert '"@type": "FAQPage"' in kory and 'href="https://pokou.app/kory"' in kory

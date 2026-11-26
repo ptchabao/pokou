@@ -413,3 +413,9 @@ a.store:hover { transform: translateY(-1px); }
 .faq summary::after { content: "+"; font-size: 1.3rem; line-height: 1; color: var(--terracotta); }
 .faq details[open] summary::after { content: "–"; }
 .faq details p { margin: 12px 0 0; color: var(--body); }
+
+/* Logotype « POKOU » (en-tête, pied de page, pages de texte) */
+.brand__logo { display: block; height: 34px; width: auto; border-radius: 0 !important; }
+.foot .brand__logo { height: 30px; }
+.back .brand__logo { height: 30px; }
+@media (max-width: 560px) { .nav .brand__logo { height: 28px; } }

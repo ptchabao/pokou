@@ -10,7 +10,7 @@ from typing import Optional
 
 PLAY_URL = "https://play.google.com/store/apps/details?id=com.pokou.pokou"
 OFFICINE_URL = "https://extranet.pokou.app/officine/"
-CSS_VERSION = "20261126c"
+CSS_VERSION = "20261126d"
 
 
 def _fcfa(amount: Optional[int]) -> Optional[str]:
@@ -49,8 +49,7 @@ def _header(active: str) -> str:
   <header class="nav">
     <div class="wrap nav__in">
       <a class="brand" href="/" aria-label="Pokou, accueil">
-        <img src="/site/img/icone-192.png" alt="" width="34" height="34">
-        <span>Pokou</span>
+        <img class="brand__logo" src="/site/img/pokou-logotype.svg" alt="Pokou" width="118" height="35">
       </a>
       <nav class="nav__links" aria-label="Sections">
         {link("/#discussions", "Discussions", "")}
@@ -72,7 +71,7 @@ _FOOTER = f"""
   <footer class="foot">
     <div class="wrap foot__grid">
       <div class="foot__brand">
-        <a class="brand" href="/"><img src="/site/img/icone-192.png" alt="" width="30" height="30"><span>Pokou</span></a>
+        <a class="brand" href="/" aria-label="Pokou, accueil"><img class="brand__logo" src="/site/img/pokou-logotype.svg" alt="Pokou" width="108" height="32"></a>
         <p>La messagerie et les services du quotidien, pensés depuis l'Afrique.</p>
       </div>
       <nav aria-label="Pokou"><h4>Pokou</h4><a href="/#discussions">Discussions</a><a href="/kory">Kory</a><a href="/#honam">Honam</a><a href="/#assime">Assimé</a></nav>
@@ -87,22 +86,57 @@ _FOOTER = f"""
   </footer>"""
 
 
+def head_tags(title: str, description: str, path: str, ld: Optional[dict] = None) -> str:
+    """Les balises de référencement communes à toutes les pages du site."""
+    import json
+
+    url = f"https://pokou.app{path}"
+    t, d = html.escape(title), html.escape(description)
+    data = f'\n  <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>' if ld else ""
+    return f"""<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{t}</title>
+  <meta name="description" content="{d}">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="{url}">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pokou">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:url" content="{url}">
+  <meta property="og:title" content="{t}">
+  <meta property="og:description" content="{d}">
+  <meta property="og:image" content="https://pokou.app/site/img/partage.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{t}">
+  <meta name="twitter:description" content="{d}">
+  <meta name="twitter:image" content="https://pokou.app/site/img/partage.jpg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/site/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/site/img/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="preload" href="/site/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/site/site.css?v={CSS_VERSION}">{data}"""
+
+
+def _faq_ld(body: str) -> Optional[dict]:
+    """Les questions fréquentes de la page, en données structurées
+    (FAQPage) : Google peut les afficher directement dans ses résultats."""
+    import re
+
+    pairs = re.findall(r"<details><summary>(.*?)</summary><p>(.*?)</p></details>", body, re.S)
+    if not pairs:
+        return None
+    return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+        {"@type": "Question", "name": html.unescape(q),
+         "acceptedAnswer": {"@type": "Answer", "text": html.unescape(a)}} for q, a in pairs]}
+
+
 def _page(title: str, description: str, active: str, body: str) -> str:
     return f"""<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{html.escape(title)}</title>
-  <meta name="description" content="{html.escape(description)}">
-  <meta name="theme-color" content="#FFFFFF">
-  <meta property="og:title" content="{html.escape(title)}">
-  <meta property="og:description" content="{html.escape(description)}">
-  <meta property="og:image" content="https://pokou.app/site/img/partage.jpg">
-  <link rel="preload" href="/site/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="icon" href="/site/img/favicon-32.png" sizes="32x32">
-  <link rel="apple-touch-icon" href="/site/img/apple-touch-icon.png">
-  <link rel="stylesheet" href="/site/site.css?v={CSS_VERSION}">
+  {head_tags(title, description, "/" + active, _faq_ld(body))}
 </head>
 <body>
 <!--email_off-->{_header(active)}
