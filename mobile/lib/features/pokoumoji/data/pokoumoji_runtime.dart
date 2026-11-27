@@ -96,9 +96,9 @@ class PokoumojiRuntime {
       debugPrint('Pokoumoji : catalogue illisible ($e)');
       return;
     }
-    // Rien à montrer (aucune entrée approuvée en production) : inutile de
-    // télécharger quoi que ce soit.
-    if (!(catalogue.value?.hasVisible ?? false)) return;
+    // Le pack est chargé même quand le catalogue ne montre rien : en
+    // production, c'est le pack signé qui publie les entrées (voir
+    // PokoumojiCatalogue.published).
     try {
       _dir = Directory(
         '${(await getApplicationSupportDirectory()).path}/pokoumoji/$channel',
@@ -200,6 +200,14 @@ class PokoumojiRuntime {
           _files.clear();
         }
         this.manifest.value = manifest;
+        final cat = catalogue.value;
+        if (cat != null && !manifest.isPlaceholder) {
+          final ids = {for (final f in manifest.files.values) f.id};
+          if (ids.length != cat.published.length ||
+              !ids.containsAll(cat.published)) {
+            catalogue.value = cat.withPublished(ids);
+          }
+        }
         return true;
       case ManifestRefused(:final reason):
         debugPrint('Pokoumoji : $reason');

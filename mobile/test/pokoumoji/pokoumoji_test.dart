@@ -86,6 +86,13 @@ void main() {
     expect(prod.hasVisible, isFalse);
   });
 
+  test('un pack de production signé publie ses entrées', () {
+    final pub = prod.withPublished({'kimia_mdr', 'expressions_yako'});
+    expect(ids(pub.search('mdr')), ['kimia_mdr']);
+    expect(pub.hasVisible, isTrue);
+    expect(pub.isVisible(pub.resolve('komi_mdr')!), isFalse);
+  });
+
   test('T17 — anciens identifiants résolus vers le nouvel identifiant', () {
     expect(dev.resolve('kimia_clin_dil')!.id, 'kimia_clin_doeil');
     expect(dev.resolve('symboles_cur_rouge')!.id, 'symboles_coeur_rouge');
@@ -340,6 +347,20 @@ void main() {
         expect((refused as ManifestRefused).reason, contains('signature'));
       },
     );
+  });
+
+  test('pack de production : signé avec la clé de production', () async {
+    const dir = '../backend/app/data/pokoumoji_packs/prod';
+    final check = await PokoumojiPackVerifier.checkManifest(
+      manifestBytes: File('$dir/manifest.json').readAsBytesSync(),
+      signatureBase64: File('$dir/manifest.sig').readAsStringSync(),
+      publicKeys: [PokoumojiKeys.production],
+      allowPlaceholder: false,
+    );
+    expect(check, isA<ManifestAccepted>());
+    final m = (check as ManifestAccepted).manifest;
+    expect(m.isPlaceholder, isFalse);
+    expect({for (final f in m.files.values) f.id}.length, 1163);
   });
 
   group('champ de saisie', () {

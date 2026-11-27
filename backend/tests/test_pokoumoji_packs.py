@@ -28,5 +28,8 @@ def test_chemins_hors_contrat_refuses():
         assert client.get(f"/pokoumoji/packs/{path}").status_code == 404, path
 
 
-def test_canal_prod_vide_tant_que_rien_n_est_valide():
-    assert client.get("/pokoumoji/packs/prod/manifest.json").status_code == 404
+def test_canal_prod_signe_en_production():
+    r = client.get("/pokoumoji/packs/prod/manifest.json")
+    assert r.status_code == 200
+    assert r.json()["status"] == "production"
+    assert r.json()["signature"]["key_id"] == "pokoumoji-prod"

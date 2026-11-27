@@ -175,6 +175,7 @@ class PokoumojiCatalogue {
     this.categories = const [],
     this.version = '',
     this.includeUnapproved = false,
+    this.published = const {},
   }) : entries = List.unmodifiable(entries),
        _aliases = aliases {
     for (var i = 0; i < entries.length; i++) {
@@ -194,6 +195,26 @@ class PokoumojiCatalogue {
   /// entrées qui ne sont pas encore `approved`.
   final bool includeUnapproved;
 
+  /// Les identifiants que le pack de PRODUCTION signé publie.
+  ///
+  /// Décision de la marque (27 novembre 2026) : en attendant les visuels
+  /// définitifs, les vignettes provisoires sont utilisables en production.
+  /// Le pack signé avec la clé de production fait office de publication :
+  /// une entrée qu'il contient est montrée même si le catalogue la dit
+  /// encore `a_produire`. Remplacer les images ne demande donc qu'un
+  /// nouveau pack signé, sans nouvelle version de l'application.
+  final Set<String> published;
+
+  /// Le même catalogue, avec les entrées publiées par un pack signé.
+  PokoumojiCatalogue withPublished(Set<String> ids) => PokoumojiCatalogue(
+    entries,
+    aliases: _aliases,
+    categories: categories,
+    version: version,
+    includeUnapproved: includeUnapproved,
+    published: ids,
+  );
+
   final Map<String, String> _aliases;
   final _byId = <String, PokoumojiEntry>{};
   final _position = <String, int>{};
@@ -203,7 +224,9 @@ class PokoumojiCatalogue {
   int get size => entries.length;
 
   bool isVisible(PokoumojiEntry e) =>
-      includeUnapproved || e.status == 'approved';
+      includeUnapproved ||
+      e.status == 'approved' ||
+      (e.status != 'retire' && published.contains(e.id));
 
   /// Y a-t-il au moins une entrée à montrer ? Sinon, l'onglet n'existe pas.
   late final bool hasVisible = entries.any(isVisible);
