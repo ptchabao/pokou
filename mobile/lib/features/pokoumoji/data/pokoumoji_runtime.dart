@@ -244,8 +244,10 @@ class PokoumojiRuntime {
       await local.delete().catchError((_) => local);
     }
     try {
+      // L'empreinte dans l'adresse : une image remplacée a une adresse
+      // neuve, qu'aucun cache (Cloudflare, proxy) ne peut servir périmée.
       final r = await _http
-          .get(Uri.parse(_url(path)))
+          .get(Uri.parse('${_url(path)}?h=${info.sha256.substring(0, 16)}'))
           .timeout(const Duration(seconds: 20));
       if (r.statusCode != 200) return null;
       final refusal = PokoumojiPackVerifier.checkFile(info, r.bodyBytes);
