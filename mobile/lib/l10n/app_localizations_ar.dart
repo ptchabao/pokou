@@ -15928,4 +15928,37 @@ class LAr extends L {
   @override
   String get chatXShareFromPhoneBookRefused =>
       'تم رفض الوصول إلى دفتر العناوين: اسمح به من إعدادات الهاتف.';
+
+  @override
+  String get pokoumojiTab => 'Pokoumoji';
+
+  @override
+  String get pokoumojiTooMany =>
+      'الرسالة طويلة جدًا: 50 Pokoumoji و4000 حرف كحد أقصى.';
+
+  @override
+  String get pokoumojiSearchHint => 'ابحث عن Pokoumoji';
+
+  @override
+  String pokoumojiNoResults(String query) {
+    return 'لا يوجد Pokoumoji لـ «$query»';
+  }
+
+  @override
+  String get pokoumojiRecents => 'الأحدث';
+
+  @override
+  String get pokoumojiRecentsEmpty =>
+      'ستظهر هنا رموز Pokoumoji التي استخدمتها مؤخرًا.';
+
+  @override
+  String pokoumojiSkinTone(String tone) {
+    return 'لون البشرة $tone';
+  }
+
+  @override
+  String get pokoumojiBubbles => 'فقاعات';
+
+  @override
+  String get pokoumojiVariantsHint => 'ضغطة مطولة: أشكال أخرى';
 }

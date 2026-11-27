@@ -7,6 +7,7 @@ import '../../../core/crypto/media_cipher.dart';
 import '../../../core/storage/pokou_message_store.dart';
 import 'direct_message_model.dart';
 import 'sealed_rich_content.dart';
+import '../../pokoumoji/domain/pokoumoji.dart';
 
 /// Le dépôt est la FRONTIÈRE du chiffrement.
 ///
@@ -165,6 +166,19 @@ class MessagingRepository {
         clearCiphertext: true,
       );
     }
+    // Un texte avec des Pokoumoji : `{content: repli, payload: {pokoumoji}}`
+    // (voir pokoumoji.dart). Un message invalide garde son texte de repli.
+    if (message.messageType == 'TEXT' && plaintext.startsWith('{')) {
+      final rich = SealedRichContent.open(plaintext);
+      if (rich != null && rich.payload.containsKey(pokoumojiPayloadKey)) {
+        final pk = pokoumojiOf(rich.payload);
+        return message.copyWith(
+          content: rich.content ?? (pk == null ? '' : pokoumojiPlainText(pk)),
+          payload: pk == null ? null : {pokoumojiPayloadKey: pk},
+          clearCiphertext: true,
+        );
+      }
+    }
     return message.copyWith(content: plaintext, clearCiphertext: true);
   }
 
@@ -174,7 +188,8 @@ class MessagingRepository {
       ? jsonEncode(
           message.mediaKey!.withAssetId(message.mediaAssetId!).toJson(),
         )
-      : (SealedRichContent.types.contains(message.messageType) &&
+      : ((SealedRichContent.types.contains(message.messageType) ||
+                pokoumojiOf(message.payload) != null) &&
             message.payload != null)
       ? SealedRichContent.seal(
           content: message.content,
@@ -363,10 +378,21 @@ class MessagingRepository {
     String? recipientPhone,
     String? replyToId,
     int forwardScore = 0,
+    Map<String, dynamic>? pokoumoji,
   }) async {
     // Si Pokou ne peut pas garantir le chiffrement, Pokou n'envoie pas le
     // message — voir _sealOrRefuse, qui lève plutôt que de dégrader.
-    final sealed = await _sealOrRefuse(recipientId, content);
+    //
+    // Un message Pokoumoji part scellé avec son texte de repli ; vers un
+    // correspondant sans trousseau, seul le repli part (en clair, comme
+    // tout texte vers lui).
+    final payload = pokoumoji == null ? null : {pokoumojiPayloadKey: pokoumoji};
+    final sealed = await _sealOrRefuse(
+      recipientId,
+      payload == null
+          ? content
+          : SealedRichContent.seal(content: content, payload: payload),
+    );
     final encrypted = sealed is SealEncrypted;
 
     final response = await _api.post(
@@ -391,7 +417,11 @@ class MessagingRepository {
     // jamais eu. On le remet côté client pour que l'expéditeur voie son
     // propre message, sans aller-retour de déchiffrement inutile.
     return encrypted
-        ? saved.copyWith(content: content, clearCiphertext: true)
+        ? saved.copyWith(
+            content: content,
+            payload: payload,
+            clearCiphertext: true,
+          )
         : saved;
   }
 

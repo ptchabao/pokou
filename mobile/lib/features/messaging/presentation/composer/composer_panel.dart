@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../stickers/data/sticker_models.dart';
+import '../../../pokoumoji/data/pokoumoji_runtime.dart';
+import '../../../pokoumoji/domain/pokoumoji.dart';
+import '../../../pokoumoji/presentation/pokoumoji_panel.dart';
+import '../../../pokoumoji/presentation/pokoumoji_text_controller.dart';
 import '../../../stickers/presentation/sticker_panel.dart';
 import 'emoji_panel.dart';
 
@@ -33,7 +37,11 @@ class ComposerPanel extends StatelessWidget {
     required this.tab,
     required this.onTabChanged,
     required this.onGifRequested,
+    this.onPokoumojiSticker,
   });
+
+  /// Envoi d'un sticker Pokoumoji (message à part, jamais dans un texte).
+  final void Function(PokoumojiEntry entry)? onPokoumojiSticker;
 
   final TextEditingController controller;
   final double height;
@@ -58,6 +66,14 @@ class ComposerPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    // L'onglet Pokoumoji n'existe que s'il y a quelque chose à montrer :
+    // en production, seulement les entrées approuvées par la marque.
+    final pokoumoji =
+        onPokoumojiSticker != null &&
+        (PokoumojiRuntime.instance.catalogue.value?.hasVisible ?? false);
+    final current = tab == ComposerPanelTab.pokoumoji && !pokoumoji
+        ? ComposerPanelTab.emoji
+        : tab;
     // Le bas de l'écran (indicateur d'accueil, barre de gestes) : le fond du
     // panneau le couvre, son contenu s'arrête au-dessus.
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
@@ -97,16 +113,31 @@ class ComposerPanel extends StatelessWidget {
                                 child: _Segment(
                                   icone: Icons.sentiment_satisfied_alt_rounded,
                                   label: l.stickerTabEmoji,
-                                  selectionne: tab == ComposerPanelTab.emoji,
+                                  selectionne:
+                                      current == ComposerPanelTab.emoji,
                                   onTap: () =>
                                       onTabChanged(ComposerPanelTab.emoji),
                                 ),
                               ),
+                              if (pokoumoji)
+                                Expanded(
+                                  child: _Segment(
+                                    icone:
+                                        Icons.face_retouching_natural_rounded,
+                                    label: l.pokoumojiTab,
+                                    selectionne:
+                                        current == ComposerPanelTab.pokoumoji,
+                                    onTap: () => onTabChanged(
+                                      ComposerPanelTab.pokoumoji,
+                                    ),
+                                  ),
+                                ),
                               Expanded(
                                 child: _Segment(
                                   icone: Icons.auto_awesome_rounded,
                                   label: l.stickerTabStickers,
-                                  selectionne: tab == ComposerPanelTab.stickers,
+                                  selectionne:
+                                      current == ComposerPanelTab.stickers,
                                   onTap: () =>
                                       onTabChanged(ComposerPanelTab.stickers),
                                 ),
@@ -153,7 +184,7 @@ class ComposerPanel extends StatelessWidget {
                       ),
                       // Effacer : à portée du pouce, en haut à droite, au
                       // lieu d'un bouton flottant qui recouvrait la grille.
-                      if (tab == ComposerPanelTab.emoji)
+                      if (current != ComposerPanelTab.stickers)
                         IconButton(
                           tooltip: l.composerBackspace,
                           onPressed: onBackspace,
@@ -169,7 +200,7 @@ class ComposerPanel extends StatelessWidget {
               ),
               SizedBox(
                 height: contentHeight,
-                child: switch (tab) {
+                child: switch (current) {
                   // La hauteur passée aux panneaux est celle qui RESTE une
                   // fois la barre et le bas de l'écran retirés — sinon ils
                   // débordent d'autant, et Flutter le signale.
@@ -177,6 +208,18 @@ class ComposerPanel extends StatelessWidget {
                     controller: controller,
                     height: contentHeight,
                     onBackspace: onBackspace,
+                  ),
+                  ComposerPanelTab.pokoumoji => PokoumojiPanel(
+                    height: contentHeight,
+                    onInsert: (entry) {
+                      final c = controller;
+                      if (c is PokoumojiTextController) {
+                        c.insertPokoumoji(entry);
+                      } else {
+                        c.text += entry.fallback;
+                      }
+                    },
+                    onSendSticker: (entry) => onPokoumojiSticker?.call(entry),
                   ),
                   ComposerPanelTab.stickers => StickerPanel(
                     height: contentHeight,
@@ -284,7 +327,7 @@ class _KeyboardHandoffState extends State<_KeyboardHandoff>
   }
 }
 
-enum ComposerPanelTab { emoji, stickers }
+enum ComposerPanelTab { emoji, pokoumoji, stickers }
 
 class _Segment extends StatelessWidget {
   const _Segment({

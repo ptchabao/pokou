@@ -15942,4 +15942,36 @@ class LEn extends L {
   @override
   String get chatXShareFromPhoneBookRefused =>
       'Address book access denied: allow it in the phone settings.';
+
+  @override
+  String get pokoumojiTab => 'Pokoumoji';
+
+  @override
+  String get pokoumojiTooMany =>
+      'Message too long: at most 50 Pokoumoji and 4,000 characters.';
+
+  @override
+  String get pokoumojiSearchHint => 'Search Pokoumoji';
+
+  @override
+  String pokoumojiNoResults(String query) {
+    return 'No Pokoumoji for “$query”';
+  }
+
+  @override
+  String get pokoumojiRecents => 'Recent';
+
+  @override
+  String get pokoumojiRecentsEmpty => 'Your recent Pokoumoji will appear here.';
+
+  @override
+  String pokoumojiSkinTone(String tone) {
+    return 'Skin tone $tone';
+  }
+
+  @override
+  String get pokoumojiBubbles => 'Bubbles';
+
+  @override
+  String get pokoumojiVariantsHint => 'Long press: other variants';
 }

@@ -1,3 +1,4 @@
+import '../../pokoumoji/domain/pokoumoji.dart';
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -544,7 +545,11 @@ class GroupChatController extends StateNotifier<GroupChatState> {
   /// Optimiste et durable — voir MessagingController.send. `senderName` est
   /// laissé vide : la bulle est la nôtre, l'étiquette d'auteur ne s'affiche
   /// que sur les messages reçus.
-  Future<void> send(String text, {GroupMessage? replyTo}) async {
+  Future<void> send(
+    String text, {
+    GroupMessage? replyTo,
+    Map<String, dynamic>? pokoumoji,
+  }) async {
     if (text.trim().isEmpty) return;
 
     final optimistic = GroupMessage(
@@ -557,6 +562,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
       mediaAssetId: null,
       media: null,
       createdAt: DateTime.now(),
+      payload: pokoumoji == null ? null : {pokoumojiPayloadKey: pokoumoji},
       replyToId: replyTo?.id,
       replyTo: replyTo == null
           ? null
@@ -664,6 +670,7 @@ class GroupChatController extends StateNotifier<GroupChatState> {
   bool canEdit(GroupMessage message) =>
       message.senderId == _myUserId &&
       message.messageType == 'TEXT' &&
+      pokoumojiOf(message.payload) == null &&
       message.deletedAt == null &&
       !(state.group?.proofMode ?? false) &&
       DateTime.now().difference(message.createdAt) <
@@ -694,6 +701,9 @@ class GroupChatController extends StateNotifier<GroupChatState> {
         messageType: optimistic.messageType,
         replyToId: optimistic.replyToId,
         replyTo: optimistic.replyTo,
+        payload: pokoumojiOf(optimistic.payload) == null
+            ? null
+            : {pokoumojiPayloadKey: pokoumojiOf(optimistic.payload)},
       );
       await _store.confirmGroup(optimistic.id, confirmed);
       if (!mounted) return;

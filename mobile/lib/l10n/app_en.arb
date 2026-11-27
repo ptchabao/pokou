@@ -4402,5 +4402,14 @@
   "chatXShareContactSearch": "Search a name or number",
   "chatXShareContactEmpty": "No contacts",
   "chatXShareFromPhoneBook": "Whole phone address book",
-  "chatXShareFromPhoneBookRefused": "Address book access denied: allow it in the phone settings."
+  "chatXShareFromPhoneBookRefused": "Address book access denied: allow it in the phone settings.",
+  "pokoumojiTab": "Pokoumoji",
+  "pokoumojiTooMany": "Message too long: at most 50 Pokoumoji and 4,000 characters.",
+  "pokoumojiSearchHint": "Search Pokoumoji",
+  "pokoumojiNoResults": "No Pokoumoji for “{query}”",
+  "pokoumojiRecents": "Recent",
+  "pokoumojiRecentsEmpty": "Your recent Pokoumoji will appear here.",
+  "pokoumojiSkinTone": "Skin tone {tone}",
+  "pokoumojiBubbles": "Bubbles",
+  "pokoumojiVariantsHint": "Long press: other variants"
 }

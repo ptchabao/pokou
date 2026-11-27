@@ -46,6 +46,10 @@ import '../../contacts/presentation/contacts_controller.dart';
 import '../../messaging/data/direct_message_model.dart'
     show MessageReactionSummary, PollData;
 import '../../messaging/presentation/bubble_widgets.dart';
+import '../../pokoumoji/data/pokoumoji_runtime.dart';
+import '../../pokoumoji/domain/pokoumoji.dart';
+import '../../pokoumoji/presentation/pokoumoji_text_controller.dart';
+import '../../pokoumoji/presentation/pokoumoji_widgets.dart';
 import '../../messaging/presentation/contact_card_bubble.dart'
     show ContactCardBubble;
 import '../../messaging/presentation/location_bubble.dart';
@@ -130,7 +134,7 @@ class _GroupConversationScreenState
     extends ConsumerState<GroupConversationScreen> {
   /// Les textes traduits, relus à chaque accès.
   L get _l => L.of(context);
-  final _inputController = TextEditingController();
+  final _inputController = PokoumojiTextController();
 
   /// Le champ garde le FOCUS quand le panneau s'ouvre — c'est ce qui
   /// permet de revenir taper d'une touche, et de garder le curseur là où
@@ -182,6 +186,15 @@ class _GroupConversationScreenState
   @override
   void initState() {
     super.initState();
+    // Le catalogue Pokoumoji : le champ et les bulles en ont besoin pour
+    // dessiner les emojis (sinon, texte de repli).
+    unawaited(
+      PokoumojiRuntime.instance
+          .ensureLoaded(ref.read(apiClientProvider).baseUrl)
+          .then((_) {
+            if (mounted) setState(() {});
+          }),
+    );
     _activeConversation = ref.read(activeConversationProvider.notifier);
     // Même règle qu'en tête-à-tête : pas de notification pour le groupe
     // qu'on est en train de lire. Après la première image, sinon modifier
@@ -951,6 +964,14 @@ class _GroupConversationScreenState
     _scrollToBottom();
   }
 
+  /// Un sticker Pokoumoji : un message à part, jamais dans un texte.
+  Future<void> _sendPokoumojiSticker(PokoumojiEntry entry) async {
+    await ref
+        .read(groupChatControllerProvider(widget.groupId).notifier)
+        .send(entry.fallback, pokoumoji: pokoumojiSticker(entry));
+    _scrollToBottom();
+  }
+
   /// La hauteur du clavier pendant qu'il est visible — le panneau la
   /// reprendra une fois qu'il aura disparu.
   void _rememberKeyboardHeight(BuildContext context) {
@@ -1022,12 +1043,26 @@ class _GroupConversationScreenState
   Future<void> _send() async {
     final text = _inputController.text;
     if (text.trim().isEmpty) return;
+    final rich = PokoumojiComposer.encode(
+      text,
+      PokoumojiRuntime.instance.catalogue.value,
+    );
+    if (rich != null && rich.errors.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L.of(context).pokoumojiTooMany)),
+      );
+      return;
+    }
     final replyTo = _replyingTo;
     _inputController.clear();
     setState(() => _replyingTo = null);
     await ref
         .read(groupChatControllerProvider(widget.groupId).notifier)
-        .send(text, replyTo: replyTo);
+        .send(
+          rich?.plainText ?? text,
+          replyTo: replyTo,
+          pokoumoji: rich?.message,
+        );
     _scrollToBottom();
   }
 
@@ -2299,6 +2334,7 @@ class _GroupConversationScreenState
                   tab: _panelTab,
                   onTabChanged: (tab) => setState(() => _panelTab = tab),
                   onStickerSelected: _sendSticker,
+                  onPokoumojiSticker: _sendPokoumojiSticker,
                   onGifRequested: () {
                     setState(() => _emojiOpen = false);
                     _pickAndSendGif();
@@ -2781,6 +2817,10 @@ class _GroupBubbleState extends State<_GroupBubble> {
 
     final media = message.media;
     if (media == null) {
+      final pokoumoji = pokoumojiOf(message.payload);
+      if (pokoumoji != null) {
+        return PokoumojiMessageView(message: pokoumoji, style: textStyle);
+      }
       final emojis = emojiOnlyCount(message.content);
       if (emojis != null) {
         return Text(

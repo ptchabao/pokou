@@ -63,6 +63,10 @@ import 'delete_discussion.dart';
 import 'search_highlight.dart';
 import '../data/sealed_rich_content.dart';
 import 'bubble_widgets.dart';
+import '../../pokoumoji/data/pokoumoji_runtime.dart';
+import '../../pokoumoji/domain/pokoumoji.dart';
+import '../../pokoumoji/presentation/pokoumoji_text_controller.dart';
+import '../../pokoumoji/presentation/pokoumoji_widgets.dart';
 import 'contact_card_bubble.dart';
 import 'forward_screen.dart';
 import 'poll_composer.dart';
@@ -135,7 +139,7 @@ class ConversationScreen extends ConsumerStatefulWidget {
 }
 
 class _ConversationScreenState extends ConsumerState<ConversationScreen> {
-  final _inputController = TextEditingController();
+  final _inputController = PokoumojiTextController();
 
   /// Le focus du champ de saisie, tenu explicitement : c'est lui qui permet
   /// de refermer le panneau emoji ET de revenir taper en un seul geste.
@@ -392,6 +396,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   @override
   void initState() {
     super.initState();
+    // Le catalogue Pokoumoji : le champ et les bulles en ont besoin pour
+    // dessiner les emojis (sinon, texte de repli).
+    unawaited(
+      PokoumojiRuntime.instance
+          .ensureLoaded(ref.read(apiClientProvider).baseUrl)
+          .then((_) {
+            if (mounted) setState(() {});
+          }),
+    );
     unawaited(_checkEncryption());
     unawaited(_reloadProof());
     _activeConversation = ref.read(activeConversationProvider.notifier);
@@ -902,6 +915,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     final text = _inputController.text;
     if (text.trim().isEmpty) return;
+    // Des Pokoumoji dans le brouillon : un message `rich_text`, dont le
+    // texte de repli part comme contenu. Trop d'emojis, texte trop long :
+    // rien ne part, le brouillon reste.
+    final rich = PokoumojiComposer.encode(
+      text,
+      PokoumojiRuntime.instance.catalogue.value,
+    );
+    if (rich != null && rich.errors.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_l.pokoumojiTooMany)),
+      );
+      return;
+    }
     // Le message part : on n'écrit plus. Le dire tout de suite évite le
     // « écrit… » qui reste affiché sous un message déjà reçu.
     _typing.stop();
@@ -912,7 +938,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     try {
       await ref
           .read(messagingControllerProvider(_key).notifier)
-          .send(text, replyToId: replyToId);
+          .send(
+            rich?.plainText ?? text,
+            replyToId: replyToId,
+            pokoumoji: rich?.message,
+          );
     } on EncryptionUnavailableException catch (exc) {
       if (!mounted) return;
       // Le texte est REMIS dans le champ. Un message refusé qu'on efface
@@ -1028,6 +1058,24 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           mediaAssetId: sticker.mediaId,
           messageType: 'STICKER',
         );
+    _scrollToBottom();
+  }
+
+  /// Un sticker Pokoumoji : un message à part (jamais dans un texte), dont
+  /// le texte de repli est la bulle écrite — « [On est ensemble !] ».
+  Future<void> _sendPokoumojiSticker(PokoumojiEntry entry) async {
+    final message = pokoumojiSticker(entry);
+    try {
+      await ref
+          .read(messagingControllerProvider(_key).notifier)
+          .send(entry.fallback, pokoumoji: message);
+    } on EncryptionUnavailableException catch (exc) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(encryptionBlockedMessage(_l, exc.reason))),
+      );
+      return;
+    }
     _scrollToBottom();
   }
 
@@ -2430,6 +2478,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           onTabChanged: (tab) =>
                               setState(() => _panelTab = tab),
                           onStickerSelected: _sendSticker,
+                          onPokoumojiSticker: _sendPokoumojiSticker,
                           // Le panneau se referme : le sélecteur de
                           // fichiers prend l'écran, et le retrouver
                           // ouvert derrière au retour ferait un
@@ -3573,6 +3622,12 @@ class _BubbleState extends State<_Bubble> {
       // la carte de visite — même geste, même fonction (voir
       // contact_card_bubble.dart::handlePhoneTap).
       final content = message.content ?? '';
+      // Un message Pokoumoji : emojis en ligne ou sticker, résolus dans le
+      // pack signé — sinon leur texte de repli.
+      final pokoumoji = pokoumojiOf(message.payload);
+      if (pokoumoji != null) {
+        return PokoumojiMessageView(message: pokoumoji, style: textStyle);
+      }
       // Coursiers 24 — une invitation coursier Honam : la carte « Voir
       // l'offre », puis le message du coursier.
       final courierInvite = decodeCourierInvite(content);

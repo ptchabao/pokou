@@ -684,6 +684,7 @@ class GroupRepository {
     String? replyToId,
     MessageReplyPreview? replyTo,
     int forwardScore = 0,
+    Map<String, dynamic>? payload,
   }) async {
     return _sendEncrypted(
       group: group,
@@ -693,6 +694,9 @@ class GroupRepository {
       forwardScore: forwardScore,
       body: {
         'content': content,
+        // Un message Pokoumoji : `{pokoumoji: …}`. Une version qui ne le
+        // connaît pas lit seulement `content`, son texte de repli.
+        'payload': ?payload,
         if (replyTo != null) 'reply_to': replyTo.toJson(),
       },
     );

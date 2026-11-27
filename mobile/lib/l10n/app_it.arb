@@ -4346,5 +4346,14 @@
   "chatXShareContactSearch": "Cerca un nome o un numero",
   "chatXShareContactEmpty": "Nessun contatto",
   "chatXShareFromPhoneBook": "Tutta la rubrica del telefono",
-  "chatXShareFromPhoneBookRefused": "Accesso alla rubrica negato: consentilo nelle impostazioni del telefono."
+  "chatXShareFromPhoneBookRefused": "Accesso alla rubrica negato: consentilo nelle impostazioni del telefono.",
+  "pokoumojiTab": "Pokoumoji",
+  "pokoumojiTooMany": "Messaggio troppo lungo: al massimo 50 Pokoumoji e 4000 caratteri.",
+  "pokoumojiSearchHint": "Cerca un Pokoumoji",
+  "pokoumojiNoResults": "Nessun Pokoumoji per «{query}»",
+  "pokoumojiRecents": "Recenti",
+  "pokoumojiRecentsEmpty": "I tuoi Pokoumoji recenti appariranno qui.",
+  "pokoumojiSkinTone": "Tonalità della pelle {tone}",
+  "pokoumojiBubbles": "Fumetti",
+  "pokoumojiVariantsHint": "Pressione lunga: altre varianti"
 }

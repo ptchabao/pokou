@@ -16072,4 +16072,36 @@ class LRu extends L {
   @override
   String get chatXShareFromPhoneBookRefused =>
       'Доступ к контактам запрещён: разрешите его в настройках телефона.';
+
+  @override
+  String get pokoumojiTab => 'Pokoumoji';
+
+  @override
+  String get pokoumojiTooMany =>
+      'Сообщение слишком длинное: не более 50 Pokoumoji и 4000 символов.';
+
+  @override
+  String get pokoumojiSearchHint => 'Найти Pokoumoji';
+
+  @override
+  String pokoumojiNoResults(String query) {
+    return 'Нет Pokoumoji для «$query»';
+  }
+
+  @override
+  String get pokoumojiRecents => 'Недавние';
+
+  @override
+  String get pokoumojiRecentsEmpty => 'Здесь появятся ваши недавние Pokoumoji.';
+
+  @override
+  String pokoumojiSkinTone(String tone) {
+    return 'Оттенок кожи $tone';
+  }
+
+  @override
+  String get pokoumojiBubbles => 'Пузыри';
+
+  @override
+  String get pokoumojiVariantsHint => 'Долгое нажатие: другие варианты';
 }

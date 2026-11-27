@@ -10017,5 +10017,28 @@
   "chatXShareContactSearch": "Rechercher un nom ou un numéro",
   "chatXShareContactEmpty": "Aucun contact",
   "chatXShareFromPhoneBook": "Tout le répertoire du téléphone",
-  "chatXShareFromPhoneBookRefused": "Accès au répertoire refusé : autorise-le dans les réglages du téléphone."
+  "chatXShareFromPhoneBookRefused": "Accès au répertoire refusé : autorise-le dans les réglages du téléphone.",
+  "pokoumojiTab": "Pokoumoji",
+  "pokoumojiTooMany": "Message trop long : 50 Pokoumoji et 4 000 caractères au plus.",
+  "pokoumojiSearchHint": "Rechercher un Pokoumoji",
+  "pokoumojiNoResults": "Aucun Pokoumoji pour « {query} »",
+  "@pokoumojiNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "pokoumojiRecents": "Récents",
+  "pokoumojiRecentsEmpty": "Tes Pokoumoji récents apparaîtront ici.",
+  "pokoumojiSkinTone": "Carnation {tone}",
+  "@pokoumojiSkinTone": {
+    "placeholders": {
+      "tone": {
+        "type": "String"
+      }
+    }
+  },
+  "pokoumojiBubbles": "Bulles",
+  "pokoumojiVariantsHint": "Appui long : autres variantes"
 }

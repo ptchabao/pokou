@@ -4346,5 +4346,14 @@
   "chatXShareContactSearch": "Buscar un nombre o número",
   "chatXShareContactEmpty": "Ningún contacto",
   "chatXShareFromPhoneBook": "Toda la agenda del teléfono",
-  "chatXShareFromPhoneBookRefused": "Acceso a la agenda denegado: permítelo en los ajustes del teléfono."
+  "chatXShareFromPhoneBookRefused": "Acceso a la agenda denegado: permítelo en los ajustes del teléfono.",
+  "pokoumojiTab": "Pokoumoji",
+  "pokoumojiTooMany": "Mensaje demasiado largo: 50 Pokoumoji y 4000 caracteres como máximo.",
+  "pokoumojiSearchHint": "Buscar un Pokoumoji",
+  "pokoumojiNoResults": "Ningún Pokoumoji para «{query}»",
+  "pokoumojiRecents": "Recientes",
+  "pokoumojiRecentsEmpty": "Tus Pokoumoji recientes aparecerán aquí.",
+  "pokoumojiSkinTone": "Tono de piel {tone}",
+  "pokoumojiBubbles": "Burbujas",
+  "pokoumojiVariantsHint": "Mantén pulsado: otras variantes"
 }

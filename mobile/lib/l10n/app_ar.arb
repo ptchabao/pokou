@@ -4346,5 +4346,14 @@
   "chatXShareContactSearch": "ابحث عن اسم أو رقم",
   "chatXShareContactEmpty": "لا توجد جهات اتصال",
   "chatXShareFromPhoneBook": "كل دفتر عناوين الهاتف",
-  "chatXShareFromPhoneBookRefused": "تم رفض الوصول إلى دفتر العناوين: اسمح به من إعدادات الهاتف."
+  "chatXShareFromPhoneBookRefused": "تم رفض الوصول إلى دفتر العناوين: اسمح به من إعدادات الهاتف.",
+  "pokoumojiTab": "Pokoumoji",
+  "pokoumojiTooMany": "الرسالة طويلة جدًا: 50 Pokoumoji و4000 حرف كحد أقصى.",
+  "pokoumojiSearchHint": "ابحث عن Pokoumoji",
+  "pokoumojiNoResults": "لا يوجد Pokoumoji لـ «{query}»",
+  "pokoumojiRecents": "الأحدث",
+  "pokoumojiRecentsEmpty": "ستظهر هنا رموز Pokoumoji التي استخدمتها مؤخرًا.",
+  "pokoumojiSkinTone": "لون البشرة {tone}",
+  "pokoumojiBubbles": "فقاعات",
+  "pokoumojiVariantsHint": "ضغطة مطولة: أشكال أخرى"
 }

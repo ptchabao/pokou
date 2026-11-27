@@ -1,3 +1,4 @@
+import '../../pokoumoji/domain/pokoumoji.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -579,7 +580,14 @@ class MessagingController extends StateNotifier<MessagingState> {
   /// Le message apparaît tout de suite et est écrit sur l'appareil AVANT
   /// toute tentative réseau : c'est ce qui permet d'écrire hors ligne et de
   /// retrouver ses messages en attente après un redémarrage de l'app.
-  Future<void> send(String text, {String? replyToId}) async {
+  ///
+  /// [pokoumoji] : le message Pokoumoji (`rich_text` ou `sticker`) dont
+  /// [text] est le texte de repli. Il voyage dans le chiffré.
+  Future<void> send(
+    String text, {
+    String? replyToId,
+    Map<String, dynamic>? pokoumoji,
+  }) async {
     if (text.trim().isEmpty) return;
 
     final optimistic = DirectMessage(
@@ -593,6 +601,7 @@ class MessagingController extends StateNotifier<MessagingState> {
       status: DirectMessageStatus.sent,
       createdAt: DateTime.now(),
       replyToId: replyToId,
+      payload: pokoumoji == null ? null : {pokoumojiPayloadKey: pokoumoji},
     );
     await _store.saveDirect([optimistic], pending: true);
     if (!mounted) return;
@@ -636,6 +645,7 @@ class MessagingController extends StateNotifier<MessagingState> {
         content: optimistic.content ?? '',
         recipientPhone: _key.contactPhone,
         replyToId: optimistic.replyToId,
+        pokoumoji: pokoumojiOf(optimistic.payload),
       );
       await _store.confirmDirect(optimistic.id, confirmed);
       if (!mounted) return;
@@ -707,6 +717,9 @@ class MessagingController extends StateNotifier<MessagingState> {
   bool canEdit(DirectMessage message) {
     if (message.senderId != _key.myUserId) return false;
     if (message.messageType != 'TEXT') return false;
+    // Un message Pokoumoji ne se corrige pas : la modification renvoie un
+    // texte simple, et les emojis seraient perdus.
+    if (pokoumojiOf(message.payload) != null) return false;
     if (PokouMessageStore.isLocalId(message.id)) return false;
     return DateTime.now().difference(message.createdAt) < editWindow;
   }

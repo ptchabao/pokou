@@ -16030,4 +16030,36 @@ class LFr extends L {
   @override
   String get chatXShareFromPhoneBookRefused =>
       'Accès au répertoire refusé : autorise-le dans les réglages du téléphone.';
+
+  @override
+  String get pokoumojiTab => 'Pokoumoji';
+
+  @override
+  String get pokoumojiTooMany =>
+      'Message trop long : 50 Pokoumoji et 4 000 caractères au plus.';
+
+  @override
+  String get pokoumojiSearchHint => 'Rechercher un Pokoumoji';
+
+  @override
+  String pokoumojiNoResults(String query) {
+    return 'Aucun Pokoumoji pour « $query »';
+  }
+
+  @override
+  String get pokoumojiRecents => 'Récents';
+
+  @override
+  String get pokoumojiRecentsEmpty => 'Tes Pokoumoji récents apparaîtront ici.';
+
+  @override
+  String pokoumojiSkinTone(String tone) {
+    return 'Carnation $tone';
+  }
+
+  @override
+  String get pokoumojiBubbles => 'Bulles';
+
+  @override
+  String get pokoumojiVariantsHint => 'Appui long : autres variantes';
 }

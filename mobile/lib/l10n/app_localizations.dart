@@ -26200,6 +26200,60 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Accès au répertoire refusé : autorise-le dans les réglages du téléphone.'**
   String get chatXShareFromPhoneBookRefused;
+
+  /// No description provided for @pokoumojiTab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pokoumoji'**
+  String get pokoumojiTab;
+
+  /// No description provided for @pokoumojiTooMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message trop long : 50 Pokoumoji et 4 000 caractères au plus.'**
+  String get pokoumojiTooMany;
+
+  /// No description provided for @pokoumojiSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un Pokoumoji'**
+  String get pokoumojiSearchHint;
+
+  /// No description provided for @pokoumojiNoResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun Pokoumoji pour « {query} »'**
+  String pokoumojiNoResults(String query);
+
+  /// No description provided for @pokoumojiRecents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récents'**
+  String get pokoumojiRecents;
+
+  /// No description provided for @pokoumojiRecentsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes Pokoumoji récents apparaîtront ici.'**
+  String get pokoumojiRecentsEmpty;
+
+  /// No description provided for @pokoumojiSkinTone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carnation {tone}'**
+  String pokoumojiSkinTone(String tone);
+
+  /// No description provided for @pokoumojiBubbles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bulles'**
+  String get pokoumojiBubbles;
+
+  /// No description provided for @pokoumojiVariantsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appui long : autres variantes'**
+  String get pokoumojiVariantsHint;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

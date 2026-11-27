@@ -4346,5 +4346,14 @@
   "chatXShareContactSearch": "Поиск по имени или номеру",
   "chatXShareContactEmpty": "Нет контактов",
   "chatXShareFromPhoneBook": "Вся адресная книга телефона",
-  "chatXShareFromPhoneBookRefused": "Доступ к контактам запрещён: разрешите его в настройках телефона."
+  "chatXShareFromPhoneBookRefused": "Доступ к контактам запрещён: разрешите его в настройках телефона.",
+  "pokoumojiTab": "Pokoumoji",
+  "pokoumojiTooMany": "Сообщение слишком длинное: не более 50 Pokoumoji и 4000 символов.",
+  "pokoumojiSearchHint": "Найти Pokoumoji",
+  "pokoumojiNoResults": "Нет Pokoumoji для «{query}»",
+  "pokoumojiRecents": "Недавние",
+  "pokoumojiRecentsEmpty": "Здесь появятся ваши недавние Pokoumoji.",
+  "pokoumojiSkinTone": "Оттенок кожи {tone}",
+  "pokoumojiBubbles": "Пузыри",
+  "pokoumojiVariantsHint": "Долгое нажатие: другие варианты"
 }

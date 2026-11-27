@@ -16028,4 +16028,37 @@ class LIt extends L {
   @override
   String get chatXShareFromPhoneBookRefused =>
       'Accesso alla rubrica negato: consentilo nelle impostazioni del telefono.';
+
+  @override
+  String get pokoumojiTab => 'Pokoumoji';
+
+  @override
+  String get pokoumojiTooMany =>
+      'Messaggio troppo lungo: al massimo 50 Pokoumoji e 4000 caratteri.';
+
+  @override
+  String get pokoumojiSearchHint => 'Cerca un Pokoumoji';
+
+  @override
+  String pokoumojiNoResults(String query) {
+    return 'Nessun Pokoumoji per «$query»';
+  }
+
+  @override
+  String get pokoumojiRecents => 'Recenti';
+
+  @override
+  String get pokoumojiRecentsEmpty =>
+      'I tuoi Pokoumoji recenti appariranno qui.';
+
+  @override
+  String pokoumojiSkinTone(String tone) {
+    return 'Tonalità della pelle $tone';
+  }
+
+  @override
+  String get pokoumojiBubbles => 'Fumetti';
+
+  @override
+  String get pokoumojiVariantsHint => 'Pressione lunga: altre varianti';
 }
