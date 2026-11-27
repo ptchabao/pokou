@@ -1,8 +1,9 @@
 # Pack Pokoumoji de production
 
 Décision de la marque (27 novembre 2026) : en attendant les visuels
-définitifs, ce pack reprend les vignettes provisoires du dossier
-développeurs V1.3, signées avec la clé de PRODUCTION. Une entrée contenue
+définitifs, ce pack reprend les dessins des planches de référence
+(329 emojis et stickers découpés, fond transparent), signés avec la clé
+de PRODUCTION. Les entrées sans dessin ne sont pas publiées. Une entrée contenue
 dans ce pack signé est montrée par l'application, même si le catalogue la
 dit encore `a_produire`.
 

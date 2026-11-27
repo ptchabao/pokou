@@ -360,7 +360,12 @@ void main() {
     expect(check, isA<ManifestAccepted>());
     final m = (check as ManifestAccepted).manifest;
     expect(m.isPlaceholder, isFalse);
-    expect({for (final f in m.files.values) f.id}.length, 1163);
+    final published = {for (final f in m.files.values) f.id};
+    // Les vrais dessins tirés des planches, pas les vignettes provisoires.
+    expect(published.length, greaterThan(300));
+    expect(published.every((id) => dev.resolve(id) != null), isTrue);
+    // Chaque entrée publiée existe dans les trois tailles.
+    expect(m.files.length, published.length * 3);
   });
 
   group('champ de saisie', () {
